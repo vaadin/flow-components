@@ -1159,5 +1159,5 @@ public class TreeGrid<T> extends Grid<T>
         } else {
             scrollToIndex(indexPath);
         }
-    }
+    }   
 }
