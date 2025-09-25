@@ -26,8 +26,8 @@ public class ClusterSourceTest {
 
     @Test
     public void defaultValues() {
-        Assert.assertEquals(20, source.getDistance());
-        Assert.assertEquals(0, source.getMinDistance());
+        Assert.assertEquals(50, source.getDistance());
+        Assert.assertEquals(50, source.getMinDistance());
         Assert.assertEquals(Constants.OL_SOURCE_CLUSTER, source.getType());
     }
 

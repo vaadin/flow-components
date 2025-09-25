@@ -35,8 +35,8 @@ public class FeatureLayerTest {
     @Test
     public void defaults() {
         Assert.assertFalse(featureLayer.isClusteringEnabled());
-        Assert.assertEquals(20, featureLayer.getClusterDistance());
-        Assert.assertEquals(0, featureLayer.getClusterMinDistance());
+        Assert.assertEquals(50, featureLayer.getClusterDistance());
+        Assert.assertEquals(50, featureLayer.getClusterMinDistance());
         Assert.assertNotNull(featureLayer.getSource());
         Assert.assertFalse(featureLayer.getSource() instanceof ClusterSource);
     }
