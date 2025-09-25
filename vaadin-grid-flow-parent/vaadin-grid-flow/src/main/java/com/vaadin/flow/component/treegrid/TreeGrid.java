@@ -1168,6 +1168,7 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private void scrollToNestedIndexes(T itemToScrollTo, TreeData<T> treeData) {
+        // TODO use filtered&sorted items
         var parents = new LinkedList<T>();
         parents.push(itemToScrollTo);
         var parent = treeData.getParent(itemToScrollTo);
