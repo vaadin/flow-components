@@ -87,7 +87,7 @@ public class ModalityDialogsPage extends Div {
 
     private Dialog createVisualModalDialog() {
         Dialog visualModalDialog = new Dialog();
-        visualModalDialog.setModalityMode(ModalityMode.VISUAL);
+        visualModalDialog.setModality(ModalityMode.VISUAL);
         visualModalDialog.setCloseOnOutsideClick(false);
         final NativeButton modalClose = new NativeButton("close",
                 e -> visualModalDialog.close());
@@ -101,7 +101,7 @@ public class ModalityDialogsPage extends Div {
 
     private Dialog createStrictModalDialog() {
         Dialog modalDialog = new Dialog();
-        modalDialog.setModalityMode(ModalityMode.STRICT);
+        modalDialog.setModality(ModalityMode.STRICT);
         modalDialog.setCloseOnOutsideClick(false);
         final NativeButton modalClose = new NativeButton("close",
                 e -> modalDialog.close());
@@ -133,7 +133,7 @@ public class ModalityDialogsPage extends Div {
         Dialog nonModalDialog = new Dialog();
 
         nonModalDialog.setCloseOnOutsideClick(false);
-        nonModalDialog.setModalityMode(ModalityMode.MODELESS);
+        nonModalDialog.setModality(ModalityMode.MODELESS);
 
         return nonModalDialog;
     }

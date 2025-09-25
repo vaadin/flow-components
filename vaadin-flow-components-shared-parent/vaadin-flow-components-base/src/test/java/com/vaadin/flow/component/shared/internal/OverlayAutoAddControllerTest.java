@@ -186,8 +186,7 @@ public class OverlayAutoAddControllerTest {
 
     @Test
     public void autoAdded_inert_close_autoRemoved() {
-        TestComponent component = new TestComponent(
-                () -> ModalityMode.MODELESS);
+        TestComponent component = new TestComponent();
 
         component.setOpened(true);
         fakeClientResponse();
@@ -250,7 +249,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_withModalSupplierReturningTrue_isModal() {
+    public void open_withModalSupplierReturningStrict_isModal() {
         TestComponent component = new TestComponent(() -> ModalityMode.STRICT);
 
         component.setOpened(true);
@@ -261,7 +260,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_withModalSupplierReturningFalse_notModal() {
+    public void open_withModalSupplierReturningModeless_notModal() {
         TestComponent component = new TestComponent(
                 () -> ModalityMode.MODELESS);
 
