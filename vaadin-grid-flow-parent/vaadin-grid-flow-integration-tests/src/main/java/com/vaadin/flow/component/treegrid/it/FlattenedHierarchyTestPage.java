@@ -46,8 +46,8 @@ public class FlattenedHierarchyTestPage extends Div {
 
     public FlattenedHierarchyTestPage() {
         treeData = new TreeData<>();
-        treeData.addItems(getManagers(),
-                FlattenedHierarchyTestPage::getEmployees);
+        treeData.addItems(EmployeeDataService.getManagers(),
+                EmployeeDataService::getEmployees);
         var treeDataProvider = new TreeDataProvider<>(treeData) {
             @Override
             public HierarchyFormat getHierarchyFormat() {
@@ -107,9 +107,11 @@ public class FlattenedHierarchyTestPage extends Div {
         });
 
         var expandAll = new Button("Expand all");
-        expandAll.addClickListener(e -> treeGrid.expand(getManagers()));
+        expandAll.addClickListener(
+                e -> treeGrid.expand(EmployeeDataService.getManagers()));
         var collapseAll = new Button("Collapse all");
-        collapseAll.addClickListener(e -> treeGrid.collapse(getManagers()));
+        collapseAll.addClickListener(
+                e -> treeGrid.collapse(EmployeeDataService.getManagers()));
 
         controls.add(parentIndexField, childIndexField, treeGridScrollToItem,
                 scrollToItem, scrollToItemExpand, scrollToIndex,
@@ -161,35 +163,39 @@ public class FlattenedHierarchyTestPage extends Div {
         return itemToScrollTo;
     }
 
-    private static List<Person> getEmployees(Person manager) {
-        if (!manager.isManager()) {
-            return Collections.emptyList();
+    private static class EmployeeDataService {
+        private static List<Person> getEmployees(Person manager) {
+            if (!manager.isManager()) {
+                return Collections.emptyList();
+            }
+            return IntStream.range(0, NUMBER_OF_EMPLOYEES_PER_MANAGER)
+                    .mapToObj(id -> getEmployee(manager.getId(), id)).toList();
         }
-        return IntStream.range(0, NUMBER_OF_EMPLOYEES_PER_MANAGER)
-                .mapToObj(id -> {
-                    var person = new Person();
-                    person.setFirstName(
-                            "FirstEmployee" + manager.getId() + "-" + id);
-                    person.setLastName(
-                            "LastEmployee" + manager.getId() + "-" + id);
-                    person.setManager(false);
-                    person.setManagerId(manager.getId());
-                    person.setId(NUMBER_OF_MANAGERS
-                            + NUMBER_OF_EMPLOYEES_PER_MANAGER * manager.getId()
-                            + id);
-                    return person;
-                }).toList();
-    }
 
-    public static List<Person> getManagers() {
-        return IntStream.range(0, NUMBER_OF_MANAGERS).mapToObj(id -> {
+        private static Person getEmployee(int managerId, int id) {
+            var person = new Person();
+            person.setFirstName("FirstEmployee" + managerId + "-" + id);
+            person.setLastName("LastEmployee" + managerId + "-" + id);
+            person.setManager(false);
+            person.setManagerId(managerId);
+            person.setId(NUMBER_OF_MANAGERS
+                    + NUMBER_OF_EMPLOYEES_PER_MANAGER * managerId + id);
+            return person;
+        }
+
+        public static List<Person> getManagers() {
+            return IntStream.range(0, NUMBER_OF_MANAGERS)
+                    .mapToObj(EmployeeDataService::getManager).toList();
+        }
+
+        private static Person getManager(int id) {
             var person = new Person();
             person.setFirstName("FirstManager" + id);
             person.setLastName("LastManager" + id);
             person.setManager(true);
             person.setId(id);
             return person;
-        }).toList();
+        }
     }
 
     public static class Person {
