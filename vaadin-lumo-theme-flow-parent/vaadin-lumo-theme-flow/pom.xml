@@ -33,18 +33,18 @@
                 <version>3.1.0</version>
                 <executions>
                     <execution>
-                        <id>copy-npm-package</id>
+                        <id>copy-theme-distribution</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <phase>process-resources</phase>
                         <configuration>
                             <executable>node</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
                             <arguments>
-                                <argument>${project.basedir}/../../scripts/copy-npm-theme-files.js</argument>
-                                <argument>${project.basedir}/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java</argument>
-                                <argument>lumo.css</argument>
-                                <argument>utility.css</argument>
+                                <argument>../../scripts/copy-theme-distribution.js</argument>
+                                <argument>src/main/java/com/vaadin/flow/theme/lumo/Lumo.java</argument>
+                                <argument>@vaadin/vaadin-lumo-styles</argument>
                             </arguments>
                         </configuration>
                     </execution>
