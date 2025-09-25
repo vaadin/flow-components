@@ -34,7 +34,7 @@ public class SpreadsheetEventListener
     }
 
     private String toStr(ArrayNode o, int pos) {
-        return o == null ? null : o.get(pos).asText();
+        return o == null ? null : o.get(pos).asString();
     }
 
     private boolean toBool(ArrayNode o, int pos) {

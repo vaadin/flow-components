@@ -56,8 +56,8 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha19")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha20")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 

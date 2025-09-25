@@ -212,8 +212,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha19")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha20")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -3867,14 +3867,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         GridSortOrderBuilder<T> sortOrderBuilder = new GridSortOrderBuilder<>();
         for (int i = 0; i < sorters.size(); ++i) {
             JsonNode sorter = sorters.get(i);
-            Column<T> column = idToColumnMap.get(sorter.get("path").asText());
+            Column<T> column = idToColumnMap.get(sorter.get("path").asString());
             if (column == null) {
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
             if (sorter.has("direction") && sorter.get("direction")
                     .getNodeType() == JsonNodeType.STRING) {
-                switch (sorter.get("direction").asText()) {
+                switch (sorter.get("direction").asString()) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
                     break;

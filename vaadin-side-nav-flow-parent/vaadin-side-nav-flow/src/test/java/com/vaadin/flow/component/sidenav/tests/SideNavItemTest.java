@@ -799,7 +799,7 @@ public class SideNavItemTest {
             Assert.assertNotNull(actualAliasesArray);
             Set<String> actualAliasesSet = new HashSet<>();
             for (int i = 0; i < actualAliasesArray.size(); i++) {
-                actualAliasesSet.add(actualAliasesArray.get(i).asText());
+                actualAliasesSet.add(actualAliasesArray.get(i).asString());
             }
             Assert.assertEquals(expectedAliases, actualAliasesSet);
         }

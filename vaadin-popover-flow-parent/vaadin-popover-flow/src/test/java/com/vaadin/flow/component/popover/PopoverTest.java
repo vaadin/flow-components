@@ -176,7 +176,7 @@ public class PopoverTest {
         ArrayNode jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
         Assert.assertEquals(1, jsonArray.size());
-        Assert.assertEquals("click", jsonArray.get(0).asText());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
     }
 
     @Test
@@ -195,8 +195,8 @@ public class PopoverTest {
         ArrayNode jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
         Assert.assertEquals(2, jsonArray.size());
-        Assert.assertEquals("click", jsonArray.get(0).asText());
-        Assert.assertEquals("focus", jsonArray.get(1).asText());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
+        Assert.assertEquals("focus", jsonArray.get(1).asString());
     }
 
     @Test
@@ -206,8 +206,8 @@ public class PopoverTest {
         ArrayNode jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
         Assert.assertEquals(2, jsonArray.size());
-        Assert.assertEquals("click", jsonArray.get(0).asText());
-        Assert.assertEquals("hover", jsonArray.get(1).asText());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
+        Assert.assertEquals("hover", jsonArray.get(1).asString());
     }
 
     @Test

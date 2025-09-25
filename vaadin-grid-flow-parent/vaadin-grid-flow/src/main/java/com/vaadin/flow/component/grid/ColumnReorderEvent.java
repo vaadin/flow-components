@@ -98,7 +98,7 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
         final List<Grid.Column<T>> columns = new ArrayList<>(
                 currentColumns.size());
         for (int i = 0; i < columnIDs.size(); i++) {
-            final String columnID = columnIDs.get(i).asText();
+            final String columnID = columnIDs.get(i).asString();
             columns.add(findByColumnId(currentColumns, columnID));
         }
         return columns;

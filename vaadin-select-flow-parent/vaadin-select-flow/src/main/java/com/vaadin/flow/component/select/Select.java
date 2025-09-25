@@ -109,7 +109,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/select", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/select", version = "25.0.0-alpha20")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -195,6 +195,53 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
                 new InvalidChangeEvent(this, event.isUserOriginated())));
+    }
+
+    /**
+     * Creates a select with the defined label.
+     *
+     * @param label
+     *            the label describing the select
+     * @see #setLabel(String)
+     */
+    public Select(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a select with the defined label and populated with the items in
+     * the collection.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Collection)
+     */
+    public Select(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a select with the defined label and populated with the items in
+     * the array.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public Select(String label, T... items) {
+        this();
+        setLabel(label);
+        setItems(items);
     }
 
     /**
