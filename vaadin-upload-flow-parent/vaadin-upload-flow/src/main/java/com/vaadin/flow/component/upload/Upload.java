@@ -196,6 +196,22 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     /**
+     * Create a new instance of Upload with the given upload handler and target
+     * name.
+     *
+     * @param handler
+     *            upload handler that handles the upload, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
+     */
+    public Upload(UploadHandler handler, String targetName) {
+        this();
+        setUploadHandler(handler, targetName);
+    }
+
+    /**
      * Add listener that is informed on all uploads finished.
      *
      * @param listener
@@ -720,17 +736,43 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * The given handler defines how uploaded file content is handled on the
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     * <p>
+     * This overload uses the default upload target name {@code "upload"}, which
+     * becomes the last segment of the dynamically generated upload URL.
      *
      * @param handler
      *            upload handler to use for file receptions, not {@code null}
      */
     public void setUploadHandler(UploadHandler handler) {
+        setUploadHandler(handler, "upload");
+    }
+
+    /**
+     * Set the upload handler to be used for this upload component.
+     * <p>
+     * The given handler defines how uploaded file content is handled on the
+     * server and invoked per each single file to be uploaded. Note! This method
+     * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     *
+     * @param handler
+     *            upload handler to use for file receptions, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
+     */
+    public void setUploadHandler(UploadHandler handler, String targetName) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
+        Objects.requireNonNull(targetName, "The target name cannot be null");
+        if (targetName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "The target name cannot be blank");
+        }
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 handler, this.getElement()) {
             @Override
             public String getName() {
-                return "upload";
+                return targetName;
             }
         };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
