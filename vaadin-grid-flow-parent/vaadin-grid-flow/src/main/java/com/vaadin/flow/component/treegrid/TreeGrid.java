@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1152,31 +1153,47 @@ public class TreeGrid<T> extends Grid<T>
                     "scrollToItem method is only supported in TreeGrids with a TreeDataProvider");
         }
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
-        var treeData = ((TreeDataProvider<T>) getDataProvider()).getTreeData();
         if (!((TreeDataProvider<T>) getDataProvider()).getTreeData()
                 .contains(item)) {
             throw new NoSuchElementException(
                     "Item to scroll to cannot be found: " + item);
         }
-        var itemToScrollTo = getItemToScrollTo(item, treeData);
+        var itemToScrollTo = getItemToScrollTo(item);
         if (getDataProvider().getHierarchyFormat()
                 .equals(HierarchicalDataProvider.HierarchyFormat.FLATTENED)) {
             scrollToFlattenedIndex(itemToScrollTo);
         } else {
-            scrollToNestedIndexes(itemToScrollTo, treeData);
+            scrollToNestedIndexes(itemToScrollTo);
         }
     }
 
-    private void scrollToNestedIndexes(T itemToScrollTo, TreeData<T> treeData) {
+    private T getItemToScrollTo(T item) {
+        var itemToScrollTo = item;
+        var parent = getParent(item);
+        while (parent != null) {
+            if (!isExpanded(parent)) {
+                itemToScrollTo = parent;
+            }
+            parent = getParent(parent);
+        }
+        return itemToScrollTo;
+    }
+
+    private void scrollToFlattenedIndex(T item) {
+        var flattenedIndex = getItemIndex(item, (T) null);
+        scrollToIndex(flattenedIndex);
+    }
+
+    private void scrollToNestedIndexes(T item) {
         var parents = new LinkedList<T>();
-        parents.push(itemToScrollTo);
-        var parent = treeData.getParent(itemToScrollTo);
+        parents.push(item);
+        var parent = getParent(item);
         while (parent != null) {
             parents.push(parent);
-            parent = treeData.getParent(parent);
+            parent = getParent(parent);
         }
         var indexesToScrollTo = new int[parents.size()];
-        indexesToScrollTo[0] = getItemIndex(parents.get(0), null);
+        indexesToScrollTo[0] = getItemIndex(parents.get(0), (T) null);
         for (var i = 1; i < parents.size(); i++) {
             indexesToScrollTo[i] = getItemIndex(parents.get(i),
                     parents.get(i - 1));
@@ -1184,31 +1201,34 @@ public class TreeGrid<T> extends Grid<T>
         scrollToIndex(indexesToScrollTo);
     }
 
-    private void scrollToFlattenedIndex(T itemToScrollTo) {
-        var flattenedIndex = getItemIndex(itemToScrollTo, null);
-        scrollToIndex(flattenedIndex);
+    private int getItemIndex(T item, T parent) {
+        return getItemIndex(item, getQuery(parent));
     }
 
-    private int getItemIndex(T itemToScrollTo, T parent) {
-        var itemId = getDataProvider().getId(itemToScrollTo);
+    private HierarchicalQuery<T, Object> getQuery(T parent) {
+        return getDataCommunicator().buildQuery(parent, 0, Integer.MAX_VALUE);
+    }
+
+    // TODO will move to data provider
+    private T getParent(T item) {
+        return ((TreeDataProvider<T>) getDataProvider()).getTreeData()
+                .getParent(item);
+    }
+
+    // TODO will move to data provider
+    private int getItemIndex(T item, HierarchicalQuery<T, Object> query) {
+        var itemId = getDataProvider().getId(item);
         Predicate<T> itemMatches = itemToMatch -> Objects.equals(itemId,
                 getDataProvider().getId(itemToMatch));
-        return (int) ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
-                .getDataProvider())
-                .fetchChildren(getDataCommunicator().buildQuery(parent, 0,
-                        Integer.MAX_VALUE))
-                .takeWhile(i -> !itemMatches.test(i)).count();
-    }
-
-    private T getItemToScrollTo(T item, TreeData<T> treeData) {
-        var itemToScrollTo = item;
-        var parent = treeData.getParent(item);
-        while (parent != null) {
-            if (!isExpanded(parent)) {
-                itemToScrollTo = parent;
-            }
-            parent = treeData.getParent(parent);
+        var itemFound = new AtomicBoolean(false);
+        var index = (int) ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
+                .getDataProvider()).fetchChildren(query).takeWhile(i -> {
+                    itemFound.set(itemMatches.test(i));
+                    return !itemFound.get();
+                }).count();
+        if (!itemFound.get()) {
+            throw new IllegalArgumentException("Item not found");
         }
-        return itemToScrollTo;
+        return index;
     }
 }
