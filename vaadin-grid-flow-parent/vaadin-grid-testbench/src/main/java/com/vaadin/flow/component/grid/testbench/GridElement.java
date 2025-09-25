@@ -425,7 +425,7 @@ public class GridElement extends TestBenchElement {
         WebElement tfoot = $("*").id("footer");
         List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
         List<WebElement> footerCells = footerRows.get(rowIndex)
-                .findElements(By.tagName("th"));
+                .findElements(By.tagName("td"));
         String slotName = footerCells.get(columnIndex)
                 .findElement(By.tagName("slot")).getDomAttribute("name");
 
@@ -446,7 +446,7 @@ public class GridElement extends TestBenchElement {
         WebElement tfoot = $("*").id("footer");
         List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
         List<WebElement> footerCells = footerRows.get(rowIndex)
-                .findElements(By.tagName("th"));
+                .findElements(By.tagName("td"));
         var cell = footerCells.get(columnIndex);
         return wrapElement(cell, getCommandExecutor())
                 .wrap(GridTHTDElement.class);
