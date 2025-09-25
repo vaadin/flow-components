@@ -18,9 +18,11 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,7 +32,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
@@ -50,6 +51,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -1008,6 +1010,7 @@ public class TreeGrid<T> extends Grid<T>
                         .executeJs("this.scrollToIndex($0);", index)));
     }
 
+    // TODO update for flattened data providers
     /**
      * Scrolls to a nested item specified by its hierarchical path.
      * <p>
@@ -1102,7 +1105,7 @@ public class TreeGrid<T> extends Grid<T>
         // page-aligned.
         dataCommunicator.preloadFlatRangeForward(flatIndex, padding + pageSize);
 
-        // Repeat the process backward to preload enough items behing the
+        // Repeat the process backward to preload enough items behind the
         // resolved flat index. Adding the page size is essential. Without it,
         // the following call to dataCommunicator.setViewportRange will try to
         // load uncovered expanded items forward, shifting the range and causing
@@ -1144,7 +1147,67 @@ public class TreeGrid<T> extends Grid<T>
     @Deprecated
     @Override
     public void scrollToItem(T item) {
-        throw new UnsupportedOperationException(
-                "scrollToItem method is not supported in TreeGrid");
+        if (!(getDataProvider() instanceof TreeDataProvider<T>)) {
+            throw new UnsupportedOperationException(
+                    "scrollToItem method is only supported in TreeGrids with a TreeDataProvider");
+        }
+        Objects.requireNonNull(item, "Item to scroll to cannot be null.");
+        var treeData = ((TreeDataProvider<T>) getDataProvider()).getTreeData();
+        if (!treeData.contains(item)) {
+            throw new NoSuchElementException(
+                    "Item to scroll to cannot be found: " + item);
+        }
+        var indexesToScrollTo = getIndexesToScrollTo(
+                getItemToScrollTo(item, treeData), treeData);
+        scrollToIndex(indexesToScrollTo);
+    }
+
+    private int[] getIndexesToScrollTo(T itemToScrollTo, TreeData<T> treeData) {
+        if (getDataProvider().getHierarchyFormat()
+                .equals(HierarchicalDataProvider.HierarchyFormat.FLATTENED)) {
+            return new int[] { getFlattenedIndexToScrollTo(itemToScrollTo) };
+        }
+        return getNestedIndexesToScrollTo(itemToScrollTo, treeData);
+    }
+
+    private int[] getNestedIndexesToScrollTo(T itemToScrollTo,
+            TreeData<T> treeData) {
+        var parents = new LinkedList<T>();
+        parents.push(itemToScrollTo);
+        var parent = treeData.getParent(itemToScrollTo);
+        while (parent != null) {
+            parents.push(parent);
+            parent = treeData.getParent(parent);
+        }
+        var indexesToScrollTo = new int[parents.size()];
+        indexesToScrollTo[0] = treeData.getRootItems().indexOf(parents.get(0));
+        for (var i = 1; i < parents.size(); i++) {
+            indexesToScrollTo[i] = treeData.getChildren(parents.get(i - 1))
+                    .indexOf(parents.get(i));
+        }
+        return indexesToScrollTo;
+    }
+
+    private int getFlattenedIndexToScrollTo(T itemToScrollTo) {
+        var itemId = getDataProvider().getId(itemToScrollTo);
+        Predicate<T> itemMatches = itemToMatch -> Objects.equals(itemId,
+                getDataProvider().getId(itemToMatch));
+        return (int) ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
+                .getDataProvider())
+                .fetchChildren(getDataCommunicator().buildQuery(null, 0,
+                        Integer.MAX_VALUE))
+                .takeWhile(i -> !itemMatches.test(i)).count();
+    }
+
+    private T getItemToScrollTo(T item, TreeData<T> treeData) {
+        var itemToScrollTo = item;
+        var parent = treeData.getParent(item);
+        while (parent != null) {
+            if (!isExpanded(parent)) {
+                itemToScrollTo = parent;
+            }
+            parent = treeData.getParent(parent);
+        }
+        return itemToScrollTo;
     }
 }
