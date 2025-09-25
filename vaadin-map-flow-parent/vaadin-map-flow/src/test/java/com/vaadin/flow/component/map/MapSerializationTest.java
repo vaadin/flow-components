@@ -111,15 +111,15 @@ public class MapSerializationTest {
         // Verify custom source
         ObjectNode sourceNode = findSyncedItem(syncedItems, source.getId());
         Assert.assertEquals("https://example.com",
-                sourceNode.get("url").asText());
+                sourceNode.get("url").asString());
         Assert.assertFalse(sourceNode.get("opaque").asBoolean());
         Assert.assertEquals("custom-cors",
-                sourceNode.get("crossOrigin").asText());
+                sourceNode.get("crossOrigin").asString());
         Assert.assertTrue(sourceNode.get("attributions").isArray());
         ArrayNode attributionsNode = (ArrayNode) sourceNode.get("attributions");
         Assert.assertEquals(1, attributionsNode.size());
         Assert.assertEquals("Custom map service",
-                attributionsNode.get(0).asText());
+                attributionsNode.get(0).asString());
     }
 
     @Test
@@ -200,8 +200,8 @@ public class MapSerializationTest {
 
     private ObjectNode findSyncedItem(ArrayNode syncedItems, String id) {
         return (ObjectNode) JacksonUtils.stream(syncedItems)
-                .filter(node -> node.get("id").asText().equals(id)).findFirst()
-                .orElseThrow(() -> new AssertionError(
+                .filter(node -> node.get("id").asString().equals(id))
+                .findFirst().orElseThrow(() -> new AssertionError(
                         "No synced item with id " + id + " found"));
     }
 

@@ -46,7 +46,7 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha20")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -119,7 +119,7 @@ public class GridPro<E> extends Grid<E> {
                 column.getItemUpdater().accept(e.getItem(), null);
             } else {
                 column.getItemUpdater().accept(e.getItem(),
-                        e.getSourceItem().get(e.getPath()).asText());
+                        e.getSourceItem().get(e.getPath()).asString());
             }
 
             if (!column.isManualRefresh()) {
@@ -587,7 +587,7 @@ public class GridPro<E> extends Grid<E> {
                 @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.get("key").asText());
+                    .get(item.get("key").asString());
             this.path = path;
         }
 
@@ -658,7 +658,7 @@ public class GridPro<E> extends Grid<E> {
             super(source, fromClient);
             this.sourceItem = item;
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.get("key").asText());
+                    .get(item.get("key").asString());
             this.path = path;
         }
 

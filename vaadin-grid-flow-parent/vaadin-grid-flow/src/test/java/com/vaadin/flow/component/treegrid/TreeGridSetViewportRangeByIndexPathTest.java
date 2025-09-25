@@ -205,7 +205,7 @@ public class TreeGridSetViewportRangeByIndexPathTest {
                 itemsCaptor.capture());
 
         return itemsCaptor.getAllValues().stream().flatMap(List::stream)
-                .map((jsonValue) -> jsonValue.get("name").asText())
+                .map((jsonValue) -> jsonValue.get("name").asString())
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 

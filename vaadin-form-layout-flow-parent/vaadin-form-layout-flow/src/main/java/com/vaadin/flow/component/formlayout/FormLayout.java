@@ -171,7 +171,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha20")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -269,14 +269,14 @@ public class FormLayout extends Component
         @Override
         public ResponsiveStep readJson(JsonNode value) {
             minWidth = value.has(MIN_WIDTH_JSON_KEY)
-                    ? value.get(MIN_WIDTH_JSON_KEY).asText()
+                    ? value.get(MIN_WIDTH_JSON_KEY).asString()
                     : null;
 
             columns = value.get(COLUMNS_JSON_KEY).asInt();
 
             JsonNode labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
             if (labelsPositionValue != null) {
-                String labelsPositionString = labelsPositionValue.asText();
+                String labelsPositionString = labelsPositionValue.asString();
                 if ("aside".equals(labelsPositionString)) {
                     labelsPosition = LabelsPosition.ASIDE;
                 } else if ("top".equals(labelsPositionString)) {
@@ -297,7 +297,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha19")
+    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha20")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -403,7 +403,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-row")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha19")
+    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha20")
     @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
     public static class FormRow extends Component implements HasComponents {
 
