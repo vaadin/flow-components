@@ -53,7 +53,8 @@ import com.vaadin.flow.shared.Registration;
  * <p>
  * Dialogs can be made modal or non-modal. A modal Dialog blocks the user from
  * interacting with the rest of the user interface while the Dialog is open, as
- * opposed to a non-modal Dialog, which does not block interaction.
+ * opposed to a non-modal Dialog, which does not block interaction. Dialogs are
+ * modal by default.
  * <p>
  * Dialogs can be made draggable and resizable. When draggable, the user is able
  * to move them around using a pointing device. It is recommended to make
