@@ -18,9 +18,11 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -970,6 +972,7 @@ public class TreeGrid<T> extends Grid<T>
                         .executeJs("this.scrollToIndex($0);", index)));
     }
 
+    // TODO update for flattened data providers
     /**
      * Scrolls to a nested item specified by its hierarchical path.
      * <p>
