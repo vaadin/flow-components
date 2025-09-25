@@ -54,6 +54,8 @@ import com.vaadin.flow.shared.Registration;
  * Each Confirm Dialog should have a title and/or message. The “Confirm” button
  * is shown by default, while the two other buttons are not (they must be
  * explicitly enabled to be displayed).
+ * <p>
+ * Confirm Dialog is modal in {@link ModalityMode#STRICT} mode.
  *
  * @author Vaadin Ltd
  */
