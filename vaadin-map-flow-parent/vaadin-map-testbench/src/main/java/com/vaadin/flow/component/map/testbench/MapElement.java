@@ -543,6 +543,11 @@ public class MapElement extends TestBenchElement {
                     "values_.features.find(feature => feature.id === '%s')",
                     featureId));
         }
+
+        public StyleReference getStyle(LayerReference layer) {
+            return new StyleReference(executor,
+                    layer.path("getStyle()(%s)", expression));
+        }
     }
 
     public static class StyleReference extends ConfigurationObjectReference {

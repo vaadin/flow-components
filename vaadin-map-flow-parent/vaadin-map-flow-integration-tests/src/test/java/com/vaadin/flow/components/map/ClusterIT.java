@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -80,5 +81,93 @@ public class ClusterIT extends AbstractComponentIT {
         Assert.assertNotNull(features.getFeature("m2"));
         Assert.assertNotNull(features.getFeature("m3"));
         Assert.assertNotNull(features.getFeature("m4"));
+    }
+
+    @Test
+    public void renderCluster_usesClusterStyle() {
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference layer = mapReference.getLayers()
+                .getLayer("feature-layer");
+        MapElement.ClusterSourceReference source = layer.getSource()
+                .asClusterSource();
+
+        // Get cluster
+        MapElement.ClusterFeatureReference cluster = source.getCluster(0);
+        Assert.assertEquals(3, cluster.getFeatureCount());
+
+        MapElement.StyleReference style = cluster.getStyle(layer);
+        MapElement.IconReference icon = style.getImage();
+        Assert.assertEquals(1, icon.getOpacity(), 0.001);
+        Assert.assertEquals(0, icon.getRotation(), 0.001);
+        Assert.assertEquals(0.5, icon.getScale(), 0.001);
+        Assert.assertTrue(icon.getSrc().endsWith(Assets.CLUSTER.getFileName()));
+
+        MapElement.TextReference text = style.getText();
+        Assert.assertEquals("3", text.getText());
+        Assert.assertEquals("bold 12px sans-serif", text.getFont());
+        Assert.assertEquals("#fff", text.getFill().getColor());
+        Assert.assertFalse(text.getStroke().exists());
+        Assert.assertEquals(0, text.getOffsetX());
+        Assert.assertEquals(0, text.getOffsetY());
+    }
+
+    @Test
+    public void renderIndividualFeature_usesFeatureStyle() {
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference layer = mapReference.getLayers()
+                .getLayer("feature-layer");
+        MapElement.ClusterSourceReference source = layer.getSource()
+                .asClusterSource();
+
+        // Get individual feature
+        MapElement.ClusterFeatureReference cluster = source.getCluster(1);
+        Assert.assertEquals(1, cluster.getFeatureCount());
+
+        MapElement.StyleReference style = cluster.getStyle(layer);
+        MapElement.IconReference icon = style.getImage();
+        Assert.assertEquals(1, icon.getOpacity(), 0.001);
+        Assert.assertEquals(0, icon.getRotation(), 0.001);
+        Assert.assertEquals(0.5, icon.getScale(), 0.001);
+        Assert.assertTrue(icon.getSrc().endsWith(Assets.PIN.getFileName()));
+
+        MapElement.TextReference text = style.getText();
+        Assert.assertEquals("Separate", text.getText());
+        Assert.assertEquals("13px sans-serif", text.getFont());
+        Assert.assertEquals("#333", text.getFill().getColor());
+        Assert.assertEquals("#fff", text.getStroke().getColor());
+        Assert.assertEquals(3, text.getStroke().getWidth());
+        Assert.assertEquals(0, text.getOffsetX());
+        Assert.assertEquals(10, text.getOffsetY());
+    }
+
+    @Test
+    public void renderCluster_withCustomClusterStyle_usesCustomStyle() {
+        clickElementWithJs("customize-style");
+
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference layer = mapReference.getLayers()
+                .getLayer("feature-layer");
+        MapElement.ClusterSourceReference source = layer.getSource()
+                .asClusterSource();
+
+        // Get cluster
+        MapElement.ClusterFeatureReference cluster = source.getCluster(0);
+        Assert.assertEquals(3, cluster.getFeatureCount());
+
+        MapElement.StyleReference style = cluster.getStyle(layer);
+        MapElement.IconReference icon = style.getImage();
+        Assert.assertEquals(1, icon.getOpacity(), 0.001);
+        Assert.assertEquals(0, icon.getRotation(), 0.001);
+        Assert.assertEquals(0.5, icon.getScale(), 0.001);
+        Assert.assertTrue(icon.getSrc().endsWith("custom-cluster.png"));
+
+        MapElement.TextReference text = style.getText();
+        Assert.assertEquals("3", text.getText());
+        Assert.assertEquals("bold 14px sans-serif", text.getFont());
+        Assert.assertEquals("#333", text.getFill().getColor());
+        Assert.assertEquals("#fff", text.getStroke().getColor());
+        Assert.assertEquals(3, text.getStroke().getWidth());
+        Assert.assertEquals(0, text.getOffsetX());
+        Assert.assertEquals(0, text.getOffsetY());
     }
 }
