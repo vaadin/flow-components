@@ -99,12 +99,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     private Receiver receiver;
 
     /**
-     * Represents the name of the target location or identifier where files or
-     * data are to be uploaded. Default value is set to "upload".
-     */
-    private String uploadTargetName = "upload";
-
-    /**
      * Create a new instance of Upload.
      * <p>
      * The upload handler must be set through
@@ -741,27 +735,15 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * The given handler defines how uploaded file content is handled on the
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     * <p>
+     * This overload uses the default upload target name {@code "upload"}, which
+     * becomes the last segment of the dynamically generated upload URL.
      *
      * @param handler
      *            upload handler to use for file receptions, not {@code null}
      */
     public void setUploadHandler(UploadHandler handler) {
-        Objects.requireNonNull(handler, "UploadHandler cannot be null");
-        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                handler, this.getElement()) {
-            @Override
-            public String getName() {
-                return uploadTargetName;
-            }
-        };
-        runBeforeClientResponse(ui -> getElement().setAttribute("target",
-                elementStreamResource));
-        if (!hasListener(UploadStartEvent.class)
-                && !(handler instanceof FailFastUploadHandler)) {
-            addListener(UploadStartEvent.class, event -> startUpload());
-            addListener(UploadCompleteEvent.class, event -> endUpload());
-        }
-        receiver = null;
+        setUploadHandler(handler, "upload");
     }
 
     /**
@@ -774,11 +756,32 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param handler
      *            upload handler to use for file receptions, not {@code null}
      * @param targetName
-     *            endpoint name (single path segment), not blank
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
      */
     public void setUploadHandler(UploadHandler handler, String targetName) {
-        setUploadTargetName(targetName);
-        setUploadHandler(handler);
+        Objects.requireNonNull(handler, "UploadHandler cannot be null");
+        Objects.requireNonNull(targetName, "The target name cannot be null");
+        if (targetName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "The target name cannot be blank");
+        }
+        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
+                handler, this.getElement()) {
+            @Override
+            public String getName() {
+                return targetName;
+            }
+        };
+        runBeforeClientResponse(ui -> getElement().setAttribute("target",
+                elementStreamResource));
+        if (!hasListener(UploadStartEvent.class)
+                && !(handler instanceof FailFastUploadHandler)) {
+            addListener(UploadStartEvent.class, event -> startUpload());
+            addListener(UploadCompleteEvent.class, event -> endUpload());
+        }
+        receiver = null;
     }
 
     private boolean isMultiFileReceiver(Receiver receiver) {
@@ -857,25 +860,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      */
     public void clearFileList() {
         getElement().setPropertyJson("files", JacksonUtils.createArrayNode());
-    }
-
-    /**
-     * Retrieves the name of the upload target.
-     *
-     * @return the name of the upload target as a String.
-     */
-    public String getUploadTargetName() {
-        return uploadTargetName;
-    }
-
-    /**
-     * Sets the name of the upload target.
-     *
-     * @param uploadTargetName
-     *            the name to set for the upload target
-     */
-    public void setUploadTargetName(String uploadTargetName) {
-        this.uploadTargetName = uploadTargetName;
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
