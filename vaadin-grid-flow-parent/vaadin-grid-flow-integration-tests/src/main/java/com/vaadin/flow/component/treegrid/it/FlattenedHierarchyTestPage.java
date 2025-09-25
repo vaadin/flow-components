@@ -35,9 +35,6 @@ import com.vaadin.flow.router.Route;
 @Route("flattened-hierarchy-test")
 public class FlattenedHierarchyTestPage extends Div {
 
-    private static final int NUMBER_OF_MANAGERS = 1000;
-    private static final int NUMBER_OF_EMPLOYEES_PER_MANAGER = 100;
-
     private final TreeGrid<Person> treeGrid;
     private final TreeData<Person> treeData;
 
@@ -164,6 +161,9 @@ public class FlattenedHierarchyTestPage extends Div {
     }
 
     private static class EmployeeDataService {
+        private static final int NUMBER_OF_MANAGERS = 1000;
+        private static final int NUMBER_OF_EMPLOYEES_PER_MANAGER = 100;
+
         private static List<Person> getEmployees(Person manager) {
             if (!manager.isManager()) {
                 return Collections.emptyList();
