@@ -202,8 +202,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param handler
      *            upload handler that handles the upload, not {@code null}
      * @param targetName
-     *            the endpoint name (single path segment) to publish the upload
-     *            under, not blank
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
      */
     public Upload(UploadHandler handler, String targetName) {
         this();
