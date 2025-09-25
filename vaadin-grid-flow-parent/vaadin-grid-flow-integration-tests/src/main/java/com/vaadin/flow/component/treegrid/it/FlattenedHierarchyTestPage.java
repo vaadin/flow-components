@@ -122,7 +122,7 @@ public class FlattenedHierarchyTestPage extends Div {
         if (expand) {
             expandAllParents(item);
         }
-        var itemToScrollTo = getItemToScrollTo(item, expand);
+        var itemToScrollTo = getItemToScrollTo(item);
         var itemId = treeGrid.getDataProvider().getId(itemToScrollTo);
         Predicate<Person> itemMatches = itemToMatch -> Objects.equals(itemId,
                 treeGrid.getDataProvider().getId(itemToMatch));
@@ -149,16 +149,14 @@ public class FlattenedHierarchyTestPage extends Div {
         }
     }
 
-    private Person getItemToScrollTo(Person item, boolean expand) {
+    private Person getItemToScrollTo(Person item) {
         var itemToScrollTo = item;
-        if (!expand) {
-            var parent = treeData.getParent(item);
-            while (parent != null) {
-                if (!treeGrid.isExpanded(parent)) {
-                    itemToScrollTo = parent;
-                }
-                parent = treeData.getParent(parent);
+        var parent = treeData.getParent(item);
+        while (parent != null) {
+            if (!treeGrid.isExpanded(parent)) {
+                itemToScrollTo = parent;
             }
+            parent = treeData.getParent(parent);
         }
         return itemToScrollTo;
     }
