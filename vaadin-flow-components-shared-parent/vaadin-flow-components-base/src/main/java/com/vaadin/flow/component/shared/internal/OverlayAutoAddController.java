@@ -57,10 +57,12 @@ public class OverlayAutoAddController<C extends Component>
         if (modalityModeSupplier != null) {
             this.modalityModeSupplier = modalityModeSupplier;
         } else if (isModalSupplier != null) {
-            this.modalityModeSupplier = () -> (isModalSupplier.get()) ? ModalityMode.STRICT
+            this.modalityModeSupplier = () -> (isModalSupplier.get())
+                    ? ModalityMode.STRICT
                     : ModalityMode.MODELESS;
         } else {
-            throw new IllegalArgumentException("Either isModalSupplier or modalityModeSupplier must be provided");
+            throw new IllegalArgumentException(
+                    "Either isModalSupplier or modalityModeSupplier must be provided");
         }
 
         // Automatically add the component to the UI when it is opened.
