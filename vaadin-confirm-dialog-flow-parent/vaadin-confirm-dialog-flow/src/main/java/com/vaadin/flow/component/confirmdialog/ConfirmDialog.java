@@ -25,6 +25,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -238,7 +239,7 @@ public class ConfirmDialog extends Component
      */
     public ConfirmDialog() {
         // Initialize auto-add behavior
-        new OverlayAutoAddController<>(this, () -> true);
+        new OverlayAutoAddController<>(this, () -> ModalityMode.STRICT);
 
         setOpened(false);
 

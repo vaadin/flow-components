@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -100,7 +101,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         });
 
         overlayAutoAddController = new OverlayAutoAddController<>(this,
-                () -> false);
+                () -> ModalityMode.MODELESS);
     }
 
     /**

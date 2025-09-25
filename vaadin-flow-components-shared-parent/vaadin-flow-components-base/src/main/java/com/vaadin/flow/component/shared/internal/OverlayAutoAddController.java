@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.shared.internal;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ModalityMode;
@@ -42,28 +43,14 @@ public class OverlayAutoAddController<C extends Component>
     private Registration beforeLeaveRegistration;
 
     public OverlayAutoAddController(C component) {
-        this(component, () -> false);
+        this(component, () -> ModalityMode.MODELESS);
     }
 
     public OverlayAutoAddController(C component,
-            SerializableSupplier<Boolean> isModalSupplier) {
-        this(component, isModalSupplier, null);
-    }
-
-    public OverlayAutoAddController(C component,
-            SerializableSupplier<Boolean> isModalSupplier,
             SerializableSupplier<ModalityMode> modalityModeSupplier) {
         this.component = component;
-        if (modalityModeSupplier != null) {
-            this.modalityModeSupplier = modalityModeSupplier;
-        } else if (isModalSupplier != null) {
-            this.modalityModeSupplier = () -> (isModalSupplier.get())
-                    ? ModalityMode.STRICT
-                    : ModalityMode.MODELESS;
-        } else {
-            throw new IllegalArgumentException(
-                    "Either isModalSupplier or modalityModeSupplier must be provided");
-        }
+        this.modalityModeSupplier = Objects.requireNonNull(modalityModeSupplier,
+                "modalityModeSupplier must not be null");
 
         // Automatically add the component to the UI when it is opened.
         component.getElement().addPropertyChangeListener("opened", event -> {

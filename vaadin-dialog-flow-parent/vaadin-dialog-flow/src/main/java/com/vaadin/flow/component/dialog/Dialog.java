@@ -127,8 +127,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setRole("dialog");
 
         // Initialize auto-add behavior
-        new OverlayAutoAddController<>(this, this::isModal,
-                this::getModalityMode);
+        new OverlayAutoAddController<>(this, this::getModalityMode);
     }
 
     /**
