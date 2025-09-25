@@ -47,6 +47,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -980,24 +981,31 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to the index of an item in the root level of the tree. To scroll
-     * to a nested item, use {@link #scrollToIndex(int...)}.
+     * Scrolls to the given item index, positioning the item at the top of the
+     * visible area if that's possible. The way the {@code index} parameter is
+     * interpreted depends on the
+     * {@link HierarchicalDataProvider#getHierarchyFormat() hierarchy format} of
+     * the current data provider:
      * <p>
-     * Scrolls so that the row is shown at the start of the visible area
-     * whenever possible.
+     * {@link HierarchyFormat#NESTED}: the index refers to an item in the root
+     * level. To reach items in deeper levels, use
+     * {@link #scrollToIndex(int...)}, which accepts a hierarchical path.
      * <p>
-     * If the index parameter exceeds current item set size the grid will scroll
-     * to the end.
+     * {@link HierarchyFormat#FLATTENED}: the index refers to an item in the
+     * entire flattened tree, not only the root level, allowing items at any
+     * expanded level to be reached with this method.
+     * <p>
+     * If the index exceeds the available range, scrolling goes to the last item
+     * according to the current hierarchy format.
      *
-     * @param rowIndex
-     *            zero based index of the item in the root level of the tree
-     * @see TreeGrid#scrollToIndex(int...)
+     * @param index
+     *            zero based index of the item to scroll to
      */
     @Override
-    public void scrollToIndex(int rowIndex) {
+    public void scrollToIndex(int index) {
         getUI().ifPresent(
                 ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0);", rowIndex)));
+                        .executeJs("this.scrollToIndex($0);", index)));
     }
 
     /**
