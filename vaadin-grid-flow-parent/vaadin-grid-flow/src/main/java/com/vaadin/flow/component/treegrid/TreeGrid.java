@@ -1134,18 +1134,16 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * TreeGrid does not support scrolling to a given item. Use
-     * {@link #scrollToIndex(int...)} instead.
+     * Scrolls to an item within the tree.
      * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
+     * This method is currently only supported by grids that use
+     * {@link TreeDataProvider}s. When called while using other types of data
+     * providers, this method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param item
      *            the item to scroll to
-     * @deprecated
      */
-    @Deprecated
     @Override
     public void scrollToItem(T item) {
         if (!(getDataProvider() instanceof TreeDataProvider<T>)) {
