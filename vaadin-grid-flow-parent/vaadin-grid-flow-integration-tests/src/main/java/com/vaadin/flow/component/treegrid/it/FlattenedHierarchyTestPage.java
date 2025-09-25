@@ -164,7 +164,12 @@ public class FlattenedHierarchyTestPage extends Div {
         private static final int NUMBER_OF_MANAGERS = 1000;
         private static final int NUMBER_OF_EMPLOYEES_PER_MANAGER = 100;
 
-        private static List<Person> getEmployees(Person manager) {
+        public static List<Person> getManagers() {
+            return IntStream.range(0, NUMBER_OF_MANAGERS)
+                    .mapToObj(EmployeeDataService::getManager).toList();
+        }
+
+        public static List<Person> getEmployees(Person manager) {
             if (!manager.isManager()) {
                 return Collections.emptyList();
             }
@@ -181,11 +186,6 @@ public class FlattenedHierarchyTestPage extends Div {
             person.setId(NUMBER_OF_MANAGERS
                     + NUMBER_OF_EMPLOYEES_PER_MANAGER * managerId + id);
             return person;
-        }
-
-        public static List<Person> getManagers() {
-            return IntStream.range(0, NUMBER_OF_MANAGERS)
-                    .mapToObj(EmployeeDataService::getManager).toList();
         }
 
         private static Person getManager(int id) {
