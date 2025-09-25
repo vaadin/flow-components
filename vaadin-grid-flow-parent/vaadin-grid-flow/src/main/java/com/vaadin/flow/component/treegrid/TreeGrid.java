@@ -1165,23 +1165,13 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private T getItemToScrollTo(T item) {
-        return getPathToRoot(item).stream()
-                .filter(parent -> !isExpanded(parent)).findFirst().orElse(item);
-    }
-
-    private void scrollToFlattenedIndex(T item) {
-        var flattenedIndex = getItemIndex(item);
-        scrollToIndex(flattenedIndex);
-    }
-
     private void scrollToNestedIndexes(T item) {
-        var nestedIndexes = getPathToRoot(item).stream()
-                .mapToInt(this::getItemIndex).toArray();
-        scrollToIndex(nestedIndexes);
+        var parents = getParents(item);
+        var indexes = parents.stream().mapToInt(this::getItemIndex).toArray();
+        scrollToIndex(indexes);
     }
 
-    private List<T> getPathToRoot(T item) {
+    private List<T> getParents(T item) {
         var parents = new LinkedList<T>();
         parents.push(item);
         var parent = getParent(item);
@@ -1225,5 +1215,22 @@ public class TreeGrid<T> extends Grid<T>
                 .fetchChildren(getDataCommunicator().buildQuery(getParent(item),
                         0, Integer.MAX_VALUE))
                 .takeWhile(i -> !itemMatches.test(i)).count();
+    }
+
+    private void scrollToFlattenedIndex(T item) {
+        var flattenedIndex = getItemIndex(item);
+        scrollToIndex(flattenedIndex);
+    }
+
+    private T getItemToScrollTo(T item) {
+        var itemToScrollTo = item;
+        var parent = getParent(item);
+        while (parent != null) {
+            if (!isExpanded(parent)) {
+                itemToScrollTo = parent;
+            }
+            parent = getParent(parent);
+        }
+        return itemToScrollTo;
     }
 }
