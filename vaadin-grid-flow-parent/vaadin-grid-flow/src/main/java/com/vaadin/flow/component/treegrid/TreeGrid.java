@@ -1168,7 +1168,6 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private void scrollToNestedIndexes(T itemToScrollTo, TreeData<T> treeData) {
-        // TODO use filtered&sorted items
         var parents = new LinkedList<T>();
         parents.push(itemToScrollTo);
         var parent = treeData.getParent(itemToScrollTo);
@@ -1177,24 +1176,28 @@ public class TreeGrid<T> extends Grid<T>
             parent = treeData.getParent(parent);
         }
         var indexesToScrollTo = new int[parents.size()];
-        indexesToScrollTo[0] = treeData.getRootItems().indexOf(parents.get(0));
+        indexesToScrollTo[0] = getItemIndex(parents.get(0), null);
         for (var i = 1; i < parents.size(); i++) {
-            indexesToScrollTo[i] = treeData.getChildren(parents.get(i - 1))
-                    .indexOf(parents.get(i));
+            indexesToScrollTo[i] = getItemIndex(parents.get(i),
+                    parents.get(i - 1));
         }
         scrollToIndex(indexesToScrollTo);
     }
 
     private void scrollToFlattenedIndex(T itemToScrollTo) {
+        var flattenedIndex = getItemIndex(itemToScrollTo, null);
+        scrollToIndex(flattenedIndex);
+    }
+
+    private int getItemIndex(T itemToScrollTo, T parent) {
         var itemId = getDataProvider().getId(itemToScrollTo);
         Predicate<T> itemMatches = itemToMatch -> Objects.equals(itemId,
                 getDataProvider().getId(itemToMatch));
-        var flattenedIndex = (int) ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
+        return (int) ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
                 .getDataProvider())
-                .fetchChildren(getDataCommunicator().buildQuery(null, 0,
+                .fetchChildren(getDataCommunicator().buildQuery(parent, 0,
                         Integer.MAX_VALUE))
                 .takeWhile(i -> !itemMatches.test(i)).count();
-        scrollToIndex(flattenedIndex);
     }
 
     private T getItemToScrollTo(T item, TreeData<T> treeData) {
