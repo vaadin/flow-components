@@ -152,7 +152,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with the given String rendered as its HTML text,
+     * Creates a Notification with the given String rendered as its text,
      * that does not close automatically.
      *
      * @param text
@@ -163,7 +163,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with given String rendered as its HTML text and
+     * Creates a Notification with given String rendered as its text and
      * given Integer rendered as its duration.
      * <p>
      * Set to {@code 0} or a negative number to disable the notification
