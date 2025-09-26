@@ -1199,13 +1199,13 @@ public class TreeGrid<T> extends Grid<T>
         return getItemIndex(item, query);
     }
 
-    // TODO will move to data provider
+    // TODO remove after logic is moved to data provider
     private T getParent(T item) {
         return ((TreeDataProvider<T>) getDataProvider()).getTreeData()
                 .getParent(item);
     }
 
-    // TODO will move to data provider
+    // TODO remove after logic is moved to data provider
     private int getItemIndex(T item, HierarchicalQuery<T, Object> query) {
         var itemId = getDataProvider().getId(item);
         Predicate<T> itemMatches = itemToMatch -> Objects.equals(itemId,
