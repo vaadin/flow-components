@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+/**
+ * Downloads the given NPM theme package with the version specified in the given Java theme class,
+ * and copies its distribution files to the target directory to expose them as static resources in
+ * a web application. The script is automatically run in the Maven build for the Aura and Lumo
+ * theme modules.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
