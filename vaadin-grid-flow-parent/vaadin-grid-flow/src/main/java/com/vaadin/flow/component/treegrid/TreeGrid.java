@@ -1151,11 +1151,6 @@ public class TreeGrid<T> extends Grid<T>
                     "scrollToItem method is only supported in TreeGrids with a TreeDataProvider");
         }
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
-        if (!((TreeDataProvider<T>) getDataProvider()).getTreeData()
-                .contains(item)) {
-            throw new NoSuchElementException(
-                    "Item to scroll to cannot be found: " + item);
-        }
         var itemToScrollTo = getItemToScrollTo(item);
         if (getDataProvider().getHierarchyFormat()
                 .equals(HierarchicalDataProvider.HierarchyFormat.FLATTENED)) {
@@ -1166,15 +1161,9 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private T getItemToScrollTo(T item) {
-        var itemToScrollTo = item;
-        var parent = getParent(item);
-        while (parent != null) {
-            if (!isExpanded(parent)) {
-                itemToScrollTo = parent;
-            }
-            parent = getParent(parent);
-        }
-        return itemToScrollTo;
+        return getPathFromRoot(item).stream()
+                .filter(itemInPath -> !isExpanded(itemInPath)).findFirst()
+                .orElse(item);
     }
 
     private void scrollToFlattenedIndex(T item) {
@@ -1183,6 +1172,17 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private void scrollToNestedIndexes(T item) {
+        var pathFromRoot = getPathFromRoot(item);
+        var indexesToScrollTo = new int[pathFromRoot.size()];
+        indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), (T) null);
+        for (var i = 1; i < pathFromRoot.size(); i++) {
+            indexesToScrollTo[i] = getItemIndex(pathFromRoot.get(i),
+                    pathFromRoot.get(i - 1));
+        }
+        scrollToIndex(indexesToScrollTo);
+    }
+
+    private List<T> getPathFromRoot(T item) {
         var parents = new LinkedList<T>();
         parents.push(item);
         var parent = getParent(item);
@@ -1190,21 +1190,13 @@ public class TreeGrid<T> extends Grid<T>
             parents.push(parent);
             parent = getParent(parent);
         }
-        var indexesToScrollTo = new int[parents.size()];
-        indexesToScrollTo[0] = getItemIndex(parents.get(0), (T) null);
-        for (var i = 1; i < parents.size(); i++) {
-            indexesToScrollTo[i] = getItemIndex(parents.get(i),
-                    parents.get(i - 1));
-        }
-        scrollToIndex(indexesToScrollTo);
+        return parents;
     }
 
     private int getItemIndex(T item, T parent) {
-        return getItemIndex(item, getQuery(parent));
-    }
-
-    private HierarchicalQuery<T, Object> getQuery(T parent) {
-        return getDataCommunicator().buildQuery(parent, 0, Integer.MAX_VALUE);
+        var query = getDataCommunicator().buildQuery(parent, 0,
+                Integer.MAX_VALUE);
+        return getItemIndex(item, query);
     }
 
     // TODO will move to data provider
