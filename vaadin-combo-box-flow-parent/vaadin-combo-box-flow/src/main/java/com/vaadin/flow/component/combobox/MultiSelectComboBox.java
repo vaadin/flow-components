@@ -98,7 +98,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha20")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -281,7 +281,7 @@ public class MultiSelectComboBox<TItem>
 
         Set<T> set = new LinkedHashSet<>();
         for (int i = 0; i < presentation.size(); i++) {
-            String key = presentation.get(i).get("key").asText();
+            String key = presentation.get(i).get("key").asString();
             set.add(keyMapper.get(key));
         }
         return set;

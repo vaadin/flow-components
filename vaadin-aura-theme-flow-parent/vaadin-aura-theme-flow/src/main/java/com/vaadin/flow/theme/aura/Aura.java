@@ -20,7 +20,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 /**
  * Aura theme base class.
  */
-@NpmPackage(value = "@vaadin/aura", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/aura", version = "25.0.0-alpha20")
 public class Aura {
 
 }

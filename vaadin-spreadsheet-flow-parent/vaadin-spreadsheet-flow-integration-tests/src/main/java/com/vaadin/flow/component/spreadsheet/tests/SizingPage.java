@@ -103,7 +103,7 @@ public class SizingPage extends Div {
                     spreadsheet.getElement().executeJs(
                             "return this.shadowRoot.querySelector('.bottom-right-pane').style.top")
                             .then(message -> {
-                                var stringMessage = message.asText();
+                                var stringMessage = message.asString();
                                 messageLog.setText(stringMessage);
                             });
                 })));

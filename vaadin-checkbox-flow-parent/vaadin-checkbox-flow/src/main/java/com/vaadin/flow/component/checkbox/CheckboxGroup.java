@@ -111,7 +111,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.0.0-alpha20")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -906,7 +906,7 @@ public class CheckboxGroup<T>
         }
         Set<T> set = new HashSet<>();
         for (int i = 0; i < presentation.size(); i++) {
-            set.add(group.keyMapper.get(presentation.get(i).asText()));
+            set.add(group.keyMapper.get(presentation.get(i).asString()));
         }
         return set;
     }
