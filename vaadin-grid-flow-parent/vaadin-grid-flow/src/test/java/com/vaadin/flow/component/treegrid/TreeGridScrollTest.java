@@ -162,17 +162,7 @@ public class TreeGridScrollTest {
     }
 
     private void setFlattenedTreeDataProvider() {
-        treeGrid.setDataProvider(new TreeDataProvider<>(treeData) {
-            @Override
-            public HierarchyFormat getHierarchyFormat() {
-                return HierarchyFormat.FLATTENED;
-            }
-
-            @Override
-            public int getDepth(HierarchicalTestBean item) {
-                return item.getDepth();
-            }
-        });
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData, HierarchyFormat.FLATTENED));
     }
 
     private void setNestedTreeDataProvider() {
