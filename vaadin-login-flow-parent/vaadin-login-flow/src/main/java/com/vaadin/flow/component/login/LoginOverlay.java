@@ -64,6 +64,13 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     private void init() {
+        getElement().addPropertyChangeListener("opened", event -> {
+            // Only handle client-side changes, server-side changes are already
+            // handled by setOpened
+            if (event.isUserOriginated()) {
+                doSetOpened(this.isOpened());
+            }
+        });
         // Initialize auto-add behavior
         OverlayAutoAddController<LoginOverlay> autoAddController = new OverlayAutoAddController<>(
                 this, () -> ModalityMode.STRICT);
@@ -72,6 +79,13 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         // case it should not be auto-added if the view redirects to a different
         // view if the user is already authenticated
         autoAddController.setSkipOnNavigation(true);
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this,
+                    modal ? ModalityMode.STRICT : ModalityMode.MODELESS));
+        }
     }
 
     /**
@@ -110,6 +124,11 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         if (opened) {
             setEnabled(true);
         }
+        doSetOpened(opened);
+    }
+
+    private void doSetOpened(boolean opened) {
+        setModality(opened);
         getElement().setProperty("opened", opened);
     }
 

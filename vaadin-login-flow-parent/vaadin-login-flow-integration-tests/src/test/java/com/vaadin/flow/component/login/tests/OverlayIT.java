@@ -163,9 +163,9 @@ public class OverlayIT extends AbstractComponentIT {
     @Test
     public void testOverlayModalityModeIsStrictByDefault() {
         openOverlay();
-        $(LoginOverlayElement.class).waitForFirst();
+        $(LoginOverlayElement.class).withAttribute("opened").waitForFirst();
         closeOverlay(); // strict mode blocks clicking button
-        $(LoginOverlayElement.class).waitForFirst();
+        $(LoginOverlayElement.class).withAttribute("opened").waitForFirst();
     }
 
     protected void checkSuccessfulLogin(TextFieldElement usernameField,
