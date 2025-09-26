@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.map;
 
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -39,7 +41,23 @@ public class ClusterPage extends Div {
                 "Customize cluster style", e -> customizeClusterStyle(map));
         customizeStyleButton.setId("customize-style");
 
-        add(map, toggleClusteringButton, customizeStyleButton);
+        Div eventLog = new Div();
+        eventLog.setId("event-log");
+        eventLog.getElement().getStyle().set("white-space", "pre");
+
+        map.addClusterClickListener(event -> {
+            String features = event.getFeatures().stream()
+                    .map(info -> info.getFeature().getId()).sorted()
+                    .collect(Collectors.joining(", "));
+            eventLog.add(new Div("cluster-click: " + features));
+        });
+
+        map.addFeatureClickListener(event -> {
+            eventLog.add(
+                    new Div("feature-click: " + event.getFeature().getId()));
+        });
+
+        add(map, toggleClusteringButton, customizeStyleButton, eventLog);
     }
 
     private void configureClustering(Map map) {
