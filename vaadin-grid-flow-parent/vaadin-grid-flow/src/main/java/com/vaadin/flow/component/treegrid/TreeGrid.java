@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1136,20 +1134,19 @@ public class TreeGrid<T> extends Grid<T>
     /**
      * Scrolls to an item within the tree.
      * <p>
-     * This method is currently only supported by grids that use
-     * {@link TreeDataProvider}s. When called while using other types of data
-     * providers, this method will throw an
-     * {@link UnsupportedOperationException}.
+     * In order to be able to use this method, the data provider should
+     * implement {@link HierarchicalDataProvider#getParent(T)} and
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}. Any
+     * in-memory data provider implements
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)} by
+     * default. Additionally, {@link TreeDataProvider} implements
+     * {@link HierarchicalDataProvider#getParent(T)} by default.
      *
      * @param item
      *            the item to scroll to
      */
     @Override
     public void scrollToItem(T item) {
-        if (!(getDataProvider() instanceof TreeDataProvider<T>)) {
-            throw new UnsupportedOperationException(
-                    "scrollToItem method is only supported in TreeGrids with a TreeDataProvider");
-        }
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
         var itemToScrollTo = getItemToScrollTo(item);
         if (getDataProvider().getHierarchyFormat()
@@ -1167,14 +1164,14 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private void scrollToFlattenedIndex(T item) {
-        var flattenedIndex = getItemIndex(item, (T) null);
+        var flattenedIndex = getItemIndex(item, null);
         scrollToIndex(flattenedIndex);
     }
 
     private void scrollToNestedIndexes(T item) {
         var pathFromRoot = getPathFromRoot(item);
         var indexesToScrollTo = new int[pathFromRoot.size()];
-        indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), (T) null);
+        indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), null);
         for (var i = 1; i < pathFromRoot.size(); i++) {
             indexesToScrollTo[i] = getItemIndex(pathFromRoot.get(i),
                     pathFromRoot.get(i - 1));
@@ -1185,10 +1182,10 @@ public class TreeGrid<T> extends Grid<T>
     private List<T> getPathFromRoot(T item) {
         var parents = new LinkedList<T>();
         parents.push(item);
-        var parent = getParent(item);
+        var parent = getDataProvider().getParent(item);
         while (parent != null) {
             parents.push(parent);
-            parent = getParent(parent);
+            parent = getDataProvider().getParent(parent);
         }
         return parents;
     }
@@ -1196,29 +1193,6 @@ public class TreeGrid<T> extends Grid<T>
     private int getItemIndex(T item, T parent) {
         var query = getDataCommunicator().buildQuery(parent, 0,
                 Integer.MAX_VALUE);
-        return getItemIndex(item, query);
-    }
-
-    // TODO remove after logic is moved to data provider
-    private T getParent(T item) {
-        return ((TreeDataProvider<T>) getDataProvider()).getTreeData()
-                .getParent(item);
-    }
-
-    // TODO remove after logic is moved to data provider
-    private int getItemIndex(T item, HierarchicalQuery<T, Object> query) {
-        var itemId = getDataProvider().getId(item);
-        Predicate<T> itemMatches = itemToMatch -> Objects.equals(itemId,
-                getDataProvider().getId(itemToMatch));
-        var itemFound = new AtomicBoolean(false);
-        var index = (int) ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
-                .getDataProvider()).fetchChildren(query).takeWhile(i -> {
-                    itemFound.set(itemMatches.test(i));
-                    return !itemFound.get();
-                }).count();
-        if (!itemFound.get()) {
-            throw new IllegalArgumentException("Item not found");
-        }
-        return index;
+        return getDataProvider().getItemIndex(item, query);
     }
 }
