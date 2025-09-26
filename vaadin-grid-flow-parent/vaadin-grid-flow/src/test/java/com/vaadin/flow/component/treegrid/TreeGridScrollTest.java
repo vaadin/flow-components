@@ -162,7 +162,8 @@ public class TreeGridScrollTest {
     }
 
     private void setFlattenedTreeDataProvider() {
-        treeGrid.setDataProvider(new TreeDataProvider<>(treeData, HierarchyFormat.FLATTENED));
+        treeGrid.setDataProvider(
+                new TreeDataProvider<>(treeData, HierarchyFormat.FLATTENED));
     }
 
     private void setNestedTreeDataProvider() {
