@@ -26,6 +26,7 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapClusterClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
@@ -227,6 +228,19 @@ public abstract class MapBase extends Component
     public Registration addFeatureClickListener(
             ComponentEventListener<MapFeatureClickEvent> listener) {
         return addListener(MapFeatureClickEvent.class, listener);
+    }
+
+    /**
+     * Adds a click listener for clusters of features. The listener will be
+     * invoked for a click on any cluster, in any feature layer.
+     *
+     * @param listener
+     *            the listener to trigger
+     * @return registration for the listener
+     */
+    public Registration addClusterClickListener(
+            ComponentEventListener<MapClusterClickEvent> listener) {
+        return addListener(MapClusterClickEvent.class, listener);
     }
 
     /**
