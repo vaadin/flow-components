@@ -28,6 +28,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
 import com.vaadin.flow.component.grid.LazyHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
@@ -46,8 +47,8 @@ public class TreeGridScrollTest {
     }
 
     @Test
-    public void setNonTreeDataProvider_scrollToNonExistingItem_unsupportedOperationExceptionThrown() {
-        setNonTreeDataProvider();
+    public void setNonInMemoryProvider_scrollToNonExistingItem_unsupportedOperationExceptionThrown() {
+        setNonInMemoryProvider();
         Assert.assertThrows(UnsupportedOperationException.class,
                 () -> treeGrid.scrollToItem(treeData.getRootItems().get(30)));
     }
@@ -170,7 +171,23 @@ public class TreeGridScrollTest {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData));
     }
 
-    private void setNonTreeDataProvider() {
+    private void setLazyProvider() {
+        // TODO implement
+        treeGrid.setDataProvider(new LazyHierarchicalDataProvider(100, 3) {
+            @Override
+            public int getItemIndex(HierarchicalTestBean item,
+                    HierarchicalQuery<HierarchicalTestBean, Object> query) {
+                return item.getIndex();
+            }
+
+            @Override
+            public HierarchicalTestBean getParent(HierarchicalTestBean item) {
+                return item;
+            }
+        });
+    }
+
+    private void setNonInMemoryProvider() {
         treeGrid.setDataProvider(new LazyHierarchicalDataProvider(100, 3));
     }
 
