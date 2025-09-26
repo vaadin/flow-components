@@ -121,12 +121,12 @@ public class FeatureLayerTest {
 
     @Test
     public void setClusterDistance() {
-        featureLayer.setClusterDistance(50);
-        Assert.assertEquals(50, featureLayer.getClusterDistance());
+        featureLayer.setClusterDistance(10);
+        Assert.assertEquals(10, featureLayer.getClusterDistance());
 
         featureLayer.setClusteringEnabled(true);
         ClusterSource clusterSource = (ClusterSource) featureLayer.getSource();
-        Assert.assertEquals(50, clusterSource.getDistance());
+        Assert.assertEquals(10, clusterSource.getDistance());
 
         featureLayer.setClusterDistance(100);
         Assert.assertEquals(100, clusterSource.getDistance());
