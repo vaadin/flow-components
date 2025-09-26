@@ -7,6 +7,7 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+import { extend } from 'ol/extent';
 import Translate from 'ol/interaction/Translate';
 import { setUserProjection as openLayersSetUserProjection } from 'ol/proj';
 import { register as openLayersRegisterProjections } from 'ol/proj/proj4';
@@ -67,6 +68,44 @@ function init(mapElement) {
           .getLayers()
           .getArray()
           .forEach((layer) => layer.changed());
+      });
+    },
+    /**
+     * Adjust the map view to fit the given features.
+     * @param featureIds array of IDs of the features to fit in the map view
+     * @param options optional options for the OL `View.fit` method
+     */
+    zoomToFit(featureIds, options) {
+      // Synchronization call for the referenced features must run beforehand, but may have
+      // been scheduled after this call. Using a timeout to compensate.
+      setTimeout(() => {
+        const features = featureIds.map((id) => this.lookup.get(id)).filter(Boolean);
+        if (features.length === 0) {
+          return;
+        }
+
+        let extent;
+        features.forEach((feature) => {
+          const featureExtent = feature.getGeometry().getExtent();
+          if (!extent) {
+            extent = featureExtent.slice();
+          } else {
+            extend(extent, featureExtent);
+          }
+        });
+
+        const padding = options?.padding ?? 0;
+        const duration = options?.duration ?? 0;
+        // Viewport size in the OL View instance may not have updated yet to the actual map size,
+        // so provide the size explicitly
+        const bounds = mapElement.getBoundingClientRect();
+        const size = [bounds.width, bounds.height];
+
+        mapElement.configuration.getView().fit(extent, {
+          padding: [padding, padding, padding, padding],
+          duration,
+          size
+        });
       });
     }
   };
