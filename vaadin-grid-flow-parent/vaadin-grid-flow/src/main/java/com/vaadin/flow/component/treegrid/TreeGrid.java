@@ -18,6 +18,7 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -1167,19 +1168,20 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private void scrollToFlattenedIndex(T item) {
-        var flattenedIndex = getItemIndex(item, (T) null);
+        var flattenedIndex = getItemIndex(item);
         scrollToIndex(flattenedIndex);
     }
 
     private void scrollToNestedIndexes(T item) {
-        var pathFromRoot = getPathFromRoot(item);
-        var indexesToScrollTo = new int[pathFromRoot.size()];
-        indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), (T) null);
-        for (var i = 1; i < pathFromRoot.size(); i++) {
-            indexesToScrollTo[i] = getItemIndex(pathFromRoot.get(i),
-                    pathFromRoot.get(i - 1));
+        var indexes = new ArrayList<Integer>();
+        indexes.add(getItemIndex(item));
+        var parent = getParent(item);
+        while (parent != null) {
+            indexes.add(getItemIndex(parent));
+            parent = getParent(parent);
         }
-        scrollToIndex(indexesToScrollTo);
+        Collections.reverse(indexes);
+        scrollToIndex(indexes.stream().mapToInt(i -> i).toArray());
     }
 
     private List<T> getPathFromRoot(T item) {
@@ -1193,8 +1195,8 @@ public class TreeGrid<T> extends Grid<T>
         return parents;
     }
 
-    private int getItemIndex(T item, T parent) {
-        var query = getDataCommunicator().buildQuery(parent, 0,
+    private int getItemIndex(T item) {
+        var query = getDataCommunicator().buildQuery(getParent(item), 0,
                 Integer.MAX_VALUE);
         return getItemIndex(item, query);
     }
