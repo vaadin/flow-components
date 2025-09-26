@@ -42,10 +42,12 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
                 .id("grid-with-header-and-footer-rows");
         scrollToElement(grid);
 
-        assertRendereredHeaderCell(grid.getHeaderCell(0), "Name", true);
-        assertRendereredHeaderCell(grid.getHeaderCell(1), "Age", true);
-        assertRendereredHeaderCell(grid.getHeaderCell(2), "Street", false);
-        assertRendereredHeaderCell(grid.getHeaderCell(3), "Postal Code", false);
+        // Joined columns are at prepended row, i.e. index 0
+        assertRendereredHeaderCell(grid.getHeaderCell(1, 0), "Name", true);
+        assertRendereredHeaderCell(grid.getHeaderCell(1, 1), "Age", true);
+        assertRendereredHeaderCell(grid.getHeaderCell(1, 2), "Street", false);
+        assertRendereredHeaderCell(grid.getHeaderCell(1, 3), "Postal Code",
+                false);
 
         Assert.assertTrue(
                 "The first column group should have 'Basic Information' header text",
@@ -58,7 +60,8 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
                         .contains("Address Information"));
 
         Assert.assertTrue("There should be a cell with the renderered footer",
-                grid.getFooterCell(0).getText().contains("Total: 500 people"));
+                grid.getFooterCell(0, 0).getText()
+                        .contains("Total: 500 people"));
     }
 
     @Test
