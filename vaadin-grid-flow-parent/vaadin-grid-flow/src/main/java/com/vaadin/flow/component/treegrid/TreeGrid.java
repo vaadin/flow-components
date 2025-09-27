@@ -18,9 +18,12 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,7 +33,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
@@ -49,6 +51,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -1000,6 +1003,7 @@ public class TreeGrid<T> extends Grid<T>
                         .executeJs("this.scrollToIndex($0);", rowIndex)));
     }
 
+    // TODO update for flattened data providers
     /**
      * Scrolls to a nested item within the tree.
      * <p>
@@ -1073,7 +1077,7 @@ public class TreeGrid<T> extends Grid<T>
         // page-aligned.
         dataCommunicator.preloadFlatRangeForward(flatIndex, padding + pageSize);
 
-        // Repeat the process backward to preload enough items behing the
+        // Repeat the process backward to preload enough items behind the
         // resolved flat index. Adding the page size is essential. Without it,
         // the following call to dataCommunicator.setViewportRange will try to
         // load uncovered expanded items forward, shifting the range and causing
@@ -1101,21 +1105,91 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * TreeGrid does not support scrolling to a given item. Use
-     * {@link #scrollToIndex(int...)} instead.
+     * Scrolls to an item within the tree.
      * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
+     * This method is currently only supported by grids that use
+     * {@link TreeDataProvider}s. When called while using other types of data
+     * providers, this method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param item
      *            the item to scroll to
-     * @deprecated
      */
-    @Deprecated
     @Override
     public void scrollToItem(T item) {
-        throw new UnsupportedOperationException(
-                "scrollToItem method is not supported in TreeGrid");
+        if (!(getDataProvider() instanceof TreeDataProvider<T>)) {
+            throw new UnsupportedOperationException(
+                    "scrollToItem method is only supported in TreeGrids with a TreeDataProvider");
+        }
+        Objects.requireNonNull(item, "Item to scroll to cannot be null.");
+        var itemToScrollTo = getItemToScrollTo(item);
+        if (getDataProvider().getHierarchyFormat()
+                .equals(HierarchicalDataProvider.HierarchyFormat.FLATTENED)) {
+            scrollToFlattenedIndex(itemToScrollTo);
+        } else {
+            scrollToNestedIndexes(itemToScrollTo);
+        }
+    }
+
+    private T getItemToScrollTo(T item) {
+        return getPathFromRoot(item).stream()
+                .filter(itemInPath -> !isExpanded(itemInPath)).findFirst()
+                .orElse(item);
+    }
+
+    private void scrollToFlattenedIndex(T item) {
+        var flattenedIndex = getItemIndex(item, (T) null);
+        scrollToIndex(flattenedIndex);
+    }
+
+    private void scrollToNestedIndexes(T item) {
+        var pathFromRoot = getPathFromRoot(item);
+        var indexesToScrollTo = new int[pathFromRoot.size()];
+        indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), (T) null);
+        for (var i = 1; i < pathFromRoot.size(); i++) {
+            indexesToScrollTo[i] = getItemIndex(pathFromRoot.get(i),
+                    pathFromRoot.get(i - 1));
+        }
+        scrollToIndex(indexesToScrollTo);
+    }
+
+    private List<T> getPathFromRoot(T item) {
+        var parents = new LinkedList<T>();
+        parents.push(item);
+        var parent = getParent(item);
+        while (parent != null) {
+            parents.push(parent);
+            parent = getParent(parent);
+        }
+        return parents;
+    }
+
+    private int getItemIndex(T item, T parent) {
+        var query = getDataCommunicator().buildQuery(parent, 0,
+                Integer.MAX_VALUE);
+        return getItemIndex(item, query);
+    }
+
+    // TODO remove after logic is moved to data provider
+    private T getParent(T item) {
+        return ((TreeDataProvider<T>) getDataProvider()).getTreeData()
+                .getParent(item);
+    }
+
+    // TODO remove after logic is moved to data provider
+    private int getItemIndex(T item, HierarchicalQuery<T, Object> query) {
+        var itemId = getDataProvider().getId(item);
+        Predicate<T> itemMatches = itemToMatch -> Objects.equals(itemId,
+                getDataProvider().getId(itemToMatch));
+        var itemFound = new AtomicBoolean(false);
+        var index = (int) ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
+                .getDataProvider()).fetchChildren(query).takeWhile(i -> {
+                    itemFound.set(itemMatches.test(i));
+                    return !itemFound.get();
+                }).count();
+        if (!itemFound.get()) {
+            throw new IllegalArgumentException("Item not found");
+        }
+        return index;
     }
 }
