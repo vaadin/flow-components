@@ -33,10 +33,16 @@ public class OverlayView extends AbstractView {
     public OverlayView() {
         init(login);
         login.addLoginListener(e -> login.close());
-        NativeButton button = new NativeButton("open");
-        button.setId("open");
-        button.addClickListener(e -> login.setOpened(true));
-        add(button);
+        NativeButton openButton = new NativeButton("open");
+        openButton.setId("open-button");
+        openButton.addClickListener(e -> login.setOpened(true));
+        add(openButton);
+
+        NativeButton closeButton = new NativeButton("close");
+        closeButton.setId("close-button");
+        closeButton.addClickListener(e -> login.setOpened(false));
+
+        add(openButton, closeButton);
     }
 
     @Override

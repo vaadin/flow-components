@@ -25,6 +25,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -53,6 +54,8 @@ import com.vaadin.flow.shared.Registration;
  * Each Confirm Dialog should have a title and/or message. The “Confirm” button
  * is shown by default, while the two other buttons are not (they must be
  * explicitly enabled to be displayed).
+ * <p>
+ * Confirm Dialog is modal in {@link ModalityMode#STRICT} mode.
  *
  * @author Vaadin Ltd
  */
@@ -238,7 +241,7 @@ public class ConfirmDialog extends Component
      */
     public ConfirmDialog() {
         // Initialize auto-add behavior
-        new OverlayAutoAddController<>(this, () -> true);
+        new OverlayAutoAddController<>(this, () -> ModalityMode.STRICT);
 
         setOpened(false);
 

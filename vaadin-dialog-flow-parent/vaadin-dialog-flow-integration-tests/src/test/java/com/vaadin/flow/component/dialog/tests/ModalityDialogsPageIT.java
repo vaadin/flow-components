@@ -53,8 +53,27 @@ public class ModalityDialogsPageIT extends AbstractDialogIT {
     }
 
     @Test
-    public void openModalDialog_removeBackdrop_logClickNotAccepted() {
-        $(NativeButtonElement.class).id("open-modal-dialog").click();
+    public void openVisualModalDialog_modalityCurtainVisible_logButtonClickable() {
+        $(NativeButtonElement.class).id("open-visual-modal-dialog").click();
+        verifyNumberOfDialogs(1);
+
+        getDialog().$("*").id("overlay").$(DivElement.class).id("backdrop");
+
+        // Even with the modality curtain, button is programmatically clickable.
+        $(NativeButtonElement.class).id("log").click();
+
+        verifyOpened();
+        Assert.assertEquals("Click should have resulted in a log message", 1,
+                $(DivElement.class).id(LOG_ID).$("div").all().size());
+
+        getDialog().$(NativeButtonElement.class).first().click();
+
+        verifyClosedAndRemoved();
+    }
+
+    @Test
+    public void openStrictModalDialog_removeBackdrop_logClickNotAccepted() {
+        $(NativeButtonElement.class).id("open-strict-modal-dialog").click();
         final DivElement backdrop = getDialog().$("*").id("overlay")
                 .$(DivElement.class).id("backdrop");
 
@@ -81,11 +100,11 @@ public class ModalityDialogsPageIT extends AbstractDialogIT {
     }
 
     @Test
-    public void openModalDialog_outsideClickToCloseDialog_logButtonClickable() {
+    public void openStrictModalDialog_outsideClickToCloseDialog_logButtonClickable() {
         $(NativeButtonElement.class).id("add-modal-dialog").click();
         $(NativeButtonElement.class).id("enable-close-on-outside-click")
                 .click();
-        $(NativeButtonElement.class).id("open-modal-dialog").click();
+        $(NativeButtonElement.class).id("open-strict-modal-dialog").click();
 
         // Click anything to close dialog
         $("body").first().click();
@@ -98,8 +117,8 @@ public class ModalityDialogsPageIT extends AbstractDialogIT {
     }
 
     @Test
-    public void openModalDialog_openNonModalOnTop_nonModalCanBeUsed() {
-        $(NativeButtonElement.class).id("open-modal-dialog").click();
+    public void openStrictModalDialog_openNonModalOnTop_nonModalCanBeUsed() {
+        $(NativeButtonElement.class).id("open-strict-modal-dialog").click();
 
         final DialogElement dialog = getDialog();
         dialog.$(NativeButtonElement.class).id("open-sub").click();
@@ -120,8 +139,8 @@ public class ModalityDialogsPageIT extends AbstractDialogIT {
     }
 
     @Test
-    public void openModalDialog_hideComponent_logClickAccepted() {
-        $(NativeButtonElement.class).id("open-modal-dialog").click();
+    public void openStrictModalDialog_hideComponent_logClickAccepted() {
+        $(NativeButtonElement.class).id("open-strict-modal-dialog").click();
 
         getDialog().$(NativeButtonElement.class).id("hide").click();
 
@@ -134,7 +153,29 @@ public class ModalityDialogsPageIT extends AbstractDialogIT {
         Assert.assertEquals("Click should have resulted in a log message", 1,
                 $(DivElement.class).id(LOG_ID).$("div").all().size());
 
-        $(NativeButtonElement.class).id("show").click();
+        $(NativeButtonElement.class).id("show-strict-modal").click();
+
+        getDialog().$(NativeButtonElement.class).id("close").click();
+
+        verifyClosedAndRemoved();
+    }
+
+    @Test
+    public void openVisualModalDialog_hideComponent_logClickAccepted() {
+        $(NativeButtonElement.class).id("open-visual-modal-dialog").click();
+
+        getDialog().$(NativeButtonElement.class).id("hide").click();
+
+        verifyOpened();
+        Assert.assertFalse("Dialog should be hidden",
+                getDialog().isDisplayed());
+
+        $(NativeButtonElement.class).id("log").click();
+
+        Assert.assertEquals("Click should have resulted in a log message", 1,
+                $(DivElement.class).id(LOG_ID).$("div").all().size());
+
+        $(NativeButtonElement.class).id("show-visual-modal").click();
 
         getDialog().$(NativeButtonElement.class).id("close").click();
 

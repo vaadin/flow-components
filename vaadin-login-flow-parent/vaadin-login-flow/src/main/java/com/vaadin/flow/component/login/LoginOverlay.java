@@ -20,6 +20,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -32,13 +33,15 @@ import com.vaadin.flow.dom.Style;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
- *
+ * <p>
  * On {@link LoginForm.LoginEvent} component becomes disabled. Disabled
  * component stops to process login events, however the
  * {@link LoginForm.ForgotPasswordEvent} event is processed anyway. To enable
  * use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)}
  * method. Setting error {@link #setError(boolean)} true makes component
  * automatically enabled for the next login attempt.
+ * <p>
+ * Login Overlay is modal in {@link ModalityMode#STRICT} mode.
  *
  * @author Vaadin Ltd
  */
@@ -61,14 +64,28 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     private void init() {
+        getElement().addPropertyChangeListener("opened", event -> {
+            // Only handle client-side changes, server-side changes are already
+            // handled by setOpened
+            if (event.isUserOriginated()) {
+                doSetOpened(this.isOpened());
+            }
+        });
         // Initialize auto-add behavior
         OverlayAutoAddController<LoginOverlay> autoAddController = new OverlayAutoAddController<>(
-                this);
+                this, () -> ModalityMode.STRICT);
         // Skip auto-adding when navigating to a new view before opening.
         // Handles cases where LoginOverlay is used in a login view, in which
         // case it should not be auto-added if the view redirects to a different
         // view if the user is already authenticated
         autoAddController.setSkipOnNavigation(true);
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this,
+                    modal ? ModalityMode.STRICT : ModalityMode.MODELESS));
+        }
     }
 
     /**
@@ -107,6 +124,11 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         if (opened) {
             setEnabled(true);
         }
+        doSetOpened(opened);
+    }
+
+    private void doSetOpened(boolean opened) {
+        setModality(opened);
         getElement().setProperty("opened", opened);
     }
 

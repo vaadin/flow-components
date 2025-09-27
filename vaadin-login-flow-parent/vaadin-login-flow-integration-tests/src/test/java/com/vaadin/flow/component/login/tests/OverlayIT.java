@@ -35,7 +35,11 @@ public class OverlayIT extends AbstractComponentIT {
     }
 
     private void openOverlay() {
-        $("button").waitForFirst().click();
+        $("button").withId("open-button").waitForFirst().click();
+    }
+
+    private void closeOverlay() {
+        $("button").withId("close-button").waitForFirst().click();
     }
 
     @Test
@@ -154,6 +158,14 @@ public class OverlayIT extends AbstractComponentIT {
         Assert.assertEquals("Property title", loginOverlay.getTitle());
         Assert.assertEquals("Property description",
                 loginOverlay.getDescription());
+    }
+
+    @Test
+    public void testOverlayModalityModeIsStrictByDefault() {
+        openOverlay();
+        $(LoginOverlayElement.class).withAttribute("opened").waitForFirst();
+        closeOverlay(); // strict mode blocks clicking button
+        $(LoginOverlayElement.class).withAttribute("opened").waitForFirst();
     }
 
     protected void checkSuccessfulLogin(TextFieldElement usernameField,
