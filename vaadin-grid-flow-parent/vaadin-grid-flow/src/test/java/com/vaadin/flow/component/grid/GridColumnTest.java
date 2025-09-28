@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -328,6 +329,140 @@ public class GridColumnTest {
         Assert.assertTrue(
                 rowHeaderColumn.getElement().getProperty("rowHeader", false));
         Assert.assertTrue(rowHeaderColumn.isRowHeader());
+    }
+
+    @Test
+    public void testCustomReversedComparatorIsRespected() {
+        Grid<Integer> grid = new Grid<>();
+        Column<Integer> column = grid.addColumn(ValueProvider.identity());
+
+        // Custom comparator that keeps favorites (even numbers) at the top
+        // regardless of sort direction
+        Comparator<Integer> customComparator = new Comparator<Integer>() {
+            private boolean isFavorite(Integer value) {
+                return value != null && value % 2 == 0;
+            }
+
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                // Favorites first, then natural order
+                return Comparator.comparing(this::isFavorite).reversed()
+                        .thenComparing(Comparator.naturalOrder())
+                        .compare(o1, o2);
+            }
+
+            @Override
+            public Comparator<Integer> reversed() {
+                // Custom reversed: favorites still first, but reversed within
+                // groups
+                return (o1, o2) -> {
+                    boolean fav1 = isFavorite(o1);
+                    boolean fav2 = isFavorite(o2);
+
+                    if (fav1 != fav2) {
+                        // Favorites always come first
+                        return fav1 ? -1 : 1;
+                    }
+                    // Within the same group, reverse the natural order
+                    return Comparator.<Integer> reverseOrder().compare(o1, o2);
+                };
+            }
+        };
+
+        column.setComparator(customComparator);
+
+        // Get comparators for both directions
+        SerializableComparator<Integer> ascComparator = column
+                .getComparator(SortDirection.ASCENDING);
+        SerializableComparator<Integer> descComparator = column
+                .getComparator(SortDirection.DESCENDING);
+
+        // Test ascending sort
+        // Favorites (even) should come first: 2, 4, then non-favorites: 1, 3
+        Assert.assertTrue("Even 2 should come before odd 1 in ascending",
+                ascComparator.compare(2, 1) < 0);
+        Assert.assertTrue("Even 4 should come before odd 3 in ascending",
+                ascComparator.compare(4, 3) < 0);
+        Assert.assertTrue(
+                "Within favorites, 2 should come before 4 in ascending",
+                ascComparator.compare(2, 4) < 0);
+        Assert.assertTrue(
+                "Within non-favorites, 1 should come before 3 in ascending",
+                ascComparator.compare(1, 3) < 0);
+
+        // Test descending sort with custom reversed implementation
+        // Favorites (even) should still come first: 4, 2, then non-favorites:
+        // 3, 1
+        Assert.assertTrue(
+                "Even 2 should come before odd 1 in descending (custom reversed)",
+                descComparator.compare(2, 1) < 0);
+        Assert.assertTrue(
+                "Even 4 should come before odd 3 in descending (custom reversed)",
+                descComparator.compare(4, 3) < 0);
+        Assert.assertTrue(
+                "Within favorites, 4 should come before 2 in descending",
+                descComparator.compare(4, 2) < 0);
+        Assert.assertTrue(
+                "Within non-favorites, 3 should come before 1 in descending",
+                descComparator.compare(3, 1) < 0);
+    }
+
+    @Test
+    public void testSerializableComparatorPreservesOriginal() {
+        Grid<Integer> grid = new Grid<>();
+        Column<Integer> column = grid.addColumn(ValueProvider.identity());
+
+        // Create a serializable comparator with custom reversed
+        SerializableComparator<Integer> serializableComparator = new SerializableComparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                // Even numbers first, then natural order
+                boolean even1 = o1 != null && o1 % 2 == 0;
+                boolean even2 = o2 != null && o2 % 2 == 0;
+                if (even1 != even2) {
+                    return even1 ? -1 : 1;
+                }
+                return Integer.compare(o1, o2);
+            }
+
+            @Override
+            public Comparator<Integer> reversed() {
+                // Custom reversed: evens still first, but reversed within
+                // groups
+                return new SerializableComparator<Integer>() {
+                    @Override
+                    public int compare(Integer o1, Integer o2) {
+                        boolean even1 = o1 != null && o1 % 2 == 0;
+                        boolean even2 = o2 != null && o2 % 2 == 0;
+                        if (even1 != even2) {
+                            return even1 ? -1 : 1;
+                        }
+                        // Within groups, reverse order
+                        return Integer.compare(o2, o1);
+                    }
+                };
+            }
+        };
+
+        column.setComparator(serializableComparator);
+
+        // Get comparators for both directions
+        SerializableComparator<Integer> ascComparator = column
+                .getComparator(SortDirection.ASCENDING);
+        SerializableComparator<Integer> descComparator = column
+                .getComparator(SortDirection.DESCENDING);
+
+        // Test that ascending uses original comparator
+        Assert.assertTrue("2 (even) should come before 1 (odd)",
+                ascComparator.compare(2, 1) < 0);
+        Assert.assertTrue("2 should come before 4 within evens",
+                ascComparator.compare(2, 4) < 0);
+
+        // Test that descending uses custom reversed
+        Assert.assertTrue("2 (even) should still come before 1 (odd) in desc",
+                descComparator.compare(2, 1) < 0);
+        Assert.assertTrue("4 should come before 2 within evens in desc",
+                descComparator.compare(4, 2) < 0);
     }
 
     private void assertEqualColumnClasses(Class columnClass, Class compareTo) {

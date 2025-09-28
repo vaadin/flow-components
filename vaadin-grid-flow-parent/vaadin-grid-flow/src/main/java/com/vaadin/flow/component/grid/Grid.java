@@ -445,7 +445,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return Stream.of(new QuerySortOrder(key, direction));
         };
 
-        private SerializableComparator<T> comparator;
+        private Comparator<T> comparator;
 
         private Registration columnDataGeneratorRegistration;
         private Registration editorDataGeneratorRegistration;
@@ -735,7 +735,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         public Column<T> setComparator(Comparator<T> comparator) {
             Objects.requireNonNull(comparator, "Comparator must not be null");
             setSortable(true);
-            this.comparator = comparator::compare;
+            this.comparator = comparator;
             return this;
         }
 
@@ -782,7 +782,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     "No comparator defined for sorted column.");
             setSortable(true);
             boolean reverse = sortDirection != SortDirection.ASCENDING;
-            return reverse ? comparator.reversed()::compare : comparator;
+
+            if (reverse) {
+                Comparator<T> reversed = comparator.reversed();
+                if (reversed instanceof SerializableComparator) {
+                    return (SerializableComparator<T>) reversed;
+                }
+                return reversed::compare;
+            }
+
+            if (comparator instanceof SerializableComparator) {
+                return (SerializableComparator<T>) comparator;
+            }
+            return comparator::compare;
         }
 
         /**
