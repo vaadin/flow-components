@@ -26,7 +26,7 @@ public class ChangeUserProjectionPage extends Div {
 
         Div eventData = new Div();
         eventData.setId("event-data");
-        map.addViewMoveEndEventListener(event -> {
+        map.addViewMoveEndListener(event -> {
             String eventText = event.getCenter().getX() + ";"
                     + event.getCenter().getY() + ";";
 
