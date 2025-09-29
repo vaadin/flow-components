@@ -22,13 +22,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.Grid;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Drop event that occurs on the {@link Grid} or its rows.
@@ -71,13 +72,13 @@ public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
         data = new HashMap<>();
         IntStream.range(0, dragData.size()).forEach(i -> {
             JsonNode jsonData = dragData.get(i);
-            data.put(jsonData.get("type").asText(),
-                    jsonData.get("data").asText());
+            data.put(jsonData.get("type").asString(),
+                    jsonData.get("data").asString());
         });
 
         if (item != null) {
             this.dropTargetItem = source.getDataCommunicator().getKeyMapper()
-                    .get(item.get("key").asText());
+                    .get(item.get("key").asString());
         } else {
             this.dropTargetItem = null;
         }

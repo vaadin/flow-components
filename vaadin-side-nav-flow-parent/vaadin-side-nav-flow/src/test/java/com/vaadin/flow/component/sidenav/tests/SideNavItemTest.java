@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
@@ -46,6 +45,8 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+
+import tools.jackson.databind.node.ArrayNode;
 
 public class SideNavItemTest {
 
@@ -798,7 +799,7 @@ public class SideNavItemTest {
             Assert.assertNotNull(actualAliasesArray);
             Set<String> actualAliasesSet = new HashSet<>();
             for (int i = 0; i < actualAliasesArray.size(); i++) {
-                actualAliasesSet.add(actualAliasesArray.get(i).asText());
+                actualAliasesSet.add(actualAliasesArray.get(i).asString());
             }
             Assert.assertEquals(expectedAliases, actualAliasesSet);
         }

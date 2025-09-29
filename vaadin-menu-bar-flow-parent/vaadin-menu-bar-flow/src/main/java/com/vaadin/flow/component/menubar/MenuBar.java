@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -45,6 +44,8 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
 
+import tools.jackson.databind.node.ObjectNode;
+
 /**
  * Menu Bar is a horizontal button bar with hierarchical drop-down menus. Menu
  * items can either trigger an action, open a menu, or work as a toggle.
@@ -55,8 +56,8 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha19")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha20")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 

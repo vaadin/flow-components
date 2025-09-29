@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -48,6 +47,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -60,6 +60,8 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Tree Grid is a component for displaying hierarchical tabular data grouped
@@ -979,46 +981,74 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to the index of an item in the root level of the tree. To scroll
-     * to a nested item, use {@link #scrollToIndex(int...)}.
+     * Scrolls to the index of an item so that the row is shown at the start of
+     * the visible area whenever possible. The way the {@code index} parameter
+     * is interpreted depends on the
+     * {@link HierarchicalDataProvider#getHierarchyFormat() hierarchy format} of
+     * the current data provider:
      * <p>
-     * Scrolls so that the row is shown at the start of the visible area
-     * whenever possible.
+     * {@link HierarchyFormat#NESTED}: the index refers to an item in the root
+     * level. To reach items in deeper levels, use
+     * {@link #scrollToIndex(int...)}, which accepts a hierarchical path.
      * <p>
-     * If the index parameter exceeds current item set size the grid will scroll
-     * to the end.
+     * {@link HierarchyFormat#FLATTENED}: the index refers to an item in the
+     * entire flattened tree, not only the root level, allowing items at any
+     * expanded level to be reached with this method.
+     * <p>
+     * If the index exceeds the valid range, scrolling stops at the last
+     * available item.
      *
-     * @param rowIndex
-     *            zero based index of the item in the root level of the tree
-     * @see TreeGrid#scrollToIndex(int...)
+     * @param index
+     *            zero based index of the item to scroll to
      */
     @Override
-    public void scrollToIndex(int rowIndex) {
+    public void scrollToIndex(int index) {
         getUI().ifPresent(
                 ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0);", rowIndex)));
+                        .executeJs("this.scrollToIndex($0);", index)));
     }
 
     /**
-     * Scrolls to a nested item within the tree.
+     * Scrolls to a nested item specified by its hierarchical path.
      * <p>
-     * The `indexes` parameter can be either a single number or multiple
-     * numbers. The grid will first try to scroll to the item at the first index
-     * in the root level of the tree. In case the item at the first index is
-     * expanded, the grid will then try scroll to the item at the second index
-     * within the children of the expanded first item, and so on. Each given
-     * index points to a child of the item at the previous index.
+     * The hierarchical path is an array of zero-based indexes, where each index
+     * refers to a child of the item at the previous index. Scrolling continues
+     * until it reaches the last index in the array or encounters a collapsed
+     * item.
+     * <p>
+     * For example, given {@code &#123; 2, 1, ... &#125;} as the path, the
+     * component will first try to scroll to the item at index 2 in the root
+     * level. If that item is expanded, it will then try to scroll to the item
+     * at index 1 among its children, and so forth.
+     * <p>
+     * This method is only supported for data providers that use
+     * {@link HierarchyFormat#NESTED}. For {@link HierarchyFormat#FLATTENED},
+     * use {@link #scrollToIndex(int)} with a flat index instead.
      *
-     * @param indexes
-     *            zero based row indexes to scroll to
-     * @see TreeGrid#scrollToIndex(int)
+     * @param path
+     *            an array of indexes representing the path to the target item
+     * @throws IllegalArgumentException
+     *             if the path is empty
+     * @throws UnsupportedOperationException
+     *             if the data provider uses a hierarchy format other than
+     *             {@link HierarchyFormat#NESTED}
      */
-    public void scrollToIndex(int... indexes) {
-        if (indexes.length == 0) {
+    public void scrollToIndex(int... path) {
+        if (!getDataProvider().getHierarchyFormat()
+                .equals(HierarchyFormat.NESTED)) {
+            throw new UnsupportedOperationException(
+                    """
+                            scrollToIndex(int...) is supported only for data providers that use HierarchyFormat.NESTED. \
+                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
+                            """);
+        }
+
+        if (path.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
+
+        String joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
                 .collect(Collectors.joining(","));
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(

@@ -17,16 +17,12 @@ package com.vaadin.flow.component.upload;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -54,6 +50,10 @@ import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+
 /**
  * Upload is a component for uploading one or more files. It shows the upload
  * progression and status of each file. Files can be uploaded using the Upload
@@ -62,7 +62,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha20")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
@@ -110,15 +110,15 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
         getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData().get(eventDetailError)
-                    .asText();
+                    .asString();
             String detailFileName = event.getEventData()
-                    .get(eventDetailFileName).asText();
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
         }).addEventData(eventDetailError).addEventData(eventDetailFileName);
 
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
-                    .get(eventDetailFileName).asText();
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRemovedEvent(this, detailFileName));
         }).addEventData(eventDetailFileName);
 
@@ -193,6 +193,22 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     public Upload(UploadHandler handler) {
         this();
         setUploadHandler(handler);
+    }
+
+    /**
+     * Create a new instance of Upload with the given upload handler and target
+     * name.
+     *
+     * @param handler
+     *            upload handler that handles the upload, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
+     */
+    public Upload(UploadHandler handler, String targetName) {
+        this();
+        setUploadHandler(handler, targetName);
     }
 
     /**
@@ -349,7 +365,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         if (accepted == null) {
             return Collections.emptyList();
         }
-        return Arrays.asList(accepted.split(","));
+        return List.of(accepted.split(","));
     }
 
     /**
@@ -720,17 +736,43 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * The given handler defines how uploaded file content is handled on the
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     * <p>
+     * This overload uses the default upload target name {@code "upload"}, which
+     * becomes the last segment of the dynamically generated upload URL.
      *
      * @param handler
      *            upload handler to use for file receptions, not {@code null}
      */
     public void setUploadHandler(UploadHandler handler) {
+        setUploadHandler(handler, "upload");
+    }
+
+    /**
+     * Set the upload handler to be used for this upload component.
+     * <p>
+     * The given handler defines how uploaded file content is handled on the
+     * server and invoked per each single file to be uploaded. Note! This method
+     * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     *
+     * @param handler
+     *            upload handler to use for file receptions, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
+     */
+    public void setUploadHandler(UploadHandler handler, String targetName) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
+        Objects.requireNonNull(targetName, "The target name cannot be null");
+        if (targetName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "The target name cannot be blank");
+        }
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 handler, this.getElement()) {
             @Override
             public String getName() {
-                return "upload";
+                return targetName;
             }
         };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",

@@ -16,8 +16,6 @@ import java.util.Objects;
 import org.jsoup.nodes.Document;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
@@ -43,6 +41,9 @@ import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+
 /**
  * Rich Text Editor is an input field for entering rich text. It allows you to
  * format and style your text using boldface, italics, headings, lists, images,
@@ -61,7 +62,7 @@ import com.vaadin.flow.shared.Registration;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha20")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -1222,7 +1223,7 @@ public class RichTextEditor
                 RichTextEditor.this.getElement()
                         .executeJs("return this.htmlValue").then(jsonNode -> {
                             isHtmlValueSync = true;
-                            RichTextEditor.this.setValue(jsonNode.asText());
+                            RichTextEditor.this.setValue(jsonNode.asString());
                             isHtmlValueSync = false;
                         });
 

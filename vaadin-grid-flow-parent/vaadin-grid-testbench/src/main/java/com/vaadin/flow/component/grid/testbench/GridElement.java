@@ -485,6 +485,25 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
+     * Finds the cell element for the given row and column in header.
+     *
+     * @param rowIndex
+     *            the index of the row in the header
+     * @param columnIndex
+     *            the index of the column in the header
+     * @return the GridTHTDElement for the given row and column in header.
+     */
+    public GridTHTDElement getHeaderCell(int rowIndex, int columnIndex) {
+        WebElement theader = $("*").id("header");
+        List<WebElement> headerRows = theader.findElements(By.tagName("tr"));
+        List<WebElement> headerCells = headerRows.get(rowIndex)
+                .findElements(By.tagName("th"));
+        var cell = headerCells.get(columnIndex);
+        return wrapElement(cell, getCommandExecutor())
+                .wrap(GridTHTDElement.class);
+    }
+
+    /**
      * Gets the footer cell for the given visible column index.
      *
      * @param columnIndex
@@ -493,6 +512,49 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getFooterCell(int columnIndex) {
         return getVisibleColumns().get(columnIndex).getFooterCell();
+    }
+
+    /**
+     * Finds the vaadin-grid-cell-content element for the given row and column
+     * in footer.
+     *
+     * @param rowIndex
+     *            the index of the row in the footer
+     * @param columnIndex
+     *            the index of the column in the footer
+     * @return the vaadin-grid-cell-content element for the given row and column
+     *         in footer.
+     */
+    public TestBenchElement getFooterCellContent(int rowIndex,
+            int columnIndex) {
+        WebElement tfoot = $("*").id("footer");
+        List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
+        List<WebElement> footerCells = footerRows.get(rowIndex)
+                .findElements(By.tagName("td"));
+        String slotName = footerCells.get(columnIndex)
+                .findElement(By.tagName("slot")).getDomAttribute("name");
+
+        return findElement(By.cssSelector(
+                "vaadin-grid-cell-content[slot='" + slotName + "']"));
+    }
+
+    /**
+     * Finds the cell element for the given row and column in footer.
+     *
+     * @param rowIndex
+     *            the index of the row in the footer
+     * @param columnIndex
+     *            the index of the column in the footer
+     * @return the GridTHTDElement for the given row and column in footer.
+     */
+    public GridTHTDElement getFooterCell(int rowIndex, int columnIndex) {
+        WebElement tfoot = $("*").id("footer");
+        List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
+        List<WebElement> footerCells = footerRows.get(rowIndex)
+                .findElements(By.tagName("td"));
+        var cell = footerCells.get(columnIndex);
+        return wrapElement(cell, getCommandExecutor())
+                .wrap(GridTHTDElement.class);
     }
 
     /**

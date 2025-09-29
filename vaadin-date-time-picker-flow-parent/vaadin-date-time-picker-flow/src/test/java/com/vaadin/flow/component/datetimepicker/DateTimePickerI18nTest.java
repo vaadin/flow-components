@@ -19,8 +19,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class DateTimePickerI18nTest {
 
@@ -35,7 +35,7 @@ public class DateTimePickerI18nTest {
     public void setDateAriaLabel_removeDateAriaLabel() {
         dateTimePicker.setDateAriaLabel("Custom date");
         Assert.assertEquals("Custom date", getI18nPropertyAsJson(dateTimePicker)
-                .get("dateLabel").asText());
+                .get("dateLabel").asString());
 
         dateTimePicker.setDateAriaLabel(null);
         Assert.assertTrue(getI18nPropertyAsJson(dateTimePicker)
@@ -49,14 +49,14 @@ public class DateTimePickerI18nTest {
         dateTimePicker.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setDateLabel("I18n date"));
         Assert.assertEquals("Custom date", getI18nPropertyAsJson(dateTimePicker)
-                .get("dateLabel").asText());
+                .get("dateLabel").asString());
     }
 
     @Test
     public void setTimeAriaLabel_removeTimeAriaLabel() {
         dateTimePicker.setTimeAriaLabel("Custom time");
         Assert.assertEquals("Custom time", getI18nPropertyAsJson(dateTimePicker)
-                .get("timeLabel").asText());
+                .get("timeLabel").asString());
 
         dateTimePicker.setTimeAriaLabel(null);
         Assert.assertTrue(getI18nPropertyAsJson(dateTimePicker)
@@ -70,7 +70,7 @@ public class DateTimePickerI18nTest {
         dateTimePicker.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setTimeLabel("I18n time"));
         Assert.assertEquals("Custom time", getI18nPropertyAsJson(dateTimePicker)
-                .get("timeLabel").asText());
+                .get("timeLabel").asString());
     }
 
     @Test
@@ -80,9 +80,9 @@ public class DateTimePickerI18nTest {
         dateTimePicker.setI18n(i18n);
 
         Assert.assertEquals("I18n date", getI18nPropertyAsJson(dateTimePicker)
-                .get("dateLabel").asText());
+                .get("dateLabel").asString());
         Assert.assertEquals("I18n time", getI18nPropertyAsJson(dateTimePicker)
-                .get("timeLabel").asText());
+                .get("timeLabel").asString());
     }
 
     @Test
@@ -93,11 +93,11 @@ public class DateTimePickerI18nTest {
 
         dateTimePicker.setDateAriaLabel("Custom date");
         Assert.assertEquals("Custom date", getI18nPropertyAsJson(dateTimePicker)
-                .get("dateLabel").asText());
+                .get("dateLabel").asString());
 
         dateTimePicker.setDateAriaLabel(null);
         Assert.assertEquals("I18n date", getI18nPropertyAsJson(dateTimePicker)
-                .get("dateLabel").asText());
+                .get("dateLabel").asString());
     }
 
     @Test
@@ -108,11 +108,11 @@ public class DateTimePickerI18nTest {
 
         dateTimePicker.setTimeAriaLabel("Custom time");
         Assert.assertEquals("Custom time", getI18nPropertyAsJson(dateTimePicker)
-                .get("timeLabel").asText());
+                .get("timeLabel").asString());
 
         dateTimePicker.setTimeAriaLabel(null);
         Assert.assertEquals("I18n time", getI18nPropertyAsJson(dateTimePicker)
-                .get("timeLabel").asText());
+                .get("timeLabel").asString());
     }
 
     private ObjectNode getI18nPropertyAsJson(DateTimePicker dateTimePicker) {

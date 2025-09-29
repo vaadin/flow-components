@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -37,6 +36,8 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.node.ObjectNode;
+
 /**
  * A component for performing <a href=
  * "https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
@@ -47,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/crud", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/crud", version = "25.0.0-alpha20")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -908,7 +909,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
                 @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
             this.item = source.getGrid().getDataCommunicator().getKeyMapper()
-                    .get(item.get("key").asText());
+                    .get(item.get("key").asString());
         }
 
         private EditEvent(Crud<E> source, boolean fromClient, E item) {

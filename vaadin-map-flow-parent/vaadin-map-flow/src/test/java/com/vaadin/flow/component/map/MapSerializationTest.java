@@ -18,8 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -27,12 +25,16 @@ import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.style.Icon;
+import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class MapSerializationTest {
 
@@ -66,6 +68,9 @@ public class MapSerializationTest {
                 .thenReturn(streamRegistrationMock, streamRegistrationMock);
 
         map = new Map();
+        // Set dummy cluster style as the default one registers a stream
+        // resource for the cluster icon, which interferes with tests below
+        map.getFeatureLayer().setClusterStyle(new Style());
         ui.add(map);
     }
 
@@ -106,15 +111,15 @@ public class MapSerializationTest {
         // Verify custom source
         ObjectNode sourceNode = findSyncedItem(syncedItems, source.getId());
         Assert.assertEquals("https://example.com",
-                sourceNode.get("url").asText());
+                sourceNode.get("url").asString());
         Assert.assertFalse(sourceNode.get("opaque").asBoolean());
         Assert.assertEquals("custom-cors",
-                sourceNode.get("crossOrigin").asText());
+                sourceNode.get("crossOrigin").asString());
         Assert.assertTrue(sourceNode.get("attributions").isArray());
         ArrayNode attributionsNode = (ArrayNode) sourceNode.get("attributions");
         Assert.assertEquals(1, attributionsNode.size());
         Assert.assertEquals("Custom map service",
-                attributionsNode.get(0).asText());
+                attributionsNode.get(0).asString());
     }
 
     @Test
@@ -195,8 +200,8 @@ public class MapSerializationTest {
 
     private ObjectNode findSyncedItem(ArrayNode syncedItems, String id) {
         return (ObjectNode) JacksonUtils.stream(syncedItems)
-                .filter(node -> node.get("id").asText().equals(id)).findFirst()
-                .orElseThrow(() -> new AssertionError(
+                .filter(node -> node.get("id").asString().equals(id))
+                .findFirst().orElseThrow(() -> new AssertionError(
                         "No synced item with id " + id + " found"));
     }
 

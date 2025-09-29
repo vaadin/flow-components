@@ -29,7 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
@@ -75,6 +74,8 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.node.ArrayNode;
+
 /**
  * CheckBoxGroup is a multi-selection component where items are displayed as
  * check boxes.
@@ -110,7 +111,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.0.0-alpha20")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -905,7 +906,7 @@ public class CheckboxGroup<T>
         }
         Set<T> set = new HashSet<>();
         for (int i = 0; i < presentation.size(); i++) {
-            set.add(group.keyMapper.get(presentation.get(i).asText()));
+            set.add(group.keyMapper.get(presentation.get(i).asString()));
         }
         return set;
     }

@@ -14,15 +14,21 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import View from 'ol/View';
-import { synchronizeImageLayer, synchronizeTileLayer, synchronizeVectorLayer } from './layers.js';
 import {
+  synchronizeFeatureLayer,
+  synchronizeImageLayer,
+  synchronizeTileLayer,
+  synchronizeVectorLayer
+} from './layers.js';
+import {
+  synchronizeCluster,
   synchronizeImageWMSSource,
   synchronizeOSMSource,
   synchronizeTileWMSSource,
   synchronizeVectorSource,
   synchronizeXYZSource
 } from './sources.js';
-import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeText, synchronizeStyle } from './styles.js';
+import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle, synchronizeText } from './styles.js';
 import { convertToCoordinateArray, convertToGeoJSONCoordinateArray, synchronizeCollection } from './util.js';
 
 /**
@@ -121,10 +127,12 @@ const synchronizerLookup = {
   'ol/Map': synchronizeMap,
   'ol/View': synchronizeView,
   // Layers
+  'ol/layer/Feature': synchronizeFeatureLayer,
   'ol/layer/Image': synchronizeImageLayer,
   'ol/layer/Tile': synchronizeTileLayer,
   'ol/layer/Vector': synchronizeVectorLayer,
   // Sources
+  'ol/source/Cluster': synchronizeCluster,
   'ol/source/ImageWMS': synchronizeImageWMSSource,
   'ol/source/OSM': synchronizeOSMSource,
   'ol/source/TileWMS': synchronizeTileWMSSource,

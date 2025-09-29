@@ -13,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -27,6 +26,7 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapClusterClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
@@ -34,6 +34,8 @@ import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.BaseJsonNode;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -45,12 +47,11 @@ import com.vaadin.flow.shared.Registration;
 public abstract class MapBase extends Component
         implements HasSize, HasStyle, HasThemeVariant<MapVariant> {
     private final Configuration configuration;
-    private final MapSerializer serializer;
+    private transient MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
 
     protected MapBase() {
-        this.serializer = new MapSerializer(this);
         this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
@@ -118,7 +119,7 @@ public abstract class MapBase extends Component
         Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
         configuration.collectChanges(changedObjects::add);
 
-        BaseJsonNode jsonChanges = serializer.toJson(changedObjects);
+        BaseJsonNode jsonChanges = getSerializer().toJson(changedObjects);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);
@@ -132,7 +133,7 @@ public abstract class MapBase extends Component
         // Register an event listener before all the other listeners of the view
         // move end event to update view state to the latest values received
         // from the client
-        addViewMoveEndEventListener(event -> {
+        addViewMoveEndListener(event -> {
             double rotation = event.getRotation();
             double zoom = event.getZoom();
             Coordinate center = event.getCenter();
@@ -154,6 +155,13 @@ public abstract class MapBase extends Component
         });
     }
 
+    MapSerializer getSerializer() {
+        if (serializer == null) {
+            serializer = new MapSerializer(this);
+        }
+        return serializer;
+    }
+
     /**
      * Adds an event listener for changes to the map's viewport. The event will
      * only be triggered after the user has finished manipulating the viewport,
@@ -161,9 +169,28 @@ public abstract class MapBase extends Component
      * interaction.
      *
      * @param listener
+     *            the listener to add
+     * @return a registration object for removing the added listener
+     * @deprecated use {@link #addViewMoveEndListener(ComponentEventListener)}
+     *             instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public Registration addViewMoveEndEventListener(
+            ComponentEventListener<MapViewMoveEndEvent> listener) {
+        return addViewMoveEndListener(listener);
+    }
+
+    /**
+     * Adds an event listener for changes to the map's viewport. The event will
+     * only be triggered after the user has finished manipulating the viewport,
+     * for example after letting go of the mouse button after a mouse drag
+     * interaction.
+     *
+     * @param listener
+     *            the listener to add
      * @return a registration object for removing the added listener
      */
-    public Registration addViewMoveEndEventListener(
+    public Registration addViewMoveEndListener(
             ComponentEventListener<MapViewMoveEndEvent> listener) {
         return addListener(MapViewMoveEndEvent.class, listener);
     }
@@ -176,9 +203,28 @@ public abstract class MapBase extends Component
      * whether a feature exists at the clicked location.
      *
      * @param listener
+     *            the listener to add
+     * @return a registration object for removing the added listener
+     * @deprecated use {@link #addClickListener(ComponentEventListener)} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public Registration addClickEventListener(
+            ComponentEventListener<MapClickEvent> listener) {
+        return addClickListener(listener);
+    }
+
+    /**
+     * Adds a click listener for the map.
+     * <p>
+     * Note that the listener will also be invoked when clicking on a
+     * {@link Feature}. Use {@link MapClickEvent#getFeatures()} to distinguish
+     * whether a feature exists at the clicked location.
+     *
+     * @param listener
+     *            the listener to add
      * @return a registration object for removing the added listener
      */
-    public Registration addClickEventListener(
+    public Registration addClickListener(
             ComponentEventListener<MapClickEvent> listener) {
         return addListener(MapClickEvent.class, listener);
     }
@@ -188,6 +234,11 @@ public abstract class MapBase extends Component
      * invoked for a click on any feature in the specified layer. For clicks on
      * overlapping features, the listener will be invoked only for the top-level
      * feature at that location.
+     * <p>
+     * When clustering is enabled, the listener will only be invoked for clicks
+     * on individual features. Use
+     * {@link #addClusterClickListener(ComponentEventListener)} to listen for
+     * clicks on clusters.
      *
      * @param listener
      *            the listener to trigger
@@ -211,6 +262,11 @@ public abstract class MapBase extends Component
      * {@link #addFeatureClickListener(VectorLayer, ComponentEventListener)}.
      * For clicks on overlapping features, the listener will be invoked only for
      * the top-level feature at that location.
+     * <p>
+     * When clustering is enabled, the listener will only be invoked for clicks
+     * on individual features. Use
+     * {@link #addClusterClickListener(ComponentEventListener)} to listen for
+     * clicks on clusters.
      *
      * @param listener
      *            the listener to trigger
@@ -220,6 +276,21 @@ public abstract class MapBase extends Component
     public Registration addFeatureClickListener(
             ComponentEventListener<MapFeatureClickEvent> listener) {
         return addListener(MapFeatureClickEvent.class, listener);
+    }
+
+    /**
+     * Adds a click listener for clusters of features. The listener will be
+     * invoked for a click on any cluster, in any feature layer. Use
+     * {@link #addFeatureClickListener(ComponentEventListener)} to listen for
+     * clicks on individual features.
+     *
+     * @param listener
+     *            the listener to trigger
+     * @return registration for the listener
+     */
+    public Registration addClusterClickListener(
+            ComponentEventListener<MapClusterClickEvent> listener) {
+        return addListener(MapClusterClickEvent.class, listener);
     }
 
     /**

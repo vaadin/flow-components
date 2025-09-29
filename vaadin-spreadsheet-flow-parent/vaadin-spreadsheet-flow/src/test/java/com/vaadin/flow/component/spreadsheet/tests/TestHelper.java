@@ -12,11 +12,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetEvent;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.core.JacksonException;
 
 public class TestHelper {
 
@@ -37,7 +38,7 @@ public class TestHelper {
             ComponentUtil.fireEvent(spreadsheet,
                     new SpreadsheetEvent(spreadsheet, true, eventName,
                             JacksonUtils.getMapper().readTree(jsonDataArray)));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

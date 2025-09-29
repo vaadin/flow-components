@@ -13,9 +13,10 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEventListener;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 @SuppressWarnings("serial")
 public class SpreadsheetEventListener
@@ -33,7 +34,7 @@ public class SpreadsheetEventListener
     }
 
     private String toStr(ArrayNode o, int pos) {
-        return o == null ? null : o.get(pos).asText();
+        return o == null ? null : o.get(pos).asString();
     }
 
     private boolean toBool(ArrayNode o, int pos) {

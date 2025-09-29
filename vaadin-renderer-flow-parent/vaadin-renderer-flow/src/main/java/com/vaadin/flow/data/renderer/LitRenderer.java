@@ -25,8 +25,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -43,6 +41,9 @@ import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
@@ -195,8 +196,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
                     // Invoked when the client calls one of the client callables
-                    String handlerName = arguments.get(0).asText();
-                    String itemKey = arguments.get(1).asText();
+                    String handlerName = arguments.get(0).asString();
+                    String itemKey = arguments.get(1).asString();
                     ArrayNode args = (ArrayNode) arguments.get(2);
 
                     SerializableBiConsumer<SOURCE, ArrayNode> handler = clientCallables

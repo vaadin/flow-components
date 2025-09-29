@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
@@ -46,6 +45,8 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import com.vaadin.flow.router.internal.HasUrlParameterFormat;
 
+import tools.jackson.databind.node.ArrayNode;
+
 /**
  * A menu item for the {@link SideNav} component.
  * <p>
@@ -57,7 +58,7 @@ import com.vaadin.flow.router.internal.HasUrlParameterFormat;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-alpha20")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends Component implements HasSideNavItems,
         HasEnabled, HasPrefix, HasSuffix, HasTooltip {

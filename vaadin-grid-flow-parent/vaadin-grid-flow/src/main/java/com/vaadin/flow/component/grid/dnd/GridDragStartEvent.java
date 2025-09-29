@@ -20,12 +20,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.Grid;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Drag start event of {@link Grid} rows.
@@ -59,7 +60,7 @@ public class GridDragStartEvent<T> extends ComponentEvent<Grid<T>> {
 
         draggedItems = new ArrayList<>();
         IntStream.range(0, items.size()).forEach(i -> {
-            String itemKey = items.get(i).get("key").asText();
+            String itemKey = items.get(i).get("key").asString();
             T item = source.getDataCommunicator().getKeyMapper().get(itemKey);
             draggedItems.add(item);
         });

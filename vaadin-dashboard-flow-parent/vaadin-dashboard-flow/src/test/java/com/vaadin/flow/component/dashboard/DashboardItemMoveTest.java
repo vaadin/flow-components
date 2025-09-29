@@ -19,11 +19,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class DashboardItemMoveTest extends DashboardTestBase {
     private Dashboard dashboard;
@@ -271,7 +272,7 @@ public class DashboardItemMoveTest extends DashboardTestBase {
             int finalIndex) {
         ObjectNode sectionItem = (ObjectNode) itemsArray.get(sectionIndex);
         ArrayNode sectionItems = (ArrayNode) sectionItem.get("items");
-        sectionItem.put("items",
+        sectionItem.set("items",
                 moveItemInJsonArray(initialIndex, finalIndex, sectionItems));
     }
 
