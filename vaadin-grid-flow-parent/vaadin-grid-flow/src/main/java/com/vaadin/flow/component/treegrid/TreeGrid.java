@@ -1020,14 +1020,29 @@ public class TreeGrid<T> extends Grid<T>
      * component will first try to scroll to the item at index 2 in the root
      * level. If that item is expanded, it will then try to scroll to the item
      * at index 1 among its children, and so forth.
+     * <p>
+     * This method is only supported for data providers that use
+     * {@link HierarchyFormat#NESTED}. For {@link HierarchyFormat#FLATTENED},
+     * use {@link #scrollToIndex(int)} with a flat index instead.
      *
      * @param path
      *            an array of indexes representing the path to the target item
      * @throws IllegalArgumentException
      *             if the path is empty
-     * @see TreeGrid#scrollToIndex(int)
+     * @throws UnsupportedOperationException
+     *             if the data provider uses a hierarchy format other than
+     *             {@link HierarchyFormat#NESTED}
      */
     public void scrollToIndex(int... path) {
+        if (!getDataProvider().getHierarchyFormat()
+                .equals(HierarchyFormat.NESTED)) {
+            throw new UnsupportedOperationException(
+                    """
+                            scrollToIndex(int...) is supported only for data providers that use HierarchyFormat.NESTED. \
+                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
+                            """);
+        }
+
         if (path.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
