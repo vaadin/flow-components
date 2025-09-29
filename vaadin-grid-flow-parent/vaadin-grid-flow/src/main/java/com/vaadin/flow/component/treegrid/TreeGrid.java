@@ -1193,6 +1193,7 @@ public class TreeGrid<T> extends Grid<T>
     private int getItemIndex(T item, T parent) {
         var query = getDataCommunicator().buildQuery(parent, 0,
                 Integer.MAX_VALUE);
-        return getDataProvider().getItemIndex(item, query);
+        return ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
+                .getDataProvider()).getItemIndex(item, query);
     }
 }
