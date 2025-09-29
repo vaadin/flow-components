@@ -234,6 +234,11 @@ public abstract class MapBase extends Component
      * invoked for a click on any feature in the specified layer. For clicks on
      * overlapping features, the listener will be invoked only for the top-level
      * feature at that location.
+     * <p>
+     * When clustering is enabled, the listener will only be invoked for clicks
+     * on individual features. Use
+     * {@link #addClusterClickListener(ComponentEventListener)} to listen for
+     * clicks on clusters.
      *
      * @param listener
      *            the listener to trigger
@@ -257,6 +262,11 @@ public abstract class MapBase extends Component
      * {@link #addFeatureClickListener(VectorLayer, ComponentEventListener)}.
      * For clicks on overlapping features, the listener will be invoked only for
      * the top-level feature at that location.
+     * <p>
+     * When clustering is enabled, the listener will only be invoked for clicks
+     * on individual features. Use
+     * {@link #addClusterClickListener(ComponentEventListener)} to listen for
+     * clicks on clusters.
      *
      * @param listener
      *            the listener to trigger
@@ -270,7 +280,9 @@ public abstract class MapBase extends Component
 
     /**
      * Adds a click listener for clusters of features. The listener will be
-     * invoked for a click on any cluster, in any feature layer.
+     * invoked for a click on any cluster, in any feature layer. Use
+     * {@link #addFeatureClickListener(ComponentEventListener)} to listen for
+     * clicks on individual features.
      *
      * @param listener
      *            the listener to trigger
