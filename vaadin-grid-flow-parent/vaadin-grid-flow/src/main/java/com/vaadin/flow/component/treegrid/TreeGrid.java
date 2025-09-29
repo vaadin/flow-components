@@ -1011,36 +1011,23 @@ public class TreeGrid<T> extends Grid<T>
     /**
      * Scrolls to a nested item specified by its hierarchical path.
      * <p>
-     * The hierarchical path is an array of indexes where each index refers to a
-     * child of the item at the previous index. Scrolling continues until it
-     * reaches the last index in the array or encounters a collapsed item.
+     * The hierarchical path is an array of zero-based indexes, where each index
+     * refers to a child of the item at the previous index. Scrolling continues
+     * until it reaches the last index in the array or encounters a collapsed
+     * item.
      * <p>
      * For example, given {@code &#123; 2, 1, ... &#125;} as the path, the
      * component will first try to scroll to the item at index 2 in the root
      * level. If that item is expanded, it will then try to scroll to the item
      * at index 1 among its children, and so forth.
-     * <p>
-     * This method is supported only for data providers that use
-     * {@link HierarchyFormat#NESTED}. For {@link HierarchyFormat#FLATTENED},
-     * use {@link #scrollToIndex(int)} with a flat index instead.
      *
      * @param path
-     *            zero based row path to scroll to
-     * @throws UnsupportedOperationException
-     *             if the data provider uses a hierarchy format other than
-     *             {@link HierarchyFormat#NESTED}
+     *            an array of indexes representing the path to the target item
+     * @throws IllegalArgumentException
+     *             if the path is empty
      * @see TreeGrid#scrollToIndex(int)
      */
     public void scrollToIndex(int... path) {
-        if (!getDataProvider().getHierarchyFormat()
-                .equals(HierarchyFormat.NESTED)) {
-            throw new UnsupportedOperationException(
-                    """
-                            scrollToIndex(int...) is supported only for data providers that use HierarchyFormat.NESTED. \
-                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
-                            """);
-        }
-
         if (path.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
