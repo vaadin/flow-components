@@ -615,7 +615,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            {@code true} otherwise.
      * @deprecated use {@link #setModality(ModalityMode)} instead
      */
-    @Deprecated
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setModal(boolean modal) {
         setModality(modal ? ModalityMode.STRICT : ModalityMode.MODELESS);
     }
@@ -626,6 +626,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @return {@code true} if modal dialog (default), {@code false} otherwise.
      * @deprecated use {@link #getModality()} instead
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public boolean isModal() {
         return !getElement().getProperty("modeless", false);
     }
