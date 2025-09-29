@@ -246,7 +246,10 @@ public class ConfirmDialog extends Component
         setOpened(false);
 
         getElement().addPropertyChangeListener("opened", event -> {
-            setModality(isOpened());
+            if (isAttached()) {
+                getUI().ifPresent(
+                        ui -> ui.setChildComponentModal(this, isOpened()));
+            }
             fireEvent(new OpenedChangeEvent(this, event.isUserOriginated()));
         });
     }
@@ -733,11 +736,5 @@ public class ConfirmDialog extends Component
                 child.removeFromParent();
             }
         });
-    }
-
-    private void setModality(boolean modal) {
-        if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
-        }
     }
 }
