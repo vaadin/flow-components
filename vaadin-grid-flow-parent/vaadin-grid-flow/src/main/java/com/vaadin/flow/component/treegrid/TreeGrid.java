@@ -1009,7 +1009,6 @@ public class TreeGrid<T> extends Grid<T>
                         .executeJs("this.scrollToIndex($0);", index)));
     }
 
-    // TODO update for flattened data providers
     /**
      * Scrolls to a nested item specified by its hierarchical path.
      * <p>
