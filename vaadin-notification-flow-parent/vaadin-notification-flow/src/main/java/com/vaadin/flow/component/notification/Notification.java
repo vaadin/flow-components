@@ -53,7 +53,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/notification", version = "25.0.0-alpha20")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -152,8 +152,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with the given String rendered as its HTML text,
-     * that does not close automatically.
+     * Creates a Notification with the given String rendered as its text, that
+     * does not close automatically.
      *
      * @param text
      *            the text of the Notification
@@ -163,8 +163,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with given String rendered as its HTML text and
-     * given Integer rendered as its duration.
+     * Creates a Notification with given String rendered as its text and given
+     * Integer rendered as its duration.
      * <p>
      * Set to {@code 0} or a negative number to disable the notification
      * auto-closing.
