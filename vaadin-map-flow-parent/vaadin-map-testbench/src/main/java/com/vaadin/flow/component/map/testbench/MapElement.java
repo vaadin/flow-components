@@ -395,6 +395,10 @@ public class MapElement extends TestBenchElement {
         public VectorSourceReference asVectorSource() {
             return new VectorSourceReference(executor, expression);
         }
+
+        public ClusterSourceReference asClusterSource() {
+            return new ClusterSourceReference(executor, expression);
+        }
     }
 
     public static abstract class UrlTileSourceReference
@@ -470,6 +474,22 @@ public class MapElement extends TestBenchElement {
         }
     }
 
+    public static class ClusterSourceReference extends SourceReference {
+        private ClusterSourceReference(ExpressionExecutor executor,
+                String expression) {
+            super(executor, expression);
+        }
+
+        public int getClusterCount() {
+            return getInt("getFeatures().length");
+        }
+
+        public ClusterFeatureReference getCluster(int index) {
+            return new ClusterFeatureReference(executor,
+                    path("getFeatures()[%s]", index));
+        }
+    }
+
     public static class FeatureCollectionReference
             extends ConfigurationObjectReference {
         private FeatureCollectionReference(ExpressionExecutor executor,
@@ -504,6 +524,29 @@ public class MapElement extends TestBenchElement {
 
         public StyleReference getStyle() {
             return new StyleReference(executor, path("getStyle()()"));
+        }
+    }
+
+    public static class ClusterFeatureReference
+            extends ConfigurationObjectReference {
+        private ClusterFeatureReference(ExpressionExecutor executor,
+                String expression) {
+            super(executor, expression);
+        }
+
+        public int getFeatureCount() {
+            return getInt("values_.features.length");
+        }
+
+        public FeatureReference getFeature(String featureId) {
+            return new FeatureReference(executor, path(
+                    "values_.features.find(feature => feature.id === '%s')",
+                    featureId));
+        }
+
+        public StyleReference getStyle(LayerReference layer) {
+            return new StyleReference(executor,
+                    layer.path("getStyle()(%s)", expression));
         }
     }
 

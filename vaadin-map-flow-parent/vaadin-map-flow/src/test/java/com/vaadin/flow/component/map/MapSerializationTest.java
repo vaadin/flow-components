@@ -25,6 +25,7 @@ import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.style.Icon;
+import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
@@ -67,6 +68,9 @@ public class MapSerializationTest {
                 .thenReturn(streamRegistrationMock, streamRegistrationMock);
 
         map = new Map();
+        // Set dummy cluster style as the default one registers a stream
+        // resource for the cluster icon, which interferes with tests below
+        map.getFeatureLayer().setClusterStyle(new Style());
         ui.add(map);
     }
 
