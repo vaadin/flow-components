@@ -44,42 +44,6 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Waits until the column's content elements are properly rendered and
-     * slotted. This is needed after horizontal scrolling to ensure
-     * lazy-rendered columns have their content properly synchronized.
-     *
-     * @param column
-     *            the column to wait for
-     */
-    private void waitUntilColumnContentReady(GridColumnElement column) {
-        waitUntil(e -> {
-            Boolean result = (Boolean) executeScript(
-                    """
-                            const grid = arguments[0];
-                            const columnId = arguments[1];
-                            const col = grid._getColumns().find(c => c.__generatedTbId === columnId);
-                            if (!col) return false;
-                            const colIndex = grid._getColumns().indexOf(col);
-                            const rows = grid._getRenderedRows();
-                            if (rows.length === 0) return true;
-                            const firstRow = rows[0];
-                            const cells = firstRow.querySelectorAll('td, th');
-                            if (colIndex >= cells.length) return false;
-                            const cell = cells[colIndex];
-                            if (!cell) return false;
-                            const slot = cell.querySelector('slot');
-                            if (!slot) return false;
-                            const slotName = slot.getAttribute('name');
-                            if (!slotName) return false;
-                            const content = grid.querySelector('vaadin-grid-cell-content[slot="' + slotName + '"]');
-                            return content !== null && content.textContent.trim().length > 0;
-                            """,
-                    this, column.get__generatedId());
-            return Boolean.TRUE.equals(result);
-        }, 2);
-    }
-
-    /**
      * Scrolls to the row with the given index.
      *
      * @param row
@@ -106,7 +70,7 @@ public class GridElement extends TestBenchElement {
      * useful when working with grids that have lazy column rendering.
      *
      * @param column
-     *            the column to scroll into view
+     *               the column to scroll into view
      */
     public void scrollToColumn(GridColumnElement column) {
         // Scroll to column using its sizer cell offset
@@ -120,11 +84,12 @@ public class GridElement extends TestBenchElement {
                 }
                 """, this, column.get__generatedId());
 
-        // Wait for scrolling to complete
+        // Wait for rendering to complete
         waitUntilLoadingFinished();
 
-        // Wait for lazy column rendering and slot synchronization
-        waitUntilColumnContentReady(column);
+        // Wait for column to be in view
+        waitUntil(driver -> isColumnInView(column));
+
     }
 
     /**
@@ -133,7 +98,7 @@ public class GridElement extends TestBenchElement {
      * rendering.
      *
      * @param columnIndex
-     *            the index of the column to scroll into view
+     *                    the index of the column to scroll into view
      */
     public void scrollToColumn(int columnIndex) {
         GridColumnElement column = getVisibleColumns().get(columnIndex);
@@ -144,7 +109,7 @@ public class GridElement extends TestBenchElement {
      * Checks if the specified column is currently in the visible viewport.
      *
      * @param column
-     *            the column to check
+     *               the column to check
      * @return {@code true} if the column is visible, {@code false} otherwise
      */
     public boolean isColumnInView(GridColumnElement column) {
@@ -201,9 +166,9 @@ public class GridElement extends TestBenchElement {
      * Automatically scrolls the given row into view
      *
      * @param rowIndex
-     *            the row index
+     *                 the row index
      * @param colIndex
-     *            the column index
+     *                 the column index
      * @return the grid cell for the given coordinates
      */
     public GridTHTDElement getCell(int rowIndex, int colIndex) {
@@ -217,9 +182,9 @@ public class GridElement extends TestBenchElement {
      * Automatically scrolls the given row and column into view
      *
      * @param rowIndex
-     *            the row index
+     *                 the row index
      * @param column
-     *            the column element for the column
+     *                 the column element for the column
      * @return the grid cell for the given coordinates
      */
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
@@ -241,10 +206,10 @@ public class GridElement extends TestBenchElement {
      * matching the given string.
      *
      * @param contents
-     *            the string to look for
+     *                 the string to look for
      * @return a grid cell containing the given string
      * @throws NoSuchElementException
-     *             if no cell with the given string was found
+     *                                if no cell with the given string was found
      */
     public GridTHTDElement getCell(String contents)
             throws NoSuchElementException {
@@ -287,7 +252,7 @@ public class GridElement extends TestBenchElement {
      * Checks if the given row is in the visible viewport.
      *
      * @param rowIndex
-     *            the row to check
+     *                 the row to check
      * @return <code>true</code> if the row is at least partially in view,
      *         <code>false</code> otherwise
      */
@@ -301,13 +266,14 @@ public class GridElement extends TestBenchElement {
      * indexes.
      *
      * @param firstRowIndex
-     *            the lower row index to be retrieved (inclusive)
+     *                      the lower row index to be retrieved (inclusive)
      * @param lastRowIndex
-     *            the upper row index to be retrieved (inclusive)
+     *                      the upper row index to be retrieved (inclusive)
      * @return a {@link GridTRElement} list with the rows contained between the
      *         given coordinates.
      * @throws IndexOutOfBoundsException
-     *             if either of the provided row indexes do not exist
+     *                                   if either of the provided row indexes do
+     *                                   not exist
      */
     public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex)
             throws IndexOutOfBoundsException {
@@ -340,11 +306,11 @@ public class GridElement extends TestBenchElement {
      * Gets the {@code tr} element for the given row index.
      *
      * @param rowIndex
-     *            the row index
+     *                 the row index
      * @return the {@code tr} element for the row, or {@code null} if the row is
      *         not in viewport
      * @throws IndexOutOfBoundsException
-     *             if no row with given index exists
+     *                                   if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
         return getRow(rowIndex, false);
@@ -357,14 +323,14 @@ public class GridElement extends TestBenchElement {
      * {@code scroll} parameter is {@code false}.
      *
      * @param rowIndex
-     *            the row index
+     *                 the row index
      * @param scroll
-     *            whether to scroll to the row index
+     *                 whether to scroll to the row index
      * @return the {@code tr} element for the row, or {@code null} if the row is
      *         not in viewport and the provided {@code scroll} parameter is
      *         {@code false}
      * @throws IndexOutOfBoundsException
-     *             if no row with given index exists
+     *                                   if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex, boolean scroll)
             throws IndexOutOfBoundsException {
@@ -434,10 +400,10 @@ public class GridElement extends TestBenchElement {
      * first column.
      *
      * @param headerText
-     *            the text in the header
+     *                   the text in the header
      * @return the grid column element for the given column
      * @throws NoSuchElementException
-     *             if no column was found
+     *                                if no column was found
      */
     public GridColumnElement getColumn(String headerText)
             throws NoSuchElementException {
@@ -453,7 +419,7 @@ public class GridElement extends TestBenchElement {
      * Gets the header cell for the given visible column index.
      *
      * @param columnIndex
-     *            the index of the column
+     *                    the index of the column
      * @return a cell element for the header cell
      */
     public GridTHTDElement getHeaderCell(int columnIndex) {
@@ -465,9 +431,9 @@ public class GridElement extends TestBenchElement {
      * in header.
      *
      * @param rowIndex
-     *            the index of the row in the header
+     *                    the index of the row in the header
      * @param columnIndex
-     *            the index of the column in the header
+     *                    the index of the column in the header
      * @return the vaadin-grid-cell-content element for the given row and column
      *         in header.
      */
@@ -488,9 +454,9 @@ public class GridElement extends TestBenchElement {
      * Finds the cell element for the given row and column in header.
      *
      * @param rowIndex
-     *            the index of the row in the header
+     *                    the index of the row in the header
      * @param columnIndex
-     *            the index of the column in the header
+     *                    the index of the column in the header
      * @return the GridTHTDElement for the given row and column in header.
      */
     public GridTHTDElement getHeaderCell(int rowIndex, int columnIndex) {
@@ -507,7 +473,7 @@ public class GridElement extends TestBenchElement {
      * Gets the footer cell for the given visible column index.
      *
      * @param columnIndex
-     *            the index of the column
+     *                    the index of the column
      * @return a cell element for the footer cell
      */
     public GridTHTDElement getFooterCell(int columnIndex) {
@@ -519,9 +485,9 @@ public class GridElement extends TestBenchElement {
      * in footer.
      *
      * @param rowIndex
-     *            the index of the row in the footer
+     *                    the index of the row in the footer
      * @param columnIndex
-     *            the index of the column in the footer
+     *                    the index of the column in the footer
      * @return the vaadin-grid-cell-content element for the given row and column
      *         in footer.
      */
@@ -542,9 +508,9 @@ public class GridElement extends TestBenchElement {
      * Finds the cell element for the given row and column in footer.
      *
      * @param rowIndex
-     *            the index of the row in the footer
+     *                    the index of the row in the footer
      * @param columnIndex
-     *            the index of the column in the footer
+     *                    the index of the column in the footer
      * @return the GridTHTDElement for the given row and column in footer.
      */
     public GridTHTDElement getFooterCell(int rowIndex, int columnIndex) {
@@ -561,7 +527,7 @@ public class GridElement extends TestBenchElement {
      * Selects the row with the given index.
      *
      * @param rowIndex
-     *            the row to select
+     *                 the row to select
      */
     public void select(int rowIndex) {
         select(getRow(rowIndex));
@@ -591,7 +557,7 @@ public class GridElement extends TestBenchElement {
      * Deselects the row with the given index.
      *
      * @param rowIndex
-     *            the row to deselect
+     *                 the row to deselect
      */
     public void deselect(int rowIndex) {
         deselect(getRow(rowIndex));
@@ -666,9 +632,9 @@ public class GridElement extends TestBenchElement {
      * Gets the grid cells for the given row and column elements.
      *
      * @param rowIndex
-     *            the row index
+     *                       the row index
      * @param columnElements
-     *            the column elements
+     *                       the column elements
      * @return a {@link GridTHTDElement} list with the cells for the given
      *         coordinates.
      */
@@ -682,7 +648,7 @@ public class GridElement extends TestBenchElement {
      * Gets the grid cells for the given row.
      *
      * @param rowIndex
-     *            the row index
+     *                 the row index
      * @return a {@link GridTHTDElement} list with the cells for the given
      *         coordinates.
      */
@@ -696,7 +662,7 @@ public class GridElement extends TestBenchElement {
      *
      * @return the empty state content
      * @throws NoSuchElementException
-     *             if no empty state content was found
+     *                                if no empty state content was found
      */
     public TestBenchElement getEmptyStateContent() {
         try {
