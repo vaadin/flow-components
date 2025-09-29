@@ -10,7 +10,6 @@ package com.vaadin.flow.component.map;
 
 import java.beans.PropertyChangeEvent;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -32,13 +31,10 @@ import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
-import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.BaseJsonNode;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -85,46 +81,6 @@ public abstract class MapBase extends Component
      */
     public void setView(View view) {
         configuration.setView(view);
-    }
-
-    /**
-     * Zooms and pans the map to fit the given features in the viewport. Uses a
-     * default padding of 50 pixels and animation duration of 400 milliseconds.
-     *
-     * @param features
-     *            the features to fit in the viewport
-     */
-    public void zoomToFit(List<Feature> features) {
-        zoomToFit(features, 50, 400);
-    }
-
-    /**
-     * Zooms and pans the map to fit the given features in the viewport.
-     *
-     * @param features
-     *            the features to fit in the viewport
-     * @param padding
-     *            padding in pixels to add around the features
-     * @param duration
-     *            animation duration in milliseconds, 0 for no animation
-     */
-    public void zoomToFit(List<Feature> features, int padding, int duration) {
-        ArrayNode featureIds = JacksonUtils.createArrayNode();
-        features.forEach(feature -> featureIds.add(feature.getId()));
-
-        ObjectNode options = JacksonUtils.createObjectNode();
-        options.put("padding", padding);
-        options.put("duration", duration);
-
-        // In order to allow calling this method before the map, or the view
-        // that contains it, is attached to the UI, this needs to be delayed
-        // with beforeClientResponse to ensure that the client-side connector
-        // has been initialized beforehand.
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> getElement().executeJs(
-                                "this.$connector.zoomToFit($0, $1)", featureIds,
-                                options)));
     }
 
     @Override
