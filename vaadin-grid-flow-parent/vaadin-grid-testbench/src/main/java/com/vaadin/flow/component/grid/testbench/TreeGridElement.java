@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
+import java.util.Arrays;
+
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -23,41 +25,92 @@ import org.openqa.selenium.WebElement;
  *
  */
 public class TreeGridElement extends GridElement {
+    /**
+     * @deprecated since 25.0, and will be removed in Vaadin 26. Use
+     *             {@link #scrollToRow(int)} to scroll to a row by flat index or
+     *             {@link #scrollToRowByPath(int...)} to scroll by hierarchical
+     *             path.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public void scrollToRowAndWait(int rootLevelRowIndex) {
+        scrollToRowByPath(rootLevelRowIndex);
+    }
 
     /**
-     * Scrolls to the row with the given index.
+     * Scrolls to a row by the flat index.
+     * <p>
+     * This method works best with {@code HierarchyFormat#FLATTENED} data
+     * providers where flat indexes are stable upfront.
+     * <p>
+     * When using {@code HierarchyFormat#NESTED} data providers, the hierarchy
+     * is resolved lazily during scrolling, so flat indexes may change as more
+     * data is loaded. To ensure consistent results with this format, consider
+     * using {@link #scrollToRowByPath(int...)} which identifies rows by their
+     * hierarchical path.
      *
-     * @param row
-     *            the row to scroll to
+     * @param rowFlatIndex
+     *            the flat index of the row to scroll to
      */
-    public void scrollToRowAndWait(int row) {
+    @Override
+    public void scrollToRow(int rowFlatIndex) {
         waitUntilLoadingFinished();
-        scrollToRow(row);
+        callFunction("_scrollToFlatIndex", rowFlatIndex);
         waitUntilLoadingFinished();
     }
 
     /**
-     * Scrolls to the row with the given indexes. The indexes are hierarchical,
-     * starting with the root index.
-     *
-     * @param indexes
-     *            the indexes of the row to scroll to
+     * @deprecated since 25.0 and will be removed in Vaadin 26. Use
+     *             {@link #scrollToRowByPath(int...)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void scrollToRowAndWait(int... indexes) {
-        waitUntilLoadingFinished();
-        callFunction("scrollToIndex", indexes);
-        waitUntilLoadingFinished();
+        scrollToRowByPath(indexes);
     }
 
     /**
-     * Scrolls to the row with the given flat index.
+     * Scrolls to a row specified by the given hierarchical path and returns its
+     * flat index, which can be used with other APIs such as
+     * {@link #getRow(int)} for example.
+     * <p>
+     * The hierarchical path is an array of zero-based indexes, where each index
+     * refers to a child of the row at the previous index. Scrolling continues
+     * until it reaches the last index in the array or encounters a collapsed
+     * row.
+     * <p>
+     * For example, given {@code &#123; 2, 1, ... &#125;} as the path, this
+     * method will first try to scroll to the row at index 2 in the root level.
+     * If that row is expanded, it will then try to scroll to the row at index 1
+     * among its children, and so forth.
+     * <p>
+     * <b>NOTE:</b> This method works only with data providers that return data
+     * in {@code HierarchyFormat#NESTED}. For {@code HierarchyFormat#FLATTENED},
+     * use {@link #scrollToRow(int)} with a flat index instead.
      *
-     * @param row
-     *            the row to scroll to
+     * @param path
+     *            an array of indexes representing the path to the target row
+     * @return the flat index of the row that was scrolled to, or -1 if no row
      */
-    public void scrollToFlatRowAndWait(int row) {
+    public int scrollToRowByPath(int... path) {
         waitUntilLoadingFinished();
-        scrollToFlatRow(row);
+        return (int) (long) getCommandExecutor().getDriver()
+                .executeAsyncScript("""
+                        const [element, path, callback] = arguments;
+                        const flatIndex = await element.scrollToIndex(...path);
+                        callback(flatIndex);
+                        """, this, path);
+    }
+
+    /**
+     * Scrolls to a row with the given flat index.
+     *
+     * @param rowFlatIndex
+     *            the flat index of the row to scroll to
+     * @deprecated since 25.0, and will be removed in Vaadin 26. Use
+     *             {@link #scrollToRow(int)} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public void scrollToFlatRowAndWait(int rowFlatIndex) {
+        scrollToRow(rowFlatIndex);
     }
 
     /**
@@ -68,15 +121,15 @@ public class TreeGridElement extends GridElement {
      * Automatically scrolls the given row into view and waits for the row to
      * load.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            the row index
      * @param colIndex
      *            the column index
      * @return the grid cell for the given coordinates
      */
-    public GridTHTDElement getCellWaitForRow(int rowIndex, int colIndex) {
+    public GridTHTDElement getCellWaitForRow(int rowFlatIndex, int colIndex) {
         GridColumnElement column = getVisibleColumns().get(colIndex);
-        return getCellWaitForRow(rowIndex, column);
+        return getCellWaitForRow(rowFlatIndex, column);
     }
 
     /**
@@ -85,20 +138,20 @@ public class TreeGridElement extends GridElement {
      * Automatically scrolls the given row into view and waits for the row to
      * load.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            the row index
      * @param column
      *            the column element for the column
      * @return the grid cell for the given coordinates
      */
-    public GridTHTDElement getCellWaitForRow(int rowIndex,
+    public GridTHTDElement getCellWaitForRow(int rowFlatIndex,
             GridColumnElement column) {
-        if (!((getFirstVisibleRowIndex() <= rowIndex
-                && rowIndex <= getLastVisibleRowIndex()))) {
-            scrollToFlatRowAndWait(rowIndex);
+        if (!((getFirstVisibleRowIndex() <= rowFlatIndex
+                && rowFlatIndex <= getLastVisibleRowIndex()))) {
+            scrollToRow(rowFlatIndex);
         }
 
-        GridTRElement row = getRow(rowIndex);
+        GridTRElement row = getRow(rowFlatIndex);
         return row.getCell(column);
     }
 
@@ -106,29 +159,29 @@ public class TreeGridElement extends GridElement {
      * Expands the row at the given index in the grid. This expects the first
      * column to have the hierarchy data.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index to expand
      * @see #expandWithClick(int, int)
      */
-    public void expandWithClick(int rowIndex) {
-        expandWithClick(rowIndex, 0);
+    public void expandWithClick(int rowFlatIndex) {
+        expandWithClick(rowFlatIndex, 0);
     }
 
     /**
      * Expands the row at the given index in the grid with the given
      * hierarchical column index.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index to expand
      * @param hierarchyColumnIndex
      *            0-based index of the hierarchy column
      */
-    public void expandWithClick(int rowIndex, int hierarchyColumnIndex) {
-        if (isRowExpanded(rowIndex, hierarchyColumnIndex)) {
-            throw new IllegalStateException(
-                    "The element at row " + rowIndex + " was expanded already");
+    public void expandWithClick(int rowFlatIndex, int hierarchyColumnIndex) {
+        if (isRowExpanded(rowFlatIndex, hierarchyColumnIndex)) {
+            throw new IllegalStateException("The element at row " + rowFlatIndex
+                    + " was expanded already");
         }
-        getExpandToggleElement(rowIndex, hierarchyColumnIndex).click();
+        getExpandToggleElement(rowFlatIndex, hierarchyColumnIndex).click();
         waitUntilLoadingFinished();
     }
 
@@ -136,44 +189,44 @@ public class TreeGridElement extends GridElement {
      * Collapses the row at the given index in the grid. This expects the first
      * column to have the hierarchy data.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index to collapse
      * @see #collapseWithClick(int, int)
      */
-    public void collapseWithClick(int rowIndex) {
-        collapseWithClick(rowIndex, 0);
+    public void collapseWithClick(int rowFlatIndex) {
+        collapseWithClick(rowFlatIndex, 0);
     }
 
     /**
      * Collapses the row at the given index in the grid with the given
      * hierarchical column index.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index to collapse
      * @param hierarchyColumnIndex
      *            0-based index of the hierarchy column
      */
-    public void collapseWithClick(int rowIndex, int hierarchyColumnIndex) {
-        if (isRowCollapsed(rowIndex, hierarchyColumnIndex)) {
-            throw new IllegalStateException("The element at row " + rowIndex
+    public void collapseWithClick(int rowFlatIndex, int hierarchyColumnIndex) {
+        if (isRowCollapsed(rowFlatIndex, hierarchyColumnIndex)) {
+            throw new IllegalStateException("The element at row " + rowFlatIndex
                     + " was collapsed already");
         }
-        getExpandToggleElement(rowIndex, hierarchyColumnIndex).click();
+        getExpandToggleElement(rowFlatIndex, hierarchyColumnIndex).click();
         waitUntilLoadingFinished();
     }
 
     /**
      * Returns whether the row at the given index is expanded or not.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index
      * @param hierarchyColumnIndex
      *            0-based index of the hierarchy column
      * @return {@code true} if expanded, {@code false} if collapsed
      */
-    public boolean isRowExpanded(int rowIndex, int hierarchyColumnIndex) {
+    public boolean isRowExpanded(int rowFlatIndex, int hierarchyColumnIndex) {
         waitUntilLoadingFinished();
-        WebElement expandElement = getExpandToggleElement(rowIndex,
+        WebElement expandElement = getExpandToggleElement(rowFlatIndex,
                 hierarchyColumnIndex);
         return expandElement != null
                 && !"false".equals(expandElement.getDomProperty("expanded"));
@@ -182,29 +235,29 @@ public class TreeGridElement extends GridElement {
     /**
      * Returns whether the row at the given index is collapsed or not.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index
      * @param hierarchyColumnIndex
      *            0-based index of the hierarchy column
      * @return {@code true} if collapsed, {@code false} if expanded
      */
-    public boolean isRowCollapsed(int rowIndex, int hierarchyColumnIndex) {
-        return !isRowExpanded(rowIndex, hierarchyColumnIndex);
+    public boolean isRowCollapsed(int rowFlatIndex, int hierarchyColumnIndex) {
+        return !isRowExpanded(rowFlatIndex, hierarchyColumnIndex);
     }
 
     /**
      * Check whether the given indices correspond to a cell that contains a
      * visible hierarchy toggle element.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index
      * @param hierarchyColumnIndex
      *            0-based index of the hierarchy column
      * @return {@code true} if this cell has the expand toggle visible
      */
-    public boolean hasExpandToggle(int rowIndex, int hierarchyColumnIndex) {
+    public boolean hasExpandToggle(int rowFlatIndex, int hierarchyColumnIndex) {
         try {
-            WebElement expandElement = getExpandToggleElement(rowIndex,
+            WebElement expandElement = getExpandToggleElement(rowFlatIndex,
                     hierarchyColumnIndex);
             return expandElement != null && expandElement.isDisplayed()
                     && "false".equals(expandElement.getDomProperty("leaf"));
@@ -216,7 +269,7 @@ public class TreeGridElement extends GridElement {
     /**
      * Gets the 'vaadin-grid-tree-toggle' element for the given row.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            0-based row index
      * @param hierarchyColumnIndex
      *            0-based index of the hierarchy column
@@ -225,22 +278,22 @@ public class TreeGridElement extends GridElement {
      * @throws NoSuchElementException
      *             if there is no expand element for this row
      */
-    public WebElement getExpandToggleElement(int rowIndex,
+    public WebElement getExpandToggleElement(int rowFlatIndex,
             int hierarchyColumnIndex) {
-        GridTHTDElement cell = getCell(rowIndex, hierarchyColumnIndex);
+        GridTHTDElement cell = getCell(rowFlatIndex, hierarchyColumnIndex);
         return cell == null ? null : cell.$("vaadin-grid-tree-toggle").first();
     }
 
     /**
      * Returns {@code true} if details are open or the given row index.
      *
-     * @param rowIndex
+     * @param rowFlatIndex
      *            the 0-based row index
      * @return {@code true} if details are shown in the target row
      */
-    public boolean isDetailsOpen(int rowIndex) {
+    public boolean isDetailsOpen(int rowFlatIndex) {
         try {
-            return getRow(rowIndex).getDetails().isDisplayed();
+            return getRow(rowFlatIndex).getDetails().isDisplayed();
         } catch (NoSuchElementException e) {
             return false;
         }
@@ -249,14 +302,14 @@ public class TreeGridElement extends GridElement {
     /**
      * Returns true if given index has tr element for the row
      *
-     * @param row
+     * @param rowFlatIndex
      *            the row index
      * @return <code>true</code> if there is tr element for the row,
      *         <code>false</code> otherwise
      */
-    public boolean hasRow(int row) {
+    public boolean hasRow(int rowFlatIndex) {
         try {
-            return getRow(row) != null;
+            return getRow(rowFlatIndex) != null;
         } catch (Exception e) {
             return false;
         }
@@ -292,7 +345,8 @@ public class TreeGridElement extends GridElement {
      * Scrolls the TreeGrid to the end.
      */
     public void scrollToEnd() {
-        executeScript("arguments[0].scrollToIndex(...Array(10).fill(-1));",
-                this);
+        int[] path = new int[11];
+        Arrays.fill(path, -1);
+        scrollToRowByPath(path);
     }
 }

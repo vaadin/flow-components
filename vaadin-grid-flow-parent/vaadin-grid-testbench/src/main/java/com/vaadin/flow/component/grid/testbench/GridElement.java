@@ -59,7 +59,10 @@ public class GridElement extends TestBenchElement {
      *
      * @param row
      *            the row to scroll to
+     * @deprecated since 25.0 and will be removed in Vaadin 26. Use
+     *             {@link #scrollToRow(int)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     protected void scrollToFlatRow(int row) {
         callFunction("_scrollToFlatIndex", row);
         waitUntilLoadingFinished();
@@ -130,7 +133,7 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
         if (!isRowInView(rowIndex)) {
-            scrollToFlatRow(rowIndex);
+            scrollToRow(rowIndex);
         }
 
         GridTRElement row = getRow(rowIndex);
@@ -266,7 +269,7 @@ public class GridElement extends TestBenchElement {
     public GridTRElement getRow(int rowIndex, boolean scroll)
             throws IndexOutOfBoundsException {
         if (scroll && !isRowInView(rowIndex)) {
-            scrollToFlatRow(rowIndex);
+            scrollToRow(rowIndex);
         }
         var rows = getRows(rowIndex, rowIndex);
         return rows.size() == 1 ? rows.get(0) : null;
