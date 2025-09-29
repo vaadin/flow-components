@@ -1135,8 +1135,9 @@ public class TreeGrid<T> extends Grid<T>
      * <p>
      * In order to be able to use this method, the data provider should
      * implement {@link HierarchicalDataProvider#getParent(T)} and
-     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}. Any
-     * in-memory data provider implements
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}.
+     * <p>
+     * Any in-memory data provider implements
      * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)} by
      * default. Additionally, {@link TreeDataProvider} implements
      * {@link HierarchicalDataProvider#getParent(T)} by default.
