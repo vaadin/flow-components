@@ -21,8 +21,8 @@ import java.util.Map;
 
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.theme.AbstractTheme;
 
 /**
@@ -30,7 +30,7 @@ import com.vaadin.flow.theme.AbstractTheme;
  */
 @NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.0.0-alpha20")
 @NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.0-alpha20")
-@StyleSheet("@vaadin/vaadin-lumo-styles/lumo.css")
+@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class Lumo implements AbstractTheme {
 
     public static final String LIGHT = "light";
