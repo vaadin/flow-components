@@ -95,10 +95,6 @@ public class FeatureLayer extends VectorLayer {
      *             {@link PointBasedFeature}
      */
     public void addFeature(Feature feature) {
-        if (clusteringEnabled && !(feature instanceof PointBasedFeature)) {
-            throw new IllegalArgumentException(
-                    "Only PointBasedFeature types are supported when clustering is enabled");
-        }
         this.getSource().addFeature(feature);
     }
 
