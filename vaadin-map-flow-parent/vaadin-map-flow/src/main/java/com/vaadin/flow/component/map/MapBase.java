@@ -26,6 +26,7 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapClusterClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
@@ -233,6 +234,11 @@ public abstract class MapBase extends Component
      * invoked for a click on any feature in the specified layer. For clicks on
      * overlapping features, the listener will be invoked only for the top-level
      * feature at that location.
+     * <p>
+     * When clustering is enabled, the listener will only be invoked for clicks
+     * on individual features. Use
+     * {@link #addClusterClickListener(ComponentEventListener)} to listen for
+     * clicks on clusters.
      *
      * @param listener
      *            the listener to trigger
@@ -256,6 +262,11 @@ public abstract class MapBase extends Component
      * {@link #addFeatureClickListener(VectorLayer, ComponentEventListener)}.
      * For clicks on overlapping features, the listener will be invoked only for
      * the top-level feature at that location.
+     * <p>
+     * When clustering is enabled, the listener will only be invoked for clicks
+     * on individual features. Use
+     * {@link #addClusterClickListener(ComponentEventListener)} to listen for
+     * clicks on clusters.
      *
      * @param listener
      *            the listener to trigger
@@ -265,6 +276,21 @@ public abstract class MapBase extends Component
     public Registration addFeatureClickListener(
             ComponentEventListener<MapFeatureClickEvent> listener) {
         return addListener(MapFeatureClickEvent.class, listener);
+    }
+
+    /**
+     * Adds a click listener for clusters of features. The listener will be
+     * invoked for a click on any cluster, in any feature layer. Use
+     * {@link #addFeatureClickListener(ComponentEventListener)} to listen for
+     * clicks on individual features.
+     *
+     * @param listener
+     *            the listener to trigger
+     * @return registration for the listener
+     */
+    public Registration addClusterClickListener(
+            ComponentEventListener<MapClusterClickEvent> listener) {
+        return addListener(MapClusterClickEvent.class, listener);
     }
 
     /**
