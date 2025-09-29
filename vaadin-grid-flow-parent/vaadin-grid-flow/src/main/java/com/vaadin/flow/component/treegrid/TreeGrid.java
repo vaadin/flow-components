@@ -981,9 +981,9 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to the given item index, positioning the item at the top of the
-     * visible area if that's possible. The way the {@code index} parameter is
-     * interpreted depends on the
+     * Scrolls to the index of an item so that the row is shown at the start of
+     * the visible area whenever possible. The way the {@code index} parameter
+     * is interpreted depends on the
      * {@link HierarchicalDataProvider#getHierarchyFormat() hierarchy format} of
      * the current data provider:
      * <p>
@@ -995,8 +995,8 @@ public class TreeGrid<T> extends Grid<T>
      * entire flattened tree, not only the root level, allowing items at any
      * expanded level to be reached with this method.
      * <p>
-     * If the index exceeds the available range, scrolling goes to the last item
-     * according to the current hierarchy format.
+     * If the index exceeds the valid range, scrolling stops at the last
+     * available item.
      *
      * @param index
      *            zero based index of the item to scroll to
