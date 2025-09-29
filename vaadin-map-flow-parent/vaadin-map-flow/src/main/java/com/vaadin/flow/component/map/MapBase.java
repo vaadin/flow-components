@@ -132,7 +132,7 @@ public abstract class MapBase extends Component
         // Register an event listener before all the other listeners of the view
         // move end event to update view state to the latest values received
         // from the client
-        addViewMoveEndEventListener(event -> {
+        addViewMoveEndListener(event -> {
             double rotation = event.getRotation();
             double zoom = event.getZoom();
             Coordinate center = event.getCenter();
@@ -168,9 +168,28 @@ public abstract class MapBase extends Component
      * interaction.
      *
      * @param listener
+     *            the listener to add
+     * @return a registration object for removing the added listener
+     * @deprecated use {@link #addViewMoveEndListener(ComponentEventListener)}
+     *             instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public Registration addViewMoveEndEventListener(
+            ComponentEventListener<MapViewMoveEndEvent> listener) {
+        return addViewMoveEndListener(listener);
+    }
+
+    /**
+     * Adds an event listener for changes to the map's viewport. The event will
+     * only be triggered after the user has finished manipulating the viewport,
+     * for example after letting go of the mouse button after a mouse drag
+     * interaction.
+     *
+     * @param listener
+     *            the listener to add
      * @return a registration object for removing the added listener
      */
-    public Registration addViewMoveEndEventListener(
+    public Registration addViewMoveEndListener(
             ComponentEventListener<MapViewMoveEndEvent> listener) {
         return addListener(MapViewMoveEndEvent.class, listener);
     }
@@ -183,9 +202,28 @@ public abstract class MapBase extends Component
      * whether a feature exists at the clicked location.
      *
      * @param listener
+     *            the listener to add
+     * @return a registration object for removing the added listener
+     * @deprecated use {@link #addClickListener(ComponentEventListener)} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public Registration addClickEventListener(
+            ComponentEventListener<MapClickEvent> listener) {
+        return addClickListener(listener);
+    }
+
+    /**
+     * Adds a click listener for the map.
+     * <p>
+     * Note that the listener will also be invoked when clicking on a
+     * {@link Feature}. Use {@link MapClickEvent#getFeatures()} to distinguish
+     * whether a feature exists at the clicked location.
+     *
+     * @param listener
+     *            the listener to add
      * @return a registration object for removing the added listener
      */
-    public Registration addClickEventListener(
+    public Registration addClickListener(
             ComponentEventListener<MapClickEvent> listener) {
         return addListener(MapClickEvent.class, listener);
     }
