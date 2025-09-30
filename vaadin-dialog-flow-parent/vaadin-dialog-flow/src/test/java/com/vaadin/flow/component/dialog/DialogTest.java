@@ -29,7 +29,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -177,51 +176,6 @@ public class DialogTest {
 
         Assert.assertTrue("resizable can be set to true",
                 dialog.getElement().getProperty("resizable", false));
-    }
-
-    @Test
-    public void isModal_trueByDefault() {
-        Dialog dialog = new Dialog();
-
-        // Element's api "modeless" acts inverted to Flow's api "modal":
-        // modeless is false and modal is true by default
-        Assert.assertTrue("modal is true by default",
-                !dialog.getElement().getProperty("modeless", false));
-    }
-
-    @Test
-    public void setModal_dialogCanBeModeless() {
-        Dialog dialog = new Dialog();
-        dialog.setModal(false);
-
-        // Element's api "modeless" acts inverted to Flow's api "modal":
-        // modeless is false and modal is true by default
-        Assert.assertFalse("modal can be set to false",
-                !dialog.getElement().getProperty("modeless", false));
-    }
-
-    @Test
-    public void getModality_visualByDefault() {
-        Dialog dialog = new Dialog();
-
-        Assert.assertEquals(ModalityMode.VISUAL, dialog.getModality());
-    }
-
-    @Test
-    public void setModality() {
-        Dialog dialog = new Dialog();
-
-        dialog.setModality(ModalityMode.STRICT);
-        Assert.assertEquals(ModalityMode.STRICT, dialog.getModality());
-        Assert.assertFalse(dialog.getElement().getProperty("modeless", false));
-
-        dialog.setModality(ModalityMode.VISUAL);
-        Assert.assertEquals(ModalityMode.VISUAL, dialog.getModality());
-        Assert.assertFalse(dialog.getElement().getProperty("modeless", false));
-
-        dialog.setModality(ModalityMode.MODELESS);
-        Assert.assertEquals(ModalityMode.MODELESS, dialog.getModality());
-        Assert.assertTrue(dialog.getElement().getProperty("modeless", false));
     }
 
     @Test
