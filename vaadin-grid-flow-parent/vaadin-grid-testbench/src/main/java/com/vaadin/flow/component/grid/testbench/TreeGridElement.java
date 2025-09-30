@@ -94,9 +94,7 @@ public class TreeGridElement extends GridElement {
      *            the flat index of the row to scroll to
      */
     public void scrollToRowByFlatIndex(int rowFlatIndex) {
-        waitUntilLoadingFinished();
-        callFunction("_scrollToFlatIndex", rowFlatIndex);
-        waitUntilLoadingFinished();
+        super.scrollToRowByFlatIndex(rowFlatIndex);
     }
 
     /**
