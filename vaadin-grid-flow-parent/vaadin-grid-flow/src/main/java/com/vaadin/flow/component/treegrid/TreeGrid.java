@@ -213,7 +213,7 @@ public class TreeGrid<T> extends Grid<T>
         this();
         setDataProvider(dataProvider);
     }
-
+    
     private static class TreeDataCommunicatorBuilder<T>
             extends DataCommunicatorBuilder<T, GridArrayUpdater> {
 
