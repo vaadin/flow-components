@@ -250,6 +250,36 @@ public class TreeGrid<T> extends Grid<T>
         protected int resolveIndexPath(int... path) {
             return super.resolveIndexPath(path);
         }
+
+        public List<T> getPathFromRoot(T item) {
+            var parents = new LinkedList<T>();
+            parents.push(item);
+            var parent = TreeGridDataCommunicator.this.getDataProvider()
+                    .getParent(item);
+            while (parent != null) {
+                parents.push(parent);
+                parent = TreeGridDataCommunicator.this.getDataProvider()
+                        .getParent(parent);
+            }
+            return parents;
+        }
+
+        public int getItemIndex(T item, T parent) {
+            var query = buildQuery(parent, 0, Integer.MAX_VALUE);
+            return ((HierarchicalDataProvider<T, Object>) TreeGridDataCommunicator.this
+                    .getDataProvider()).getItemIndex(item, query);
+        }
+
+        public int[] getIndexPath(T item) {
+            var pathFromRoot = getPathFromRoot(item);
+            var indexesToScrollTo = new int[pathFromRoot.size()];
+            indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), null);
+            for (var i = 1; i < pathFromRoot.size(); i++) {
+                indexesToScrollTo[i] = getItemIndex(pathFromRoot.get(i),
+                        pathFromRoot.get(i - 1));
+            }
+            return indexesToScrollTo;
+        }
     }
 
     private static class TreeDataCommunicatorBuilder<T>
@@ -1131,7 +1161,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to an item within the tree.
+     * Scrolls to an item within the tree. Does nothing if the item does not
+     * belong to the tree.
      * <p>
      * In order to be able to use this method, the data provider should
      * implement {@link HierarchicalDataProvider#getParent(T)} and
@@ -1148,52 +1179,30 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void scrollToItem(T item) {
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
-        var itemToScrollTo = getItemToScrollTo(item);
         if (getDataProvider().getHierarchyFormat()
                 .equals(HierarchicalDataProvider.HierarchyFormat.FLATTENED)) {
-            scrollToFlattenedIndex(itemToScrollTo);
+            scrollToFlattenedIndex(item);
         } else {
-            scrollToNestedIndexes(itemToScrollTo);
+            scrollToNestedIndexes(item);
         }
-    }
-
-    private T getItemToScrollTo(T item) {
-        return getPathFromRoot(item).stream()
-                .filter(itemInPath -> !isExpanded(itemInPath)).findFirst()
-                .orElse(item);
     }
 
     private void scrollToFlattenedIndex(T item) {
-        var flattenedIndex = getItemIndex(item, null);
-        scrollToIndex(flattenedIndex);
+        var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
+        var itemToScrollTo = dataCommunicator.getPathFromRoot(item).stream()
+                .filter(i -> !isExpanded(i)).findFirst().orElse(item);
+        var flattenedIndex = dataCommunicator.getItemIndex(itemToScrollTo,
+                null);
+        if (flattenedIndex != -1) {
+            scrollToIndex(flattenedIndex);
+        }
     }
 
     private void scrollToNestedIndexes(T item) {
-        var pathFromRoot = getPathFromRoot(item);
-        var indexesToScrollTo = new int[pathFromRoot.size()];
-        indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), null);
-        for (var i = 1; i < pathFromRoot.size(); i++) {
-            indexesToScrollTo[i] = getItemIndex(pathFromRoot.get(i),
-                    pathFromRoot.get(i - 1));
+        var indexesToScrollTo = ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                .getIndexPath(item);
+        if (indexesToScrollTo[0] != -1) {
+            scrollToIndex(indexesToScrollTo);
         }
-        scrollToIndex(indexesToScrollTo);
-    }
-
-    private List<T> getPathFromRoot(T item) {
-        var parents = new LinkedList<T>();
-        parents.push(item);
-        var parent = getDataProvider().getParent(item);
-        while (parent != null) {
-            parents.push(parent);
-            parent = getDataProvider().getParent(parent);
-        }
-        return parents;
-    }
-
-    private int getItemIndex(T item, T parent) {
-        var query = getDataCommunicator().buildQuery(parent, 0,
-                Integer.MAX_VALUE);
-        return ((HierarchicalDataProvider<T, Object>) getDataCommunicator()
-                .getDataProvider()).getItemIndex(item, query);
     }
 }
