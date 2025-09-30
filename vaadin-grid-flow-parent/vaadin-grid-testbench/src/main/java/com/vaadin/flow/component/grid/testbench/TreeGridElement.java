@@ -37,16 +37,21 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
-     * Scrolls to a row by the flat index.
+     * Scrolls to a row with the given flat index.
      * <p>
      * This method works best with {@code HierarchyFormat#FLATTENED} data
-     * providers where flat indexes are stable upfront.
+     * providers that guarantee stable flat indexes.
      * <p>
      * When using {@code HierarchyFormat#NESTED} data providers, the hierarchy
-     * is resolved lazily during scrolling, so flat indexes may change as more
-     * data is loaded. To ensure consistent results with this format, consider
-     * using {@link #scrollToRowByPath(int...)} which identifies rows by their
-     * hierarchical path.
+     * is resolved lazily during scrolling, which means flat indexes may shift
+     * as more data is loaded. In this case, consider using
+     * {@link #scrollToRowByPath(int...)}, which targets rows by their
+     * hierarchical path and thereby ensures consistent scrolling with this
+     * format.
+     * <p>
+     * <b>NOTE:</b> In versions prior to 25.0, this method only scrolled to rows
+     * at the root level. Starting with Vaadin 25, this behavior can be achieved
+     * by calling {@link #scrollToRowByPath(int...)} with a single index.
      *
      * @param rowFlatIndex
      *            the flat index of the row to scroll to

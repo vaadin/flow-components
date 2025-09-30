@@ -39,7 +39,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         grid.expandWithClick(2);
         grid.expandWithClick(3);
-        grid.scrollToRow(300);
+        grid.scrollToRowByPath(300);
 
         expandSecondRowButton.click();
 
@@ -47,13 +47,13 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Dad 1/0", "Dad 1/1", "Dad 1/2", "Granddad 2", "Dad 2/0" });
 
-        grid.scrollToRow(300);
+        grid.scrollToRowByPath(300);
         collapseSecondRowButton.click();
         grid.scrollToRow(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
 
-        grid.scrollToRow(300);
+        grid.scrollToRowByPath(300);
         expandSecondRowButton.click();
         collapseSecondRowButton.click();
         grid.scrollToRow(0);
@@ -127,7 +127,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         for (int i = 0; i < assumedCachedSize; i++) {
             cellTexts[i] = grid.getCellWaitForRow(i, 0).getText();
         }
-        grid.scrollToRowAndWait(0);
+        grid.scrollToRow(0);
         grid.collapseWithClick(1);
         grid.expandWithClick(1);
 
@@ -145,11 +145,11 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         $("button").id("expand-recursively").click();
 
         // Scroll as far as possible
-        grid.scrollToRowAndWait(1000000);
+        grid.scrollToRow(1000000);
         assertExpandedNodesPopulated(grid);
 
         // Repeat
-        grid.scrollToRowAndWait(1000000);
+        grid.scrollToRow(1000000);
         assertExpandedNodesPopulated(grid);
     }
 
