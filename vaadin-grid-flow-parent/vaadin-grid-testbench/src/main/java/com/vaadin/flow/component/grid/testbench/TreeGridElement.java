@@ -55,6 +55,11 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
+     * Scrolls to the row with the given indexes. The indexes are hierarchical,
+     * starting with the root index.
+     *
+     * @param indexes
+     *            the indexes of the row to scroll to
      * @deprecated since 25.0 and will be removed in Vaadin 26. Use
      *             {@link #scrollToRowByPath(int...)} instead.
      */
