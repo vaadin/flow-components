@@ -22,45 +22,36 @@ import org.openqa.selenium.WebElement;
 
 /**
  * TestBench Element API for TreeGrid.
- *
  */
 public class TreeGridElement extends GridElement {
     /**
-     * @deprecated since 25.0, and will be removed in Vaadin 26. Use
-     *             {@link #scrollToRow(int)} to scroll to a row by flat index or
-     *             {@link #scrollToRowByPath(int...)} to scroll by hierarchical
-     *             path.
+     * Scrolls to the row with the given index in the root level.
+     *
+     * @deprecated since 25.0. Please update your code to use
+     *             {@link #scrollToRowByPath(int...)} with a single index where
+     *             you want to scroll to a root-level row. In Vaadin 26, this
+     *             deprecated method will be changed to accept a flat index and
+     *             behave as {@link #scrollToRowByFlatIndex(int)}, which may
+     *             break tests if not updated.
      */
-    @Deprecated(since = "25.0", forRemoval = true)
-    public void scrollToRowAndWait(int rootLevelRowIndex) {
-        scrollToRowByPath(rootLevelRowIndex);
+    @Override
+    @Deprecated(since = "25.0")
+    public void scrollToRow(int row) {
+        scrollToRowByPath(row);
     }
 
     /**
-     * Scrolls to a row with the given flat index.
-     * <p>
-     * This method works best with {@code HierarchyFormat#FLATTENED} data
-     * providers that guarantee stable flat indexes.
-     * <p>
-     * When using {@code HierarchyFormat#NESTED} data providers, the hierarchy
-     * is resolved lazily during scrolling, which means flat indexes may shift
-     * as more data is loaded. In this case, consider using
-     * {@link #scrollToRowByPath(int...)}, which targets rows by their
-     * hierarchical path and thereby ensures consistent scrolling with this
-     * format.
-     * <p>
-     * <b>NOTE:</b> In versions prior to 25.0, this method only scrolled to rows
-     * at the root level. Starting with Vaadin 25, this behavior can be achieved
-     * by calling {@link #scrollToRowByPath(int...)} with a single index.
+     * Scrolls to the row with the given index in the root level.
      *
-     * @param rowFlatIndex
-     *            the flat index of the row to scroll to
+     * @param row
+     *            the row to scroll to
+     * @deprecated since 25.0 and will be removed in Vaadin 26. Use
+     *             {@link #scrollToRowByPath(int...)} with a single index
+     *             instead.
      */
-    @Override
-    public void scrollToRow(int rowFlatIndex) {
-        waitUntilLoadingFinished();
-        callFunction("_scrollToFlatIndex", rowFlatIndex);
-        waitUntilLoadingFinished();
+    @Deprecated(since = "25.0", forRemoval = true)
+    public void scrollToRowAndWait(int row) {
+        scrollToRowByPath(row);
     }
 
     /**
@@ -73,11 +64,52 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
-     * Scrolls to a row specified by the given hierarchical path and returns its
-     * flat index, which can be used with other APIs such as
-     * {@link #getRow(int)} for example.
+     * Scrolls to the row with the given flat index.
+     *
+     * @param row
+     *            the row to scroll to
+     * @deprecated since 25.0, and will be removed in Vaadin 26. Use
+     *             {@link #scrollToRowByFlatIndex(int)} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public void scrollToFlatRowAndWait(int row) {
+        scrollToRowByFlatIndex(row);
+    }
+
+    /**
+     * Scrolls to a row at the given flat index, an index that represents the
+     * position across all rows, including children of expanded rows.
      * <p>
-     * The hierarchical path is an array of zero-based indexes, where each index
+     * This method works best with {@code HierarchyFormat#FLATTENED} data
+     * providers, where the full hierarchy is known upfront and flat indexes
+     * remain stable during scrolling.
+     * <p>
+     * When using {@code HierarchyFormat#NESTED} data providers, the hierarchy
+     * is resolved lazily during scrolling, so flat indexes may shift as more
+     * levels are discovered. With these data providers, consider using
+     * {@link #scrollToRowByPath(int...)}, which targets rows by their
+     * hierarchical path.
+     *
+     * @param rowFlatIndex
+     *            the flat index of the row to scroll to
+     */
+    public void scrollToRowByFlatIndex(int rowFlatIndex) {
+        waitUntilLoadingFinished();
+        callFunction("_scrollToFlatIndex", rowFlatIndex);
+        waitUntilLoadingFinished();
+    }
+
+    /**
+     * Scrolls to a row specified by the given hierarchical path and returns its
+     * flat index. The returned index can then be used with other methods, for
+     * example {@link #getRow(int)}:
+     *
+     * <pre>
+     * int rowFlatIndex = treeGrid.scrollToRowByPath(2, 1);
+     * assertEquals("Row 2-1", treeGrid.getRow(rowFlatIndex).getText());
+     * </pre>
+     * <p>
+     * The hierarchical path is an array of 0-based indexes, where each index
      * refers to a child of the row at the previous index. Scrolling continues
      * until it reaches the last index in the array or encounters a collapsed
      * row.
@@ -89,11 +121,11 @@ public class TreeGridElement extends GridElement {
      * <p>
      * <b>NOTE:</b> This method works only with data providers that return data
      * in {@code HierarchyFormat#NESTED}. For {@code HierarchyFormat#FLATTENED},
-     * use {@link #scrollToRow(int)} with a flat index instead.
+     * use {@link #scrollToRowByFlatIndex(int)} with a flat index instead.
      *
      * @param path
      *            an array of indexes representing the path to the target row
-     * @return the flat index of the row that was scrolled to, or -1 if no row
+     * @return the flat index of the row that was scrolled to
      */
     public int scrollToRowByPath(int... path) {
         waitUntilLoadingFinished();
@@ -106,19 +138,6 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
-     * Scrolls to a row with the given flat index.
-     *
-     * @param rowFlatIndex
-     *            the flat index of the row to scroll to
-     * @deprecated since 25.0, and will be removed in Vaadin 26. Use
-     *             {@link #scrollToRow(int)} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
-    public void scrollToFlatRowAndWait(int rowFlatIndex) {
-        scrollToRow(rowFlatIndex);
-    }
-
-    /**
      * Gets the grid cell for the given row and column index.
      * <p>
      * For the column index, only visible columns are taken into account.
@@ -127,7 +146,7 @@ public class TreeGridElement extends GridElement {
      * load.
      *
      * @param rowFlatIndex
-     *            the row index
+     *            the flat index of the row
      * @param colIndex
      *            the column index
      * @return the grid cell for the given coordinates
@@ -144,7 +163,7 @@ public class TreeGridElement extends GridElement {
      * load.
      *
      * @param rowFlatIndex
-     *            the row index
+     *            the flat index of the row
      * @param column
      *            the column element for the column
      * @return the grid cell for the given coordinates
@@ -165,7 +184,7 @@ public class TreeGridElement extends GridElement {
      * column to have the hierarchy data.
      *
      * @param rowFlatIndex
-     *            0-based row index to expand
+     *            the flat index of the row to expand
      * @see #expandWithClick(int, int)
      */
     public void expandWithClick(int rowFlatIndex) {
@@ -177,9 +196,9 @@ public class TreeGridElement extends GridElement {
      * hierarchical column index.
      *
      * @param rowFlatIndex
-     *            0-based row index to expand
+     *            the flat index of the row to expand
      * @param hierarchyColumnIndex
-     *            0-based index of the hierarchy column
+     *            the index of the hierarchy column
      */
     public void expandWithClick(int rowFlatIndex, int hierarchyColumnIndex) {
         if (isRowExpanded(rowFlatIndex, hierarchyColumnIndex)) {
@@ -195,7 +214,7 @@ public class TreeGridElement extends GridElement {
      * column to have the hierarchy data.
      *
      * @param rowFlatIndex
-     *            0-based row index to collapse
+     *            the flat index of the row to collapse
      * @see #collapseWithClick(int, int)
      */
     public void collapseWithClick(int rowFlatIndex) {
@@ -207,9 +226,9 @@ public class TreeGridElement extends GridElement {
      * hierarchical column index.
      *
      * @param rowFlatIndex
-     *            0-based row index to collapse
+     *            the flat index of the row to collapse
      * @param hierarchyColumnIndex
-     *            0-based index of the hierarchy column
+     *            the index of the hierarchy column
      */
     public void collapseWithClick(int rowFlatIndex, int hierarchyColumnIndex) {
         if (isRowCollapsed(rowFlatIndex, hierarchyColumnIndex)) {
@@ -224,9 +243,9 @@ public class TreeGridElement extends GridElement {
      * Returns whether the row at the given index is expanded or not.
      *
      * @param rowFlatIndex
-     *            0-based row index
+     *            the flat index of the row
      * @param hierarchyColumnIndex
-     *            0-based index of the hierarchy column
+     *            the index of the hierarchy column
      * @return {@code true} if expanded, {@code false} if collapsed
      */
     public boolean isRowExpanded(int rowFlatIndex, int hierarchyColumnIndex) {
@@ -241,9 +260,9 @@ public class TreeGridElement extends GridElement {
      * Returns whether the row at the given index is collapsed or not.
      *
      * @param rowFlatIndex
-     *            0-based row index
+     *            the flat index of the row
      * @param hierarchyColumnIndex
-     *            0-based index of the hierarchy column
+     *            the index of the hierarchy column
      * @return {@code true} if collapsed, {@code false} if expanded
      */
     public boolean isRowCollapsed(int rowFlatIndex, int hierarchyColumnIndex) {
@@ -255,9 +274,9 @@ public class TreeGridElement extends GridElement {
      * visible hierarchy toggle element.
      *
      * @param rowFlatIndex
-     *            0-based row index
+     *            the flat index of the row
      * @param hierarchyColumnIndex
-     *            0-based index of the hierarchy column
+     *            the index of the hierarchy column
      * @return {@code true} if this cell has the expand toggle visible
      */
     public boolean hasExpandToggle(int rowFlatIndex, int hierarchyColumnIndex) {
@@ -275,9 +294,9 @@ public class TreeGridElement extends GridElement {
      * Gets the 'vaadin-grid-tree-toggle' element for the given row.
      *
      * @param rowFlatIndex
-     *            0-based row index
+     *            the flat index of the row
      * @param hierarchyColumnIndex
-     *            0-based index of the hierarchy column
+     *            the index of the hierarchy column
      * @return the {@code span} element that is clicked for expanding/collapsing
      *         a rows
      * @throws NoSuchElementException
@@ -293,7 +312,7 @@ public class TreeGridElement extends GridElement {
      * Returns {@code true} if details are open or the given row index.
      *
      * @param rowFlatIndex
-     *            the 0-based row index
+     *            the flat index of the row
      * @return {@code true} if details are shown in the target row
      */
     public boolean isDetailsOpen(int rowFlatIndex) {
@@ -308,7 +327,7 @@ public class TreeGridElement extends GridElement {
      * Returns true if given index has tr element for the row
      *
      * @param rowFlatIndex
-     *            the row index
+     *            the flat index of the row
      * @return <code>true</code> if there is tr element for the row,
      *         <code>false</code> otherwise
      */
