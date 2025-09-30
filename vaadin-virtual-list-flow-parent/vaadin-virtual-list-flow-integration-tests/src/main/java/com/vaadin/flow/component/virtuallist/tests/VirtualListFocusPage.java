@@ -76,20 +76,21 @@ public class VirtualListFocusPage extends Div {
 
     private void focusFirstItem() {
         // Execute focus after a small delay to ensure rendering is complete
-        getElement().executeJs("""
-            setTimeout(() => {
-              const list = document.getElementById('virtual-list');
-              const firstItem = list.querySelector('[id^="item-"]');
-              if (firstItem) {
-                firstItem.focus();
-                document.getElementById('status').textContent = 'First item focused: ' + document.activeElement.id;
-                return true;
-              } else {
-                document.getElementById('status').textContent = 'No item found to focus';
-                return false;
-              }
-            }, 100);
-            """);
+        getElement().executeJs(
+                """
+                        setTimeout(() => {
+                          const list = document.getElementById('virtual-list');
+                          const firstItem = list.querySelector('[id^="item-"]');
+                          if (firstItem) {
+                            firstItem.focus();
+                            document.getElementById('status').textContent = 'First item focused: ' + document.activeElement.id;
+                            return true;
+                          } else {
+                            document.getElementById('status').textContent = 'No item found to focus';
+                            return false;
+                          }
+                        }, 100);
+                        """);
     }
 
     private void resetList() {
@@ -100,9 +101,9 @@ public class VirtualListFocusPage extends Div {
 
         // Try to focus first item after reset
         getElement().executeJs("""
-            setTimeout(() => { 
-              document.getElementById('focus-first-button').click(); 
-            }, 200);
-            """);
+                setTimeout(() => {
+                  document.getElementById('focus-first-button').click();
+                }, 200);
+                """);
     }
 }

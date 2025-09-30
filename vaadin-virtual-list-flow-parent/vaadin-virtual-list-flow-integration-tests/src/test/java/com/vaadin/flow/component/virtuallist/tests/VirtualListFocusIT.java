@@ -92,7 +92,8 @@ public class VirtualListFocusIT extends AbstractComponentIT {
         WebElement focusButton = findElement(By.id("focus-first-button"));
         focusButton.click();
 
-        // Wait for focus to be set (includes the 100ms delay from focusFirstItem)
+        // Wait for focus to be set (includes the 100ms delay from
+        // focusFirstItem)
         waitUntil(driver -> {
             WebElement status = findElement(By.id("status"));
             return status.getText().contains("First item focused");
@@ -107,10 +108,11 @@ public class VirtualListFocusIT extends AbstractComponentIT {
 
         // Execute JavaScript to verify the focused element hasn't changed
         // This checks that no unexpected re-render occurred
-        Object result = executeScript("""
-            const activeId = document.activeElement.id;
-            return activeId === 'item-Item-0' ? 'still-focused' : 'focus-lost: ' + activeId;
-            """);
+        Object result = executeScript(
+                """
+                        const activeId = document.activeElement.id;
+                        return activeId === 'item-Item-0' ? 'still-focused' : 'focus-lost: ' + activeId;
+                        """);
 
         Assert.assertEquals("Focus should remain on first item",
                 "still-focused", result.toString());
