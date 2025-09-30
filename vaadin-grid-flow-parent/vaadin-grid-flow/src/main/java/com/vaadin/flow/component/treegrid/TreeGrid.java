@@ -252,14 +252,13 @@ public class TreeGrid<T> extends Grid<T>
         }
 
         public List<T> getPathFromRoot(T item) {
+            var dataProvider = TreeGridDataCommunicator.this.getDataProvider();
             var parents = new LinkedList<T>();
             parents.push(item);
-            var parent = TreeGridDataCommunicator.this.getDataProvider()
-                    .getParent(item);
+            var parent = dataProvider.getParent(item);
             while (parent != null) {
                 parents.push(parent);
-                parent = TreeGridDataCommunicator.this.getDataProvider()
-                        .getParent(parent);
+                parent = dataProvider.getParent(parent);
             }
             return parents;
         }
