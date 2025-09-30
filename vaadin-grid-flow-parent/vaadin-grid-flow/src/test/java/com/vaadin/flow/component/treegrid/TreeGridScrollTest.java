@@ -134,6 +134,27 @@ public class TreeGridScrollTest {
     }
 
     @Test
+    public void flattenedProvider_scrollToMissingItem_doesNotScroll() {
+        setFlattenedProvider();
+        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
+        assertNotScrolled();
+    }
+
+    @Test
+    public void nestedProvider_scrollToMissingItem_doesNotScroll() {
+        setNestedProvider();
+        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
+        assertNotScrolled();
+    }
+
+    @Test
+    public void lazyProvider_scrollToMissingItem_doesNotScroll() {
+        setLazyProvider();
+        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
+        assertNotScrolled();
+    }
+
+    @Test
     public void flattenedProvider_reverseSort_scrollToItem_scrollsToCorrectIndex() {
         setFlattenedProvider();
         sortDescending();
@@ -177,6 +198,10 @@ public class TreeGridScrollTest {
 
     private void assertScrolledIndex(int scrolledIndex) {
         Mockito.verify(treeGrid, Mockito.times(1)).scrollToIndex(scrolledIndex);
+    }
+
+    private void assertNotScrolled() {
+        Mockito.verify(treeGrid, Mockito.times(0)).scrollToIndex(Mockito.any());
     }
 
     private CustomTestBean getLastRootItem() {
@@ -245,7 +270,7 @@ public class TreeGridScrollTest {
         @Override
         public int getItemIndex(CustomTestBean item,
                 HierarchicalQuery<CustomTestBean, Void> query) {
-            return item.getIndex();
+            return item.getIndex() < 0 ? -1 : item.getIndex();
         }
 
         @Override
