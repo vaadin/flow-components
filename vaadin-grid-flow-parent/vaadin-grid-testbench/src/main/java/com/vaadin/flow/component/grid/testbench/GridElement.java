@@ -81,6 +81,7 @@ public class GridElement extends TestBenchElement {
                 const col = columns.find(c => c.__generatedTbId === columnId);
                 if (col && col._sizerCell) {
                     grid.$.table.scrollLeft = col._sizerCell.offsetLeft;
+                    grid.__updateColumnsBodyContentHidden();
                 }
                 """, this, column.get__generatedId());
 
