@@ -49,7 +49,7 @@ public class TreeGridScrollTest {
     }
 
     @Test
-    public void setCustomProviderWithoutMethodImpl_scrollTotem_unsupportedOperationExceptionThrown() {
+    public void setCustomProviderWithoutMethodImpl_scrollToItem_unsupportedOperationExceptionThrown() {
         treeGrid.setDataProvider(new LazyDataProviderWithoutMethodImpl(100, 3));
         Assert.assertThrows(UnsupportedOperationException.class, () -> treeGrid
                 .scrollToItem(new CustomTestBean("", 0, 0, null)));
