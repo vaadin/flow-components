@@ -121,7 +121,7 @@ public class TreeGridScrollTest {
         var rootItem = treeData.getRootItems().get(10);
         var firstChild = treeData.getChildren(rootItem).iterator().next();
         treeGrid.scrollToItem(firstChild);
-        assertScrolledIndexes(10);
+        assertScrolledIndexes(10, 0);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class TreeGridScrollTest {
         var rootItem = treeData.getRootItems().get(10);
         var firstChild = treeData.getChildren(rootItem).iterator().next();
         treeGrid.scrollToItem(firstChild);
-        assertScrolledIndexes(10);
+        assertScrolledIndexes(10, 0);
     }
 
     @Test
