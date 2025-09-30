@@ -15,16 +15,19 @@ import org.junit.Test;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-map/cluster")
 public class ClusterIT extends AbstractComponentIT {
     private MapElement map;
+    private TestBenchElement eventLog;
 
     @Before
     public void init() {
         open();
         map = $(MapElement.class).waitForFirst();
+        eventLog = $("div").id("event-log");
     }
 
     @Test
@@ -169,5 +172,35 @@ public class ClusterIT extends AbstractComponentIT {
         Assert.assertEquals(3, text.getStroke().getWidth());
         Assert.assertEquals(0, text.getOffsetX());
         Assert.assertEquals(0, text.getOffsetY());
+    }
+
+    @Test
+    public void clickCluster_triggersClusterClickEvent() {
+        map.clickAtCoordinates(0, 0);
+
+        // Click events are delayed by around 250ms, wait for event
+        waitSeconds(1);
+
+        Assert.assertEquals("cluster-click: m1, m2, m3", eventLog.getText());
+    }
+
+    @Test
+    public void clickClusterWithSingleFeature_triggersFeatureClickEvent() {
+        map.getMapReference().getView().setZoom(6);
+
+        map.clickAtCoordinates(0, 0);
+
+        // Click events are delayed by around 250ms, wait for event
+        waitSeconds(1);
+
+        Assert.assertEquals("feature-click: m1", eventLog.getText());
+    }
+
+    private void waitSeconds(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

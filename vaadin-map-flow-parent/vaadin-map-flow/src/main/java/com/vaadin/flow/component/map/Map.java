@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.map;
 
+import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Tag;
@@ -16,6 +17,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
@@ -27,6 +29,10 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Map is a component for displaying geographic maps from various sources. It
@@ -320,5 +326,45 @@ public class Map extends MapBase {
      */
     public void setZoom(double zoom) {
         getView().setZoom(zoom);
+    }
+
+    /**
+     * Zooms and pans the map to fit the given features in the viewport. Uses a
+     * default padding of 50 pixels and animation duration of 400 milliseconds.
+     *
+     * @param features
+     *            the features to fit in the viewport
+     */
+    public void zoomToFit(List<Feature> features) {
+        zoomToFit(features, 50, 400);
+    }
+
+    /**
+     * Zooms and pans the map to fit the given features in the viewport.
+     *
+     * @param features
+     *            the features to fit in the viewport
+     * @param padding
+     *            padding in pixels to add around the features
+     * @param duration
+     *            animation duration in milliseconds, 0 for no animation
+     */
+    public void zoomToFit(List<Feature> features, int padding, int duration) {
+        ArrayNode featureIds = JacksonUtils.createArrayNode();
+        features.forEach(feature -> featureIds.add(feature.getId()));
+
+        ObjectNode options = JacksonUtils.createObjectNode();
+        options.put("padding", padding);
+        options.put("duration", duration);
+
+        // In order to allow calling this method before the map, or the view
+        // that contains it, is attached to the UI, this needs to be delayed
+        // with beforeClientResponse to ensure that the client-side connector
+        // has been initialized beforehand.
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> getElement().executeJs(
+                                "this.$connector.zoomToFit($0, $1)", featureIds,
+                                options)));
     }
 }
