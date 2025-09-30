@@ -10,7 +10,7 @@ window.Vaadin.Flow.virtualListConnector = {
 
     const extraItemsBuffer = 20;
 
-    let lastRequestedRange = [0, 0];
+    let lastRequestedRange = null;
 
     list.$connector = {};
     list.$connector.placeholderItem = { __placeholder: true };
@@ -34,7 +34,7 @@ window.Vaadin.Flow.virtualListConnector = {
       let first = Math.max(0, firstNeededItem - extraItemsBuffer);
       let last = Math.min(lastNeededItem + extraItemsBuffer, list.items.length);
 
-      if (lastRequestedRange[0] != first || lastRequestedRange[1] != last) {
+      if (lastRequestedRange === null || lastRequestedRange[0] != first || lastRequestedRange[1] != last) {
         lastRequestedRange = [first, last];
         const count = 1 + last - first;
         list.$server.setViewportRange(first, count);
