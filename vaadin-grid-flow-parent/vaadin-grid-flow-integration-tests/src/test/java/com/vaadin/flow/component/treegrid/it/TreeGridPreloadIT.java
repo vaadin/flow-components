@@ -128,7 +128,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void expandedOnSecondPage_scrollToIndex_shouldHaveItemExpanded() {
         open(Arrays.asList(70), null, 100, 1, null);
-        getTreeGrid().scrollToRow(70);
+        getTreeGrid().scrollToRowByPath(70);
         verifyRow(71, "/0/70/1/0");
     }
 
@@ -137,7 +137,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         open(Arrays.asList(70), null, 100, 1, null);
         requestCountReset.click();
 
-        getTreeGrid().scrollToRow(70);
+        getTreeGrid().scrollToRowByPath(70);
         Assert.assertEquals("1", requestCount.getValue());
     }
 

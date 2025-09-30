@@ -85,7 +85,7 @@ public class TreeGridElement extends GridElement {
      * remain stable during scrolling.
      * <p>
      * When using {@code HierarchyFormat#NESTED} data providers, the hierarchy
-     * is resolved lazily during scrolling, so flat indexes may shift as more
+     * is resolved lazily while scrolling, so flat indexes may shift as more
      * levels are discovered. With these data providers, consider using
      * {@link #scrollToRowByPath(int...)}, which targets rows by their
      * hierarchical path.
@@ -119,9 +119,10 @@ public class TreeGridElement extends GridElement {
      * If that row is expanded, it will then try to scroll to the row at index 1
      * among its children, and so forth.
      * <p>
-     * <b>NOTE:</b> This method works only with data providers that return data
-     * in {@code HierarchyFormat#NESTED}. For {@code HierarchyFormat#FLATTENED},
-     * use {@link #scrollToRowByFlatIndex(int)} with a flat index instead.
+     * <b>NOTE:</b> This method works only with tree grids using data providers
+     * that return data in {@code HierarchyFormat#NESTED}. For
+     * {@code HierarchyFormat#FLATTENED} data providers, use
+     * {@link #scrollToRowByFlatIndex(int)} with a flat index instead.
      *
      * @param path
      *            an array of indexes representing the path to the target row
@@ -172,7 +173,7 @@ public class TreeGridElement extends GridElement {
             GridColumnElement column) {
         if (!((getFirstVisibleRowIndex() <= rowFlatIndex
                 && rowFlatIndex <= getLastVisibleRowIndex()))) {
-            scrollToRow(rowFlatIndex);
+            scrollToRowByFlatIndex(rowFlatIndex);
         }
 
         GridTRElement row = getRow(rowFlatIndex);

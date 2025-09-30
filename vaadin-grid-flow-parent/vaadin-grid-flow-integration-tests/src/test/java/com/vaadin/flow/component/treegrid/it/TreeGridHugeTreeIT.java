@@ -43,20 +43,20 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         expandSecondRowButton.click();
 
-        grid.scrollToRow(0);
+        grid.scrollToRowByPath(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Dad 1/0", "Dad 1/1", "Dad 1/2", "Granddad 2", "Dad 2/0" });
 
         grid.scrollToRowByPath(300);
         collapseSecondRowButton.click();
-        grid.scrollToRow(0);
+        grid.scrollToRowByPath(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
 
         grid.scrollToRowByPath(300);
         expandSecondRowButton.click();
         collapseSecondRowButton.click();
-        grid.scrollToRow(0);
+        grid.scrollToRowByPath(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
     }
@@ -96,7 +96,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         // Scroll first root item way out of viewport and check that the key was
         // dropped
-        grid.scrollToRow(200);
+        grid.scrollToRowByPath(200);
         checkFirstRootItemKey.click();
         Assert.assertEquals(
                 "First root key was in KeyMapper when it should not be",
@@ -127,7 +127,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         for (int i = 0; i < assumedCachedSize; i++) {
             cellTexts[i] = grid.getCellWaitForRow(i, 0).getText();
         }
-        grid.scrollToRow(0);
+        grid.scrollToRowByPath(0);
         grid.collapseWithClick(1);
         grid.expandWithClick(1);
 
@@ -145,11 +145,11 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         $("button").id("expand-recursively").click();
 
         // Scroll as far as possible
-        grid.scrollToRow(1000000);
+        grid.scrollToRowByPath(1000000);
         assertExpandedNodesPopulated(grid);
 
         // Repeat
-        grid.scrollToRow(1000000);
+        grid.scrollToRowByPath(1000000);
         assertExpandedNodesPopulated(grid);
     }
 
