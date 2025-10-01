@@ -102,21 +102,17 @@ public class TabsElement extends TestBenchElement {
      */
     public List<TabElement> getTabs() {
         List<TestBenchElement> children = getChildren();
-        return children.stream()
-                .map(it -> it.wrap(TabElement.class))
-                .toList();
+        return children.stream().map(it -> it.wrap(TabElement.class)).toList();
     }
 
     /**
      * Returns the captions of all tab elements.
      *
      * @return a list of tab captions, one for every tab. Not null, may be
-     * empty.
+     *         empty.
      */
     public List<String> getTabCaptions() {
         final List<TabElement> tabElements = getTabs();
-        return tabElements.stream()
-                .map(TestBenchElement::getText)
-                .toList();
+        return tabElements.stream().map(TestBenchElement::getText).toList();
     }
 }

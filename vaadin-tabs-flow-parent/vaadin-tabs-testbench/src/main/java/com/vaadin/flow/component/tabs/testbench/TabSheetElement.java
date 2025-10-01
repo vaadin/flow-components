@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.tabs.testbench;
 
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-
-import java.util.List;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-tabsheet&gt;</code>
@@ -107,7 +107,7 @@ public class TabSheetElement extends TestBenchElement {
      * Returns the captions of all tab elements.
      *
      * @return a list of tab captions, one for every tab. Not null, may be
-     * empty.
+     *         empty.
      */
     public List<String> getTabCaptions() {
         return getTabs().getTabCaptions();
