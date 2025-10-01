@@ -18,7 +18,6 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -1124,10 +1123,6 @@ public class TreeGrid<T> extends Grid<T>
             scrollToIndex(indexPath.get(0));
         } else {
             scrollToIndex(indexPath.stream().mapToInt(i -> i).toArray());
-        }
-    }
-
-        var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
         }
     }
 }
