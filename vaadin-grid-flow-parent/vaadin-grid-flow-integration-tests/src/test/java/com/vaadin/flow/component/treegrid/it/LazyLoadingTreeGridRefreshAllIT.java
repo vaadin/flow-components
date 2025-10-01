@@ -38,7 +38,7 @@ public class LazyLoadingTreeGridRefreshAllIT extends AbstractTreeGridIT {
 
         // The row index should be larger than 100 in order to replicate the
         // issue.
-        treeGrid.scrollToRow(120);
+        treeGrid.scrollToRowByPath(120);
 
         // The count should be smaller than 100 in order to replicate the issue.
         IntegerFieldElement childCount = $(IntegerFieldElement.class)
