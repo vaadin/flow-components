@@ -32,7 +32,9 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 
 import tools.jackson.databind.JsonNode;
+import net.jcip.annotations.NotThreadSafe;
 
+@NotThreadSafe
 public class MessageListTest {
 
     private MessageList messageList;
