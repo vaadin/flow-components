@@ -93,4 +93,10 @@ public class TabSheetIT extends AbstractComponentIT {
         Assert.assertThrows(NoSuchElementException.class,
                 () -> tabSheet.getContent());
     }
+
+    @Test
+    public void getTabCaptions_shouldReturnTwoTabs() {
+        Assert.assertArrayEquals(new String[] { "Tab one", "Tab two" },
+                tabSheet.getTabCaptions().toArray());
+    }
 }

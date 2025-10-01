@@ -21,6 +21,8 @@ import org.openqa.selenium.NoSuchElementException;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
+import java.util.List;
+
 /**
  * A TestBench element representing a <code>&lt;vaadin-tabsheet&gt;</code>
  * element.
@@ -101,4 +103,13 @@ public class TabSheetElement extends TestBenchElement {
         return $(TabsElement.class).first();
     }
 
+    /**
+     * Returns the captions of all tab elements.
+     *
+     * @return a list of tab captions, one for every tab. Not null, may be
+     * empty.
+     */
+    public List<String> getTabCaptions() {
+        return getTabs().getTabCaptions();
+    }
 }
