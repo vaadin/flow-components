@@ -33,6 +33,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ModalComponent;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
@@ -729,15 +730,45 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     private void onTargetAttach(UI ui) {
+
         if (target != null) {
             if (getElement().getNode().getParent() == null) {
                 // Remove the popover from its current state tree
                 getElement().removeFromTree(false);
-                ui.addToModalComponent(this);
+                getModalParentComponent().ifPresentOrElse(modalParent -> {
+                    // Place the popover in the same context as the target
+                    getElement().removeAttribute("slot");
+                    if (target.getElement().hasAttribute("slot")) {
+                        getElement().setAttribute("slot",
+                                target.getElement().getAttribute("slot"));
+                    }
+
+                    if (modalParent instanceof HasComponents) {
+                        ((HasComponents) modalParent).add(this);
+                    } else {
+                        modalParent.getElement().appendChild(getElement());
+                    }
+                }, () -> {
+                    ui.addToModalComponent(this);
+                });
+
                 autoAddedToTheUi = true;
             }
             getElement().executeJs("this.target = $0", target.getElement());
         }
+    }
+
+    private Optional<Component> getModalParentComponent() {
+        var parent = target.getParent();
+        while (parent.isPresent()) {
+            var parentComponent = parent.get();
+            if (parentComponent.getClass()
+                    .isAnnotationPresent(ModalComponent.class)) {
+                return parent;
+            }
+            parent = parentComponent.getParent();
+        }
+        return Optional.empty();
     }
 
     /**
