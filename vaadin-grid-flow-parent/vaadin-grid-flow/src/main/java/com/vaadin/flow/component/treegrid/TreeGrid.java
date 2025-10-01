@@ -18,6 +18,7 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -956,22 +957,19 @@ public class TreeGrid<T> extends Grid<T>
      * {@link HierarchyFormat#FLATTENED}: the index refers to an item in the
      * entire flattened tree, not only the root level, allowing items at any
      * expanded level to be reached with this method.
-     * <p>
-     * If the index exceeds the valid range, scrolling stops at the last
-     * available item.
      *
      * @param index
      *            zero based index of the item to scroll to
+     * @throws IllegalArgumentException
+     *             if the path does not correspond to an item
      */
     @Override
     public void scrollToIndex(int index) {
-        getUI().ifPresent(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0);", index)));
+        doScrollToIndex(index);
     }
 
     /**
-     * Scrolls to a nested item specified by its hierarchical path.
+     * Scrolls to a nested item specified by its hierarchical path. Any collapsed parent of the item is expanded before scrolling.
      * <p>
      * The hierarchical path is an array of zero-based indexes, where each index
      * refers to a child of the item at the previous index. Scrolling continues
@@ -990,7 +988,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param path
      *            an array of indexes representing the path to the target item
      * @throws IllegalArgumentException
-     *             if the path is empty
+     *             if the path is empty or the path does not correspond to an item
      * @throws UnsupportedOperationException
      *             if the data provider uses a hierarchy format other than
      *             {@link HierarchyFormat#NESTED}
@@ -1004,17 +1002,7 @@ public class TreeGrid<T> extends Grid<T>
                             For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
                             """);
         }
-
-        if (path.length == 0) {
-            throw new IllegalArgumentException(
-                    "At least one index should be provided.");
-        }
-
-        String joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        doScrollToIndex(path);
     }
 
     @Override
@@ -1156,5 +1144,25 @@ public class TreeGrid<T> extends Grid<T>
         } else {
             scrollToIndex(indexPath);
         }
+    }
+
+    private void doScrollToIndex(int... path) {
+        if (path.length == 0) {
+            throw new IllegalArgumentException(
+                    "At least one index should be provided.");
+        }
+        var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator()).getPathItems(path);
+        if (pathItems.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "There is no item with the specified path.");
+        }
+        var ancestors = pathItems.subList(0, pathItems.size() - 1);
+        expand(ancestors);
+
+        var joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
     }
 }

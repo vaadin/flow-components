@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.treegrid;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -132,7 +133,30 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
         return ancestors;
     }
 
-    private List<Integer> getAncestorPath(List<T> ancestors) {
+    /**
+     * Gets the ordered list of items for the specified path. Returns empty if any of the items are not found.
+     *
+     * @param path
+     *            the path to get the items for
+     * @return ordered list of items for the specified path
+     */
+    public List<T> getPathItems(int... path) {
+        var dataProvider = (HierarchicalDataProvider<T, Object>) getDataProvider();
+        var pathItems = new ArrayList<T>();
+        T parent = null;
+        for (var index : path) {
+            var query = buildQuery(parent, index, 1);
+            var parentOptional = dataProvider.fetchChildren(query).findFirst();
+            if (parentOptional.isEmpty()) {
+                return Collections.emptyList();
+            }
+            parent = parentOptional.get();
+            pathItems.add(parent);
+        }
+        return pathItems;
+    }
+
+        private List<Integer> getAncestorPath(List<T> ancestors) {
         var ancestorPath = new ArrayList<Integer>();
         for (var i = 0; i < ancestors.size(); i++) {
             var ancestorIndex = getItemIndex(ancestors.get(i),
