@@ -134,7 +134,8 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     }
 
     /**
-     * Gets the ordered list of items for the specified path. Returns empty if any of the items are not found.
+     * Gets the ordered list of items for the specified path. Returns empty if
+     * any of the items are not found.
      *
      * @param path
      *            the path to get the items for

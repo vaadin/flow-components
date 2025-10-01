@@ -18,7 +18,6 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -969,7 +968,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to a nested item specified by its hierarchical path. Any collapsed parent of the item is expanded before scrolling.
+     * Scrolls to a nested item specified by its hierarchical path. Any
+     * collapsed parent of the item is expanded before scrolling.
      * <p>
      * The hierarchical path is an array of zero-based indexes, where each index
      * refers to a child of the item at the previous index. Scrolling continues
@@ -988,7 +988,8 @@ public class TreeGrid<T> extends Grid<T>
      * @param path
      *            an array of indexes representing the path to the target item
      * @throws IllegalArgumentException
-     *             if the path is empty or the path does not correspond to an item
+     *             if the path is empty or the path does not correspond to an
+     *             item
      * @throws UnsupportedOperationException
      *             if the data provider uses a hierarchy format other than
      *             {@link HierarchyFormat#NESTED}
@@ -1151,7 +1152,8 @@ public class TreeGrid<T> extends Grid<T>
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-        var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator()).getPathItems(path);
+        var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                .getPathItems(path);
         if (pathItems.isEmpty()) {
             throw new IllegalArgumentException(
                     "There is no item with the specified path.");
