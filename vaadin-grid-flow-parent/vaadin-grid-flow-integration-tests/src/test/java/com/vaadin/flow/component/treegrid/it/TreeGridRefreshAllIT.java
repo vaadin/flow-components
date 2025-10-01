@@ -56,7 +56,7 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
         getTreeGrid().expandWithClick(0);
         getTreeGrid().expandWithClick(1);
 
-        getTreeGrid().scrollToRow(100);
+        getTreeGrid().scrollToRowByPath(100);
 
         refreshAllButton.click();
 
@@ -68,11 +68,11 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
         getTreeGrid().expandWithClick(0);
         getTreeGrid().expandWithClick(1);
 
-        getTreeGrid().scrollToRow(100);
+        getTreeGrid().scrollToRowByPath(100);
 
         refreshAllButton.click();
 
-        getTreeGrid().scrollToRow(0);
+        getTreeGrid().scrollToRowByPath(0);
 
         assertCellTexts(0, 0,
                 new String[] { "0 | 0", "1 | 0", "2 | 0", "2 | 1", "2 | 2" });
@@ -95,7 +95,7 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
         TreeGridElement grid = $(TreeGridElement.class)
                 .id("grid-with-page-size");
 
-        grid.scrollToRow(20);
+        grid.scrollToRowByPath(20);
 
         grid.select(14);
 

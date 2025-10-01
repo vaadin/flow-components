@@ -62,6 +62,8 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
     grid._scrollToFlatIndex(flatIndex);
 
     delete grid.__pendingScrollToIndexes;
+
+    return flatIndex;
   };
 
   grid.__getRowLevel = function (row) {
