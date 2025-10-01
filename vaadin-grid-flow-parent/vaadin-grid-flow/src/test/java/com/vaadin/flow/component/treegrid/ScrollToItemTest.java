@@ -35,7 +35,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
-public class TreeGridScrollTest {
+public class ScrollToItemTest {
 
     private TreeGrid<CustomTestBean> treeGrid;
     private TreeData<CustomTestBean> treeData;
@@ -66,14 +66,14 @@ public class TreeGridScrollTest {
     public void nestedProvider_scrollToRootItem_scrollsToCorrectIndex() {
         setNestedProvider();
         treeGrid.scrollToItem(treeData.getRootItems().get(30));
-        assertScrolledIndexes(30);
+        assertScrolledIndex(30);
     }
 
     @Test
     public void lazyProvider_scrollToRootItem_scrollsToCorrectIndex() {
         setLazyProvider();
         treeGrid.scrollToItem(treeData.getRootItems().get(30));
-        assertScrolledIndexes(30);
+        assertScrolledIndex(30);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class TreeGridScrollTest {
         var rootItem = treeData.getRootItems().get(10);
         var firstChild = treeData.getChildren(rootItem).iterator().next();
         treeGrid.scrollToItem(firstChild);
-        assertScrolledIndex(10);
+        assertScrolledIndex(11);
     }
 
     @Test
@@ -130,27 +130,64 @@ public class TreeGridScrollTest {
         var rootItem = treeData.getRootItems().get(10);
         var firstChild = treeData.getChildren(rootItem).iterator().next();
         treeGrid.scrollToItem(firstChild);
+        Assert.assertTrue(treeGrid.isExpanded(rootItem));
         assertScrolledIndexes(10, 0);
+    }
+
+    @Test
+    public void flattenedProvider_scrollToItemWithCollapsedParent_expandsParent() {
+        setFlattenedProvider();
+        var rootItem = treeData.getRootItems().get(10);
+        Assert.assertFalse(treeGrid.isExpanded(rootItem));
+        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        treeGrid.scrollToItem(firstChild);
+        Assert.assertTrue(treeGrid.isExpanded(rootItem));
+        Assert.assertFalse(treeGrid.isExpanded(firstChild));
+    }
+
+    @Test
+    public void nestedProvider_scrollToItemWithCollapsedParent_expandsParent() {
+        setNestedProvider();
+        var rootItem = treeData.getRootItems().get(10);
+        Assert.assertFalse(treeGrid.isExpanded(rootItem));
+        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        treeGrid.scrollToItem(firstChild);
+        Assert.assertTrue(treeGrid.isExpanded(rootItem));
+        Assert.assertFalse(treeGrid.isExpanded(firstChild));
+    }
+
+    @Test
+    public void lazyProvider_scrollToItemWithCollapsedParent_expandsParent() {
+        setLazyProvider();
+        var rootItem = treeData.getRootItems().get(10);
+        Assert.assertFalse(treeGrid.isExpanded(rootItem));
+        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        treeGrid.scrollToItem(firstChild);
+        Assert.assertTrue(treeGrid.isExpanded(rootItem));
+        Assert.assertFalse(treeGrid.isExpanded(firstChild));
     }
 
     @Test
     public void flattenedProvider_scrollToMissingItem_doesNotScroll() {
         setFlattenedProvider();
-        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
+        Assert.assertThrows(IllegalArgumentException.class,
+                this::scrollToMissingItem);
         assertNotScrolled();
     }
 
     @Test
     public void nestedProvider_scrollToMissingItem_doesNotScroll() {
         setNestedProvider();
-        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
+        Assert.assertThrows(IllegalArgumentException.class,
+                this::scrollToMissingItem);
         assertNotScrolled();
     }
 
     @Test
     public void lazyProvider_scrollToMissingItem_doesNotScroll() {
         setLazyProvider();
-        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
+        Assert.assertThrows(IllegalArgumentException.class,
+                this::scrollToMissingItem);
         assertNotScrolled();
     }
 
@@ -167,7 +204,7 @@ public class TreeGridScrollTest {
         setNestedProvider();
         sortDescending();
         treeGrid.scrollToItem(getLastRootItem());
-        assertScrolledIndexes(0);
+        assertScrolledIndex(0);
     }
 
     @Test
@@ -198,6 +235,10 @@ public class TreeGridScrollTest {
 
     private void assertScrolledIndex(int scrolledIndex) {
         Mockito.verify(treeGrid, Mockito.times(1)).scrollToIndex(scrolledIndex);
+    }
+
+    private void scrollToMissingItem() {
+        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
     }
 
     private void assertNotScrolled() {

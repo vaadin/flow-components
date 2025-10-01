@@ -18,7 +18,7 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -37,7 +37,6 @@ import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
-import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -213,72 +212,6 @@ public class TreeGrid<T> extends Grid<T>
     public TreeGrid(HierarchicalDataProvider<T, ?> dataProvider) {
         this();
         setDataProvider(dataProvider);
-    }
-
-    private static class TreeGridDataCommunicator<T>
-            extends HierarchicalDataCommunicator<T> {
-        private Element element;
-
-        public TreeGridDataCommunicator(Element element,
-                CompositeDataGenerator<T> dataGenerator,
-                ArrayUpdater arrayUpdater,
-                SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            super(dataGenerator, arrayUpdater, element.getNode(),
-                    uniqueKeyProviderSupplier);
-            this.element = element;
-        }
-
-        @Override
-        public void reset() {
-            super.reset();
-            if (element != null) {
-                element.callJsFunction("$connector.reset");
-            }
-        }
-
-        @Override
-        protected List<T> preloadFlatRangeForward(int start, int length) {
-            return super.preloadFlatRangeForward(start, length);
-        }
-
-        @Override
-        protected List<T> preloadFlatRangeBackward(int start, int length) {
-            return super.preloadFlatRangeBackward(start, length);
-        }
-
-        @Override
-        protected int resolveIndexPath(int... path) {
-            return super.resolveIndexPath(path);
-        }
-
-        public List<T> getPathFromRoot(T item) {
-            var dataProvider = TreeGridDataCommunicator.this.getDataProvider();
-            var parents = new LinkedList<T>();
-            parents.push(item);
-            var parent = dataProvider.getParent(item);
-            while (parent != null) {
-                parents.push(parent);
-                parent = dataProvider.getParent(parent);
-            }
-            return parents;
-        }
-
-        public int getItemIndex(T item, T parent) {
-            var query = buildQuery(parent, 0, Integer.MAX_VALUE);
-            return ((HierarchicalDataProvider<T, Object>) TreeGridDataCommunicator.this
-                    .getDataProvider()).getItemIndex(item, query);
-        }
-
-        public int[] getIndexPath(T item) {
-            var pathFromRoot = getPathFromRoot(item);
-            var indexesToScrollTo = new int[pathFromRoot.size()];
-            indexesToScrollTo[0] = getItemIndex(pathFromRoot.get(0), null);
-            for (var i = 1; i < pathFromRoot.size(); i++) {
-                indexesToScrollTo[i] = getItemIndex(pathFromRoot.get(i),
-                        pathFromRoot.get(i - 1));
-            }
-            return indexesToScrollTo;
-        }
     }
 
     private static class TreeDataCommunicatorBuilder<T>
@@ -1160,8 +1093,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to an item within the tree. Does nothing if the item does not
-     * belong to the tree.
+     * Scrolls to an item within the tree. If the ancestors of the item are not
+     * expanded, this method expands them before scrolling.
      * <p>
      * In order to be able to use this method, the data provider should
      * implement {@link HierarchicalDataProvider#getParent(T)} and
@@ -1174,34 +1107,27 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @param item
      *            the item to scroll to
+     * @throws IllegalArgumentException
+     *             if the item does not belong to the tree
      */
     @Override
     public void scrollToItem(T item) {
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
-        if (getDataProvider().getHierarchyFormat()
-                .equals(HierarchicalDataProvider.HierarchyFormat.FLATTENED)) {
-            scrollToFlattenedIndex(item);
-        } else {
-            scrollToNestedIndexes(item);
-        }
-    }
-
-    private void scrollToFlattenedIndex(T item) {
         var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
-        var itemToScrollTo = dataCommunicator.getPathFromRoot(item).stream()
-                .filter(i -> !isExpanded(i)).findFirst().orElse(item);
-        var flattenedIndex = dataCommunicator.getItemIndex(itemToScrollTo,
-                null);
-        if (flattenedIndex != -1) {
-            scrollToIndex(flattenedIndex);
+        var ancestors = dataCommunicator.getAncestors(item);
+        expand(ancestors);
+        var indexPath = dataCommunicator.getIndexPath(item, ancestors);
+        if (indexPath.isEmpty()) {
+            throw new IllegalArgumentException("Item does not exist.");
+        }
+        if (indexPath.size() == 1) {
+            scrollToIndex(indexPath.get(0));
+        } else {
+            scrollToIndex(indexPath.stream().mapToInt(i -> i).toArray());
         }
     }
 
-    private void scrollToNestedIndexes(T item) {
-        var indexesToScrollTo = ((TreeGridDataCommunicator<T>) getDataCommunicator())
-                .getIndexPath(item);
-        if (indexesToScrollTo[0] != -1) {
-            scrollToIndex(indexesToScrollTo);
+        var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
         }
     }
 }
