@@ -18,7 +18,7 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -213,7 +213,7 @@ public class TreeGrid<T> extends Grid<T>
         this();
         setDataProvider(dataProvider);
     }
-    
+
     private static class TreeDataCommunicatorBuilder<T>
             extends DataCommunicatorBuilder<T, GridArrayUpdater> {
 
