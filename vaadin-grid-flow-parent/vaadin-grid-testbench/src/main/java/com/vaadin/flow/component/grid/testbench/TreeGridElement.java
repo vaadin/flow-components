@@ -265,7 +265,7 @@ public class TreeGridElement extends GridElement {
     /**
      * Gets the total number of rows currently known to TreeGrid.
      * <p>
-     * This method returns the accurate total number of rows across the entire
+     * This method returns the actual total number of rows across the entire
      * expanded tree only when TreeGrid uses a {@code HierarchyFormat#FLATTENED}
      * data provider.
      * <p>
