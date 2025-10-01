@@ -24,6 +24,8 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
@@ -71,6 +73,11 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * <p>
      * Accepts the list of ancestors for optimization purposes where the list
      * already exists.
+     * <p>
+     * In order to be able to use this method, the data provider should
+     * implement
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}. Any
+     * in-memory data provider implements it by default.
      *
      * @param item
      *            the item to get the index path for
@@ -104,6 +111,15 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * <p>
      * Accepts the list of ancestors for optimization purposes where the list
      * already exists.
+     * <p>
+     * In order to be able to use this method, the data provider should
+     * implement {@link HierarchicalDataProvider#getParent(T)} and
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}.
+     * <p>
+     * Any in-memory data provider implements
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)} by
+     * default. Additionally, {@link TreeDataProvider} implements
+     * {@link HierarchicalDataProvider#getParent(T)} by default.
      *
      * @param item
      *            the item to get the index path for
@@ -118,6 +134,10 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * <p>
      * Accepts the list of ancestors for optimization purposes where the list
      * already exists.
+     * <p>
+     * In order to be able to use this method, the data provider should
+     * implement {@link HierarchicalDataProvider#getParent(T)}.
+     * {@link TreeDataProvider} implements it by default.
      *
      * @param item
      *            the item to get the index path for
