@@ -41,7 +41,7 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
 
     @Test
     public void scrollDown_detach_attach_firstItemsRendered() {
-        grid.scrollToRow(150);
+        grid.scrollToRowByPath(150);
 
         toggleAttachedButton.click();
         toggleAttachedButton.click();

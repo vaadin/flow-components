@@ -128,7 +128,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void expandedOnSecondPage_scrollToIndex_shouldHaveItemExpanded() {
         open(Arrays.asList(70), null, 100, 1, null);
-        getTreeGrid().scrollToRow(70);
+        getTreeGrid().scrollToRowByPath(70);
         verifyRow(71, "/0/70/1/0");
     }
 
@@ -137,7 +137,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         open(Arrays.asList(70), null, 100, 1, null);
         requestCountReset.click();
 
-        getTreeGrid().scrollToRow(70);
+        getTreeGrid().scrollToRowByPath(70);
         Assert.assertEquals("1", requestCount.getValue());
     }
 
@@ -149,22 +149,9 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void multipleExpanded_shouldExpandWhenScrolledTo() {
         open(Arrays.asList(0, 2), null, null, null, null);
-        // Scroll to the last index
-        // TODO: Update to use getTreeGrid().scrollToRowAndWait with multiple
-        // arguments once the API is available
-        getTreeGrid().getCommandExecutor().executeScript(
-                "arguments[0].scrollToIndex(2, 2, 2, 2, 2)", getTreeGrid());
-
-        waitUntil(w -> {
-            try {
-                return getTreeGrid().getCell("/0/2/1/2/2/2/3/2/4/2") != null;
-            } catch (RuntimeException e) {
-                return false;
-            }
-        });
-
-        Assert.assertEquals("/0/2/1/2/2/2/3/2/4/2", getTreeGrid()
-                .getCell(getTreeGrid().getLastVisibleRowIndex(), 0).getText());
+        int rowIndex = getTreeGrid().scrollToRowByPath(2, 2, 2, 2, 2);
+        Assert.assertEquals("/0/2/1/2/2/2/3/2/4/2",
+                getTreeGrid().getCell(rowIndex, 0).getText());
     }
 
     @Test

@@ -54,14 +54,9 @@ public class GridElement extends TestBenchElement {
         waitUntilLoadingFinished();
     }
 
-    /**
-     * Scrolls to the row with the given flat row index.
-     *
-     * @param row
-     *            the row to scroll to
-     */
-    protected void scrollToFlatRow(int row) {
-        callFunction("_scrollToFlatIndex", row);
+    void scrollToRowByFlatIndex(int rowFlatIndex) {
+        waitUntilLoadingFinished();
+        callFunction("_scrollToFlatIndex", rowFlatIndex);
         waitUntilLoadingFinished();
     }
 
@@ -130,7 +125,7 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
         if (!isRowInView(rowIndex)) {
-            scrollToFlatRow(rowIndex);
+            scrollToRowByFlatIndex(rowIndex);
         }
 
         GridTRElement row = getRow(rowIndex);
@@ -266,7 +261,7 @@ public class GridElement extends TestBenchElement {
     public GridTRElement getRow(int rowIndex, boolean scroll)
             throws IndexOutOfBoundsException {
         if (scroll && !isRowInView(rowIndex)) {
-            scrollToFlatRow(rowIndex);
+            scrollToRowByFlatIndex(rowIndex);
         }
         var rows = getRows(rowIndex, rowIndex);
         return rows.size() == 1 ? rows.get(0) : null;
