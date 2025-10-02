@@ -18,7 +18,6 @@ package com.vaadin.flow.component.tabs;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -36,7 +35,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
 @NpmPackage(value = "@vaadin/tabs", version = "25.0.0-alpha20")
 public class Tab extends Component implements HasAriaLabel, HasComponents,
-        HasLabel, HasStyle, HasThemeVariant<TabVariant>, HasTooltip {
+        HasStyle, HasThemeVariant<TabVariant>, HasTooltip {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
 
@@ -71,7 +70,6 @@ public class Tab extends Component implements HasAriaLabel, HasComponents,
      *
      * @return the label
      */
-    @Override
     public final String getLabel() {
         return getElement().getText();
     }
@@ -82,7 +80,6 @@ public class Tab extends Component implements HasAriaLabel, HasComponents,
      * @param label
      *            the label to display
      */
-    @Override
     public final void setLabel(String label) {
         getElement().setText(label);
     }
