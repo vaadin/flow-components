@@ -275,6 +275,23 @@ public class PopoverAutoAddTest {
                 popover.getElement().hasAttribute("slot"));
     }
 
+    @Test
+    public void targetAncestorWithSlot_popoverInheritsSlotAttribute() {
+        var modal = new TestModalContainer();
+        ui.add(modal);
+        var container = new Div();
+        container.getElement().setAttribute("slot", "my-slot");
+        var target = new Div();
+        container.add(target);
+        var popover = new Popover();
+        popover.setTarget(target);
+        modal.add(container);
+        fakeClientResponse();
+
+        Assert.assertEquals("my-slot",
+                popover.getElement().getAttribute("slot"));
+    }
+
     @ModalComponent
     @Tag("div")
     public class TestModalContainer extends Component implements HasComponents {
