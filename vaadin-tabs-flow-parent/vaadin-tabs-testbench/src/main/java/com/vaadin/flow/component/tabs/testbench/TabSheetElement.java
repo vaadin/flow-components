@@ -104,7 +104,7 @@ public class TabSheetElement extends TestBenchElement {
     }
 
     /**
-     * Returns the labels of all tab elements.
+     * Returns the labels of all tab elements, in the order they appear.
      *
      * @return a list of tab labels, one for every tab. Not null, may be empty.
      */
