@@ -66,11 +66,12 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     }
 
     /**
-     * Expands and gets all ancestors of the provided item.
+     * Expands all ancestors of the item and returns the index path of it.
+     * Returns empty list if item is not found.
      *
      * @param item
-     *            the item to expand the ancestors of
-     * @return the ancestors of the item
+     *            the item to resolve
+     * @return the index path of the item
      */
     public int[] resolveItem(T item) {
         var ancestors = getAncestors(item);
