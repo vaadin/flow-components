@@ -104,12 +104,12 @@ public class TabSheetElement extends TestBenchElement {
     }
 
     /**
-     * Returns the captions of all tab elements.
+     * Returns the labels of all tab elements.
      *
-     * @return a list of tab captions, one for every tab. Not null, may be
+     * @return a list of tab labels, one for every tab. Not null, may be
      *         empty.
      */
-    public List<String> getTabCaptions() {
-        return getTabs().getTabCaptions();
+    public List<String> getTabLabels() {
+        return getTabs().getTabLabels();
     }
 }
