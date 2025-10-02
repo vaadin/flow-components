@@ -68,22 +68,17 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     }
 
     /**
-     * Ensures that the provided item and all ancestors of it are preloaded into
-     * the cache, starting from the root level, and returns the flat index of
-     * the target item.
+     * Expands all ancestors of the item and returns the index path of it.
+     * Returns empty list if item is not found.
      *
      * @param item
      *            the item to resolve
-     * @return the flat index of the target item after resolving all ancestors
+     * @return the index path of the item
      */
     public List<Integer> resolveItem(T item) {
         var ancestors = getAncestors(item);
         expand(ancestors);
-        var indexPath = getIndexPath(item, ancestors);
-        if (!indexPath.isEmpty()) {
-            resolveIndexPath(indexPath.stream().mapToInt(i -> i).toArray());
-        }
-        return indexPath;
+        return getIndexPath(item, ancestors);
     }
 
     /**
