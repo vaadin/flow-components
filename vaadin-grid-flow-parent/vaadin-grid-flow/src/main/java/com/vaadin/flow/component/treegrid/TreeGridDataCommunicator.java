@@ -68,16 +68,17 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     }
 
     /**
-     * Expands and gets all ancestors of the provided item.
+     * Expands all ancestors of the item and returns the index path of it.
+     * Returns empty list if item is not found.
      *
      * @param item
-     *            the item to expand the ancestors of
-     * @return the ancestors of the item
+     *            the item to resolve
+     * @return the index path of the item
      */
-    public List<T> expandAncestors(T item) {
+    public List<Integer> resolveItem(T item) {
         var ancestors = getAncestors(item);
         expand(ancestors);
-        return ancestors;
+        return getIndexPath(item, ancestors);
     }
 
     /**
@@ -98,7 +99,7 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      *            the ordered list of the ancestors of the item
      * @return index path for the given item
      */
-    public List<Integer> getIndexPath(T item, List<T> ancestors) {
+    private List<Integer> getIndexPath(T item, List<T> ancestors) {
         var path = new ArrayList<Integer>();
         if (getDataProvider().getHierarchyFormat()
                 .equals(HierarchicalDataProvider.HierarchyFormat.NESTED)) {
