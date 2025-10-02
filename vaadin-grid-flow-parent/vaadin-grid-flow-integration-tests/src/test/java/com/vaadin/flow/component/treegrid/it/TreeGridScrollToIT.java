@@ -114,7 +114,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     @Test
     public void scrollToIndex30_1_correctFirstVisibleItem() {
         scrollToIndexInput.sendKeys("30-1", Keys.TAB);
-        assertFirstVisibleRowContent("Granddad 30");
+        assertFirstVisibleRowContent("Dad 30/1");
     }
 
     @Test
