@@ -108,8 +108,7 @@ public class TabsElement extends TestBenchElement {
     /**
      * Returns the labels of all tab elements.
      *
-     * @return a list of tab labels, one for every tab. Not null, may be
-     *         empty.
+     * @return a list of tab labels, one for every tab. Not null, may be empty.
      */
     public List<String> getTabLabels() {
         final List<TabElement> tabElements = getTabs();
