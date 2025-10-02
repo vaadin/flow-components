@@ -660,7 +660,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         this.modality = Objects.requireNonNull(mode,
                 "ModalityMode must not be null");
         getElement().setProperty("modeless", mode == ModalityMode.MODELESS);
-        getUI().ifPresent(ui -> ui.setChildComponentModal(this, mode));
+        applyModality();
     }
 
     /**
@@ -931,9 +931,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-
-        getUI().ifPresent(ui -> ui.setChildComponentModal(this,
-                visible && isModal() ? getModality() : ModalityMode.MODELESS));
+        applyModality();
     }
 
     /**
@@ -1005,8 +1003,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private void doSetOpened(boolean opened, boolean fromClient) {
-        setModality(opened && isModal());
         getElement().setProperty("opened", opened);
+        applyModality();
         fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
@@ -1018,13 +1016,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
-    }
-
-    private void setModality(boolean modal) {
-        if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this,
-                    modal ? getModality() : ModalityMode.MODELESS));
-        }
     }
 
     /**
@@ -1137,6 +1128,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
         registerClientCloseHandler();
+        applyModality();
     }
 
     /**
@@ -1256,5 +1248,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "Dialog does not support adding styles");
+    }
+
+    private void applyModality() {
+        getUI().ifPresent(ui -> {
+            boolean modal = isOpened() && isVisible()
+                    && modality == ModalityMode.STRICT;
+            ui.setChildComponentModal(this, modal);
+        });
     }
 }
