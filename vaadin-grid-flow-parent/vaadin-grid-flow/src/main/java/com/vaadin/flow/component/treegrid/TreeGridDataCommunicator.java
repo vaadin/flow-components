@@ -75,8 +75,11 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      */
     public int[] resolveItem(T item) {
         var ancestors = getAncestors(item);
-        expand(ancestors);
-        return getIndexPath(item, ancestors);
+        var indexPath = getIndexPath(item, ancestors);
+        if (!indexPath.isEmpty()) {
+            expand(ancestors);
+        }
+        return indexPath;
     }
 
     /**
