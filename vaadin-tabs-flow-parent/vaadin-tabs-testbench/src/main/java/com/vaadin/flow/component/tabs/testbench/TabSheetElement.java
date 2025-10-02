@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.tabs.testbench;
 
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
@@ -101,4 +103,12 @@ public class TabSheetElement extends TestBenchElement {
         return $(TabsElement.class).first();
     }
 
+    /**
+     * Returns the labels of all tab elements, in the order they appear.
+     *
+     * @return a list of tab labels, one for every tab. Not null, may be empty.
+     */
+    public List<String> getTabLabels() {
+        return getTabs().getTabLabels();
+    }
 }
