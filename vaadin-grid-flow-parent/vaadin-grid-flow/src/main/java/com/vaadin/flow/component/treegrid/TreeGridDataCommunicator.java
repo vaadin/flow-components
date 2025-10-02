@@ -18,7 +18,6 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -75,7 +74,7 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      *            the item to resolve
      * @return the index path of the item
      */
-    public List<Integer> resolveItem(T item) {
+    public int[] resolveItem(T item) {
         var ancestors = getAncestors(item);
         expand(ancestors);
         return getIndexPath(item, ancestors);
@@ -99,38 +98,31 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      *            the ordered list of the ancestors of the item
      * @return index path for the given item
      */
-    private List<Integer> getIndexPath(T item, List<T> ancestors) {
+    private int[] getIndexPath(T item, List<T> ancestors) {
         var path = new ArrayList<Integer>();
         if (getDataProvider().getHierarchyFormat()
                 .equals(HierarchicalDataProvider.HierarchyFormat.NESTED)) {
-            var ancestorPathOptional = getAncestorPath(ancestors);
-            if (ancestorPathOptional.isEmpty()) {
-                return Collections.emptyList();
-            }
-            path.addAll(ancestorPathOptional.get());
+            path.addAll(getAncestorPath(ancestors));
         }
         var itemIndex = getItemIndex(item,
                 path.isEmpty() ? null : ancestors.get(ancestors.size() - 1));
         if (itemIndex == -1) {
-            return Collections.emptyList();
+            throw new IllegalArgumentException("Item does not exist.");
         }
         path.add(itemIndex);
-        return path;
+        return path.stream().mapToInt(i -> i).toArray();
     }
 
     /**
      * Gets the ordered list of ancestors for the given item.
-     * <p>
-     * Accepts the list of ancestors for optimization purposes where the list
-     * already exists.
      * <p>
      * In order to be able to use this method, the data provider should
      * implement {@link HierarchicalDataProvider#getParent(T)}.
      * {@link TreeDataProvider} implements it by default.
      *
      * @param item
-     *            the item to get the index path for
-     * @return index path for the given item
+     *            the item to get the ancestors for
+     * @return ordered list of ancestors of the given item
      */
     private List<T> getAncestors(T item) {
         var ancestors = new ArrayList<T>();
@@ -141,17 +133,17 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
         return ancestors;
     }
 
-    private Optional<List<Integer>> getAncestorPath(List<T> ancestors) {
+    private List<Integer> getAncestorPath(List<T> ancestors) {
         var ancestorPath = new ArrayList<Integer>();
         for (var i = 0; i < ancestors.size(); i++) {
             var ancestorIndex = getItemIndex(ancestors.get(i),
                     i == 0 ? null : ancestors.get(i - 1));
             if (ancestorIndex == -1) {
-                return Optional.empty();
+                throw new IllegalArgumentException("Item does not exist.");
             }
             ancestorPath.add(ancestorIndex);
         }
-        return Optional.of(ancestorPath);
+        return ancestorPath;
     }
 
     private int getItemIndex(T item, T parent) {

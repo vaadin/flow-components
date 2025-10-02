@@ -1114,13 +1114,10 @@ public class TreeGrid<T> extends Grid<T>
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
         var indexPath = ((TreeGridDataCommunicator<T>) getDataCommunicator())
                 .resolveItem(item);
-        if (indexPath.isEmpty()) {
-            throw new IllegalArgumentException("Item does not exist.");
-        }
-        if (indexPath.size() == 1) {
-            scrollToIndex(indexPath.get(0));
+        if (indexPath.length == 1) {
+            scrollToIndex(indexPath[0]);
         } else {
-            scrollToIndex(indexPath.stream().mapToInt(i -> i).toArray());
+            scrollToIndex(indexPath);
         }
     }
 }
