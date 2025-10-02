@@ -95,7 +95,7 @@ public class TabSheetIT extends AbstractComponentIT {
     }
 
     @Test
-    public void getTabCaptions_shouldReturnTwoTabs() {
+    public void getTabLabels_shouldReturnTwoTabs() {
         Assert.assertArrayEquals(new String[] { "Tab one", "Tab two" },
                 tabSheet.getTabLabels().toArray());
     }
