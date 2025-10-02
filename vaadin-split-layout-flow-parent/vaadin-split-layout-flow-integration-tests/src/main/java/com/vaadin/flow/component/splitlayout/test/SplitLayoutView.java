@@ -69,7 +69,7 @@ public class SplitLayoutView extends Div {
 
         Span message = new Span("Drag and drop the splitter");
         AtomicInteger resizeCounter = new AtomicInteger();
-        layout.addSplitterDragendListener(
+        layout.addSplitterDragEndListener(
                 event -> message.setText("SplitLayout Resized "
                         + resizeCounter.incrementAndGet() + " times."));
 
