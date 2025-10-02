@@ -68,6 +68,25 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     }
 
     /**
+     * Ensures that the provided item and all ancestors of it are preloaded into
+     * the cache, starting from the root level, and returns the flat index of
+     * the target item.
+     *
+     * @param item
+     *            the item to resolve
+     * @return the flat index of the target item after resolving all ancestors
+     */
+    public List<Integer> resolveItem(T item) {
+        var ancestors = getAncestors(item);
+        expand(ancestors);
+        var indexPath = getIndexPath(item, ancestors);
+        if (!indexPath.isEmpty()) {
+            resolveIndexPath(indexPath.stream().mapToInt(i -> i).toArray());
+        }
+        return indexPath;
+    }
+
+    /**
      * Gets the index path for the given item. Returns empty list if item is not
      * found.
      * <p>
@@ -84,9 +103,8 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * @param ancestors
      *            the ordered list of the ancestors of the item
      * @return index path for the given item
-     * @see #getIndexPath(T)
      */
-    public List<Integer> getIndexPath(T item, List<T> ancestors) {
+    private List<Integer> getIndexPath(T item, List<T> ancestors) {
         var path = new ArrayList<Integer>();
         if (getDataProvider().getHierarchyFormat()
                 .equals(HierarchicalDataProvider.HierarchyFormat.NESTED)) {
@@ -106,30 +124,6 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     }
 
     /**
-     * Gets the index path for the given item. Returns empty list if item is not
-     * found.
-     * <p>
-     * Accepts the list of ancestors for optimization purposes where the list
-     * already exists.
-     * <p>
-     * In order to be able to use this method, the data provider should
-     * implement {@link HierarchicalDataProvider#getParent(T)} and
-     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}.
-     * <p>
-     * Any in-memory data provider implements
-     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)} by
-     * default. Additionally, {@link TreeDataProvider} implements
-     * {@link HierarchicalDataProvider#getParent(T)} by default.
-     *
-     * @param item
-     *            the item to get the index path for
-     * @return index path for the given item
-     */
-    public List<Integer> getIndexPath(T item) {
-        return getIndexPath(item, getAncestors(item));
-    }
-
-    /**
      * Gets the ordered list of ancestors for the given item.
      * <p>
      * Accepts the list of ancestors for optimization purposes where the list
@@ -143,7 +137,7 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      *            the item to get the index path for
      * @return index path for the given item
      */
-    public List<T> getAncestors(T item) {
+    private List<T> getAncestors(T item) {
         var ancestors = new ArrayList<T>();
         while ((item = getDataProvider().getParent(item)) != null) {
             ancestors.add(item);
