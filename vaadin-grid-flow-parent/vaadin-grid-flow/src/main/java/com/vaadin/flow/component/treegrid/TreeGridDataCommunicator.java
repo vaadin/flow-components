@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.treegrid;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -125,11 +125,10 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * @return ordered list of ancestors of the given item
      */
     private List<T> getAncestors(T item) {
-        var ancestors = new ArrayList<T>();
+        var ancestors = new LinkedList<T>();
         while ((item = getDataProvider().getParent(item)) != null) {
-            ancestors.add(item);
+            ancestors.addFirst(item);
         }
-        Collections.reverse(ancestors);
         return ancestors;
     }
 
