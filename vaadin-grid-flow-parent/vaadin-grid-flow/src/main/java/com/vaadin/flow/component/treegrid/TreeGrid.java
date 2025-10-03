@@ -1129,7 +1129,7 @@ public class TreeGrid<T> extends Grid<T>
      * <td>HierarchyFormat.FLATTENED</td>
      * <td>false</td>
      * <td>required</td>
-     * <td>not required</td>
+     * <td>required</td>
      * </tr>
      * <tr>
      * <td>TreeDataProvider</td>
