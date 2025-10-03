@@ -344,23 +344,17 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
-     * Gets the total number of rows.
+     * Gets the total number of rows currently known to TreeGrid.
      * <p>
-     * Note that for TreeGrid this does not return reliable results if rows are
-     * expanded. Due to the lazy-loading nature of the grid, children of
-     * expanded rows are only loaded into the grid when they are scrolled into
-     * view. Likewise, they are removed again from the grid at some point when
-     * they are scrolled out of view. These child rows then only count against
-     * the total row count while they are loaded into the grid. Effectively,
-     * that means that the total row count will depend on the scroll position of
-     * the grid.
+     * This method returns the actual total number of rows across the entire
+     * expanded tree only when TreeGrid uses a {@code HierarchyFormat#FLATTENED}
+     * data provider.
      * <p>
-     * We are looking into making this more reliable by adding additional APIs
-     * to TreeGrid that would allow the component to keep track of the total
-     * number of rows just based on the expanded rows, and regardless of the
-     * scroll position. Please see
-     * <a href="https://github.com/vaadin/flow-components/issues/7269">this
-     * issue</a> for more details.
+     * For data providers that return data in {@code HierarchyFormat#NESTED},
+     * hierarchy levels are discovered lazily – only when they appear in the
+     * viewport, which makes it impossible to determine the total number of rows
+     * in advance. As a result, this method may return a lower number that will
+     * gradually increase as more expanded rows have been seen.
      *
      * @return the number of rows
      */
