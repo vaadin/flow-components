@@ -245,10 +245,7 @@ public class ScrollToItemTest {
         @Override
         public int getChildCount(
                 HierarchicalQuery<HierarchicalTestBean, Void> query) {
-            var count = query.getParentOptional().flatMap(parent -> Optional
-                    .of(internalHasChildren(parent) ? nodesPerLevel : 0));
-
-            return count.orElse(nodesPerLevel);
+            return 0;
         }
 
         @Override
