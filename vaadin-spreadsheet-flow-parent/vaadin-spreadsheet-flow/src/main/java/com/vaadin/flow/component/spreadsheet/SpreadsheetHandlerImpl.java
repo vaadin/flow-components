@@ -337,7 +337,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         for (int x = region.getFirstColumn(); x <= region
                 .getLastColumn(); x++) {
             for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
-                cells.add(new CellReference(y, x));
+                cells.add(new CellReference(
+                        spreadsheet.getActiveSheet().getSheetName(), y, x,
+                        false, false));
             }
         }
         fireCellValueChangeEvent(cells);
