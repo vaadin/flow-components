@@ -149,6 +149,11 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
         var pathItems = new ArrayList<T>();
         T parent = null;
         for (var index : path) {
+            if (index < 0) {
+                var childrenCount = dataProvider.getChildCount(
+                        buildQuery(parent, 0, Integer.MAX_VALUE));
+                index = childrenCount + index;
+            }
             var query = buildQuery(parent, index, 1);
             var childOptional = dataProvider.fetchChildren(query).findFirst();
             if (childOptional.isEmpty()) {

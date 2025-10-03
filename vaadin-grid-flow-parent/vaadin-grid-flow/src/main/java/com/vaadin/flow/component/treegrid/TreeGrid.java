@@ -959,15 +959,13 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @param index
      *            zero based index of the item to scroll to
-     * @throws IllegalArgumentException
-     *             if the path does not correspond to an item
      */
     @Override
     public void scrollToIndex(int index) {
         var itemCount = getDataCommunicator().getItemCount();
-        if (index >= itemCount) {
-            throw new IllegalArgumentException(
-                    "There is no item with the specified path.");
+        if (index >= itemCount || index < -itemCount) {
+            // The index does not correspond to an item
+            return;
         }
         doScrollToIndex(index);
     }
@@ -993,8 +991,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param path
      *            an array of indexes representing the path to the target item
      * @throws IllegalArgumentException
-     *             if the path is empty or the path does not correspond to an
-     *             item
+     *             if the path is empty
      * @throws UnsupportedOperationException
      *             if the data provider uses a hierarchy format other than
      *             {@link HierarchyFormat#NESTED}
@@ -1012,7 +1009,15 @@ public class TreeGrid<T> extends Grid<T>
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-        expandAncestors(path);
+        try {
+            var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                    .getPathItems(path);
+            var ancestors = pathItems.subList(0, pathItems.size() - 1);
+            expand(ancestors);
+        } catch (IllegalArgumentException e) {
+            // The path does not correspond to an item
+            return;
+        }
         doScrollToIndex(path);
     }
 
@@ -1163,12 +1168,5 @@ public class TreeGrid<T> extends Grid<T>
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
                         "this.scrollToIndex(" + joinedIndexes + ");")));
-    }
-
-    private void expandAncestors(int... path) {
-        var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator())
-                .getPathItems(path);
-        var ancestors = pathItems.subList(0, pathItems.size() - 1);
-        expand(ancestors);
     }
 }
