@@ -29,4 +29,12 @@ public class TabElement extends TestBenchElement {
         return !getPropertyBoolean("disabled");
     }
 
+    /**
+     * Gets the label of the tab.
+     * 
+     * @return the label of the tab
+     */
+    public String getLabel() {
+        return getText();
+    }
 }

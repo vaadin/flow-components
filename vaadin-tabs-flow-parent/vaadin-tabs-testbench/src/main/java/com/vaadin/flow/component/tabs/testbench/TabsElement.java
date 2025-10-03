@@ -85,14 +85,33 @@ public class TabsElement extends TestBenchElement {
      *         or -1 if no match was found
      */
     public int getTab(String text) {
-        List<TestBenchElement> children = getPropertyElements("children");
+        List<TabElement> children = getTabs();
         for (int i = 0; i < children.size(); i++) {
-            String tabText = children.get(i).wrap(TabElement.class).getText();
-            if (text.equals(tabText)) {
+            String tabLabel = children.get(i).getLabel();
+            if (text.equals(tabLabel)) {
                 return i;
             }
         }
         return -1;
     }
 
+    /**
+     * Returns the child tabs.
+     *
+     * @return the list of child tab elements. Not null, may be empty.
+     */
+    public List<TabElement> getTabs() {
+        List<TestBenchElement> children = getChildren();
+        return children.stream().map(it -> it.wrap(TabElement.class)).toList();
+    }
+
+    /**
+     * Returns the labels of all tab elements, in the order they appear.
+     *
+     * @return a list of tab labels, one for every tab. Not null, may be empty.
+     */
+    public List<String> getTabLabels() {
+        final List<TabElement> tabElements = getTabs();
+        return tabElements.stream().map(TabElement::getLabel).toList();
+    }
 }

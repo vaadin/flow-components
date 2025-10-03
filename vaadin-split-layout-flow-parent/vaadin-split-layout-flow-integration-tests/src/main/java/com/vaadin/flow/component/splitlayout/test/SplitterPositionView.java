@@ -60,7 +60,7 @@ public class SplitterPositionView extends Div {
 
         Span showSplitterPosition = new Span();
         showSplitterPosition.setId("showSplitterPositionJavaApi");
-        layout.addSplitterDragendListener(e -> showSplitterPosition
+        layout.addSplitterDragEndListener(e -> showSplitterPosition
                 .setText(String.valueOf(e.getSource().getSplitterPosition())));
         add(setSplitterPosition, layout, showSplitterPosition);
     }
@@ -83,7 +83,7 @@ public class SplitterPositionView extends Div {
 
         Span showSplitterPosition = new Span();
         showSplitterPosition.setId("showSplitterPositionElementApi");
-        layout.addSplitterDragendListener(e -> showSplitterPosition
+        layout.addSplitterDragEndListener(e -> showSplitterPosition
                 .setText(String.valueOf(e.getSource().getSplitterPosition())));
         add(setSplitterPosition, layout, showSplitterPosition);
     }
