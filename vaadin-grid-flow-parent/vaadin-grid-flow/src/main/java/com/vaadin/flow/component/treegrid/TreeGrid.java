@@ -48,6 +48,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -1102,37 +1103,38 @@ public class TreeGrid<T> extends Grid<T>
      * based on the data provider types.
      * <table>
      * <tr>
-     * <th>HierarchicalDataProvider</th>
+     * <th>{@link HierarchicalDataProvider}</th>
      * <th>{@link HierarchicalDataProvider#isInMemory() isInMemory()}</th>
-     * <th>getItemIndex()</th>
-     * <th>getParent()</th>
+     * <th>{@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)
+     * getItemIndex()}</th>
+     * <th>{@link HierarchicalDataProvider#getParent(T) getParent()}</th>
      * </tr>
      * <tr>
-     * <td>HierarchyFormat.NESTED</td>
+     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
      * <td>true</td>
      * <td>not required</td>
      * <td>required</td>
      * </tr>
      * <tr>
-     * <td>HierarchyFormat.NESTED</td>
+     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
      * <td>false</td>
      * <td>required</td>
      * <td>required</td>
      * </tr>
      * <tr>
-     * <td>HierarchyFormat.FLATTENED</td>
+     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
      * <td>true</td>
      * <td>not required</td>
      * <td>required</td>
      * </tr>
      * <tr>
-     * <td>HierarchyFormat.FLATTENED</td>
+     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
      * <td>false</td>
      * <td>required</td>
      * <td>required</td>
      * </tr>
      * <tr>
-     * <td>TreeDataProvider</td>
+     * <td>{@link TreeDataProvider}</td>
      * <td>true</td>
      * <td>not required</td>
      * <td>not required</td>
