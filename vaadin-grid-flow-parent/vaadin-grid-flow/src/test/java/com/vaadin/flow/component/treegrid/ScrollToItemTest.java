@@ -250,7 +250,7 @@ public class ScrollToItemTest {
 
         @Override
         public boolean hasChildren(HierarchicalTestBean item) {
-            return internalHasChildren(item);
+            return false;
         }
 
         private boolean internalHasChildren(HierarchicalTestBean node) {
