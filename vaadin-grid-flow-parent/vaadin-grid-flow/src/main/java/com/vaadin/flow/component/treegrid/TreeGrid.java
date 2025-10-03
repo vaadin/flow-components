@@ -956,22 +956,23 @@ public class TreeGrid<T> extends Grid<T>
      * {@link HierarchyFormat#FLATTENED}: the index refers to an item in the
      * entire flattened tree, not only the root level, allowing items at any
      * expanded level to be reached with this method.
-     * <p>
-     * If the index exceeds the valid range, scrolling stops at the last
-     * available item.
      *
      * @param index
      *            zero based index of the item to scroll to
      */
     @Override
     public void scrollToIndex(int index) {
-        getUI().ifPresent(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0);", index)));
+        var itemCount = getDataCommunicator().getItemCount();
+        if (index >= itemCount || index < -itemCount) {
+            // The index does not correspond to an item
+            return;
+        }
+        doScrollToIndex(index);
     }
 
     /**
-     * Scrolls to a nested item specified by its hierarchical path.
+     * Scrolls to a nested item specified by its hierarchical path. Any
+     * collapsed parent of the item is expanded before scrolling.
      * <p>
      * The hierarchical path is an array of zero-based indexes, where each index
      * refers to a child of the item at the previous index. Scrolling continues
@@ -1004,24 +1005,27 @@ public class TreeGrid<T> extends Grid<T>
                             For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
                             """);
         }
-
         if (path.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-
-        String joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        try {
+            var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                    .getPathItems(path);
+            var ancestors = pathItems.subList(0, pathItems.size() - 1);
+            expand(ancestors);
+        } catch (IllegalArgumentException e) {
+            // The path does not correspond to an item
+            return;
+        }
+        doScrollToIndex(path);
     }
 
     @Override
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(...Array(10).fill(-1))")));
+        var indexes = new int[10];
+        Arrays.fill(indexes, -1);
+        doScrollToIndex(indexes);
     }
 
     /**
@@ -1156,5 +1160,13 @@ public class TreeGrid<T> extends Grid<T>
         } else {
             scrollToIndex(indexPath);
         }
+    }
+
+    private void doScrollToIndex(int... path) {
+        var joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
     }
 }

@@ -97,6 +97,8 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * @param ancestors
      *            the ordered list of the ancestors of the item
      * @return index path for the given item
+     * @throws IllegalArgumentException
+     *             if the item does not exist
      */
     private int[] getIndexPath(T item, List<T> ancestors) {
         var path = new ArrayList<Integer>();
@@ -130,6 +132,38 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
             ancestors.addFirst(item);
         }
         return ancestors;
+    }
+
+    /**
+     * Gets the ordered list of items for the specified path. Returns empty if
+     * any of the items are not found.
+     *
+     * @param path
+     *            the path to get the items for
+     * @return ordered list of items for the specified path
+     * @throws IllegalArgumentException
+     *             if the path does not correspond to an item
+     */
+    public List<T> getPathItems(int... path) {
+        var dataProvider = (HierarchicalDataProvider<T, Object>) getDataProvider();
+        var pathItems = new ArrayList<T>();
+        T parent = null;
+        for (var index : path) {
+            if (index < 0) {
+                var childrenCount = dataProvider.getChildCount(
+                        buildQuery(parent, 0, Integer.MAX_VALUE));
+                index = childrenCount + index;
+            }
+            var query = buildQuery(parent, index, 1);
+            var childOptional = dataProvider.fetchChildren(query).findFirst();
+            if (childOptional.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "There is no item with the specified path.");
+            }
+            parent = childOptional.get();
+            pathItems.add(parent);
+        }
+        return pathItems;
     }
 
     private List<Integer> getAncestorPath(List<T> ancestors) {
