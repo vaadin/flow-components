@@ -964,6 +964,11 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Override
     public void scrollToIndex(int index) {
+        var itemCount = getDataCommunicator().getItemCount();
+        if (index >= itemCount) {
+            throw new IllegalArgumentException(
+                    "There is no item with the specified path.");
+        }
         doScrollToIndex(index);
     }
 
