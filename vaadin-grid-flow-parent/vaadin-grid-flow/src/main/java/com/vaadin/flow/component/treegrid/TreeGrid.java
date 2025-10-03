@@ -1103,7 +1103,7 @@ public class TreeGrid<T> extends Grid<T>
      * <table>
      * <tr>
      * <th>HierarchicalDataProvider</th>
-     * <th>isInMemory()</th>
+     * <th>{@link HierarchicalDataProvider#isInMemory() isInMemory()}</th>
      * <th>getItemIndex()</th>
      * <th>getParent()</th>
      * </tr>
