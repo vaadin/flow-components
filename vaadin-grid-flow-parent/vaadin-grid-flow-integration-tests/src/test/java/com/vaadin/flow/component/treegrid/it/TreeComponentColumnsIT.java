@@ -98,7 +98,7 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         var rowHeight = compThenGrid.getRow(1).getSize().getHeight();
         compThenGrid.expandWithClick(0);
         compThenGrid.expandWithClick(1);
-        compThenGrid.scrollToRow(104);
+        compThenGrid.scrollToRowByPath(104);
 
         var visibleRows = compThenGrid.getVisibleRows();
         Assert.assertFalse(visibleRows.isEmpty());

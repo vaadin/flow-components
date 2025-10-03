@@ -30,14 +30,12 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
-import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -50,6 +48,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -212,43 +211,6 @@ public class TreeGrid<T> extends Grid<T>
     public TreeGrid(HierarchicalDataProvider<T, ?> dataProvider) {
         this();
         setDataProvider(dataProvider);
-    }
-
-    private static class TreeGridDataCommunicator<T>
-            extends HierarchicalDataCommunicator<T> {
-        private Element element;
-
-        public TreeGridDataCommunicator(Element element,
-                CompositeDataGenerator<T> dataGenerator,
-                ArrayUpdater arrayUpdater,
-                SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            super(dataGenerator, arrayUpdater, element.getNode(),
-                    uniqueKeyProviderSupplier);
-            this.element = element;
-        }
-
-        @Override
-        public void reset() {
-            super.reset();
-            if (element != null) {
-                element.callJsFunction("$connector.reset");
-            }
-        }
-
-        @Override
-        protected List<T> preloadFlatRangeForward(int start, int length) {
-            return super.preloadFlatRangeForward(start, length);
-        }
-
-        @Override
-        protected List<T> preloadFlatRangeBackward(int start, int length) {
-            return super.preloadFlatRangeBackward(start, length);
-        }
-
-        @Override
-        protected int resolveIndexPath(int... path) {
-            return super.resolveIndexPath(path);
-        }
     }
 
     private static class TreeDataCommunicatorBuilder<T>
@@ -994,22 +956,23 @@ public class TreeGrid<T> extends Grid<T>
      * {@link HierarchyFormat#FLATTENED}: the index refers to an item in the
      * entire flattened tree, not only the root level, allowing items at any
      * expanded level to be reached with this method.
-     * <p>
-     * If the index exceeds the valid range, scrolling stops at the last
-     * available item.
      *
      * @param index
      *            zero based index of the item to scroll to
      */
     @Override
     public void scrollToIndex(int index) {
-        getUI().ifPresent(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0);", index)));
+        var itemCount = getDataCommunicator().getItemCount();
+        if (index >= itemCount || index < -itemCount) {
+            // The index does not correspond to an item
+            return;
+        }
+        doScrollToIndex(index);
     }
 
     /**
-     * Scrolls to a nested item specified by its hierarchical path.
+     * Scrolls to a nested item specified by its hierarchical path. Any
+     * collapsed parent of the item is expanded before scrolling.
      * <p>
      * The hierarchical path is an array of zero-based indexes, where each index
      * refers to a child of the item at the previous index. Scrolling continues
@@ -1042,24 +1005,27 @@ public class TreeGrid<T> extends Grid<T>
                             For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
                             """);
         }
-
         if (path.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-
-        String joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        try {
+            var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                    .getPathItems(path);
+            var ancestors = pathItems.subList(0, pathItems.size() - 1);
+            expand(ancestors);
+        } catch (IllegalArgumentException e) {
+            // The path does not correspond to an item
+            return;
+        }
+        doScrollToIndex(path);
     }
 
     @Override
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(...Array(10).fill(-1))")));
+        var indexes = new int[10];
+        Arrays.fill(indexes, -1);
+        doScrollToIndex(indexes);
     }
 
     /**
@@ -1102,7 +1068,7 @@ public class TreeGrid<T> extends Grid<T>
         // page-aligned.
         dataCommunicator.preloadFlatRangeForward(flatIndex, padding + pageSize);
 
-        // Repeat the process backward to preload enough items behing the
+        // Repeat the process backward to preload enough items behind the
         // resolved flat index. Adding the page size is essential. Without it,
         // the following call to dataCommunicator.setViewportRange will try to
         // load uncovered expanded items forward, shifting the range and causing
@@ -1130,21 +1096,77 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * TreeGrid does not support scrolling to a given item. Use
-     * {@link #scrollToIndex(int...)} instead.
+     * Scrolls to an item within the tree. If the ancestors of the item are not
+     * expanded, this method expands them before scrolling. Does not fire any
+     * {@link ExpandEvent}s for the ancestors expanded during scrolling.
      * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
+     * In order to be able to use this method, the data provider should
+     * implement {@link HierarchicalDataProvider#getParent(T)} and
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}. The
+     * following table shows which methods have to be explicitly implemented
+     * based on the data provider types.
+     * <table>
+     * <tr>
+     * <th>HierarchicalDataProvider</th>
+     * <th>{@link HierarchicalDataProvider#isInMemory() isInMemory()}</th>
+     * <th>{@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)
+     * getItemIndex()}</th>
+     * <th>{@link HierarchicalDataProvider#getParent(T) getParent()}</th>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
+     * <td>false</td>
+     * <td>required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
+     * <td>false</td>
+     * <td>required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link TreeDataProvider}</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>not required</td>
+     * </tr>
+     * </table>
      *
      * @param item
      *            the item to scroll to
-     * @deprecated
+     * @throws IllegalArgumentException
+     *             if the item does not belong to the tree
      */
-    @Deprecated
     @Override
     public void scrollToItem(T item) {
-        throw new UnsupportedOperationException(
-                "scrollToItem method is not supported in TreeGrid");
+        Objects.requireNonNull(item, "Item to scroll to cannot be null.");
+        var indexPath = ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                .resolveItem(item);
+        if (indexPath.length == 1) {
+            scrollToIndex(indexPath[0]);
+        } else {
+            scrollToIndex(indexPath);
+        }
+    }
+
+    private void doScrollToIndex(int... path) {
+        var joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
     }
 }
