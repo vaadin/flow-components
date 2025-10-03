@@ -260,7 +260,7 @@ public class ScrollToItemTest {
         @Override
         protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
                 HierarchicalQuery<HierarchicalTestBean, Void> query) {
-            var queryDepth = query.getParentOptional().isPresent()
+            return Stream.empty();
                     ? query.getParent().getDepth() + 1
                     : 0;
             var parentKey = query.getParentOptional()
