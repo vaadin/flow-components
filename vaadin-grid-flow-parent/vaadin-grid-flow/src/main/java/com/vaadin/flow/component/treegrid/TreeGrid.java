@@ -964,7 +964,6 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Override
     public void scrollToIndex(int index) {
-        expandAncestors(index);
         doScrollToIndex(index);
     }
 
