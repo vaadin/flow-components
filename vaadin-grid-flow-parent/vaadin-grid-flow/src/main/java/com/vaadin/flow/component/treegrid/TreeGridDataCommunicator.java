@@ -157,7 +157,7 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
         return pathItems;
     }
 
-        private List<Integer> getAncestorPath(List<T> ancestors) {
+    private List<Integer> getAncestorPath(List<T> ancestors) {
         var ancestorPath = new ArrayList<Integer>();
         for (var i = 0; i < ancestors.size(); i++) {
             var ancestorIndex = getItemIndex(ancestors.get(i),
