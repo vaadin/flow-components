@@ -32,6 +32,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -733,7 +734,21 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
             if (getElement().getNode().getParent() == null) {
                 // Remove the popover from its current state tree
                 getElement().removeFromTree(false);
-                ui.addToModalComponent(this);
+
+                // Check if target is inside a Dialog component
+                Dialog dialog = target.findAncestor(Dialog.class);
+                if (dialog != null) {
+                    // In modal contexts, append to target's parent to ensure
+                    // proper DOM structure
+                    // and maintain backward compatibility for existing
+                    // applications
+                    target.getElement().getParent().appendChild(getElement());
+                } else {
+                    // In non-modal contexts, use UI modal container to enable
+                    // proper cleanup
+                    // when components are removed via removeAll()
+                    ui.addToModalComponent(this);
+                }
                 autoAddedToTheUi = true;
             }
             getElement().executeJs("this.target = $0", target.getElement());
