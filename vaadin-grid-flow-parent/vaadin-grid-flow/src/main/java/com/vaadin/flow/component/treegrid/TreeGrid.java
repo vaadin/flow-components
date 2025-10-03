@@ -48,7 +48,6 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -1098,12 +1097,47 @@ public class TreeGrid<T> extends Grid<T>
      * <p>
      * In order to be able to use this method, the data provider should
      * implement {@link HierarchicalDataProvider#getParent(T)} and
-     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}.
-     * <p>
-     * Any in-memory data provider implements
-     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)} by
-     * default. Additionally, {@link TreeDataProvider} implements
-     * {@link HierarchicalDataProvider#getParent(T)} by default.
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}. The
+     * following table shows which methods have to be explicitly implemented
+     * based on the data provider types.
+     * <table>
+     * <tr>
+     * <th>DataProvider</th>
+     * <th>In-memory</th>
+     * <th>getItemIndex()</th>
+     * <th>getParent()</th>
+     * </tr>
+     * <tr>
+     * <td>HierarchyFormat.NESTED</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>HierarchyFormat.NESTED</td>
+     * <td>false</td>
+     * <td>required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>HierarchyFormat.FLATTENED</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>not required</td>
+     * </tr>
+     * <tr>
+     * <td>HierarchyFormat.FLATTENED</td>
+     * <td>false</td>
+     * <td>required</td>
+     * <td>not required</td>
+     * </tr>
+     * <tr>
+     * <td>TreeDataProvider</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>not required</td>
+     * </tr>
+     * </table>
      *
      * @param item
      *            the item to scroll to
