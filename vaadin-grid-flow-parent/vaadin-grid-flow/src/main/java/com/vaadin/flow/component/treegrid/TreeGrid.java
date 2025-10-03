@@ -1102,7 +1102,7 @@ public class TreeGrid<T> extends Grid<T>
      * based on the data provider types.
      * <table>
      * <tr>
-     * <th>DataProvider</th>
+     * <th>HierarchicalDataProvider</th>
      * <th>isInMemory()</th>
      * <th>getItemIndex()</th>
      * <th>getParent()</th>
