@@ -37,193 +37,155 @@ import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
 public class ScrollToItemTest {
 
-    private TreeGrid<CustomTestBean> treeGrid;
-    private TreeData<CustomTestBean> treeData;
+    private TreeGrid<HierarchicalTestBean> treeGrid;
+    private TreeData<HierarchicalTestBean> treeData;
 
     @Before
     public void init() {
         treeGrid = Mockito.spy(new TreeGrid<>());
-        treeGrid.addHierarchyColumn(CustomTestBean::getIndex).setSortable(true);
+        treeGrid.addHierarchyColumn(HierarchicalTestBean::getIndex)
+                .setSortable(true);
         treeGrid.setPageSize(50);
         treeData = getTreeData();
     }
 
     @Test
-    public void setCustomProviderWithoutMethodImpl_scrollToItem_unsupportedOperationExceptionThrown() {
-        treeGrid.setDataProvider(new LazyDataProviderWithoutMethodImpl(100, 3));
+    public void setProviderWithoutMethodImpl_scrollToItem_unsupportedOperationExceptionThrown() {
+        treeGrid.setDataProvider(new DataProviderWithoutMethodImpl(100, 3));
         Assert.assertThrows(UnsupportedOperationException.class, () -> treeGrid
-                .scrollToItem(new CustomTestBean("", 0, 0, null)));
+                .scrollToItem(new HierarchicalTestBean("", 0, 0)));
     }
 
     @Test
-    public void flattenedProvider_scrollToRootItem_scrollsToCorrectIndex() {
-        setFlattenedProvider();
+    public void treeDataProvider_flattenedHierarchyFormat_scrollToRootItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         treeGrid.scrollToItem(treeData.getRootItems().get(30));
         assertScrolledIndex(30);
     }
 
     @Test
-    public void nestedProvider_scrollToRootItem_scrollsToCorrectIndex() {
-        setNestedProvider();
+    public void treeDataProvider_nestedHierarchyFormat_scrollToRootItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
         treeGrid.scrollToItem(treeData.getRootItems().get(30));
         assertScrolledIndex(30);
     }
 
     @Test
-    public void lazyProvider_scrollToRootItem_scrollsToCorrectIndex() {
-        setLazyProvider();
-        treeGrid.scrollToItem(treeData.getRootItems().get(30));
-        assertScrolledIndex(30);
-    }
-
-    @Test
-    public void flattenedProvider_scrollToExpandedChildItem_scrollsToCorrectIndex() {
-        setFlattenedProvider();
+    public void treeDataProvider_flattenedHierarchyFormat_scrollToExpandedChildItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         var rootItem = treeData.getRootItems().get(10);
         treeGrid.expand(rootItem);
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
         assertScrolledIndex(11);
     }
 
     @Test
-    public void nestedProvider_scrollToExpandedChildItem_scrollsToCorrectIndex() {
-        setNestedProvider();
+    public void treeDataProvider_nestedHierarchyFormat_scrollToExpandedChildItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
         var rootItem = treeData.getRootItems().get(10);
         treeGrid.expand(rootItem);
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
         assertScrolledIndexes(10, 0);
     }
 
     @Test
-    public void lazyProvider_scrollToExpandedChildItem_scrollsToCorrectIndex() {
-        setLazyProvider();
+    public void treeDataProvider_flattenedHierarchyFormat_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         var rootItem = treeData.getRootItems().get(10);
-        treeGrid.expand(rootItem);
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
-        treeGrid.scrollToItem(firstChild);
-        assertScrolledIndexes(10, 0);
-    }
-
-    @Test
-    public void flattenedProvider_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
-        setFlattenedProvider();
-        var rootItem = treeData.getRootItems().get(10);
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
         assertScrolledIndex(11);
     }
 
     @Test
-    public void nestedProvider_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
-        setNestedProvider();
+    public void treeDataProvider_nestedHierarchyFormat_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
         var rootItem = treeData.getRootItems().get(10);
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
         assertScrolledIndexes(10, 0);
     }
 
     @Test
-    public void lazyProvider_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
-        setLazyProvider();
-        var rootItem = treeData.getRootItems().get(10);
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
-        treeGrid.scrollToItem(firstChild);
-        Assert.assertTrue(treeGrid.isExpanded(rootItem));
-        assertScrolledIndexes(10, 0);
-    }
-
-    @Test
-    public void flattenedProvider_scrollToItemWithCollapsedParent_expandsParent() {
-        setFlattenedProvider();
+    public void treeDataProvider_flattenedHierarchyFormat_scrollToItemWithCollapsedParent_expandsParent() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         var rootItem = treeData.getRootItems().get(10);
         Assert.assertFalse(treeGrid.isExpanded(rootItem));
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
         Assert.assertTrue(treeGrid.isExpanded(rootItem));
         Assert.assertFalse(treeGrid.isExpanded(firstChild));
     }
 
     @Test
-    public void nestedProvider_scrollToItemWithCollapsedParent_expandsParent() {
-        setNestedProvider();
+    public void treeDataProvider_nestedHierarchyFormat_scrollToItemWithCollapsedParent_expandsParent() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
         var rootItem = treeData.getRootItems().get(10);
         Assert.assertFalse(treeGrid.isExpanded(rootItem));
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
+        var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
         Assert.assertTrue(treeGrid.isExpanded(rootItem));
         Assert.assertFalse(treeGrid.isExpanded(firstChild));
     }
 
     @Test
-    public void lazyProvider_scrollToItemWithCollapsedParent_expandsParent() {
-        setLazyProvider();
-        var rootItem = treeData.getRootItems().get(10);
-        Assert.assertFalse(treeGrid.isExpanded(rootItem));
-        var firstChild = treeData.getChildren(rootItem).iterator().next();
-        treeGrid.scrollToItem(firstChild);
-        Assert.assertTrue(treeGrid.isExpanded(rootItem));
-        Assert.assertFalse(treeGrid.isExpanded(firstChild));
-    }
-
-    @Test
-    public void flattenedProvider_scrollToMissingItem_doesNotScroll() {
-        setFlattenedProvider();
+    public void treeDataProvider_flattenedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         Assert.assertThrows(IllegalArgumentException.class,
                 this::scrollToMissingItem);
         assertNotScrolled();
     }
 
     @Test
-    public void nestedProvider_scrollToMissingItem_doesNotScroll() {
-        setNestedProvider();
+    public void treeDataProvider_nestedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
         Assert.assertThrows(IllegalArgumentException.class,
                 this::scrollToMissingItem);
         assertNotScrolled();
     }
 
     @Test
-    public void lazyProvider_scrollToMissingItem_doesNotScroll() {
-        setLazyProvider();
-        Assert.assertThrows(IllegalArgumentException.class,
-                this::scrollToMissingItem);
-        assertNotScrolled();
-    }
-
-    @Test
-    public void flattenedProvider_reverseSort_scrollToItem_scrollsToCorrectIndex() {
-        setFlattenedProvider();
+    public void treeDataProvider_flattenedHierarchyFormat_reverseSort_scrollToItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         sortDescending();
-        treeGrid.scrollToItem(getLastRootItem());
+        treeGrid.scrollToItem(treeData.getRootItems().getLast());
         assertScrolledIndex(0);
     }
 
     @Test
-    public void nestedProvider_reverseSort_scrollToItem_scrollsToCorrectIndex() {
-        setNestedProvider();
+    public void treeDataProvider_nestedHierarchyFormat_reverseSort_scrollToItem_scrollsToCorrectIndex() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
         sortDescending();
-        treeGrid.scrollToItem(getLastRootItem());
+        treeGrid.scrollToItem(treeData.getRootItems().getLast());
         assertScrolledIndex(0);
     }
 
     @Test
-    public void flattenedProvider_scrollToItem_nullItem_nullPointerExceptionThrown() {
-        setFlattenedProvider();
+    public void treeDataProvider_flattenedHierarchyFormat_scrollToItem_nullItem_nullPointerExceptionThrown() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         Assert.assertThrows(NullPointerException.class,
                 () -> treeGrid.scrollToItem(null));
     }
 
     @Test
-    public void nestedProvider_scrollToItem_nullItem_nullPointerExceptionThrown() {
-        setNestedProvider();
-        Assert.assertThrows(NullPointerException.class,
-                () -> treeGrid.scrollToItem(null));
-    }
-
-    @Test
-    public void lazyProvider_scrollToItem_nullItem_nullPointerExceptionThrown() {
-        setLazyProvider();
+    public void treeDataProvider_nestedHierarchyFormat_scrollToItem_nullItem_nullPointerExceptionThrown() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
         Assert.assertThrows(NullPointerException.class,
                 () -> treeGrid.scrollToItem(null));
     }
@@ -238,102 +200,51 @@ public class ScrollToItemTest {
     }
 
     private void scrollToMissingItem() {
-        treeGrid.scrollToItem(new CustomTestBean("NOT PRESENT", -2, -2, null));
+        treeGrid.scrollToItem(new HierarchicalTestBean("NOT PRESENT", -2, -2));
     }
 
     private void assertNotScrolled() {
         Mockito.verify(treeGrid, Mockito.times(0)).scrollToIndex(Mockito.any());
     }
 
-    private CustomTestBean getLastRootItem() {
-        var rootItems = treeData.getRootItems();
-        return rootItems.get(rootItems.size() - 1);
-    }
-
     private void sortDescending() {
-        var column = treeGrid.getColumns().get(0);
+        var column = treeGrid.getColumns().getFirst();
         treeGrid.sort(
                 List.of(new GridSortOrder<>(column, SortDirection.DESCENDING)));
     }
 
-    private void setFlattenedProvider() {
-        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
-                HierarchicalDataProvider.HierarchyFormat.FLATTENED));
-    }
-
-    private void setNestedProvider() {
-        treeGrid.setDataProvider(new TreeDataProvider<>(treeData));
-    }
-
-    private void setLazyProvider() {
-        treeGrid.setDataProvider(new LazyDataProvider(100, 3));
-    }
-
-    private static TreeData<CustomTestBean> getTreeData() {
+    private static TreeData<HierarchicalTestBean> getTreeData() {
         var depth = 2;
         var rootItemCount = 50;
         var childItemCountPerRootItem = 10;
-        var treeData = new TreeData<CustomTestBean>();
+        var treeData = new TreeData<HierarchicalTestBean>();
         var rootItems = IntStream.range(0, rootItemCount)
-                .mapToObj(i -> new CustomTestBean(null, 0, i, null));
+                .mapToObj(i -> new HierarchicalTestBean(null, 0, i));
         treeData.addItems(rootItems, parent -> {
             if (parent.getDepth() >= depth - 1) {
                 return Stream.empty();
             }
             return IntStream.range(0, childItemCountPerRootItem)
-                    .mapToObj(i -> new CustomTestBean(parent.getId(),
-                            parent.getDepth() + 1, i, parent));
+                    .mapToObj(i -> new HierarchicalTestBean(parent.getId(),
+                            parent.getDepth() + 1, i));
         });
         return treeData;
     }
 
-    private static class CustomTestBean extends HierarchicalTestBean {
-        private final CustomTestBean parent;
-
-        public CustomTestBean(String id, int depth, int index,
-                CustomTestBean parent) {
-            super(id, depth, index);
-            this.parent = parent;
-        }
-
-        public CustomTestBean getParent() {
-            return parent;
-        }
-    }
-
-    private static class LazyDataProvider
-            extends LazyDataProviderWithoutMethodImpl {
-
-        public LazyDataProvider(int nodesPerLevel, int depth) {
-            super(nodesPerLevel, depth);
-        }
-
-        @Override
-        public int getItemIndex(CustomTestBean item,
-                HierarchicalQuery<CustomTestBean, Void> query) {
-            return item.getIndex() < 0 ? -1 : item.getIndex();
-        }
-
-        @Override
-        public CustomTestBean getParent(CustomTestBean item) {
-            return item.getParent();
-        }
-    }
-
-    private static class LazyDataProviderWithoutMethodImpl extends
-            AbstractBackEndHierarchicalDataProvider<CustomTestBean, Void> {
+    private static class DataProviderWithoutMethodImpl extends
+            AbstractBackEndHierarchicalDataProvider<HierarchicalTestBean, Void> {
 
         private final int nodesPerLevel;
         private final int depth;
 
-        public LazyDataProviderWithoutMethodImpl(int nodesPerLevel, int depth) {
+        public DataProviderWithoutMethodImpl(int nodesPerLevel, int depth) {
             this.nodesPerLevel = nodesPerLevel;
             this.depth = depth;
         }
 
         @Override
         public int getChildCount(
-                HierarchicalQuery<CustomTestBean, Void> query) {
+                HierarchicalQuery<HierarchicalTestBean, Void> query) {
             var count = query.getParentOptional().flatMap(parent -> Optional
                     .of(internalHasChildren(parent) ? nodesPerLevel : 0));
 
@@ -341,27 +252,27 @@ public class ScrollToItemTest {
         }
 
         @Override
-        public boolean hasChildren(CustomTestBean item) {
+        public boolean hasChildren(HierarchicalTestBean item) {
             return internalHasChildren(item);
         }
 
-        private boolean internalHasChildren(CustomTestBean node) {
+        private boolean internalHasChildren(HierarchicalTestBean node) {
             return node.getDepth() < depth;
         }
 
         @Override
-        protected Stream<CustomTestBean> fetchChildrenFromBackEnd(
-                HierarchicalQuery<CustomTestBean, Void> query) {
+        protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
+                HierarchicalQuery<HierarchicalTestBean, Void> query) {
             var queryDepth = query.getParentOptional().isPresent()
                     ? query.getParent().getDepth() + 1
                     : 0;
             var parentKey = query.getParentOptional()
                     .flatMap(parent -> Optional.of(parent.getId()));
-            var list = new ArrayList<CustomTestBean>();
+            var list = new ArrayList<HierarchicalTestBean>();
             var limit = Math.min(query.getLimit(), nodesPerLevel);
             for (var i = 0; i < limit; i++) {
-                list.add(new CustomTestBean(parentKey.orElse(null), queryDepth,
-                        i + query.getOffset(), query.getParent()));
+                list.add(new HierarchicalTestBean(parentKey.orElse(null),
+                        queryDepth, i + query.getOffset()));
             }
             return list.stream();
         }
