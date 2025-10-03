@@ -1014,9 +1014,9 @@ public class TreeGrid<T> extends Grid<T>
 
     @Override
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(...Array(10).fill(-1))")));
+        var indexes = new int[10];
+        Arrays.fill(indexes, -1);
+        doScrollToIndex(indexes);
     }
 
     /**
