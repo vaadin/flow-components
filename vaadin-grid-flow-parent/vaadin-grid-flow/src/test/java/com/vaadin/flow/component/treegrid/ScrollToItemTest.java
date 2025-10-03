@@ -15,9 +15,7 @@
  */
 package com.vaadin.flow.component.treegrid;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -51,7 +49,7 @@ public class ScrollToItemTest {
 
     @Test
     public void setProviderWithoutMethodImpl_scrollToItem_unsupportedOperationExceptionThrown() {
-        treeGrid.setDataProvider(new DataProviderWithoutMethodImpl(100, 3));
+        treeGrid.setDataProvider(new DataProviderWithoutMethodImpl());
         Assert.assertThrows(UnsupportedOperationException.class, () -> treeGrid
                 .scrollToItem(new HierarchicalTestBean("", 0, 0)));
     }
@@ -234,14 +232,6 @@ public class ScrollToItemTest {
     private static class DataProviderWithoutMethodImpl extends
             AbstractBackEndHierarchicalDataProvider<HierarchicalTestBean, Void> {
 
-        private final int nodesPerLevel;
-        private final int depth;
-
-        public DataProviderWithoutMethodImpl(int nodesPerLevel, int depth) {
-            this.nodesPerLevel = nodesPerLevel;
-            this.depth = depth;
-        }
-
         @Override
         public int getChildCount(
                 HierarchicalQuery<HierarchicalTestBean, Void> query) {
@@ -253,25 +243,10 @@ public class ScrollToItemTest {
             return false;
         }
 
-        private boolean internalHasChildren(HierarchicalTestBean node) {
-            return node.getDepth() < depth;
-        }
-
         @Override
         protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
                 HierarchicalQuery<HierarchicalTestBean, Void> query) {
             return Stream.empty();
-                    ? query.getParent().getDepth() + 1
-                    : 0;
-            var parentKey = query.getParentOptional()
-                    .flatMap(parent -> Optional.of(parent.getId()));
-            var list = new ArrayList<HierarchicalTestBean>();
-            var limit = Math.min(query.getLimit(), nodesPerLevel);
-            for (var i = 0; i < limit; i++) {
-                list.add(new HierarchicalTestBean(parentKey.orElse(null),
-                        queryDepth, i + query.getOffset()));
-            }
-            return list.stream();
         }
     }
 }
