@@ -1093,7 +1093,8 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Scrolls to an item within the tree. If the ancestors of the item are not
-     * expanded, this method expands them before scrolling.
+     * expanded, this method expands them before scrolling. Does not fire any
+     * {@link ExpandEvent}s for the ancestors expanded during scrolling.
      * <p>
      * In order to be able to use this method, the data provider should
      * implement {@link HierarchicalDataProvider#getParent(T)} and
