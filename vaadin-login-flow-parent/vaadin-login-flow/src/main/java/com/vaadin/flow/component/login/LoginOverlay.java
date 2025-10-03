@@ -27,6 +27,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ModalComponent;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
@@ -48,6 +49,7 @@ import com.vaadin.flow.dom.Style;
 @Tag("vaadin-login-overlay")
 @NpmPackage(value = "@vaadin/login", version = "25.0.0-alpha20")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
+@ModalComponent
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;

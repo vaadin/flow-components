@@ -33,6 +33,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ModalComponent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
@@ -729,15 +731,89 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     private void onTargetAttach(UI ui) {
+
         if (target != null) {
             if (getElement().getNode().getParent() == null) {
                 // Remove the popover from its current state tree
                 getElement().removeFromTree(false);
-                ui.addToModalComponent(this);
+                getModalParentComponent().ifPresentOrElse(modalParent -> {
+                    updateSlotAttribute(modalParent);
+
+                    if (modalParent instanceof HasComponents) {
+                        ((HasComponents) modalParent).add(this);
+                    } else {
+                        modalParent.getElement().appendChild(getElement());
+                    }
+                }, () -> {
+                    ui.addToModalComponent(this);
+                });
+
                 autoAddedToTheUi = true;
             }
             getElement().executeJs("this.target = $0", target.getElement());
         }
+    }
+
+    /**
+     * Finds the closest parent component that is annotated with
+     * {@link ModalComponent}, if any.
+     *
+     * @return an optional with the closest modal parent component, or an empty
+     *         optional if none found
+     */
+    private Optional<Component> getModalParentComponent() {
+        var parent = target.getParent();
+        while (parent.isPresent()) {
+            var parentComponent = parent.get();
+            if (parentComponent.getClass()
+                    .isAnnotationPresent(ModalComponent.class)) {
+                return parent;
+            }
+            parent = parentComponent.getParent();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Updates the {@code slot} attribute based on the target or its ancestors
+     * up to the modal parent.
+     * <p>
+     * It starts by removing any existing {@code slot} attribute from the
+     * popover. Then, it traverses the target's ancestors until it finds a
+     * component with a {@code slot} attribute or reaches the modal parent.
+     * <p>
+     * This ensures that the popover is rendered in the correct slot when used
+     * inside a modal component.
+     *
+     * @param modalParent
+     *            the modal parent component
+     */
+    private void updateSlotAttribute(Component modalParent) {
+        getElement().removeAttribute("slot");
+        var slotValue = getSlotValueFromAncestors(target.getElement(),
+                modalParent.getElement());
+        if (slotValue != null) {
+            getElement().setAttribute("slot", slotValue);
+        }
+    }
+
+    /**
+     * Finds the slot attribute value from the target or its ancestors up to the
+     * modal parent.
+     * 
+     * @param target
+     * @param modalParent
+     * @return the slot attribute value, or {@code null} if not found
+     */
+    private String getSlotValueFromAncestors(Element target,
+            Element modalParent) {
+        while (target != null && target != modalParent) {
+            if (target.hasAttribute("slot")) {
+                return target.getAttribute("slot");
+            }
+            target = target.getParent();
+        }
+        return null;
     }
 
     /**
