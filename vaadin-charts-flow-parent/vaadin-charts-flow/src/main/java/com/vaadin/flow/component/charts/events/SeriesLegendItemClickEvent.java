@@ -37,7 +37,7 @@ public class SeriesLegendItemClickEvent extends ComponentEvent<Chart>
             @EventData("event.detail.originalEvent.browserEvent.ctrlKey") boolean ctrlKey,
             @EventData("event.detail.originalEvent.browserEvent.metaKey") boolean metaKey,
             @EventData("event.detail.originalEvent.browserEvent.shiftKey") boolean shiftKey,
-            @EventData("event.detail.originalEvent.button") int button,
+            @EventData("event.detail.originalEvent.browserEvent.button") int button,
             @EventData("event.detail.series.index") int seriesIndex) {
         super(source, fromClient);
         this.seriesIndex = seriesIndex;
