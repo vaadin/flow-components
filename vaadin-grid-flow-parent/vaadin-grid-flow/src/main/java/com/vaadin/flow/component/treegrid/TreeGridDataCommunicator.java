@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.treegrid;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -98,6 +97,8 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * @param ancestors
      *            the ordered list of the ancestors of the item
      * @return index path for the given item
+     * @throws IllegalArgumentException
+     *             if the item does not exist
      */
     private int[] getIndexPath(T item, List<T> ancestors) {
         var path = new ArrayList<Integer>();
@@ -140,6 +141,8 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
      * @param path
      *            the path to get the items for
      * @return ordered list of items for the specified path
+     * @throws IllegalArgumentException
+     *             if the path does not correspond to an item
      */
     public List<T> getPathItems(int... path) {
         var dataProvider = (HierarchicalDataProvider<T, Object>) getDataProvider();
@@ -147,11 +150,12 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
         T parent = null;
         for (var index : path) {
             var query = buildQuery(parent, index, 1);
-            var parentOptional = dataProvider.fetchChildren(query).findFirst();
-            if (parentOptional.isEmpty()) {
-                return Collections.emptyList();
+            var childOptional = dataProvider.fetchChildren(query).findFirst();
+            if (childOptional.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "There is no item with the specified path.");
             }
-            parent = parentOptional.get();
+            parent = childOptional.get();
             pathItems.add(parent);
         }
         return pathItems;

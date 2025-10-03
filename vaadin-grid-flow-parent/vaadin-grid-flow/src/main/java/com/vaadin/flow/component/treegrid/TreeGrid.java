@@ -964,6 +964,7 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Override
     public void scrollToIndex(int index) {
+        expandAncestors(index);
         doScrollToIndex(index);
     }
 
@@ -1003,6 +1004,11 @@ public class TreeGrid<T> extends Grid<T>
                             For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
                             """);
         }
+        if (path.length == 0) {
+            throw new IllegalArgumentException(
+                    "At least one index should be provided.");
+        }
+        expandAncestors(path);
         doScrollToIndex(path);
     }
 
@@ -1148,23 +1154,17 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private void doScrollToIndex(int... path) {
-        if (path.length == 0) {
-            throw new IllegalArgumentException(
-                    "At least one index should be provided.");
-        }
-        var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator())
-                .getPathItems(path);
-        if (pathItems.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "There is no item with the specified path.");
-        }
-        var ancestors = pathItems.subList(0, pathItems.size() - 1);
-        expand(ancestors);
-
         var joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
                 .collect(Collectors.joining(","));
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
                         "this.scrollToIndex(" + joinedIndexes + ");")));
+    }
+
+    private void expandAncestors(int... path) {
+        var pathItems = ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                .getPathItems(path);
+        var ancestors = pathItems.subList(0, pathItems.size() - 1);
+        expand(ancestors);
     }
 }
