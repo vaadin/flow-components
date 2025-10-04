@@ -32,6 +32,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -52,7 +53,8 @@ import com.vaadin.flow.shared.Registration;
  * <p>
  * Dialogs can be made modal or non-modal. A modal Dialog blocks the user from
  * interacting with the rest of the user interface while the Dialog is open, as
- * opposed to a non-modal Dialog, which does not block interaction.
+ * opposed to a non-modal Dialog, which does not block interaction. Dialogs are
+ * modal by default using {@link ModalityMode#VISUAL}.
  * <p>
  * Dialogs can be made draggable and resizable. When draggable, the user is able
  * to move them around using a pointing device. It is recommended to make
@@ -88,6 +90,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
+    private ModalityMode modality = ModalityMode.VISUAL;
 
     /**
      * Creates an empty dialog.
@@ -125,7 +128,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setRole("dialog");
 
         // Initialize auto-add behavior
-        new OverlayAutoAddController<>(this, this::isModal);
+        new OverlayAutoAddController<>(this, this::getModality);
     }
 
     /**
@@ -602,7 +605,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Sets whether component will open modal or modeless dialog.
      * <p>
      * Note: When dialog is set to be modeless, then it's up to you to provide
-     * means for it to be closed (eg. a button that calls
+     * means for it to be closed (e.g. a button that calls
      * {@link Dialog#close()}). The reason being that a modeless dialog allows
      * user to interact with the interface under it and won't be closed by
      * clicking outside or the ESC key.
@@ -610,19 +613,63 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param modal
      *            {@code false} to enable dialog to open as modeless modal,
      *            {@code true} otherwise.
+     * @deprecated use {@link #setModality(ModalityMode)} instead
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setModal(boolean modal) {
-        getElement().setProperty("modeless", !modal);
-        getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        setModality(modal ? ModalityMode.STRICT : ModalityMode.MODELESS);
     }
 
     /**
      * Gets whether component is set as modal or modeless dialog.
      *
      * @return {@code true} if modal dialog (default), {@code false} otherwise.
+     * @deprecated use {@link #getModality()} instead
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public boolean isModal() {
         return !getElement().getProperty("modeless", false);
+    }
+
+    /**
+     * Sets the modality of the dialog. The following modes are available:
+     * <ul>
+     * <li>{@link ModalityMode#STRICT}: The dialog shows a modality curtain and
+     * users can not interact with components outside the dialog. Client-side
+     * events and RPC calls from components outside the dialog are blocked.
+     * <li>{@link ModalityMode#VISUAL}: The dialog shows a modality curtain and
+     * users can not interact with components outside the dialog. However,
+     * client-side events and RPC calls from components outside the dialog are
+     * allowed.
+     * <li>{@link ModalityMode#MODELESS}: The dialog does not show a modality
+     * curtain and users can interact with components outside the dialog.
+     * Client-side events and RPC calls from components outside the dialog are
+     * allowed.
+     * </ul>
+     * <p>
+     * Note: When dialog is set to be {@link ModalityMode#MODELESS}, then it's
+     * up to you to provide means for it to be closed (e.g. a button that calls
+     * {@link Dialog#close()}). The reason being that a modeless dialog allows
+     * user to interact with the interface under it and won't be closed by
+     * clicking outside or the ESC key.
+     *
+     * @param mode
+     *            the modality mode, not null
+     */
+    public void setModality(ModalityMode mode) {
+        this.modality = Objects.requireNonNull(mode,
+                "ModalityMode must not be null");
+        getElement().setProperty("modeless", mode == ModalityMode.MODELESS);
+        getUI().ifPresent(ui -> ui.setChildComponentModal(this, mode));
+    }
+
+    /**
+     * Gets the modality of the dialog. {@link ModalityMode#VISUAL} by default.
+     *
+     * @return the modality mode, not null
+     */
+    public ModalityMode getModality() {
+        return modality;
     }
 
     /**
@@ -885,8 +932,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
-        getUI().ifPresent(
-                ui -> ui.setChildComponentModal(this, visible && isModal()));
+        getUI().ifPresent(ui -> ui.setChildComponentModal(this,
+                visible && isModal() ? getModality() : ModalityMode.MODELESS));
     }
 
     /**
@@ -975,7 +1022,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private void setModality(boolean modal) {
         if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this,
+                    modal ? getModality() : ModalityMode.MODELESS));
         }
     }
 

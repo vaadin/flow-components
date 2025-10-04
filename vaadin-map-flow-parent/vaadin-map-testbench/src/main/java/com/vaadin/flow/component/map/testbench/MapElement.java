@@ -318,6 +318,10 @@ public class MapElement extends TestBenchElement {
         public void setRotation(float rotation) {
             executor.executeScript(path("setRotation(%s)", rotation));
         }
+
+        public List<Double> calculateExtent() {
+            return (List<Double>) get("calculateExtent()");
+        }
     }
 
     public static class LayerCollectionReference

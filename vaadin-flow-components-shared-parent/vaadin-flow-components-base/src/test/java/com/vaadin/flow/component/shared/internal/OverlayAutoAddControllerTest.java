@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomEvent;
@@ -185,7 +186,7 @@ public class OverlayAutoAddControllerTest {
 
     @Test
     public void autoAdded_inert_close_autoRemoved() {
-        TestComponent component = new TestComponent(() -> false);
+        TestComponent component = new TestComponent();
 
         component.setOpened(true);
         fakeClientResponse();
@@ -244,29 +245,30 @@ public class OverlayAutoAddControllerTest {
         fakeClientResponse();
 
         Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                false);
+                ModalityMode.MODELESS);
     }
 
     @Test
-    public void open_withModalSupplierReturningTrue_isModal() {
-        TestComponent component = new TestComponent(() -> true);
+    public void open_withModalSupplierReturningStrict_isModal() {
+        TestComponent component = new TestComponent(() -> ModalityMode.STRICT);
 
         component.setOpened(true);
         fakeClientResponse();
 
         Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                true);
+                ModalityMode.STRICT);
     }
 
     @Test
-    public void open_withModalSupplierReturningFalse_notModal() {
-        TestComponent component = new TestComponent(() -> false);
+    public void open_withModalSupplierReturningModeless_notModal() {
+        TestComponent component = new TestComponent(
+                () -> ModalityMode.MODELESS);
 
         component.setOpened(true);
         fakeClientResponse();
 
         Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                false);
+                ModalityMode.MODELESS);
     }
 
     @Test
@@ -364,8 +366,10 @@ public class OverlayAutoAddControllerTest {
             controller = new OverlayAutoAddController<>(this);
         }
 
-        public TestComponent(SerializableSupplier<Boolean> isModalSupplier) {
-            controller = new OverlayAutoAddController<>(this, isModalSupplier);
+        public TestComponent(
+                SerializableSupplier<ModalityMode> modalityModeSupplier) {
+            controller = new OverlayAutoAddController<>(this,
+                    modalityModeSupplier);
         }
 
         public void setOpened(boolean opened) {

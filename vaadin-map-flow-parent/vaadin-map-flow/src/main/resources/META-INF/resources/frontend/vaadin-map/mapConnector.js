@@ -7,12 +7,13 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+import { extend } from 'ol/extent';
 import Translate from 'ol/interaction/Translate';
 import { setUserProjection as openLayersSetUserProjection } from 'ol/proj';
 import { register as openLayersRegisterProjections } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 import { synchronize } from './synchronization/index.js';
-import { createLookup, getLayerForFeature } from './util';
+import { createLookup, getFeatureInfo } from './util';
 
 // By default, use EPSG:4326 projection for all coordinates passed to, and return from the public API.
 // Internally coordinates will be converted to the projection used by the map's view.
@@ -68,6 +69,44 @@ function init(mapElement) {
           .getArray()
           .forEach((layer) => layer.changed());
       });
+    },
+    /**
+     * Adjust the map view to fit the given features.
+     * @param featureIds array of IDs of the features to fit in the map view
+     * @param options optional options for the OL `View.fit` method
+     */
+    zoomToFit(featureIds, options) {
+      // Synchronization call for the referenced features must run beforehand, but may have
+      // been scheduled after this call. Using a timeout to compensate.
+      setTimeout(() => {
+        const features = featureIds.map((id) => this.lookup.get(id)).filter(Boolean);
+        if (features.length === 0) {
+          return;
+        }
+
+        let extent;
+        features.forEach((feature) => {
+          const featureExtent = feature.getGeometry().getExtent();
+          if (!extent) {
+            extent = featureExtent.slice();
+          } else {
+            extend(extent, featureExtent);
+          }
+        });
+
+        const padding = options?.padding ?? 0;
+        const duration = options?.duration ?? 0;
+        // Viewport size in the OL View instance may not have updated yet to the actual map size,
+        // so provide the size explicitly
+        const bounds = mapElement.getBoundingClientRect();
+        const size = [bounds.width, bounds.height];
+
+        mapElement.configuration.getView().fit(extent, {
+          padding: [padding, padding, padding, padding],
+          duration,
+          size
+        });
+      });
     }
   };
 
@@ -99,20 +138,14 @@ function init(mapElement) {
     // back-most feature as the last result
     const pixelCoordinate = event.pixel;
     const featuresAtPixel = mapElement.configuration.getFeaturesAtPixel(pixelCoordinate);
-    // Create tuples of features and the layer that they are in
-    const featuresAndLayers = featuresAtPixel.map((feature) => {
-      const layer = getLayerForFeature(mapElement.configuration.getLayers().getArray(), feature);
-      return {
-        feature,
-        layer
-      };
-    });
+    const featureInfos = featuresAtPixel.map((feature) => getFeatureInfo(mapElement.configuration, feature));
 
     // Map click event
+    const nonClusterFeatures = featureInfos.filter((info) => info && !info.isCluster);
     const mapClickEvent = new CustomEvent('map-click', {
       detail: {
         coordinate,
-        features: featuresAndLayers,
+        features: nonClusterFeatures,
         originalEvent: event.originalEvent
       }
     });
@@ -120,18 +153,34 @@ function init(mapElement) {
     mapElement.dispatchEvent(mapClickEvent);
 
     // Feature click event
-    if (featuresAndLayers.length > 0) {
+    if (nonClusterFeatures.length > 0) {
       // Send a feature click event for the top-level feature
-      const featureAndLayer = featuresAndLayers[0];
+      const featureInfo = nonClusterFeatures[0];
       const featureClickEvent = new CustomEvent('map-feature-click', {
         detail: {
-          feature: featureAndLayer.feature,
-          layer: featureAndLayer.layer,
+          feature: featureInfo.feature,
+          layer: featureInfo.layer,
           originalEvent: event.originalEvent
         }
       });
 
       mapElement.dispatchEvent(featureClickEvent);
+    }
+
+    // Cluster click event
+    const clusterInfos = featureInfos.filter((info) => info && info.isCluster);
+    if (clusterInfos.length > 0) {
+      // Send a cluster click event for the top-level cluster
+      const clusterInfo = clusterInfos[0];
+      const clusterClickEvent = new CustomEvent('map-cluster-click', {
+        detail: {
+          features: clusterInfo.feature.get('features'),
+          layer: clusterInfo.layer,
+          originalEvent: event.originalEvent
+        }
+      });
+
+      mapElement.dispatchEvent(clusterClickEvent);
     }
   });
 
@@ -144,12 +193,12 @@ function init(mapElement) {
   translate.on('translateend', (event) => {
     const feature = event.features.item(0);
     if (!feature) return;
-    const layer = getLayerForFeature(mapElement.configuration.getLayers().getArray(), feature);
 
+    const featureInfo = getFeatureInfo(mapElement.configuration, feature);
     const featureDropEvent = new CustomEvent('map-feature-drop', {
       detail: {
         feature,
-        layer,
+        layer: featureInfo.layer,
         coordinate: event.coordinate,
         startCoordinate: event.startCoordinate
       }
