@@ -78,7 +78,7 @@ public class SplitLayout extends Component
         setOrientation(orientation);
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
-        addSplitterDragendListener(e -> {
+        addSplitterDragEndListener(e -> {
             splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
 
@@ -210,7 +210,7 @@ public class SplitLayout extends Component
      * 0 and 100. The value will be null unless the splitter position has been
      * explicitly set on the server-side, or the splitter has been moved on the
      * client side. The splitter position is automatically updated when as part
-     * of the {@link SplitterDragendEvent}.
+     * of the {@link SplitterDragEndEvent}.
      *
      * @return the splitter position, may be null
      */
@@ -339,7 +339,7 @@ public class SplitLayout extends Component
     }
 
     @DomEvent("splitter-dragend")
-    public static class SplitterDragendEvent
+    public static class SplitterDragEndEvent
             extends ComponentEvent<SplitLayout> {
 
         private static final String PRIMARY_FLEX_BASIS = "element.querySelector(':scope > [slot=\"primary\"]').style.flexBasis";
@@ -348,7 +348,7 @@ public class SplitLayout extends Component
         String primaryComponentFlexBasis;
         String secondaryComponentFlexBasis;
 
-        public SplitterDragendEvent(SplitLayout source, boolean fromClient,
+        public SplitterDragEndEvent(SplitLayout source, boolean fromClient,
                 @EventData(PRIMARY_FLEX_BASIS) String primaryComponentFlexBasis,
                 @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentFlexBasis) {
             super(source, fromClient);
@@ -366,9 +366,9 @@ public class SplitLayout extends Component
      *            the listener to add
      * @return a registration for removing the listener
      */
-    public Registration addSplitterDragendListener(
-            ComponentEventListener<SplitterDragendEvent> listener) {
-        return addListener(SplitterDragendEvent.class,
+    public Registration addSplitterDragEndListener(
+            ComponentEventListener<SplitterDragEndEvent> listener) {
+        return addListener(SplitterDragEndEvent.class,
                 (ComponentEventListener) listener);
     }
 

@@ -350,11 +350,11 @@ public class VirtualListIT extends AbstractComponentIT {
 
         // JDK16 adds extra comma after year in en_US
         Assert.assertTrue(items.get(0).getText()
-                .matches("January 1, 2001,? 1:01[ \\u00A0]AM"));
+                .matches("January 1, 2001,? 1:01[ \\u00A0\\u202F]AM"));
         Assert.assertTrue(items.get(1).getText()
-                .matches("February 2, 2002,? 2:02[ \\u00A0]AM"));
+                .matches("February 2, 2002,? 2:02[ \\u00A0\\u202F]AM"));
         Assert.assertTrue(items.get(2).getText()
-                .matches("March 3, 2003,? 3:03[ \\u00A0]AM"));
+                .matches("March 3, 2003,? 3:03[ \\u00A0\\u202F]AM"));
     }
 
     @Test

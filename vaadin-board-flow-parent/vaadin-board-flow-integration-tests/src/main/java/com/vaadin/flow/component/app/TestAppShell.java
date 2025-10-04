@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.app;
 
-import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 
-@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
+@StyleSheet("@vaadin/vaadin-lumo-styles/lumo.css")
 public class TestAppShell implements AppShellConfigurator {
 }
