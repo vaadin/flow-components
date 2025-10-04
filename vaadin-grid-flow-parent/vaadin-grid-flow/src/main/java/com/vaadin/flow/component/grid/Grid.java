@@ -445,7 +445,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return Stream.of(new QuerySortOrder(key, direction));
         };
 
-        private Comparator<T> comparator;
+        private SerializableComparator<T> comparator;
+        private SerializableComparator<T> reversedComparator;
 
         private Registration columnDataGeneratorRegistration;
         private Registration editorDataGeneratorRegistration;
@@ -735,7 +736,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         public Column<T> setComparator(Comparator<T> comparator) {
             Objects.requireNonNull(comparator, "Comparator must not be null");
             setSortable(true);
-            this.comparator = comparator;
+
+            // Store the main comparator
+            if (comparator instanceof SerializableComparator) {
+                this.comparator = (SerializableComparator<T>) comparator;
+            } else {
+                this.comparator = comparator::compare;
+            }
+
+            // Compute and store the reversed comparator
+            Comparator<T> reversed = comparator.reversed();
+            if (reversed instanceof SerializableComparator) {
+                this.reversedComparator = (SerializableComparator<T>) reversed;
+            } else {
+                this.reversedComparator = reversed::compare;
+            }
+
             return this;
         }
 
@@ -783,18 +799,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             setSortable(true);
             boolean reverse = sortDirection != SortDirection.ASCENDING;
 
-            if (reverse) {
-                Comparator<T> reversed = comparator.reversed();
-                if (reversed instanceof SerializableComparator) {
-                    return (SerializableComparator<T>) reversed;
-                }
-                return reversed::compare;
-            }
-
-            if (comparator instanceof SerializableComparator) {
-                return (SerializableComparator<T>) comparator;
-            }
-            return comparator::compare;
+            return reverse ? reversedComparator : comparator;
         }
 
         /**
