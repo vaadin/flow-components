@@ -778,8 +778,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * up to the modal parent.
      * <p>
      * It starts by removing any existing {@code slot} attribute from the
-     * popover. Then, it traverses the target's ancestors until it finds a
-     * component with a {@code slot} attribute or reaches the modal parent.
+     * popover. Then, it gets the {@link ModalRoot} annotation from the modal
+     * parent component to determine the appropriate slot value. If the modal
+     * parent defines a value for the {@link ModalRoot#slot()} property, it sets
+     * the {@code slot} attribute on the popover element.
+     * 
      * <p>
      * This ensures that the popover is rendered in the correct slot when used
      * inside a modal component.

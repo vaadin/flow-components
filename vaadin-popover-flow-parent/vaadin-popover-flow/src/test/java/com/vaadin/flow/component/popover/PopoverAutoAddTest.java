@@ -247,40 +247,25 @@ public class PopoverAutoAddTest {
     }
 
     @Test
-    public void popoverWithTargetHavingSlot_popoverInheritsSlotAttribute() {
-        var modal = new TestModalContainer();
-        ui.add(modal);
-        var target = new Div();
-        target.getElement().setAttribute("slot", "my-slot");
-        var popover = new Popover();
-        popover.setTarget(target);
-        modal.add(target);
-        fakeClientResponse();
-
-        Assert.assertEquals("my-slot",
-                popover.getElement().getAttribute("slot"));
-
-        fakeClientResponse();
-        var newTarget = new Div();
-        popover.setTarget(newTarget);
-        modal.add(newTarget);
-        fakeClientResponse();
-        Assert.assertFalse("Popover should not have value for slot attribute",
-                popover.getElement().hasAttribute("slot"));
-    }
-
-    @Test
-    public void targetAncestorWithSlot_popoverInheritsSlotAttribute() {
+    public void targetWithinModalWithSlotDefined_popoverInheritsSlotAttribute() {
         var modal = new TestModalContainerWithSlot();
         ui.add(modal);
         var target = new Div();
-        modal.add(target);
         var popover = new Popover();
         popover.setTarget(target);
+        modal.add(target);
         fakeClientResponse();
 
         Assert.assertEquals("custom-slot",
                 popover.getElement().getAttribute("slot"));
+
+        fakeClientResponse();
+        var newModal = new TestModalContainer();
+        ui.add(newModal);
+        newModal.add(target);
+        fakeClientResponse();
+        Assert.assertFalse("Popover should not have value for slot attribute",
+                popover.getElement().hasAttribute("slot"));
     }
 
     @Test
