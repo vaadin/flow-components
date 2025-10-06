@@ -1143,7 +1143,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @param item
      *            the item to scroll to
-     * @throws IllegalArgumentException
+     * @throws NoSuchElementException
      *             if the item does not belong to the tree
      */
     @Override
