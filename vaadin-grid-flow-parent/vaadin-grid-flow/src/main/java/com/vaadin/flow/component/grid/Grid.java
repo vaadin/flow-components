@@ -737,6 +737,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Objects.requireNonNull(comparator, "Comparator must not be null");
             setSortable(true);
 
+            internalSetComparator(comparator);
+            return this;
+        }
+
+        void internalSetComparator(Comparator<T> comparator) {
             // Store the main comparator
             if (comparator instanceof SerializableComparator) {
                 this.comparator = (SerializableComparator<T>) comparator;
@@ -751,8 +756,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             } else {
                 this.reversedComparator = reversed::compare;
             }
-
-            return this;
         }
 
         /**
@@ -1881,7 +1884,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         item -> formatValueToSendToTheClient(
                                 applyValueProvider(valueProvider, item))),
                 columnFactory);
-        ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
+        column.internalSetComparator((a, b) -> compareMaybeComparables(
                 applyValueProvider(valueProvider, a),
                 applyValueProvider(valueProvider, b)));
         return column;
