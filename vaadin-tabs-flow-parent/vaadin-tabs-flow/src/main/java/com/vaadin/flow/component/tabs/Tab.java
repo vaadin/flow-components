@@ -33,7 +33,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
  */
 @Tag("vaadin-tab")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/tabs", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/tabs", version = "25.0.0-alpha21")
 public class Tab extends Component implements HasAriaLabel, HasComponents,
         HasStyle, HasThemeVariant<TabVariant>, HasTooltip {
 
