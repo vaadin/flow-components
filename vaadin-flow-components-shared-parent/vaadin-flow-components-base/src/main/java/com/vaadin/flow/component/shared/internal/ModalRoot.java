@@ -35,8 +35,7 @@ import java.lang.annotation.Target;
  * that has this annotation, and attaches to that component instead of the UI
  * root.
  * <p>
- * <strong>
- * Internal use only. May be renamed or removed in a future release.
+ * <strong> Internal use only. May be renamed or removed in a future release.
  * </strong>
  */
 @Retention(RetentionPolicy.RUNTIME)
