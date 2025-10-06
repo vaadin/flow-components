@@ -18,6 +18,7 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -107,7 +108,7 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
         var itemIndex = getItemIndex(item,
                 path.isEmpty() ? null : ancestors.get(ancestors.size() - 1));
         if (itemIndex == -1) {
-            throw new IllegalArgumentException("Item does not exist.");
+            throw new NoSuchElementException("Item does not exist.");
         }
         path.add(itemIndex);
         return path.stream().mapToInt(i -> i).toArray();
@@ -138,7 +139,7 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
             var ancestorIndex = getItemIndex(ancestors.get(i),
                     i == 0 ? null : ancestors.get(i - 1));
             if (ancestorIndex == -1) {
-                throw new IllegalArgumentException("Item does not exist.");
+                throw new NoSuchElementException("Item does not exist.");
             }
             ancestorPath.add(ancestorIndex);
         }
