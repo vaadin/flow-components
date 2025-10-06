@@ -1864,7 +1864,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         item -> formatValueToSendToTheClient(
                                 applyValueProvider(valueProvider, item))),
                 columnFactory);
-        ((Column<T>) column).comparator = ((a, b) -> compareMaybeComparables(
+        column.setComparator((a, b) -> compareMaybeComparables(
                 applyValueProvider(valueProvider, a),
                 applyValueProvider(valueProvider, b)));
         return column;
