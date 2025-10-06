@@ -792,7 +792,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         var annotation = modalParent.getClass().getAnnotation(ModalRoot.class);
 
         var slotValue = annotation.slot();
-        if (slotValue != null) {
+        if (slotValue != null && !slotValue.isEmpty()) {
             getElement().setAttribute("slot", slotValue);
         }
     }
