@@ -33,8 +33,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.ModalComponent;
-import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
@@ -756,7 +755,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * Finds the closest parent component that is annotated with
-     * {@link ModalComponent}, if any.
+     * {@link ModalRoot}, if any.
      *
      * @return an optional with the closest modal parent component, or an empty
      *         optional if none found
@@ -766,7 +765,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         while (parent.isPresent()) {
             var parentComponent = parent.get();
             if (parentComponent.getClass()
-                    .isAnnotationPresent(ModalComponent.class)) {
+                    .isAnnotationPresent(ModalRoot.class)) {
                 return parent;
             }
             parent = parentComponent.getParent();
@@ -790,30 +789,12 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      */
     private void updateSlotAttribute(Component modalParent) {
         getElement().removeAttribute("slot");
-        var slotValue = getSlotValueFromAncestors(target.getElement(),
-                modalParent.getElement());
+        var annotation = modalParent.getClass().getAnnotation(ModalRoot.class);
+
+        var slotValue = annotation.slot();
         if (slotValue != null) {
             getElement().setAttribute("slot", slotValue);
         }
-    }
-
-    /**
-     * Finds the slot attribute value from the target or its ancestors up to the
-     * modal parent.
-     * 
-     * @param target
-     * @param modalParent
-     * @return the slot attribute value, or {@code null} if not found
-     */
-    private String getSlotValueFromAncestors(Element target,
-            Element modalParent) {
-        while (target != null && target != modalParent) {
-            if (target.hasAttribute("slot")) {
-                return target.getAttribute("slot");
-            }
-            target = target.getParent();
-        }
-        return null;
     }
 
     /**

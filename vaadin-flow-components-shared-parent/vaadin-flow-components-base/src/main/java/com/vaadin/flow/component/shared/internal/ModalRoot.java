@@ -21,12 +21,31 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a component is a modal component, i.e. a component that blocks
- * interaction with the rest of the UI when displayed.
+ * The purpose of this annotation is to help {@code Popover} decide where to
+ * auto-attach itself based on the target component.
  * <p>
+ * Normally, {@code Popover} attaches to the UI's root element, using the
+ * {@code UI#addToModalComponent} method. But that is problematic when the
+ * target component is attached inside an element with modality, such as
+ * {@code Dialog}. This prevents any events in the client-side fired from the
+ * {@code Popover} component or any of its children from being listened to in
+ * the server-side.
+ * <p>
+ * To solve this, {@code Popover} tries to find the closest parent component
+ * that has this annotation, and attaches to that component instead of the UI
+ * root.
+ * <p>
+ * <strong>
  * Internal use only. May be renamed or removed in a future release.
+ * </strong>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ModalComponent {
+public @interface ModalRoot {
+
+    /**
+     * The slot to use when attaching to the modal root. If empty, no slot
+     * attribute is set.
+     */
+    String slot() default "";
 }

@@ -26,7 +26,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.shared.internal.ModalComponent;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
@@ -188,12 +188,6 @@ public class PopoverAutoAddTest {
         Assert.assertEquals(ui, popover.getParent().orElseThrow());
     }
 
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
-    }
-
     @Test
     public void popoverWithTargetInModalComponent_popoverAttachedToModal() {
         var modal = new TestModalComponent();
@@ -277,22 +271,38 @@ public class PopoverAutoAddTest {
 
     @Test
     public void targetAncestorWithSlot_popoverInheritsSlotAttribute() {
-        var modal = new TestModalContainer();
+        var modal = new TestModalContainerWithSlot();
         ui.add(modal);
-        var container = new Div();
-        container.getElement().setAttribute("slot", "my-slot");
         var target = new Div();
-        container.add(target);
+        modal.add(target);
         var popover = new Popover();
         popover.setTarget(target);
-        modal.add(container);
         fakeClientResponse();
 
-        Assert.assertEquals("my-slot",
+        Assert.assertEquals("custom-slot",
                 popover.getElement().getAttribute("slot"));
     }
 
-    @ModalComponent
+    @Test
+    public void popoverWithTargetAddedAsVirtualChild_popoverAttachedToModal() {
+        var modal = new TestModalComponent();
+        ui.add(modal);
+        var target = new Div();
+        modal.getElement().appendVirtualChild(target.getElement());
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals("Popover should be attached to modal", modal,
+                popover.getParent().orElse(null));
+    }
+
+    private void fakeClientResponse() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
+    }
+
+    @ModalRoot
     @Tag("div")
     public class TestModalContainer extends Component implements HasComponents {
         public TestModalContainer() {
@@ -300,10 +310,19 @@ public class PopoverAutoAddTest {
         }
     }
 
-    @ModalComponent
+    @ModalRoot
     @Tag("div")
     public class TestModalComponent extends Component {
         public TestModalComponent() {
+            super();
+        }
+    }
+
+    @ModalRoot(slot = "custom-slot")
+    @Tag("div")
+    public class TestModalContainerWithSlot extends Component
+            implements HasComponents {
+        public TestModalContainerWithSlot() {
             super();
         }
     }
