@@ -40,7 +40,7 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
             @EventData("event.detail.originalEvent.browserEvent.ctrlKey") boolean ctrlKey,
             @EventData("event.detail.originalEvent.browserEvent.metaKey") boolean metaKey,
             @EventData("event.detail.originalEvent.browserEvent.shiftKey") boolean shiftKey,
-            @EventData("event.detail.originalEvent.button") int button,
+            @EventData("event.detail.originalEvent.browserEvent.button") int button,
             @EventData("event.detail.point.series.index") int seriesIndex,
             @EventData("event.detail.point.category") String category,
             @EventData("event.detail.point.index") int pointIndex,

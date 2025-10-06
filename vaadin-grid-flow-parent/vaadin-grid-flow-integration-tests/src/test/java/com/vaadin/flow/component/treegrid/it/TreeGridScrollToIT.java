@@ -42,14 +42,17 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
 
     private TestBenchElement scrollToIndexInput;
 
+    private TestBenchElement scrollToItemInput;
+
     @Before
     public void init() {
         open();
-        grid = $(TreeGridElement.class).first();
+        grid = $(TreeGridElement.class).waitForFirst();
         expandAllButton = $("button").id("expand-all");
         scrollToStartButton = $("button").id("scroll-to-start");
         scrollToEndButton = $("button").id("scroll-to-end");
         scrollToIndexInput = $("input").id("scroll-to-index");
+        scrollToItemInput = $("input").id("scroll-to-item");
     }
 
     @Test
@@ -98,6 +101,13 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     public void expandAll_scrollToIndex30_1_correctFirstVisibleItem() {
         expandAllButton.click();
         scrollToIndexInput.sendKeys("30-1", Keys.TAB);
+        assertFirstVisibleRowContent("Dad 30/1");
+    }
+
+    @Test
+    public void expandAll_scrollToItem30_1_correctFirstVisibleItem() {
+        expandAllButton.click();
+        scrollToItemInput.sendKeys("Dad 30/1", Keys.TAB);
         assertFirstVisibleRowContent("Dad 30/1");
     }
 
