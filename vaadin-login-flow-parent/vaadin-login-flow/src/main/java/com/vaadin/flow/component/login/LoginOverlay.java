@@ -26,6 +26,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
@@ -49,6 +50,7 @@ import com.vaadin.flow.dom.Style;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/login", version = "24.8.9")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
+@ModalRoot(slot = "footer")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;
