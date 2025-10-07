@@ -4918,6 +4918,33 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .setAttribute("position", position.getPosition()));
     }
 
+    /**
+     * Returns whether the tooltip content is rendered as Markdown.
+     *
+     * @return {@code true} if the content is rendered as Markdown,
+     *         {@code false} if it is treated as plain text
+     */
+    public boolean isTooltipMarkdownEnabled() {
+        return getTooltipElement().map(
+                tooltipElement -> tooltipElement.getProperty("markdown", false))
+                .orElse(false);
+    }
+
+    /**
+     * Sets whether the tooltip content is rendered as Markdown. By default, the
+     * content is treated as plain text.
+     *
+     * @param markdownEnabled
+     *            {@code true} to render the content as Markdown, {@code false}
+     *            to treat it as plain text
+     */
+    public void setTooltipMarkdownEnabled(boolean markdownEnabled) {
+        addTooltipElementToTooltipSlot();
+
+        getTooltipElement().ifPresent(tooltipElement -> tooltipElement
+                .setProperty("markdown", markdownEnabled));
+    }
+
     private void addTooltipElementToTooltipSlot() {
         if (getTooltipElement().isPresent()) {
             // the grid's tooltip slot has already been filled

@@ -37,7 +37,7 @@ import com.vaadin.flow.component.HasElement;
 public interface HasTooltip extends HasElement {
 
     /**
-     * Sets a tooltip text for the component.
+     * Sets a tooltip text for the component as plain text.
      *
      * @param text
      *            The tooltip text
@@ -50,6 +50,23 @@ public interface HasTooltip extends HasElement {
             tooltip = Tooltip.forHasTooltip(this);
         }
         tooltip.setText(text);
+        return tooltip;
+    }
+
+    /**
+     * Sets a tooltip text for the component in Markdown format.
+     *
+     * @param markdown
+     *            The tooltip text in Markdown format
+     *
+     * @return the tooltip handle
+     */
+    default Tooltip setTooltipMarkdown(String markdown) {
+        var tooltip = Tooltip.getForElement(getElement());
+        if (tooltip == null) {
+            tooltip = Tooltip.forHasTooltip(this);
+        }
+        tooltip.setMarkdown(markdown);
         return tooltip;
     }
 
