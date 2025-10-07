@@ -33,6 +33,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
@@ -66,6 +67,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/confirm-dialog", version = "24.9.2")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
+@ModalRoot
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 

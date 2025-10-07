@@ -39,6 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
@@ -81,6 +82,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/dialog", version = "24.9.2")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
+@ModalRoot
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
 
