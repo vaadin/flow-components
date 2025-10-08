@@ -147,6 +147,42 @@ public class GridTooltipTest {
                 grid.getTooltipPosition());
     }
 
+    @Test
+    public void setTooltipMarkdownEnabled_hasTooltipElement() {
+        grid.setTooltipMarkdownEnabled(true);
+        Assert.assertTrue(getTooltipElement(grid).isPresent());
+    }
+
+    @Test
+    public void setTooltipMarkdownEnabled_hasTooltipWithProperty() {
+        grid.setTooltipMarkdownEnabled(true);
+        Assert.assertTrue(getTooltipElement(grid).orElseThrow()
+                .getProperty("markdown", false));
+
+        grid.setTooltipMarkdownEnabled(false);
+        Assert.assertFalse(getTooltipElement(grid).orElseThrow()
+                .getProperty("markdown", false));
+    }
+
+    @Test
+    public void setTooltipMarkdownEnabled_isTooltipMarkdownEnabled() {
+        grid.setTooltipMarkdownEnabled(true);
+        Assert.assertTrue(grid.isTooltipMarkdownEnabled());
+
+        grid.setTooltipMarkdownEnabled(false);
+        Assert.assertFalse(grid.isTooltipMarkdownEnabled());
+    }
+
+    @Test
+    public void isTooltipMarkdownEnabled_defaultValue() {
+        // without tooltip element
+        Assert.assertFalse(grid.isTooltipMarkdownEnabled());
+
+        // with tooltip element, no property value
+        grid.setTooltipGenerator(item -> item);
+        Assert.assertFalse(grid.isTooltipMarkdownEnabled());
+    }
+
     private Optional<Element> getTooltipElement(Grid<?> grid) {
         return getTooltipElements(grid).findFirst();
     }

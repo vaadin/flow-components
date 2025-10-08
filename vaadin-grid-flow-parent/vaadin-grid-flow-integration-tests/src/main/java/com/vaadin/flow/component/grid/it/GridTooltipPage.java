@@ -56,6 +56,15 @@ public class GridTooltipPage extends Div {
                 });
         setAgeTooltipButton.setId("set-age-tooltip-button");
 
+        var setMarkdownTooltipButton = new NativeButton("Set markdown tooltip",
+                event -> {
+                    grid.setTooltipMarkdownEnabled(true);
+                    grid.setTooltipGenerator(
+                            person -> "**Markdown** _tooltip_ for "
+                                    + person.getFirstName());
+                });
+        setMarkdownTooltipButton.setId("set-markdown-tooltip-button");
+
         var toggleGridButton = new NativeButton("Toggle grid", event -> {
 
             if (grid.getParent().isPresent()) {
@@ -68,7 +77,7 @@ public class GridTooltipPage extends Div {
 
         grid.setId("grid-with-tooltips");
         add(setGridTooltipButton, addColumnButton, setAgeTooltipButton,
-                toggleGridButton, grid);
+                setMarkdownTooltipButton, toggleGridButton, grid);
     }
 
 }

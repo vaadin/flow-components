@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.treegrid;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -140,7 +141,7 @@ public class ScrollToItemTest {
     public void treeDataProvider_flattenedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assert.assertThrows(NoSuchElementException.class,
                 this::scrollToMissingItem);
         assertNotScrolled();
     }
@@ -149,7 +150,7 @@ public class ScrollToItemTest {
     public void treeDataProvider_nestedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assert.assertThrows(NoSuchElementException.class,
                 this::scrollToMissingItem);
         assertNotScrolled();
     }
