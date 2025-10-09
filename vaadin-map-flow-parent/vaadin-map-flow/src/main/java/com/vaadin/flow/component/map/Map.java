@@ -71,7 +71,8 @@ import tools.jackson.databind.node.ObjectNode;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/map", version = "25.0.0-alpha21")
+@NpmPackage(value = "ol", version = "10.6.1")
 @NpmPackage(value = "proj4", version = "2.17.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")

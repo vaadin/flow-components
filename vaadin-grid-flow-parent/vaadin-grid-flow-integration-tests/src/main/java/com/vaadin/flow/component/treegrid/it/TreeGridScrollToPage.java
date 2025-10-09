@@ -64,6 +64,14 @@ public class TreeGridScrollToPage extends Div {
         });
         scrollToIndex.setId("scroll-to-index");
 
-        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex);
+        Input scrollToItem = new Input(ValueChangeMode.ON_BLUR);
+        scrollToItem.setPlaceholder("Scroll to item (by name)");
+        scrollToItem.setWidth("200px");
+        scrollToItem.addValueChangeListener(
+                event -> grid.scrollToItem(event.getValue()));
+        scrollToItem.setId("scroll-to-item");
+
+        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex,
+                scrollToItem);
     }
 }

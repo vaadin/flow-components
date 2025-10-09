@@ -55,11 +55,11 @@ public class TreeGridRefreshItemIT extends AbstractComponentIT {
     public void expandRootItem_scrollToBottom_refreshChildItem_scrollToTop_childItemRefreshed() {
         treeGrid.expandWithClick(0);
 
-        treeGrid.scrollToRow(99);
+        treeGrid.scrollToRowByPath(99);
         assertRowContents(treeGrid.getRowCount() - 1, "Item 99");
 
         clickElementWithJs("refresh-item-0-1");
-        treeGrid.scrollToRow(0);
+        treeGrid.scrollToRowByPath(0);
 
         assertRowContents(0, "Item 0", "Item 0-0", "Updated", "Item 0-2",
                 "Item 1");

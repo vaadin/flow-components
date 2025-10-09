@@ -104,6 +104,16 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setMarkdownTooltip() {
+        clickElementWithJs("set-markdown-tooltip-button");
+        flushScrolling(grid);
+        showTooltip(grid.getCell(0, 0));
+        Assert.assertEquals(
+                "<p><strong>Markdown</strong> <em>tooltip</em> for Jack</p>",
+                getActiveTooltipHtmlContent());
+    }
+
+    @Test
     public void newColumnHasGridTooltipGenerator() {
         scrollToElement(grid);
         // set grid tooltip
@@ -125,6 +135,12 @@ public class GridTooltipIT extends AbstractComponentIT {
 
     private String getActiveTooltipText() {
         return findElement(By.tagName("vaadin-tooltip")).getText();
+    }
+
+    private String getActiveTooltipHtmlContent() {
+        return $("vaadin-tooltip").first().$("div")
+                .withAttribute("slot", "overlay").first()
+                .getAttribute("innerHTML").strip();
     }
 
     /**

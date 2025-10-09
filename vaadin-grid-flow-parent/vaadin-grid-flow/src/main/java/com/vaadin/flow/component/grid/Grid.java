@@ -212,8 +212,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha20")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha21")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha21")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -4916,6 +4916,33 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         getTooltipElement().ifPresent(tooltipElement -> tooltipElement
                 .setAttribute("position", position.getPosition()));
+    }
+
+    /**
+     * Returns whether the tooltip content is rendered as Markdown.
+     *
+     * @return {@code true} if the content is rendered as Markdown,
+     *         {@code false} if it is treated as plain text
+     */
+    public boolean isTooltipMarkdownEnabled() {
+        return getTooltipElement().map(
+                tooltipElement -> tooltipElement.getProperty("markdown", false))
+                .orElse(false);
+    }
+
+    /**
+     * Sets whether the tooltip content is rendered as Markdown. By default, the
+     * content is treated as plain text.
+     *
+     * @param markdownEnabled
+     *            {@code true} to render the content as Markdown, {@code false}
+     *            to treat it as plain text
+     */
+    public void setTooltipMarkdownEnabled(boolean markdownEnabled) {
+        addTooltipElementToTooltipSlot();
+
+        getTooltipElement().ifPresent(tooltipElement -> tooltipElement
+                .setProperty("markdown", markdownEnabled));
     }
 
     private void addTooltipElementToTooltipSlot() {
