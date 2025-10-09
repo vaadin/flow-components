@@ -45,6 +45,7 @@
                                 <argument>../../scripts/copy-theme-distribution.js</argument>
                                 <argument>src/main/java/com/vaadin/flow/theme/lumo/Lumo.java</argument>
                                 <argument>@vaadin/vaadin-lumo-styles</argument>
+                                <argument>lumo</argument>
                             </arguments>
                         </configuration>
                     </execution>
