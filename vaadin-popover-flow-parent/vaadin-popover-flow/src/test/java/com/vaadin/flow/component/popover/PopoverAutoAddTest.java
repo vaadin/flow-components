@@ -231,6 +231,19 @@ public class PopoverAutoAddTest {
     }
 
     @Test
+    public void popoverWithTargetInModalSubContainer_popoverAttachedToModal() {
+        var modal = new TestModalSubContainer();
+        ui.add(modal);
+        var target = new Div();
+        modal.add(target);
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals("Popover should be attached to modal", modal,
+                popover.getParent().orElse(null));
+    }
+
+    @Test
     public void popoverWithTargetInModalContainer_targetRemoved_popoverDetached() {
         var modal = new TestModalContainer();
         ui.add(modal);
@@ -308,6 +321,13 @@ public class PopoverAutoAddTest {
     public class TestModalContainerWithSlot extends Component
             implements HasComponents {
         public TestModalContainerWithSlot() {
+            super();
+        }
+    }
+
+    @Tag("div")
+    public class TestModalSubContainer extends TestModalContainer {
+        public TestModalSubContainer() {
             super();
         }
     }
