@@ -43,7 +43,7 @@ public class MainView extends VerticalLayout {
 
         final Button newButton = new Button(
                 CrudI18n.createDefault().getNewItem());
-        newButton.setThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
+        newButton.setThemeName(ButtonVariant.PRIMARY.getVariantName());
 
         final Button serverSideNewButton = new Button(
                 CrudI18n.createDefault().getNewItem());

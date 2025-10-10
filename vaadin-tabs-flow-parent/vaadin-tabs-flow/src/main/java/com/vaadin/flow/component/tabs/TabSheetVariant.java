@@ -27,7 +27,14 @@ public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_TABS_EQUAL_WIDTH_TABS("equal-width-tabs"),
     LUMO_BORDERED("bordered"),
-    LUMO_NO_PADDING("no-padding");
+    LUMO_NO_PADDING("no-padding"),
+    TABS_CENTERED("centered"),
+    TABS_SMALL("small"),
+    TABS_MINIMAL("minimal"),
+    TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    TABS_EQUAL_WIDTH_TABS("equal-width-tabs"),
+    BORDERED("bordered"),
+    NO_PADDING("no-padding");
 
     private final String variant;
 

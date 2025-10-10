@@ -25,7 +25,12 @@ public enum CardVariant implements ThemeVariant {
     LUMO_OUTLINED("outlined"),
     LUMO_HORIZONTAL("horizontal"),
     LUMO_STRETCH_MEDIA("stretch-media"),
-    LUMO_COVER_MEDIA("cover-media");
+    LUMO_COVER_MEDIA("cover-media"),
+    ELEVATED("elevated"),
+    OUTLINED("outlined"),
+    HORIZONTAL("horizontal"),
+    STRETCH_MEDIA("stretch-media"),
+    COVER_MEDIA("cover-media");
 
     private final String variant;
 
