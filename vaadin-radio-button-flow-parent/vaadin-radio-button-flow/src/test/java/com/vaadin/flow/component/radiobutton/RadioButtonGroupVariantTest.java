@@ -25,21 +25,21 @@ public class RadioButtonGroupVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        group.addThemeVariants(RadioGroupVariant.VERTICAL);
 
         ThemeList themeNames = group.getThemeNames();
         Assert.assertTrue(themeNames
-                .contains(RadioGroupVariant.LUMO_VERTICAL.getVariantName()));
+                .contains(RadioGroupVariant.VERTICAL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        group.removeThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        group.addThemeVariants(RadioGroupVariant.VERTICAL);
+        group.removeThemeVariants(RadioGroupVariant.VERTICAL);
 
         ThemeList themeNames = group.getThemeNames();
         Assert.assertFalse(themeNames
-                .contains(RadioGroupVariant.LUMO_VERTICAL.getVariantName()));
+                .contains(RadioGroupVariant.VERTICAL.getVariantName()));
     }
 }

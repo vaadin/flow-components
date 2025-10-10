@@ -27,21 +27,21 @@ public class SplitLayoutVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         SplitLayout layout = new SplitLayout();
-        layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
+        layout.addThemeVariants(SplitLayoutVariant.SMALL);
 
         ThemeList themeNames = layout.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(SplitLayoutVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(SplitLayoutVariant.SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         SplitLayout layout = new SplitLayout();
-        layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
-        layout.removeThemeVariants(SplitLayoutVariant.LUMO_SMALL);
+        layout.addThemeVariants(SplitLayoutVariant.SMALL);
+        layout.removeThemeVariants(SplitLayoutVariant.SMALL);
 
         ThemeList themeNames = layout.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(SplitLayoutVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertFalse(
+                themeNames.contains(SplitLayoutVariant.SMALL.getVariantName()));
     }
 }

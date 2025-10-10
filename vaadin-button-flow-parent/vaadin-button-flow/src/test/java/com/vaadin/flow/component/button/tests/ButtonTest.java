@@ -240,46 +240,46 @@ public class ButtonTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        button.addThemeVariants(ButtonVariant.SMALL);
 
         Set<String> themeNames = button.getThemeNames();
         Assert.assertTrue(
-                themeNames.contains(ButtonVariant.LUMO_SMALL.getVariantName()));
+                themeNames.contains(ButtonVariant.SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-        button.removeThemeVariants(ButtonVariant.LUMO_SMALL);
+        button.addThemeVariants(ButtonVariant.SMALL);
+        button.removeThemeVariants(ButtonVariant.SMALL);
 
         Set<String> themeNames = button.getThemeNames();
         Assert.assertFalse(
-                themeNames.contains(ButtonVariant.LUMO_SMALL.getVariantName()));
+                themeNames.contains(ButtonVariant.SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_setIcon_themeAttributeContainsThemeVariantAndIcon() {
         button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        button.addThemeVariants(ButtonVariant.SUCCESS);
         button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
 
         Set<String> themeNames = button.getThemeNames();
         Assert.assertTrue(themeNames.contains("icon"));
-        Assert.assertTrue(themeNames
-                .contains(ButtonVariant.LUMO_SUCCESS.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(ButtonVariant.SUCCESS.getVariantName()));
     }
 
     @Test
     public void setIcon_addThemeVariant_themeAttributeContiansThemeVariantAndIcon() {
         button = new Button();
         button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
-        button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        button.addThemeVariants(ButtonVariant.SUCCESS);
 
         Set<String> themeNames = button.getThemeNames();
         Assert.assertTrue(themeNames.contains("icon"));
-        Assert.assertTrue(themeNames
-                .contains(ButtonVariant.LUMO_SUCCESS.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(ButtonVariant.SUCCESS.getVariantName()));
     }
 
     @Test

@@ -176,7 +176,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         filterOptionsProvider = new ListDataProvider<>(filterOptions);
         filterCheckbox = new CheckboxGroup<>();
         filterCheckbox.setItems(filterOptionsProvider);
-        filterCheckbox.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        filterCheckbox.addThemeVariants(CheckboxGroupVariant.VERTICAL);
         filterCheckbox.addValueChangeListener(event -> {
             if (firstUpdate) {
                 firstUpdate = false;

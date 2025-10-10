@@ -154,22 +154,22 @@ public class TextAreaTest {
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
         TextArea textArea = new TextArea();
-        textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+        textArea.addThemeVariants(TextAreaVariant.SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(TextAreaVariant.SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         TextArea textArea = new TextArea();
-        textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
-        textArea.removeThemeVariants(TextAreaVariant.LUMO_SMALL);
+        textArea.addThemeVariants(TextAreaVariant.SMALL);
+        textArea.removeThemeVariants(TextAreaVariant.SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertFalse(
+                themeNames.contains(TextAreaVariant.SMALL.getVariantName()));
     }
 
     @Test

@@ -27,21 +27,21 @@ public class CheckboxGroupVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        group.addThemeVariants(CheckboxGroupVariant.VERTICAL);
 
         ThemeList themeNames = group.getThemeNames();
         Assert.assertTrue(themeNames
-                .contains(CheckboxGroupVariant.LUMO_VERTICAL.getVariantName()));
+                .contains(CheckboxGroupVariant.VERTICAL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        group.removeThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        group.addThemeVariants(CheckboxGroupVariant.VERTICAL);
+        group.removeThemeVariants(CheckboxGroupVariant.VERTICAL);
 
         ThemeList themeNames = group.getThemeNames();
         Assert.assertFalse(themeNames
-                .contains(CheckboxGroupVariant.LUMO_VERTICAL.getVariantName()));
+                .contains(CheckboxGroupVariant.VERTICAL.getVariantName()));
     }
 }

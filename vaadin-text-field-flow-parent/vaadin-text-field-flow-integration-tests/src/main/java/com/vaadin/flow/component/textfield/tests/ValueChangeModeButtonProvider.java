@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static com.vaadin.flow.component.textfield.TextFieldVariant.LUMO_ALIGN_RIGHT;
-import static com.vaadin.flow.component.textfield.TextFieldVariant.LUMO_SMALL;
+import static com.vaadin.flow.component.textfield.TextFieldVariant.ALIGN_RIGHT;
+import static com.vaadin.flow.component.textfield.TextFieldVariant.SMALL;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -42,7 +42,7 @@ public class ValueChangeModeButtonProvider {
         field.setPattern("[0-9]*");
         field.setMaxLength(4);
         field.setAllowedCharPattern("[0-9]");
-        field.addThemeVariants(LUMO_ALIGN_RIGHT, LUMO_SMALL);
+        field.addThemeVariants(ALIGN_RIGHT, SMALL);
         field.setValue(elementWithChangeMode.getValueChangeTimeout() + "");
         field.addValueChangeListener(this::onTimeoutChange);
         return field;
