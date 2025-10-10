@@ -35,8 +35,9 @@ public class PopupButtonFixture implements SpreadsheetFixture {
             }
             List<String> values = new ArrayList<>(VALUES);
             CellReference ref = event.getSelectedCellReference();
-            CellReference newRef = new CellReference(ref.getRow(),
-                    ref.getCol());
+            CellReference newRef = new CellReference(
+                    spreadsheet.getActiveSheet().getSheetName(), ref.getRow(),
+                    ref.getCol(), false, false);
             DataValidationButton popupButton = new DataValidationButton(
                     spreadsheet, values);
             popupButton.setUp();
