@@ -23,7 +23,10 @@ public enum CustomFieldVariant {
 
     LUMO_SMALL("small"),
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    LUMO_WHITESPACE("whitespace");
+    LUMO_WHITESPACE("whitespace"),
+    SMALL("small"),
+    HELPER_ABOVE_FIELD("helper-above-field"),
+    WHITESPACE("whitespace");
 
     private final String variant;
 

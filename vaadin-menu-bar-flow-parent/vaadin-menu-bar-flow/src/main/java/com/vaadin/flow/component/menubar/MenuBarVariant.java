@@ -29,7 +29,16 @@ public enum MenuBarVariant implements ThemeVariant {
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
     LUMO_END_ALIGNED("end-aligned"),
-    LUMO_DROPDOWN_INDICATORS("dropdown-indicators");
+    LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
+    SMALL("small"),
+    LARGE("large"),
+    TERTIARY("tertiary"),
+    TERTIARY_INLINE("tertiary-inline"),
+    PRIMARY("primary"),
+    CONTRAST("contrast"),
+    ICON("icon"),
+    END_ALIGNED("end-aligned"),
+    DROPDOWN_INDICATORS("dropdown-indicators");
 
     private final String variant;
 
