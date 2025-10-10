@@ -37,6 +37,7 @@
                                 <argument>../../scripts/copy-theme-distribution.js</argument>
                                 <argument>src/main/java/com/vaadin/flow/theme/aura/Aura.java</argument>
                                 <argument>@vaadin/aura</argument>
+                                <argument>aura</argument>
                             </arguments>
                         </configuration>
                     </execution>

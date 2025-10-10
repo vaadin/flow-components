@@ -16,11 +16,18 @@
 package com.vaadin.flow.theme.aura;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.page.AppShellConfigurator;
 
 /**
  * Aura theme base class.
  */
 @NpmPackage(value = "@vaadin/aura", version = "25.0.0-alpha21")
 public class Aura {
-
+    /**
+     * The path to the Aura stylesheet. Can be used as argument to a
+     * {@link StyleSheet} on an {@link AppShellConfigurator} class to apply the
+     * Aura theme to an application.
+     */
+    public static final String STYLESHEET = "aura/aura.css";
 }
