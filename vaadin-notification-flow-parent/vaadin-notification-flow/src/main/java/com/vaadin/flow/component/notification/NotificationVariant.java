@@ -25,7 +25,12 @@ public enum NotificationVariant implements ThemeVariant {
     LUMO_CONTRAST("contrast"),
     LUMO_SUCCESS("success"),
     LUMO_ERROR("error"),
-    LUMO_WARNING("warning");
+    LUMO_WARNING("warning"),
+    PRIMARY("primary"),
+    CONTRAST("contrast"),
+    SUCCESS("success"),
+    ERROR("error"),
+    WARNING("warning");
 
     private final String variant;
 

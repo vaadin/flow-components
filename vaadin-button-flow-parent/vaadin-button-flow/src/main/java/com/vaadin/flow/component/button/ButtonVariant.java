@@ -30,7 +30,17 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_WARNING("warning"),
     LUMO_ERROR("error"),
     LUMO_CONTRAST("contrast"),
-    LUMO_ICON("icon");
+    LUMO_ICON("icon"),
+    SMALL("small"),
+    LARGE("large"),
+    TERTIARY("tertiary"),
+    TERTIARY_INLINE("tertiary-inline"),
+    PRIMARY("primary"),
+    SUCCESS("success"),
+    WARNING("warning"),
+    ERROR("error"),
+    CONTRAST("contrast"),
+    ICON("icon");
 
     private final String variant;
 

@@ -21,7 +21,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-dialog} component.
  */
 public enum DialogVariant implements ThemeVariant {
-    LUMO_NO_PADDING("no-padding");
+    LUMO_NO_PADDING("no-padding"), NO_PADDING("no-padding");
 
     private final String variant;
 

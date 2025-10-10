@@ -25,7 +25,12 @@ public enum TabsVariant implements ThemeVariant {
     LUMO_SMALL("small"),
     LUMO_MINIMAL("minimal"),
     LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs");
+    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
+    CENTERED("centered"),
+    SMALL("small"),
+    MINIMAL("minimal"),
+    HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    EQUAL_WIDTH_TABS("equal-width-tabs");
 
     private final String variant;
 
