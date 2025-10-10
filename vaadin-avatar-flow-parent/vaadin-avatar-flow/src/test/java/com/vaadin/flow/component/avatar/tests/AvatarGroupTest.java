@@ -138,21 +138,21 @@ public class AvatarGroupTest {
 
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        avatarGroup.addThemeVariants(AvatarGroupVariant.LUMO_LARGE);
+        avatarGroup.addThemeVariants(AvatarGroupVariant.LARGE);
 
         Set<String> themeNames = avatarGroup.getThemeNames();
         Assert.assertTrue(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
+                themeNames.contains(AvatarVariant.LARGE.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_doesNotContainThemeVariant() {
-        avatarGroup.addThemeVariants(AvatarGroupVariant.LUMO_LARGE);
-        avatarGroup.removeThemeVariants(AvatarGroupVariant.LUMO_LARGE);
+        avatarGroup.addThemeVariants(AvatarGroupVariant.LARGE);
+        avatarGroup.removeThemeVariants(AvatarGroupVariant.LARGE);
 
         Set<String> themeNames = avatarGroup.getThemeNames();
         Assert.assertFalse(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
+                themeNames.contains(AvatarVariant.LARGE.getVariantName()));
     }
 
     @Test

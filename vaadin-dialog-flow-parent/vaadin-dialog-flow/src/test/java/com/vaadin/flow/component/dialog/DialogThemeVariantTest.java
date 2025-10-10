@@ -26,9 +26,9 @@ public class DialogThemeVariantTest {
     @Test
     public void addAndRemoveLumoNoPaddingVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dialog.addThemeVariants(DialogVariant.LUMO_NO_PADDING);
+        dialog.addThemeVariants(DialogVariant.NO_PADDING);
         assertThemeAttribute("no-padding");
-        dialog.removeThemeVariants(DialogVariant.LUMO_NO_PADDING);
+        dialog.removeThemeVariants(DialogVariant.NO_PADDING);
         assertThemeAttribute(null);
     }
 

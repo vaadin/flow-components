@@ -26,49 +26,49 @@ public class ChartVariantTest {
     @Test
     public void addAndRemoveLumoGradientVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
+        chart.addThemeVariants(ChartVariant.GRADIENT);
         assertThemeAttribute("gradient");
-        chart.removeThemeVariants(ChartVariant.LUMO_GRADIENT);
+        chart.removeThemeVariants(ChartVariant.GRADIENT);
         assertThemeAttribute(null);
     }
 
     @Test
-    public void addLumoGradientVariant_themeAttributeUpdated() {
+    public void addGradientVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
+        chart.addThemeVariants(ChartVariant.GRADIENT);
         assertThemeAttribute("gradient");
     }
 
     @Test
-    public void addLumoMonotoneVariant_themeAttributeUpdated() {
+    public void addMonotoneVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        chart.addThemeVariants(ChartVariant.LUMO_MONOTONE);
+        chart.addThemeVariants(ChartVariant.MONOTONE);
         assertThemeAttribute("monotone");
     }
 
     @Test
-    public void addLumoClassicVariant_themeAttributeUpdated() {
+    public void addClassicVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
+        chart.addThemeVariants(ChartVariant.CLASSIC);
         assertThemeAttribute("classic");
     }
 
     @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        chart.addThemeVariants(ChartVariant.LUMO_MONOTONE);
-        chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
+        chart.addThemeVariants(ChartVariant.MONOTONE);
+        chart.addThemeVariants(ChartVariant.GRADIENT);
         assertThemeAttributeContains("monotone");
         assertThemeAttributeContains("gradient");
-        chart.removeThemeVariants(ChartVariant.LUMO_GRADIENT);
+        chart.removeThemeVariants(ChartVariant.GRADIENT);
         assertThemeAttribute("monotone");
     }
 
     @Test
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        chart.addThemeVariants(ChartVariant.LUMO_MONOTONE);
-        chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
+        chart.addThemeVariants(ChartVariant.MONOTONE);
+        chart.addThemeVariants(ChartVariant.GRADIENT);
         chart.getThemeNames().clear();
         assertThemeAttribute(null);
     }
@@ -76,8 +76,8 @@ public class ChartVariantTest {
     @Test
     public void addTwiceAndSeeIbce_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
-        chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
+        chart.addThemeVariants(ChartVariant.CLASSIC);
+        chart.addThemeVariants(ChartVariant.CLASSIC);
         assertThemeAttribute("classic");
     }
 

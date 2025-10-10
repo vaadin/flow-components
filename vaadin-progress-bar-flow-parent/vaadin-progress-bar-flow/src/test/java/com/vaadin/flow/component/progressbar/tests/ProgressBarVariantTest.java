@@ -27,21 +27,21 @@ public class ProgressBarVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ProgressBar progressBar = new ProgressBar();
-        progressBar.addThemeVariants(ProgressBarVariant.LUMO_ERROR);
+        progressBar.addThemeVariants(ProgressBarVariant.ERROR);
 
         ThemeList themeNames = progressBar.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(ProgressBarVariant.LUMO_ERROR.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(ProgressBarVariant.ERROR.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ProgressBar progressBar = new ProgressBar();
-        progressBar.addThemeVariants(ProgressBarVariant.LUMO_ERROR);
-        progressBar.removeThemeVariants(ProgressBarVariant.LUMO_ERROR);
+        progressBar.addThemeVariants(ProgressBarVariant.ERROR);
+        progressBar.removeThemeVariants(ProgressBarVariant.ERROR);
 
         ThemeList themeNames = progressBar.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(ProgressBarVariant.LUMO_ERROR.getVariantName()));
+        Assert.assertFalse(
+                themeNames.contains(ProgressBarVariant.ERROR.getVariantName()));
     }
 }
