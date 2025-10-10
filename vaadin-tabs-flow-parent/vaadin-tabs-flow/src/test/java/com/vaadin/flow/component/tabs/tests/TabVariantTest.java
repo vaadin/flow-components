@@ -27,21 +27,21 @@ public class TabVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         Tab tab = new Tab();
-        tab.addThemeVariants(TabVariant.LUMO_ICON_ON_TOP);
+        tab.addThemeVariants(TabVariant.ICON_ON_TOP);
 
         ThemeList themeNames = tab.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(TabVariant.LUMO_ICON_ON_TOP.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(TabVariant.ICON_ON_TOP.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         Tab tab = new Tab();
-        tab.addThemeVariants(TabVariant.LUMO_ICON_ON_TOP);
-        tab.removeThemeVariants(TabVariant.LUMO_ICON_ON_TOP);
+        tab.addThemeVariants(TabVariant.ICON_ON_TOP);
+        tab.removeThemeVariants(TabVariant.ICON_ON_TOP);
 
         ThemeList themeNames = tab.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TabVariant.LUMO_ICON_ON_TOP.getVariantName()));
+        Assert.assertFalse(
+                themeNames.contains(TabVariant.ICON_ON_TOP.getVariantName()));
     }
 }

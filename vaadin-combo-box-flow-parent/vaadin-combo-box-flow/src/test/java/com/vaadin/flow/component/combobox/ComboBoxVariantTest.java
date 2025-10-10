@@ -25,21 +25,21 @@ public class ComboBoxVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+        comboBox.addThemeVariants(ComboBoxVariant.SMALL);
 
         ThemeList themeNames = comboBox.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(ComboBoxVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(ComboBoxVariant.SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
-        comboBox.removeThemeVariants(ComboBoxVariant.LUMO_SMALL);
+        comboBox.addThemeVariants(ComboBoxVariant.SMALL);
+        comboBox.removeThemeVariants(ComboBoxVariant.SMALL);
 
         ThemeList themeNames = comboBox.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(ComboBoxVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertFalse(
+                themeNames.contains(ComboBoxVariant.SMALL.getVariantName()));
     }
 }

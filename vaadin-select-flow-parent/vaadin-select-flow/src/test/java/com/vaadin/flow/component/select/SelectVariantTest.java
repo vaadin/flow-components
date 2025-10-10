@@ -33,56 +33,56 @@ public class SelectVariantTest {
     @Test
     public void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_ALIGN_CENTER);
+        select.addThemeVariants(SelectVariant.ALIGN_CENTER);
         assertThemeAttribute("align-center");
-        select.removeThemeVariants(SelectVariant.LUMO_ALIGN_CENTER);
+        select.removeThemeVariants(SelectVariant.ALIGN_CENTER);
         assertThemeAttribute(null);
     }
 
     @Test
-    public void addLumoAlignRightVariant_themeAttributeUpdated() {
+    public void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_ALIGN_RIGHT);
+        select.addThemeVariants(SelectVariant.ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    public void addLumoSmallVariant_themeAttributeUpdated() {
+    public void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_SMALL);
+        select.addThemeVariants(SelectVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addLumoAlignLeftVariant_themeAttributeUpdated() {
+    public void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_ALIGN_LEFT);
+        select.addThemeVariants(SelectVariant.ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
     @Test
-    public void addLumoHelperAboveField_themeAttributeUpdated() {
+    public void addHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
+        select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");
     }
 
     @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_SMALL);
-        select.addThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
+        select.addThemeVariants(SelectVariant.SMALL);
+        select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        select.removeThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
+        select.removeThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
         assertThemeAttribute("small");
     }
 
     @Test
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_SMALL);
-        select.addThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
+        select.addThemeVariants(SelectVariant.SMALL);
+        select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
         select.getThemeNames().clear();
         assertThemeAttribute(null);
     }
@@ -90,8 +90,8 @@ public class SelectVariantTest {
     @Test
     public void addTwiceAndSeeIbce_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.LUMO_SMALL);
-        select.addThemeVariants(SelectVariant.LUMO_SMALL);
+        select.addThemeVariants(SelectVariant.SMALL);
+        select.addThemeVariants(SelectVariant.SMALL);
         assertThemeAttribute("small");
     }
 

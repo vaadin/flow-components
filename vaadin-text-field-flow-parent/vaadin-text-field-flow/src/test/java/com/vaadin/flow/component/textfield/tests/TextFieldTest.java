@@ -136,22 +136,22 @@ public class TextFieldTest {
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
         TextField field = new TextField();
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertTrue(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         TextField field = new TextField();
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
+        field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assert.assertFalse(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     public void assertAutoselectPropertyValueEquals(TextField textField,
