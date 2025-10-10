@@ -752,8 +752,7 @@ public class TreeGrid<T> extends Grid<T>
      */
     protected void expand(Collection<T> items, boolean userOriginated) {
         Collection<T> expandedItems = getDataCommunicator().expand(items);
-        fireEvent(new ExpandEvent<T, TreeGrid<T>>(this, userOriginated,
-                expandedItems));
+        fireEvent(new ExpandEvent<>(this, userOriginated, expandedItems));
     }
 
     /**
@@ -764,8 +763,6 @@ public class TreeGrid<T> extends Grid<T>
      * descendant, meaning that {@code expandRecursively(items, 0)} expands only
      * the given items while {@code expandRecursively(items, 2)} expands the
      * given items as well as their children and grandchildren.
-     * <p>
-     * This method will <i>not</i> fire events for expanded nodes.
      *
      * @param items
      *            the items to expand recursively
@@ -774,7 +771,7 @@ public class TreeGrid<T> extends Grid<T>
      * @since 8.4
      */
     public void expandRecursively(Stream<T> items, int depth) {
-        expandRecursively(items.collect(Collectors.toList()), depth);
+        expandRecursively(items.toList(), depth);
     }
 
     /**
@@ -785,8 +782,6 @@ public class TreeGrid<T> extends Grid<T>
      * descendant, meaning that {@code expandRecursively(items, 0)} expands only
      * the given items while {@code expandRecursively(items, 2)} expands the
      * given items as well as their children and grandchildren.
-     * <p>
-     * This method will <i>not</i> fire events for expanded nodes.
      *
      * @param items
      *            the items to expand recursively
@@ -795,8 +790,9 @@ public class TreeGrid<T> extends Grid<T>
      * @since 8.4
      */
     public void expandRecursively(Collection<T> items, int depth) {
-        getDataCommunicator()
+        var expandedItems = getDataCommunicator()
                 .expand(getItemsWithChildrenRecursively(items, depth));
+        fireEvent(new ExpandEvent<>(this, false, expandedItems));
     }
 
     /**
@@ -835,8 +831,7 @@ public class TreeGrid<T> extends Grid<T>
      */
     protected void collapse(Collection<T> items, boolean userOriginated) {
         Collection<T> collapsedItems = getDataCommunicator().collapse(items);
-        fireEvent(new CollapseEvent<T, TreeGrid<T>>(this, userOriginated,
-                collapsedItems));
+        fireEvent(new CollapseEvent<>(this, userOriginated, collapsedItems));
     }
 
     /**
@@ -847,8 +842,6 @@ public class TreeGrid<T> extends Grid<T>
      * descendant, meaning that {@code collapseRecursively(items, 0)} collapses
      * only the given items while {@code collapseRecursively(items, 2)}
      * collapses the given items as well as their children and grandchildren.
-     * <p>
-     * This method will <i>not</i> fire events for collapsed nodes.
      *
      * @param items
      *            the items to collapse recursively
@@ -857,7 +850,7 @@ public class TreeGrid<T> extends Grid<T>
      * @since 8.4
      */
     public void collapseRecursively(Stream<T> items, int depth) {
-        collapseRecursively(items.collect(Collectors.toList()), depth);
+        collapseRecursively(items.toList(), depth);
     }
 
     /**
@@ -868,8 +861,6 @@ public class TreeGrid<T> extends Grid<T>
      * descendant, meaning that {@code collapseRecursively(items, 0)} collapses
      * only the given items while {@code collapseRecursively(items, 2)}
      * collapses the given items as well as their children and grandchildren.
-     * <p>
-     * This method will <i>not</i> fire events for collapsed nodes.
      *
      * @param items
      *            the items to collapse recursively
@@ -878,8 +869,9 @@ public class TreeGrid<T> extends Grid<T>
      * @since 8.4
      */
     public void collapseRecursively(Collection<T> items, int depth) {
-        getDataCommunicator()
+        var collapsedItems = getDataCommunicator()
                 .collapse(getItemsWithChildrenRecursively(items, depth));
+        fireEvent(new CollapseEvent<>(this, false, collapsedItems));
     }
 
     /**
