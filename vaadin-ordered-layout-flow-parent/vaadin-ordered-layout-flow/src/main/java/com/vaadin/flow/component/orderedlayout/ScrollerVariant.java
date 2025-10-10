@@ -21,7 +21,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-scroller} component.
  */
 public enum ScrollerVariant implements ThemeVariant {
-    LUMO_OVERFLOW_INDICATORS("overflow-indicators");
+    LUMO_OVERFLOW_INDICATORS("overflow-indicators"),
+    OVERFLOW_INDICATORS("overflow-indicators");
 
     private final String variant;
 

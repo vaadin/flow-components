@@ -24,7 +24,13 @@ public enum GridVariant {
     LUMO_COLUMN_BORDERS("column-borders"),
     LUMO_ROW_STRIPES("row-stripes"),
     LUMO_COMPACT("compact"),
-    LUMO_WRAP_CELL_CONTENT("wrap-cell-content");
+    LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
+    NO_BORDER("no-border"),
+    NO_ROW_BORDERS("no-row-borders"),
+    COLUMN_BORDERS("column-borders"),
+    ROW_STRIPES("row-stripes"),
+    COMPACT("compact"),
+    WRAP_CELL_CONTENT("wrap-cell-content");
 
     private final String variant;
 
