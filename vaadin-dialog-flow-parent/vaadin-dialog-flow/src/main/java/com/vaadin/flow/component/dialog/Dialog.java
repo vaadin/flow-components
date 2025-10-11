@@ -39,6 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
@@ -75,9 +76,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/dialog", version = "25.0.0-alpha21")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
+@ModalRoot
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
 
@@ -660,7 +662,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         this.modality = Objects.requireNonNull(mode,
                 "ModalityMode must not be null");
         getElement().setProperty("modeless", mode == ModalityMode.MODELESS);
-        getUI().ifPresent(ui -> ui.setChildComponentModal(this, mode));
+        applyModality();
     }
 
     /**
@@ -931,9 +933,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-
-        getUI().ifPresent(ui -> ui.setChildComponentModal(this,
-                visible && isModal() ? getModality() : ModalityMode.MODELESS));
+        applyModality();
     }
 
     /**
@@ -1005,8 +1005,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private void doSetOpened(boolean opened, boolean fromClient) {
-        setModality(opened && isModal());
         getElement().setProperty("opened", opened);
+        applyModality();
         fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
@@ -1018,13 +1018,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
-    }
-
-    private void setModality(boolean modal) {
-        if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this,
-                    modal ? getModality() : ModalityMode.MODELESS));
-        }
     }
 
     /**
@@ -1137,6 +1130,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
         registerClientCloseHandler();
+        applyModality();
     }
 
     /**
@@ -1256,5 +1250,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "Dialog does not support adding styles");
+    }
+
+    private void applyModality() {
+        getUI().ifPresent(ui -> {
+            boolean modal = isOpened() && isVisible()
+                    && modality == ModalityMode.STRICT;
+            ui.setChildComponentModal(this, modal);
+        });
     }
 }
