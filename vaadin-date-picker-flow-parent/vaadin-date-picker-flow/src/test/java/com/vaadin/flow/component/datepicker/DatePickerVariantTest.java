@@ -40,21 +40,21 @@ public class DatePickerVariantTest {
     }
 
     @Test
-    public void addAlignRightVariant_themeAttributeUpdated() {
+    public void addLumoAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.LUMO_ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    public void addSmallVariant_themeAttributeUpdated() {
+    public void addLumoSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addAlignLeftVariant_themeAttributeUpdated() {
+    public void addLumoAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.LUMO_ALIGN_LEFT);
         assertThemeAttribute("align-left");

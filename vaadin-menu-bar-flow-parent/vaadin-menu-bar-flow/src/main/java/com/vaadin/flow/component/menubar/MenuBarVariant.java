@@ -21,14 +21,26 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-menu-bar} component.
  */
 public enum MenuBarVariant implements ThemeVariant {
-    LUMO_SMALL("small"), LUMO_LARGE("large"), @Deprecated
+    LUMO_SMALL("small"),
+    LUMO_LARGE("large"),
+    /**
+     * @deprecated Use {@link #TERTIARY} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_TERTIARY("tertiary"),
     LUMO_TERTIARY_INLINE("tertiary-inline"),
     LUMO_PRIMARY("primary"),
     LUMO_CONTRAST("contrast"),
-    @Deprecated
+    /**
+     * @deprecated Use {@link #ICON} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_ICON("icon"),
-    @Deprecated
+
+    /**
+     * @deprecated Use {@link #END_ALIGNED} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_END_ALIGNED("end-aligned"),
     LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
     TERTIARY("tertiary"),
