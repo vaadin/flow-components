@@ -23,24 +23,24 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum ButtonVariant implements ThemeVariant {
     LUMO_SMALL("small"),
     LUMO_LARGE("large"),
+    /**
+     * @deprecated Use {@link #TERTIARY} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_TERTIARY("tertiary"),
     LUMO_TERTIARY_INLINE("tertiary-inline"),
+    /**
+     * @deprecated Use {@link #PRIMARY} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_PRIMARY("primary"),
     LUMO_SUCCESS("success"),
     LUMO_WARNING("warning"),
     LUMO_ERROR("error"),
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
-    SMALL("small"),
-    LARGE("large"),
-    TERTIARY("tertiary"),
-    TERTIARY_INLINE("tertiary-inline"),
     PRIMARY("primary"),
-    SUCCESS("success"),
-    WARNING("warning"),
-    ERROR("error"),
-    CONTRAST("contrast"),
-    ICON("icon");
+    TERTIARY("tertiary");
 
     private final String variant;
 

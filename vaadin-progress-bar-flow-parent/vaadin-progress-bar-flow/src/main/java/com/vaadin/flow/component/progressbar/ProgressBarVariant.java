@@ -21,12 +21,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-progress-bar} component.
  */
 public enum ProgressBarVariant implements ThemeVariant {
-    LUMO_CONTRAST("contrast"),
-    LUMO_ERROR("error"),
-    LUMO_SUCCESS("success"),
-    CONTRAST("contrast"),
-    ERROR("error"),
-    SUCCESS("success");
+    LUMO_CONTRAST("contrast"), LUMO_ERROR("error"), LUMO_SUCCESS("success");
 
     private final String variant;
 

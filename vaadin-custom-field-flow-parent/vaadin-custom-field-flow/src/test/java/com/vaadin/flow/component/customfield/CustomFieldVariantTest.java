@@ -27,7 +27,7 @@ public class CustomFieldVariantTest {
 
     @Before
     public void initTest() {
-        customField = new CustomField<String>() {
+        customField = new CustomField<>() {
             @Override
             protected String generateModelValue() {
                 return null;
@@ -43,7 +43,7 @@ public class CustomFieldVariantTest {
     @Test
     public void addSmall_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.SMALL);
+        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
         assertThemeAttribute("small");
     }
 
@@ -57,14 +57,14 @@ public class CustomFieldVariantTest {
     @Test
     public void addWhitespace_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.WHITESPACE);
+        customField.addThemeVariants(CustomFieldVariant.LUMO_WHITESPACE);
         assertThemeAttribute("whitespace");
     }
 
     @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.SMALL);
+        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
         customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
@@ -75,7 +75,7 @@ public class CustomFieldVariantTest {
     @Test
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.SMALL);
+        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
         customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE_FIELD);
         customField.getThemeNames().clear();
         assertThemeAttribute(null);

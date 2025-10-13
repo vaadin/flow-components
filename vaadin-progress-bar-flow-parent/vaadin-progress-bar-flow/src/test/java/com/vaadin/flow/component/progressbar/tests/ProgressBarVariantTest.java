@@ -15,33 +15,24 @@
  */
 package com.vaadin.flow.component.progressbar.tests;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class ProgressBarVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.addThemeVariants(ProgressBarVariant.ERROR);
-
-        ThemeList themeNames = progressBar.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(ProgressBarVariant.ERROR.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new ProgressBar(), ProgressBarVariant.LUMO_SUCCESS);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.addThemeVariants(ProgressBarVariant.ERROR);
-        progressBar.removeThemeVariants(ProgressBarVariant.ERROR);
-
-        ThemeList themeNames = progressBar.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(ProgressBarVariant.ERROR.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new ProgressBar(), ProgressBarVariant.LUMO_SUCCESS);
     }
 }
