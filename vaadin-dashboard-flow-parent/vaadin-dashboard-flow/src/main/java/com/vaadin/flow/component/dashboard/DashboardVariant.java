@@ -19,9 +19,7 @@ public enum DashboardVariant implements ThemeVariant {
     LUMO_SHADED_BACKGROUND("shaded-background"),
     LUMO_ELEVATED_WIDGETS("elevated-widgets"),
     LUMO_FLAT_WIDGETS("flat-widgets"),
-    SHADED_BACKGROUND("shaded-background"),
-    ELEVATED_WIDGETS("elevated-widgets"),
-    FLAT_WIDGETS("flat-widgets");
+    TERTIARY("tertiary");
 
     private final String variant;
 

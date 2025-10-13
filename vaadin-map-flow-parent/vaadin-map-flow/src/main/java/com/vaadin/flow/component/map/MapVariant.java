@@ -18,7 +18,9 @@ public enum MapVariant implements ThemeVariant {
      * @deprecated Use {@link #NO_BORDER} instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
-    BORDERLESS("no-border"), NO_BORDER("no-border");
+    BORDERLESS("no-border"),
+
+    NO_BORDER("no-border");
 
     private final String variant;
 

@@ -21,10 +21,30 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-card} component.
  */
 public enum CardVariant implements ThemeVariant {
+    /**
+     * @deprecated Use {@link #ELEVATED} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_ELEVATED("elevated"),
+    /**
+     * @deprecated Use {@link #OUTLINED} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_OUTLINED("outlined"),
+    /**
+     * @deprecated Use {@link #HORIZONTAL} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_HORIZONTAL("horizontal"),
+    /**
+     * @deprecated Use {@link #STRETCH_MEDIA} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_STRETCH_MEDIA("stretch-media"),
+    /**
+     * @deprecated Use {@link #COVER_MEDIA} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_COVER_MEDIA("cover-media"),
     ELEVATED("elevated"),
     OUTLINED("outlined"),

@@ -15,33 +15,24 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class TabsVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        Tabs tabs = new Tabs();
-        tabs.addThemeVariants(TabsVariant.SMALL);
-
-        ThemeList themeNames = tabs.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(TabsVariant.SMALL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new Tabs(), TabsVariant.HIDE_SCROLL_BUTTONS);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        Tabs tabs = new Tabs();
-        tabs.addThemeVariants(TabsVariant.SMALL);
-        tabs.removeThemeVariants(TabsVariant.SMALL);
-
-        ThemeList themeNames = tabs.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(TabsVariant.SMALL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new Tabs(), TabsVariant.HIDE_SCROLL_BUTTONS);
     }
 }

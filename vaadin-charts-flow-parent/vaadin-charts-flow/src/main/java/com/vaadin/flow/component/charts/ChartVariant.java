@@ -14,10 +14,7 @@ package com.vaadin.flow.component.charts;
 public enum ChartVariant {
     LUMO_GRADIENT("gradient"),
     LUMO_MONOTONE("monotone"),
-    LUMO_CLASSIC("classic"),
-    GRADIENT("gradient"),
-    MONOTONE("monotone"),
-    CLASSIC("classic");
+    LUMO_CLASSIC("classic");
 
     private final String variant;
 
