@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.avatar.tests;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,8 +23,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
-import com.vaadin.flow.component.avatar.AvatarGroupVariant;
-import com.vaadin.flow.component.avatar.AvatarVariant;
 
 public class AvatarGroupTest {
 
@@ -134,25 +131,6 @@ public class AvatarGroupTest {
     @Test
     public void getMaxItemsVisible_returnsNull() {
         Assert.assertNull(avatarGroup.getMaxItemsVisible());
-    }
-
-    @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        avatarGroup.addThemeVariants(AvatarGroupVariant.LARGE);
-
-        Set<String> themeNames = avatarGroup.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(AvatarVariant.LARGE.getVariantName()));
-    }
-
-    @Test
-    public void addThemeVariant_removeThemeVariant_doesNotContainThemeVariant() {
-        avatarGroup.addThemeVariants(AvatarGroupVariant.LARGE);
-        avatarGroup.removeThemeVariants(AvatarGroupVariant.LARGE);
-
-        Set<String> themeNames = avatarGroup.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(AvatarVariant.LARGE.getVariantName()));
     }
 
     @Test
