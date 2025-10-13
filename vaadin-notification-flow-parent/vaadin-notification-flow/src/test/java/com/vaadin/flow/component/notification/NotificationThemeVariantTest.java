@@ -25,9 +25,9 @@ public class NotificationThemeVariantTest {
     @Test
     public void addAndRemoveVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        notification.addThemeVariants(NotificationVariant.ERROR);
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         assertThemeAttribute("error");
-        notification.removeThemeVariants(NotificationVariant.ERROR);
+        notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
         assertThemeAttribute(null);
     }
 

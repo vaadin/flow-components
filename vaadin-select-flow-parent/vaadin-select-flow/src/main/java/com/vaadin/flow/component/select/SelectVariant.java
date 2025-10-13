@@ -25,11 +25,11 @@ public enum SelectVariant implements ThemeVariant {
     LUMO_ALIGN_LEFT("align-left"),
     LUMO_ALIGN_CENTER("align-center"),
     LUMO_ALIGN_RIGHT("align-right"),
+    /**
+     * @deprecated Use {@link #HELPER_ABOVE_FIELD} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    SMALL("small"),
-    ALIGN_LEFT("align-left"),
-    ALIGN_CENTER("align-center"),
-    ALIGN_RIGHT("align-right"),
     HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;

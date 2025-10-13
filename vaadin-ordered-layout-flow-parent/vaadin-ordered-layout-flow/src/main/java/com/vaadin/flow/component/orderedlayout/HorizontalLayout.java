@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
@@ -43,7 +44,8 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/horizontal-layout", version = "25.0.0-beta3")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
-        FlexComponent, ClickNotifier<HorizontalLayout> {
+        FlexComponent, HasThemeVariant<HorizontalLayoutVariant>,
+        ClickNotifier<HorizontalLayout> {
 
     /**
      * Constructs an empty layout with spacing on by default.

@@ -22,7 +22,9 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum ScrollerVariant implements ThemeVariant {
     LUMO_OVERFLOW_INDICATORS("overflow-indicators"),
-    OVERFLOW_INDICATORS("overflow-indicators");
+    OVERFLOW_INDICATORS("overflow-indicators"),
+    OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),
+    OVERFLOW_INDICATOR_TOP("overflow-indicator-top");
 
     private final String variant;
 

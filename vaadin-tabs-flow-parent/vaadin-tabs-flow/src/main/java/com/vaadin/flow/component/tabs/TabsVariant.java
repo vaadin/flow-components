@@ -24,13 +24,14 @@ public enum TabsVariant implements ThemeVariant {
     LUMO_CENTERED("centered"),
     LUMO_SMALL("small"),
     LUMO_MINIMAL("minimal"),
+    /**
+     * @deprecated Use {@link #HIDE_SCROLL_BUTTONS} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
-    CENTERED("centered"),
-    SMALL("small"),
-    MINIMAL("minimal"),
     HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    EQUAL_WIDTH_TABS("equal-width-tabs");
+    SHOW_SCROLL_BUTTONS("show-scroll-buttons");
 
     private final String variant;
 

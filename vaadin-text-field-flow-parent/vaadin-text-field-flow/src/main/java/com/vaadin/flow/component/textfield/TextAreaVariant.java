@@ -24,10 +24,11 @@ public enum TextAreaVariant implements ThemeVariant {
     LUMO_SMALL("small"),
     LUMO_ALIGN_CENTER("align-center"),
     LUMO_ALIGN_RIGHT("align-right"),
+    /**
+     * @deprecated Use {@link #HELPER_ABOVE_FIELD} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    SMALL("small"),
-    ALIGN_CENTER("align-center"),
-    ALIGN_RIGHT("align-right"),
     HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;

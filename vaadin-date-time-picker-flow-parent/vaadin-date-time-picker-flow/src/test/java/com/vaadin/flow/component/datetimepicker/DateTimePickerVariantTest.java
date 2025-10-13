@@ -33,30 +33,32 @@ public class DateTimePickerVariantTest {
     @Test
     public void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.ALIGN_CENTER);
+        dateTimePicker
+                .addThemeVariants(DateTimePickerVariant.LUMO_ALIGN_CENTER);
         assertThemeAttribute("align-center");
-        dateTimePicker.removeThemeVariants(DateTimePickerVariant.ALIGN_CENTER);
+        dateTimePicker
+                .removeThemeVariants(DateTimePickerVariant.LUMO_ALIGN_CENTER);
         assertThemeAttribute(null);
     }
 
     @Test
     public void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.ALIGN_RIGHT);
+        dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
     public void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.SMALL);
+        dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
     public void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.ALIGN_LEFT);
+        dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
@@ -71,7 +73,7 @@ public class DateTimePickerVariantTest {
     @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.SMALL);
+        dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         dateTimePicker
                 .addThemeVariants(DateTimePickerVariant.HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
@@ -84,7 +86,7 @@ public class DateTimePickerVariantTest {
     @Test
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.SMALL);
+        dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         dateTimePicker
                 .addThemeVariants(DateTimePickerVariant.HELPER_ABOVE_FIELD);
         dateTimePicker.getThemeNames().clear();
@@ -94,8 +96,8 @@ public class DateTimePickerVariantTest {
     @Test
     public void addTwiceAndSeeIbce_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.SMALL);
-        dateTimePicker.addThemeVariants(DateTimePickerVariant.SMALL);
+        dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
+        dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         assertThemeAttribute("small");
     }
 

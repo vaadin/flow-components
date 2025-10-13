@@ -15,33 +15,25 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class CheckboxGroupVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.addThemeVariants(CheckboxGroupVariant.VERTICAL);
-
-        ThemeList themeNames = group.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(CheckboxGroupVariant.VERTICAL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new CheckboxGroup<>(), CheckboxGroupVariant.HELPER_ABOVE_FIELD);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.addThemeVariants(CheckboxGroupVariant.VERTICAL);
-        group.removeThemeVariants(CheckboxGroupVariant.VERTICAL);
-
-        ThemeList themeNames = group.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(CheckboxGroupVariant.VERTICAL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new CheckboxGroup(),
+                        CheckboxGroupVariant.HELPER_ABOVE_FIELD);
     }
 }

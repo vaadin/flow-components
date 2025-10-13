@@ -24,7 +24,8 @@ public class MultiSelectComboBoxVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new MultiSelectComboBox<>(), MultiSelectComboBoxVariant.SMALL);
+                new MultiSelectComboBox<>(),
+                MultiSelectComboBoxVariant.HELPER_ABOVE_FIELD);
     }
 
     @Test
@@ -32,6 +33,6 @@ public class MultiSelectComboBoxVariantTest {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
                         new MultiSelectComboBox<>(),
-                        MultiSelectComboBoxVariant.SMALL);
+                        MultiSelectComboBoxVariant.HELPER_ABOVE_FIELD);
     }
 }

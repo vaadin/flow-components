@@ -33,30 +33,30 @@ public class SelectVariantTest {
     @Test
     public void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.ALIGN_CENTER);
+        select.addThemeVariants(SelectVariant.LUMO_ALIGN_CENTER);
         assertThemeAttribute("align-center");
-        select.removeThemeVariants(SelectVariant.ALIGN_CENTER);
+        select.removeThemeVariants(SelectVariant.LUMO_ALIGN_CENTER);
         assertThemeAttribute(null);
     }
 
     @Test
     public void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.ALIGN_RIGHT);
+        select.addThemeVariants(SelectVariant.LUMO_ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
     public void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.SMALL);
+        select.addThemeVariants(SelectVariant.LUMO_SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
     public void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.ALIGN_LEFT);
+        select.addThemeVariants(SelectVariant.LUMO_ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
@@ -70,7 +70,7 @@ public class SelectVariantTest {
     @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.SMALL);
+        select.addThemeVariants(SelectVariant.LUMO_SMALL);
         select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
@@ -81,7 +81,7 @@ public class SelectVariantTest {
     @Test
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.SMALL);
+        select.addThemeVariants(SelectVariant.LUMO_SMALL);
         select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
         select.getThemeNames().clear();
         assertThemeAttribute(null);
@@ -90,8 +90,8 @@ public class SelectVariantTest {
     @Test
     public void addTwiceAndSeeIbce_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.SMALL);
-        select.addThemeVariants(SelectVariant.SMALL);
+        select.addThemeVariants(SelectVariant.LUMO_SMALL);
+        select.addThemeVariants(SelectVariant.LUMO_SMALL);
         assertThemeAttribute("small");
     }
 
