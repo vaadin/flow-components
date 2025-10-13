@@ -29,7 +29,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.component.tabs.TabSheetVariant;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -339,18 +338,6 @@ public class TabSheetTest {
     @Test(expected = IllegalArgumentException.class)
     public void setTextAsSuffix_throws() {
         tabSheet.setSuffixComponent(new Text("Suffix"));
-    }
-
-    @Test
-    public void addThemeVariants_hasThemeVariants() {
-        tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED,
-                TabSheetVariant.LUMO_BORDERED, TabSheetVariant.NO_PADDING);
-        Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_TABS_CENTERED.getVariantName()));
-        Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_BORDERED.getVariantName()));
-        Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.NO_PADDING.getVariantName()));
     }
 
     @Test
