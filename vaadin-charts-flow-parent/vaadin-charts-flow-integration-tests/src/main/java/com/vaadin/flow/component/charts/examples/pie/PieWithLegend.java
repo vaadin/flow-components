@@ -28,7 +28,7 @@ public class PieWithLegend extends AbstractChartExample {
     @Override
     public void initDemo() {
         chart = new Chart(ChartType.PIE);
-        chart.addThemeVariants(ChartVariant.GRADIENT);
+        chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
         chart.getConfiguration().getChart().setStyledMode(true);
 
         Configuration conf = chart.getConfiguration();

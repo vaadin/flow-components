@@ -41,7 +41,7 @@ public class CustomFieldVariantTest {
     }
 
     @Test
-    public void addSmall_themeAttributeUpdated() {
+    public void addLumoSmall_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
         assertThemeAttribute("small");
@@ -55,7 +55,7 @@ public class CustomFieldVariantTest {
     }
 
     @Test
-    public void addWhitespace_themeAttributeUpdated() {
+    public void addLumoWhitespace_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.LUMO_WHITESPACE);
         assertThemeAttribute("whitespace");

@@ -42,7 +42,7 @@ class MinimizableComponentContainer extends Div {
 
         minimizeButton.addClassName("minimize-button");
         minimizeButton.addThemeVariants(ButtonVariant.TERTIARY,
-                ButtonVariant.SMALL);
+                ButtonVariant.LUMO_SMALL);
         minimizeButton.getStyle().set("position", "absolute");
         minimizeButton.getStyle().set("top", "-25px");
         minimizeButton.getStyle().set("left", "-10px");

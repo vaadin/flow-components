@@ -33,21 +33,21 @@ public class ChartVariantTest {
     }
 
     @Test
-    public void addGradientVariant_themeAttributeUpdated() {
+    public void addLumoGradientVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
         assertThemeAttribute("gradient");
     }
 
     @Test
-    public void addMonotoneVariant_themeAttributeUpdated() {
+    public void addLumoMonotoneVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_MONOTONE);
         assertThemeAttribute("monotone");
     }
 
     @Test
-    public void addClassicVariant_themeAttributeUpdated() {
+    public void addLumoClassicVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
         assertThemeAttribute("classic");
