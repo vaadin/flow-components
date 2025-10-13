@@ -65,7 +65,8 @@ public class TreeComponentColumnsPage extends Div {
         ComponentRenderer<Button, String> componentRendererBtn = new ComponentRenderer<>(
                 () -> new Button("btn"), ((button, s) -> {
                     button.setText(s);
-                    button.setThemeName(ButtonVariant.ERROR.getVariantName());
+                    button.setThemeName(
+                            ButtonVariant.LUMO_ERROR.getVariantName());
                 }));
         grid.addColumn(componentRendererBtn).setHeader("Header C");
 
