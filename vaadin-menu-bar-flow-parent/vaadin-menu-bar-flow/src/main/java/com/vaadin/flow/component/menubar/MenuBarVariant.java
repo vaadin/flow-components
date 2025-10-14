@@ -29,6 +29,10 @@ public enum MenuBarVariant implements ThemeVariant {
     @Deprecated(since = "25.0", forRemoval = true)
     LUMO_TERTIARY("tertiary"),
     LUMO_TERTIARY_INLINE("tertiary-inline"),
+    /**
+     * @deprecated Use {@link #PRIMARY} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_PRIMARY("primary"),
     LUMO_CONTRAST("contrast"),
     /**
@@ -36,13 +40,13 @@ public enum MenuBarVariant implements ThemeVariant {
      */
     @Deprecated(since = "25.0", forRemoval = true)
     LUMO_ICON("icon"),
-
     /**
      * @deprecated Use {@link #END_ALIGNED} instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
     LUMO_END_ALIGNED("end-aligned"),
     LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
+    PRIMARY("primary"),
     TERTIARY("tertiary"),
     ICON("icon"),
     END_ALIGNED("end-aligned");
