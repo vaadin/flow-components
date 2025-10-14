@@ -21,6 +21,10 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-scroller} component.
  */
 public enum ScrollerVariant implements ThemeVariant {
+    /**
+     * @deprecated Use {@link #OVERFLOW_INDICATORS} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_OVERFLOW_INDICATORS("overflow-indicators"),
     OVERFLOW_INDICATORS("overflow-indicators"),
     OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),

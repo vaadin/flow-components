@@ -17,13 +17,14 @@ public class DashboardVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Dashboard(), DashboardVariant.TERTIARY);
+                new Dashboard(), DashboardVariant.LUMO_ELEVATED_WIDGETS);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Dashboard(), DashboardVariant.TERTIARY);
+                        new Dashboard(),
+                        DashboardVariant.LUMO_ELEVATED_WIDGETS);
     }
 }

@@ -24,13 +24,13 @@ public class RadioButtonGroupVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new RadioButtonGroup<>(), RadioGroupVariant.VERTICAL);
+                new RadioButtonGroup<>(), RadioGroupVariant.HORIZONTAL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new RadioButtonGroup<>(), RadioGroupVariant.VERTICAL);
+                        new RadioButtonGroup<>(), RadioGroupVariant.HORIZONTAL);
     }
 }
