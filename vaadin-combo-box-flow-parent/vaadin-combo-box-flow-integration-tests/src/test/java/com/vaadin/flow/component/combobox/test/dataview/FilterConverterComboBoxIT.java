@@ -64,7 +64,7 @@ public class FilterConverterComboBoxIT extends AbstractComboBoxIT {
 
         scrollToItem(definedCountComboBox, 499);
 
-        waitUntilTextInContent("Item 499");
+        waitUntilTextInContent(definedCountComboBox, "Item 499");
     }
 
     @Test
@@ -85,10 +85,10 @@ public class FilterConverterComboBoxIT extends AbstractComboBoxIT {
 
         scrollToItem(unknownCountComboBox, 199);
 
-        waitUntilTextInContent("Item 199");
+        waitUntilTextInContent(unknownCountComboBox, "Item 199");
 
         scrollToItem(unknownCountComboBox, 399);
 
-        waitUntilTextInContent("Item 399");
+        waitUntilTextInContent(unknownCountComboBox, "Item 399");
     }
 }

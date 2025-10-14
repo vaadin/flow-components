@@ -22,10 +22,9 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/close-listener-reopen-dialog")
-public class CloseListenerReopenDialogIT extends AbstractComponentIT {
+public class CloseListenerReopenDialogIT extends AbstractDialogIT {
 
     @Test
     public void reopenDialog_closeActionListenerIsCalled() {
@@ -33,10 +32,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
         waitForElementPresent(By.id("open"));
         findElement(By.id("open")).click();
-
-        // Dialog is opened
-        Assert.assertTrue(
-                isElementPresent(By.tagName("vaadin-dialog-overlay")));
+        verifyOpened();
 
         // try to close dialog
         closeDialog();
@@ -46,6 +42,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
         // close dialog via button
         $("button").id("close").click();
+        verifyClosedAndRemoved();
 
         // reopen
         findElement(By.id("open")).click();
@@ -59,21 +56,18 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
     }
 
     @Test
-    public void reopenDialog_removeCloseListener_dialogIsClosed()
-            throws InterruptedException {
+    public void reopenDialog_removeCloseListener_dialogIsClosed() {
         open();
 
         findElement(By.id("open")).click();
-
-        // Dialog is opened
-        Assert.assertTrue(
-                isElementPresent(By.tagName("vaadin-dialog-overlay")));
+        verifyOpened();
 
         // try to close dialog
         closeDialog();
 
         // close dialog via button
         $("button").id("close").click();
+        verifyClosedAndRemoved();
 
         // remove close listener
         findElement(By.id("remove")).click();
@@ -83,10 +77,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
         // try to close dialog
         closeDialog();
-
-        // Dialog should be closed
-        waitUntilNot(driver -> isElementPresent(
-                By.tagName("vaadin-dialog-overlay")));
+        verifyClosedAndRemoved();
     }
 
     @Test
@@ -94,18 +85,15 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
         open();
 
         findElement(By.id("open")).click();
+        verifyOpened();
 
         findElement(By.id("open-sub")).click();
 
-        // Two dialogs are opened
-        Assert.assertEquals("Expected two dialogs", 2,
-                findElements(By.tagName("vaadin-dialog-overlay")).size());
+        verifyNumberOfDialogs(2);
 
         closeDialog();
 
-        // One dialog is opened
-        waitUntil(driver -> findElements(By.tagName("vaadin-dialog-overlay"))
-                .size() == 1);
+        verifyNumberOfDialogs(1);
 
         // close action listener prints its info message
         Assert.assertEquals(

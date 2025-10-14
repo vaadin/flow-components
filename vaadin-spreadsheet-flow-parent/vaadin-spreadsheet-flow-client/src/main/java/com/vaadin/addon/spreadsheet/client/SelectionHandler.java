@@ -129,7 +129,6 @@ public class SelectionHandler {
             spreadsheet.customCellEditorDisplayed = false;
             sheetWidget.removeCustomCellEditor();
         }
-        spreadsheet.cellLocked = locked;
         sheetWidget.setSelectedCell(col, row);
         newSelectedCellSet();
 
@@ -182,7 +181,8 @@ public class SelectionHandler {
             sheetWidget.removeCustomCellEditor();
         }
 
-        if (!sheetWidget.isSelectedCellCustomized() && !spreadsheet.cellLocked
+        if (!sheetWidget.isSelectedCellCustomized()
+                && !spreadsheet.isCurrentCellLocked()
                 && spreadsheet.customEditorFactory != null
                 && spreadsheet.customEditorFactory
                         .hasCustomEditor(sheetWidget.getSelectedCellKey())) {

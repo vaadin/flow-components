@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.map.configuration.layer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
 /**
@@ -61,6 +62,8 @@ public abstract class Layer extends AbstractConfigurationObject {
     /**
      * @return the z-index of the layer, or null if not defined
      */
+    @JsonProperty("zIndex") // Jackson ignores properties that don't start with
+                            // uppercase letters
     public Integer getzIndex() {
         return zIndex;
     }

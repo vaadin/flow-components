@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -26,8 +25,6 @@ public class EditorPositionIT extends AbstractComponentIT {
 
     @Test
     public void compositeTouchesDirtyState() {
-        final CrudElement crud = $(CrudElement.class).waitForFirst();
-
         setPositionButton("Bottom").click();
         assertPositionEquals("bottom");
 

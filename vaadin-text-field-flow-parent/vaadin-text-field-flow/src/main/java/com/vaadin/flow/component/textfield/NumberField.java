@@ -75,7 +75,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/number-field", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/number-field", version = "25.0.0-alpha21")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -217,7 +217,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
 
     /**
      * Gets the minimum value for this field. The constraint activates only if
-     * the value was explicitly set with {@link #setMin(int)}.
+     * the value was explicitly set with {@link #setMin(double)}.
      *
      * @return the minimum double value
      * @see #setMin(double)

@@ -15,7 +15,13 @@
  */
 package com.vaadin.flow.component.contextmenu.testbench;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -31,17 +37,44 @@ import com.vaadin.testbench.elementsbase.Element;
 public class ContextMenuElement extends TestBenchElement {
 
     /**
-     * This is a utility method equivalent to calling
-     * {@link TestBenchElement#contextClick()} on the target. If the target has
-     * a {@code ContextMenu}, it can be used to access the menu items.
+     * Does a right click on the target using
+     * {@link TestBenchElement#contextClick()} and returns the context menu that
+     * is opened as a result.
      *
      * @param target
-     *            The element to which the {@code ContextMenu} has been hooked
-     *            to.
-     * @see TestBenchElement#contextClick()
+     *            the element that has the context menu
+     * @return the opened context menu element
+     * @throws NoSuchElementException
+     *             if no context menu is opened
      */
-    public static void openByRightClick(TestBenchElement target) {
+    public static ContextMenuElement openByRightClick(TestBenchElement target) {
         target.contextClick();
+        TestBenchElement body = wrapElement(
+                target.getDriver().findElement(By.tagName("body")),
+                target.getCommandExecutor());
+        return body.$(ContextMenuElement.class).withAttribute("opened")
+                .waitForFirst();
+    }
+
+    /**
+     * Get the items of this context menu.
+     *
+     * @return List of menu items.
+     */
+    public List<ContextMenuItemElement> getMenuItems() {
+        TestBenchElement overlayContent = findElement(
+                By.cssSelector(":scope > [slot='overlay']"));
+        return overlayContent.$(ContextMenuItemElement.class).all();
+    }
+
+    /**
+     * Get the first menu item matching the text.
+     *
+     * @return Optional menu item.
+     */
+    public Optional<ContextMenuItemElement> getMenuItem(String text) {
+        return getMenuItems().stream()
+                .filter(item -> item.getText().equals(text)).findFirst();
     }
 
     /**
@@ -55,5 +88,22 @@ public class ContextMenuElement extends TestBenchElement {
         } catch (StaleElementReferenceException e) {
             return false;
         }
+    }
+
+    /**
+     * Wait until the context menu is closed and its closing animation has
+     * finished.
+     *
+     * @throws TimeoutException
+     *             if the menu does not close
+     */
+    public void waitUntilClosed() {
+        waitUntil(driver -> {
+            try {
+                return !(hasAttribute("opened") || hasAttribute("closing"));
+            } catch (StaleElementReferenceException e) {
+                return true;
+            }
+        });
     }
 }

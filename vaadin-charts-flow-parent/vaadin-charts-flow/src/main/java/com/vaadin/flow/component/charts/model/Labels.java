@@ -8,9 +8,10 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vaadin.flow.component.charts.model.serializers.LabelsRotationSerializer;
 import com.vaadin.flow.component.charts.model.style.Style;
+
+import tools.jackson.databind.annotation.JsonSerialize;
 
 public class Labels extends AbstractConfigurationObject {
 

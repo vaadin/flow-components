@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import java.time.Instant;
-import java.util.Date;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
@@ -100,14 +99,6 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
      */
     public void setX(Instant instant) {
         setX(Util.toHighchartsTS(instant));
-    }
-
-    /**
-     * @deprecated as of 4.0. Use {@link #setX(Instant)}
-     */
-    @Deprecated
-    public void setX(Date date) {
-        setX(Util.toHighchartsTS(date));
     }
 
     /**

@@ -82,7 +82,7 @@ public class FilteringIT extends AbstractComboBoxIT {
         box.openPopup();
         clickButton("add-items");
         box.openPopup();
-        assertRendered("Item 8");
+        assertRendered(box, "Item 8");
         assertClientSideFilter(false);
     }
 
@@ -110,9 +110,9 @@ public class FilteringIT extends AbstractComboBoxIT {
                 + "should be no filtered items until server has responded.", 0,
                 items.size());
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 11);
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() == 11);
 
-        getNonEmptyOverlayContents().forEach(item -> Assert.assertTrue(
+        getNonEmptyOverlayContents(box).forEach(item -> Assert.assertTrue(
                 "Unexpected item found after filtering.",
                 item.startsWith("Item 2")));
     }
@@ -136,23 +136,23 @@ public class FilteringIT extends AbstractComboBoxIT {
         box.openPopup();
         box.setFilter("0");
         box.setFilter("");
-        waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
-        assertRendered("Item 0");
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() > 0);
+        assertRendered(box, "Item 0");
     }
 
     @Test
     public void configureFilterInDataProvider_setDataProvider_serverSideFiltering() {
         box = $(ComboBoxElement.class).id("filterable-data-provider");
         box.openPopup();
-        assertRendered("foo");
+        assertRendered(box, "foo");
         List<String> filteredItems = setFilterAndGetImmediateResults("f");
         Assert.assertEquals("Expected server-side filtering, so there "
                 + "should be no filtered items until server has responded.", 0,
                 filteredItems.size());
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
-        waitUntil(driver -> getOverlayContents().get(0).equals("filtered"));
-        assertRendered("filtered");
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() == 1);
+        waitUntil(driver -> getOverlayContents(box).get(0).equals("filtered"));
+        assertRendered(box, "filtered");
     }
 
     @Test
@@ -163,8 +163,8 @@ public class FilteringIT extends AbstractComboBoxIT {
         assertItemsNotLoaded();
 
         box.setFilter("foo");
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
-        assertRendered("Item 0");
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() == 1);
+        assertRendered(box, "Item 0");
 
         box.setFilter("");
         assertItemsNotLoaded();
@@ -263,8 +263,8 @@ public class FilteringIT extends AbstractComboBoxIT {
                     + "should be no filtered items until server has responded.",
                     0, items.size());
 
-            waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
-            getNonEmptyOverlayContents().forEach(rendered -> {
+            waitUntil(driver -> getNonEmptyOverlayContents(box).size() > 0);
+            getNonEmptyOverlayContents(box).forEach(rendered -> {
                 Assert.assertTrue(
                         "Item which doesn't match the filter was found after server-side filtering.",
                         rendered.contains(filter));

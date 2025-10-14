@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha21")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -169,13 +169,25 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * String used as a tooltip content.
+     * Sets the tooltip content as plain text.
      *
      * @param text
      *            the text to set
      */
     public void setText(String text) {
         tooltipElement.setProperty("text", text);
+        tooltipElement.setProperty("markdown", false);
+    }
+
+    /**
+     * Sets the tooltip content in Markdown format.
+     *
+     * @param markdown
+     *            the text to set in Markdown format
+     */
+    public void setMarkdown(String markdown) {
+        tooltipElement.setProperty("text", markdown);
+        tooltipElement.setProperty("markdown", true);
     }
 
     /**

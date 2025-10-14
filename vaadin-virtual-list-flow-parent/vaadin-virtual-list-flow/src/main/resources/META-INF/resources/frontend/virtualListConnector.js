@@ -37,7 +37,7 @@ window.Vaadin.Flow.virtualListConnector = {
       if (lastRequestedRange[0] != first || lastRequestedRange[1] != last) {
         lastRequestedRange = [first, last];
         const count = 1 + last - first;
-        list.$server.setRequestedRange(first, count);
+        list.$server.setViewportRange(first, count);
       }
     };
 

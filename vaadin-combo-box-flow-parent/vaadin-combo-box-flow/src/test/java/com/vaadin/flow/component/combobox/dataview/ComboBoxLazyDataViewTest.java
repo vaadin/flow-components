@@ -40,7 +40,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.tests.dataprovider.MockUI;
 
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
 
 public class ComboBoxLazyDataViewTest {
 
@@ -98,7 +98,7 @@ public class ComboBoxLazyDataViewTest {
             }
 
             @Override
-            public void set(int start, List<JsonValue> items) {
+            public void set(int start, List<JsonNode> items) {
 
             }
 
@@ -137,7 +137,7 @@ public class ComboBoxLazyDataViewTest {
         final AtomicInteger itemCount = new AtomicInteger(0);
         dataView.addItemCountChangeListener(
                 event -> itemCount.set(event.getItemCount()));
-        dataCommunicator.setRequestedRange(0, 50);
+        dataCommunicator.setViewportRange(0, 50);
 
         ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 

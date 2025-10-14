@@ -84,8 +84,9 @@ public class ProtectedBackendIT extends AbstractComponentIT {
             boolean isModifyAllowed) {
         Assert.assertTrue(crud.isEditorOpen());
 
-        TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).last();
+        TextFieldElement lastNameField = crud.getForm()
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
         lastNameField.setValue(newValue);
         crud.getEditorSaveButton().click();

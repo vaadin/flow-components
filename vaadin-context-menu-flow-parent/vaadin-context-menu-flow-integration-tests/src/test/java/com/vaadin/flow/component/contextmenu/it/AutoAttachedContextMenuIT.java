@@ -48,7 +48,7 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
 
         clickBody();
         waitForElementNotPresent(By.id(MENU_ID));
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
@@ -58,12 +58,12 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
         rightClickOn(TARGET_ID);
         verifyOpened();
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
         rightClickOn(TARGET_ID);
 
         verifyOpened();
         Assert.assertEquals("Auto-attached context menu",
-                getOverlay().getDomProperty("innerText"));
+                getMenu().getDomProperty("innerText"));
 
         checkLogsForErrors();
     }

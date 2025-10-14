@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.contextmenu.testbench;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -29,12 +33,17 @@ import com.vaadin.testbench.elementsbase.Element;
 public class ContextMenuItemElement extends TestBenchElement {
 
     /**
-     * Open the potential sub menu of this item by hovering. If there is a sub
-     * menu, it can be used to access the sub menu items after opening the last
-     * {@code ContextMenuOverlayElement}.
+     * Open the submenu of this item by hovering over it. Returns the submenu
+     * after it has opened, which can be used to access the items in the
+     * submenu.
+     *
+     * @return the submenu element.
+     * @throws NoSuchElementException
+     *             if no submenu is opened for this item.
      */
-    public void openSubMenu() {
+    public ContextMenuElement openSubMenu() {
         hover();
+        return getSubMenu();
     }
 
     /**
@@ -44,5 +53,30 @@ public class ContextMenuItemElement extends TestBenchElement {
      */
     public boolean isChecked() {
         return hasAttribute("menu-item-checked");
+    }
+
+    private ContextMenuElement getMenu() {
+        TestBenchElement listBox = getPropertyElement("parentElement");
+        TestBenchElement overlayContent = listBox
+                .getPropertyElement("parentElement");
+        TestBenchElement menu = overlayContent
+                .getPropertyElement("parentElement");
+
+        return menu.wrap(ContextMenuElement.class);
+    }
+
+    private ContextMenuElement getSubMenu() {
+        ContextMenuElement menu = getMenu();
+        By submenuLocator = By.cssSelector(":scope > [slot='submenu'][opened]");
+
+        try {
+            // Wait for the submenu to be opened
+            waitUntil(driver -> menu.findElement(submenuLocator));
+        } catch (TimeoutException e) {
+            throw new NoSuchElementException(
+                    "No sub menu opened for this menu item.");
+        }
+
+        return menu.findElement(submenuLocator).wrap(ContextMenuElement.class);
     }
 }

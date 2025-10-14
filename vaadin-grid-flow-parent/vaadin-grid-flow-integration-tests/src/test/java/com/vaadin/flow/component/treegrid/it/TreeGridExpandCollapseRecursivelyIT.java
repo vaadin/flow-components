@@ -108,8 +108,6 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractComponentIT {
     }
 
     private void assertNumberOfExpandedLevels(int expectedNumberOfLevels) {
-        waitUntilNot((driver) -> treeGrid.isLoadingExpandedRows());
-
         // Calculate the total number of rows in a tree with the given number of
         // expanded levels using a geometric-like series: 2 + 6 + 14 + 30 ...
         // when LEVEL_SIZE is 2.

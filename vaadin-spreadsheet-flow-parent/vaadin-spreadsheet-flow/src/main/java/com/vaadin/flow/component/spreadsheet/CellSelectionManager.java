@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
@@ -273,7 +274,7 @@ public class CellSelectionManager implements Serializable {
      *
      * @param rowIndex
      *            Index of row, 1-based
-     * @param columnIndex
+     * @param colIndex
      *            Index of column, 1-based
      */
     void handleCellAddressChange(int rowIndex, int colIndex,
@@ -312,10 +313,13 @@ public class CellSelectionManager implements Serializable {
                     }
                     spreadsheet.getRpcProxy().showSelectedCell(name, colIndex,
                             rowIndex, value, formula,
-                            spreadsheet.isCellLocked(cell), initialSelection);
+                            spreadsheet.isCellLocked(cell.getAddress()),
+                            initialSelection);
                 } else {
                     spreadsheet.getRpcProxy().showSelectedCell(name, colIndex,
-                            rowIndex, "", false, spreadsheet.isCellLocked(cell),
+                            rowIndex, "", false,
+                            spreadsheet.isCellLocked(
+                                    new CellAddress(rowIndex, colIndex)),
                             initialSelection);
                 }
             } else {

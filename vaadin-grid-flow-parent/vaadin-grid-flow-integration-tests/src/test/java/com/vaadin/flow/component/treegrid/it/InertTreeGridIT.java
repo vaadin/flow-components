@@ -56,4 +56,10 @@ public class InertTreeGridIT extends AbstractComponentIT {
         Assert.assertEquals("Child 0/99", cell.getText());
     }
 
+    @Test
+    public void scrollToEnd_lastItemRendered() {
+        clickElementWithJs("scroll-to-end");
+        Assert.assertEquals(99, treeGrid.getLastVisibleRowIndex());
+    }
+
 }

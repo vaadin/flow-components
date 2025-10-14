@@ -89,4 +89,38 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
             rowIndex++;
         }
     }
+
+    protected void assertRowExpanded(int startRowIndex,
+            boolean... expectedStates) {
+        int rowIndex = startRowIndex;
+        for (boolean expectedState : expectedStates) {
+            Assert.assertEquals(
+                    "Row with index %d has unexpected expanded state"
+                            .formatted(rowIndex),
+                    String.valueOf(expectedState),
+                    treeGrid.getExpandToggleElement(rowIndex, 0)
+                            .getDomProperty("expanded"));
+            rowIndex++;
+        }
+    }
+
+    protected void assertRowLevel(int startRowIndex, int... expectedStates) {
+        int rowIndex = startRowIndex;
+        for (int expectedState : expectedStates) {
+            Assert.assertEquals(
+                    "Row with index %d has unexpected level"
+                            .formatted(rowIndex),
+                    String.valueOf(expectedState),
+                    treeGrid.getExpandToggleElement(rowIndex, 0)
+                            .getDomProperty("level"));
+
+            Assert.assertEquals(
+                    "Row with index %d has unexpected aria-level value"
+                            .formatted(rowIndex),
+                    String.valueOf(expectedState + 1),
+                    treeGrid.getRow(rowIndex).getDomAttribute("aria-level"));
+
+            rowIndex++;
+        }
+    }
 }

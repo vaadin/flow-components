@@ -83,15 +83,18 @@ public interface SpreadsheetComponentFactory extends Serializable {
             int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
 
     /**
-     * Should return the custom component that is displayed in the cell when it
-     * has been selected. Thus, the component replaces the default inline editor
+     * Should return the custom component that is displayed in the cell when the
+     * sheet is loaded or then the cell is selected when
+     * {@link Spreadsheet#setShowCustomEditorOnFocus(boolean)} is enabled. has
+     * been selected. Thus, the component replaces the default inline editor
      * functionality in the Spreadsheet. This method is called only for cells
      * that are <b>not locked</b> (a cell is considered locked when the sheet or
      * cell is protected or the cell is null).
      * <p>
-     * If some cells share the same type of "editor", the same component
-     * instance can be shared for all of those cells. As the component comes
-     * visible in Cell X, the
+     * If {@link Spreadsheet#setShowCustomEditorOnFocus(boolean)} is enabled and
+     * some cells share the same type of "editor", the same component instance
+     * can be shared for all of those cells. As the component comes visible in
+     * Cell X, the
      * {@link #onCustomEditorDisplayed(Cell, int, int, Spreadsheet, Sheet, Component)}
      * is called with the appropriate parameters. This way, you can update the
      * editor component value accordingly to the currently selected cell.

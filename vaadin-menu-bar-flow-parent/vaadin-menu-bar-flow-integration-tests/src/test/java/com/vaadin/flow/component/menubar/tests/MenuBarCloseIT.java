@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
+import com.vaadin.flow.component.menubar.testbench.MenuBarSubMenuElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -33,18 +34,14 @@ public class MenuBarCloseIT extends AbstractComponentIT {
 
     @Test
     public void clickingCloseButton_closesSubmenu() {
-        var menuBar = $(MenuBarElement.class).first();
-        menuBar.getButtons().get(0).click();
-        verifyOpened();
+        MenuBarElement menuBar = $(MenuBarElement.class).first();
+        MenuBarSubMenuElement subMenu = menuBar.getButtons().get(0)
+                .openSubMenu();
+
+        Assert.assertTrue(subMenu.isOpen());
+
         clickElementWithJs("close-button");
-        verifyClosed();
-    }
 
-    private void verifyOpened() {
-        waitForElementPresent(By.tagName(MenuBarPageIT.OVERLAY_TAG));
-    }
-
-    private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(MenuBarPageIT.OVERLAY_TAG));
+        Assert.assertFalse(subMenu.isOpen());
     }
 }

@@ -26,7 +26,6 @@ import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.avatar.AvatarGroupVariant;
 import com.vaadin.flow.component.avatar.AvatarVariant;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 
 public class AvatarGroupTest {
 
@@ -165,12 +164,5 @@ public class AvatarGroupTest {
 
         avatarGroup.setI18n(i18n);
         Assert.assertEquals(i18n, avatarGroup.getI18n());
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("AvatarGroup should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new AvatarGroup().getClass()));
     }
 }

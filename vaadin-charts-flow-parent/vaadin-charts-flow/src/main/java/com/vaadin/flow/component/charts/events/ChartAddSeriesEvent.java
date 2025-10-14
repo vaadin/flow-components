@@ -13,7 +13,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.charts.Chart;
 
-import elemental.json.JsonArray;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * The ChartAddSeriesEvent class stores data about new series added to an
@@ -35,12 +35,12 @@ public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
      */
     public ChartAddSeriesEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.options.name") String name,
-            @EventData("event.detail.originalEvent.options.data") JsonArray data) {
+            @EventData("event.detail.originalEvent.options.data") ArrayNode data) {
         super(source, fromClient);
         this.name = name;
-        this.data = new Number[data.length()];
-        for (int a = 0; a < data.length(); a++) {
-            this.data[a] = data.getObject(a).getNumber("y");
+        this.data = new Number[data.size()];
+        for (int a = 0; a < data.size(); a++) {
+            this.data[a] = data.get(a).get("y").asDouble();
         }
     }
 

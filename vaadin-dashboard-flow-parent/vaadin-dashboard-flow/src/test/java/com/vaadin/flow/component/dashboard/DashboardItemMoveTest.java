@@ -20,15 +20,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class DashboardItemMoveTest extends DashboardTestBase {
     private Dashboard dashboard;
 
-    private JsonArray itemsArray;
+    private ArrayNode itemsArray;
 
     @Before
     @Override
@@ -269,9 +270,9 @@ public class DashboardItemMoveTest extends DashboardTestBase {
 
     private void moveSectionWidget(int sectionIndex, int initialIndex,
             int finalIndex) {
-        JsonObject sectionItem = itemsArray.get(sectionIndex);
-        JsonArray sectionItems = sectionItem.getArray("items");
-        sectionItem.put("items",
+        ObjectNode sectionItem = (ObjectNode) itemsArray.get(sectionIndex);
+        ArrayNode sectionItems = (ArrayNode) sectionItem.get("items");
+        sectionItem.set("items",
                 moveItemInJsonArray(initialIndex, finalIndex, sectionItems));
     }
 
@@ -306,19 +307,19 @@ public class DashboardItemMoveTest extends DashboardTestBase {
         Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
     }
 
-    private static JsonArray moveItemInJsonArray(int initialIndex,
-            int finalIndex, JsonArray initialArray) {
-        JsonObject itemToMove = initialArray.get(initialIndex);
+    private static ArrayNode moveItemInJsonArray(int initialIndex,
+            int finalIndex, ArrayNode initialArray) {
+        JsonNode itemToMove = initialArray.get(initialIndex);
         initialArray.remove(initialIndex);
-        JsonArray newArray = Json.createArray();
+        ArrayNode newArray = JacksonUtils.createArrayNode();
         for (int i = 0; i < finalIndex; i++) {
-            JsonObject currentItem = initialArray.get(i);
-            newArray.set(i, currentItem);
+            JsonNode currentItem = initialArray.get(i);
+            newArray.add(currentItem);
         }
-        newArray.set(finalIndex, itemToMove);
-        for (int i = finalIndex; i < initialArray.length(); i++) {
-            JsonObject currentItem = initialArray.get(i);
-            newArray.set(i + 1, currentItem);
+        newArray.add(itemToMove);
+        for (int i = finalIndex; i < initialArray.size(); i++) {
+            JsonNode currentItem = initialArray.get(i);
+            newArray.add(currentItem);
         }
         return newArray;
     }

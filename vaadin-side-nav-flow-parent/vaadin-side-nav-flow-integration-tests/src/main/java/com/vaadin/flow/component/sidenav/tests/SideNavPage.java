@@ -46,6 +46,8 @@ public class SideNavPage extends Div {
         SideNavItem navigableParent = new SideNavItem("Navigable parent",
                 "vaadin-side-nav/side-nav-test-target-view");
         navigableParent.setId("navigable-parent");
+        navigableParent
+                .setTooltipText("Parent of items that can be navigated to.");
         navigableParent.addItem(new SideNavItem("Item 1",
                 "vaadin-side-nav/side-nav-test-target-view"));
         navigableParent.addItem(new SideNavItem("Item 2"));

@@ -8,20 +8,18 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vaadin.flow.component.charts.model.style.GradientColor;
 
-public class GradientColorStopsSerializer
-        extends JsonSerializer<GradientColor.Stop> {
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
-    public static Module getModule() {
+public class GradientColorStopsSerializer
+        extends ValueSerializer<GradientColor.Stop> {
+
+    public static JacksonModule getModule() {
         SimpleModule module = new SimpleModule();
         module.addSerializer(GradientColor.Stop.class,
                 new GradientColorStopsSerializer());
@@ -31,8 +29,7 @@ public class GradientColorStopsSerializer
 
     @Override
     public void serialize(GradientColor.Stop value, JsonGenerator gen,
-            SerializerProvider serializers)
-            throws IOException, JsonProcessingException {
+            SerializationContext context) {
         gen.writeStartArray();
         gen.writeNumber(value.getPosition());
         gen.writeString(value.getColor().toString());

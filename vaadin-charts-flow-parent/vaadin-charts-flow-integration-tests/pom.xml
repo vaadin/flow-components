@@ -14,7 +14,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.13.1</version>
+            <version>2.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -97,6 +97,10 @@
             <artifactId>vaadin-testbench-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -161,6 +165,9 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>flow-maven-plugin</artifactId>
+                        <configuration>
+                            <frontendDirectory>./frontend</frontendDirectory>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

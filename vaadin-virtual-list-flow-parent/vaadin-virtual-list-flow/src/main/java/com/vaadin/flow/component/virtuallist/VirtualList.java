@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.virtuallist.paging.PagelessDataCommunicator;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -43,13 +44,12 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Virtual List allows you to render a long list of items inside a scrollable
@@ -69,7 +69,7 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-alpha21")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -84,9 +84,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         }
 
         @Override
-        public void set(int start, List<JsonValue> items) {
+        public void set(int start, List<JsonNode> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()));
+                    items.stream().collect(JacksonUtils.asArray()));
         }
 
         @Override
@@ -148,7 +148,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                         getElement());
     }
 
-    private void generateItemAccessibleName(T item, JsonObject jsonObject) {
+    private void generateItemAccessibleName(T item, ObjectNode jsonObject) {
         var accessibleName = this.itemAccessibleNameGenerator.apply(item);
         if (accessibleName != null) {
             jsonObject.put("accessibleName", accessibleName);
@@ -255,7 +255,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         this.placeholderItem = placeholderItem;
 
         runBeforeClientResponse(() -> {
-            var json = Json.createObject();
+            var json = JacksonUtils.createObjectNode();
 
             if (placeholderItem != null) {
                 // Use the renderer's data generator to create the final
@@ -301,9 +301,10 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         setRenderer(renderer);
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
-        getDataCommunicator().setRequestedRange(start, length);
+    private void setViewportRange(int start, int length) {
+        getDataCommunicator().setViewportRange(start, length);
     }
 
     /**

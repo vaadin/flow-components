@@ -17,7 +17,6 @@ package com.vaadin.flow.component.upload;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -39,7 +38,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.NoInputStreamException;
@@ -51,11 +50,9 @@ import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonNull;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Upload is a component for uploading one or more files. It shows the upload
@@ -65,7 +62,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha21")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
@@ -112,16 +109,16 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         final String eventDetailFileName = "event.detail.file.name";
 
         getElement().addEventListener("file-reject", event -> {
-            String detailError = event.getEventData()
-                    .getString(eventDetailError);
+            String detailError = event.getEventData().get(eventDetailError)
+                    .asString();
             String detailFileName = event.getEventData()
-                    .getString(eventDetailFileName);
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
         }).addEventData(eventDetailError).addEventData(eventDetailFileName);
 
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
-                    .getString(eventDetailFileName);
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRemovedEvent(this, detailFileName));
         }).addEventData(eventDetailFileName);
 
@@ -133,13 +130,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
-            JsonArray files = e.getEventData().getArray(elementFiles);
+            ArrayNode files = (ArrayNode) e.getEventData().get(elementFiles);
 
-            boolean isUploading = IntStream.range(0, files.length())
+            boolean isUploading = IntStream.range(0, files.size())
                     .anyMatch(index -> {
                         final String KEY = "uploading";
-                        JsonObject object = files.getObject(index);
-                        return object.hasKey(KEY) && object.getBoolean(KEY);
+                        JsonNode object = files.get(index);
+                        return object.has(KEY)
+                                && object.get(KEY).booleanValue();
                     });
 
             if (this.uploading && !isUploading) {
@@ -195,6 +193,22 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     public Upload(UploadHandler handler) {
         this();
         setUploadHandler(handler);
+    }
+
+    /**
+     * Create a new instance of Upload with the given upload handler and target
+     * name.
+     *
+     * @param handler
+     *            upload handler that handles the upload, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
+     */
+    public Upload(UploadHandler handler, String targetName) {
+        this();
+        setUploadHandler(handler, targetName);
     }
 
     /**
@@ -351,7 +365,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         if (accepted == null) {
             return Collections.emptyList();
         }
-        return Arrays.asList(accepted.split(","));
+        return List.of(accepted.split(","));
     }
 
     /**
@@ -722,17 +736,43 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * The given handler defines how uploaded file content is handled on the
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     * <p>
+     * This overload uses the default upload target name {@code "upload"}, which
+     * becomes the last segment of the dynamically generated upload URL.
      *
      * @param handler
      *            upload handler to use for file receptions, not {@code null}
      */
     public void setUploadHandler(UploadHandler handler) {
+        setUploadHandler(handler, "upload");
+    }
+
+    /**
+     * Set the upload handler to be used for this upload component.
+     * <p>
+     * The given handler defines how uploaded file content is handled on the
+     * server and invoked per each single file to be uploaded. Note! This method
+     * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     *
+     * @param handler
+     *            upload handler to use for file receptions, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
+     */
+    public void setUploadHandler(UploadHandler handler, String targetName) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
+        Objects.requireNonNull(targetName, "The target name cannot be null");
+        if (targetName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "The target name cannot be blank");
+        }
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 handler, this.getElement()) {
             @Override
             public String getName() {
-                return "upload";
+                return targetName;
             }
         };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
@@ -767,11 +807,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        deeplyRemoveNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(this.i18n);
 
         // Assign new I18N object to WC, by deeply merging the existing
         // WC I18N, and the values from the new UploadI18N instance,
@@ -803,16 +839,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         }
     }
 
-    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
-                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
-            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
-    }
-
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
@@ -830,38 +856,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         return i18n;
     }
 
-    private String getStringObject(String propertyName, String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(subName)
-                && !(json.get(subName) instanceof JsonNull)) {
-            result = json.getString(subName);
-        }
-        return result;
-    }
-
-    private String getStringObject(String propertyName, String object,
-            String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(object)
-                && !(json.get(object) instanceof JsonNull)) {
-            json = json.getObject(object);
-            if (json != null && json.hasKey(subName)
-                    && !(json.get(subName) instanceof JsonNull)) {
-                result = json.getString(subName);
-            }
-        }
-        return result;
-    }
-
     /**
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", Json.createArray());
+        getElement().setPropertyJson("files", JacksonUtils.createArrayNode());
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

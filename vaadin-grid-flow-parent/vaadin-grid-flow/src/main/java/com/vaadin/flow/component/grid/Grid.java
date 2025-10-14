@@ -126,17 +126,16 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Grid is a component for showing tabular data. A basic Grid uses plain text to
@@ -213,8 +212,8 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha8")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha21")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha21")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -266,9 +265,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         @Override
-        public void set(int start, List<JsonValue> items) {
+        public void set(int start, List<JsonNode> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()));
+                    items.stream().collect(JacksonUtils.asArray()));
         }
 
         @Override
@@ -1301,7 +1300,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         @Override
-        public void generateData(T item, JsonObject jsonObject) {
+        public void generateData(T item, ObjectNode jsonObject) {
             if (itemDetailsDataGenerator != null && isDetailsVisible(item)) {
                 jsonObject.put("detailsOpened", true);
                 itemDetailsDataGenerator.generateData(item, jsonObject);
@@ -1373,7 +1372,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @Override
         public void initialize() {
-            setRequestedRange(0, getPageSize());
+            setViewportRange(0, getPageSize());
         }
     }
 
@@ -1689,9 +1688,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         initSelectionPreservationHandler();
     }
 
-    private void generateUniqueKeyData(T item, JsonObject jsonObject) {
-        if (uniqueKeyProperty != null
-                && !jsonObject.hasKey(uniqueKeyProperty)) {
+    private void generateUniqueKeyData(T item, ObjectNode jsonObject) {
+        if (uniqueKeyProperty != null && !jsonObject.has(uniqueKeyProperty)) {
             jsonObject.put(uniqueKeyProperty, getUniqueKey(item));
         }
     }
@@ -1923,8 +1921,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Adds a new text column to this {@link Grid} with a value provider and
      * sorting properties.The value is converted to a JSON value by using
-     * {@link JsonSerializer#toJson(Object)}. The sorting properties are used to
-     * configure backend sorting for this column. In-memory sorting is
+     * {@link JacksonSerializer#toJson(Object)}. The sorting properties are used
+     * to configure backend sorting for this column. In-memory sorting is
      * automatically configured using the return type of the given
      * {@link ValueProvider}.
      *
@@ -3061,7 +3059,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getElement()
                 .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
-        setRequestedRange(0, pageSize);
+        setViewportRange(0, pageSize);
         getDataCommunicator().reset();
     }
 
@@ -3328,20 +3326,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (items.isEmpty()) {
             return;
         }
-        JsonArray jsonArray = Json.createArray();
+        ArrayNode jsonArray = JacksonUtils.createArrayNode();
         for (T item : items) {
-            JsonObject jsonObject = item != null
-                    ? generateJsonForSelection(item)
+            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
                     : null;
-            jsonArray.set(jsonArray.length(), jsonObject);
+            jsonArray.add(jsonObject);
         }
 
         callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
                 false);
     }
 
-    private JsonObject generateJsonForSelection(T item) {
-        JsonObject json = Json.createObject();
+    private JsonNode generateJsonForSelection(T item) {
+        ObjectNode json = JacksonUtils.createObjectNode();
         json.put("key", getDataCommunicator().getKeyMapper().key(item));
         return json;
     }
@@ -3839,7 +3836,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
+    private void setViewportRange(int start, int length) {
         if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
             throw new IllegalArgumentException(
                     "Attempted to fetch more items from server than allowed in one go. "
@@ -3850,7 +3847,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + "reason this is not an option, increase the page size of the grid so that rendering "
                             + "every item at once doesn't result in a request for over 10 pages.");
         }
-        getDataCommunicator().setRequestedRange(start, length);
+        getDataCommunicator().setViewportRange(start, length);
     }
 
     @ClientCallable
@@ -3864,18 +3861,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     @ClientCallable
-    private void sortersChanged(JsonArray sorters) {
+    private void sortersChanged(ArrayNode sorters) {
         GridSortOrderBuilder<T> sortOrderBuilder = new GridSortOrderBuilder<>();
-        for (int i = 0; i < sorters.length(); ++i) {
-            JsonObject sorter = sorters.getObject(i);
-            Column<T> column = idToColumnMap.get(sorter.getString("path"));
+        for (int i = 0; i < sorters.size(); ++i) {
+            JsonNode sorter = sorters.get(i);
+            Column<T> column = idToColumnMap.get(sorter.get("path").asString());
             if (column == null) {
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")
-                    && sorter.get("direction").getType() == JsonType.STRING) {
-                switch (sorter.getString("direction")) {
+            if (sorter.has("direction") && sorter.get("direction")
+                    .getNodeType() == JsonNodeType.STRING) {
+                switch (sorter.get("direction").asString()) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
                     break;
@@ -4007,11 +4004,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             pendingSorterUpdate.cancelExecution();
         }
 
-        JsonArray directions = Json.createArray();
+        ArrayNode directions = JacksonUtils.createArrayNode();
 
-        for (int i = 0; i < order.size(); i++) {
-            GridSortOrder<T> gridSortOrder = order.get(i);
-            JsonObject direction = Json.createObject();
+        for (GridSortOrder<T> gridSortOrder : order) {
+            ObjectNode direction = JacksonUtils.createObjectNode();
 
             String columnId = gridSortOrder.getSorted().getInternalId();
             direction.put("column", columnId);
@@ -4029,7 +4025,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + gridSortOrder.getDirection());
                 }
             }
-            directions.set(i, direction);
+            directions.add(direction);
         }
 
         if (getElement().getNode().isAttached()) {
@@ -4154,7 +4150,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(valueProvider);
 
         return addDataGenerator(
-                (item, data) -> data.put(property, JsonSerializer
+                (item, data) -> data.set(property, JacksonSerializer
                         .toJson(applyValueProvider(valueProvider, item))));
     }
 
@@ -4434,8 +4430,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return partNameGenerator;
     }
 
-    private void generateTooltipTextData(T item, JsonObject jsonObject) {
-        JsonObject tooltips = Json.createObject();
+    private void generateTooltipTextData(T item, ObjectNode jsonObject) {
+        ObjectNode tooltips = JacksonUtils.createObjectNode();
 
         String rowTooltip = tooltipGenerator.apply(item);
         if (rowTooltip != null) {
@@ -4449,13 +4445,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         });
 
-        if (tooltips.keys().length > 0) {
-            jsonObject.put("gridtooltips", tooltips);
+        if (!JacksonUtils.getKeys(tooltips).isEmpty()) {
+            jsonObject.set("gridtooltips", tooltips);
         }
     }
 
-    private void generateStyleData(T item, JsonObject jsonObject) {
-        JsonObject style = Json.createObject();
+    private void generateStyleData(T item, ObjectNode jsonObject) {
+        ObjectNode style = JacksonUtils.createObjectNode();
 
         String rowClassName = classNameGenerator.apply(item);
         if (rowClassName != null) {
@@ -4469,13 +4465,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         });
 
-        if (style.keys().length > 0) {
-            jsonObject.put("style", style);
+        if (!JacksonUtils.getKeys(style).isEmpty()) {
+            jsonObject.set("style", style);
         }
     }
 
-    private void generatePartData(T item, JsonObject jsonObject) {
-        JsonObject part = Json.createObject();
+    private void generatePartData(T item, ObjectNode jsonObject) {
+        ObjectNode part = JacksonUtils.createObjectNode();
 
         String rowPartName = partNameGenerator.apply(item);
         if (rowPartName != null) {
@@ -4489,12 +4485,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         });
 
-        if (part.keys().length > 0) {
-            jsonObject.put("part", part);
+        if (!JacksonUtils.getKeys(part).isEmpty()) {
+            jsonObject.set("part", part);
         }
     }
 
-    private void generateRowsDragAndDropAccess(T item, JsonObject jsonObject) {
+    private void generateRowsDragAndDropAccess(T item, ObjectNode jsonObject) {
         if (getDropMode() != null && !dropFilter.test(item)) {
             jsonObject.put("dropDisabled", true);
         }
@@ -4504,18 +4500,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    private void generateDragData(T item, JsonObject jsonObject) {
-        JsonObject dragData = Json.createObject();
+    private void generateDragData(T item, ObjectNode jsonObject) {
+        ObjectNode dragData = JacksonUtils.createObjectNode();
 
         this.dragDataGenerators.entrySet().forEach(entry -> dragData
                 .put(entry.getKey(), entry.getValue().apply(item)));
 
-        if (dragData.keys().length > 0) {
-            jsonObject.put("dragData", dragData);
+        if (!JacksonUtils.getKeys(dragData).isEmpty()) {
+            jsonObject.set("dragData", dragData);
         }
     }
 
-    private void generateSelectableData(T item, JsonObject jsonObject) {
+    private void generateSelectableData(T item, ObjectNode jsonObject) {
         if (selectableProvider != null) {
             boolean selectable = selectableProvider.test(item);
             jsonObject.put("selectable", selectable);
@@ -4864,10 +4860,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             SerializableFunction<T, String> dragDataGenerator) {
         this.dragDataGenerators.put(type, dragDataGenerator);
 
-        JsonArray types = Json.createArray();
+        ArrayNode types = JacksonUtils.createArrayNode();
 
-        this.dragDataGenerators.keySet()
-                .forEach(t -> types.set(types.length(), t));
+        this.dragDataGenerators.keySet().forEach(types::add);
         this.getElement().setPropertyJson("__dragDataTypes", types);
         getDataCommunicator().reset();
     }
@@ -4922,6 +4917,33 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .setAttribute("position", position.getPosition()));
     }
 
+    /**
+     * Returns whether the tooltip content is rendered as Markdown.
+     *
+     * @return {@code true} if the content is rendered as Markdown,
+     *         {@code false} if it is treated as plain text
+     */
+    public boolean isTooltipMarkdownEnabled() {
+        return getTooltipElement().map(
+                tooltipElement -> tooltipElement.getProperty("markdown", false))
+                .orElse(false);
+    }
+
+    /**
+     * Sets whether the tooltip content is rendered as Markdown. By default, the
+     * content is treated as plain text.
+     *
+     * @param markdownEnabled
+     *            {@code true} to render the content as Markdown, {@code false}
+     *            to treat it as plain text
+     */
+    public void setTooltipMarkdownEnabled(boolean markdownEnabled) {
+        addTooltipElementToTooltipSlot();
+
+        getTooltipElement().ifPresent(tooltipElement -> tooltipElement
+                .setProperty("markdown", markdownEnabled));
+    }
+
     private void addTooltipElementToTooltipSlot() {
         if (getTooltipElement().isPresent()) {
             // the grid's tooltip slot has already been filled
@@ -4966,7 +4988,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 draggedItemsCount);
 
         if (dragData != null) {
-            JsonObject json = Json.createObject();
+            ObjectNode json = JacksonUtils.createObjectNode();
             dragData.entrySet()
                     .forEach(e -> json.put(e.getKey(), e.getValue()));
             this.getElement().setPropertyJson("__selectionDragData", json);
@@ -5091,7 +5113,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         int preloadedItemsCount = lastIndexPageEndIndex - targetPageStartIndex
                 + 1;
         // Preload the items
-        setRequestedRange(targetPageStartIndex, preloadedItemsCount);
+        setViewportRange(targetPageStartIndex, preloadedItemsCount);
 
         // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);

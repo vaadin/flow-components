@@ -47,7 +47,7 @@ public class DetachAttachIT extends AbstractComponentIT {
     private void editItemAndChangeField() {
         crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(0);
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");

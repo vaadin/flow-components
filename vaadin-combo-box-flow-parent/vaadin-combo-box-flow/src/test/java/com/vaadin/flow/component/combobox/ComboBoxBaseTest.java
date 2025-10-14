@@ -30,18 +30,16 @@ import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 import com.vaadin.tests.dataprovider.MockUI;
-
-import elemental.json.Json;
 
 /**
  * Suite of basic tests that apply to both, ComboBox and MultiSelectComboBox
@@ -78,13 +76,6 @@ public abstract class ComboBoxBaseTest {
     public void implementsHasAllowedCharPattern() {
         Assert.assertTrue("ComboBox should support allowed char pattern",
                 HasAllowedCharPattern.class.isAssignableFrom(
-                        createComboBox(String.class).getClass()));
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("ComboBox should support overlay class name",
-                HasOverlayClassName.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 
@@ -252,7 +243,8 @@ public abstract class ComboBoxBaseTest {
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
 
-        comboBox.getDataGenerator().generateData("foo", Json.createObject());
+        comboBox.getDataGenerator().generateData("foo",
+                JacksonUtils.createObjectNode());
     }
 
     @Test

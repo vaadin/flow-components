@@ -15,29 +15,30 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Dashboard is a responsive layout component that allows users to organize
@@ -58,7 +59,7 @@ import elemental.json.JsonType;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha21")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -590,42 +591,46 @@ public class Dashboard extends Component
     }
 
     private void updateClientItems() {
-        final AtomicInteger itemIndex = new AtomicInteger();
-        List<String> itemRepresentations = new ArrayList<>();
-        List<Component> flatOrderedComponents = new ArrayList<>();
+        ArrayNode itemsJson = JacksonUtils.createArrayNode();
         for (Component component : childrenComponents) {
-            flatOrderedComponents.add(component);
-            String itemRepresentation;
             if (component instanceof DashboardSection section) {
-                flatOrderedComponents.addAll(section.getWidgets());
                 List<DashboardWidget> sectionWidgets = section.getWidgets();
-                int sectionIndex = itemIndex.getAndIncrement();
-                String sectionWidgetsRepresentation = sectionWidgets.stream()
-                        .map(widget -> getWidgetRepresentation(widget,
-                                itemIndex.getAndIncrement()))
-                        .collect(Collectors.joining(","));
-                itemRepresentation = "{ component: $%d, items: [ %s ], id: %d }"
-                        .formatted(sectionIndex, sectionWidgetsRepresentation,
-                                section.getElement().getNode().getId());
+                ArrayNode widgetsJson = sectionWidgets.stream()
+                        .map(Dashboard::getWidgetRepresentation)
+                        .collect(JacksonUtils.asArray());
+
+                ObjectNode sectionJson = JacksonUtils.createObjectNode();
+                sectionJson.put("id", section.getElement().getNode().getId());
+                sectionJson.set("items", widgetsJson);
+                itemsJson.add(sectionJson);
             } else {
-                itemRepresentation = getWidgetRepresentation(
-                        (DashboardWidget) component,
-                        itemIndex.getAndIncrement());
+                ObjectNode widgetJson = getWidgetRepresentation(
+                        (DashboardWidget) component);
+                itemsJson.add(widgetJson);
             }
-            itemRepresentations.add(itemRepresentation);
         }
-        String updateItemsSnippet = "this.items = [ %s ];"
-                .formatted(String.join(",", itemRepresentations));
-        getElement().executeJs(updateItemsSnippet,
-                flatOrderedComponents.toArray(Component[]::new));
+
+        String appId = UI.getCurrent().getInternals().getAppId();
+        getElement().executeJs(
+                """
+                        const items = $0;
+                        const appId = $1;
+                        function populateComponents(items) {
+                          items.forEach(item => {
+                            item.component = window.Vaadin.Flow.clients[appId].getByNodeId(item.id);
+                            if (item.items) {
+                              populateComponents(item.items);
+                            }
+                          });
+                        }
+                        populateComponents(items);
+                        this.items = items;
+                        """,
+                itemsJson, appId);
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new DashboardI18n instance,
@@ -634,19 +639,13 @@ public class Dashboard extends Component
                 i18nJson);
     }
 
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
-    }
+    private static ObjectNode getWidgetRepresentation(DashboardWidget widget) {
+        ObjectNode widgetJson = JacksonUtils.createObjectNode();
+        widgetJson.put("id", widget.getElement().getNode().getId());
+        widgetJson.put("colspan", widget.getColspan());
+        widgetJson.put("rowspan", widget.getRowspan());
 
-    private static String getWidgetRepresentation(DashboardWidget widget,
-            int itemIndex) {
-        return "{ component: $%d, colspan: %d, rowspan: %d, id: %d  }"
-                .formatted(itemIndex, widget.getColspan(), widget.getRowspan(),
-                        widget.getElement().getNode().getId());
+        return widgetJson;
     }
 
     private void doRemoveAll() {
@@ -698,10 +697,10 @@ public class Dashboard extends Component
 
     private void handleItemMovedClientEvent(DomEvent e, String itemKey,
             String itemsKey, String sectionKey) {
-        int itemNodeId = (int) e.getEventData().getNumber(itemKey);
-        JsonArray itemsNodeIds = e.getEventData().getArray(itemsKey);
-        Integer sectionNodeId = e.getEventData().hasKey(sectionKey)
-                ? (int) e.getEventData().getNumber(sectionKey)
+        int itemNodeId = e.getEventData().get(itemKey).intValue();
+        ArrayNode itemsNodeIds = (ArrayNode) e.getEventData().get(itemsKey);
+        Integer sectionNodeId = e.getEventData().has(sectionKey)
+                ? e.getEventData().get(sectionKey).intValue()
                 : null;
         DashboardSection section = null;
         List<Component> reorderedItems;
@@ -741,9 +740,9 @@ public class Dashboard extends Component
 
     private void handleItemResizedClientEvent(DomEvent e, String idKey,
             String colspanKey, String rowspanKey) {
-        int nodeId = (int) e.getEventData().getNumber(idKey);
-        int colspan = (int) e.getEventData().getNumber(colspanKey);
-        int rowspan = (int) e.getEventData().getNumber(rowspanKey);
+        int nodeId = e.getEventData().get(idKey).intValue();
+        int colspan = e.getEventData().get(colspanKey).intValue();
+        int rowspan = e.getEventData().get(rowspanKey).intValue();
         DashboardWidget resizedWidget = getWidgets().stream()
                 .filter(child -> nodeId == child.getElement().getNode().getId())
                 .findAny().orElseThrow();
@@ -766,7 +765,7 @@ public class Dashboard extends Component
     }
 
     private void handleItemRemovedClientEvent(DomEvent e, String idKey) {
-        int nodeId = (int) e.getEventData().getNumber(idKey);
+        int nodeId = e.getEventData().get(idKey).intValue();
         Component removedItem = getItem(nodeId);
         withoutClientUpdate(removedItem::removeFromParent);
         fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
@@ -795,7 +794,7 @@ public class Dashboard extends Component
     }
 
     private static List<Component> getReorderedItemsList(
-            JsonArray reorderedItemsFromClient,
+            ArrayNode reorderedItemsFromClient,
             Component reorderedItemsParent) {
         Objects.requireNonNull(reorderedItemsFromClient);
         Map<Integer, Component> nodeIdToItems = reorderedItemsParent
@@ -804,24 +803,23 @@ public class Dashboard extends Component
                         item -> item.getElement().getNode().getId(),
                         Function.identity()));
         List<Component> items = new ArrayList<>();
-        for (int index = 0; index < reorderedItemsFromClient
-                .length(); index++) {
-            int nodeIdFromClient = (int) ((JsonObject) reorderedItemsFromClient
-                    .get(index)).getNumber("id");
+        for (int index = 0; index < reorderedItemsFromClient.size(); index++) {
+            int nodeIdFromClient = reorderedItemsFromClient.get(index).get("id")
+                    .intValue();
             items.add(nodeIdToItems.get(nodeIdFromClient));
         }
         return items;
     }
 
-    private static JsonArray getSectionItems(JsonArray items,
+    private static ArrayNode getSectionItems(ArrayNode items,
             int sectionNodeId) {
         for (int rootLevelIdx = 0; rootLevelIdx < items
-                .length(); rootLevelIdx++) {
-            JsonObject item = items.get(rootLevelIdx);
-            int itemNodeId = (int) item.getNumber("id");
+                .size(); rootLevelIdx++) {
+            JsonNode item = items.get(rootLevelIdx);
+            int itemNodeId = item.get("id").intValue();
             if (sectionNodeId == itemNodeId) {
-                JsonObject sectionObj = items.get(rootLevelIdx);
-                return sectionObj.getArray("items");
+                JsonNode sectionObj = items.get(rootLevelIdx);
+                return (ArrayNode) sectionObj.get("items");
             }
         }
         return null;
@@ -830,6 +828,7 @@ public class Dashboard extends Component
     /**
      * The internationalization properties for {@link Dashboard}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DashboardI18n implements Serializable {
 
         private String selectSection;

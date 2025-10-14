@@ -26,14 +26,16 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
@@ -177,22 +179,12 @@ public class DialogTest {
     }
 
     @Test
-    public void isModal_trueByDefault() {
+    public void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
 
-        // Element's api "modeless" acts inverted to Flow's api "modal":
-        // modeless is false and modal is true by default
-        Assert.assertTrue("modal is true by default",
-                !dialog.getElement().getProperty("modeless", false));
-    }
-
-    @Test
-    public void getOverlayRole_defaultDialog() {
-        Dialog dialog = new Dialog();
-
+        Assert.assertEquals("dialog", dialog.getRole());
         Assert.assertEquals("dialog", dialog.getOverlayRole());
-        Assert.assertEquals("dialog",
-                dialog.getElement().getProperty("overlayRole"));
+        Assert.assertEquals("dialog", dialog.getElement().getProperty("role"));
     }
 
     @Test
@@ -200,9 +192,10 @@ public class DialogTest {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole("alertdialog");
 
+        Assert.assertEquals("alertdialog", dialog.getRole());
         Assert.assertEquals("alertdialog", dialog.getOverlayRole());
         Assert.assertEquals("alertdialog",
-                dialog.getElement().getProperty("overlayRole"));
+                dialog.getElement().getProperty("role"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -212,37 +205,20 @@ public class DialogTest {
     }
 
     @Test
-    public void setModal_dialogCanBeModeless() {
+    public void setRole_getRole() {
         Dialog dialog = new Dialog();
-        dialog.setModal(false);
+        dialog.setRole("alertdialog");
 
-        // Element's api "modeless" acts inverted to Flow's api "modal":
-        // modeless is false and modal is true by default
-        Assert.assertFalse("modal can be set to false",
-                !dialog.getElement().getProperty("modeless", false));
+        Assert.assertEquals("alertdialog", dialog.getRole());
+        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                dialog.getElement().getProperty("role"));
     }
 
-    // vaadin/flow#7799,vaadin/vaadin-dialog#229
-    @Test
-    public void dialogAttached_targetedWithShortcutListenOn_addsJsExecutionForTransportingShortcutEvents() {
+    @Test(expected = NullPointerException.class)
+    public void setRole_null_throws() {
         Dialog dialog = new Dialog();
-        dialog.open();
-        // there are a 6 invocations pending after opening a dialog (???) clear
-        // those first
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().dumpPendingJavaScriptInvocations();
-
-        // adding a shortcut with listenOn(dialog) makes flow pass events from
-        // overlay to dialog so that shortcuts inside dialog work
-        Shortcuts.addShortcutListener(dialog, event -> {
-        }, Key.KEY_A).listenOn(dialog);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-
-        final List<PendingJavaScriptInvocation> pendingJavaScriptInvocations = ui
-                .getInternals().dumpPendingJavaScriptInvocations();
-        Assert.assertEquals(
-                "Shortcut transferring invocation should be pending", 1,
-                pendingJavaScriptInvocations.size());
+        dialog.setRole(null);
     }
 
     private void addDivAtIndex(int index) {
@@ -418,6 +394,23 @@ public class DialogTest {
 
         Assert.assertEquals("10px", dialog.getTop());
         Assert.assertEquals("20px", dialog.getLeft());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void addClosedListener_listenerInvokedOnClose() {
+        Dialog dialog = new Dialog();
+        ComponentEventListener<Dialog.ClosedEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+        dialog.addClosedListener(listener);
+
+        Element element = dialog.getElement();
+        dialog.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(element, "closed",
+                        JacksonUtils.createObjectNode()));
+
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any(Dialog.ClosedEvent.class));
     }
 
     private void fakeClientResponse() {

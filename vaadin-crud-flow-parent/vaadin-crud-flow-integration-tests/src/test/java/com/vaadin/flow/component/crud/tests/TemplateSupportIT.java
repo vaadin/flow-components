@@ -72,10 +72,10 @@ public class TemplateSupportIT extends AbstractComponentIT {
                 "Edit: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
 
-        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
+        Assert.assertEquals("Guille", crud.getForm().$(TextFieldElement.class)
                 .id("firstName").getValue());
 
-        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
+        Assert.assertEquals("Guille", crud.getForm().$(TextFieldElement.class)
                 .id("lastName").getValue());
     }
 
@@ -83,7 +83,7 @@ public class TemplateSupportIT extends AbstractComponentIT {
     public void saveTest() {
         CrudElement crud = getCrud().waitForFirst();
         crud.openRowForEditing(0);
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class).id("lastName");
         lastNameField.setValue("Oladeji");
 

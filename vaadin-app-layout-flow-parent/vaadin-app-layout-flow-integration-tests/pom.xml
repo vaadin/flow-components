@@ -96,7 +96,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.17</version>
         </dependency>
     </dependencies>
     <build>
@@ -162,6 +161,9 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>flow-maven-plugin</artifactId>
+                        <configuration>
+                            <frontendDirectory>./frontend</frontendDirectory>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

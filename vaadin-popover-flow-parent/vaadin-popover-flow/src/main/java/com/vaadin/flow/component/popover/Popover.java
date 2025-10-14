@@ -16,15 +16,10 @@
 package com.vaadin.flow.component.popover;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -38,17 +33,13 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.dom.ClassList;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.ElementDetachEvent;
-import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Popover is a component for creating overlays that are positioned next to
@@ -57,7 +48,7 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/popover", version = "25.0.0-alpha21")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
@@ -82,13 +73,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * Constructs an empty popover.
      */
     public Popover() {
-        getElement().getNode().addAttachListener(this::attachComponentRenderer);
-
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
 
         updateTrigger();
-        setOverlayRole("dialog");
+        setRole("dialog");
     }
 
     /**
@@ -185,7 +174,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * {@code opened-changed} event is sent when the overlay opened state
+     * {@code opened-changed} event is sent when the popover opened state
      * changes.
      */
     @DomEvent("opened-changed")
@@ -332,27 +321,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         return getElement().getProperty("withBackdrop", false);
     }
 
-    @Override
-    public void setAriaLabel(String ariaLabel) {
-        getElement().setProperty("accessibleName", ariaLabel);
-    }
-
-    @Override
-    public Optional<String> getAriaLabel() {
-        return Optional.ofNullable(getElement().getProperty("accessibleName"));
-    }
-
-    @Override
-    public void setAriaLabelledBy(String labelledBy) {
-        getElement().setProperty("accessibleNameRef", labelledBy);
-    }
-
-    @Override
-    public Optional<String> getAriaLabelledBy() {
-        return Optional
-                .ofNullable(getElement().getProperty("accessibleNameRef"));
-    }
-
     /**
      * Set {@code true} to make the popover content automatically receive focus
      * after it is opened. Modal popovers use this behavior by default.
@@ -376,25 +344,51 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the popover element, used by screen readers.
      *
      * @param role
      *            the role to set
      */
-    public void setOverlayRole(String role) {
+    public void setRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
 
-        getElement().setProperty("overlayRole", role);
+        getElement().setProperty("role", role);
     }
 
     /**
-     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the popover, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     * @deprecated Use {@link #setRole(String)} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public void setOverlayRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        setRole(role);
+    }
+
+    /**
+     * Gets the ARIA role for the popover element, used by screen readers.
      * Defaults to {@code dialog}.
      *
      * @return the role
      */
+    public String getRole() {
+        return getElement().getProperty("role");
+    }
+
+    /**
+     * Gets the ARIA role for the popover, used by screen readers. Defaults to
+     * {@code dialog}.
+     *
+     * @return the role
+     * @deprecated Use {@link #getRole()} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public String getOverlayRole() {
-        return getElement().getProperty("overlayRole");
+        return getRole();
     }
 
     /**
@@ -653,18 +647,18 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     private void updateTrigger() {
-        JsonArray trigger = Json.createArray();
+        ArrayNode trigger = JacksonUtils.createArrayNode();
 
         if (isOpenOnClick()) {
-            trigger.set(trigger.length(), "click");
+            trigger.add("click");
         }
 
         if (isOpenOnHover()) {
-            trigger.set(trigger.length(), "hover");
+            trigger.add("hover");
         }
 
         if (isOpenOnFocus()) {
-            trigger.set(trigger.length(), "focus");
+            trigger.add("focus");
         }
 
         getElement().setPropertyJson("trigger", trigger);
@@ -736,14 +730,73 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     private void onTargetAttach(UI ui) {
+
         if (target != null) {
             if (getElement().getNode().getParent() == null) {
                 // Remove the popover from its current state tree
                 getElement().removeFromTree(false);
-                ui.addToModalComponent(this);
+                getModalParentComponent().ifPresentOrElse(modalParent -> {
+                    updateSlotAttribute(modalParent);
+
+                    if (modalParent instanceof HasComponents) {
+                        ((HasComponents) modalParent).add(this);
+                    } else {
+                        modalParent.getElement().appendChild(getElement());
+                    }
+                }, () -> {
+                    ui.addToModalComponent(this);
+                });
+
                 autoAddedToTheUi = true;
             }
             getElement().executeJs("this.target = $0", target.getElement());
+        }
+    }
+
+    /**
+     * Finds the closest parent component that is annotated with
+     * {@link ModalRoot}, if any.
+     *
+     * @return an optional with the closest modal parent component, or an empty
+     *         optional if none found
+     */
+    private Optional<Component> getModalParentComponent() {
+        var parent = target.getParent();
+        while (parent.isPresent()) {
+            var parentComponent = parent.get();
+            if (parentComponent.getClass()
+                    .isAnnotationPresent(ModalRoot.class)) {
+                return parent;
+            }
+            parent = parentComponent.getParent();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Updates the {@code slot} attribute based on the target or its ancestors
+     * up to the modal parent.
+     * <p>
+     * It starts by removing any existing {@code slot} attribute from the
+     * popover. Then, it gets the {@link ModalRoot} annotation from the modal
+     * parent component to determine the appropriate slot value. If the modal
+     * parent defines a value for the {@link ModalRoot#slot()} property, it sets
+     * the {@code slot} attribute on the popover element.
+     * 
+     * <p>
+     * This ensures that the popover is rendered in the correct slot when used
+     * inside a modal component.
+     *
+     * @param modalParent
+     *            the modal parent component
+     */
+    private void updateSlotAttribute(Component modalParent) {
+        getElement().removeAttribute("slot");
+        var annotation = modalParent.getClass().getAnnotation(ModalRoot.class);
+
+        var slotValue = annotation.slot();
+        if (slotValue != null && !slotValue.isEmpty()) {
+            getElement().setAttribute("slot", slotValue);
         }
     }
 
@@ -759,14 +812,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the width of the popover overlay content area.
+     * Sets the width of the popover content area.
      * <p>
      * The width should be in a format understood by the browser, e.g. "100px"
      * or "2.5em" (Using relative unit, such as percentage, will lead to
      * unexpected results).
      * <p>
      * If the provided {@code width} value is {@literal null} then width is
-     * removed, and the popover overlay is auto-sized based on the content.
+     * removed, and the popover is auto-sized based on the content.
      *
      * @param width
      *            the width to set, may be {@code null}
@@ -776,14 +829,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the height of the popover overlay content area.
+     * Sets the height of the popover content area.
      * <p>
      * The height should be in a format understood by the browser, e.g. "100px"
      * or "2.5em" (Using relative unit, such as percentage, will lead to
      * unexpected results).
      * <p>
      * If the provided {@code height} value is {@literal null} then height is
-     * removed, and the popover overlay is auto-sized based on the content.
+     * removed, and the popover is auto-sized based on the content.
      *
      * @param height
      *            the height to set, may be {@code null}
@@ -793,137 +846,12 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Adds the given components into this popover.
-     * <p>
-     * The elements in the DOM will not be children of the
-     * {@code <vaadin-popover>} element, but will be inserted into an overlay
-     * that is attached into the {@code <body>}.
-     *
-     * @param components
-     *            the components to add
-     */
-    @Override
-    public void add(Collection<Component> components) {
-        HasComponents.super.add(components);
-
-        updateVirtualChildNodeIds();
-    }
-
-    /**
-     * Adds the given component into this popover at the given index.
-     * <p>
-     * The element in the DOM will not be child of the {@code <vaadin-popover>}
-     * element, but will be inserted into an overlay that is attached into the
-     * {@code <body>}.
-     *
-     * @param index
-     *            the index, where the component will be added.
-     *
-     * @param component
-     *            the component to add
-     */
-    @Override
-    public void addComponentAtIndex(int index, Component component) {
-        HasComponents.super.addComponentAtIndex(index, component);
-
-        updateVirtualChildNodeIds();
-    }
-
-    private void attachComponentRenderer() {
-        getElement().executeJs(
-                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
-
-        String appId = UI.getCurrent().getInternals().getAppId();
-
-        getElement().executeJs(
-                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
-                appId);
-    }
-
-    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-
-    // Must not use lambda here as that would break serialization. See
-    // https://github.com/vaadin/flow-components/issues/5597
-    private ElementDetachListener childDetachListener = new ElementDetachListener() {
-        @Override
-        public void onDetach(ElementDetachEvent e) {
-            var child = e.getSource();
-            var childDetachedFromContainer = !getElement().getChildren()
-                    .anyMatch(containerChild -> Objects.equals(child,
-                            containerChild));
-
-            if (childDetachedFromContainer) {
-                // The child was removed from the popover
-
-                // Remove the registration for the child detach listener
-                childDetachListenerMap.get(child).remove();
-                childDetachListenerMap.remove(child);
-
-                updateVirtualChildNodeIds();
-            }
-        }
-    };
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        updateVirtualChildNodeIds();
-    }
-
-    /**
-     * Updates the virtualChildNodeIds property of the popover element.
-     * <p>
-     * This method is called whenever the popover's child components change.
-     * <p>
-     * Also calls {@code requestContentUpdate} on the popover element to trigger
-     * the content update.
-     */
-    private void updateVirtualChildNodeIds() {
-        // Add detach listeners (child may be removed with removeFromParent())
-        getElement().getChildren().forEach(child -> {
-            if (!childDetachListenerMap.containsKey(child)) {
-                childDetachListenerMap.put(child,
-                        child.addDetachListener(childDetachListener));
-            }
-        });
-
-        getElement().setPropertyList("virtualChildNodeIds",
-                getElement().getChildren()
-                        .map(element -> element.getNode().getId())
-                        .collect(Collectors.toList()));
-
-        getElement().callJsFunction("requestContentUpdate");
-    }
-
-    /**
-     * Sets the CSS class names of the popover overlay element. This method
-     * overwrites any previous set class names.
-     *
-     * @param className
-     *            a space-separated string of class names to set, or
-     *            <code>null</code> to remove all class names
-     */
-    @Override
-    public void setClassName(String className) {
-        getClassNames().clear();
-        if (className != null) {
-            addClassNames(className.split(" "));
-        }
-    }
-
-    @Override
-    public ClassList getClassNames() {
-        return new OverlayClassListProxy(this);
-    }
-
-    /**
      * @throws UnsupportedOperationException
-     *             Popover does not support adding styles to overlay
+     *             Popover does not support adding styles
      */
     @Override
     public Style getStyle() {
         throw new UnsupportedOperationException(
-                "Popover does not support adding styles to overlay");
+                "Popover does not support adding styles");
     }
 }

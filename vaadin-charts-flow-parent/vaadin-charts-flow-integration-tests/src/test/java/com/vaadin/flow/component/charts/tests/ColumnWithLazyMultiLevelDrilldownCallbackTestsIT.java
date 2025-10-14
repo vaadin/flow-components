@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,11 +50,11 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
         assertLastLogText("DrilldownEvent: Item1_2_2");
         // Set same callback
         findElement(By.id("setSame")).click();
-        getDrillUpButtonByTopItemName(chart, "Item1_2").click();
+        getBreadcrumbButton(chart, "Item1_2").click();
         assertLastLogText("ChartDrillupEvent");
         clickDrilldownPoint(chart, 0);
         assertLastLogText("DrilldownEvent: Item1_2_1");
-        getDrillUpButtonByTopItemName(chart, "Item1_2").click();
+        getBreadcrumbButton(chart, "Item1_2").click();
         assertLastLogText("ChartDrillupEvent");
 
         // Set callback to null
@@ -63,9 +62,9 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
         clickDrilldownPoint(chart, 0);
         // Can't drilldown with null callback
         assertLastLogText("ChartDrillupEvent");
-        getDrillUpButtonByTopItemName(chart, "Item1").click();
+        getBreadcrumbButton(chart, "Item1").click();
         // At Item1
-        getDrillUpButton(chart, "Back to Top").click();
+        getBreadcrumbButton(chart, "Top").click();
         // At top level, no more drilldown buttons
         assertLastLogText("ChartDrillupEvent");
 
@@ -94,28 +93,21 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
                 .click();
     }
 
-    private WebElement getDrillUpButtonByTopItemName(ChartElement chart,
-            String item) {
-        return getDrillUpButton(chart, "Back to " + item + "_drill");
-    }
-
-    private WebElement getDrillUpButton(ChartElement chart, String label) {
-        final String selector = String.format("button[aria-label=\"◁ %s\"",
-                label);
-        return getElementFromShadowRoot(chart, selector);
+    private WebElement getBreadcrumbButton(ChartElement chart, String label) {
+        var breadcrumbs = chart.$("g.highcharts-breadcrumbs-button").all();
+        var button = breadcrumbs.stream().filter(e -> e.getText().equals(label))
+                .findFirst();
+        if (button.isEmpty()) {
+            throw new AssertionError(
+                    "Couldn't find breadcrumb button with label '%s'"
+                            .formatted(label));
+        }
+        return button.get();
     }
 
     private void assertLastLogText(String text) {
         final List<String> messages = getLogMessages();
         assertEquals(text, messages.get(messages.size() - 1));
-    }
-
-    private void assertLogText(String text) {
-        final StringBuilder sb = new StringBuilder();
-        getLogMessages().forEach(sb::append);
-        final String messages = sb.toString();
-        assertTrue(String.format("Couldn't find text '%s' from the log.", text),
-                messages.contains(text));
     }
 
     private List<String> getLogMessages() {

@@ -89,6 +89,10 @@
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -153,6 +157,9 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>flow-maven-plugin</artifactId>
+                        <configuration>
+                            <frontendDirectory>./frontend</frontendDirectory>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

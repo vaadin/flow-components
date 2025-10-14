@@ -38,15 +38,15 @@ import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha21")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -287,7 +287,7 @@ public class GridPro<E> extends Grid<E> {
          */
         protected EditColumn<T> setOptions(List<String> options) {
             getElement().setPropertyJson("editorOptions",
-                    JsonSerializer.toJson(options));
+                    JacksonSerializer.toJson(options));
             return this;
         }
 
@@ -298,8 +298,8 @@ public class GridPro<E> extends Grid<E> {
          */
         @Synchronize("editor-options-changed")
         protected List<String> getOptions() {
-            return JsonSerializer.toObjects(String.class,
-                    (JsonArray) getElement().getPropertyRaw("editorOptions"));
+            return JacksonSerializer.toObjects(String.class,
+                    (ArrayNode) getElement().getPropertyRaw("editorOptions"));
         }
 
         public ValueProvider<T, ?> getValueProvider() {
@@ -532,7 +532,7 @@ public class GridPro<E> extends Grid<E> {
         return column;
     }
 
-    private void generateCellEditableData(E item, JsonObject jsonObject) {
+    private void generateCellEditableData(E item, ObjectNode jsonObject) {
         // Get edit columns with cell editable providers
         List<EditColumn<E>> editColumns = getColumns().stream()
                 .filter(column -> column instanceof EditColumn<E> editColumn
@@ -546,13 +546,13 @@ public class GridPro<E> extends Grid<E> {
         }
 
         // Generate data for each column
-        JsonObject cellEditableData = Json.createObject();
+        ObjectNode cellEditableData = JacksonUtils.createObjectNode();
         editColumns.forEach(column -> {
             boolean cellEditable = column.cellEditableProvider.test(item);
             cellEditableData.put(column.getInternalId(), cellEditable);
         });
 
-        jsonObject.put("cellEditable", cellEditableData);
+        jsonObject.set("cellEditable", cellEditableData);
     }
 
     /**
@@ -583,11 +583,11 @@ public class GridPro<E> extends Grid<E> {
          *            item subproperty that was changed
          */
         public CellEditStartedEvent(GridPro<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asString());
             this.path = path;
         }
 
@@ -635,7 +635,7 @@ public class GridPro<E> extends Grid<E> {
             extends ComponentEvent<GridPro<E>> {
 
         private E item;
-        private JsonObject sourceItem;
+        private ObjectNode sourceItem;
         private String path;
 
         /**
@@ -653,12 +653,12 @@ public class GridPro<E> extends Grid<E> {
          *            item subproperty that was changed
          */
         public ItemPropertyChangedEvent(GridPro<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.sourceItem = item;
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asString());
             this.path = path;
         }
 
@@ -676,7 +676,7 @@ public class GridPro<E> extends Grid<E> {
          *
          * @return the instance of edited item
          */
-        private JsonObject getSourceItem() {
+        private ObjectNode getSourceItem() {
             return sourceItem;
         }
 

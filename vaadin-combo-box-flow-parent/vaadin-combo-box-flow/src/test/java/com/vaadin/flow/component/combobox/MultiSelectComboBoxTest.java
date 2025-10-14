@@ -33,7 +33,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.InputField;
 
-import elemental.json.JsonArray;
+import tools.jackson.databind.node.ArrayNode;
 
 public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     @Override
@@ -65,9 +65,9 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
         Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
         // should refresh web components selectedItems property
-        JsonArray jsonArray = (JsonArray) comboBox.getElement()
+        ArrayNode jsonArray = (ArrayNode) comboBox.getElement()
                 .getPropertyRaw("selectedItems");
-        Assert.assertEquals(2, jsonArray.length());
+        Assert.assertEquals(2, jsonArray.size());
     }
 
     @Test
@@ -80,9 +80,9 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         // should hold an empty set, rather than null
         Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
         // should refresh web components selectedItems property
-        JsonArray jsonArray = (JsonArray) comboBox.getElement()
+        ArrayNode jsonArray = (ArrayNode) comboBox.getElement()
                 .getPropertyRaw("selectedItems");
-        Assert.assertEquals(0, jsonArray.length());
+        Assert.assertEquals(0, jsonArray.size());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

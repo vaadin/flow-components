@@ -95,6 +95,38 @@ public class TooltipTest {
         Assert.assertEquals("foo",
                 getTooltipElement().get().getProperty("text"));
         Assert.assertEquals("foo", tooltip.getText());
+        Assert.assertFalse(
+                getTooltipElement().get().getProperty("markdown", false));
+    }
+
+    @Test
+    public void createTooltip_setMarkdown() {
+        var tooltip = Tooltip.forComponent(component);
+        tooltip.setMarkdown("**Markdown** _foo_");
+        ui.add(component);
+        Assert.assertEquals("**Markdown** _foo_",
+                getTooltipElement().get().getProperty("text"));
+        Assert.assertEquals("**Markdown** _foo_", tooltip.getText());
+        Assert.assertTrue(
+                getTooltipElement().get().getProperty("markdown", false));
+    }
+
+    @Test
+    public void createTooltip_switchContentType() {
+        var tooltip = Tooltip.forComponent(component);
+        ui.add(component);
+
+        tooltip.setText("foo");
+        Assert.assertFalse(
+                getTooltipElement().get().getProperty("markdown", false));
+
+        tooltip.setMarkdown("**Markdown** _foo_");
+        Assert.assertTrue(
+                getTooltipElement().get().getProperty("markdown", false));
+
+        tooltip.setText("foo");
+        Assert.assertFalse(
+                getTooltipElement().get().getProperty("markdown", false));
     }
 
     @Test

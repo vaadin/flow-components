@@ -23,9 +23,9 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.grid.Person;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 public class EditorRendererTest {
 
@@ -56,10 +56,10 @@ public class EditorRendererTest {
 
         renderer.render(container, null);
         renderer.refreshData(item);
-        JsonObject object = Json.createObject();
+        ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertEquals(42, (int) object.getNumber("_col_editor"));
+        Assert.assertEquals(42, object.get("_col_editor").intValue());
         Mockito.verify(renderer, Mockito.times(1)).getComponentNodeId(span);
 
         Assert.assertEquals(1, editorContainer.getChildCount());
@@ -76,10 +76,10 @@ public class EditorRendererTest {
 
         renderer.render(container, null);
         renderer.refreshData(item);
-        JsonObject object = Json.createObject();
+        ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertFalse(object.hasKey("_col_editor"));
+        Assert.assertFalse(object.has("_col_editor"));
         Assert.assertEquals(0, editorContainer.getChildCount());
     }
 
@@ -92,10 +92,10 @@ public class EditorRendererTest {
 
         renderer.render(container, null);
         renderer.refreshData(item);
-        JsonObject object = Json.createObject();
+        ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertTrue(object.hasKey("_col_editor"));
+        Assert.assertTrue(object.has("_col_editor"));
         Assert.assertEquals(1, editorContainer.getChildCount());
         Assert.assertNull(editorContainer.getChild(0).getProperty("innerHTML"));
     }

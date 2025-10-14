@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import java.time.Instant;
-import java.util.Date;
 
 /**
  * DataSeriesItem that can hold also title and text values. Used in flags
@@ -43,15 +42,6 @@ public class FlagItem extends DataSeriesItem {
     }
 
     /**
-     * @deprecated as of 4.0. Use {@link #FlagItem(Instant, String)}
-     */
-    @Deprecated
-    public FlagItem(Date date, String title) {
-        setX(date);
-        setTitle(title);
-    }
-
-    /**
      * Constructs an item with X, Title and Text values
      *
      * @param x
@@ -72,16 +62,6 @@ public class FlagItem extends DataSeriesItem {
      */
     public FlagItem(Instant instant, String title, String text) {
         setX(instant);
-        setTitle(title);
-        setText(text);
-    }
-
-    /**
-     * @deprecated as of 4.0. Use {@link #FlagItem(Instant, String, String)}
-     */
-    @Deprecated
-    public FlagItem(Date date, String title, String text) {
-        setX(date);
         setTitle(title);
         setText(text);
     }

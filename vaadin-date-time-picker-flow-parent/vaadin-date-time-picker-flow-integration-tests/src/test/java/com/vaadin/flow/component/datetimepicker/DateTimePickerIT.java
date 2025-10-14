@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -77,6 +78,7 @@ public class DateTimePickerIT extends AbstractComponentIT {
                 message.getText().contains("1987-04-10 14:42"));
 
         picker.setDate(null);
+        picker.sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
         Assert.assertEquals("No date is selected", message.getText());
     }
 

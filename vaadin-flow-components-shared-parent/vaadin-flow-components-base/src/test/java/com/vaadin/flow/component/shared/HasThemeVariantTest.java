@@ -29,9 +29,9 @@ public class HasThemeVariantTest {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
+                component.getThemeNames());
     }
 
     @Test
@@ -40,13 +40,80 @@ public class HasThemeVariantTest {
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.removeThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
+        Assert.assertTrue(component.getThemeNames().isEmpty());
+    }
+
+    @Test
+    public void setThemeVariant_setTrue_addsThemeVariant() {
+        TestComponent component = new TestComponent();
+        component.setThemeVariant(TestComponentVariant.TEST_VARIANT, true);
+
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
+                component.getThemeNames());
+    }
+
+    @Test
+    public void setThemeVariant_setFalse_removesThemeVariant() {
+        TestComponent component = new TestComponent();
+        component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
+        component.setThemeVariant(TestComponentVariant.TEST_VARIANT, false);
+
+        Assert.assertTrue(component.getThemeNames().isEmpty());
+    }
+
+    @Test
+    public void setThemeVariants_overridesExisting() {
+        TestComponent component = new TestComponent();
+        component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
+        component.setThemeVariants(TestComponentVariant.TEST_VARIANT_2,
+                TestComponentVariant.TEST_VARIANT_3);
+
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT_2.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_3.getVariantName()),
+                component.getThemeNames());
+    }
+
+    @Test
+    public void setThemeVariants_withoutArgs_clearsThemeVariants() {
+        TestComponent component = new TestComponent();
+        component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
+        component.setThemeVariants();
+
+        Assert.assertTrue(component.getThemeNames().isEmpty());
+    }
+
+    @Test
+    public void setThemeVariants_setTrue_addsThemeVariants() {
+        TestComponent component = new TestComponent();
+        component.addThemeVariants(TestComponentVariant.TEST_VARIANT_3);
+        component.setThemeVariants(true, TestComponentVariant.TEST_VARIANT,
+                TestComponentVariant.TEST_VARIANT_2);
+
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_2.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_3.getVariantName()),
+                component.getThemeNames());
+    }
+
+    @Test
+    public void setThemeVariants_setFalse_removesThemeVariants() {
+        TestComponent component = new TestComponent();
+        component.addThemeVariants(TestComponentVariant.TEST_VARIANT,
+                TestComponentVariant.TEST_VARIANT_2,
+                TestComponentVariant.TEST_VARIANT_3);
+        component.setThemeVariants(false, TestComponentVariant.TEST_VARIANT,
+                TestComponentVariant.TEST_VARIANT_2);
+
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT_3.getVariantName()),
+                component.getThemeNames());
     }
 
     private enum TestComponentVariant implements ThemeVariant {
-        TEST_VARIANT("test");
+        TEST_VARIANT("test1"), TEST_VARIANT_2("test2"), TEST_VARIANT_3("test3");
 
         private final String variant;
 

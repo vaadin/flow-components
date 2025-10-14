@@ -26,29 +26,29 @@ const dom = new JSDOM(
         </body>
     </html>`);
 const win = dom.window;
-const doc = win.document;
 //workaround for highcharts#15913
-global.Node = win.Node
+global.Node = win.Node;
+global.window = win;
 
 // Require Highcharts with the window shim
-const Highcharts = require('highcharts/highstock.src')(win);
-require("highcharts/modules/accessibility")(Highcharts);
-require("highcharts/highcharts-more")(Highcharts);
-require("highcharts/highcharts-3d")(Highcharts);
-require("highcharts/modules/data")(Highcharts);
-require("highcharts/modules/drilldown")(Highcharts);
-require("highcharts/modules/exporting")(Highcharts);
-require("highcharts/modules/funnel")(Highcharts);
-require("highcharts/modules/heatmap")(Highcharts);
-require("highcharts/modules/solid-gauge")(Highcharts);
-require("highcharts/modules/treemap")(Highcharts);
-require("highcharts/modules/no-data-to-display")(Highcharts);
-require("highcharts/modules/sankey")(Highcharts);
-require("highcharts/modules/timeline")(Highcharts);
-require("highcharts/modules/organization")(Highcharts);
-require("highcharts/modules/xrange")(Highcharts);
-require("highcharts/modules/bullet")(Highcharts);
-require("highcharts/modules/annotations")(Highcharts);
+const Highcharts = require('highcharts/highstock');
+require("highcharts/modules/accessibility");
+require("highcharts/highcharts-more");
+require("highcharts/highcharts-3d");
+require("highcharts/modules/data");
+require("highcharts/modules/drilldown");
+require("highcharts/modules/exporting");
+require("highcharts/modules/funnel");
+require("highcharts/modules/heatmap");
+require("highcharts/modules/solid-gauge");
+require("highcharts/modules/treemap");
+require("highcharts/modules/no-data-to-display");
+require("highcharts/modules/sankey");
+require("highcharts/modules/timeline");
+require("highcharts/modules/organization");
+require("highcharts/modules/xrange");
+require("highcharts/modules/bullet");
+require("highcharts/modules/annotations");
 
 win.Date = Date;
 
@@ -113,14 +113,50 @@ function removeHighchartsTextOutlines(elem) {
 
 }
 
+const BASE_FONT_SIZE = 16;
+/**
+ * Convert a CSS size string to pixel size.
+ *
+ * @param {string} size
+ * @returns {number}
+ */
+function cssSizeInPixel(size) {
+     if (/px/.test(size)) {
+        size = parseInt(size, 10);
+    } else {
+        size = /em/.test(size) ? parseFloat(size) * BASE_FONT_SIZE : BASE_FONT_SIZE;
+    }
+    return size;
+}
+
+/**
+ * The original fontMetrics function from Highcharts relies in the `getComputedStyle`
+ * to retrieve the `font-size` value from the element. In JSDOM, relative units, such as `em`,
+ * are not computed into pixel values as in a real browser. This monkeypatch is a best effort
+ * to calculate the pixel value when `em` is encountered, by multiplying it with the base font size.
+ *
+ * @param {HTMLElement} element
+ * @returns {Object} Font metrics for the element
+ */
+Highcharts.SVGRenderer.prototype.fontMetrics = function (element) {
+    let f = Highcharts.SVGElement.prototype.getStyle.call(element, 'font-size');
+    f = cssSizeInPixel(f);
+
+    const h = f < 24 ? f + 3 : Math.round(f * 1.2),
+        b = Math.round(h * 0.8);
+    return {
+        // Line height
+        h,
+        // Baseline
+        b,
+        // Font size
+        f
+    };
+};
+
 // Do some modifications to the jsdom document in order to get the SVG bounding
 // boxes right.
 
-/**
- * Pass Highcharts' test for SVG capabilities
- * @returns {undefined}
- */
-win.SVGElement.prototype.createSVGRect = function() { };
 /**
  * jsdom doesn't compute layout (see
  * https://github.com/tmpvar/jsdom/issues/135). This getBBox implementation
@@ -156,16 +192,13 @@ win.SVGElement.prototype.getBBox = function() {
         // The font size and lineHeight is based on empirical values,
         // copied from the SVGRenderer.fontMetrics function in
         // Highcharts.
-        if (/px/.test(fontSize)) {
-            fontSize = parseInt(fontSize, 10);
-        } else {
-            fontSize = /em/.test(fontSize) ?
-                parseFloat(fontSize) * 12 :
-                12;
-        }
+        
+        fontSize = cssSizeInPixel(fontSize);
+
         let nodeHeight = fontSize < 24 ?
             fontSize + 3 :
             Math.round(fontSize * 1.2);
+
         lineHeight = Math.max(lineHeight, nodeHeight);
         let fontToUse = findSizableFont(fontFamily);
         textLength = pixelWidth(textNode.data, { size: fontSize, font: fontToUse, map: widthsMap });
@@ -200,6 +233,7 @@ win.SVGElement.prototype.getBBox = function() {
         height: retHeight
     };
 };
+
 /**
  * Estimate the rendered length of a substring of text. Uses a similar strategy to getBBox,
  * above.
@@ -237,13 +271,7 @@ win.SVGElement.prototype.getSubStringLength = function(charnum, numchars) {
             // The font size is based on empirical values,
             // copied from the SVGRenderer.fontMetrics function in
             // Highcharts.
-            if (/px/.test(fontSize)) {
-                fontSize = parseInt(fontSize, 10);
-            } else {
-                fontSize = /em/.test(fontSize) ?
-                    parseFloat(fontSize) * 12 :
-                    12;
-            }
+            fontSize = cssSizeInPixel(fontSize);
             let textToSize = textNode.data.substring(offset, offset + usedLength);
             let fontToUse = findSizableFont(fontFamily);
             let measuredWidth = pixelWidth(textToSize, { size: fontSize, font: fontToUse, map: widthsMap });
@@ -337,7 +365,7 @@ const jsdomExporter = ({ chartConfigurationFile, chartConfiguration, outFile = '
             },
             credits: { enabled: false },
             exporting: { enabled: false },
-            title: { text : null }
+            title: { text: null }
         });
 
         let isTimeline = false;
@@ -347,7 +375,7 @@ const jsdomExporter = ({ chartConfigurationFile, chartConfiguration, outFile = '
             }
 
             if (exportOptions.lang) {
-                Highcharts.setOptions({ lang: exportOptions.lang })
+                Highcharts.setOptions({ lang: exportOptions.lang });
             }
 
             if (exportOptions.height || exportOptions.width) {
@@ -378,9 +406,11 @@ const jsdomExporter = ({ chartConfigurationFile, chartConfiguration, outFile = '
             reject(e);
         }
 
+        // Sanitize the DOM tree and remove the <div> element rendered before the <svg> element
         let svg = chart.sanitizeSVG(
             chart.container.innerHTML
-        );
+        ).replace(/^.*<\/div>/g, '');
+        
         fs.writeFile(path.join(__dirname, outFile), svg, function (err) {
             if (err) {
                 reject(err);

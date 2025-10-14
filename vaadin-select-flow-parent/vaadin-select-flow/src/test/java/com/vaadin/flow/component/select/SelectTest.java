@@ -42,7 +42,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -149,7 +148,7 @@ public class SelectTest {
         Assert.assertEquals("Invalid number of items", 0,
                 getListBox().getChildren().count());
 
-        select = new Select<>("label", null, "foo", "bar", "baz");
+        select = new Select<>("label", "foo", "bar", "baz");
 
         Assert.assertEquals("Invalid number of items", 3,
                 getListBox().getChildren().count());
@@ -829,13 +828,6 @@ public class SelectTest {
 
         Assert.assertEquals("Invalid label for select ", "label",
                 select.getElement().getProperty("label"));
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("Select should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new Select().getClass()));
     }
 
     @Test

@@ -29,7 +29,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       const count = endIndex - startIndex;
       const filter = params.filter;
 
-      comboBox.$server.setRequestedRange(startIndex, count, filter);
+      comboBox.$server.setViewportRange(startIndex, count, filter);
       lastFilterSentToServer = filter;
       if (dataCommunicatorResetNeeded) {
         comboBox.$server.resetDataCommunicator();

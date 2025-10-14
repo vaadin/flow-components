@@ -56,7 +56,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/button", version = "25.0.0-alpha21")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -482,8 +482,6 @@ public class Button extends Component
      * {@code exclusion} array. This includes child components, text content as
      * well as child elements that have been added directly to this component
      * using the {@link Element} API.
-     *
-     * @see Button#removeAll()
      */
     private void removeAll(Element... exclusion) {
         Set<Element> toExclude = Stream.of(exclusion)

@@ -23,14 +23,14 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.JsonObject;
-import elemental.json.impl.JreJsonFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 public class GridProTest {
 
     GridPro<Person> grid;
-    JsonObject selectedItem;
+    ObjectNode selectedItem;
     ArrayList<Person> items = new ArrayList<>();
     Person testItem = new Person("Foo", 1996);
 
@@ -46,8 +46,9 @@ public class GridProTest {
                 .text((item, newValue) -> Assert.assertEquals("foo", newValue));
 
         // A client-side Grid item.
-        selectedItem = new JreJsonFactory()
-                .parse("{\"key\": \"1\", \"col0\":\"foo\"}");
+        selectedItem = JacksonUtils.createObjectNode();
+        selectedItem.put("key", "1");
+        selectedItem.put("col0", "foo");
     }
 
     private GridPro<Person> createFakeGridPro() {
@@ -111,8 +112,9 @@ public class GridProTest {
         ItemUpdater<Person, String> mock = Mockito.mock(ItemUpdater.class);
         grid.addEditColumn(Person::getName).text(mock);
 
-        JsonObject item = new JreJsonFactory()
-                .parse("{\"key\": \"2\", \"col1\":\"foo\"}");
+        ObjectNode item = JacksonUtils.createObjectNode();
+        item.put("key", "2");
+        item.put("col1", "foo");
 
         ComponentUtil.fireEvent(grid,
                 new GridPro.ItemPropertyChangedEvent<Person>(grid, false, item,
@@ -132,8 +134,9 @@ public class GridProTest {
                 .mock(ItemUpdater.class);
         GridPro.EditColumn<Person> column = (GridPro.EditColumn<Person>) grid
                 .addEditColumn(Person::getName).text(itemUpdater);
-        JsonObject item = new JreJsonFactory()
-                .parse("{\"key\": \"1\", \"col1\":\"foo\"}");
+        ObjectNode item = JacksonUtils.createObjectNode();
+        item.put("key", "1");
+        item.put("col1", "foo");
         GridPro.ItemPropertyChangedEvent<Person> event = new GridPro.ItemPropertyChangedEvent<>(
                 grid, true, item, "col1");
 

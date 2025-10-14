@@ -55,13 +55,13 @@ public class LayersIT extends AbstractComponentIT {
         Assert.assertNull(backgroundLayer.getZIndex());
         Assert.assertEquals("ol/source/OSM", backgroundSource.getTypeName());
 
-        // Second layer should be a vector layer with a vector source
+        // Second layer should be a feature layer with a vector source
         MapElement.LayerReference featureLayer = mapReference.getLayers()
                 .getLayer(1);
         MapElement.SourceReference featureLayerSource = featureLayer
                 .getSource();
 
-        Assert.assertEquals("ol/layer/Vector", featureLayer.getTypeName());
+        Assert.assertEquals("ol/layer/Feature", featureLayer.getTypeName());
         Assert.assertTrue(featureLayer.isVisible());
         Assert.assertEquals(1f, featureLayer.getOpacity(), 0.001);
         Assert.assertEquals(100, (long) featureLayer.getZIndex());

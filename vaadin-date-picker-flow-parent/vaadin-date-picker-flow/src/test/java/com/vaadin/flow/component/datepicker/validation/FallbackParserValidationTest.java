@@ -27,9 +27,8 @@ import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-
-import elemental.json.Json;
 
 public class FallbackParserValidationTest {
     private DatePicker datePicker;
@@ -140,7 +139,8 @@ public class FallbackParserValidationTest {
 
     private void fakeClientDomEvent(Component component, String eventName) {
         Element element = component.getElement();
-        DomEvent event = new DomEvent(element, eventName, Json.createObject());
+        DomEvent event = new DomEvent(element, eventName,
+                JacksonUtils.createObjectNode());
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 

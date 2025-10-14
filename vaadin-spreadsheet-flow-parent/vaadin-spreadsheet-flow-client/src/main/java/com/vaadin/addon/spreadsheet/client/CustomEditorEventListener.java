@@ -28,15 +28,23 @@ import com.google.gwt.user.client.EventListener;
 public class CustomEditorEventListener implements EventListener {
 
     private Slot slot;
-    private String key;
+    private String cellAddress;
     private SpreadsheetWidget widget;
 
-    public void init(Slot slot, String key) {
+    public void init(Slot slot, String cellAddress) {
         this.slot = slot;
-        this.key = key;
+        this.cellAddress = cellAddress;
         Event.setEventListener(slot.getAssignedElement(), this);
         DOM.sinkEvents(slot.getAssignedElement(),
                 Event.ONKEYDOWN | Event.FOCUSEVENTS);
+    }
+
+    public void setCellAddress(String cellAddress) {
+        this.cellAddress = cellAddress;
+    }
+
+    public String getCellAddress() {
+        return cellAddress;
     }
 
     @Override
@@ -57,7 +65,7 @@ public class CustomEditorEventListener implements EventListener {
             break;
         case Event.ONFOCUS:
             var jsniUtil = getSheetWidget().getSheetJsniUtil();
-            jsniUtil.parseColRow(key);
+            jsniUtil.parseColRow(cellAddress);
             var col = jsniUtil.getParsedCol();
             var row = jsniUtil.getParsedRow();
             getSheetWidget().setSelectedCell(col, row);

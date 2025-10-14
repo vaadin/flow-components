@@ -8,22 +8,21 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.vaadin.flow.component.charts.model.Labels;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for {@link Labels#getRotation()}. Attempts to serialize the
  * rotation value as a number, otherwise falls back to writing it as a string to
  * support values like "auto".
  */
-public class LabelsRotationSerializer extends JsonSerializer<String> {
+public class LabelsRotationSerializer extends ValueSerializer<String> {
     @Override
     public void serialize(String value, JsonGenerator gen,
-            SerializerProvider serializers) throws IOException {
+            SerializationContext context) {
         if (value == null) {
             return;
         }

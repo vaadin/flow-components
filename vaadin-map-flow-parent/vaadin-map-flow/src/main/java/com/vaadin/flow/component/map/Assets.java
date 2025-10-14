@@ -23,6 +23,9 @@ public class Assets {
     public static final ImageAsset POINT = new ImageAsset("point.png",
             "/META-INF/resources/frontend/vaadin-map/assets/point.png", 128,
             128);
+    public static final ImageAsset CLUSTER = new ImageAsset("cluster.png",
+            "/META-INF/resources/frontend/vaadin-map/assets/cluster.png", 72,
+            72);
 
     public static class Asset implements Serializable {
         private final String fileName;

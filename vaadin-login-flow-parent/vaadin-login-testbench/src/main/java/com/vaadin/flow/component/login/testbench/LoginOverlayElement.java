@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.login.testbench;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
@@ -33,14 +34,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      * Returns the container of the branding and form area
      */
     public TestBenchElement getLoginOverlayWrapper() {
-        return $("vaadin-login-overlay-wrapper").onPage().waitForFirst();
-    }
-
-    /**
-     * Returns the login form, the actual container of native html form
-     */
-    public LoginFormElement getLoginForm() {
-        return getLoginOverlayWrapper().$(LoginFormElement.class).first();
+        return $("vaadin-login-overlay-wrapper").first();
     }
 
     public boolean isOpened() {
@@ -53,27 +47,33 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
 
     @Override
     public TextFieldElement getUsernameField() {
-        return getLoginForm().getUsernameField();
+        return $(TextFieldElement.class).id("vaadinLoginUsername");
     }
 
     @Override
     public PasswordFieldElement getPasswordField() {
-        return getLoginForm().getPasswordField();
+        return $(PasswordFieldElement.class).id("vaadinLoginPassword");
     }
 
     @Override
     public ButtonElement getSubmitButton() {
-        return getLoginForm().getSubmitButton();
+        return $(ButtonElement.class).withAttribute("slot", "submit").first();
     }
 
     @Override
     public ButtonElement getForgotPasswordButton() {
-        return getLoginForm().getForgotPasswordButton();
+        return $(ButtonElement.class).withAttribute("slot", "forgot-password")
+                .first();
+    }
+
+    private TestBenchElement getFormWrapper() {
+        return $("vaadin-login-form-wrapper").first();
     }
 
     @Override
     public TestBenchElement getErrorComponent() {
-        return getLoginForm().getErrorComponent();
+        return getFormWrapper().$(TestBenchElement.class)
+                .withAttribute("part", "error-message").first();
     }
 
     @Override
@@ -90,14 +90,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      * Returns the title displayed in the login overlay element
      */
     public String getTitle() {
-        if (hasTitleComponent()) {
-            return getTitleComponent().getText();
-        }
-        return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .withAttribute("part", "title").first()
-                // Using textContent, since getText() works unpredictable in
-                // Edge
-                .getPropertyString("textContent");
+        return getTitleComponent().getPropertyString("textContent");
     }
 
     /**
@@ -109,47 +102,43 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
     }
 
     /**
-     * Checks if anything was set into the title slot
-     */
-    public boolean hasTitleComponent() {
-        return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .withAttribute("slot", "title").exists();
-    }
-
-    /**
-     * Returns the title component which is set into the title slot of the login
-     * element. If was not set returns <code>null</code>
+     * Returns the title component of the login element.
      */
     public TestBenchElement getTitleComponent() {
-        if (!hasTitleComponent()) {
-            return null;
-        }
-        return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .withAttribute("slot", "title").first();
+        return (TestBenchElement) findElements(
+                By.cssSelector("[slot='%s']".formatted("title"))).stream()
+                .findFirst().orElse(null);
     }
 
     @Override
     public String getFormTitle() {
-        return getLoginForm().getFormTitle();
+        return $(TestBenchElement.class).withAttribute("part", "form-title")
+                .first().getText();
     }
 
     @Override
     public String getErrorMessageTitle() {
-        return getLoginForm().getErrorMessageTitle();
+        return getErrorComponent().$(TestBenchElement.class)
+                .withAttribute("part", "error-message-title").first().getText();
     }
 
     @Override
     public String getErrorMessage() {
-        return getLoginForm().getErrorMessage();
+        return getErrorComponent().$(TestBenchElement.class)
+                .withAttribute("part", "error-message-description").first()
+                .getText();
     }
 
     @Override
     public String getAdditionalInformation() {
-        return getLoginForm().getAdditionalInformation();
+        return getFormWrapper().$(TestBenchElement.class)
+                .withAttribute("part", "footer").first().$("div").first()
+                .getText();
     }
 
     @Override
     public boolean isEnabled() {
-        return getLoginForm().isEnabled();
+        return !Boolean.TRUE.equals(getPropertyBoolean("disabled"))
+                && super.isEnabled();
     }
 }

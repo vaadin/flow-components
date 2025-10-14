@@ -24,10 +24,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
-
-import elemental.json.Json;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<TimePicker, LocalTime> {
@@ -143,7 +142,8 @@ public class BasicValidationTest
 
     private void fakeClientDomEvent(Component component, String eventName) {
         Element element = component.getElement();
-        DomEvent event = new DomEvent(element, eventName, Json.createObject());
+        DomEvent event = new DomEvent(element, eventName,
+                JacksonUtils.createObjectNode());
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 

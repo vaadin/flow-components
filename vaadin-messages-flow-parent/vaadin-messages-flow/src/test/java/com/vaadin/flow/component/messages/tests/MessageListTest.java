@@ -26,14 +26,15 @@ import org.junit.Test;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import net.jcip.annotations.NotThreadSafe;
+import tools.jackson.databind.JsonNode;
 
+@NotThreadSafe
 public class MessageListTest {
 
     private MessageList messageList;
@@ -198,8 +199,8 @@ public class MessageListTest {
     }
 
     private String getSerializedThemeProperty(MessageListItem item) {
-        JsonValue theme = JsonUtils.beanToJson(item).get("theme");
-        if (theme.getType() == JsonType.NULL) {
+        JsonNode theme = JacksonUtils.beanToJson(item).get("theme");
+        if (theme.isNull()) {
             return null;
         } else {
             return theme.asString();

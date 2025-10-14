@@ -16,6 +16,7 @@ public class Slot extends Widget {
 
     private final Element assignedElement;
     private boolean isElementFocused;
+    private CustomEditorEventListener listener;
 
     public Slot(String name, Element assignedElement, Element host) {
         this.assignedElement = assignedElement;
@@ -48,5 +49,13 @@ public class Slot extends Widget {
 
     public void setElementFocused(boolean isElementFocused) {
         this.isElementFocused = isElementFocused;
+    }
+
+    public CustomEditorEventListener getListener() {
+        return listener;
+    }
+
+    public void setListener(CustomEditorEventListener listener) {
+        this.listener = listener;
     }
 }

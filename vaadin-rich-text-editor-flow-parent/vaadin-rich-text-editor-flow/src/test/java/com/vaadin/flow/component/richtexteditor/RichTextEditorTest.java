@@ -28,7 +28,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.JsonArray;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Tests for the {@link RichTextEditor}.
@@ -246,9 +246,13 @@ public class RichTextEditorTest {
         RichTextEditor rte = new RichTextEditor();
         rte.setColorOptions(
                 List.of("#000000", "#0066cc", "#008a00", "#e60000"));
-        JsonArray jsonArray = (JsonArray) rte.getElement()
+        ArrayNode jsonArray = (ArrayNode) rte.getElement()
                 .getPropertyRaw("colorOptions");
-        Assert.assertEquals(4, jsonArray.length());
+        Assert.assertEquals(4, jsonArray.size());
+        Assert.assertEquals("#000000", jsonArray.get(0).asString());
+        Assert.assertEquals("#0066cc", jsonArray.get(1).asString());
+        Assert.assertEquals("#008a00", jsonArray.get(2).asString());
+        Assert.assertEquals("#e60000", jsonArray.get(3).asString());
     }
 
     @Test
@@ -258,5 +262,9 @@ public class RichTextEditorTest {
                 List.of("#000000", "#0066cc", "#008a00", "#e60000"));
         List<String> options = rte.getColorOptions();
         Assert.assertEquals(4, options.size());
+        Assert.assertEquals("#000000", options.get(0));
+        Assert.assertEquals("#0066cc", options.get(1));
+        Assert.assertEquals("#008a00", options.get(2));
+        Assert.assertEquals("#e60000", options.get(3));
     }
 }

@@ -21,6 +21,7 @@ import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.AxisDimension;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.internal.JacksonUtils;
 
 class ProxyChangeForwarder implements ConfigurationChangeListener {
 
@@ -35,8 +36,8 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
         if (event.getItem() != null) {
             chart.getElement().callJsFunction("__callSeriesFunction",
                     "addPoint", getSeriesIndex(event),
-                    chart.getJsonFactory()
-                            .parse(ChartSerialization.toJSON(event.getItem())),
+                    JacksonUtils.readTree(
+                            ChartSerialization.toJSON(event.getItem())),
                     true, event.isShift());
         }
     }
@@ -56,8 +57,8 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
         } else {
             chart.getElement().callJsFunction("__callPointFunction", "update",
                     getSeriesIndex(event), event.getPointIndex(),
-                    chart.getJsonFactory()
-                            .parse(ChartSerialization.toJSON(event.getItem())));
+                    JacksonUtils.readTree(
+                            ChartSerialization.toJSON(event.getItem())));
         }
     }
 
@@ -93,7 +94,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     @Override
     public void seriesAdded(SeriesAddedEvent event) {
         chart.getElement().callJsFunction("__callChartFunction", "addSeries",
-                chart.getJsonFactory().parse(ChartSerialization.toJSON(
+                JacksonUtils.readTree(ChartSerialization.toJSON(
                         (AbstractConfigurationObject) event.getSeries())));
     }
 
@@ -101,7 +102,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     public void seriesChanged(SeriesChangedEvent event) {
         chart.getElement().callJsFunction("__callSeriesFunction", "update",
                 getSeriesIndex(event),
-                chart.getJsonFactory().parse(ChartSerialization.toJSON(
+                JacksonUtils.readTree(ChartSerialization.toJSON(
                         (AbstractConfigurationObject) event.getSeries())));
     }
 

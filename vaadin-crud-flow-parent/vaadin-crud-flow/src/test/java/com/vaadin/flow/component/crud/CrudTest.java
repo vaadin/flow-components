@@ -22,9 +22,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.JsonObject;
-import elemental.json.impl.JreJsonFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 public class CrudTest {
 
@@ -43,8 +43,8 @@ public class CrudTest {
         systemUnderTest.addNewListener(e -> Assert.assertNotNull(e.getItem()));
 
         // A client-side Grid item.
-        final JsonObject selectedItem = new JreJsonFactory()
-                .parse("{\"key\": \"1\"}");
+        final ObjectNode selectedItem = JacksonUtils.createObjectNode();
+        selectedItem.put("key", "1");
 
         // Simulate a sequence of interactions.
         Arrays.asList(new Crud.NewEvent<>(systemUnderTest, false, null),

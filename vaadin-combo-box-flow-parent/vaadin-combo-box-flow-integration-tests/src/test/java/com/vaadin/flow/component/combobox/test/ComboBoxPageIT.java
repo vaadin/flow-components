@@ -134,7 +134,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         // opens the dropdown
         clickElementWithJs(input);
 
-        WebElement item = getItemElements().get(0);
+        WebElement item = getItemElements(combo).get(0);
         WebElement button = item.findElement(By.cssSelector("button"));
         clickElementWithJs(button);
 
@@ -202,9 +202,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
                 .id("update-on-change-combo");
         combo.openPopup();
 
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
-                .$("vaadin-combo-box-item");
+        ElementQuery<TestBenchElement> items = combo.$("vaadin-combo-box-item");
 
         TestBenchElement item1 = items.get(0);
         TestBenchElement item2 = items.get(1);

@@ -8,23 +8,21 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vaadin.flow.component.charts.model.AxisList;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Serializer for {@link AxisList}
  *
  */
-public class AxisListSerializer extends JsonSerializer<AxisList> {
+public class AxisListSerializer extends ValueSerializer<AxisList> {
 
-    public static Module getModule() {
+    public static JacksonModule getModule() {
         SimpleModule module = new SimpleModule();
         module.addSerializer(AxisList.class, new AxisListSerializer());
         return module;
@@ -32,12 +30,11 @@ public class AxisListSerializer extends JsonSerializer<AxisList> {
 
     @Override
     public void serialize(AxisList value, JsonGenerator gen,
-            SerializerProvider serializers)
-            throws IOException, JsonProcessingException {
+            SerializationContext context) {
         if (value != null && value.getNumberOfAxes() == 1) {
-            gen.writeObject(value.getAxis(0));
+            gen.writePOJO(value.getAxis(0));
         } else if (value != null) {
-            gen.writeObject(value.getAxes());
+            gen.writePOJO(value.getAxes());
         }
     }
 }

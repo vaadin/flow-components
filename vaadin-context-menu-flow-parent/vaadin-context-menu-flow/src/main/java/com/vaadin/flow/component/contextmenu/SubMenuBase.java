@@ -46,7 +46,7 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
 
     /**
      * Creates a new menu item with the given text content and adds it to the
-     * sub menu overlay.
+     * sub menu.
      *
      * @param text
      *            the text content for the created menu item
@@ -58,7 +58,7 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
 
     /**
      * Creates a new menu item with the given component content and adds it to
-     * the sub menu overlay.
+     * the sub menu.
      *
      * @param component
      *            the component to add to the created menu item
@@ -69,14 +69,10 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
-     * Adds the given components into the sub menu overlay.
+     * Adds the given components to the sub menu.
      * <p>
      * For the common use case of having a list of high-lightable items inside
-     * the overlay, use {@link #addItem(String)} and its overload methods
-     * instead.
-     * <p>
-     * The added elements will be inserted into an overlay that is attached into
-     * the {@code <body>}.
+     * the menu, use {@link #addItem(String)} and its overload methods instead.
      *
      * @param components
      *            the components to add
@@ -88,7 +84,7 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
-     * Removes the given components from the sub menu overlay.
+     * Removes the given components from the sub menu.
      *
      * @param components
      *            the components to remove
@@ -98,21 +94,17 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
-     * Removes all components inside the sub menu overlay.
+     * Removes all components from the sub menu.
      */
     public void removeAll() {
         getMenuManager().removeAll();
     }
 
     /**
-     * Adds the given component into the sub menu overlay at the given index.
+     * Adds the given component to the sub menu at the given index.
      * <p>
      * For the common use case of having a list of high-lightable items inside
-     * the overlay, use {@link #addItem(String)} and its overload methods
-     * instead.
-     * <p>
-     * The added elements will be inserted into an overlay that is attached into
-     * the {@code <body>}.
+     * the menu, use {@link #addItem(String)} and its overload methods instead.
      *
      * @param index
      *            the index, where the component will be added
@@ -149,7 +141,7 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
-     * Gets the menu item component that opens this sub menu overlay.
+     * Gets the menu item component that opens this sub menu.
      *
      * @return the parent menu item of this sub menu
      */

@@ -47,6 +47,29 @@ public class TreeGridComponentHierarchyColumnIT extends AbstractTreeGridIT {
         assertAllRowsHasTextField(6);
     }
 
+    @Test
+    public void treegridComponentRenderer_expandCollapse_rowLevelStateUpdated() {
+        assertRowLevel(0, new int[] { 0, 0, 0 });
+
+        getTreeGrid().expandWithClick(0);
+        assertRowLevel(0, new int[] { 0, 1, 1, 1, 0, 0 });
+
+        getTreeGrid().collapseWithClick(0);
+        assertRowLevel(0, new int[] { 0, 0, 0 });
+    }
+
+    @Test
+    public void treegridComponentRenderer_expandCollapse_rowExpandedStateUpdated() {
+        assertRowExpanded(0, new boolean[] { false, false, false });
+
+        getTreeGrid().expandWithClick(0);
+        assertRowExpanded(0,
+                new boolean[] { true, false, false, false, false, false });
+
+        getTreeGrid().collapseWithClick(0);
+        assertRowExpanded(0, new boolean[] { false, false, false });
+    }
+
     private void assertAllRowsHasTextField(int expectedRowCount) {
         Assert.assertEquals(expectedRowCount, getTreeGrid().getRowCount());
         IntStream.range(0, getTreeGrid().getRowCount())

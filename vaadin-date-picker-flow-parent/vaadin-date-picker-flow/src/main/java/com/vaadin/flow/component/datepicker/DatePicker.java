@@ -30,6 +30,8 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -47,7 +49,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -63,12 +64,11 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Date Picker is an input field that allows the user to enter a date by typing
@@ -126,7 +126,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.0.0-alpha21")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "4.1.0")
@@ -135,8 +135,8 @@ public class DatePicker
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
-        HasOverlayClassName, HasPrefix, HasThemeVariant<DatePickerVariant>,
-        HasValidationProperties, HasValidator<LocalDate>, HasPlaceholder {
+        HasPrefix, HasThemeVariant<DatePickerVariant>, HasValidationProperties,
+        HasValidator<LocalDate>, HasPlaceholder {
 
     private DatePickerI18n i18n;
 
@@ -221,7 +221,7 @@ public class DatePicker
      *
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      */
     public DatePicker(LocalDate initialDate) {
         this(initialDate, false);
@@ -242,7 +242,7 @@ public class DatePicker
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
         super("value", null, String.class, PARSER, FORMATTER);
@@ -300,7 +300,7 @@ public class DatePicker
      *            the label describing the date picker
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #setLabel(String)
      */
     public DatePicker(String label, LocalDate initialDate) {
@@ -348,7 +348,7 @@ public class DatePicker
      *            the pre-selected date in the picker
      * @param listener
      *            the listener to receive value change events
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(LocalDate initialDate,
@@ -368,7 +368,7 @@ public class DatePicker
      * @param listener
      *            the listener to receive value change events
      * @see #setLabel(String)
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label, LocalDate initialDate,
@@ -575,7 +575,7 @@ public class DatePicker
      * custom date formats specified in DatePickerI18N.
      */
     private void executeI18nUpdate() {
-        JsonObject i18nObject = getI18nAsJsonObject();
+        ObjectNode i18nObject = getI18nAsJsonObject();
 
         // For ill-formed locales, Locale.toLanguageTag() will append subtag
         // "lvariant" to it, which will cause the client side
@@ -601,36 +601,18 @@ public class DatePicker
                 i18nObject);
     }
 
-    private JsonObject getI18nAsJsonObject() {
+    private ObjectNode getI18nAsJsonObject() {
         if (i18n == null) {
             return null;
         }
-        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        ObjectNode i18nObject = JacksonUtils.beanToJson(i18n);
         // LocalDate objects have to be explicitly added to the serialized i18n
         // object in order to be formatted correctly
         if (i18n.getReferenceDate() != null) {
             i18nObject.put("referenceDate",
                     i18n.getReferenceDate().format(DateTimeFormatter.ISO_DATE));
         }
-
-        // Remove the error message properties because they aren't used on
-        // the client-side.
-        i18nObject.remove("badInputErrorMessage");
-        i18nObject.remove("requiredErrorMessage");
-        i18nObject.remove("minErrorMessage");
-        i18nObject.remove("maxErrorMessage");
-
-        // Remove properties with null values to prevent errors in web component
-        removeNullValuesFromJsonObject(i18nObject);
         return i18nObject;
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -1120,6 +1102,7 @@ public class DatePicker
     /**
      * The internationalization properties for {@link DatePicker}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DatePickerI18n implements Serializable {
         private List<String> monthNames;
         private List<String> weekdays;
@@ -1413,6 +1396,7 @@ public class DatePicker
          *
          * @return the error message or {@code null} if not set
          */
+        @JsonIgnore // Not used in client side
         public String getBadInputErrorMessage() {
             return badInputErrorMessage;
         }
@@ -1442,6 +1426,7 @@ public class DatePicker
          * @see DatePicker#isRequiredIndicatorVisible()
          * @see DatePicker#setRequiredIndicatorVisible(boolean)
          */
+        @JsonIgnore // Not used in client side
         public String getRequiredErrorMessage() {
             return requiredErrorMessage;
         }
@@ -1473,6 +1458,7 @@ public class DatePicker
          * @see DatePicker#getMin()
          * @see DatePicker#setMin(LocalDate)
          */
+        @JsonIgnore // Not used in client side
         public String getMinErrorMessage() {
             return minErrorMessage;
         }
@@ -1504,6 +1490,7 @@ public class DatePicker
          * @see DatePicker#getMax()
          * @see DatePicker#setMax(LocalDate)
          */
+        @JsonIgnore // Not used in client side
         public String getMaxErrorMessage() {
             return maxErrorMessage;
         }

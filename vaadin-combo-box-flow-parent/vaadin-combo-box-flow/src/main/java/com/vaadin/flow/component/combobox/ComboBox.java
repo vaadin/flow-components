@@ -32,9 +32,9 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableBiPredicate;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Combo Box allows the user to choose a value from a filterable list of options
@@ -88,7 +88,7 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.0.0-alpha21")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -336,7 +336,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
         // This ensures that the selection works even with lazy loading when the
         // item is not yet loaded
-        JsonObject json = Json.createObject();
+        ObjectNode json = JacksonUtils.createObjectNode();
         json.put("key", keyMapper.key(value));
         getDataGenerator().generateData(value, json);
         getElement().setPropertyJson(PROP_SELECTED_ITEM, json);

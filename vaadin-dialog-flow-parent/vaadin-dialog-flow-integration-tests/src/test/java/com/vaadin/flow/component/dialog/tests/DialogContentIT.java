@@ -35,8 +35,7 @@ public class DialogContentIT extends AbstractComponentIT {
         // Add dialog content (the close button) and open the dialog
         clickElementWithJs("add-content-button");
         clickElementWithJs("open-button");
-        waitForElementPresent(
-                By.cssSelector("vaadin-dialog-overlay #close-button"));
+        waitForElementPresent(By.cssSelector("vaadin-dialog #close-button"));
 
         // Close the dialog
         clickElementWithJs("open-button");
@@ -45,7 +44,6 @@ public class DialogContentIT extends AbstractComponentIT {
         clickElementWithJs("add-content-button");
         clickElementWithJs("open-button");
         // Expect the content to be present inside the dialog overlay
-        waitForElementPresent(
-                By.cssSelector("vaadin-dialog-overlay #close-button"));
+        waitForElementPresent(By.cssSelector("vaadin-dialog #close-button"));
     }
 }

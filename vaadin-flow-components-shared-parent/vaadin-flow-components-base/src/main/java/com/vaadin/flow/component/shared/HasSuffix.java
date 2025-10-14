@@ -44,7 +44,7 @@ public interface HasSuffix extends HasElement {
      *
      * @return the suffix component of this field, or {@code null} if no suffix
      *         component has been set
-     * @see #setPrefixComponent(Component)
+     * @see #setSuffixComponent(Component)
      */
     default Component getSuffixComponent() {
         return SlotUtils.getChildInSlot(this, "suffix");

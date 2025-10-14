@@ -53,7 +53,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/notification", version = "25.0.0-alpha21")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -62,6 +62,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
     private static final String OPENED_PROPERTY = "opened";
+
+    private OverlayAutoAddController<Notification> autoAddController;
 
     /**
      * Enumeration of all available positions for notification component
@@ -150,8 +152,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with the given String rendered as its HTML text,
-     * that does not close automatically.
+     * Creates a Notification with the given String rendered as its text, that
+     * does not close automatically.
      *
      * @param text
      *            the text of the Notification
@@ -161,8 +163,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with given String rendered as its HTML text and
-     * given Integer rendered as its duration.
+     * Creates a Notification with given String rendered as its text and given
+     * Integer rendered as its duration.
      * <p>
      * Set to {@code 0} or a negative number to disable the notification
      * auto-closing.
@@ -244,7 +246,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                         new OpenedChangeEvent(this, event.isUserOriginated())));
 
         // Initialize auto add behavior
-        new OverlayAutoAddController<>(this);
+        autoAddController = new OverlayAutoAddController<>(this);
     }
 
     /**
@@ -660,6 +662,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
             // itself when its parent, for example a dialog, gets attached
             // again.
             setOpened(false);
+            autoAddController.remove();
         });
     }
 

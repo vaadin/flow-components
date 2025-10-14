@@ -22,13 +22,12 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
+import com.vaadin.flow.component.menubar.testbench.MenuBarSubMenuElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/menu-bar-theme")
 public class MenuBarThemeIT extends AbstractComponentIT {
-
-    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
 
     private MenuBarElement menuBar;
 
@@ -83,28 +82,24 @@ public class MenuBarThemeIT extends AbstractComponentIT {
 
     @Test
     public void toggleSubMenuItemTheme_themeIsToggled() {
-        menuBar.getButtons().get(0).click();
-        verifyOpened();
-        Assert.assertFalse(
-                menuBar.getSubMenuItems().get(1).hasAttribute("theme"));
+        MenuBarSubMenuElement subMenu = menuBar.getButtons().get(0)
+                .openSubMenu();
+        Assert.assertFalse(subMenu.getMenuItems().get(1).hasAttribute("theme"));
 
         click("toggle-sub-theme");
-        verifyClosed();
+        subMenu.waitUntilClosed();
 
-        menuBar.getButtons().get(0).click();
-        verifyOpened();
+        subMenu = menuBar.getButtons().get(0).openSubMenu();
         Assert.assertEquals(
-                menuBar.getSubMenuItems().get(1).getDomAttribute("theme"),
+                subMenu.getMenuItems().get(1).getDomAttribute("theme"),
                 MenuBarThemePage.SUB_ITEM_THEME);
 
         click("toggle-sub-theme");
-        verifyClosed();
+        subMenu.waitUntilClosed();
 
-        menuBar.getButtons().get(0).click();
-        verifyOpened();
+        subMenu = menuBar.getButtons().get(0).openSubMenu();
 
-        Assert.assertFalse(
-                menuBar.getSubMenuItems().get(1).hasAttribute("theme"));
+        Assert.assertFalse(subMenu.getMenuItems().get(1).hasAttribute("theme"));
     }
 
     @Test
@@ -119,13 +114,5 @@ public class MenuBarThemeIT extends AbstractComponentIT {
 
     private void click(String id) {
         findElement(By.id(id)).click();
-    }
-
-    public void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
-    }
-
-    public void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
     }
 }
