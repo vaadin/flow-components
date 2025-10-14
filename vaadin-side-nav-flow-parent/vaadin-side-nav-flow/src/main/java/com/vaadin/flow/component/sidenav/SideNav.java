@@ -152,6 +152,29 @@ public class SideNav extends Component
     }
 
     /**
+     * Gets whether to expand parent items of the nested matching item after
+     * initial rendering or navigation. By default, all the parent items are
+     * expanded.
+     *
+     * @return true if parent items for the item should be expanded
+     */
+    public boolean isAutoExpand() {
+        return !getElement().getProperty("noAutoExpand", false);
+    }
+
+    /**
+     * Sets whether to expand parent items of the nested matching item after
+     * initial rendering or navigation. By default, all the parent items are
+     * expanded.
+     *
+     * @param {boolean}
+     *            autoExpand
+     */
+    public void setAutoExpand(boolean autoExpand) {
+        getElement().setProperty("noAutoExpand", !autoExpand);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
