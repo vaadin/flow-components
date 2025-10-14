@@ -35,10 +35,6 @@ public enum MenuBarVariant implements ThemeVariant {
     @Deprecated(since = "25.0", forRemoval = true)
     LUMO_PRIMARY("primary"),
     LUMO_CONTRAST("contrast"),
-    /**
-     * @deprecated Use {@link #ICON} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_ICON("icon"),
     /**
      * @deprecated Use {@link #END_ALIGNED} instead.
@@ -48,7 +44,6 @@ public enum MenuBarVariant implements ThemeVariant {
     LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
     PRIMARY("primary"),
     TERTIARY("tertiary"),
-    ICON("icon"),
     END_ALIGNED("end-aligned");
 
     private final String variant;
