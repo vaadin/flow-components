@@ -138,11 +138,19 @@ public class DetachReattachPage extends Div {
                 });
         btnDetachAndReattach.setId("detach-and-reattach-button");
 
+        NativeButton attachAndDetach = new NativeButton("attach and detach",
+                e -> {
+                    add(grid);
+                    remove(grid);
+                });
+        attachAndDetach.setId("attach-and-detach-button");
+
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
                 toggleDetailsVisibleOnClick, resetSortingButton,
                 selectAndDetachButton, selectMultipleItems,
                 setPageSizeAndDetachButton, setSelectionModeAndDetachButton,
                 sortAndDetachButton, btnHideGrid, btnSelectionModeNone,
-                btnSelectionModeMulti, btnDetachAndReattach, btnShowGrid, grid);
+                btnSelectionModeMulti, btnDetachAndReattach, btnShowGrid,
+                attachAndDetach, grid);
     }
 }
