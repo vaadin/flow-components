@@ -167,8 +167,9 @@ public class SideNav extends Component
      * initial rendering or navigation. By default, all the parent items are
      * expanded.
      *
-     * @param {boolean}
-     *            autoExpand
+     * @param autoExpand
+     *            true if parent items for the item should be expanded, false
+     *            otherwise
      */
     public void setAutoExpand(boolean autoExpand) {
         getElement().setProperty("noAutoExpand", !autoExpand);
