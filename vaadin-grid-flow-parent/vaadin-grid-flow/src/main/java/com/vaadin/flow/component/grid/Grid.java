@@ -212,8 +212,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha21")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha21")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-beta1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-beta1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -1372,8 +1372,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @Override
         public void initialize() {
-            initConnector();
-            updateSelectionModeOnClient();
             setViewportRange(0, getPageSize());
         }
     }
@@ -1748,8 +1746,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
-                .getPage()
-                .executeJs("window.Vaadin.Flow.gridConnector.initLazy($0)",
+                .getPage().executeJs(
+                        "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
                         getElement());
     }
 
@@ -3922,6 +3920,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        initConnector();
         updateClientSideSorterIndicators(sortOrder);
         updateSelectionModeOnClient();
         if (getDataProvider() != null) {

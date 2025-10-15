@@ -12,12 +12,18 @@ import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.feature.PointBasedFeature;
+import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 
 /**
  * A source that clusters features within a certain distance.
  * <p>
  * Currently only point-based features such as {@link MarkerFeature} are
  * supported.
+ * <p>
+ * Note: There should be no need to construct this class directly. Instead, use
+ * a {@link FeatureLayer} which exposes the same API as this source. Clustering
+ * can be enabled in a feature layer using
+ * {@link FeatureLayer#setClusteringEnabled(boolean)}.
  */
 public class ClusterSource extends VectorSource {
     private int distance = 50;
