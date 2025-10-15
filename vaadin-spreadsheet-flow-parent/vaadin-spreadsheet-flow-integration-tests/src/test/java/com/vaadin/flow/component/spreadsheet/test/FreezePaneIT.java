@@ -240,7 +240,7 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         loadFile("freeze_and_scroll_test.xlsx");
 
         // Verify acceptable render by screenshot
-        assertTrue(testBench().compareScreen("freeze_and_scroll_test.png"));
+        Assert.assertTrue(testBench().compareScreen("freeze_and_scroll_test.png"));
     }
 
     @Test
@@ -248,7 +248,7 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         loadFile("freeze_and_scroll_vertical_test.xlsx");
 
         // Verify acceptable render by screenshot
-        assertTrue(testBench()
+        Assert.assertTrue(testBench()
                 .compareScreen("freeze_and_scroll_vertical_test.png"));
     }
 
