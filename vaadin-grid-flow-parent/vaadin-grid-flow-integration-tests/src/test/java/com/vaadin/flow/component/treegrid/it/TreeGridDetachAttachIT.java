@@ -90,4 +90,15 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
         Assert.assertEquals(columnOffsetWidth,
                 grid.getCell(0, 0).getPropertyInteger("offsetWidth"));
     }
+
+    @Test
+    public void detach_attachAndDetach_noClientErrors() {
+        // Detach
+        $("button").id("toggle-attached").click();
+
+        // Attach and detach in the same round trip
+        $("button").id("attach-and-detach-button").click();
+
+        checkLogsForErrors();
+    }
 }
