@@ -735,17 +735,17 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
             if (getElement().getNode().getParent() == null) {
                 // Remove the popover from its current state tree
                 getElement().removeFromTree(false);
-                getModalParentComponent().ifPresentOrElse(modalParent -> {
-                    updateSlotAttribute(modalParent);
+                getParentComponentCandidate()
+                        .ifPresentOrElse(parentComponent -> {
+                            updateSlotAttribute(parentComponent);
 
-                    if (modalParent instanceof HasComponents) {
-                        ((HasComponents) modalParent).add(this);
-                    } else {
-                        modalParent.getElement().appendChild(getElement());
-                    }
-                }, () -> {
-                    ui.addToModalComponent(this);
-                });
+                            if (parentComponent instanceof HasComponents) {
+                                ((HasComponents) parentComponent).add(this);
+                            } else {
+                                parentComponent.getElement()
+                                        .appendChild(getElement());
+                            }
+                        }, () -> ui.addToModalComponent(this));
 
                 autoAddedToTheUi = true;
             }
@@ -754,18 +754,24 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Finds the closest parent component that is annotated with
-     * {@link ModalRoot}, if any.
+     * Finds the closest candidate in the component hierarchy to use as a parent
+     * component when auto-adding the popover. This can be:
+     * <ul>
+     * <li>Another popover component</li>
+     * <li>A component annotated with {@link ModalRoot}</li>
+     * </ul>
      *
-     * @return an optional with the closest modal parent component, or an empty
-     *         optional if none found
+     * @return an optional with the candidate to use as parent component, or an
+     *         empty optional if none found
      */
-    private Optional<Component> getModalParentComponent() {
+    private Optional<Component> getParentComponentCandidate() {
         var parent = target.getParent();
         while (parent.isPresent()) {
             var parentComponent = parent.get();
-            if (parentComponent.getClass()
-                    .isAnnotationPresent(ModalRoot.class)) {
+            var isPopover = parentComponent instanceof Popover;
+            var isModal = parentComponent.getClass()
+                    .isAnnotationPresent(ModalRoot.class);
+            if (isPopover || isModal) {
                 return parent;
             }
             parent = parentComponent.getParent();
@@ -774,25 +780,29 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Updates the {@code slot} attribute based on the target or its ancestors
-     * up to the modal parent.
+     * Updates the {@code slot} attribute based on the parent component.
      * <p>
      * It starts by removing any existing {@code slot} attribute from the
-     * popover. Then, it gets the {@link ModalRoot} annotation from the modal
-     * parent component to determine the appropriate slot value. If the modal
-     * parent defines a value for the {@link ModalRoot#slot()} property, it sets
-     * the {@code slot} attribute on the popover element.
-     * 
+     * popover. Then, it gets the {@link ModalRoot} annotation from the parent
+     * component to determine the appropriate slot value. If the parent is
+     * annotated with {@link ModalRoot} and defines a value for the
+     * {@link ModalRoot#slot()} property, it sets the {@code slot} attribute on
+     * the popover element.
+     *
      * <p>
      * This ensures that the popover is rendered in the correct slot when used
      * inside a modal component.
      *
-     * @param modalParent
-     *            the modal parent component
+     * @param parentComponent
+     *            the parent component
      */
-    private void updateSlotAttribute(Component modalParent) {
+    private void updateSlotAttribute(Component parentComponent) {
         getElement().removeAttribute("slot");
-        var annotation = modalParent.getClass().getAnnotation(ModalRoot.class);
+        var annotation = parentComponent.getClass()
+                .getAnnotation(ModalRoot.class);
+        if (annotation == null) {
+            return;
+        }
 
         var slotValue = annotation.slot();
         if (slotValue != null && !slotValue.isEmpty()) {
