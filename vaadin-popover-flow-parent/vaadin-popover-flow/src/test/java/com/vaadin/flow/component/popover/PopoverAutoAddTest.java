@@ -189,6 +189,20 @@ public class PopoverAutoAddTest {
     }
 
     @Test
+    public void popoverWithTargetInPopover_popoverAttachedToPopover() {
+        var firstPopover = new Popover();
+        ui.add(firstPopover);
+        var target = new Div();
+        firstPopover.add(target);
+        var secondPopover = new Popover();
+        secondPopover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals(
+                "Second popover should be attached to first popover",
+                firstPopover, secondPopover.getParent().orElse(null));
+    }
+
+    @Test
     public void popoverWithTargetInModalComponent_popoverAttachedToModal() {
         var modal = new TestModalComponent();
         ui.add(modal);
