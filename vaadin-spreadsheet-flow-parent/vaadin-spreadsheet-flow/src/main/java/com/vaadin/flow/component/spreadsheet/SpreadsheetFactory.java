@@ -1064,9 +1064,9 @@ public class SpreadsheetFactory implements Serializable {
              *
              * In Spreadsheet the meaning is the opposite.
              * 
-             * POI uses a split position of 0 to mean "no split", so we
-             * should not be setting split positions or hiding anything
-             * in the case this position is 0.
+             * POI uses a split position of 0 to mean "no split", so we should
+             * not be setting split positions or hiding anything in the case
+             * this position is 0.
              *
              * If the view was scrolled down / right when panes were frozen, the
              * invisible frozen rows/columns are effectively hidden in Excel. We
@@ -1076,9 +1076,9 @@ public class SpreadsheetFactory implements Serializable {
             if (vSplit > 0) {
                 spreadsheet.setHorizontalSplitPosition(vSplit + leftCol);
                 if (leftCol > 0) {
-                    spreadsheet.setColumnsHidden(
-                    IntStream.range(0, leftCol).boxed().collect(Collectors
-                            .toMap(Function.identity(), index -> true)));
+                    spreadsheet.setColumnsHidden(IntStream.range(0, leftCol)
+                            .boxed().collect(Collectors.toMap(
+                                    Function.identity(), index -> true)));
                 }
             } else if (leftCol > 0) {
                 // TODO: should scroll vertically to restore viewport state
@@ -1088,9 +1088,9 @@ public class SpreadsheetFactory implements Serializable {
             if (hSplit > 0) {
                 spreadsheet.setVerticalSplitPosition(hSplit + topRow);
                 if (topRow > 0) {
-                    spreadsheet.setRowsHidden(
-                    IntStream.range(0, topRow).boxed().collect(Collectors
-                            .toMap(Function.identity(), index -> true)));
+                    spreadsheet.setRowsHidden(IntStream.range(0, topRow).boxed()
+                            .collect(Collectors.toMap(Function.identity(),
+                                    index -> true)));
                 }
             } else if (topRow > 0) {
                 // TODO: should scroll vertically to restore viewport state
@@ -1100,7 +1100,7 @@ public class SpreadsheetFactory implements Serializable {
             spreadsheet.setVerticalSplitPosition(0);
             spreadsheet.setHorizontalSplitPosition(0);
         }
-    
+
     }
 
     private static Sheet createNewSheet(Workbook workbook) {

@@ -248,7 +248,8 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         loadFile("freeze_and_scroll_vertical_test.xlsx");
 
         // Verify acceptable render by screenshot
-        assertTrue(testBench().compareScreen("freeze_and_scroll_vertical_test.png"));
+        assertTrue(testBench()
+                .compareScreen("freeze_and_scroll_vertical_test.png"));
     }
 
     private int getHeaderCount(String selector) {
