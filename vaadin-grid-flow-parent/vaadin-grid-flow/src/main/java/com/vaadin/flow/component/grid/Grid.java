@@ -1746,8 +1746,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
-                .getPage()
-                .executeJs("window.Vaadin.Flow.gridConnector.initLazy($0)",
+                .getPage().executeJs(
+                        "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
                         getElement());
     }
 
