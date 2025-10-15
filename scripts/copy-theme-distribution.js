@@ -12,13 +12,14 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // Check command line arguments
-if (process.argv.length !== 4) {
-  console.error('Usage: node copy-theme-distribution.js <path-to-theme-class> <npm-theme-package>');
+if (process.argv.length !== 5) {
+  console.error('Usage: node copy-theme-distribution.js <path-to-theme-class> <npm-theme-package> <theme-path>');
   process.exit(1);
 }
 
 const javaThemeClass = process.argv[2];
 const npmThemePackage = process.argv[3];
+const themePath = process.argv[4];
 
 // Read Java file and extract NPM package info
 if (!fs.existsSync(javaThemeClass)) {
@@ -65,7 +66,7 @@ execSync('npm install', {
 });
 
 // Create target directory
-const targetDir = path.join('target/classes/META-INF/resources', npmThemePackage);
+const targetDir = path.join('target/classes/META-INF/resources', themePath);
 fs.mkdirSync(targetDir, { recursive: true });
 
 // Copy the distribution files

@@ -181,7 +181,9 @@ public class ClusterIT extends AbstractComponentIT {
         // Click events are delayed by around 250ms, wait for event
         waitSeconds(1);
 
-        Assert.assertEquals("cluster-click: m1, m2, m3", eventLog.getText());
+        Assert.assertEquals(
+                "cluster-click: features=[m1, m2, m3], layer=feature-layer, source=cluster-source",
+                eventLog.getText());
     }
 
     @Test

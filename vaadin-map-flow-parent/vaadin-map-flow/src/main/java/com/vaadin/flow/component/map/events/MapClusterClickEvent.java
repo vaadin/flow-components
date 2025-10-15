@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.map.events;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.vaadin.flow.component.ComponentEvent;
@@ -17,7 +15,12 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.MapBase;
+import com.vaadin.flow.component.map.configuration.Feature;
+import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
+import com.vaadin.flow.component.map.configuration.source.VectorSource;
+import com.vaadin.flow.internal.JacksonUtils;
 
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 
 /**
@@ -26,7 +29,9 @@ import tools.jackson.databind.node.ArrayNode;
 @DomEvent("map-cluster-click")
 public class MapClusterClickEvent extends ComponentEvent<MapBase> {
 
-    private final List<FeatureEventDetails> features;
+    private final List<Feature> features;
+    private final VectorLayer layer;
+    private final VectorSource vectorSource;
     private final MouseEventDetails details;
 
     public MapClusterClickEvent(Map source, boolean fromClient,
@@ -41,15 +46,19 @@ public class MapClusterClickEvent extends ComponentEvent<MapBase> {
             @EventData("event.detail.originalEvent.button") int button) {
         super(source, fromClient);
 
-        List<FeatureEventDetails> features = new ArrayList<>();
-        for (int i = 0; i < featureIds.size(); i++) {
-            String featureId = featureIds.get(i).asString();
-            FeatureEventDetails featureEventDetails = MapEventUtil
-                    .getFeatureEventDetails(source.getRawConfiguration(),
-                            layerId, featureId);
-            features.add(featureEventDetails);
-        }
-        this.features = Collections.unmodifiableList(features);
+        layer = source.getRawConfiguration().getLayers().stream()
+                .filter(l -> l instanceof VectorLayer && l.getId() != null
+                        && l.getId().equals(layerId))
+                .map(l -> (VectorLayer) l).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No vector layer with id " + layerId));
+        vectorSource = (VectorSource) layer.getSource();
+
+        List<String> featureIdList = JacksonUtils.stream(featureIds)
+                .map(JsonNode::asString).toList();
+        features = vectorSource.getFeatures().stream()
+                .filter(feature -> featureIdList.contains(feature.getId()))
+                .toList();
 
         details = new MouseEventDetails();
         details.setAbsoluteX(pageX);
@@ -66,8 +75,26 @@ public class MapClusterClickEvent extends ComponentEvent<MapBase> {
      *
      * @return the list of features in the cluster
      */
-    public List<FeatureEventDetails> getFeatures() {
+    public List<Feature> getFeatures() {
         return features;
+    }
+
+    /**
+     * Gets the layer that contains the cluster's features.
+     *
+     * @return the layer
+     */
+    public VectorLayer getLayer() {
+        return layer;
+    }
+
+    /**
+     * Gets the source that contains the cluster's features.
+     *
+     * @return the source
+     */
+    public VectorSource getVectorSource() {
+        return vectorSource;
     }
 
     /**

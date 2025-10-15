@@ -10,7 +10,8 @@ package com.vaadin.flow.component.app;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.theme.lumo.Lumo;
 
-@StyleSheet("@vaadin/vaadin-lumo-styles/lumo.css")
+@StyleSheet(Lumo.STYLESHEET)
 public class TestAppShell implements AppShellConfigurator {
 }

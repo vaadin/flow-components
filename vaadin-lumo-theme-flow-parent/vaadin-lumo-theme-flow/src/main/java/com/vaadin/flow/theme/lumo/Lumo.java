@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.AbstractTheme;
 
 /**
@@ -35,6 +37,21 @@ public class Lumo implements AbstractTheme {
 
     public static final String LIGHT = "light";
     public static final String DARK = "dark";
+
+    /**
+     * The path to the Lumo stylesheet. Can be used as argument to a
+     * {@link StyleSheet} on an {@link AppShellConfigurator} class to apply the
+     * Lumo theme to an application.
+     */
+    public static final String STYLESHEET = "lumo/lumo.css";
+
+    /**
+     * The path to the stylesheet that contains the Lumo utility classes. Can be
+     * used as argument to a {@link StyleSheet} on an
+     * {@link AppShellConfigurator} class to apply the utility classes to an
+     * application.
+     */
+    public static final String UTILITY_STYLESHEET = "lumo/utility.css";
 
     @Override
     public String getBaseUrl() {

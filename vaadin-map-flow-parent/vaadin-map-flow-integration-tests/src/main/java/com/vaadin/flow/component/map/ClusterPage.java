@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.style.Icon;
@@ -46,10 +47,14 @@ public class ClusterPage extends Div {
         eventLog.getElement().getStyle().set("white-space", "pre");
 
         map.addClusterClickListener(event -> {
-            String features = event.getFeatures().stream()
-                    .map(info -> info.getFeature().getId()).sorted()
-                    .collect(Collectors.joining(", "));
-            eventLog.add(new Div("cluster-click: " + features));
+            String featureIds = event.getFeatures().stream().map(Feature::getId)
+                    .sorted().collect(Collectors.joining(", "));
+            String layerId = event.getLayer().getId();
+            String sourceId = event.getVectorSource().getId();
+            String eventText = String.format(
+                    "cluster-click: features=[%s], layer=%s, source=%s",
+                    featureIds, layerId, sourceId);
+            eventLog.add(new Div(eventText));
         });
 
         map.addFeatureClickListener(event -> {
@@ -66,6 +71,8 @@ public class ClusterPage extends Div {
         layer.setClusteringEnabled(true);
         layer.setClusterDistance(50);
         layer.setClusterMinDistance(50);
+
+        layer.getSource().setId("cluster-source");
 
         // Cluster feature in some region
         MarkerFeature marker = new MarkerFeature(new Coordinate(0, 0));
