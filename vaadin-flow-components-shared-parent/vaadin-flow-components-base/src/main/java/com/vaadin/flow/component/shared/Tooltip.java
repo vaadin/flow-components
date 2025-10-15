@@ -211,6 +211,17 @@ public class Tooltip implements Serializable {
     }
 
     /**
+     * String used as a tooltip content in Markdown format.
+     *
+     * @param markdown
+     *            the text to set in Markdown format
+     */
+    public Tooltip withMarkdown(String markdown) {
+        setMarkdown(markdown);
+        return this;
+    }
+
+    /**
      * The delay in milliseconds before the tooltip is opened on keyboard focus,
      * when not in manual mode.
      *

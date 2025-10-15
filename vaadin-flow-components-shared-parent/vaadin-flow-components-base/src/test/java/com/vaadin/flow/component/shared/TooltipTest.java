@@ -214,6 +214,8 @@ public class TooltipTest {
 
         Assert.assertEquals("foo",
                 getTooltipElement().get().getProperty("text"));
+        Assert.assertFalse(
+                getTooltipElement().get().getProperty("markdown", false));
         Assert.assertEquals(200,
                 getTooltipElement().get().getProperty("focusDelay", 0));
         Assert.assertEquals(1000,
@@ -224,6 +226,21 @@ public class TooltipTest {
                 getTooltipElement().get().getProperty("position"));
         Assert.assertEquals(true,
                 getTooltipElement().get().getProperty("manual", false));
+    }
+
+    @Test
+    public void createTooltip_fluentAPI_withMarkdown() {
+        ui.add(component);
+
+        var tooltip = Tooltip.forComponent(component)
+                .withMarkdown("**Bold** _italic_");
+
+        Assert.assertNotNull(tooltip);
+
+        Assert.assertEquals("**Bold** _italic_",
+                getTooltipElement().get().getProperty("text"));
+        Assert.assertTrue(
+                getTooltipElement().get().getProperty("markdown", false));
     }
 
     private Optional<Element> getTooltipElement() {
