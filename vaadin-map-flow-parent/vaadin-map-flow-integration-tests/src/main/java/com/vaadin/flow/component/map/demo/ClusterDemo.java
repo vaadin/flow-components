@@ -35,6 +35,10 @@ public class ClusterDemo extends Div {
             layer.addFeature(marker);
         }
 
+        map.addClusterClickListener(event -> {
+            map.zoomToFit(event.getFeatures());
+        });
+
         add(map);
     }
 }

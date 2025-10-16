@@ -41,7 +41,7 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
 
     @Test
     public void scrollDown_detach_attach_firstItemsRendered() {
-        grid.scrollToRow(150);
+        grid.scrollToRowByPath(150);
 
         toggleAttachedButton.click();
         toggleAttachedButton.click();
@@ -89,5 +89,16 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
         grid = $(TreeGridElement.class).first();
         Assert.assertEquals(columnOffsetWidth,
                 grid.getCell(0, 0).getPropertyInteger("offsetWidth"));
+    }
+
+    @Test
+    public void detach_attachAndDetach_noClientErrors() {
+        // Detach
+        $("button").id("toggle-attached").click();
+
+        // Attach and detach in the same round trip
+        $("button").id("attach-and-detach-button").click();
+
+        checkLogsForErrors();
     }
 }

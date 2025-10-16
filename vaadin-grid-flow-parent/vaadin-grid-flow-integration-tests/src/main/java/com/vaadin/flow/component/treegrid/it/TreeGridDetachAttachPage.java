@@ -44,6 +44,14 @@ public class TreeGridDetachAttachPage extends Div {
         toggleAttached.setId("toggle-attached");
         add(toggleAttached);
 
+        NativeButton attachAndDetach = new NativeButton("attach and detach",
+                e -> {
+                    add(grid);
+                    grid.setUniqueKeyDataGenerator("key", null);
+                    remove(grid);
+                });
+        attachAndDetach.setId("attach-and-detach-button");
+
         NativeButton useAutoWidthColumn = new NativeButton(
                 "use auto-width column", e -> {
                     grid.removeAllColumns();
@@ -51,6 +59,6 @@ public class TreeGridDetachAttachPage extends Div {
                             .setAutoWidth(true).setFlexGrow(0);
                 });
         useAutoWidthColumn.setId("use-auto-width-column");
-        add(useAutoWidthColumn);
+        add(useAutoWidthColumn, attachAndDetach);
     }
 }

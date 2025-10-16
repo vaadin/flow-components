@@ -33,6 +33,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
@@ -47,7 +48,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/popover", version = "25.0.0-beta1")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
@@ -729,14 +730,83 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     private void onTargetAttach(UI ui) {
+
         if (target != null) {
             if (getElement().getNode().getParent() == null) {
                 // Remove the popover from its current state tree
                 getElement().removeFromTree(false);
-                ui.addToModalComponent(this);
+                getParentComponentCandidate()
+                        .ifPresentOrElse(parentComponent -> {
+                            updateSlotAttribute(parentComponent);
+
+                            if (parentComponent instanceof HasComponents) {
+                                ((HasComponents) parentComponent).add(this);
+                            } else {
+                                parentComponent.getElement()
+                                        .appendChild(getElement());
+                            }
+                        }, () -> ui.addToModalComponent(this));
+
                 autoAddedToTheUi = true;
             }
             getElement().executeJs("this.target = $0", target.getElement());
+        }
+    }
+
+    /**
+     * Finds the closest candidate in the component hierarchy to use as a parent
+     * component when auto-adding the popover. This can be:
+     * <ul>
+     * <li>Another popover component</li>
+     * <li>A component annotated with {@link ModalRoot}</li>
+     * </ul>
+     *
+     * @return an optional with the candidate to use as parent component, or an
+     *         empty optional if none found
+     */
+    private Optional<Component> getParentComponentCandidate() {
+        var parent = target.getParent();
+        while (parent.isPresent()) {
+            var parentComponent = parent.get();
+            var isPopover = parentComponent instanceof Popover;
+            var isModal = parentComponent.getClass()
+                    .isAnnotationPresent(ModalRoot.class);
+            if (isPopover || isModal) {
+                return parent;
+            }
+            parent = parentComponent.getParent();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Updates the {@code slot} attribute based on the parent component.
+     * <p>
+     * It starts by removing any existing {@code slot} attribute from the
+     * popover. Then, it gets the {@link ModalRoot} annotation from the parent
+     * component to determine the appropriate slot value. If the parent is
+     * annotated with {@link ModalRoot} and defines a value for the
+     * {@link ModalRoot#slot()} property, it sets the {@code slot} attribute on
+     * the popover element.
+     *
+     * <p>
+     * This ensures that the popover is rendered in the correct slot when used
+     * inside a modal component.
+     *
+     * @param parentComponent
+     *            the parent component
+     */
+    private void updateSlotAttribute(Component parentComponent) {
+        getElement().removeAttribute("slot");
+        var annotation = parentComponent.getClass()
+                .getAnnotation(ModalRoot.class);
+        if (annotation == null) {
+            return;
+        }
+
+        var slotValue = annotation.slot();
+        if (slotValue != null && !slotValue.isEmpty()) {
+            getElement().setAttribute("slot", slotValue);
         }
     }
 

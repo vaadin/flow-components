@@ -39,7 +39,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-alpha20")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-beta1")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends Component
         implements HasSideNavItems, HasSize, HasStyle {
@@ -149,6 +149,30 @@ public class SideNav extends Component
      */
     public void setExpanded(boolean expanded) {
         getElement().setProperty("collapsed", !expanded);
+    }
+
+    /**
+     * Gets whether to expand parent items of the nested matching item after
+     * initial rendering or navigation. By default, all the parent items are
+     * expanded.
+     *
+     * @return true if parent items for the item should be expanded
+     */
+    public boolean isAutoExpand() {
+        return !getElement().getProperty("noAutoExpand", false);
+    }
+
+    /**
+     * Sets whether to expand parent items of the nested matching item after
+     * initial rendering or navigation. By default, all the parent items are
+     * expanded.
+     *
+     * @param autoExpand
+     *            true if parent items for the item should be expanded, false
+     *            otherwise
+     */
+    public void setAutoExpand(boolean autoExpand) {
+        getElement().setProperty("noAutoExpand", !autoExpand);
     }
 
     /**

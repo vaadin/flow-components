@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>copy-theme-distribution</id>
@@ -45,6 +45,7 @@
                                 <argument>../../scripts/copy-theme-distribution.js</argument>
                                 <argument>src/main/java/com/vaadin/flow/theme/lumo/Lumo.java</argument>
                                 <argument>@vaadin/vaadin-lumo-styles</argument>
+                                <argument>lumo</argument>
                             </arguments>
                         </configuration>
                     </execution>

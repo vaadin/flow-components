@@ -26,7 +26,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout.SplitterDragendEvent;
+import com.vaadin.flow.component.splitlayout.SplitLayout.SplitterDragEndEvent;
 
 public class SplitLayoutUnitTest {
 
@@ -156,7 +156,7 @@ public class SplitLayoutUnitTest {
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
-        ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
+        ComponentUtil.fireEvent(splitLayout, new SplitterDragEndEvent(
                 splitLayout, true, "432.68px", "267.32px"));
 
         Assert.assertEquals(61.81, splitLayout.getSplitterPosition(), 0.01);
@@ -168,7 +168,7 @@ public class SplitLayoutUnitTest {
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
-        ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
+        ComponentUtil.fireEvent(splitLayout, new SplitterDragEndEvent(
                 splitLayout, true, "58.23%", "41.77%"));
 
         Assert.assertEquals(58.23, splitLayout.getSplitterPosition(), 0);
@@ -189,7 +189,7 @@ public class SplitLayoutUnitTest {
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
-        ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
+        ComponentUtil.fireEvent(splitLayout, new SplitterDragEndEvent(
                 splitLayout, true, "58.23%", "41.77%"));
 
         Assert.assertEquals(58.23, splitLayout.getSplitterPosition(), 0);
@@ -206,7 +206,7 @@ public class SplitLayoutUnitTest {
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
-        ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
+        ComponentUtil.fireEvent(splitLayout, new SplitterDragEndEvent(
                 splitLayout, true, "58.23%", "41.77%"));
 
         Assert.assertEquals(58.23, splitLayout.getSplitterPosition(), 0);
@@ -227,7 +227,7 @@ public class SplitLayoutUnitTest {
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
-        ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
+        ComponentUtil.fireEvent(splitLayout, new SplitterDragEndEvent(
                 splitLayout, true, "58.23%", "41.77%"));
 
         Assert.assertEquals(58.23, splitLayout.getSplitterPosition(), 0);
@@ -246,7 +246,7 @@ public class SplitLayoutUnitTest {
         splitLayout.setSplitterPosition(splitterPosition);
 
         ComponentUtil.fireEvent(splitLayout,
-                new SplitterDragendEvent(splitLayout, true, null, "41.77%"));
+                new SplitterDragEndEvent(splitLayout, true, null, "41.77%"));
 
         Assert.assertEquals(45.66, splitLayout.getSplitterPosition(), 0);
     }
@@ -258,7 +258,7 @@ public class SplitLayoutUnitTest {
         splitLayout.setSplitterPosition(splitterPosition);
 
         ComponentUtil.fireEvent(splitLayout,
-                new SplitterDragendEvent(splitLayout, true, "41.77%", null));
+                new SplitterDragEndEvent(splitLayout, true, "41.77%", null));
 
         Assert.assertEquals(45.66, splitLayout.getSplitterPosition(), 0);
     }
@@ -267,7 +267,7 @@ public class SplitLayoutUnitTest {
     public void testUpdateSplitterPosition_noInitialPosition() {
         SplitLayout splitLayout = new SplitLayout();
 
-        ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
+        ComponentUtil.fireEvent(splitLayout, new SplitterDragEndEvent(
                 splitLayout, true, "432.68px", "267.32px"));
 
         Assert.assertEquals(61.81, splitLayout.getSplitterPosition(), 0.01);

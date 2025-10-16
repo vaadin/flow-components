@@ -21,8 +21,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
@@ -184,9 +188,161 @@ public class PopoverAutoAddTest {
         Assert.assertEquals(ui, popover.getParent().orElseThrow());
     }
 
+    @Test
+    public void popoverWithTargetInPopover_popoverAttachedToPopover() {
+        var firstPopover = new Popover();
+        ui.add(firstPopover);
+        var target = new Div();
+        firstPopover.add(target);
+        var secondPopover = new Popover();
+        secondPopover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals(
+                "Second popover should be attached to first popover",
+                firstPopover, secondPopover.getParent().orElse(null));
+    }
+
+    @Test
+    public void popoverWithTargetInModalComponent_popoverAttachedToModal() {
+        var modal = new TestModalComponent();
+        ui.add(modal);
+        var target = new Div();
+        modal.getElement().appendChild(target.getElement());
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals("Popover should be attached to modal", modal,
+                popover.getParent().orElse(null));
+    }
+
+    @Test
+    public void popoverWithTargetInModalComponent_targetRemoved_popoverDetached() {
+        var modal = new TestModalComponent();
+        ui.add(modal);
+        var target = new Div();
+        modal.getElement().appendChild(target.getElement());
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+
+        target.removeFromParent();
+        fakeClientResponse();
+        Assert.assertFalse("Popover should be detached",
+                popover.getParent().isPresent());
+    }
+
+    @Test
+    public void popoverWithTargetInModalContainer_popoverAttachedToModal() {
+        var modal = new TestModalContainer();
+        ui.add(modal);
+        var target = new Div();
+        modal.add(target);
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals("Popover should be attached to modal", modal,
+                popover.getParent().orElse(null));
+    }
+
+    @Test
+    public void popoverWithTargetInModalSubContainer_popoverAttachedToModal() {
+        var modal = new TestModalSubContainer();
+        ui.add(modal);
+        var target = new Div();
+        modal.add(target);
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals("Popover should be attached to modal", modal,
+                popover.getParent().orElse(null));
+    }
+
+    @Test
+    public void popoverWithTargetInModalContainer_targetRemoved_popoverDetached() {
+        var modal = new TestModalContainer();
+        ui.add(modal);
+        var target = new Div();
+        modal.add(target);
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+
+        target.removeFromParent();
+        fakeClientResponse();
+        Assert.assertFalse("Popover should be detached",
+                popover.getParent().isPresent());
+    }
+
+    @Test
+    public void targetWithinModalWithSlotDefined_popoverInheritsSlotAttribute() {
+        var modal = new TestModalContainerWithSlot();
+        ui.add(modal);
+        var target = new Div();
+        var popover = new Popover();
+        popover.setTarget(target);
+        modal.add(target);
+        fakeClientResponse();
+
+        Assert.assertEquals("custom-slot",
+                popover.getElement().getAttribute("slot"));
+
+        fakeClientResponse();
+        var newModal = new TestModalContainer();
+        ui.add(newModal);
+        newModal.add(target);
+        fakeClientResponse();
+        Assert.assertFalse("Popover should not have value for slot attribute",
+                popover.getElement().hasAttribute("slot"));
+    }
+
+    @Test
+    public void popoverWithTargetAddedAsVirtualChild_popoverAttachedToModal() {
+        var modal = new TestModalComponent();
+        ui.add(modal);
+        var target = new Div();
+        modal.getElement().appendVirtualChild(target.getElement());
+        var popover = new Popover();
+        popover.setTarget(target);
+        fakeClientResponse();
+        Assert.assertEquals("Popover should be attached to modal", modal,
+                popover.getParent().orElse(null));
+    }
+
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
+    }
+
+    @ModalRoot
+    @Tag("div")
+    public class TestModalContainer extends Component implements HasComponents {
+        public TestModalContainer() {
+            super();
+        }
+    }
+
+    @ModalRoot
+    @Tag("div")
+    public class TestModalComponent extends Component {
+        public TestModalComponent() {
+            super();
+        }
+    }
+
+    @ModalRoot(slot = "custom-slot")
+    @Tag("div")
+    public class TestModalContainerWithSlot extends Component
+            implements HasComponents {
+        public TestModalContainerWithSlot() {
+            super();
+        }
+    }
+
+    @Tag("div")
+    public class TestModalSubContainer extends TestModalContainer {
+        public TestModalSubContainer() {
+            super();
+        }
     }
 }

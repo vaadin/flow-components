@@ -56,6 +56,19 @@ public class SideNavTest {
     }
 
     @Test
+    public void setAutoExpand_isAutoExpand() {
+        Assert.assertTrue(sideNav.isAutoExpand());
+        Assert.assertFalse(
+                sideNav.getElement().getProperty("noAutoExpand", false));
+
+        sideNav.setAutoExpand(false);
+
+        Assert.assertFalse(sideNav.isAutoExpand());
+        Assert.assertTrue(
+                sideNav.getElement().getProperty("noAutoExpand", false));
+    }
+
+    @Test
     public void changeLabel_labelChanged() {
         Assert.assertNull(sideNav.getLabel());
         sideNav.setLabel("Navigation test");

@@ -220,4 +220,17 @@ public class DetachReattachIT extends AbstractComponentIT {
         sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
         Assert.assertEquals(direction, sorter.getProperty("direction"));
     }
+
+    @Test
+    public void detach_attachAndDetach_noClientErrors() {
+        open();
+
+        // Detach
+        $("button").id("detach-button").click();
+
+        // Attach and detach in the same round trip
+        $("button").id("attach-and-detach-button").click();
+
+        checkLogsForErrors();
+    }
 }
