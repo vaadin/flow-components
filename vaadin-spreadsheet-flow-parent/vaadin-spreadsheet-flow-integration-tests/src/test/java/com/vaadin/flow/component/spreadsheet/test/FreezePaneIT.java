@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
+import java.io.IOException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -233,6 +235,30 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
                 "Bottommost row header should be within spreadsheet bounds",
                 bottomLeftPaneRect.getY() + bottomLeftPaneRect.getHeight(),
                 headerRect.getY() + headerRect.getHeight());
+    }
+
+    @Test
+    public void loadFrozenAndScrolledDocument() {
+        loadFile("freeze_and_scroll_test.xlsx");
+
+        // Verify acceptable render by screenshot
+        compareScreen("freeze_and_scroll_test.png");
+    }
+
+    @Test
+    public void loadFrozenAndScrolledDowcumentTwoWay() {
+        loadFile("freeze_and_scroll_vertical_test.xlsx");
+
+        // Verify acceptable render by screenshot
+        compareScreen("freeze_and_scroll_vertical_test.png");
+    }
+
+    private void compareScreen(String fileName) {
+        try {
+            Assert.assertTrue(testBench().compareScreen(fileName));
+        } catch (IOException ioex) {
+            Assert.fail("Could not read screenshot " + fileName);
+        }
     }
 
     private int getHeaderCount(String selector) {
