@@ -26,7 +26,7 @@ public class MenuBarThemeVariantTest {
     private MenuBar menuBar = new MenuBar();
 
     @Test
-    public void addAndRemoveTertiaryVariant_themeAttributeUpdated() {
+    public void addAndRemoveLumoTertiaryVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
         assertThemeAttribute("tertiary");

@@ -61,7 +61,7 @@ public class SelectVariantTest {
     }
 
     @Test
-    public void addHelperAboveField_themeAttributeUpdated() {
+    public void addLumoHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");

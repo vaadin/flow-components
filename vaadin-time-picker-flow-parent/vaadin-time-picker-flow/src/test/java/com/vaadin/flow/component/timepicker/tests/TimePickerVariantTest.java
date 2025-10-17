@@ -64,7 +64,7 @@ public class TimePickerVariantTest {
     }
 
     @Test
-    public void addHelperAboveField_themeAttributeUpdated() {
+    public void addLumoHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");

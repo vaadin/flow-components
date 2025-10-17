@@ -63,7 +63,7 @@ public class DateTimePickerVariantTest {
     }
 
     @Test
-    public void addHelperAboveField_themeAttributeUpdated() {
+    public void addLumoHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(
                 DateTimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
