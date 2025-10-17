@@ -17,22 +17,22 @@ package com.vaadin.flow.component.tabs.tests;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.TabVariant;
+import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.component.tabs.TabSheetVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 
-public class TabVariantTest {
+public class TabSheetVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Tab(), TabVariant.LUMO_ICON_ON_TOP);
+                new TabSheet(), TabSheetVariant.LUMO_BORDERED);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Tab(), TabVariant.LUMO_ICON_ON_TOP);
+                        new TabSheet(), TabSheetVariant.LUMO_BORDERED);
     }
 }

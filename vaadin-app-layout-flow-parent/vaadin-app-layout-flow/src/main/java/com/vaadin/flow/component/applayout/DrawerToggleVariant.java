@@ -13,27 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.tabs;
+package com.vaadin.flow.component.applayout;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-tabsheet} component.
+ * The set of theme variants applicable to the {@code vaadin-drawer-toggle}
+ * component.
  */
-public enum TabSheetVariant implements ThemeVariant {
-    LUMO_TABS_CENTERED("centered"),
-    LUMO_TABS_SMALL("small"),
-    LUMO_TABS_MINIMAL("minimal"),
-    LUMO_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    LUMO_TABS_EQUAL_WIDTH_TABS("equal-width-tabs"),
-    LUMO_BORDERED("bordered"),
-    LUMO_NO_PADDING("no-padding"),
-    AURA_TABS_FILLED("filled"),
-    AURA_TABS_ACCENT("accent");
+public enum DrawerToggleVariant implements ThemeVariant {
+
+    LUMO_SMALL("small"),
+    LUMO_LARGE("large"),
+    LUMO_TERTIARY_INLINE("tertiary-inline"),
+    LUMO_SUCCESS("success"),
+    LUMO_WARNING("warning"),
+    LUMO_ERROR("error"),
+    LUMO_CONTRAST("contrast"),
+    LUMO_ICON("icon"),
+    AURA_ERROR("error"),
+    AURA_ACCENT("accent"),
+    AURA_DANGER("danger"),
+    AURA_PERMANENT("permanent");
 
     private final String variant;
 
-    TabSheetVariant(String variant) {
+    DrawerToggleVariant(String variant) {
         this.variant = variant;
     }
 

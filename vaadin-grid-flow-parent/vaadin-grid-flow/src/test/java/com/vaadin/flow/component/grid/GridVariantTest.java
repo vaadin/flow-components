@@ -13,26 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.tabs.tests;
+package com.vaadin.flow.component.grid;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.TabVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
-
-public class TabVariantTest {
+public class GridVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Tab(), TabVariant.LUMO_ICON_ON_TOP);
+        var grid = new Grid<>();
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        var themeNames = grid.getThemeNames();
+        Assert.assertTrue(themeNames
+                .contains(GridVariant.LUMO_NO_BORDER.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Tab(), TabVariant.LUMO_ICON_ON_TOP);
+        var grid = new Grid<>();
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.removeThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        var themeNames = grid.getThemeNames();
+        Assert.assertFalse(themeNames
+                .contains(GridVariant.LUMO_NO_BORDER.getVariantName()));
     }
 }

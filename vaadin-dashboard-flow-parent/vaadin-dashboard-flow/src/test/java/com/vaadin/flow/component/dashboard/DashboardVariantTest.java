@@ -6,23 +6,25 @@
  * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
-package com.vaadin.flow.component.map;
+package com.vaadin.flow.component.dashboard;
 
 import org.junit.Test;
 
 import com.vaadin.tests.ThemeVariantTestHelper;
 
-public class MapVariantTest {
+public class DashboardVariantTest {
+
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Map(), MapVariant.NO_BORDER);
+                new Dashboard(), DashboardVariant.LUMO_ELEVATED_WIDGETS);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Map(), MapVariant.NO_BORDER);
+                        new Dashboard(),
+                        DashboardVariant.LUMO_ELEVATED_WIDGETS);
     }
 }

@@ -22,7 +22,10 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum DetailsVariant implements ThemeVariant {
 
-    FILLED("filled"), REVERSE("reverse"), SMALL("small");
+    FILLED("filled"),
+    REVERSE("reverse"),
+    SMALL("small"),
+    AURA_NO_PADDING("no-padding");
 
     private final String variant;
 

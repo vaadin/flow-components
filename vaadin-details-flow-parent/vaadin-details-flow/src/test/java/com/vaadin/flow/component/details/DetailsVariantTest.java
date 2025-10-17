@@ -15,31 +15,22 @@
  */
 package com.vaadin.flow.component.details;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class DetailsVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        Details details = new Details();
-        details.addThemeVariants(DetailsVariant.SMALL);
-
-        ThemeList themeNames = details.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(DetailsVariant.SMALL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new Details(), DetailsVariant.REVERSE);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        Details details = new Details();
-        details.addThemeVariants(DetailsVariant.SMALL);
-        details.removeThemeVariants(DetailsVariant.SMALL);
-
-        ThemeList themeNames = details.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(DetailsVariant.SMALL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new Details(), DetailsVariant.REVERSE);
     }
 }

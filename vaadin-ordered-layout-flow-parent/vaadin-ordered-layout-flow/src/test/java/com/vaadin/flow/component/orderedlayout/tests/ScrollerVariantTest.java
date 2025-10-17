@@ -13,26 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.tabs.tests;
+package com.vaadin.flow.component.orderedlayout.tests;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.TabVariant;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.ScrollerVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 
-public class TabVariantTest {
+public class ScrollerVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Tab(), TabVariant.LUMO_ICON_ON_TOP);
+                new Scroller(), ScrollerVariant.LUMO_OVERFLOW_INDICATORS);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Tab(), TabVariant.LUMO_ICON_ON_TOP);
+                        new Scroller(),
+                        ScrollerVariant.LUMO_OVERFLOW_INDICATORS);
     }
 }
