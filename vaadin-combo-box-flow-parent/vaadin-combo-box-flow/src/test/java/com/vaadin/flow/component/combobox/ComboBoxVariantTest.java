@@ -24,13 +24,13 @@ public class ComboBoxVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new ComboBox<>(), ComboBoxVariant.HELPER_ABOVE_FIELD);
+                new ComboBox<>(), ComboBoxVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new ComboBox<>(), ComboBoxVariant.HELPER_ABOVE_FIELD);
+                        new ComboBox<>(), ComboBoxVariant.LUMO_SMALL);
     }
 }

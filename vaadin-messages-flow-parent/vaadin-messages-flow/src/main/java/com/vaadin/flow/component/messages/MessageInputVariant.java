@@ -13,20 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.orderedlayout;
+package com.vaadin.flow.component.messages;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-horizontal-layout}
- * component.
+ * Set of theme variants applicable for {@code vaadin-message-input} component.
  */
-public enum HorizontalLayoutVariant implements ThemeVariant {
-    MARGIN("margin"), PADDING("padding"), SPACING("spacing"), WRAP("wrap");
+public enum MessageInputVariant implements ThemeVariant {
+    AURA_ICON_BUTTON("icon-button");
 
     private final String variant;
 
-    HorizontalLayoutVariant(String variant) {
+    MessageInputVariant(String variant) {
         this.variant = variant;
     }
 

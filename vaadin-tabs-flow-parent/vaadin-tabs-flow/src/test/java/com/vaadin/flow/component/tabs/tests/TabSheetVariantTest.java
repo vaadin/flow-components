@@ -26,13 +26,13 @@ public class TabSheetVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new TabSheet(), TabSheetVariant.NO_BORDER);
+                new TabSheet(), TabSheetVariant.LUMO_BORDERED);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new TabSheet(), TabSheetVariant.NO_BORDER);
+                        new TabSheet(), TabSheetVariant.LUMO_BORDERED);
     }
 }

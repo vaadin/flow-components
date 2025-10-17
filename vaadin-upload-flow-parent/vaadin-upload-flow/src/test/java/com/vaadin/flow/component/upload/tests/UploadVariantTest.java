@@ -13,26 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.orderedlayout.tests;
+package com.vaadin.flow.component.upload.tests;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayoutVariant;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.UploadVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 
-public class HorizontalLayoutVariantTest {
+public class UploadVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new HorizontalLayout(), HorizontalLayoutVariant.MARGIN);
+                new Upload(), UploadVariant.AURA_NO_BORDER);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new HorizontalLayout(), HorizontalLayoutVariant.MARGIN);
+                        new Upload(), UploadVariant.AURA_NO_BORDER);
     }
 }

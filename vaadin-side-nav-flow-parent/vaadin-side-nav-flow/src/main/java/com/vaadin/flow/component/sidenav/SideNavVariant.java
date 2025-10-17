@@ -13,20 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.orderedlayout;
+package com.vaadin.flow.component.sidenav;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-vertical-layout}
- * component.
+ * Set of theme variants applicable for {@code vaadin-side-nav} component.
  */
-public enum VerticalLayoutVariant implements ThemeVariant {
-    MARGIN("margin"), PADDING("padding"), SPACING("spacing"), WRAP("wrap");
+public enum SideNavVariant implements ThemeVariant {
+    AURA_FILLED("filled");
 
     private final String variant;
 
-    VerticalLayoutVariant(String variant) {
+    SideNavVariant(String variant) {
         this.variant = variant;
     }
 

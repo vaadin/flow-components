@@ -23,28 +23,13 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum MenuBarVariant implements ThemeVariant {
     LUMO_SMALL("small"),
     LUMO_LARGE("large"),
-    /**
-     * @deprecated Use {@link #TERTIARY} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_TERTIARY("tertiary"),
     LUMO_TERTIARY_INLINE("tertiary-inline"),
-    /**
-     * @deprecated Use {@link #PRIMARY} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_PRIMARY("primary"),
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
-    /**
-     * @deprecated Use {@link #END_ALIGNED} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_END_ALIGNED("end-aligned"),
-    LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
-    PRIMARY("primary"),
-    TERTIARY("tertiary"),
-    END_ALIGNED("end-aligned");
+    LUMO_DROPDOWN_INDICATORS("dropdown-indicators");
 
     private final String variant;
 
