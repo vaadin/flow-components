@@ -13,27 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.virtuallist.tests;
+package com.vaadin.flow.component.sidenav.tests;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.virtuallist.VirtualList;
-import com.vaadin.flow.component.virtuallist.VirtualListVariant;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 
-public class VirtualListVariantTest {
+public class SideNavVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new VirtualList<>(), VirtualListVariant.OVERFLOW_INDICATOR_TOP);
+                new SideNav(), SideNavVariant.AURA_FILLED);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new VirtualList<>(),
-                        VirtualListVariant.OVERFLOW_INDICATOR_TOP);
+                        new SideNav(), SideNavVariant.AURA_FILLED);
     }
 }

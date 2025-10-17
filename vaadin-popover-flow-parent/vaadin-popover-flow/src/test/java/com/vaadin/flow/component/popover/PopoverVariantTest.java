@@ -24,13 +24,13 @@ public class PopoverVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Popover(), PopoverVariant.NO_PADDING);
+                new Popover(), PopoverVariant.LUMO_NO_PADDING);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Popover(), PopoverVariant.NO_PADDING);
+                        new Popover(), PopoverVariant.LUMO_NO_PADDING);
     }
 }

@@ -24,22 +24,12 @@ public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_CENTERED("centered"),
     LUMO_TABS_SMALL("small"),
     LUMO_TABS_MINIMAL("minimal"),
-    /**
-     * @deprecated Use {@link #TABS_HIDE_SCROLL_BUTTONS} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_TABS_EQUAL_WIDTH_TABS("equal-width-tabs"),
     LUMO_BORDERED("bordered"),
-    /**
-     * @deprecated Use {@link #NO_PADDING} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_NO_PADDING("no-padding"),
-    NO_BORDER("no-border"),
-    NO_PADDING("no-padding"),
-    TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    TABS_SHOW_SCROLL_BUTTONS("show-scroll-buttons");
+    AURA_TABS_FILLED("filled"),
+    AURA_TABS_ACCENT("accent");
 
     private final String variant;
 

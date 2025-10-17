@@ -63,7 +63,7 @@ public class DatePickerVariantTest {
     @Test
     public void addHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE_FIELD);
+        datePicker.addThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");
     }
 
@@ -71,10 +71,11 @@ public class DatePickerVariantTest {
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
-        datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE_FIELD);
+        datePicker.addThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        datePicker.removeThemeVariants(DatePickerVariant.HELPER_ABOVE_FIELD);
+        datePicker
+                .removeThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("small");
     }
 
@@ -82,7 +83,7 @@ public class DatePickerVariantTest {
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
-        datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE_FIELD);
+        datePicker.addThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         datePicker.getThemeNames().clear();
         assertThemeAttribute(null);
     }

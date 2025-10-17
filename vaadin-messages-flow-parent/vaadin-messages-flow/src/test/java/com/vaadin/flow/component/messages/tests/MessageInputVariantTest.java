@@ -13,26 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.checkbox.tests;
+package com.vaadin.flow.component.messages.tests;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.checkbox.CheckboxVariant;
+import com.vaadin.flow.component.messages.MessageInput;
+import com.vaadin.flow.component.messages.MessageInputVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 
-public class CheckboxVariantTest {
+public class MessageInputVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Checkbox(), CheckboxVariant.HELPER_ABOVE_FIELD);
+                new MessageInput(), MessageInputVariant.AURA_ICON_BUTTON);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Checkbox(), CheckboxVariant.HELPER_ABOVE_FIELD);
+                        new MessageInput(),
+                        MessageInputVariant.AURA_ICON_BUTTON);
     }
 }

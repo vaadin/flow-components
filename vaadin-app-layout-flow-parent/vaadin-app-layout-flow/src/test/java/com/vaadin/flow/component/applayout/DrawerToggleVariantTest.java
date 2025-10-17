@@ -13,30 +13,33 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.card;
+package com.vaadin.flow.component.applayout;
+
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.tests.ThemeVariantTestHelper;
-
-public class CardVariantTest {
-
-    @Test
-    public void cardThemeVariantsEmptyByDefault() {
-        Assert.assertTrue(new Card().getThemeNames().isEmpty());
-    }
+public class DrawerToggleVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Card(), CardVariant.LUMO_HORIZONTAL);
+        var drawerToggle = new DrawerToggle();
+        drawerToggle.addThemeVariants(DrawerToggleVariant.AURA_PERMANENT);
+
+        Set<String> themeNames = drawerToggle.getThemeNames();
+        Assert.assertTrue(themeNames
+                .contains(DrawerToggleVariant.AURA_PERMANENT.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Card(), CardVariant.LUMO_HORIZONTAL);
+        var drawerToggle = new DrawerToggle();
+        drawerToggle.addThemeVariants(DrawerToggleVariant.AURA_PERMANENT);
+        drawerToggle.removeThemeVariants(DrawerToggleVariant.AURA_PERMANENT);
+
+        Set<String> themeNames = drawerToggle.getThemeNames();
+        Assert.assertFalse(themeNames
+                .contains(DrawerToggleVariant.AURA_PERMANENT.getVariantName()));
     }
 }

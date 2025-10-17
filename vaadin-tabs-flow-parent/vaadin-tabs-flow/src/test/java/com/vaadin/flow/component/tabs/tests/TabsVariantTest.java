@@ -26,13 +26,13 @@ public class TabsVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Tabs(), TabsVariant.HIDE_SCROLL_BUTTONS);
+                new Tabs(), TabsVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Tabs(), TabsVariant.HIDE_SCROLL_BUTTONS);
+                        new Tabs(), TabsVariant.LUMO_SMALL);
     }
 }

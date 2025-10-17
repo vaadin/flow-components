@@ -26,13 +26,14 @@ public class ScrollerVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Scroller(), ScrollerVariant.OVERFLOW_INDICATORS);
+                new Scroller(), ScrollerVariant.LUMO_OVERFLOW_INDICATORS);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Scroller(), ScrollerVariant.OVERFLOW_INDICATORS);
+                        new Scroller(),
+                        ScrollerVariant.LUMO_OVERFLOW_INDICATORS);
     }
 }

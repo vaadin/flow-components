@@ -22,13 +22,8 @@ package com.vaadin.flow.component.customfield;
 public enum CustomFieldVariant {
 
     LUMO_SMALL("small"),
-    /**
-     * @deprecated Use {@link #HELPER_ABOVE_FIELD} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    LUMO_WHITESPACE("whitespace"),
-    HELPER_ABOVE_FIELD("helper-above-field");
+    LUMO_WHITESPACE("whitespace");
 
     private final String variant;
 

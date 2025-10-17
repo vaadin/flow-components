@@ -50,7 +50,8 @@ public class CustomFieldVariantTest {
     @Test
     public void addHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE_FIELD);
+        customField
+                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");
     }
 
@@ -65,10 +66,12 @@ public class CustomFieldVariantTest {
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
-        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE_FIELD);
+        customField
+                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        customField.removeThemeVariants(CustomFieldVariant.HELPER_ABOVE_FIELD);
+        customField.removeThemeVariants(
+                CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("small");
     }
 
@@ -76,7 +79,8 @@ public class CustomFieldVariantTest {
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
-        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE_FIELD);
+        customField
+                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
         customField.getThemeNames().clear();
         assertThemeAttribute(null);
     }
