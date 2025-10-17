@@ -27,7 +27,7 @@ public class CustomFieldVariantTest {
 
     @Before
     public void initTest() {
-        customField = new CustomField<>() {
+        customField = new CustomField<String>() {
             @Override
             protected String generateModelValue() {
                 return null;
@@ -48,7 +48,7 @@ public class CustomFieldVariantTest {
     }
 
     @Test
-    public void addHelperAboveField_themeAttributeUpdated() {
+    public void addLumoHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField
                 .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);

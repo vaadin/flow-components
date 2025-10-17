@@ -62,7 +62,7 @@ public class ProductView extends VerticalLayout implements BeforeEnterObserver {
         binder.bind(dateAdded, "dateAdded");
 
         var save = new Button("Save", e -> close());
-        save.addThemeVariants(ButtonVariant.PRIMARY);
+        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         var cancel = new Button("Cancel", e -> close());
         var footer = new HorizontalLayout(save, cancel);
         footer.setWidthFull();
