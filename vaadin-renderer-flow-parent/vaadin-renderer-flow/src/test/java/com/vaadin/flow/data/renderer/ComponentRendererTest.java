@@ -152,6 +152,11 @@ public class ComponentRendererTest {
         Assert.assertNotNull(
                 "Placeholder component should be generated for null values", c);
         Assert.assertEquals(0, c.getElement().getChildCount());
+
+        c = cdg.updateComponent(c, "foo");
+        Assert.assertNotNull(
+                "Placeholder component should be generated for null values", c);
+        Assert.assertEquals(0, c.getElement().getChildCount());
     }
 
     private void attachElement(UI ui, Element contentTemplate) {
