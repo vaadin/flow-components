@@ -66,6 +66,6 @@ public class DrawerToggle extends Button {
         var variantNames = Stream.of(variants)
                 .map(DrawerToggleVariant::getVariantName)
                 .collect(Collectors.toSet());
-        getThemeNames().addAll(variantNames);
+        getThemeNames().removeAll(variantNames);
     }
 }
