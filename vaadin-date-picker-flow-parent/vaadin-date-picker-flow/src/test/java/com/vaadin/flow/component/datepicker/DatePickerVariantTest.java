@@ -61,7 +61,7 @@ public class DatePickerVariantTest {
     }
 
     @Test
-    public void addHelperAboveField_themeAttributeUpdated() {
+    public void addLumoHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");
