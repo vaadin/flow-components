@@ -13,21 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.virtuallist;
+package com.vaadin.flow.component.applayout;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-virtual-list} component.
+ * The set of theme variants applicable to the {@code vaadin-drawer-toggle}
+ * component.
  */
-public enum VirtualListVariant implements ThemeVariant {
-    OVERFLOW_INDICATORS("overflow-indicators"),
-    OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),
-    OVERFLOW_INDICATOR_TOP("overflow-indicator-top");
+public enum DrawerToggleVariant implements ThemeVariant {
+
+    LUMO_SMALL("small"),
+    LUMO_LARGE("large"),
+    LUMO_TERTIARY_INLINE("tertiary-inline"),
+    LUMO_SUCCESS("success"),
+    LUMO_WARNING("warning"),
+    LUMO_ERROR("error"),
+    LUMO_CONTRAST("contrast"),
+    LUMO_ICON("icon"),
+    AURA_ERROR("error"),
+    AURA_ACCENT("accent"),
+    AURA_DANGER("danger"),
+    AURA_PERMANENT("permanent");
 
     private final String variant;
 
-    VirtualListVariant(String variant) {
+    DrawerToggleVariant(String variant) {
         this.variant = variant;
     }
 

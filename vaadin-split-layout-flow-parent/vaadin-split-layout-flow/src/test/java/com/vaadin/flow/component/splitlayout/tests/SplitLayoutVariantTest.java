@@ -26,13 +26,13 @@ public class SplitLayoutVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new SplitLayout(), SplitLayoutVariant.SMALL);
+                new SplitLayout(), SplitLayoutVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new SplitLayout(), SplitLayoutVariant.SMALL);
+                        new SplitLayout(), SplitLayoutVariant.LUMO_SMALL);
     }
 }

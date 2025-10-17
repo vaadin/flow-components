@@ -13,19 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.checkbox;
+package com.vaadin.flow.component.upload;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-checkbox} component.
+ * Set of theme variants applicable for {@code vaadin-upload} component.
  */
-public enum CheckboxVariant implements ThemeVariant {
-    HELPER_ABOVE_FIELD("helper-above-field");
+public enum UploadVariant implements ThemeVariant {
+    AURA_NO_BORDER("no-border");
 
     private final String variant;
 
-    CheckboxVariant(String variant) {
+    UploadVariant(String variant) {
         this.variant = variant;
     }
 

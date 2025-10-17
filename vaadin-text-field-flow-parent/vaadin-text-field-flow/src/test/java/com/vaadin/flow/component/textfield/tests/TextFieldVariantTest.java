@@ -26,13 +26,13 @@ public class TextFieldVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new TextField(), TextFieldVariant.HELPER_ABOVE_FIELD);
+                new TextField(), TextFieldVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new TextField(), TextFieldVariant.HELPER_ABOVE_FIELD);
+                        new TextField(), TextFieldVariant.LUMO_SMALL);
     }
 }

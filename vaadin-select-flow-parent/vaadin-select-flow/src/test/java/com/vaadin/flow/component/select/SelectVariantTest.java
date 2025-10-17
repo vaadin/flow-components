@@ -63,7 +63,7 @@ public class SelectVariantTest {
     @Test
     public void addHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
+        select.addThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");
     }
 
@@ -71,10 +71,10 @@ public class SelectVariantTest {
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.LUMO_SMALL);
-        select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
+        select.addThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        select.removeThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
+        select.removeThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("small");
     }
 
@@ -82,7 +82,7 @@ public class SelectVariantTest {
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.LUMO_SMALL);
-        select.addThemeVariants(SelectVariant.HELPER_ABOVE_FIELD);
+        select.addThemeVariants(SelectVariant.LUMO_HELPER_ABOVE_FIELD);
         select.getThemeNames().clear();
         assertThemeAttribute(null);
     }

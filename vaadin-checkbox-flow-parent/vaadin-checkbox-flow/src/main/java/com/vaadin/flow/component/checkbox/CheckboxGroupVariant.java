@@ -21,19 +21,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-checkbox-group} component.
  */
 public enum CheckboxGroupVariant implements ThemeVariant {
-    /**
-     * @deprecated Use {@link #VERTICAL} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
-    LUMO_VERTICAL("vertical"),
-    /**
-     * @deprecated Use {@link #HELPER_ABOVE_FIELD} instead.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    HORIZONTAL("horizontal"),
-    VERTICAL("vertical"),
-    HELPER_ABOVE_FIELD("helper-above-field");
+
+    LUMO_VERTICAL("vertical"), LUMO_HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;
 

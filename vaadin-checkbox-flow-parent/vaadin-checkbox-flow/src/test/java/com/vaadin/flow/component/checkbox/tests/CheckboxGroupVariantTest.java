@@ -26,14 +26,14 @@ public class CheckboxGroupVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new CheckboxGroup<>(), CheckboxGroupVariant.HELPER_ABOVE_FIELD);
+                new CheckboxGroup<>(), CheckboxGroupVariant.LUMO_VERTICAL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new CheckboxGroup(),
-                        CheckboxGroupVariant.HELPER_ABOVE_FIELD);
+                        new CheckboxGroup<>(),
+                        CheckboxGroupVariant.LUMO_VERTICAL);
     }
 }

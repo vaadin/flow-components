@@ -66,7 +66,7 @@ public class TimePickerVariantTest {
     @Test
     public void addHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE_FIELD);
+        timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");
     }
 
@@ -74,10 +74,11 @@ public class TimePickerVariantTest {
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);
-        timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE_FIELD);
+        timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        timePicker.removeThemeVariants(TimePickerVariant.HELPER_ABOVE_FIELD);
+        timePicker
+                .removeThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("small");
     }
 
@@ -85,7 +86,7 @@ public class TimePickerVariantTest {
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);
-        timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE_FIELD);
+        timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         timePicker.getThemeNames().clear();
         assertThemeAttribute(null);
     }

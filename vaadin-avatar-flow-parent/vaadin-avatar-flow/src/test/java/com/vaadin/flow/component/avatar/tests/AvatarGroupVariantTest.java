@@ -26,13 +26,13 @@ public class AvatarGroupVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new AvatarGroup(), AvatarGroupVariant.REVERSE);
+                new AvatarGroup(), AvatarGroupVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new AvatarGroup(), AvatarGroupVariant.REVERSE);
+                        new AvatarGroup(), AvatarGroupVariant.LUMO_SMALL);
     }
 }
