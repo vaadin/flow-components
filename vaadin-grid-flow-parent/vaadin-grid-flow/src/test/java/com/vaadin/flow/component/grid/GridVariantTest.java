@@ -23,21 +23,21 @@ public class GridVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         var grid = new Grid<>();
-        grid.addThemeVariants(GridVariant.NO_BORDER);
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         var themeNames = grid.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(GridVariant.NO_BORDER.getVariantName()));
+        Assert.assertTrue(themeNames
+                .contains(GridVariant.LUMO_NO_BORDER.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         var grid = new Grid<>();
-        grid.addThemeVariants(GridVariant.NO_BORDER);
-        grid.removeThemeVariants(GridVariant.NO_BORDER);
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.removeThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         var themeNames = grid.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(GridVariant.NO_BORDER.getVariantName()));
+        Assert.assertFalse(themeNames
+                .contains(GridVariant.LUMO_NO_BORDER.getVariantName()));
     }
 }
