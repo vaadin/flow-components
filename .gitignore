@@ -28,6 +28,7 @@ node_modules
 package*json
 pnpm*
 .npmrc
+.pnpm-store
 .pnpmfile.cjs
 error-screenshots
 
