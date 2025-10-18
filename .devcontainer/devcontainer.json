@@ -1,0 +1,41 @@
+{
+  "name": "Vaadin Flow Components Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "none",
+      "installMaven": "true",
+      "installGradle": "false"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  "appPort": [
+    8080
+  ],
+  "forwardPorts": [
+    8080
+  ],
+  "containerEnv": {
+    // Set marker that we're in a devcontainer, used by ITs for setting up the web driver
+    "FLOW_COMPONENTS_DEVCONTAINER": "true"
+  },
+  "remoteEnv": {
+    // Fix JAVA_HOME when opening terminal
+    "JAVA_HOME": "/usr/lib/jvm/msopenjdk-current",
+  },
+  // Allow node user in the container to access the Git repository, which is
+  // otherwise owned by the host system user.
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+  "customizations": {
+    "jetbrains": {
+      "backend": "IntelliJ"
+    }
+  }
+}

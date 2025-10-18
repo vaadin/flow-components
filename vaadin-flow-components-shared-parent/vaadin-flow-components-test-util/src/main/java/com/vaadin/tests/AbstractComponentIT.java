@@ -15,6 +15,14 @@
  */
 package com.vaadin.tests;
 
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import com.vaadin.flow.testutil.net.PortProber;
+import com.vaadin.testbench.TestBench;
+
 public abstract class AbstractComponentIT
         extends com.vaadin.flow.testutil.AbstractComponentIT {
 
@@ -24,9 +32,37 @@ public abstract class AbstractComponentIT
 
     @Override
     public void setup() throws Exception {
-        super.setup();
+        if (isInDevContainer()) {
+            WebDriver driver = createDevContainerChromeDriver();
+            setDriver(driver);
+        } else {
+            super.setup();
+        }
 
         // Set a default window size
         testBench().resizeViewPortTo(1024, 800);
+    }
+
+    private static boolean isInDevContainer() {
+        // This should be set in devcontainer.json
+        String devContainer = System.getenv("FLOW_COMPONENTS_DEV_CONTAINER");
+        return devContainer != null && devContainer.equals("true");
+    }
+
+    private static WebDriver createDevContainerChromeDriver() {
+        // Adapted from ChromeBrowserTest
+        // For dev containers we always need headless mode. Chrome binary needs
+        // to be set to use Chromium installed in the container. For Chrome
+        // Driver, TestBench seems to correctly pick it up from PATH.
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless=new", "--disable-gpu");
+        options.addArguments("--disable-backgrounding-occluded-windows");
+        options.setBinary("/usr/bin/chromium");
+
+        int port = PortProber.findFreePort();
+        ChromeDriverService service = (new ChromeDriverService.Builder())
+                .usingPort(port).withSilent(true).build();
+        ChromeDriver chromeDriver = new ChromeDriver(service, options);
+        return TestBench.createDriver(chromeDriver);
     }
 }
