@@ -101,16 +101,20 @@ public class ComponentDataGenerator<T>
 
     @Override
     protected Component createComponent(T item) {
-        Component c = componentRenderer.createComponent(item);
-        if (c == null) {
-            c = new Text("");
-        }
-        return c;
+        return ensureNonNullComponent(componentRenderer.createComponent(item));
     }
 
     @Override
     protected Component updateComponent(Component currentComponent, T item) {
-        return componentRenderer.updateComponent(currentComponent, item);
+        return ensureNonNullComponent(
+                componentRenderer.updateComponent(currentComponent, item));
+    }
+
+    private Component ensureNonNullComponent(Component component) {
+        if (component == null) {
+            return new Text("");
+        }
+        return component;
     }
 
     @Override
