@@ -40,17 +40,21 @@ public class MessageListTest {
     private MessageList messageList;
     private MessageListItem item1;
     private MessageListItem item2;
+    private UI ui;
 
     @Before
     public void setup() {
         messageList = new MessageList();
         item1 = new MessageListItem();
+        ui = new UI();
+        UI.setCurrent(ui);
         item2 = new MessageListItem();
     }
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -94,7 +98,6 @@ public class MessageListTest {
 
     @Test
     public void setImageAsStreamResource_overridesImageUrl() {
-        UI.setCurrent(new UI());
         item1.setUserImage("foo/bar");
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
@@ -105,7 +108,6 @@ public class MessageListTest {
 
     @Test
     public void setImageAsUrl_streamResourceBecomesNull() {
-        UI.setCurrent(new UI());
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
         item1.setUserImage("foo/bar");
@@ -114,7 +116,6 @@ public class MessageListTest {
 
     @Test
     public void setImageHandler_overridesImageUrl() {
-        UI.setCurrent(new UI());
         item1.setUserImage("foo/bar");
         item1.setUserImageHandler(
                 DownloadHandler.fromInputStream(data -> new DownloadResponse(
@@ -127,7 +128,6 @@ public class MessageListTest {
 
     @Test
     public void setImageHandler_streamResourceBecomesNull() {
-        UI.setCurrent(new UI());
         item1.setUserImageHandler(
                 DownloadHandler.fromInputStream(data -> new DownloadResponse(
                         getClass().getResourceAsStream("baz/qux"),
