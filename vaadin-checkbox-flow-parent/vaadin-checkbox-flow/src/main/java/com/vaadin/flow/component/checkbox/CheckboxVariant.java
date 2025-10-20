@@ -13,24 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.select;
+package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-select} component.
+ * Set of theme variants applicable for {@code vaadin-checkbox} component.
  */
-public enum SelectVariant implements ThemeVariant {
-    LUMO_SMALL("small"),
-    LUMO_ALIGN_LEFT("align-left"),
-    LUMO_ALIGN_CENTER("align-center"),
-    LUMO_ALIGN_RIGHT("align-right"),
+public enum CheckboxVariant implements ThemeVariant {
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
     AURA_HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;
 
-    SelectVariant(String variant) {
+    CheckboxVariant(String variant) {
         this.variant = variant;
     }
 

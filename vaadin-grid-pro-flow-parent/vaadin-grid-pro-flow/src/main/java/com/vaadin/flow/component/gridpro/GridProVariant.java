@@ -20,8 +20,13 @@ public enum GridProVariant {
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
     LUMO_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
     LUMO_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells"),
+    AURA_NO_BORDER("no-border"),
+    AURA_NO_ROW_BORDERS("no-row-borders"),
     AURA_COLUMN_BORDERS("column-borders"),
-    AURA_NO_ROW_BORDERS("no-row-borders");
+    AURA_ROW_STRIPES("row-stripes"),
+    AURA_WRAP_CELL_CONTENT("wrap-cell-content"),
+    AURA_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
+    AURA_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells");
 
     private final String variant;
 

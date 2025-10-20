@@ -13,24 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.select;
+package com.vaadin.flow.component.orderedlayout;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-select} component.
+ * Set of theme variants applicable for {@code vaadin-horizontal-layout}
+ * component.
  */
-public enum SelectVariant implements ThemeVariant {
-    LUMO_SMALL("small"),
-    LUMO_ALIGN_LEFT("align-left"),
-    LUMO_ALIGN_CENTER("align-center"),
-    LUMO_ALIGN_RIGHT("align-right"),
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    AURA_HELPER_ABOVE_FIELD("helper-above-field");
+public enum HorizontalLayoutVariant implements ThemeVariant {
+    LUMO_MARGIN("margin"),
+    LUMO_PADDING("padding"),
+    LUMO_SPACING("spacing"),
+    LUMO_WRAP("wrap"),
+    AURA_MARGIN("margin"),
+    AURA_PADDING("padding"),
+    AURA_SPACING("spacing"),
+    AURA_WRAP("wrap");
 
     private final String variant;
 
-    SelectVariant(String variant) {
+    HorizontalLayoutVariant(String variant) {
         this.variant = variant;
     }
 
