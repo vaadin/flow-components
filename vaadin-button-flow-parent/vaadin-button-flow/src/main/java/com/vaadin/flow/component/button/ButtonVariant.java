@@ -31,6 +31,8 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_ERROR("error"),
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
+    AURA_PRIMARY("primary"),
+    AURA_TERTIARY("tertiary"),
     AURA_ERROR("error"),
     AURA_ACCENT("accent"),
     AURA_DANGER("danger");

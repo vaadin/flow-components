@@ -13,24 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.select;
+package com.vaadin.flow.component.virtuallist;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-select} component.
+ * Set of theme variants applicable for {@code vaadin-virtual-list} component.
  */
-public enum SelectVariant implements ThemeVariant {
-    LUMO_SMALL("small"),
-    LUMO_ALIGN_LEFT("align-left"),
-    LUMO_ALIGN_CENTER("align-center"),
-    LUMO_ALIGN_RIGHT("align-right"),
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    AURA_HELPER_ABOVE_FIELD("helper-above-field");
+public enum VirtualListVariant implements ThemeVariant {
+    LUMO_OVERFLOW_INDICATORS("overflow-indicators"),
+    LUMO_OVERFLOW_INDICATOR_TOP("overflow-indicator-top"),
+    LUMO_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),
+    AURA_OVERFLOW_INDICATORS("overflow-indicators"),
+    AURA_OVERFLOW_INDICATOR_TOP("overflow-indicator-top"),
+    AURA_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom");
 
     private final String variant;
 
-    SelectVariant(String variant) {
+    VirtualListVariant(String variant) {
         this.variant = variant;
     }
 

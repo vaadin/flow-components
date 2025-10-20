@@ -25,7 +25,8 @@ public enum TimePickerVariant implements ThemeVariant {
     LUMO_ALIGN_LEFT("align-left"),
     LUMO_ALIGN_CENTER("align-center"),
     LUMO_ALIGN_RIGHT("align-right"),
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field");
+    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
+    AURA_HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;
 

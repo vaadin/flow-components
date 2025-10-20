@@ -21,7 +21,12 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-radio-group} component.
  */
 public enum RadioGroupVariant implements ThemeVariant {
-    LUMO_VERTICAL("vertical"), LUMO_HELPER_ABOVE_FIELD("helper-above-field");
+    LUMO_VERTICAL("vertical"),
+    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
+    LUMO_HORIZONTAL("horizontal"),
+    AURA_VERTICAL("vertical"),
+    AURA_HELPER_ABOVE_FIELD("helper-above-field"),
+    AURA_HORIZONTAL("horizontal");
 
     private final String variant;
 

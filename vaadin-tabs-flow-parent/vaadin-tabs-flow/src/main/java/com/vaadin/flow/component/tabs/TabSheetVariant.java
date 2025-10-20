@@ -28,6 +28,12 @@ public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_EQUAL_WIDTH_TABS("equal-width-tabs"),
     LUMO_BORDERED("bordered"),
     LUMO_NO_PADDING("no-padding"),
+    LUMO_NO_BORDER("no-border"),
+    LUMO_TABS_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
+    AURA_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    AURA_TABS_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
+    AURA_NO_PADDING("no-padding"),
+    AURA_NO_BORDER("no-border"),
     AURA_TABS_FILLED("filled"),
     AURA_TABS_ACCENT("accent");
 

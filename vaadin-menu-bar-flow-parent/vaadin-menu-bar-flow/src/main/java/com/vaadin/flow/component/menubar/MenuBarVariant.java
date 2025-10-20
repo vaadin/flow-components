@@ -29,7 +29,8 @@ public enum MenuBarVariant implements ThemeVariant {
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
     LUMO_END_ALIGNED("end-aligned"),
-    LUMO_DROPDOWN_INDICATORS("dropdown-indicators");
+    LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
+    AURA_END_ALIGNED("end-aligned");
 
     private final String variant;
 

@@ -16,13 +16,13 @@ public class MapVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Map(), MapVariant.NO_BORDER);
+                new Map(), MapVariant.LUMO_NO_BORDER);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Map(), MapVariant.NO_BORDER);
+                        new Map(), MapVariant.LUMO_NO_BORDER);
     }
 }
