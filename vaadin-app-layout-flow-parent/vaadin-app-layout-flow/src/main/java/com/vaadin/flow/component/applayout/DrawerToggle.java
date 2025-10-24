@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.applayout;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
@@ -42,30 +39,5 @@ public class DrawerToggle extends Button {
         // the slot attribute needs to be removed because vaadin-drawer-toggle
         // template doesn't have prefix and suffix slots
         icon.getElement().removeAttribute("slot");
-    }
-
-    /**
-     * Adds theme variants to the toggle.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(DrawerToggleVariant... variants) {
-        var variantNames = Stream.of(variants)
-                .map(DrawerToggleVariant::getVariantName).toList();
-        getThemeNames().addAll(variantNames);
-    }
-
-    /**
-     * Removes theme variants from the toggle.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(DrawerToggleVariant... variants) {
-        var variantNames = Stream.of(variants)
-                .map(DrawerToggleVariant::getVariantName)
-                .collect(Collectors.toSet());
-        getThemeNames().removeAll(variantNames);
     }
 }
