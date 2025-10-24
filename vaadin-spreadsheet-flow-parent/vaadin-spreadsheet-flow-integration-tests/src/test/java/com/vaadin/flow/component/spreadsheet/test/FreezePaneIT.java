@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -243,7 +241,7 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
 
         var firstColumn = getSpreadsheet().getColumnHeader(1);
         Assert.assertTrue("Header of column A should have size",
-                        firstColumn.getSize().getWidth() > 0);
+                firstColumn.getSize().getWidth() > 0);
     }
 
     @Test
@@ -252,7 +250,7 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
 
         var firstRowHeader = getSpreadsheet().getRowHeader(1);
         Assert.assertTrue("Header of row 1 should have size",
-                        firstRowHeader.getSize().getHeight() > 0);
+                firstRowHeader.getSize().getHeight() > 0);
     }
 
     private int getHeaderCount(String selector) {
