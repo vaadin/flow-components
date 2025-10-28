@@ -235,6 +235,24 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
                 headerRect.getY() + headerRect.getHeight());
     }
 
+    @Test
+    public void frozenAndScrolledSheet_headerColumnsRendered() {
+        loadFile("freeze_and_scroll_test.xlsx");
+
+        var firstColumn = getSpreadsheet().getColumnHeader(1);
+        Assert.assertTrue("Header of column A should have size",
+                firstColumn.getSize().getWidth() > 0);
+    }
+
+    @Test
+    public void frozenAndScrolledSheet_headerRowsRendered() {
+        loadFile("freeze_and_scroll_vertical_test.xlsx");
+
+        var firstRowHeader = getSpreadsheet().getRowHeader(1);
+        Assert.assertTrue("Header of row 1 should have size",
+                firstRowHeader.getSize().getHeight() > 0);
+    }
+
     private int getHeaderCount(String selector) {
         var headers = findElementsInShadowRoot(By.cssSelector(selector));
         return headers.size();
