@@ -58,8 +58,8 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.10")
-@NpmPackage(value = "@vaadin/popover", version = "24.8.10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.11")
+@NpmPackage(value = "@vaadin/popover", version = "24.8.11")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
@@ -791,7 +791,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * parent component to determine the appropriate slot value. If the modal
      * parent defines a value for the {@link ModalRoot#slot()} property, it sets
      * the {@code slot} attribute on the popover element.
-     * 
+     *
      * <p>
      * This ensures that the popover is rendered in the correct slot when used
      * inside a modal component.
