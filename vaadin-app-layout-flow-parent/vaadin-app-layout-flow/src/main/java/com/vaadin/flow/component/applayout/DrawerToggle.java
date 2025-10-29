@@ -40,4 +40,5 @@ public class DrawerToggle extends Button {
         // template doesn't have prefix and suffix slots
         icon.getElement().removeAttribute("slot");
     }
+
 }
