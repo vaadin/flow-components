@@ -24,7 +24,11 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum HorizontalLayoutVariant implements ThemeVariant {
     LUMO_MARGIN("margin"),
     LUMO_PADDING("padding"),
+    LUMO_SPACING_XS("spacing-xs"),
+    LUMO_SPACING_S("spacing-s"),
     LUMO_SPACING("spacing"),
+    LUMO_SPACING_L("spacing-l"),
+    LUMO_SPACING_XL("spacing-xl"),
     LUMO_WRAP("wrap"),
     AURA_MARGIN("margin"),
     AURA_PADDING("padding"),
