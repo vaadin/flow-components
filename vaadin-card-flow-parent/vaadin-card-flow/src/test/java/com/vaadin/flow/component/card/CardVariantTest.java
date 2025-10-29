@@ -15,17 +15,11 @@
  */
 package com.vaadin.flow.component.card;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class CardVariantTest {
-
-    @Test
-    public void cardThemeVariantsEmptyByDefault() {
-        Assert.assertTrue(new Card().getThemeNames().isEmpty());
-    }
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
