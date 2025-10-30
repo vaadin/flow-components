@@ -553,7 +553,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return this._sorters.filter((sorter) => sorter.direction);
   };
 
-  grid.__applySorters = (...args) => {
+  grid.__applySorters = function (...args) {
     const sorters = grid._mapSorters();
     const sortersChanged = JSON.stringify(grid._previousSorters) !== JSON.stringify(sorters);
 
