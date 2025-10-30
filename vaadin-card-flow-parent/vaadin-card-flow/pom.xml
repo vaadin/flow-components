@@ -13,6 +13,11 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
             <scope>test</scope>
         </dependency>
@@ -24,11 +29,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-flow-components-base</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
