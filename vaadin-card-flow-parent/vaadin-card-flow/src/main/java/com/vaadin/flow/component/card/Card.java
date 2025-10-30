@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.html.Span;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
@@ -183,6 +184,24 @@ public class Card extends Component implements HasSize,
      */
     public void setSubtitle(Component subtitle) {
         SlotUtils.setSlot(this, SUBTITLE_SLOT_NAME, subtitle);
+    }
+
+    /**
+     * Sets the card's subtitle. If a
+     * {@link #setHeader(Component) header component} is set, the subtitle will
+     * not be displayed.
+     * <p>
+     * Passing {@code null} removes the current subtitle from the card.
+     *
+     * @param subtitle
+     *            the subtitle component, or {@code null} to remove
+     */
+    public void setSubtitle(String subtitle) {
+        if(subtitle == null){
+            setSubtitle((Component) null);
+        } else {
+            setSubtitle(new Span(subtitle));
+        }
     }
 
     /**
