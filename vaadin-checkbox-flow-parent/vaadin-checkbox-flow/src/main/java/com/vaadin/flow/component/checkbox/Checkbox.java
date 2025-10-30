@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -82,7 +83,8 @@ import com.vaadin.flow.dom.PropertyChangeListener;
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
         HasValidationProperties, HasValidator<Boolean>,
-        InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> {
+        InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>,
+        HasThemeVariant<CheckboxVariant> {
 
     private final NativeLabel labelElement;
 
