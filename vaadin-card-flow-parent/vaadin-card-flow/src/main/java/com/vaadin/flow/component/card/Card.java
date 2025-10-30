@@ -194,7 +194,7 @@ public class Card extends Component implements HasSize,
      * Passing {@code null} removes the current subtitle from the card.
      *
      * @param subtitle
-     *            the subtitle component, or {@code null} to remove
+     *            the subtitle, or {@code null} to remove
      */
     public void setSubtitle(String subtitle) {
         if(subtitle == null){
