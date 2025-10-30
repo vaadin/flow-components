@@ -268,12 +268,12 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.__updateVisibleRows = function (...args) {
     if (preventUpdateVisibleRowsActive === 0) {
-      Grid.prototype.__updateVisibleRows.call(grid, ...args);
+      Object.getPrototypeOf(this).__updateVisibleRows.call(this, ...args);
     }
   };
 
-  grid.__updateRow = function (row) {
-    Grid.prototype.__updateRow.call(grid, row);
+  grid.__updateRow = function (row, ...args) {
+    Object.getPrototypeOf(this).__updateRow.call(this, row, ...args);
 
     // since no row can be selected when selection mode is NONE
     // if selectionMode is set to NONE, remove aria-selected attribute from the row
@@ -553,7 +553,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return this._sorters.filter((sorter) => sorter.direction);
   };
 
-  grid.__applySorters = () => {
+  grid.__applySorters = function (...args) {
     const sorters = grid._mapSorters();
     const sortersChanged = JSON.stringify(grid._previousSorters) !== JSON.stringify(sorters);
 
@@ -572,7 +572,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     grid._previousSorters = sorters;
 
     // Call the original __applySorters method in vaadin-grid-sort-mixin
-    Grid.prototype.__applySorters.call(grid);
+    Object.getPrototypeOf(this).__applySorters.call(this, ...args);
 
     if (sortersChanged && !sorterDirectionsSetFromServer) {
       grid.$server.sortersChanged(sorters);
