@@ -31,6 +31,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
@@ -41,7 +42,7 @@ import com.vaadin.flow.dom.Element;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-card")
-@NpmPackage(value = "@vaadin/card", version = "25.0.0-beta1")
+@NpmPackage(value = "@vaadin/card", version = "25.0.0-beta2")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component implements HasSize,
         HasThemeVariant<CardVariant>, HasComponents, HasAriaLabel {
@@ -183,6 +184,23 @@ public class Card extends Component implements HasSize,
      */
     public void setSubtitle(Component subtitle) {
         SlotUtils.setSlot(this, SUBTITLE_SLOT_NAME, subtitle);
+    }
+
+    /**
+     * Sets the card's subtitle. If a {@link #setHeader(Component) header
+     * component} is set, the subtitle will not be displayed.
+     * <p>
+     * Passing {@code null} removes the current subtitle from the card.
+     *
+     * @param subtitle
+     *            the subtitle, or {@code null} to remove
+     */
+    public void setSubtitle(String subtitle) {
+        if (subtitle == null) {
+            setSubtitle((Component) null);
+        } else {
+            setSubtitle(new Span(subtitle));
+        }
     }
 
     /**

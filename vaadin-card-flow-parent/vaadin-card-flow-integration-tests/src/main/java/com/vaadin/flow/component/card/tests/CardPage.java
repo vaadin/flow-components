@@ -30,7 +30,7 @@ public class CardPage extends Div {
         Card card = new Card();
 
         card.setTitle(new Span("Title"));
-        card.setSubtitle(new Span("Subtitle"));
+        card.setSubtitle("Subtitle");
         card.setMedia(
                 new Image("https://vaadin.com/images/vaadin-logo.svg", ""));
         card.setHeaderPrefix(new Span("Header prefix"));
