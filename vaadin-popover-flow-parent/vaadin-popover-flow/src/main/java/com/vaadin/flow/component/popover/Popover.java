@@ -62,6 +62,7 @@ import elemental.json.JsonArray;
 @NpmPackage(value = "@vaadin/popover", version = "24.9.4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
+@JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
         HasThemeVariant<PopoverVariant> {
