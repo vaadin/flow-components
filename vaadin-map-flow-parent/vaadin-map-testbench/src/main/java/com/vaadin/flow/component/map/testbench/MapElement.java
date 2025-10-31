@@ -566,6 +566,14 @@ public class MapElement extends TestBenchElement {
         public TextReference getText() {
             return new TextReference(executor, path("getText()"));
         }
+
+        public FillReference getFill() {
+            return new FillReference(executor, path("getFill()"));
+        }
+
+        public StrokeReference getStroke() {
+            return new StrokeReference(executor, path("getStroke()"));
+        }
     }
 
     public static class GeometryReference extends ConfigurationObjectReference {
@@ -577,6 +585,31 @@ public class MapElement extends TestBenchElement {
         public Coordinate getCoordinates() {
             return new Coordinate(getDouble("getCoordinates()[0]"),
                     getDouble("getCoordinates()[1]"));
+        }
+
+        public Coordinate[] getCoordinatesArray() {
+            // Get the coordinates array from OpenLayers
+            Object coordinatesObj = get("getCoordinates()");
+            if (coordinatesObj == null) {
+                return null;
+            }
+
+            // Cast to lists (OpenLayers returns coordinates as array)
+            @SuppressWarnings("unchecked")
+            List<List<Number>> coords = (List<List<Number>>) coordinatesObj;
+
+            // Create result array with the size matching the number of coords
+            Coordinate[] result = new Coordinate[coords.size()];
+
+            // Process each coordinate
+            for (int coordIndex = 0; coordIndex < coords.size(); coordIndex++) {
+                List<Number> coord = coords.get(coordIndex);
+                double x = coord.get(0).doubleValue();
+                double y = coord.get(1).doubleValue();
+                result[coordIndex] = new Coordinate(x, y);
+            }
+
+            return result;
         }
 
         public Coordinate[][] getPolygonCoordinates() {
