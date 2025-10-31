@@ -69,7 +69,7 @@ import tools.jackson.databind.node.ObjectNode;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-beta3")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
