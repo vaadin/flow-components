@@ -30,6 +30,17 @@ public class MapTest {
         Assert.assertTrue(
                 ((TileLayer) backgroundLayer).getSource() instanceof OSMSource);
         Assert.assertTrue(featureLayer instanceof FeatureLayer);
+
+        Assert.assertNotNull(map.getControls());
+
+        Assert.assertNotNull(map.getControls().getAttribution());
+        Assert.assertTrue(map.getControls().getAttribution().isVisible());
+
+        Assert.assertNotNull(map.getControls().getScaleLine());
+        Assert.assertFalse(map.getControls().getScaleLine().isVisible());
+
+        Assert.assertNotNull(map.getControls().getZoom());
+        Assert.assertTrue(map.getControls().getZoom().isVisible());
     }
 
     @Test
