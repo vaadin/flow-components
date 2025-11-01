@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.map;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,6 +20,10 @@ import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
+import com.vaadin.flow.component.map.configuration.controls.AttributionControl;
+import com.vaadin.flow.component.map.configuration.controls.Control;
+import com.vaadin.flow.component.map.configuration.controls.ScaleLineControl;
+import com.vaadin.flow.component.map.configuration.controls.ZoomControl;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.ImageLayer;
@@ -60,6 +65,11 @@ import tools.jackson.databind.node.ObjectNode;
  * setting the center, zoom level and rotation. The map's view can be accessed
  * through {@link Map#getView()}.
  * <p>
+ * The UI controls of the map (zoom buttons, attribution text, ...) can be
+ * configured using the respective control instances, accessible through
+ * {@link Map#getControls()}. By default, only the attribution and zoom controls
+ * are visible.
+ * <p>
  * The default projection, or coordinate system, for all coordinates passed to,
  * or returned from the public API is {@code EPSG:4326}, also referred to as GPS
  * coordinates. This is called the user projection. Internally the component
@@ -80,6 +90,7 @@ public class Map extends MapBase {
 
     private Layer backgroundLayer;
     private final FeatureLayer featureLayer;
+    private final Controls controls = new Controls();
 
     /**
      * Sets the projection (or coordinate system) to use for all coordinates.
@@ -185,6 +196,11 @@ public class Map extends MapBase {
         // layers by default. Developers can customize the z-index if they want
         // a different rendering order.
         featureLayer.setzIndex(100);
+
+        // Setup default control instances
+        getConfiguration().addControl(controls.attributionControl);
+        getConfiguration().addControl(controls.scaleLineControl);
+        getConfiguration().addControl(controls.zoomControl);
     }
 
     public Configuration getRawConfiguration() {
@@ -367,5 +383,60 @@ public class Map extends MapBase {
                         context -> getElement().executeJs(
                                 "this.$connector.zoomToFit($0, $1)", featureIds,
                                 options)));
+    }
+
+    /**
+     * Gets the default controls of the map.
+     * <p>
+     * By default, only the attribution and zoom controls are visible. The
+     * visibility of each control can be toggled using the respective control's
+     * {@link Control#setVisible} method.
+     * 
+     * @return the default controls
+     */
+    public Controls getControls() {
+        return controls;
+    }
+
+    /**
+     * The default controls available in the map.
+     */
+    public static final class Controls implements Serializable {
+        private final AttributionControl attributionControl = new AttributionControl();
+        private final ScaleLineControl scaleLineControl = new ScaleLineControl();
+        private final ZoomControl zoomControl = new ZoomControl();
+
+        private Controls() {
+            attributionControl.setVisible(true);
+            scaleLineControl.setVisible(false);
+            zoomControl.setVisible(true);
+        }
+
+        /**
+         * Gets the attribution control of the map.
+         *
+         * @return the attribution control
+         */
+        public AttributionControl getAttribution() {
+            return attributionControl;
+        }
+
+        /**
+         * Gets the scale line control of the map.
+         *
+         * @return the scale line control
+         */
+        public ScaleLineControl getScaleLine() {
+            return scaleLineControl;
+        }
+
+        /**
+         * Gets the zoom control of the map.
+         *
+         * @return the zoom control
+         */
+        public ZoomControl getZoom() {
+            return zoomControl;
+        }
     }
 }
