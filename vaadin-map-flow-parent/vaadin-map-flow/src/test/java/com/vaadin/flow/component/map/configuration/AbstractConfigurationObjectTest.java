@@ -124,6 +124,30 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
+    public void setNestedObject_addsAndRemovesChangeListener() {
+        TestConfiguration nestedObject = new TestConfiguration();
+        Assert.assertFalse(nestedObject.hasListeners());
+
+        testConfiguration.setNestedConfiguration(nestedObject);
+        Assert.assertTrue(nestedObject.hasListeners());
+
+        testConfiguration.addPropertyChangeListener(changeListenerMock);
+
+        nestedObject.setFoo("test");
+        Mockito.verify(changeListenerMock, Mockito.times(1))
+                .propertyChange(Mockito.any());
+
+        testConfiguration.setNestedConfiguration(null);
+        Assert.assertFalse(nestedObject.hasListeners());
+        Mockito.verify(changeListenerMock, Mockito.times(2))
+                .propertyChange(Mockito.any());
+
+        nestedObject.setFoo("anotherTest");
+        Mockito.verify(changeListenerMock, Mockito.times(2))
+                .propertyChange(Mockito.any());
+    }
+
+    @Test
     public void removeChangeListener_doesNotNotifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.removePropertyChangeListener(changeListenerMock);
@@ -289,13 +313,17 @@ public class AbstractConfigurationObjectTest {
                 TestConfiguration nestedConfiguration) {
             removeChild(this.nestedConfiguration);
             this.nestedConfiguration = nestedConfiguration;
-            addChild(nestedConfiguration);
+            addNullableChild(nestedConfiguration);
         }
 
         // Expose method for testing
         @Override
         protected void deepMarkAsDirty() {
             super.deepMarkAsDirty();
+        }
+
+        protected boolean hasListeners() {
+            return propertyChangeSupport.hasListeners("property");
         }
     }
 }
