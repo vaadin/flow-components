@@ -33,7 +33,8 @@ public class SolidGauge extends AbstractChartExample {
         Configuration configuration = chart.getConfiguration();
 
         Pane pane = configuration.getPane();
-        pane.setCenter(new String[] { "50%", "50%" });
+        pane.setCenter(new String[] { "50%", "85%" });
+        pane.setSize("140%");
         pane.setStartAngle(-90);
         pane.setEndAngle(90);
 
@@ -41,6 +42,7 @@ public class SolidGauge extends AbstractChartExample {
         paneBackground.setInnerRadius("60%");
         paneBackground.setOuterRadius("100%");
         paneBackground.setShape(BackgroundShape.ARC);
+        paneBackground.setBorderRadius("5");
         pane.setBackground(paneBackground);
 
         YAxis yAxis = configuration.getyAxis();
@@ -53,6 +55,7 @@ public class SolidGauge extends AbstractChartExample {
         yAxis.setMax(200);
 
         PlotOptionsSolidgauge plotOptionsSolidgauge = new PlotOptionsSolidgauge();
+        plotOptionsSolidgauge.setBorderRadius("5");
 
         DataLabels dataLabels = plotOptionsSolidgauge.getDataLabels();
         dataLabels.setY(5);
