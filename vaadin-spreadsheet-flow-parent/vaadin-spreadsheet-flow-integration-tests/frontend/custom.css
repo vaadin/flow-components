@@ -1,0 +1,62 @@
+vaadin-spreadsheet.custom::part(popup-button) {
+    background: #faeada;
+    color: brown;
+    font-weight: 600;
+}
+
+vaadin-spreadsheet.custom::part(popup-button):hover {
+    background: #f2d1c7;
+}
+
+vaadin-spreadsheet.custom::part(popup-button):after {
+    content: '▼';
+}
+
+vaadin-spreadsheet.custom::part(row-header) {
+    background-color: #f0f8ff;
+    border-right: 2px solid #add8e6;
+}
+
+vaadin-spreadsheet.custom::part(column-header) {
+    background-color: #f0f8ff;
+    border-bottom: 2px solid #add8e6;
+}
+
+vaadin-spreadsheet.custom::part(column-header selected-header) {
+    --lumo-primary-color-10pct: #4d88e6 !important;
+    color: white;
+    font-weight: bold;
+    border-bottom: 2px solid blue !important;
+}
+
+vaadin-spreadsheet.custom::part(row-header selected-header) {
+    --lumo-primary-color-10pct: #4d88e6 !important;
+    color: white;
+    font-weight: bold;
+    border-right: 2px solid blue !important;
+}
+
+vaadin-spreadsheet.custom::part(cell-input) {
+    background-color: #f0f8ff;
+    color: black;
+    box-shadow: unset;
+}
+
+vaadin-spreadsheet.custom::part(scroll-tab-disabled) {
+    color: #add8e6;
+}
+
+vaadin-spreadsheet.custom::part(tabsheet-tab) {
+    border-color: #add8e6;
+}
+
+vaadin-spreadsheet.custom::part(comment-triangle) {
+    border-width: 0 15px 15px 0;
+    border-color: transparent orange transparent transparent;
+}
+
+vaadin-spreadsheet.custom {
+    --vaadin-spreadsheet-header-border-color: #add8e6;
+    --vaadin-spreadsheet-border-color: unset;
+    --vaadin-spreadsheet-cell-border-color: #add8e6;
+}

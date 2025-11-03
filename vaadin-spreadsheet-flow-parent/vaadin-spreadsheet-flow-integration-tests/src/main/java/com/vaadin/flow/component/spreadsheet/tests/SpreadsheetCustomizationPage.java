@@ -20,7 +20,7 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetFilterTable;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-@CssImport("./styles.css")
+@CssImport("./custom.css")
 @Route("spreadsheet-customization")
 @PageTitle("Demo")
 public class SpreadsheetCustomizationPage extends VerticalLayout {
