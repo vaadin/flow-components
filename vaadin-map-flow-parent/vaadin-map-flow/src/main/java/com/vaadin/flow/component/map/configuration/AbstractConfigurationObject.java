@@ -174,6 +174,18 @@ public abstract class AbstractConfigurationObject implements Serializable {
     }
 
     /**
+     * Convenience wrapper for {@link #addChild(AbstractConfigurationObject)}
+     * that allows {@code configurationObject} to be a null reference.
+     */
+    protected void addNullableChild(
+            AbstractConfigurationObject configurationObject) {
+        if (configurationObject == null) {
+            return;
+        }
+        addChild(configurationObject);
+    }
+
+    /**
      * Removes a nested object reference from tracking. This removes the object
      * from the internal set used for collecting changes, and removes the change
      * listener on it. This method also automatically marks this object as
