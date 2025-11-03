@@ -24,7 +24,7 @@ import com.vaadin.flow.router.Route;
 @Route("spreadsheet-customization")
 @PageTitle("Demo")
 public class SpreadsheetCustomizationPage extends VerticalLayout {
-    
+
     public SpreadsheetCustomizationPage() {
         Spreadsheet spreadsheet = new Spreadsheet();
         spreadsheet.setTheme(SpreadsheetTheme.LUMO);
@@ -73,11 +73,12 @@ public class SpreadsheetCustomizationPage extends VerticalLayout {
         }
         CellRangeAddress range = new CellRangeAddress(1, maxRows, 1,
                 maxColumns);
-        SpreadsheetFilterTable table = new SpreadsheetFilterTable(spreadsheet, range);
+        SpreadsheetFilterTable table = new SpreadsheetFilterTable(spreadsheet,
+                range);
         spreadsheet.registerTable(table);
         spreadsheet.refreshAllCellValues();
 
-        spreadsheet.setSelectionRange(2, 7, 2+5, 7+3);
+        spreadsheet.setSelectionRange(2, 7, 2 + 5, 7 + 3);
 
         Checkbox checkbox = new Checkbox("Custom");
         checkbox.addValueChangeListener(event -> {

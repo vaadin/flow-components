@@ -2776,7 +2776,8 @@ public class SheetWidget extends Panel {
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 if (selectedColHeaderIndexes.contains(i)) {
                     colHeader.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                    colHeader.setAttribute("part", "column-header selected-header");
+                    colHeader.setAttribute("part",
+                            "column-header selected-header");
                 }
             } else {
                 debugConsole.severe("Trying to add plain column header (index:"
@@ -2822,7 +2823,8 @@ public class SheetWidget extends Panel {
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 if (selectedRowHeaderIndexes.contains(i)) {
                     rowHeader.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                    rowHeader.setAttribute("part", "row-header selected-header");
+                    rowHeader.setAttribute("part",
+                            "row-header selected-header");
                 }
             } else {
                 debugConsole.severe("Trying to add plain row header (index:" + i
@@ -3046,7 +3048,8 @@ public class SheetWidget extends Panel {
                 if (mergedCell != null) {
                     cellRangeStyledCells.add(mergedCell);
                     mergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                    mergedCell.getElement().setAttribute("part", "cell cell-range");
+                    mergedCell.getElement().setAttribute("part",
+                            "cell cell-range");
                 }
             }
         }
@@ -4669,7 +4672,8 @@ public class SheetWidget extends Panel {
                     if (cell != null) {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                        cell.getElement().setAttribute("part", "cell cell-range");
+                        cell.getElement().setAttribute("part",
+                                "cell cell-range");
                     }
 
                     Cell mergedCell = getMergedCell(toKey(c, r));
@@ -4678,7 +4682,7 @@ public class SheetWidget extends Panel {
                         mergedCell.getElement()
                                 .addClassName(CELL_RANGE_CLASSNAME);
                         mergedCell.getElement().setAttribute("part",
-                                "cell cell-range");        
+                                "cell cell-range");
                     }
                 }
             }
@@ -4858,12 +4862,14 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
-                oldSelectionCell.getElement().setAttribute("part", "cell cell-range");
+                oldSelectionCell.getElement().setAttribute("part",
+                        "cell cell-range");
             }
             if (oldMergedCell != null) {
                 cellRangeStyledCells.add(oldMergedCell);
                 oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                oldMergedCell.getElement().setAttribute("part", "cell cell-range");
+                oldMergedCell.getElement().setAttribute("part",
+                        "cell cell-range");
             }
             cellRangeStylesCleared = false;
         } else {
@@ -4873,12 +4879,14 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
-                oldSelectionCell.getElement().setAttribute("part", "cell cell-range");
+                oldSelectionCell.getElement().setAttribute("part",
+                        "cell cell-range");
             }
             if (oldMergedCell != null) {
                 cellRangeStyledCells.add(oldMergedCell);
                 oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                oldMergedCell.getElement().setAttribute("part", "cell cell-range");
+                oldMergedCell.getElement().setAttribute("part",
+                        "cell cell-range");
             }
             // highlight the new selected cell headers
             MergedRegion region = actionHandler
@@ -4948,7 +4956,8 @@ public class SheetWidget extends Panel {
             oldSelectionCell.getElement()
                     .removeClassName(CELL_SELECTION_CLASSNAME);
             oldSelectionCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-            oldSelectionCell.getElement().setAttribute("part", "cell cell-range");
+            oldSelectionCell.getElement().setAttribute("part",
+                    "cell cell-range");
         }
         if (oldMergedSelectionCell != null) {
             cellRangeStyledCells.add(oldMergedSelectionCell);
@@ -4956,7 +4965,8 @@ public class SheetWidget extends Panel {
                     .removeClassName(CELL_SELECTION_CLASSNAME);
             oldMergedSelectionCell.getElement()
                     .addClassName(CELL_RANGE_CLASSNAME);
-            oldMergedSelectionCell.getElement().setAttribute("part", "cell cell-range");
+            oldMergedSelectionCell.getElement().setAttribute("part",
+                    "cell cell-range");
         }
         cellRangeStyledCoords.remove(new CellCoord(col, row));
         if (newSelectionCell != null) {
@@ -4992,7 +5002,8 @@ public class SheetWidget extends Panel {
                     if (cell != null) {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                        cell.getElement().setAttribute("part", "cell cell-range");
+                        cell.getElement().setAttribute("part",
+                                "cell cell-range");
                     }
 
                     Cell mergedCell = getMergedCell(toKey(c, r));

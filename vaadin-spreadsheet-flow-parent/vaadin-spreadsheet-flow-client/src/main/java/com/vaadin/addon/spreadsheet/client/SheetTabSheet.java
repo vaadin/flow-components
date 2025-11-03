@@ -503,14 +503,17 @@ public class SheetTabSheet extends Widget {
     private void showHideScrollIcons() {
         if (tabScrollIndex == 0) {
             scrollLeft.addClassName(HIDDEN);
-            scrollLeft.setAttribute("part", "scroll-tab-disabled scroll-tab-left");
+            scrollLeft.setAttribute("part",
+                    "scroll-tab-disabled scroll-tab-left");
             scrollBeginning.addClassName(HIDDEN);
-            scrollBeginning.setAttribute("part", "scroll-tab-disabled scroll-tab-beginning");
+            scrollBeginning.setAttribute("part",
+                    "scroll-tab-disabled scroll-tab-beginning");
         } else {
             scrollLeft.removeClassName(HIDDEN);
             scrollLeft.setAttribute("part", "scroll-tab scroll-tab-left");
             scrollBeginning.removeClassName(HIDDEN);
-            scrollBeginning.setAttribute("part", "scroll-tab scroll-tab-beginning");
+            scrollBeginning.setAttribute("part",
+                    "scroll-tab scroll-tab-beginning");
         }
         int lastTabVisibleWithScrollIndex = getLastTabVisibleWithScrollIndex();
         if (tabScrollIndex < lastTabVisibleWithScrollIndex) {
@@ -520,9 +523,11 @@ public class SheetTabSheet extends Widget {
             scrollEnd.setAttribute("part", "scroll-tab scroll-tab-end");
         } else {
             scrollRight.addClassName(HIDDEN);
-            scrollRight.setAttribute("part", "scroll-tab-disabled scroll-tab-right");
+            scrollRight.setAttribute("part",
+                    "scroll-tab-disabled scroll-tab-right");
             scrollEnd.addClassName(HIDDEN);
-            scrollEnd.setAttribute("part", "scroll-tab-disabled scroll-tab-end");
+            scrollEnd.setAttribute("part",
+                    "scroll-tab-disabled scroll-tab-end");
         }
     }
 

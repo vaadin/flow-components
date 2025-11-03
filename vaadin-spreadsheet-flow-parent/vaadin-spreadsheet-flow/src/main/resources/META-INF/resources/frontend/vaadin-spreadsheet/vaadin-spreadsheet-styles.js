@@ -10,15 +10,14 @@
 import { css } from 'lit';
 
 export const spreadsheetStyles = css`
+  :host {
+    --vaadin-spreadsheet-border-color: #c7c7c7;
+    --vaadin-spreadsheet-cell-border-color: #c7c7c7;
+    --vaadin-spreadsheet-header-border-color: #c7c7c7;
+    --vaadin-spreadsheet-text-color: #474747;
+  }
 
-:host {
-  --vaadin-spreadsheet-border-color: #c7c7c7;
-  --vaadin-spreadsheet-cell-border-color: #c7c7c7;
-  --vaadin-spreadsheet-header-border-color: #c7c7c7;
-  --vaadin-spreadsheet-text-color: #474747;
-}
-
-:host {
+  :host {
     display: block;
     width: 100%;
     height: 100%;
@@ -1704,35 +1703,35 @@ export const spreadsheetOverlayStyles = css`
   /*
    * Lumo theme variant 
    */
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip {
     background-color: var(--lumo-contrast-50pct);
     box-shadow: var(--lumo-box-shadow-s);
     color: var(--lumo-base-color);
     padding: var(--lumo-space-xs) var(--lumo-space-s);
     font-size: var(--lumo-font-size-s);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage {
     background-color: var(--lumo-base-color);
     color: var(--lumo-error-color);
     margin: calc(-1 * var(--lumo-space-xs)) calc(-1 * var(--lumo-space-s));
     padding: var(--lumo-space-xs) var(--lumo-space-s);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-info {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-info {
     color: var(--lumo-error-text-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-warning {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-warning {
     color: var(--lumo-warning-text-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-error {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-error {
     color: var(--lumo-error-text-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-critical {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-critical {
     color: var(--vaadin-user-color-0);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-system {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-system {
     color: var(--vaadin-user-color-1);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu {
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
     border-radius: var(--lumo-border-radius-s);
     background-color: var(--lumo-base-color);
@@ -1740,26 +1739,26 @@ export const spreadsheetOverlayStyles = css`
     box-shadow: var(--lumo-box-shadow-s);
     -webkit-backface-visibility: hidden;
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem {
     cursor: var(--lumo-clickable-cursor);
     line-height: calc(1.5 * var(--lumo-line-height-m));
     padding: 0 var(--lumo-space-l) 0 var(--lumo-space-m);
     border-radius: var(--lumo-border-radius-s);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem:active:before {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem:active:before {
     background: var(--lumo-primary-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem .v-icon {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem .v-icon {
     max-height: calc(1.5 * var(--lumo-line-height-m));
     margin-right: var(--lumo-space-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem-selected {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem-selected {
     background-color: var(--lumo-primary-color-10pct) !important;
     background-image: var(--lumo-primary-color-10pct);
     color: var(--lumo-body-text-color) !important;
   }
 
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay {
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
     border-radius: var(--lumo-border-radius-m);
     background-color: var(--lumo-base-color);
@@ -1768,23 +1767,23 @@ export const spreadsheetOverlayStyles = css`
     padding: var(--lumo-space-s);
     border: 1px solid var(--lumo-contrast-20pct);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-author {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-author {
     padding-bottom: var(--lumo-space-s);
     font-size: var(--lumo-font-size-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
     color: var(--lumo-error-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-input {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-input {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
     background-color: var(--lumo-base-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-separator {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-separator {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     margin-bottom: 7px;
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay {
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
     border-radius: var(--lumo-border-radius-m);
     background-color: var(--lumo-base-color);
@@ -1792,20 +1791,20 @@ export const spreadsheetOverlayStyles = css`
     box-shadow: var(--lumo-box-shadow-s);
     border: 1px solid var(--lumo-contrast-20pct);
   }
-  #spreadsheet-overlays[theme~="lumo"] .spreadsheet-item-filter-layout {
+  #spreadsheet-overlays[theme~='lumo'] .spreadsheet-item-filter-layout {
     gap: var(--lumo-space-xs);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
 
-  #spreadsheet-overlays[theme~="lumo"] .spreadsheet-filter-table-content {
+  #spreadsheet-overlays[theme~='lumo'] .spreadsheet-filter-table-content {
     gap: var(--lumo-space-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header {
     padding-bottom: var(--lumo-space-xs);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     margin-bottom: var(--lumo-space-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox {
     right: 0px;
     left: unset;
     cursor: var(--lumo-clickable-cursor);
@@ -1814,14 +1813,14 @@ export const spreadsheetOverlayStyles = css`
     padding-right: var(--lumo-space-xs);
     border-radius: 0 var(--lumo-border-radius-m) 0 var(--lumo-border-radius-m);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:hover {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:hover {
     color: var(--lumo-primary-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:before {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:before {
     content: var(--lumo-icons-cross);
     font-family: 'lumo-icons';
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .header-caption {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .header-caption {
     margin-left: var(--lumo-space-xs);
     color: var(--lumo-body-text-color);
     font-weight: bold;
