@@ -94,10 +94,15 @@ public class SheetTabSheet extends Widget {
 
     private void initDOM() {
         scrollBeginning.setClassName("scroll-tabs-beginning");
+        scrollBeginning.setAttribute("part", "scroll-tab scroll-tab-beginning");
         scrollEnd.setClassName("scroll-tabs-end");
+        scrollEnd.setAttribute("part", "scroll-tab scroll-tab-end");
         scrollLeft.setClassName("scroll-tabs-left");
+        scrollLeft.setAttribute("part", "scroll-tab scroll-tab-left");
         scrollRight.setClassName("scroll-tabs-right");
+        scrollRight.setAttribute("part", "scroll-tab scroll-tab-right");
         addNewSheet.setClassName("add-new-tab");
+        addNewSheet.setAttribute("part", "add-new-tab");
 
         options.setClassName("sheet-tabsheet-options");
         options.appendChild(scrollBeginning);
@@ -395,6 +400,7 @@ public class SheetTabSheet extends Widget {
         final Element e = Document.get().createDivElement();
         setTabName(e, tabName);
         e.setClassName("sheet-tabsheet-tab");
+        e.setAttribute("part", "tabsheet-tab");
         return e;
     }
 
@@ -454,12 +460,14 @@ public class SheetTabSheet extends Widget {
      */
     public void setSelectedTab(int sheetIndex) {
         if (selectedTabIndex != -1) {
-            ((Element) tabs.get(selectedTabIndex).cast())
-                    .removeClassName(SELECTED_TAB_CLASSNAME);
+            Element selectedTab = ((Element) tabs.get(selectedTabIndex).cast());
+            selectedTab.removeClassName(SELECTED_TAB_CLASSNAME);
+            selectedTab.setAttribute("part", "tabsheet-tab");
         }
         selectedTabIndex = sheetIndex - 1;
         Element selectedTab = ((Element) tabs.get(selectedTabIndex).cast());
         selectedTab.addClassName(SELECTED_TAB_CLASSNAME);
+        selectedTab.setAttribute("part", "tabsheet-tab selected-tab");
         if (tabScrollIndex > selectedTabIndex) {
             setFirstVisibleTab(selectedTabIndex);
         } else if (root.getAbsoluteRight() < selectedTab.getAbsoluteRight()
@@ -495,18 +503,26 @@ public class SheetTabSheet extends Widget {
     private void showHideScrollIcons() {
         if (tabScrollIndex == 0) {
             scrollLeft.addClassName(HIDDEN);
+            scrollLeft.setAttribute("part", "scroll-tab-disabled scroll-tab-left");
             scrollBeginning.addClassName(HIDDEN);
+            scrollBeginning.setAttribute("part", "scroll-tab-disabled scroll-tab-beginning");
         } else {
             scrollLeft.removeClassName(HIDDEN);
+            scrollLeft.setAttribute("part", "scroll-tab scroll-tab-left");
             scrollBeginning.removeClassName(HIDDEN);
+            scrollBeginning.setAttribute("part", "scroll-tab scroll-tab-beginning");
         }
         int lastTabVisibleWithScrollIndex = getLastTabVisibleWithScrollIndex();
         if (tabScrollIndex < lastTabVisibleWithScrollIndex) {
             scrollRight.removeClassName(HIDDEN);
+            scrollRight.setAttribute("part", "scroll-tab scroll-tab-right");
             scrollEnd.removeClassName(HIDDEN);
+            scrollEnd.setAttribute("part", "scroll-tab scroll-tab-end");
         } else {
             scrollRight.addClassName(HIDDEN);
+            scrollRight.setAttribute("part", "scroll-tab-disabled scroll-tab-right");
             scrollEnd.addClassName(HIDDEN);
+            scrollEnd.setAttribute("part", "scroll-tab-disabled scroll-tab-end");
         }
     }
 
