@@ -92,6 +92,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
+    private final SerializablePropertyChangeListener childChangeListener = this::notifyChange;
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
@@ -162,7 +163,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
      */
     protected void addChild(AbstractConfigurationObject configurationObject) {
         children.add(configurationObject);
-        configurationObject.addPropertyChangeListener(this::notifyChange);
+        configurationObject.addPropertyChangeListener(childChangeListener);
         markAsDirty();
         // When adding a sub-hierarchy, we need to make sure that the client
         // receives the whole hierarchy. Otherwise objects that have been synced
@@ -183,7 +184,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         if (configurationObject == null)
             return;
         children.remove(configurationObject);
-        configurationObject.removePropertyChangeListener(this::notifyChange);
+        configurationObject.removePropertyChangeListener(childChangeListener);
         markAsDirty();
     }
 
