@@ -809,13 +809,21 @@ public class DatePicker
             isFallbackParserRunning = false;
         }
 
+        // Case: User enters unparsable input in a field with valid input
+        if (fromClient && newModelValue == null && oldModelValue != null
+                && isInputUnparsable()) {
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
         boolean isModelValueRemainedEmpty = newModelValue == null
                 && oldModelValue == null;
 
         // Cases:
         // - User modifies input but it remains unparsable
         // - User enters unparsable input in empty field
-        // - User clears unparsable input
+        // - User clears unparsable input (that was already empty)
         if (fromClient && isModelValueRemainedEmpty) {
             validate();
             fireValidationStatusChangeEvent();

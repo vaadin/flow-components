@@ -117,6 +117,52 @@ public class BinderValidationTest {
         Assert.assertFalse(statusCaptor.getValue().isError());
     }
 
+    @Test
+    public void validValue_enterUnparsableInput_valueIsPreserved() {
+        var binder = attachBinderToField();
+        var bean = new Bean();
+        var validTime = LocalTime.of(14, 30);
+        bean.setTime(validTime);
+        binder.setBean(bean);
+
+        // Simulate setting unparsable input
+        fakeClientPropertyChange(field, "_inputElementValue", "foobar");
+        fakeClientPropertyChange(field, "value", "");
+        fakeClientDomEvent("change");
+
+        Assert.assertEquals(
+                "Field value should be preserved after entering unparsable input",
+                validTime, field.getValue());
+        Assert.assertEquals(
+                "Binder value should be preserved after entering unparsable input",
+                validTime, bean.getTime());
+    }
+
+    @Test
+    public void validValue_enterUnparsableInput_clearInput_binderValueChangesToNull() {
+        var binder = attachBinderToField();
+        var bean = new Bean();
+        var validTime = LocalTime.of(14, 30);
+        bean.setTime(validTime);
+        binder.setBean(bean);
+
+        // Simulate setting an invalid input
+        fakeClientPropertyChange(field, "_inputElementValue", "foobar");
+        fakeClientPropertyChange(field, "value", "");
+        fakeClientDomEvent("change");
+
+        // Simulate clearing the invalid input
+        fakeClientPropertyChange(field, "_inputElementValue", "");
+        fakeClientDomEvent("unparsable-change");
+
+        Assert.assertNull(
+                "Field value should be null after clearing unparsable input",
+                field.getValue());
+        Assert.assertNull(
+                "Binder value should be null after clearing unparsable input",
+                bean.getTime());
+    }
+
     private Binder<Bean> attachBinderToField() {
         return attachBinderToField(false);
     }
@@ -137,5 +183,22 @@ public class BinderValidationTest {
         binding.bind("time");
 
         return binder;
+    }
+
+    private void fakeClientDomEvent(String eventName) {
+        var element = field.getElement();
+        var event = new com.vaadin.flow.dom.DomEvent(element, eventName,
+                com.vaadin.flow.internal.JacksonUtils.createObjectNode());
+        element.getNode().getFeature(
+                com.vaadin.flow.internal.nodefeature.ElementListenerMap.class)
+                .fireEvent(event);
+    }
+
+    private void fakeClientPropertyChange(
+            com.vaadin.flow.component.Component component, String property,
+            String value) {
+        var element = component.getElement();
+        element.getStateProvider().setProperty(element.getNode(), property,
+                value, false);
     }
 }
