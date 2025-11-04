@@ -25,7 +25,12 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
+
+import elemental.json.Json;
 
 public class PopoverOpenedChangeListenerTest {
     private final UI ui = new UI();
@@ -83,6 +88,18 @@ public class PopoverOpenedChangeListenerTest {
 
         clearCapturedData();
         popover.close();
+        Assert.assertNull(event.get());
+        assertListenerCalls(0);
+    }
+
+    @Test
+    public void openedChangeFromClient_noChangeEvent() {
+        Element element = popover.getElement();
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(
+                new DomEvent(element, "opened-changed", Json.createObject()));
+
+        // The event should only be fired when the opened state changes, not for
+        // any opened-changed event from the client
         Assert.assertNull(event.get());
         assertListenerCalls(0);
     }
