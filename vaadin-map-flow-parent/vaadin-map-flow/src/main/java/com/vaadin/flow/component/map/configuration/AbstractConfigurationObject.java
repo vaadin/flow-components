@@ -92,6 +92,12 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
+    private final SerializablePropertyChangeListener childChangeListener = new SerializablePropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            AbstractConfigurationObject.this.notifyChange(evt);
+        }
+    };
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
@@ -162,7 +168,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
      */
     protected void addChild(AbstractConfigurationObject configurationObject) {
         children.add(configurationObject);
-        configurationObject.addPropertyChangeListener(this::notifyChange);
+        configurationObject.addPropertyChangeListener(childChangeListener);
         markAsDirty();
         // When adding a sub-hierarchy, we need to make sure that the client
         // receives the whole hierarchy. Otherwise objects that have been synced
@@ -170,6 +176,18 @@ public abstract class AbstractConfigurationObject implements Serializable {
         // client-side reference lookup anymore, due to the client removing
         // references from the lookup during garbage collection.
         configurationObject.deepMarkAsDirty();
+    }
+
+    /**
+     * Convenience wrapper for {@link #addChild(AbstractConfigurationObject)}
+     * that allows {@code configurationObject} to be a null reference.
+     */
+    protected void addNullableChild(
+            AbstractConfigurationObject configurationObject) {
+        if (configurationObject == null) {
+            return;
+        }
+        addChild(configurationObject);
     }
 
     /**
@@ -183,7 +201,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         if (configurationObject == null)
             return;
         children.remove(configurationObject);
-        configurationObject.removePropertyChangeListener(this::notifyChange);
+        configurationObject.removePropertyChangeListener(childChangeListener);
         markAsDirty();
     }
 
