@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Synchronize;
@@ -78,6 +77,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         updateTrigger();
         setRole("dialog");
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -177,7 +179,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * {@code opened-changed} event is sent when the popover opened state
      * changes.
      */
-    @DomEvent("opened-changed")
     public static class OpenedChangeEvent extends ComponentEvent<Popover> {
         private final boolean opened;
 
@@ -200,7 +201,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     public void setOpened(boolean opened) {
         if (opened != isOpened()) {
             getElement().setProperty("opened", opened);
-            fireEvent(new OpenedChangeEvent(this, false));
         }
     }
 
