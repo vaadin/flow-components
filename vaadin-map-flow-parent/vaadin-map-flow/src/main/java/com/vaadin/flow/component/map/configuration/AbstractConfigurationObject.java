@@ -92,7 +92,12 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
-    private final SerializablePropertyChangeListener childChangeListener = this::notifyChange;
+    private final SerializablePropertyChangeListener childChangeListener = new SerializablePropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            AbstractConfigurationObject.this.notifyChange(evt);
+        }
+    };
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
