@@ -35,6 +35,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -64,7 +65,8 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-upload")
 @NpmPackage(value = "@vaadin/upload", version = "25.0.0-beta3")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
-public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
+public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
+        HasThemeVariant<UploadVariant> {
 
     /**
      * Server-side component for the default {@code <vaadin-upload>} icon.
