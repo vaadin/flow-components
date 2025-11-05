@@ -211,6 +211,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.reset = function () {
+    if (comboBox._topGroup) {
+      comboBox._topGroup = [...comboBox.selectedItems];
+    }
     clearPageCallbacks();
     cache = {};
     comboBox.clearCache();
