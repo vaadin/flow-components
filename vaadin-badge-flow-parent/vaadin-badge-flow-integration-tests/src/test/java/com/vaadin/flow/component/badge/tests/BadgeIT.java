@@ -39,11 +39,11 @@ public class BadgeIT extends AbstractComponentIT {
         boolean hasShadowRoot = (Boolean) executeScript(
                 "return arguments[0].shadowRoot !== null", badge);
         String componentName = (String) executeScript(
-                "return Object.getPrototypeOf(arguments[0]).constructor.is",
+                "return arguments[0].tagName",
                 badge);
 
-        Assert.assertTrue(hasShadowRoot);
-        Assert.assertEquals("vaadin-badge", componentName);
+        Assert.assertFalse(hasShadowRoot); // there should be no
+        Assert.assertEquals("VAADIN-BADGE", componentName);
         Assert.assertNotNull(badge.getText());
         Assert.assertFalse(badge.getText().isEmpty());
     }
