@@ -129,7 +129,7 @@ public class PopupButton extends Component {
             parent.getElement().callJsFunction("onPopupButtonOpen",
                     getRow() + 1, getColumn() + 1,
                     getElement().getNode().getId(),
-                    UI.getCurrent().getInternals().getAppId());
+                    UI.getCurrentOrThrow().getInternals().getAppId());
         });
         fireOpen();
     }

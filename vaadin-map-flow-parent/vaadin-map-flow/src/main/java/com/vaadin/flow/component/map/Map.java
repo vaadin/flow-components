@@ -29,6 +29,7 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -111,16 +112,7 @@ public class Map extends MapBase {
      *            the user projection to use for all public facing API
      */
     public static void setUserProjection(String projection) {
-        UI ui = UI.getCurrent();
-        if (ui == null || ui.getPage() == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        UI.getCurrent().getPage().executeJs(
-                "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
+        executeJs("window.Vaadin.Flow.mapConnector.setUserProjection($0)",
                 projection);
     }
 
@@ -158,17 +150,14 @@ public class Map extends MapBase {
      */
     public static void defineProjection(String projectionName,
             String wksDefinition) {
-        UI ui = UI.getCurrent();
-        if (ui == null || ui.getPage() == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        UI.getCurrent().getPage().executeJs(
-                "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
+        executeJs("window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
                 projectionName, wksDefinition);
+    }
+
+    private static PendingJavaScriptResult executeJs(String expression,
+            Object... parameters) {
+        return UI.getCurrentOrThrow().getPage().executeJs(expression,
+                parameters);
     }
 
     public Map() {

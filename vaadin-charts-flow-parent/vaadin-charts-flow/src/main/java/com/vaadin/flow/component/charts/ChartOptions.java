@@ -125,13 +125,7 @@ public class ChartOptions extends AbstractConfigurationObject {
      * @return a ChartOptions instance connected to the currently active UI
      */
     public static ChartOptions get() {
-        UI ui = UI.getCurrent();
-
-        if (ui == null) {
-            throw new IllegalStateException(
-                    "This method must be used from UI thread");
-        }
-        return get(ui);
+        return get(UI.getCurrentOrThrow());
     }
 
 }
