@@ -20,6 +20,7 @@
         <module>vaadin-avatar-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
         <module>vaadin-aura-theme-flow-parent</module>
+        <module>vaadin-badge-flow-parent</module>
         <module>vaadin-button-flow-parent</module>
         <module>vaadin-card-flow-parent</module>
         <module>vaadin-checkbox-flow-parent</module>
