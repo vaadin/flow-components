@@ -22,14 +22,12 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 
 /**
  * Badge is a colored text element for labeling content, displaying metadata,
- * or highlighting information.
+ * or highlighting information. Note, currently only Lumo theme supports badges.
  * <p>
  * Badges are typically used to show statuses, categories, or counts. They
  * support text content, icons, and various theme variants for different colors
@@ -82,8 +80,6 @@ import com.vaadin.flow.component.shared.HasTooltip;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-badge")
-@NpmPackage(value = "@vaadin/badge", version = "25.0.0-beta3")
-@JsModule("@vaadin/badge/src/vaadin-badge.js")
 public class Badge extends Component implements HasText, HasSize, HasStyle,
         HasComponents, HasThemeVariant<BadgeVariant>, HasTooltip, HasAriaLabel {
 
@@ -95,6 +91,7 @@ public class Badge extends Component implements HasText, HasSize, HasStyle,
      * </p>
      */
     public Badge() {
+        getElement().getThemeList().add("badge");
     }
 
     /**
@@ -104,6 +101,7 @@ public class Badge extends Component implements HasText, HasSize, HasStyle,
      *            the text content of the badge
      */
     public Badge(String text) {
+        this();
         setText(text);
     }
 }

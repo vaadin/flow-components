@@ -17,17 +17,22 @@ package com.vaadin.flow.component.badge.tests;
 
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.badge.BadgeVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Comprehensive visual test page for the Badge component showing all variants,
  * sizes, colors, and use cases.
  */
 @Route("vaadin-badge")
+// Currently only Lumo is supported
+@StyleSheet(Lumo.STYLESHEET)
 public class BadgePage extends Div {
 
     public BadgePage() {
@@ -35,6 +40,13 @@ public class BadgePage extends Div {
         getStyle().set("padding", "20px");
 
         add(new H3("Badge Component - Visual Test Page"));
+
+
+        Span rawOldStyleSpanBadge = new Span(new Span("Pending"));
+        rawOldStyleSpanBadge.getElement().getThemeList().add("badge");
+
+        add(rawOldStyleSpanBadge);
+
 
         // Basic badges
         add(new H3("Basic Badges"));
