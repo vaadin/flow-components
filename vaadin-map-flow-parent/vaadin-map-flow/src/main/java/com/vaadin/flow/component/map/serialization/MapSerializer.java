@@ -99,7 +99,7 @@ public class MapSerializer {
             StreamRegistration registration = streamRegistrationCache
                     .get(resource);
             if (registration == null) {
-                StreamResourceRegistry resourceRegistry = UI.getCurrent()
+                StreamResourceRegistry resourceRegistry = UI.requireCurrent()
                         .getSession().getResourceRegistry();
                 registration = resourceRegistry.registerResource(resource);
                 streamRegistrationCache.put(resource, registration);
@@ -137,7 +137,7 @@ public class MapSerializer {
             StreamRegistration registration = streamRegistrationCache
                     .get(resource);
             if (registration == null) {
-                StreamResourceRegistry resourceRegistry = UI.getCurrent()
+                StreamResourceRegistry resourceRegistry = UI.requireCurrent()
                         .getSession().getResourceRegistry();
                 registration = resourceRegistry.registerResource(resource);
                 streamRegistrationCache.put(resource, registration);

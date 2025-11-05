@@ -148,7 +148,7 @@ public class GridPro<E> extends Grid<E> {
                         .setValue(column.getValueProvider().apply(e.getItem()));
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
-                UI.getCurrent().getPage().executeJs(
+                UI.requireCurrent().getPage().executeJs(
                         "window.Vaadin.Flow.gridProConnector.selectAll($0, $1, $2)",
                         column.getEditorField().getElement(), itemKey,
                         this.getElement());

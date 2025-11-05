@@ -468,7 +468,7 @@ public class MessageListItem implements Serializable {
 
         setUserImageResource(new StreamResourceRegistry.ElementStreamResource(
                 downloadHandler, getHost() != null ? getHost().getElement()
-                        : UI.getCurrent().getElement()));
+                        : UI.requireCurrent().getElement()));
     }
 
     /**

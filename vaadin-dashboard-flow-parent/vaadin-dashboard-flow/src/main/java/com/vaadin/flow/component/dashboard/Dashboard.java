@@ -610,7 +610,7 @@ public class Dashboard extends Component
             }
         }
 
-        String appId = UI.getCurrent().getInternals().getAppId();
+        String appId = UI.requireCurrent().getInternals().getAppId();
         getElement().executeJs(
                 """
                         const items = $0;
