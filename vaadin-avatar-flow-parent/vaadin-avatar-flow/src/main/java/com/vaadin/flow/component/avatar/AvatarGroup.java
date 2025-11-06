@@ -255,7 +255,7 @@ public class AvatarGroup extends Component
 
             setImageResource(new StreamResourceRegistry.ElementStreamResource(
                     downloadHandler, getHost() != null ? getHost().getElement()
-                            : UI.getCurrent().getElement()));
+                            : UI.getCurrentOrThrow().getElement()));
         }
 
         /**

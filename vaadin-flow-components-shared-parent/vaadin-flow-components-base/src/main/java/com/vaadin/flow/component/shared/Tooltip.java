@@ -106,7 +106,7 @@ public class Tooltip implements Serializable {
 
             // The host under which the <vaadin-tooltip> element is
             // auto-attached
-            var tooltipHost = UI.getCurrent().getElement();
+            var tooltipHost = UI.getCurrentOrThrow().getElement();
             tooltipHost.appendChild(tooltip.tooltipElement);
             tooltip.tooltipElement.executeJs("this.target = $0;", element);
         };
