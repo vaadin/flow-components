@@ -29,7 +29,6 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -112,7 +111,8 @@ public class Map extends MapBase {
      *            the user projection to use for all public facing API
      */
     public static void setUserProjection(String projection) {
-        executeJs("window.Vaadin.Flow.mapConnector.setUserProjection($0)",
+        UI.getCurrentOrThrow().getPage().executeJs(
+                "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
                 projection);
     }
 
@@ -150,14 +150,9 @@ public class Map extends MapBase {
      */
     public static void defineProjection(String projectionName,
             String wksDefinition) {
-        executeJs("window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
+        UI.getCurrentOrThrow().getPage().executeJs(
+                "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
                 projectionName, wksDefinition);
-    }
-
-    private static PendingJavaScriptResult executeJs(String expression,
-            Object... parameters) {
-        return UI.getCurrentOrThrow().getPage().executeJs(expression,
-                parameters);
     }
 
     public Map() {
