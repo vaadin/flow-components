@@ -22,16 +22,18 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class VirtualListHelpers {
 
-    public static JsonArray getItems(WebDriver driver, WebElement element) {
+    public static ArrayNode getItems(WebDriver driver, WebElement element) {
         Object result = ((JavascriptExecutor) driver)
                 .executeScript("return arguments[0].items;", element);
-        JsonArray array = Json.createArray();
+        ArrayNode array = JacksonUtils.createArrayNode();
         if (!(result instanceof List)) {
             return array;
         }
@@ -39,13 +41,12 @@ public class VirtualListHelpers {
         for (int i = 0; i < list.size(); i++) {
             Map<String, ?> map = list.get(i);
             if (map != null) {
-                JsonObject obj = Json.createObject();
-                map.entrySet().forEach(entry -> {
-                    obj.put(entry.getKey(), String.valueOf(entry.getValue()));
-                });
-                array.set(i, obj);
+                ObjectNode obj = JacksonUtils.createObjectNode();
+                map.forEach(
+                        (key, value) -> obj.put(key, String.valueOf(value)));
+                array.add(obj);
             } else {
-                array.set(i, Json.createNull());
+                array.add((JsonNode) null);
             }
         }
         return array;
