@@ -15,31 +15,22 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class ComboBoxVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
-
-        ThemeList themeNames = comboBox.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(ComboBoxVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new ComboBox<>(), ComboBoxVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
-        comboBox.removeThemeVariants(ComboBoxVariant.LUMO_SMALL);
-
-        ThemeList themeNames = comboBox.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(ComboBoxVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new ComboBox<>(), ComboBoxVariant.LUMO_SMALL);
     }
 }

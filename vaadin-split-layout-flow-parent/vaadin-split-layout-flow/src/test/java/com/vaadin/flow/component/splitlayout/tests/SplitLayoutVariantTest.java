@@ -15,33 +15,24 @@
  */
 package com.vaadin.flow.component.splitlayout.tests;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class SplitLayoutVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        SplitLayout layout = new SplitLayout();
-        layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
-
-        ThemeList themeNames = layout.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(SplitLayoutVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new SplitLayout(), SplitLayoutVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        SplitLayout layout = new SplitLayout();
-        layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
-        layout.removeThemeVariants(SplitLayoutVariant.LUMO_SMALL);
-
-        ThemeList themeNames = layout.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(SplitLayoutVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new SplitLayout(), SplitLayoutVariant.LUMO_SMALL);
     }
 }
