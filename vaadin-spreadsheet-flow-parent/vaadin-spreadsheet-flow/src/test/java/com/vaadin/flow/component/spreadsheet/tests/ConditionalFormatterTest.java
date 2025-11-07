@@ -20,7 +20,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Tests for conditional formatting
@@ -147,8 +146,8 @@ public class ConditionalFormatterTest {
     private static void assertCellHasStyle(Spreadsheet sheet, Cell cell) {
 
         try {
-            var styles = JacksonUtils.getMapper().readTree(
-                    sheet.getElement().getProperty("conditionalFormattingStyles"));
+            var styles = JacksonUtils.getMapper().readTree(sheet.getElement()
+                    .getProperty("conditionalFormattingStyles"));
             var cellFormattingIndex = sheet.getConditionalFormatter()
                     .getCellFormattingIndex(cell);
 
