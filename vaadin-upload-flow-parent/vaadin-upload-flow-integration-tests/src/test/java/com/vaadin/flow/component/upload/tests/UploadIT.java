@@ -66,6 +66,20 @@ public class UploadIT extends AbstractUploadIT {
     }
 
     @Test
+    public void testUploadFileWithUrlEncodedFileName() throws Exception {
+        File tempFile = createTempFile("religion åk4", "txt");
+        getUpload().upload(tempFile);
+
+        String content = uploadOutput.getText();
+
+        String expectedContents = tempFile.getName() + "text/plain"
+                + getTempFileContents();
+
+        Assert.assertTrue("Upload content does not contain file details",
+                content.contains(expectedContents));
+    }
+
+    @Test
     public void testClearFileList() throws Exception {
         File tempFile = createTempFile("txt");
 

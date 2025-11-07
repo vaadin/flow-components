@@ -70,6 +70,22 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
     }
 
     @Test
+    public void uploadWithHandler_uploadFileWithUrlEncodedFileName_fileNameIsDecoded()
+            throws Exception {
+        File tempFile = createTempFile("religion åk4", "txt");
+        upload.upload(tempFile);
+
+        checkLogsForErrors();
+
+        String expectedMetadata = "%s-%s-%s".formatted(tempFile.getName(),
+                "text/plain", getTempFileContents().getBytes().length);
+
+        Assert.assertEquals(
+                "Unexpected file metadata for upload with upload handler",
+                expectedMetadata, uploadOutput.getText());
+    }
+
+    @Test
     public void uploadWithHandler_withLargeBinaryFile_fileUploadedAndNoErrorThrown()
             throws Exception {
         File tempFile = createTempBinaryFile();

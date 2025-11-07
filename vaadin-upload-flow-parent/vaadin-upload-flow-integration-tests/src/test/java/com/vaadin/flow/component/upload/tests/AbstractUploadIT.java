@@ -33,7 +33,22 @@ public abstract class AbstractUploadIT extends AbstractComponentIT {
      * @throws IOException
      */
     File createTempFile(String extension) throws IOException {
-        File tempFile = File.createTempFile("TestFileUpload", "." + extension);
+        return createTempFile("TestFileUpload", extension);
+    }
+
+    /**
+     * Creates a temp file with the provided name and extension for testing
+     * purposes.
+     * 
+     * @param fileName
+     *            the temp file name prefix
+     * @param extension
+     *            the temp file extension without leading dot
+     * @return The generated temp file handle
+     * @throws IOException
+     */
+    File createTempFile(String fileName, String extension) throws IOException {
+        File tempFile = File.createTempFile(fileName, "." + extension);
         BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
         writer.write(getTempFileContents());
         writer.close();
