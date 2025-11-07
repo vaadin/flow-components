@@ -84,8 +84,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     public enum UploadFormat {
         /**
          * Send files as raw binary data with Content-Type header set to the
-         * file's MIME type. This is the default format for Flow Upload
-         * component, which uses XMLHttpRequest (XHR) for file transmission.
+         * file's MIME type. This is the default format, which uses
+         * XMLHttpRequest (XHR) for file transmission.
          */
         RAW("raw"),
 
@@ -219,10 +219,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
         defaultDropLabelIcon = new UploadIcon();
         setDropLabelIcon(defaultDropLabelIcon);
-
-        // Set default upload format to RAW (different from web component
-        // default)
-        setUploadFormat(UploadFormat.RAW);
     }
 
     /**
@@ -428,7 +424,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * <p>
      * {@link UploadFormat#RAW} sends files as raw binary data with the
      * Content-Type header set to the file's MIME type. This is the default
-     * format for Flow Upload component.
+     * format.
      * <p>
      * {@link UploadFormat#MULTIPART} sends files as multipart form data with
      * Content-Disposition header. This is the traditional format used for HTML

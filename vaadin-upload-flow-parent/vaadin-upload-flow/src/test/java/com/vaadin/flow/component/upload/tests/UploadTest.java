@@ -56,8 +56,6 @@ public class UploadTest {
         Upload upload = new Upload();
         Assert.assertEquals("Upload format should default to RAW",
                 UploadFormat.RAW, upload.getUploadFormat());
-        Assert.assertEquals("raw",
-                upload.getElement().getProperty("uploadFormat"));
     }
 
     @Test
