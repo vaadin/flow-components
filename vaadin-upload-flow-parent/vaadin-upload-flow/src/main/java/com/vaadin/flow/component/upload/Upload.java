@@ -170,6 +170,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
         defaultDropLabelIcon = new UploadIcon();
         setDropLabelIcon(defaultDropLabelIcon);
+
+        getElement().setProperty("uploadFormat", "multipart");
     }
 
     /**
