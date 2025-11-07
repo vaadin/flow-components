@@ -63,7 +63,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-beta4")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
