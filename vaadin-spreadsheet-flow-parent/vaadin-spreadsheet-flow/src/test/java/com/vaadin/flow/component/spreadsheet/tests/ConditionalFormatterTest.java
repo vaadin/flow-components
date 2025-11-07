@@ -17,9 +17,10 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.SheetImageWrapper;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.impl.JreJsonObject;
-import elemental.json.impl.JsonUtil;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tests for conditional formatting
@@ -145,14 +146,18 @@ public class ConditionalFormatterTest {
 
     private static void assertCellHasStyle(Spreadsheet sheet, Cell cell) {
 
-        var styles = (JreJsonObject) JsonUtil.parse(
-                sheet.getElement().getProperty("conditionalFormattingStyles"));
-        var cellFormattingIndex = sheet.getConditionalFormatter()
-                .getCellFormattingIndex(cell);
+        try {
+            var styles = JacksonUtils.getMapper().readTree(
+                    sheet.getElement().getProperty("conditionalFormattingStyles"));
+            var cellFormattingIndex = sheet.getConditionalFormatter()
+                    .getCellFormattingIndex(cell);
 
-        Assert.assertEquals(1, cellFormattingIndex.size());
-        var formattingIndex = cellFormattingIndex.stream().findFirst()
-                .orElse(-1).toString();
-        Assert.assertNotNull(styles.get(formattingIndex));
+            Assert.assertEquals(1, cellFormattingIndex.size());
+            var formattingIndex = cellFormattingIndex.stream().findFirst()
+                    .orElse(-1).toString();
+            Assert.assertNotNull(styles.get(formattingIndex));
+        } catch (JacksonException e) {
+            throw new RuntimeException("Failed to parse JSON", e);
+        }
     }
 }
