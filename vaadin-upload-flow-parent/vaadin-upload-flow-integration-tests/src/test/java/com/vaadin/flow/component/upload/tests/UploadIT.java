@@ -56,8 +56,11 @@ public class UploadIT extends AbstractUploadIT {
 
         String content = uploadOutput.getText();
 
+        String expectedContents = tempFile.getName() + "text/plain"
+                + getTempFileContents();
+
         Assert.assertTrue("Upload content does not contain file details",
-                content.contains(tempFile.getName() + getTempFileContents()));
+                content.contains(expectedContents));
         Assert.assertTrue("Progress update event was not fired properly",
                 content.contains("PROGRESS:" + tempFile.getName()));
     }
