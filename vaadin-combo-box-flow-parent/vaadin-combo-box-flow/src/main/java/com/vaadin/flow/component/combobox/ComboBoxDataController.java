@@ -145,6 +145,8 @@ class ComboBoxDataController<TItem>
     // provided.
     private String lastFilter;
 
+    private boolean needsForceResetOnReopen = false;
+
     private SerializableConsumer<String> filterSlot = filter -> {
         // Just ignore when setDataProvider has not been called
     };
@@ -280,8 +282,12 @@ class ComboBoxDataController<TItem>
         // results in it not sending an update. However, the client needs to
         // receive an update in order to clear the loading state from opening
         // the combo box.
-        if (lastFilter == null) {
+        if (lastFilter == null
+                || comboBox.isOpened() && needsForceResetOnReopen) {
             dataCommunicator.reset();
+            if (comboBox.isOpened()) {
+                needsForceResetOnReopen = false;
+            }
         }
         dataCommunicator.setViewportRange(start, length);
         filterSlot.accept(filter);
@@ -587,7 +593,13 @@ class ComboBoxDataController<TItem>
     private void clearFilterOnClose(PropertyChangeEvent event) {
         if (Boolean.FALSE.equals(event.getValue())) {
             if (lastFilter != null && !lastFilter.isEmpty()) {
+                // Clear non-empty filter and set flag to force reset on reopen,
+                // protecting against late client requests that would update
+                // lastFilter and prevent normal reset.
                 clearClientSideFilterAndUpdateInMemoryFilter();
+                needsForceResetOnReopen = true;
+            } else {
+                needsForceResetOnReopen = false;
             }
         }
     }
