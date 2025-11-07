@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.Upload.UploadFormat;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 
@@ -49,39 +48,5 @@ public class UploadTest {
 
         upload.setReceiver(new MemoryBuffer());
         Assert.assertEquals(1, upload.getElement().getProperty("maxFiles", 0));
-    }
-
-    @Test
-    public void uploadFormatDefaultsToRaw() {
-        Upload upload = new Upload();
-        Assert.assertEquals("Upload format should default to RAW",
-                UploadFormat.RAW, upload.getUploadFormat());
-    }
-
-    @Test
-    public void setUploadFormatToMultipart() {
-        Upload upload = new Upload();
-        upload.setUploadFormat(UploadFormat.MULTIPART);
-        Assert.assertEquals("Upload format should be MULTIPART",
-                UploadFormat.MULTIPART, upload.getUploadFormat());
-        Assert.assertEquals("multipart",
-                upload.getElement().getProperty("uploadFormat"));
-    }
-
-    @Test
-    public void setUploadFormatToRaw() {
-        Upload upload = new Upload();
-        upload.setUploadFormat(UploadFormat.MULTIPART);
-        upload.setUploadFormat(UploadFormat.RAW);
-        Assert.assertEquals("Upload format should be RAW", UploadFormat.RAW,
-                upload.getUploadFormat());
-        Assert.assertEquals("raw",
-                upload.getElement().getProperty("uploadFormat"));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setUploadFormatToNull_throwsException() {
-        Upload upload = new Upload();
-        upload.setUploadFormat(null);
     }
 }

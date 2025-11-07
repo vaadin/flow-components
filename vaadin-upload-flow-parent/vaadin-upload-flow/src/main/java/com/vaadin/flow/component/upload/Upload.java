@@ -78,55 +78,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         }
     }
 
-    /**
-     * Defines the upload transmission format for files.
-     */
-    public enum UploadFormat {
-        /**
-         * Send files as raw binary data with Content-Type header set to the
-         * file's MIME type. This is the default format, which uses
-         * XMLHttpRequest (XHR) for file transmission.
-         */
-        RAW("raw"),
-
-        /**
-         * Send files as multipart form data with Content-Disposition header.
-         * This is the traditional format used for HTML form submissions.
-         */
-        MULTIPART("multipart");
-
-        private final String clientValue;
-
-        UploadFormat(String clientValue) {
-            this.clientValue = clientValue;
-        }
-
-        /**
-         * Get the client-side value for this upload format.
-         *
-         * @return the string value used by the web component
-         */
-        public String getClientValue() {
-            return clientValue;
-        }
-
-        /**
-         * Parse an UploadFormat from its client-side string value.
-         *
-         * @param clientValue
-         *            the string value from the web component
-         * @return the corresponding UploadFormat, or RAW if not recognized
-         */
-        public static UploadFormat fromClientValue(String clientValue) {
-            for (UploadFormat format : values()) {
-                if (format.clientValue.equals(clientValue)) {
-                    return format;
-                }
-            }
-            return RAW;
-        }
-    }
-
     private StreamVariable streamVariable;
     private volatile boolean interrupted = false;
 
@@ -417,36 +368,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             return Collections.emptyList();
         }
         return List.of(accepted.split(","));
-    }
-
-    /**
-     * Set the upload transmission format for files.
-     * <p>
-     * {@link UploadFormat#RAW} sends files as raw binary data with the
-     * Content-Type header set to the file's MIME type. This is the default
-     * format.
-     * <p>
-     * {@link UploadFormat#MULTIPART} sends files as multipart form data with
-     * Content-Disposition header. This is the traditional format used for HTML
-     * form submissions.
-     *
-     * @param uploadFormat
-     *            the upload format to use, not {@code null}
-     */
-    public void setUploadFormat(UploadFormat uploadFormat) {
-        Objects.requireNonNull(uploadFormat, "Upload format cannot be null");
-        getElement().setProperty("uploadFormat", uploadFormat.getClientValue());
-    }
-
-    /**
-     * Get the upload transmission format for files.
-     *
-     * @return the upload format, defaults to {@link UploadFormat#RAW}
-     */
-    public UploadFormat getUploadFormat() {
-        String clientValue = getElement().getProperty("uploadFormat",
-                UploadFormat.RAW.getClientValue());
-        return UploadFormat.fromClientValue(clientValue);
     }
 
     /**
