@@ -29,7 +29,7 @@ import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 public class NativeButtonRendererTest {
@@ -83,7 +83,7 @@ public class NativeButtonRendererTest {
             var clientCallablesField = LitRenderer.class
                     .getDeclaredField("clientCallables");
             clientCallablesField.setAccessible(true);
-            var clientCallables = (Map<String, SerializableBiConsumer<String, JsonObject>>) clientCallablesField
+            var clientCallables = (Map<String, SerializableBiConsumer<String, ArrayNode>>) clientCallablesField
                     .get(renderer);
             clientCallables.values()
                     .forEach(listener -> listener.accept("foo", null));

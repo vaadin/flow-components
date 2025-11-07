@@ -30,8 +30,6 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.JsonObject;
-
 @Ignore
 public class AbstractComboBoxIT extends AbstractComponentIT {
 
@@ -65,12 +63,11 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     // Gets all the loaded json items, but they are not necessarily rendered
-    protected List<JsonObject> getLoadedItems(ComboBoxElement comboBox) {
-        List<JsonObject> list = (List<JsonObject>) executeScript(
+    protected List<?> getLoadedItems(ComboBoxElement comboBox) {
+        return (List<?>) executeScript(
                 "return arguments[0].filteredItems.filter("
                         + "item => !(item instanceof window.Vaadin.ComboBoxPlaceholder));",
                 comboBox);
-        return list;
     }
 
     protected void assertRendered(ComboBoxElement comboBox, String innerHTML) {

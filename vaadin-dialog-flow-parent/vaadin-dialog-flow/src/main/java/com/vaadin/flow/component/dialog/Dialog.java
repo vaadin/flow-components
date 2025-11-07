@@ -1230,7 +1230,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         this.getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
 
-        String appId = UI.getCurrent().getInternals().getAppId();
+        String appId = UI.getCurrentOrThrow().getInternals().getAppId();
 
         getElement().executeJs(
                 "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",

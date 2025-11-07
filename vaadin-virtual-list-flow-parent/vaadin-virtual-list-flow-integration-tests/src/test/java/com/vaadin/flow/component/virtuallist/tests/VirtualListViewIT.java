@@ -32,9 +32,8 @@ import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Core feature tests are covered at the {@code com.vaadin.ui.virtuallist.it}
@@ -103,13 +102,13 @@ public class VirtualListViewIT extends AbstractComponentIT {
         // Check that an item wasn't removed
         Assert.assertTrue(removalInfo.getText().trim().isEmpty());
 
-        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
-        List<JsonValue> loadedItems = getLoadedItems(list);
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
+        List<JsonNode> loadedItems = getLoadedItems(list);
         int loadedItemsSize = loadedItems.size();
 
         Assert.assertNotEquals("Items should be lazy loaded into the list. "
                 + "But loaded items size is the same as the whole size of the list",
-                items.length(), loadedItemsSize);
+                items.size(), loadedItemsSize);
 
         getCommandExecutor().executeScript(
                 "arguments[0].scrollToIndex(arguments[1]); return null;", list,
@@ -185,19 +184,19 @@ public class VirtualListViewIT extends AbstractComponentIT {
     }
 
     private void validateListSize(WebElement list, int expectedSize) {
-        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
         Assert.assertEquals(
                 "There should be " + expectedSize + " items in the '"
                         + list.getDomAttribute("id") + "' virtual-list",
-                expectedSize, items.length());
+                expectedSize, items.size());
     }
 
-    private List<JsonValue> getLoadedItems(WebElement list) {
-        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
-        List<JsonValue> result = new ArrayList<>();
-        for (int i = 0; i < items.length(); i++) {
-            JsonValue value = items.get(i);
-            if (!value.getType().equals(JsonType.NULL)) {
+    private List<JsonNode> getLoadedItems(WebElement list) {
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
+        List<JsonNode> result = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            JsonNode value = items.get(i);
+            if (!value.isNull()) {
                 result.add(value);
             }
         }
