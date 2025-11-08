@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -52,7 +53,7 @@ public class CellValueChangeEventOnFormulaChangeTest {
      */
     @Test
     public void formulaChangeResultingInSameValue() {
-        AtomicReference<CellSet> changedCells = new AtomicReference<>();
+        AtomicReference<Set<CellReference>> changedCells = new AtomicReference<>();
 
         spreadsheet.addCellValueChangeListener(
                 event -> changedCells.set(event.getChangedCells()));
@@ -70,15 +71,18 @@ public class CellValueChangeEventOnFormulaChangeTest {
                 changedCells.get().contains(new CellReference("Sheet1!C1")));
         assertTrue("The changed cells should include C1 without sheet name",
                 changedCells.get().contains(new CellReference("C1")));
+
+        // CellSet-specific methods
+        var cellSet = (CellSet) changedCells.get();
         assertTrue(
                 "The changed cells should include a cell with correct indexes without a sheet name",
-                changedCells.get().contains(0, 2));
+                cellSet.contains(0, 2));
         assertTrue(
                 "The changed cells should include a cell with correct indexes and sheet name",
-                changedCells.get().contains(0, 2, "Sheet0"));
+                cellSet.contains(0, 2, "Sheet0"));
         assertFalse(
                 "The changed cells should not include a cell with correct indexes and a wrong sheet name",
-                changedCells.get().contains(0, 2, "Sheet1"));
+                cellSet.contains(0, 2, "Sheet1"));
     }
 
 }

@@ -8,7 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,10 +17,11 @@ import org.apache.poi.ss.util.CellReference;
 /**
  * CellSet is a set of cells that also provides utilities regarding the contents
  * of the set.
+ * <p>
+ * <strong>Internal use only. May be renamed or removed in a future
+ * release.</strong>
  */
-public class CellSet {
-
-    private final Set<CellReference> cells;
+public class CellSet extends HashSet<CellReference> {
 
     /**
      * Creates a set with the specified cells
@@ -29,26 +30,7 @@ public class CellSet {
      *            cells to construct the set with, not {@code null}
      */
     public CellSet(Set<CellReference> cells) {
-        Objects.requireNonNull(cells, "Cells cannot be null");
-        this.cells = cells;
-    }
-
-    /**
-     * Gets an unmodifiable set of the cells
-     *
-     * @return an unmodifiable set of the cells
-     */
-    public Set<CellReference> getCells() {
-        return Collections.unmodifiableSet(cells);
-    }
-
-    /**
-     * Gets the number of the cells
-     *
-     * @return number of cells
-     */
-    public int size() {
-        return cells.size();
+        super(cells);
     }
 
     /**
@@ -56,24 +38,25 @@ public class CellSet {
      * names of the cells in set into account if the sheet name of the cell
      * reference is {@code null}.
      *
-     * @param cellReference
+     * @param object
      *            cell to be checked whether it exists in the set
      * @return {@code true} if set contains the specified cell, {@code false}
      *         otherwise
      */
-    public boolean contains(CellReference cellReference) {
-        if (cells.isEmpty()) {
+    @Override
+    public boolean contains(Object object) {
+        if (isEmpty() || object == null) {
             return false;
         }
-        if (cellReference.getSheetName() == null) {
+        if (object instanceof CellReference cellReference
+                && cellReference.getSheetName() == null) {
             CellReference cellWithSheetName = new CellReference(
-                    cells.iterator().next().getSheetName(),
-                    cellReference.getRow(), cellReference.getCol(),
-                    cellReference.isRowAbsolute(),
+                    iterator().next().getSheetName(), cellReference.getRow(),
+                    cellReference.getCol(), cellReference.isRowAbsolute(),
                     cellReference.isColAbsolute());
-            return cells.contains(cellWithSheetName);
+            return super.contains(cellWithSheetName);
         }
-        return cells.contains(cellReference);
+        return super.contains(object);
     }
 
     /**
@@ -106,9 +89,5 @@ public class CellSet {
     public boolean contains(int row, int col, String sheetName) {
         Objects.requireNonNull(sheetName, "The sheet name cannot be null");
         return contains(new CellReference(sheetName, row, col, false, false));
-    }
-
-    public int getCellCount() {
-        return cells.size();
     }
 }

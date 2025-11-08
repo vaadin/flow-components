@@ -5162,7 +5162,7 @@ public class Spreadsheet extends Component
      */
     public abstract static class ValueChangeEvent
             extends ComponentEvent<Component> {
-        private final CellSet changedCells;
+        private final Set<CellReference> changedCells;
 
         public ValueChangeEvent(Component source,
                 Set<CellReference> changedCells) {
@@ -5170,7 +5170,7 @@ public class Spreadsheet extends Component
             this.changedCells = new CellSet(changedCells);
         }
 
-        public CellSet getChangedCells() {
+        public Set<CellReference> getChangedCells() {
             return changedCells;
         }
     }
@@ -5294,7 +5294,7 @@ public class Spreadsheet extends Component
          * @return A combination of all selected cells, regardless of selection
          *         mode. Doesn't contain duplicates.
          */
-        public CellSet getAllSelectedCells() {
+        public Set<CellReference> getAllSelectedCells() {
             return new CellSet(
                     Spreadsheet.getAllSelectedCells(selectedCellReference,
                             individualSelectedCells, cellRangeAddresses));
@@ -5513,7 +5513,7 @@ public class Spreadsheet extends Component
         if (event == null) {
             return new HashSet<>();
         }
-        return event.getAllSelectedCells().getCells();
+        return event.getAllSelectedCells();
     }
 
     /**
