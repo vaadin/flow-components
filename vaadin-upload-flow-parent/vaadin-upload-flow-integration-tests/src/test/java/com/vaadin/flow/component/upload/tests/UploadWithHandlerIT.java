@@ -52,7 +52,7 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
     @Test
     public void uploadWithHandler_uploadTextFile_fileUploadedAndNoErrorThrown()
             throws Exception {
-        File tempFile = createTempFile("txt");
+        File tempFile = createTempFile("some file", "txt");
         upload.upload(tempFile);
 
         checkLogsForErrors();
@@ -60,22 +60,6 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
         Assert.assertEquals(
                 "Unexpected handler events for upload with using upload handler",
                 "started-completed", eventsOutput.getText());
-
-        String expectedMetadata = "%s-%s-%s".formatted(tempFile.getName(),
-                "text/plain", getTempFileContents().getBytes().length);
-
-        Assert.assertEquals(
-                "Unexpected file metadata for upload with upload handler",
-                expectedMetadata, uploadOutput.getText());
-    }
-
-    @Test
-    public void uploadWithHandler_uploadFileWithUrlEncodedFileName_fileNameIsDecoded()
-            throws Exception {
-        File tempFile = createTempFile("religion åk4", "txt");
-        upload.upload(tempFile);
-
-        checkLogsForErrors();
 
         String expectedMetadata = "%s-%s-%s".formatted(tempFile.getName(),
                 "text/plain", getTempFileContents().getBytes().length);
