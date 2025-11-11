@@ -15,31 +15,23 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class RadioButtonGroupVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-
-        ThemeList themeNames = group.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(RadioGroupVariant.LUMO_VERTICAL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new RadioButtonGroup<>(), RadioGroupVariant.LUMO_VERTICAL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        group.removeThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-
-        ThemeList themeNames = group.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(RadioGroupVariant.LUMO_VERTICAL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new RadioButtonGroup<>(),
+                        RadioGroupVariant.LUMO_VERTICAL);
     }
 }

@@ -70,7 +70,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-beta4")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -255,7 +255,7 @@ public class AvatarGroup extends Component
 
             setImageResource(new StreamResourceRegistry.ElementStreamResource(
                     downloadHandler, getHost() != null ? getHost().getElement()
-                            : UI.getCurrent().getElement()));
+                            : UI.getCurrentOrThrow().getElement()));
         }
 
         /**

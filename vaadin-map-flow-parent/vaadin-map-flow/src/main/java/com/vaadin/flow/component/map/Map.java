@@ -71,7 +71,7 @@ import tools.jackson.databind.node.ObjectNode;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/map", version = "25.0.0-beta4")
 @NpmPackage(value = "ol", version = "10.6.1")
 @NpmPackage(value = "proj4", version = "2.17.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
@@ -111,15 +111,7 @@ public class Map extends MapBase {
      *            the user projection to use for all public facing API
      */
     public static void setUserProjection(String projection) {
-        UI ui = UI.getCurrent();
-        if (ui == null || ui.getPage() == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        UI.getCurrent().getPage().executeJs(
+        UI.getCurrentOrThrow().getPage().executeJs(
                 "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
                 projection);
     }
@@ -158,15 +150,7 @@ public class Map extends MapBase {
      */
     public static void defineProjection(String projectionName,
             String wksDefinition) {
-        UI ui = UI.getCurrent();
-        if (ui == null || ui.getPage() == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        UI.getCurrent().getPage().executeJs(
+        UI.getCurrentOrThrow().getPage().executeJs(
                 "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
                 projectionName, wksDefinition);
     }

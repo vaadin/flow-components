@@ -21,6 +21,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
 public class Background extends AbstractConfigurationObject {
     private Color backgroundColor;
     private Color borderColor;
+    private String borderRadius;
     private Number borderWidth;
     private String className;
     private String outerRadius;
@@ -57,6 +58,27 @@ public class Background extends AbstractConfigurationObject {
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
+    }
+
+    /**
+     * Returns the border radius of the background.
+     *
+     * @see #setBorderRadius(String)
+     * @return The border radius of the background.
+     */
+    public String getBorderRadius() {
+        return borderRadius;
+    }
+
+    /**
+     * The border radius of the pane background when the shape is
+     * {@link BackgroundShape#ARC}. Can be a number (pixels) or a percentage
+     * string.
+     *
+     * @param borderRadius
+     */
+    public void setBorderRadius(String borderRadius) {
+        this.borderRadius = borderRadius;
     }
 
     /**

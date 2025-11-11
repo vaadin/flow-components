@@ -21,8 +21,28 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * The set of theme variants applicable to the {@code vaadin-details} component.
  */
 public enum DetailsVariant implements ThemeVariant {
-
-    FILLED("filled"), REVERSE("reverse"), SMALL("small");
+    /**
+     * @deprecated Use {@link #LUMO_FILLED} or {@link #AURA_FILLED} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    FILLED("filled"),
+    /**
+     * @deprecated Use {@link #LUMO_REVERSE} or {@link #AURA_REVERSE} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    REVERSE("reverse"),
+    /**
+     * @deprecated Use {@link #LUMO_SMALL} or {@link #AURA_SMALL} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    SMALL("small"),
+    LUMO_FILLED("filled"),
+    AURA_FILLED("filled"),
+    LUMO_REVERSE("reverse"),
+    AURA_REVERSE("reverse"),
+    LUMO_SMALL("small"),
+    AURA_SMALL("small"),
+    AURA_NO_PADDING("no-padding");
 
     private final String variant;
 

@@ -24,8 +24,6 @@ import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.JsonType;
-
 @TestPath("vaadin-virtual-list/inert")
 public class InertVirtualListIT extends AbstractComponentIT {
 
@@ -42,9 +40,9 @@ public class InertVirtualListIT extends AbstractComponentIT {
     @Test
     public void inertVirtualList_itemsAreRendered() {
         var items = VirtualListHelpers.getItems(getDriver(), virtualList);
-        Assert.assertTrue(items.length() > 0);
-        for (var i = 0; i < items.length(); i++) {
-            Assert.assertNotEquals(JsonType.NULL, items.get(i).getType());
+        Assert.assertFalse(items.isEmpty());
+        for (var i = 0; i < items.size(); i++) {
+            Assert.assertFalse(items.get(i).isNull());
         }
     }
 }

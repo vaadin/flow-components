@@ -29,11 +29,11 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.JsonArray;
-import elemental.json.impl.JsonUtil;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 public class DialogChildrenTest {
 
@@ -207,11 +207,11 @@ public class DialogChildrenTest {
                 .collect(Collectors.toList());
 
         // Get the virtualChildNodeIds property from the dialog as a JsonArray
-        var jsonArrayOfIds = (JsonArray) JsonUtil
-                .parse(dialog.getElement().getProperty("virtualChildNodeIds"));
+        var jsonArrayOfIds = (ArrayNode) JacksonUtils.getMapper().readTree(
+                dialog.getElement().getProperty("virtualChildNodeIds"));
 
-        var virtualChildNodeIds = JsonUtils.numberStream(jsonArrayOfIds)
-                .mapToInt(i -> (int) i).boxed().collect(Collectors.toList());
+        var virtualChildNodeIds = JacksonUtils.stream(jsonArrayOfIds)
+                .mapToInt(JsonNode::asInt).boxed().collect(Collectors.toList());
 
         Assert.assertEquals(childIds, virtualChildNodeIds);
     }

@@ -22,10 +22,10 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 @Route("vaadin-grid/grid-client-item-toggle-event")
 public class GridClientItemToggleEventPage extends Div {
@@ -40,7 +40,7 @@ public class GridClientItemToggleEventPage extends Div {
 
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .addClientItemToggleListener(event -> {
-                    JsonObject record = Json.createObject();
+                    ObjectNode record = JacksonUtils.createObjectNode();
                     record.put("isFromClient", event.isFromClient());
                     record.put("item", event.getItem());
                     record.put("isSelected", event.isSelected());

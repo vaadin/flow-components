@@ -142,15 +142,7 @@ public class OverlayAutoAddController<C extends Component>
     }
 
     private UI getUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
+        return UI.getCurrentOrThrow();
     }
 
     private boolean isOpened() {
