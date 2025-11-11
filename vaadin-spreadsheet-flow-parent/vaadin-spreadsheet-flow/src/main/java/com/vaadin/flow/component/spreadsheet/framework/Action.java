@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.framework;
 import java.io.Serializable;
 
 import com.vaadin.flow.component.ShortcutEventListener;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.shared.Registration;
 
@@ -22,6 +23,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  * @since 3.0
  */
+@Uses(Icon.class)
 @SuppressWarnings("serial")
 public class Action implements Serializable {
 
@@ -37,6 +39,9 @@ public class Action implements Serializable {
 
     /**
      * Constructs a new action with the given caption.
+     * <p>
+     * Note: HTML content allowed. If this user input, make sure it is properly
+     * sanitized to prevent XSS vulnerabilities.
      *
      * @param caption
      *            the caption for the new action.
@@ -47,6 +52,9 @@ public class Action implements Serializable {
 
     /**
      * Constructs a new action with the given caption string and icon.
+     * <p>
+     * Note: HTML content allowed. If this user input, make sure it is properly
+     * sanitized to prevent XSS vulnerabilities.
      *
      * @param caption
      *            the caption for the new action.
@@ -54,7 +62,9 @@ public class Action implements Serializable {
      *            the icon for the new action.
      */
     public Action(String caption, Icon icon) {
-        this.caption = caption;
+        this.caption = String.format(
+                "<vaadin-icon icon=\"%s\"></vaadin-icon> %s",
+                icon.getIcon(), caption);
         this.icon = icon;
     }
 
