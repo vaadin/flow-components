@@ -11,7 +11,6 @@ package com.vaadin.flow.component.spreadsheet.framework;
 import java.io.Serializable;
 
 import com.vaadin.flow.component.ShortcutEventListener;
-import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.shared.Registration;
 
@@ -23,7 +22,6 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  * @since 3.0
  */
-@Uses(Icon.class)
 @SuppressWarnings("serial")
 public class Action implements Serializable {
 
