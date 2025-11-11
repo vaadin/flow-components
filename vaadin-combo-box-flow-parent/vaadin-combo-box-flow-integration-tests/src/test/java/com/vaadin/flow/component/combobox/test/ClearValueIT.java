@@ -179,8 +179,8 @@ public class ClearValueIT extends AbstractComponentIT {
                 comboBox.getSelectedText());
         Assert.assertEquals(String.format(
                 "Unexpected 'allowCustomValue' property name for combo box with id '%s'",
-                comboBoxId), Boolean.toString(allowCustomValue),
-                comboBox.getPropertyString("allowCustomValue"));
+                comboBoxId), allowCustomValue,
+                comboBox.getPropertyBoolean("allowCustomValue"));
 
         findElement(By.id(buttonId)).click();
 
