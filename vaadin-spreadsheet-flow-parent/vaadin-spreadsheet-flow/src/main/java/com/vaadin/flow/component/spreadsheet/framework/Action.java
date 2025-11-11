@@ -61,8 +61,8 @@ public class Action implements Serializable {
      */
     public Action(String caption, Icon icon) {
         this.caption = String.format(
-                "<vaadin-icon icon=\"%s\"></vaadin-icon> %s",
-                icon.getIcon(), caption);
+                "<vaadin-icon icon=\"%s\"></vaadin-icon> %s", icon.getIcon(),
+                caption);
         this.icon = icon;
     }
 
