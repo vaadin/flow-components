@@ -51,6 +51,7 @@ public class UploadView extends Div {
         upload.addSucceededListener(event -> {
             try {
                 output.add(event.getFileName());
+                output.add(event.getMIMEType());
                 output.add(IOUtils.toString(
                         buffer.getInputStream(event.getFileName()), "UTF-8"));
             } catch (IOException e) {

@@ -38,9 +38,12 @@ public class UploadWithHandlerView extends Div {
         Div handlerEventsOutput = new Div();
 
         InMemoryUploadHandler handler = UploadHandler
-                .inMemory((metaData, bytes) -> UI.getCurrent().access(
-                        () -> output.setText(String.valueOf(bytes.length))))
-                .whenStart(() -> handlerEventsOutput.add("started"))
+                .inMemory((metaData, bytes) -> UI.getCurrent().access(() -> {
+                    String metaInfo = "%s-%s-%s".formatted(metaData.fileName(),
+                            metaData.contentType(),
+                            String.valueOf(bytes.length));
+                    output.setText(metaInfo);
+                })).whenStart(() -> handlerEventsOutput.add("started"))
                 .onProgress((transferred, total) -> handlerEventsOutput
                         .add("-progress"))
                 .whenComplete(success -> {
