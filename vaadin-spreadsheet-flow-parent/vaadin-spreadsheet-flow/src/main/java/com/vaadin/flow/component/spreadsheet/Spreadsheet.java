@@ -5158,7 +5158,7 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * This is a parent class for a value change events.
+     * This is a parent class for value change events.
      */
     public abstract static class ValueChangeEvent
             extends ComponentEvent<Component> {
@@ -5170,6 +5170,16 @@ public class Spreadsheet extends Component
             this.changedCells = new CellSet(changedCells);
         }
 
+        /**
+         * Gets the changed cells.
+         * <p>
+         * When using {@link Set#contains(Object)}, you should only use
+         * {@link CellReference}s with sheet names. Otherwise, it will throw an
+         * {@link IllegalArgumentException}.
+         *
+         * @return the changed cells
+         * @see CellSet
+         */
         public Set<CellReference> getChangedCells() {
             return changedCells;
         }
@@ -5290,9 +5300,14 @@ public class Spreadsheet extends Component
 
         /**
          * Gets a combination of all selected cells.
+         * <p>
+         * When using {@link Set#contains(Object)}, you should only use
+         * {@link CellReference}s with sheet names. Otherwise, it will throw an
+         * {@link IllegalArgumentException}.
          *
          * @return A combination of all selected cells, regardless of selection
          *         mode. Doesn't contain duplicates.
+         * @see CellSet
          */
         public Set<CellReference> getAllSelectedCells() {
             return new CellSet(

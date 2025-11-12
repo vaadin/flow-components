@@ -9,7 +9,7 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
@@ -23,7 +23,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.spreadsheet.CellSet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
@@ -66,23 +65,10 @@ public class CellValueChangeEventOnFormulaChangeTest {
                 changedCells.get().size());
         assertTrue("The changed cells should include C1 with sheet name",
                 changedCells.get().contains(new CellReference("Sheet0!C1")));
-        assertFalse(
-                "The changed cells should not include C1 with a wrong sheet name",
-                changedCells.get().contains(new CellReference("Sheet1!C1")));
-        assertTrue("The changed cells should include C1 without sheet name",
-                changedCells.get().contains(new CellReference("C1")));
-
-        // CellSet-specific methods
-        var cellSet = (CellSet) changedCells.get();
-        assertTrue(
-                "The changed cells should include a cell with correct indexes without a sheet name",
-                cellSet.contains(0, 2));
-        assertTrue(
-                "The changed cells should include a cell with correct indexes and sheet name",
-                cellSet.contains(0, 2, "Sheet0"));
-        assertFalse(
-                "The changed cells should not include a cell with correct indexes and a wrong sheet name",
-                cellSet.contains(0, 2, "Sheet1"));
+        assertThrows(
+                "Calling contains on changedCells using a CellReference without a sheet name should result in an exception",
+                IllegalArgumentException.class,
+                () -> changedCells.get().contains(new CellReference("C1")));
     }
 
 }

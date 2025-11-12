@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import org.apache.poi.ss.util.CellReference;
@@ -34,60 +33,22 @@ public class CellSet extends HashSet<CellReference> {
     }
 
     /**
-     * Whether the set contains the specified cell. Does not take the sheet
-     * names of the cells in set into account if the sheet name of the cell
-     * reference is {@code null}.
+     * Whether the set contains the specified cell.
      *
      * @param object
      *            cell to be checked whether it exists in the set
      * @return {@code true} if set contains the specified cell, {@code false}
      *         otherwise
+     * @throws IllegalArgumentException
+     *             the sheet name for the {@link CellReference} is {@code null}
      */
     @Override
     public boolean contains(Object object) {
-        if (isEmpty() || object == null) {
-            return false;
-        }
         if (object instanceof CellReference cellReference
                 && cellReference.getSheetName() == null) {
-            CellReference cellWithSheetName = new CellReference(
-                    iterator().next().getSheetName(), cellReference.getRow(),
-                    cellReference.getCol(), cellReference.isRowAbsolute(),
-                    cellReference.isColAbsolute());
-            return super.contains(cellWithSheetName);
+            throw new IllegalArgumentException(
+                    "Sheet name in CellReference cannot be null.");
         }
         return super.contains(object);
-    }
-
-    /**
-     * Whether the set contains the specified cell. Does not take the sheet
-     * names of the cells in set into account.
-     *
-     * @param row
-     *            row index of the cell, 0-based
-     * @param col
-     *            col index of the cell, 0-based
-     * @return {@code true} if set contains the specified cell, {@code false}
-     *         otherwise
-     */
-    public boolean contains(int row, int col) {
-        return contains(new CellReference(row, col));
-    }
-
-    /**
-     * Whether the set contains the specified cell
-     *
-     * @param row
-     *            row index of the cell, 0-based
-     * @param col
-     *            col index of the cell, 0-based
-     * @param sheetName
-     *            sheet name of the cell, not {@code null}
-     * @return {@code true} if set contains the specified cell, {@code false}
-     *         otherwise
-     */
-    public boolean contains(int row, int col, String sheetName) {
-        Objects.requireNonNull(sheetName, "The sheet name cannot be null");
-        return contains(new CellReference(sheetName, row, col, false, false));
     }
 }
