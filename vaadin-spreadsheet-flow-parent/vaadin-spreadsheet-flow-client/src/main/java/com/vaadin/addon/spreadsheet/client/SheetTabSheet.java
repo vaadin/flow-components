@@ -506,8 +506,7 @@ public class SheetTabSheet extends Widget {
             scrollLeft.setAttribute("part",
                     "scroll-tab-disabled scroll-tab-left");
             scrollBeginning.addClassName(HIDDEN);
-            scrollBeginning.setAttribute("part",
-                    "scroll-tab-disabled scroll-tab-start");
+            scrollBeginning.setAttribute("part", "scroll-tab-disabled scroll-tab-start");
         } else {
             scrollLeft.removeClassName(HIDDEN);
             scrollLeft.setAttribute("part", "scroll-tab scroll-tab-left");
