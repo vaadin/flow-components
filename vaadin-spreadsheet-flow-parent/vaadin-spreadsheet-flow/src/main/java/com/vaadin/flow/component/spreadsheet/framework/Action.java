@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet.framework;
 
 import java.io.Serializable;
 
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
+
 import com.vaadin.flow.component.ShortcutEventListener;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.shared.Registration;
@@ -38,21 +41,21 @@ public class Action implements Serializable {
     /**
      * Constructs a new action with the given caption.
      * <p>
-     * Note: HTML content allowed. If this user input, make sure it is properly
-     * sanitized to prevent XSS vulnerabilities.
+     * Note: HTML content allowed in caption. Will be sanitized.
      *
      * @param caption
      *            the caption for the new action.
      */
     public Action(String caption) {
+        caption = caption == null ? ""
+                : Jsoup.clean(caption, Safelist.relaxed());
         this.caption = caption;
     }
 
     /**
      * Constructs a new action with the given caption string and icon.
      * <p>
-     * Note: HTML content allowed. If this user input, make sure it is properly
-     * sanitized to prevent XSS vulnerabilities.
+     * Note: HTML content allowed in caption. Will be sanitized.
      *
      * @param caption
      *            the caption for the new action.
@@ -60,6 +63,8 @@ public class Action implements Serializable {
      *            the icon for the new action.
      */
     public Action(String caption, Icon icon) {
+        caption = caption == null ? ""
+                : Jsoup.clean(caption, Safelist.relaxed());
         this.caption = String.format(
                 "<vaadin-icon icon=\"%s\"></vaadin-icon> %s", icon.getIcon(),
                 caption);
