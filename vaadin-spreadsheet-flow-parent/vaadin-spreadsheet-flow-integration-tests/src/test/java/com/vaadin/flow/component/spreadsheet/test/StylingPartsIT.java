@@ -55,8 +55,9 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
                 .withClassName("sheet-tabsheet-tab").first();
         assertPartContains(tab, "tabsheet-tab");
 
-        var scrollTabButtons = Map.of("scroll-tabs-start", "scroll-tab-start",
-                "scroll-tabs-left", "scroll-tab-left", "scroll-tabs-right",
+        var scrollTabButtons = Map.of("scroll-tabs-beginning",
+                "scroll-tab-start", "scroll-tabs-left", "scroll-tab-left",
+            "scroll-tabs-right",
                 "scroll-tab-right", "scroll-tabs-end", "scroll-tab-end",
                 "add-new-tab", "add-new-tab");
 
@@ -165,7 +166,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         var scrollTabBeginning = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-beginning").first();
         assertPartEquals(scrollTabBeginning, "scroll-tab-disabled",
-                "scroll-tab-beginning");
+                "scroll-tab-start");
 
         var scrollTabLeft = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-left").first();
@@ -184,7 +185,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         scrollTabEnd.click();
 
         assertPartEquals(scrollTabBeginning, "scroll-tab",
-                "scroll-tab-beginning");
+            "scroll-tab-start");
         assertPartEquals(scrollTabLeft, "scroll-tab", "scroll-tab-left");
         assertPartEquals(scrollTabRight, "scroll-tab-disabled",
                 "scroll-tab-right");
