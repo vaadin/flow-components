@@ -9,9 +9,11 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -50,18 +52,23 @@ public class CellValueChangeEventOnFormulaChangeTest {
      */
     @Test
     public void formulaChangeResultingInSameValue() {
-        List<CellReference> changedCells = new LinkedList<>();
+        AtomicReference<Set<CellReference>> changedCells = new AtomicReference<>();
 
         spreadsheet.addCellValueChangeListener(
-                event -> changedCells.addAll(event.getChangedCells()));
+                event -> changedCells.set(event.getChangedCells()));
 
         spreadsheet.setSelection("C1");
         // B1 is 0, so the result doesn't change
         spreadsheet.getCellValueManager().onCellValueChange(3, 1, "=A1+2*B1");
 
-        assertEquals("There should be 1 changed cell", 1, changedCells.size());
-        assertEquals("The changed cell should be C1",
-                new CellReference("Sheet0!C1"), changedCells.get(0));
+        assertEquals("There should be one changed cell", 1,
+                changedCells.get().size());
+        assertTrue("The changed cells should include C1 with sheet name",
+                changedCells.get().contains(new CellReference("Sheet0!C1")));
+        assertThrows(
+                "Calling contains on changedCells using a CellReference without a sheet name should result in an exception",
+                IllegalArgumentException.class,
+                () -> changedCells.get().contains(new CellReference("C1")));
     }
 
 }
