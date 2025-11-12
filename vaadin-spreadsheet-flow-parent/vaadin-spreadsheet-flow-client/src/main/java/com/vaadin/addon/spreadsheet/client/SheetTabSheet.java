@@ -94,7 +94,7 @@ public class SheetTabSheet extends Widget {
 
     private void initDOM() {
         scrollBeginning.setClassName("scroll-tabs-beginning");
-        scrollBeginning.setAttribute("part", "scroll-tab scroll-tab-beginning");
+        scrollBeginning.setAttribute("part", "scroll-tab scroll-tab-start");
         scrollEnd.setClassName("scroll-tabs-end");
         scrollEnd.setAttribute("part", "scroll-tab scroll-tab-end");
         scrollLeft.setClassName("scroll-tabs-left");
@@ -507,13 +507,13 @@ public class SheetTabSheet extends Widget {
                     "scroll-tab-disabled scroll-tab-left");
             scrollBeginning.addClassName(HIDDEN);
             scrollBeginning.setAttribute("part",
-                    "scroll-tab-disabled scroll-tab-beginning");
+                    "scroll-tab-disabled scroll-tab-start");
         } else {
             scrollLeft.removeClassName(HIDDEN);
             scrollLeft.setAttribute("part", "scroll-tab scroll-tab-left");
             scrollBeginning.removeClassName(HIDDEN);
             scrollBeginning.setAttribute("part",
-                    "scroll-tab scroll-tab-beginning");
+                    "scroll-tab scroll-tab-start");
         }
         int lastTabVisibleWithScrollIndex = getLastTabVisibleWithScrollIndex();
         if (tabScrollIndex < lastTabVisibleWithScrollIndex) {
