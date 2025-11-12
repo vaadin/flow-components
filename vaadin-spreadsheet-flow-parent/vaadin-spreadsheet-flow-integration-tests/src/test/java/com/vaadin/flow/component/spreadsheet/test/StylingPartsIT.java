@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
@@ -36,6 +37,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
     @Test
     public void cellStyling_partAttributeExists() {
         var spreadsheet = getSpreadsheet();
+
         var cell = spreadsheet.getCellAt("B2");
         assertPartEquals(cell, "cell");
 
@@ -57,9 +59,8 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
 
         var scrollTabButtons = Map.of("scroll-tabs-beginning",
                 "scroll-tab-start", "scroll-tabs-left", "scroll-tab-left",
-            "scroll-tabs-right",
-                "scroll-tab-right", "scroll-tabs-end", "scroll-tab-end",
-                "add-new-tab", "add-new-tab");
+                "scroll-tabs-right", "scroll-tab-right", "scroll-tabs-end",
+                "scroll-tab-end", "add-new-tab", "add-new-tab");
 
         for (var entry : scrollTabButtons.entrySet()) {
             var button = spreadsheet.$(TestBenchElement.class)
@@ -70,6 +71,9 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         var selectionCorner = spreadsheet.$(TestBenchElement.class)
                 .withClassName("s-corner").first();
         assertPartEquals(selectionCorner, "selection-corner");
+
+        var cellInput = getInlineEditor("A1");
+        assertPartEquals(cellInput, "cell-input");
     }
 
     @Test
@@ -184,8 +188,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         // Click to scroll tabs and verify state changes
         scrollTabEnd.click();
 
-        assertPartEquals(scrollTabBeginning, "scroll-tab",
-            "scroll-tab-start");
+        assertPartEquals(scrollTabBeginning, "scroll-tab", "scroll-tab-start");
         assertPartEquals(scrollTabLeft, "scroll-tab", "scroll-tab-left");
         assertPartEquals(scrollTabRight, "scroll-tab-disabled",
                 "scroll-tab-right");
@@ -219,8 +222,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
      * Helper method to check if an element's part attribute exactly matches the
      * expected parts, regardless of order.
      */
-    private void assertPartEquals(TestBenchElement element,
-            String... expectedParts) {
+    private void assertPartEquals(WebElement element, String... expectedParts) {
         String partAttribute = element.getAttribute("part");
         Assert.assertNotNull("Part attribute should not be null",
                 partAttribute);
@@ -238,7 +240,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
     /**
      * Helper method to assert that a part does not contain certain parts.
      */
-    private void assertPartDoesNotContain(TestBenchElement element,
+    private void assertPartDoesNotContain(WebElement element,
             String... unwantedParts) {
         String partAttribute = element.getAttribute("part");
         if (partAttribute == null) {
