@@ -40,13 +40,15 @@ public class SubDialogIT extends AbstractComponentIT {
         // Scroll the scroller inside the dialog
         var scroller = ((TestBenchElement) findElement(By.id("scroller")));
         scroller.scroll(100);
-        Assert.assertEquals("100", scroller.getPropertyString("scrollTop"));
+        Assert.assertEquals(100,
+                (int) scroller.getPropertyInteger("scrollTop"));
 
         // Open the sub dialog
         clickElementWithJs("open-sub-dialog");
 
         // Expect the scroller scroll position to not have changed
-        Assert.assertEquals("100", scroller.getPropertyString("scrollTop"));
+        Assert.assertEquals(100,
+                (int) scroller.getPropertyInteger("scrollTop"));
     }
 
 }
