@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -146,6 +147,8 @@ public class GridPro<E> extends Grid<E> {
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
+                ComponentUtil.setData((Component) column.getEditorField(), "gridProCustomEditorInitialValue", column.getEditorField().getValue());
+                
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
                 UI.getCurrentOrThrow().getPage().executeJs(

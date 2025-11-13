@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -163,9 +165,13 @@ public class EditColumnConfigurator<T> implements Serializable {
         // This is needed because in this case the attach listener is not called
         setEditModeRenderer(component);
 
-        return configureColumn(valueProvider, (item, ignore) -> itemUpdater
-                .accept(item, component.getValue()), EditorType.CUSTOM,
-                component);
+        return configureColumn(valueProvider, (item, ignore) -> {
+            var initialValue = ComponentUtil.getData((Component) component, "gridProCustomEditorInitialValue");
+            if (!Objects.equals(component.getValue(), initialValue)) {
+                itemUpdater.accept(item, component.getValue());
+            }
+        }, EditorType.CUSTOM,
+component);
     }
 
     private <V> void setEditModeRenderer(HasValueAndElement<?, V> component) {
