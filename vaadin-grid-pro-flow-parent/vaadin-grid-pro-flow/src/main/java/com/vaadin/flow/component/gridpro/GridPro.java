@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -147,8 +146,6 @@ public class GridPro<E> extends Grid<E> {
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
-                ComponentUtil.setData((Component) column.getEditorField(), "gridProCustomEditorInitialValue", column.getEditorField().getValue());
-                
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
                 UI.getCurrentOrThrow().getPage().executeJs(
@@ -709,17 +706,14 @@ public class GridPro<E> extends Grid<E> {
             EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
                     event.getPath());
 
-            var editorField = column.getEditorField();
-            if (editorField instanceof Component component) {
-                var initialValue = ComponentUtil.getData(component, "gridProCustomEditorInitialValue");
-
-                System.out.println("Initial value: " + initialValue + ", current value: " + editorField.getValue());
-                if (Objects.equals(editorField.getValue(), initialValue)) {
+            if (column.getEditorField() != null) {
+                // Custom editor column
+                var itemPropertyValue = column.getValueProvider().apply(event.getItem());
+                if (Objects.equals(column.getEditorField().getValue(), itemPropertyValue)) {
+                    // No actual change in value, skip notifying the listener
                     return;
                 }
-                System.out.println("Value changed, proceeding to update item.");
             }
-
 
             if (column.cellEditableProvider == null
                     || column.cellEditableProvider.test(event.getItem())) {
