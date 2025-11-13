@@ -27,6 +27,7 @@ import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapClickEvent;
 import com.vaadin.flow.component.map.events.MapClusterClickEvent;
+import com.vaadin.flow.component.map.events.MapDropEvent;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
@@ -306,5 +307,21 @@ public abstract class MapBase extends Component
     public Registration addFeatureDropListener(
             ComponentEventListener<MapFeatureDropEvent> listener) {
         return addListener(MapFeatureDropEvent.class, listener);
+    }
+
+    /**
+     * Adds an event listener for when an element from an external drag source
+     * is dropped onto the map. The event provides the geographic coordinates
+     * (latitude, longitude) where the drop occurred.
+     *
+     * @param listener
+     *            the listener to trigger
+     * @return registration for the listener
+     * @see MapDropEvent
+     * @see #addFeatureDropListener(ComponentEventListener)
+     */
+    public Registration addDropListener(
+            ComponentEventListener<MapDropEvent> listener) {
+        return addListener(MapDropEvent.class, listener);
     }
 }
