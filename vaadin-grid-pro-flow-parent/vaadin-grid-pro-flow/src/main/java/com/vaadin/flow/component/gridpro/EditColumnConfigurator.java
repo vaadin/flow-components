@@ -166,10 +166,10 @@ public class EditColumnConfigurator<T> implements Serializable {
         setEditModeRenderer(component);
 
         return configureColumn(valueProvider, (item, ignore) -> {
-            var initialValue = ComponentUtil.getData((Component) component, "gridProCustomEditorInitialValue");
-            if (!Objects.equals(component.getValue(), initialValue)) {
+            // var initialValue = ComponentUtil.getData((Component) component, "gridProCustomEditorInitialValue");
+            // if (!Objects.equals(component.getValue(), initialValue)) {
                 itemUpdater.accept(item, component.getValue());
-            }
+            // }
         }, EditorType.CUSTOM,
 component);
     }

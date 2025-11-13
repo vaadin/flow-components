@@ -709,6 +709,18 @@ public class GridPro<E> extends Grid<E> {
             EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
                     event.getPath());
 
+            var editorField = column.getEditorField();
+            if (editorField instanceof Component component) {
+                var initialValue = ComponentUtil.getData(component, "gridProCustomEditorInitialValue");
+
+                System.out.println("Initial value: " + initialValue + ", current value: " + editorField.getValue());
+                if (Objects.equals(editorField.getValue(), initialValue)) {
+                    return;
+                }
+                System.out.println("Value changed, proceeding to update item.");
+            }
+
+
             if (column.cellEditableProvider == null
                     || column.cellEditableProvider.test(event.getItem())) {
                 listener.onComponentEvent(event);
