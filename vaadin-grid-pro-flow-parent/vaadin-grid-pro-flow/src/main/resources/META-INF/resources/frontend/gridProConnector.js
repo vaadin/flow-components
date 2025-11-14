@@ -115,6 +115,9 @@ window.Vaadin.Flow.gridProConnector = {
         updatePart(target, isUpdating, 'updating-cell');
       });
     };
+
+    // Override the method to avoid applying the web component's value to the cell while it's being updated server-side.
+    grid._applyEdit = function () {};
   },
 
   clearUpdatingCell(grid) {
