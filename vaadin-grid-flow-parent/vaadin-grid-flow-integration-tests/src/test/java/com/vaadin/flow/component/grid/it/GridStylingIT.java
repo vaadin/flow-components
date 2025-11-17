@@ -40,7 +40,6 @@ public class GridStylingIT extends AbstractComponentIT {
         grid = $(GridElement.class).first();
     }
 
-
     @Test
     public void noCustomPartsOnCellsInitially() {
         assertCellPartNames( //

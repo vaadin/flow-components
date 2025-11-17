@@ -713,14 +713,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   }
 
-  grid.cellClassNameGenerator = function (column, rowData) {
-    const style = rowData.item.style;
-    if (!style) {
-      return;
-    }
-    return (style.row || '') + ' ' + ((column && style[column._flowId]) || '');
-  };
-
   grid.cellPartNameGenerator = function (column, rowData) {
     const part = rowData.item.part;
     if (!part) {
