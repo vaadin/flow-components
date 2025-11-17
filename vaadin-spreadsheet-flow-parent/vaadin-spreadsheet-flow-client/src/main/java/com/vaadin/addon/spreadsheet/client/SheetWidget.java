@@ -2772,6 +2772,7 @@ public class SheetWidget extends Panel {
                     colHeaders.add(i - firstColumnIndex, colHeader);
                 }
                 colHeader.setClassName("ch col" + (i));
+                colHeader.setAttribute("part", "column-header");
                 colHeader.setInnerHTML(
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 if (selectedColHeaderIndexes.contains(i)) {
@@ -2819,6 +2820,7 @@ public class SheetWidget extends Panel {
                     rowHeaders.add(i - firstRowIndex, rowHeader);
                 }
                 rowHeader.setClassName("rh row" + (i));
+                rowHeader.setAttribute("part", "row-header");
                 rowHeader.setInnerHTML(
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 if (selectedRowHeaderIndexes.contains(i)) {
