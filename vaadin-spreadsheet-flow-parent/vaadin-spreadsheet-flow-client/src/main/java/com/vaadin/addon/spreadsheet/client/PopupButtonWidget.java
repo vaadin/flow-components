@@ -74,7 +74,7 @@ public class PopupButtonWidget extends FocusWidget
     public PopupButtonWidget() {
         root.setClassName(BUTTON_CLASSNAME);
         root.setAttribute("role", "button");
-        root.setAttribute("part", "popup-button");
+        SheetJsniUtil.partOf(root).add("popup-button");
 
         popup = new SpreadsheetOverlay(true, false);
         popup.setStyleName(POPUP_OVERLAY_CLASSNAME);

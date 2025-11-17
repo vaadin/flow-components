@@ -125,7 +125,7 @@ public class SelectionWidget extends Composite {
             right.setClassName("s-right");
             bottom.setClassName("s-bottom");
             corner.setClassName("s-corner");
-            corner.setAttribute("part", "selection-corner");
+            SheetJsniUtil.partOf(corner).add("selection-corner");
             cornerTouchArea.setClassName("s-corner-touch");
 
             topSquare.setClassName("square");

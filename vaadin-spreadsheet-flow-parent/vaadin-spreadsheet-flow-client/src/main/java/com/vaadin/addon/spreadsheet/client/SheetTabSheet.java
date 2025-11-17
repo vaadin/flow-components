@@ -27,6 +27,9 @@ import com.vaadin.client.WidgetUtil;
 
 public class SheetTabSheet extends Widget {
 
+    private static final String SELECTED_TAB_PART = "selected-tab";
+    private static final String SCROLL_TAB_DISABLED_PART = "scroll-tab-disabled";
+    private static final String SCROLL_TAB_PART = "scroll-tab";
     private static final String HIDDEN = "hidden";
 
     public interface SheetTabSheetHandler {
@@ -43,7 +46,7 @@ public class SheetTabSheet extends Widget {
         public void onSheetTabSheetFocus();
     }
 
-    private static final String SELECTED_TAB_CLASSNAME = "selected-tab";
+    private static final String SELECTED_TAB_CLASSNAME = SELECTED_TAB_PART;
 
     private DivElement root = Document.get().createDivElement();
     // div containing the tabs
@@ -94,15 +97,22 @@ public class SheetTabSheet extends Widget {
 
     private void initDOM() {
         scrollBeginning.setClassName("scroll-tabs-beginning");
-        scrollBeginning.setAttribute("part", "scroll-tab scroll-tab-start");
+        SheetJsniUtil.partOf(scrollBeginning).add(SCROLL_TAB_PART,
+                "scroll-tab-start");
+
         scrollEnd.setClassName("scroll-tabs-end");
-        scrollEnd.setAttribute("part", "scroll-tab scroll-tab-end");
+        SheetJsniUtil.partOf(scrollEnd).add(SCROLL_TAB_PART, "scroll-tab-end");
+
         scrollLeft.setClassName("scroll-tabs-left");
-        scrollLeft.setAttribute("part", "scroll-tab scroll-tab-left");
+        SheetJsniUtil.partOf(scrollLeft).add(SCROLL_TAB_PART,
+                "scroll-tab-left");
+
         scrollRight.setClassName("scroll-tabs-right");
-        scrollRight.setAttribute("part", "scroll-tab scroll-tab-right");
+        SheetJsniUtil.partOf(scrollRight).add(SCROLL_TAB_PART,
+                "scroll-tab-right");
+
         addNewSheet.setClassName("add-new-tab");
-        addNewSheet.setAttribute("part", "add-new-tab");
+        SheetJsniUtil.partOf(addNewSheet).add("add-new-tab");
 
         options.setClassName("sheet-tabsheet-options");
         options.appendChild(scrollBeginning);
@@ -400,7 +410,7 @@ public class SheetTabSheet extends Widget {
         final Element e = Document.get().createDivElement();
         setTabName(e, tabName);
         e.setClassName("sheet-tabsheet-tab");
-        e.setAttribute("part", "tabsheet-tab");
+        SheetJsniUtil.partOf(e).add("tabsheet-tab");
         return e;
     }
 
@@ -462,12 +472,12 @@ public class SheetTabSheet extends Widget {
         if (selectedTabIndex != -1) {
             Element selectedTab = ((Element) tabs.get(selectedTabIndex).cast());
             selectedTab.removeClassName(SELECTED_TAB_CLASSNAME);
-            selectedTab.setAttribute("part", "tabsheet-tab");
+            SheetJsniUtil.partOf(selectedTab).remove(SELECTED_TAB_PART);
         }
         selectedTabIndex = sheetIndex - 1;
         Element selectedTab = ((Element) tabs.get(selectedTabIndex).cast());
         selectedTab.addClassName(SELECTED_TAB_CLASSNAME);
-        selectedTab.setAttribute("part", "tabsheet-tab selected-tab");
+        SheetJsniUtil.partOf(selectedTab).add(SELECTED_TAB_PART);
         if (tabScrollIndex > selectedTabIndex) {
             setFirstVisibleTab(selectedTabIndex);
         } else if (root.getAbsoluteRight() < selectedTab.getAbsoluteRight()
@@ -503,30 +513,36 @@ public class SheetTabSheet extends Widget {
     private void showHideScrollIcons() {
         if (tabScrollIndex == 0) {
             scrollLeft.addClassName(HIDDEN);
-            scrollLeft.setAttribute("part",
-                    "scroll-tab-disabled scroll-tab-left");
+            SheetJsniUtil.partOf(scrollLeft).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
+
             scrollBeginning.addClassName(HIDDEN);
-            scrollBeginning.setAttribute("part",
-                    "scroll-tab-disabled scroll-tab-start");
+            SheetJsniUtil.partOf(scrollBeginning).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
         } else {
             scrollLeft.removeClassName(HIDDEN);
-            scrollLeft.setAttribute("part", "scroll-tab scroll-tab-left");
+            SheetJsniUtil.partOf(scrollLeft).replace(SCROLL_TAB_DISABLED_PART,
+                    SCROLL_TAB_PART);
+
             scrollBeginning.removeClassName(HIDDEN);
-            scrollBeginning.setAttribute("part", "scroll-tab scroll-tab-start");
+            SheetJsniUtil.partOf(scrollBeginning)
+                    .replace(SCROLL_TAB_DISABLED_PART, SCROLL_TAB_PART);
         }
         int lastTabVisibleWithScrollIndex = getLastTabVisibleWithScrollIndex();
         if (tabScrollIndex < lastTabVisibleWithScrollIndex) {
             scrollRight.removeClassName(HIDDEN);
-            scrollRight.setAttribute("part", "scroll-tab scroll-tab-right");
+            SheetJsniUtil.partOf(scrollRight).replace(SCROLL_TAB_DISABLED_PART,
+                    SCROLL_TAB_PART);
             scrollEnd.removeClassName(HIDDEN);
-            scrollEnd.setAttribute("part", "scroll-tab scroll-tab-end");
+            SheetJsniUtil.partOf(scrollEnd).replace(SCROLL_TAB_DISABLED_PART,
+                    SCROLL_TAB_PART);
         } else {
             scrollRight.addClassName(HIDDEN);
-            scrollRight.setAttribute("part",
-                    "scroll-tab-disabled scroll-tab-right");
+            SheetJsniUtil.partOf(scrollRight).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
             scrollEnd.addClassName(HIDDEN);
-            scrollEnd.setAttribute("part",
-                    "scroll-tab-disabled scroll-tab-end");
+            SheetJsniUtil.partOf(scrollEnd).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
         }
     }
 

@@ -933,7 +933,7 @@ public class SheetWidget extends Panel {
         input.setWidth("0");
         input.setValue("x");
         input.getElement().setId("cellinput");
-        input.getElement().setAttribute("part", "cell-input");
+        SheetJsniUtil.partOf(input.getElement()).add("cell-input");
         DOM.appendChild(sheet, input.getElement());
         adopt(input);
 
@@ -2713,10 +2713,10 @@ public class SheetWidget extends Panel {
             for (int i = frozenColumnHeaders.size()
                     + 1; i <= horizontalSplitPosition; i++) {
                 DivElement colHeader = Document.get().createDivElement();
+                SheetJsniUtil.partOf(colHeader).add("column-header");
                 colHeader.setInnerHTML(
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 colHeader.setClassName("ch col" + (i));
-                colHeader.setAttribute("part", "column-header");
                 frozenColumnHeaders.add(colHeader);
                 topLeftPane.appendChild(colHeader);
             }
@@ -2737,7 +2737,7 @@ public class SheetWidget extends Panel {
                 rowHeader.setInnerHTML(
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 rowHeader.setClassName("rh row" + (i));
-                rowHeader.setAttribute("part", "row-header");
+                SheetJsniUtil.partOf(rowHeader).add("row-header");
                 frozenRowHeaders.add(rowHeader);
                 topLeftPane.appendChild(rowHeader);
             }
@@ -2772,13 +2772,12 @@ public class SheetWidget extends Panel {
                     colHeaders.add(i - firstColumnIndex, colHeader);
                 }
                 colHeader.setClassName("ch col" + (i));
-                colHeader.setAttribute("part", "column-header");
+                SheetJsniUtil.partOf(colHeader).add("column-header");
                 colHeader.setInnerHTML(
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 if (selectedColHeaderIndexes.contains(i)) {
                     colHeader.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                    colHeader.setAttribute("part",
-                            "column-header selected-header");
+                    SheetJsniUtil.partOf(colHeader).add("selected-header");
                 }
             } else {
                 debugConsole.severe("Trying to add plain column header (index:"
@@ -2820,13 +2819,12 @@ public class SheetWidget extends Panel {
                     rowHeaders.add(i - firstRowIndex, rowHeader);
                 }
                 rowHeader.setClassName("rh row" + (i));
-                rowHeader.setAttribute("part", "row-header");
+                SheetJsniUtil.partOf(rowHeader).add("row-header");
                 rowHeader.setInnerHTML(
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 if (selectedRowHeaderIndexes.contains(i)) {
                     rowHeader.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                    rowHeader.setAttribute("part",
-                            "row-header selected-header");
+                    SheetJsniUtil.partOf(rowHeader).add("selected-header");
                 }
             } else {
                 debugConsole.severe("Trying to add plain row header (index:" + i
@@ -3041,7 +3039,7 @@ public class SheetWidget extends Panel {
                 Cell cell = getCell(coord.getCol(), coord.getRow());
                 if (cell != null) {
                     cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                    cell.getElement().setAttribute("part", "cell cell-range");
+                    SheetJsniUtil.partOf(cell.getElement()).add("cell-range");
                     cellRangeStyledCells.add(cell);
                 }
 
@@ -3050,8 +3048,8 @@ public class SheetWidget extends Panel {
                 if (mergedCell != null) {
                     cellRangeStyledCells.add(mergedCell);
                     mergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                    mergedCell.getElement().setAttribute("part",
-                            "cell cell-range");
+                    SheetJsniUtil.partOf(mergedCell.getElement())
+                            .add("cell-range");
                 }
             }
         }
@@ -4674,8 +4672,8 @@ public class SheetWidget extends Panel {
                     if (cell != null) {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                        cell.getElement().setAttribute("part",
-                                "cell cell-range");
+                        SheetJsniUtil.partOf(cell.getElement())
+                                .add("cell-range");
                     }
 
                     Cell mergedCell = getMergedCell(toKey(c, r));
@@ -4683,8 +4681,8 @@ public class SheetWidget extends Panel {
                         cellRangeStyledCells.add(mergedCell);
                         mergedCell.getElement()
                                 .addClassName(CELL_RANGE_CLASSNAME);
-                        mergedCell.getElement().setAttribute("part",
-                                "cell cell-range");
+                        SheetJsniUtil.partOf(mergedCell.getElement())
+                                .add("cell-range");
                     }
                 }
             }
@@ -4704,14 +4702,14 @@ public class SheetWidget extends Panel {
             selectedFrozenColHeaderIndexes.add(c);
             DivElement ch = frozenColumnHeaders.get(c - 1);
             ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-            ch.setAttribute("part", "column-header selected-header");
+            SheetJsniUtil.partOf(ch).add("selected-header");
         } else {
             selectedColHeaderIndexes.add(c);
             int targetCol = c - firstColumnIndex;
             if (targetCol >= 0 && colHeaders.size() > targetCol) {
                 DivElement ch = colHeaders.get(targetCol);
                 ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                ch.setAttribute("part", "column-header selected-header");
+                SheetJsniUtil.partOf(ch).add("selected-header");
             }
         }
     }
@@ -4721,14 +4719,14 @@ public class SheetWidget extends Panel {
             selectedFrozenRowHeaderIndexes.add(r);
             DivElement rh = frozenRowHeaders.get(r - 1);
             rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-            rh.setAttribute("part", "row-header selected-header");
+            SheetJsniUtil.partOf(rh).add("selected-header");
         } else {
             selectedRowHeaderIndexes.add(r);
             int targetRow = r - firstRowIndex;
             if (targetRow >= 0 && rowHeaders.size() > targetRow) {
                 DivElement rh = rowHeaders.get(targetRow);
                 rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                rh.setAttribute("part", "row-header selected-header");
+                SheetJsniUtil.partOf(rh).add("selected-header");
             }
         }
     }
@@ -4736,22 +4734,22 @@ public class SheetWidget extends Panel {
     private void clearSelectedHeaderStyles() {
         for (DivElement rh : rowHeaders) {
             rh.removeClassName(SELECTED_ROW_HEADER_CLASSNAME);
-            rh.setAttribute("part", "row-header");
+            SheetJsniUtil.partOf(rh).remove("selected-header");
         }
         for (DivElement ch : colHeaders) {
             ch.removeClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-            ch.setAttribute("part", "column-header");
+            SheetJsniUtil.partOf(ch).remove("selected-header");
         }
         if (frozenRowHeaders != null) {
             for (DivElement rh : frozenRowHeaders) {
                 rh.removeClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                rh.setAttribute("part", "row-header");
+                SheetJsniUtil.partOf(rh).remove("selected-header");
             }
         }
         if (frozenColumnHeaders != null) {
             for (DivElement ch : frozenColumnHeaders) {
                 ch.removeClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                ch.setAttribute("part", "column-header");
+                SheetJsniUtil.partOf(ch).remove("selected-header");
             }
         }
         selectedRowHeaderIndexes.clear();
@@ -4763,7 +4761,7 @@ public class SheetWidget extends Panel {
     private void clearCellRangeStylesFromCells() {
         for (Cell cell : cellRangeStyledCells) {
             cell.getElement().removeClassName(CELL_RANGE_CLASSNAME);
-            cell.getElement().setAttribute("part", "cell");
+            SheetJsniUtil.partOf(cell.getElement()).remove("cell-range");
         }
         cellRangeStyledCells.clear();
         cellRangeStyledCoords.clear();
@@ -4864,14 +4862,14 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
-                oldSelectionCell.getElement().setAttribute("part",
-                        "cell cell-range");
+                SheetJsniUtil.partOf(oldSelectionCell.getElement())
+                        .add("cell-range");
             }
             if (oldMergedCell != null) {
                 cellRangeStyledCells.add(oldMergedCell);
                 oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                oldMergedCell.getElement().setAttribute("part",
-                        "cell cell-range");
+                SheetJsniUtil.partOf(oldMergedCell.getElement())
+                        .add("cell-range");
             }
             cellRangeStylesCleared = false;
         } else {
@@ -4881,14 +4879,14 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
-                oldSelectionCell.getElement().setAttribute("part",
-                        "cell cell-range");
+                SheetJsniUtil.partOf(oldSelectionCell.getElement())
+                        .add("cell-range");
             }
             if (oldMergedCell != null) {
                 cellRangeStyledCells.add(oldMergedCell);
                 oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                oldMergedCell.getElement().setAttribute("part",
-                        "cell cell-range");
+                SheetJsniUtil.partOf(oldMergedCell.getElement())
+                        .add("cell-range");
             }
             // highlight the new selected cell headers
             MergedRegion region = actionHandler
@@ -4958,8 +4956,8 @@ public class SheetWidget extends Panel {
             oldSelectionCell.getElement()
                     .removeClassName(CELL_SELECTION_CLASSNAME);
             oldSelectionCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-            oldSelectionCell.getElement().setAttribute("part",
-                    "cell cell-range");
+            SheetJsniUtil.partOf(oldSelectionCell.getElement())
+                    .add("cell-range");
         }
         if (oldMergedSelectionCell != null) {
             cellRangeStyledCells.add(oldMergedSelectionCell);
@@ -4967,20 +4965,22 @@ public class SheetWidget extends Panel {
                     .removeClassName(CELL_SELECTION_CLASSNAME);
             oldMergedSelectionCell.getElement()
                     .addClassName(CELL_RANGE_CLASSNAME);
-            oldMergedSelectionCell.getElement().setAttribute("part",
-                    "cell cell-range");
+            SheetJsniUtil.partOf(oldMergedSelectionCell.getElement())
+                    .add("cell-range");
         }
         cellRangeStyledCoords.remove(new CellCoord(col, row));
         if (newSelectionCell != null) {
             cellRangeStyledCells.remove(newSelectionCell);
             newSelectionCell.getElement().removeClassName(CELL_RANGE_CLASSNAME);
-            newSelectionCell.getElement().setAttribute("part", "cell");
+            SheetJsniUtil.partOf(newSelectionCell.getElement())
+                    .remove("cell-range");
         }
         if (newMergedSelectionCell != null) {
             cellRangeStyledCells.remove(newMergedSelectionCell);
             newMergedSelectionCell.getElement()
                     .removeClassName(CELL_RANGE_CLASSNAME);
-            newMergedSelectionCell.getElement().setAttribute("part", "cell");
+            SheetJsniUtil.partOf(newMergedSelectionCell.getElement())
+                    .remove("cell-range");
         }
         setSelectedCell(col, row);
     }
@@ -5004,8 +5004,8 @@ public class SheetWidget extends Panel {
                     if (cell != null) {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                        cell.getElement().setAttribute("part",
-                                "cell cell-range");
+                        SheetJsniUtil.partOf(cell.getElement())
+                                .add("cell-range");
                     }
 
                     Cell mergedCell = getMergedCell(toKey(c, r));
@@ -5013,8 +5013,8 @@ public class SheetWidget extends Panel {
                         cellRangeStyledCells.add(mergedCell);
                         mergedCell.getElement()
                                 .addClassName(CELL_RANGE_CLASSNAME);
-                        mergedCell.getElement().setAttribute("part",
-                                "cell cell-range");
+                        SheetJsniUtil.partOf(mergedCell.getElement())
+                                .add("cell-range");
                     }
                 }
             }

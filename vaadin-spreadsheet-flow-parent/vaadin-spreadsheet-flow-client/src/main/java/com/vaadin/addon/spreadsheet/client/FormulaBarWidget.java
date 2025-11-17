@@ -150,9 +150,9 @@ public class FormulaBarWidget extends Composite {
         addressField = new TextBox();
         addressField.setTabIndex(1);
         formulaField.setStyleName("functionfield");
-        formulaField.getElement().setAttribute("part", "formula-field");
+        SheetJsniUtil.partOf(formulaField.getElement()).add("formula-field");
         addressField.setStyleName("addressfield");
-        addressField.getElement().setAttribute("part", "address-field");
+        SheetJsniUtil.partOf(addressField.getElement()).add("address-field");
 
         namedRangeBox = new ListBox();
         namedRangeBox.setStyleName("namedrangebox");
