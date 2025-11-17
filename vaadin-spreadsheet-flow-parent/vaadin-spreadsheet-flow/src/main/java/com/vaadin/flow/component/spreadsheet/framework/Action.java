@@ -73,6 +73,8 @@ public class Action implements Serializable {
 
     /**
      * Returns the action's caption.
+     * <p>
+     * Note: Can contain HTML if it was used in the caption or icon was included.
      *
      * @return the action's caption as a <code>String</code>.
      */
