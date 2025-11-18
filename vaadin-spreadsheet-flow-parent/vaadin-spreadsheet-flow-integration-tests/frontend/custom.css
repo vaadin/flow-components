@@ -46,7 +46,7 @@ vaadin-spreadsheet.custom::part(scroll-tabs-button-disabled) {
     color: #add8e6;
 }
 
-vaadin-spreadsheet.custom::part(tabsheet-tab) {
+vaadin-spreadsheet.custom::part(tab) {
     border-color: #add8e6;
 }
 
