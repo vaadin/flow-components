@@ -170,21 +170,23 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
 
         var scrollTabBeginning = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-beginning").first();
-        assertPartEquals(scrollTabBeginning, "scroll-tab-disabled",
-                "scroll-tab-start");
+        assertPartEquals(scrollTabBeginning, "scroll-tabs-disabled-button",
+                "scroll-tabs-button-start");
 
         var scrollTabLeft = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-left").first();
-        assertPartEquals(scrollTabLeft, "scroll-tab-disabled",
-                "scroll-tab-left");
+        assertPartEquals(scrollTabLeft, "scroll-tabs-disabled-button",
+                "scroll-tabs-button-left");
 
         var scrollTabRight = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-right").first();
-        assertPartEquals(scrollTabRight, "scroll-tab", "scroll-tab-right");
+        assertPartEquals(scrollTabRight, "scroll-tabs-button",
+                "scroll-tabs-button-right");
 
         var scrollTabEnd = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-end").first();
-        assertPartEquals(scrollTabEnd, "scroll-tab", "scroll-tab-end");
+        assertPartEquals(scrollTabEnd, "scroll-tabs-button",
+                "scroll-tabs-button-end");
 
         // Click to scroll tabs and verify state changes
         scrollTabEnd.click();
