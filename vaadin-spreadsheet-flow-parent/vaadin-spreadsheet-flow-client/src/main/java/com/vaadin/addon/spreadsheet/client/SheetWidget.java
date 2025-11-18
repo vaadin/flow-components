@@ -2773,6 +2773,7 @@ public class SheetWidget extends Panel {
                 }
                 colHeader.setClassName("ch col" + (i));
                 SheetJsniUtil.partOf(colHeader).add("column-header");
+                SheetJsniUtil.partOf(colHeader).remove("selected-header");
                 colHeader.setInnerHTML(
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 if (selectedColHeaderIndexes.contains(i)) {
