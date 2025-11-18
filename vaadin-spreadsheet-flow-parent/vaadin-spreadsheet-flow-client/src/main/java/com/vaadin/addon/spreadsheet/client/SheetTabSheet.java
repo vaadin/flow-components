@@ -101,7 +101,8 @@ public class SheetTabSheet extends Widget {
                 "scroll-tabs-button-start");
 
         scrollEnd.setClassName("scroll-tabs-end");
-        SheetJsniUtil.partOf(scrollEnd).add(SCROLL_TAB_PART, "scroll-tabs-button-end");
+        SheetJsniUtil.partOf(scrollEnd).add(SCROLL_TAB_PART,
+                "scroll-tabs-button-end");
 
         scrollLeft.setClassName("scroll-tabs-left");
         SheetJsniUtil.partOf(scrollLeft).add(SCROLL_TAB_PART,
