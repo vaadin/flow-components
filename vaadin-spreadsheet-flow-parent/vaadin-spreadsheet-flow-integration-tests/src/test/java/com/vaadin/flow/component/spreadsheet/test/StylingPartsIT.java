@@ -63,7 +63,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
 
         var tab = spreadsheet.$(TestBenchElement.class)
                 .withClassName("sheet-tabsheet-tab").first();
-        assertPartContains(tab, "tabsheet-tab");
+        assertPartContains(tab, "tab");
 
         //@formatter:off
         var scrollTabButtons = Map.of(
@@ -97,7 +97,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         // Verify selected headers and cells in range
         for (int row = 3; row <= 5; row++) {
             assertPartEquals(spreadsheet.getRowHeader(row), "row-header",
-                    "selected-header");
+                    "header-selected");
             for (int col = 8; col <= 9; col++) {
                 var cell = spreadsheet.getCellAt(row, col);
                 if (row == 3 && col == 8) {
@@ -111,7 +111,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         }
         for (int col = 8; col <= 9; col++) {
             assertPartEquals(spreadsheet.getColumnHeader(col), "column-header",
-                    "selected-header");
+                    "header-selected");
         }
 
         // Clear selection and verify parts are removed
@@ -170,9 +170,8 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         var sheetTabs = spreadsheet.$(TestBenchElement.class)
                 .withClassName("sheet-tabsheet-tab");
 
-        assertPartEquals(sheetTabs.get(0), "tabsheet-tab");
-        assertPartEquals(sheetTabs.get(1), "tabsheet-tab",
-                "selected-tab-button");
+        assertPartEquals(sheetTabs.get(0), "tab");
+        assertPartEquals(sheetTabs.get(1), "tab", "tab-selected");
     }
 
     @Test

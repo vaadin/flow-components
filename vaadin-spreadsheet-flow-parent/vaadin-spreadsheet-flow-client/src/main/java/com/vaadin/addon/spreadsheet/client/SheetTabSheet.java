@@ -27,7 +27,7 @@ import com.vaadin.client.WidgetUtil;
 
 public class SheetTabSheet extends Widget {
 
-    private static final String SELECTED_TAB_PART = "selected-tab-button";
+    private static final String SELECTED_TAB_PART = "tab-selected";
     private static final String SCROLL_TAB_DISABLED_PART = "scroll-tabs-button-disabled";
     private static final String SCROLL_TAB_PART = "scroll-tabs-button";
     private static final String HIDDEN = "hidden";
@@ -411,7 +411,7 @@ public class SheetTabSheet extends Widget {
         final Element e = Document.get().createDivElement();
         setTabName(e, tabName);
         e.setClassName("sheet-tabsheet-tab");
-        SheetJsniUtil.partOf(e).add("tabsheet-tab");
+        SheetJsniUtil.partOf(e).add("tab");
         return e;
     }
 

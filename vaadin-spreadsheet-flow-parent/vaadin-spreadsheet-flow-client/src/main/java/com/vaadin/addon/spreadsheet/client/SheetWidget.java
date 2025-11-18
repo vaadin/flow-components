@@ -2773,12 +2773,12 @@ public class SheetWidget extends Panel {
                 }
                 colHeader.setClassName("ch col" + (i));
                 SheetJsniUtil.partOf(colHeader).add("column-header");
-                SheetJsniUtil.partOf(colHeader).remove("selected-header");
+                SheetJsniUtil.partOf(colHeader).remove("header-selected");
                 colHeader.setInnerHTML(
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 if (selectedColHeaderIndexes.contains(i)) {
                     colHeader.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                    SheetJsniUtil.partOf(colHeader).add("selected-header");
+                    SheetJsniUtil.partOf(colHeader).add("header-selected");
                 }
             } else {
                 debugConsole.severe("Trying to add plain column header (index:"
@@ -2825,7 +2825,7 @@ public class SheetWidget extends Panel {
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 if (selectedRowHeaderIndexes.contains(i)) {
                     rowHeader.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                    SheetJsniUtil.partOf(rowHeader).add("selected-header");
+                    SheetJsniUtil.partOf(rowHeader).add("header-selected");
                 }
             } else {
                 debugConsole.severe("Trying to add plain row header (index:" + i
@@ -4703,14 +4703,14 @@ public class SheetWidget extends Panel {
             selectedFrozenColHeaderIndexes.add(c);
             DivElement ch = frozenColumnHeaders.get(c - 1);
             ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-            SheetJsniUtil.partOf(ch).add("selected-header");
+            SheetJsniUtil.partOf(ch).add("header-selected");
         } else {
             selectedColHeaderIndexes.add(c);
             int targetCol = c - firstColumnIndex;
             if (targetCol >= 0 && colHeaders.size() > targetCol) {
                 DivElement ch = colHeaders.get(targetCol);
                 ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                SheetJsniUtil.partOf(ch).add("selected-header");
+                SheetJsniUtil.partOf(ch).add("header-selected");
             }
         }
     }
@@ -4720,14 +4720,14 @@ public class SheetWidget extends Panel {
             selectedFrozenRowHeaderIndexes.add(r);
             DivElement rh = frozenRowHeaders.get(r - 1);
             rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-            SheetJsniUtil.partOf(rh).add("selected-header");
+            SheetJsniUtil.partOf(rh).add("header-selected");
         } else {
             selectedRowHeaderIndexes.add(r);
             int targetRow = r - firstRowIndex;
             if (targetRow >= 0 && rowHeaders.size() > targetRow) {
                 DivElement rh = rowHeaders.get(targetRow);
                 rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                SheetJsniUtil.partOf(rh).add("selected-header");
+                SheetJsniUtil.partOf(rh).add("header-selected");
             }
         }
     }
@@ -4735,22 +4735,22 @@ public class SheetWidget extends Panel {
     private void clearSelectedHeaderStyles() {
         for (DivElement rh : rowHeaders) {
             rh.removeClassName(SELECTED_ROW_HEADER_CLASSNAME);
-            SheetJsniUtil.partOf(rh).remove("selected-header");
+            SheetJsniUtil.partOf(rh).remove("header-selected");
         }
         for (DivElement ch : colHeaders) {
             ch.removeClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-            SheetJsniUtil.partOf(ch).remove("selected-header");
+            SheetJsniUtil.partOf(ch).remove("header-selected");
         }
         if (frozenRowHeaders != null) {
             for (DivElement rh : frozenRowHeaders) {
                 rh.removeClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                SheetJsniUtil.partOf(rh).remove("selected-header");
+                SheetJsniUtil.partOf(rh).remove("header-selected");
             }
         }
         if (frozenColumnHeaders != null) {
             for (DivElement ch : frozenColumnHeaders) {
                 ch.removeClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                SheetJsniUtil.partOf(ch).remove("selected-header");
+                SheetJsniUtil.partOf(ch).remove("header-selected");
             }
         }
         selectedRowHeaderIndexes.clear();
