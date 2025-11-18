@@ -46,7 +46,7 @@ public class SheetTabSheet extends Widget {
         public void onSheetTabSheetFocus();
     }
 
-    private static final String SELECTED_TAB_CLASSNAME = SELECTED_TAB_PART;
+    private static final String SELECTED_TAB_CLASSNAME = "selected-tab";
 
     private DivElement root = Document.get().createDivElement();
     // div containing the tabs
