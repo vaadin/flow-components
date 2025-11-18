@@ -2821,6 +2821,7 @@ public class SheetWidget extends Panel {
                 }
                 rowHeader.setClassName("rh row" + (i));
                 SheetJsniUtil.partOf(rowHeader).add("row-header");
+                SheetJsniUtil.partOf(rowHeader).remove("header-selected");
                 rowHeader.setInnerHTML(
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 if (selectedRowHeaderIndexes.contains(i)) {
