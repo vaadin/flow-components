@@ -22,7 +22,7 @@ vaadin-spreadsheet.custom::part(column-header) {
     border-bottom: 2px solid #add8e6;
 }
 
-vaadin-spreadsheet.custom::part(column-header selected-header) {
+vaadin-spreadsheet.custom::part(column-header header-selected) {
     --lumo-primary-color-10pct: #4d88e6 !important;
     color: white;
     font-weight: bold;
