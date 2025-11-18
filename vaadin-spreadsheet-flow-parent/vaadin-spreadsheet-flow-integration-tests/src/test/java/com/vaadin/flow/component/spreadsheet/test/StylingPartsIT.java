@@ -27,6 +27,14 @@ import com.vaadin.testbench.TestBenchElement;
 @TestPath("vaadin-spreadsheet")
 public class StylingPartsIT extends AbstractSpreadsheetIT {
 
+    private static final String SCROLL_TABS_BUTTON = "scroll-tabs-button";
+    private static final String SCROLL_TABS_BUTTON_DISABLED = "scroll-tabs-button-disabled";
+    private static final String NEW_TAB_BUTTON = "new-tab-button";
+    private static final String SCROLL_TABS_TO_END_BUTTON = "scroll-tabs-to-end-button";
+    private static final String SCROLL_TABS_FORWARD_BUTTON = "scroll-tabs-forward-button";
+    private static final String SCROLL_TABS_BACKWARD_BUTTON = "scroll-tabs-backward-button";
+    private static final String SCROLL_TABS_TO_START_BUTTON = "scroll-tabs-to-start-button";
+
     @Before
     public void init() {
         open();
@@ -57,11 +65,15 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
                 .withClassName("sheet-tabsheet-tab").first();
         assertPartContains(tab, "tabsheet-tab");
 
-        var scrollTabButtons = Map.of("scroll-tabs-beginning",
-                "scroll-tabs-button-start", "scroll-tabs-left",
-                "scroll-tabs-button-left", "scroll-tabs-right",
-                "scroll-tabs-button-right", "scroll-tabs-end",
-                "scroll-tabs-button-end", "add-new-tab", "add-new-tab-button");
+        //@formatter:off
+        var scrollTabButtons = Map.of(
+                "scroll-tabs-beginning", SCROLL_TABS_TO_START_BUTTON, 
+                "scroll-tabs-left", SCROLL_TABS_BACKWARD_BUTTON, 
+                "scroll-tabs-right", SCROLL_TABS_FORWARD_BUTTON, 
+                "scroll-tabs-end", SCROLL_TABS_TO_END_BUTTON, 
+                "add-new-tab", NEW_TAB_BUTTON
+        );
+        //@formatter:on
 
         for (var entry : scrollTabButtons.entrySet()) {
             var button = spreadsheet.$(TestBenchElement.class)
@@ -159,7 +171,8 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
                 .withClassName("sheet-tabsheet-tab");
 
         assertPartEquals(sheetTabs.get(0), "tabsheet-tab");
-        assertPartEquals(sheetTabs.get(1), "tabsheet-tab", "selected-tab");
+        assertPartEquals(sheetTabs.get(1), "tabsheet-tab",
+                "selected-tab-button");
     }
 
     @Test
@@ -170,32 +183,34 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
 
         var scrollTabBeginning = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-beginning").first();
-        assertPartEquals(scrollTabBeginning, "scroll-tabs-button-disabled",
-                "scroll-tabs-button-start");
+        assertPartEquals(scrollTabBeginning, SCROLL_TABS_BUTTON_DISABLED,
+                SCROLL_TABS_TO_START_BUTTON);
 
         var scrollTabLeft = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-left").first();
-        assertPartEquals(scrollTabLeft, "scroll-tabs-button-disabled",
-                "scroll-tabs-button-left");
+        assertPartEquals(scrollTabLeft, SCROLL_TABS_BUTTON_DISABLED,
+                SCROLL_TABS_BACKWARD_BUTTON);
 
         var scrollTabRight = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-right").first();
-        assertPartEquals(scrollTabRight, "scroll-tabs-button",
-                "scroll-tabs-button-right");
-
+        assertPartEquals(scrollTabRight, SCROLL_TABS_BUTTON,
+                SCROLL_TABS_FORWARD_BUTTON);
         var scrollTabEnd = spreadsheet.$(TestBenchElement.class)
                 .withClassName("scroll-tabs-end").first();
-        assertPartEquals(scrollTabEnd, "scroll-tabs-button",
-                "scroll-tabs-button-end");
+        assertPartEquals(scrollTabEnd, SCROLL_TABS_BUTTON,
+                SCROLL_TABS_TO_END_BUTTON);
 
         // Click to scroll tabs and verify state changes
         scrollTabEnd.click();
 
-        assertPartEquals(scrollTabBeginning, "scroll-tab", "scroll-tab-start");
-        assertPartEquals(scrollTabLeft, "scroll-tab", "scroll-tab-left");
-        assertPartEquals(scrollTabRight, "scroll-tab-disabled",
-                "scroll-tab-right");
-        assertPartEquals(scrollTabEnd, "scroll-tab-disabled", "scroll-tab-end");
+        assertPartEquals(scrollTabBeginning, SCROLL_TABS_BUTTON,
+                SCROLL_TABS_TO_START_BUTTON);
+        assertPartEquals(scrollTabLeft, SCROLL_TABS_BUTTON,
+                SCROLL_TABS_BACKWARD_BUTTON);
+        assertPartEquals(scrollTabRight, SCROLL_TABS_BUTTON_DISABLED,
+                SCROLL_TABS_FORWARD_BUTTON);
+        assertPartEquals(scrollTabEnd, SCROLL_TABS_BUTTON_DISABLED,
+                SCROLL_TABS_TO_END_BUTTON);
     }
 
     /**

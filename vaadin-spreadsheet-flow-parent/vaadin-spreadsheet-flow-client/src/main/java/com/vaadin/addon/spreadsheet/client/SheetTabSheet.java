@@ -98,22 +98,22 @@ public class SheetTabSheet extends Widget {
     private void initDOM() {
         scrollBeginning.setClassName("scroll-tabs-beginning");
         SheetJsniUtil.partOf(scrollBeginning).add(SCROLL_TAB_PART,
-                "scroll-tabs-button-start");
+                "scroll-tabs-to-start-button");
 
         scrollEnd.setClassName("scroll-tabs-end");
         SheetJsniUtil.partOf(scrollEnd).add(SCROLL_TAB_PART,
-                "scroll-tabs-button-end");
+                "scroll-tabs-to-end-button");
 
         scrollLeft.setClassName("scroll-tabs-left");
         SheetJsniUtil.partOf(scrollLeft).add(SCROLL_TAB_PART,
-                "scroll-tabs-button-left");
+                "scroll-tabs-backward-button");
 
         scrollRight.setClassName("scroll-tabs-right");
         SheetJsniUtil.partOf(scrollRight).add(SCROLL_TAB_PART,
-                "scroll-tabs-button-right");
+                "scroll-tabs-forward-button");
 
         addNewSheet.setClassName("add-new-tab");
-        SheetJsniUtil.partOf(addNewSheet).add("add-new-tab-button");
+        SheetJsniUtil.partOf(addNewSheet).add("new-tab-button");
 
         options.setClassName("sheet-tabsheet-options");
         options.appendChild(scrollBeginning);
