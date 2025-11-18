@@ -400,6 +400,47 @@ public class BasicIT extends AbstractComponentIT {
                 grid.getCell(0, 1).getInnerHTML());
     }
 
+    @Test
+    public void departmentColumn_openAndCloseEditorWithoutChange_valueUnchangedAndNoEventFired() {
+        // Record the initial value of the first cell in Department column
+        GridTHTDElement cell = grid.getCell(0, 2);
+        String initialValue = cell.getText();
+
+        // Verify the initial value
+        Assert.assertNotNull("Initial department value should not be null",
+                initialValue);
+        Assert.assertFalse("Initial department value should not be empty",
+                initialValue.isEmpty());
+
+        // Get initial events panel text to count events
+        String initialEventsPanelText = getPanelText("events-panel");
+        int initialEventCount = initialEventsPanelText
+                .split("ItemPropertyChanged").length - 1;
+
+        // Open the editor for the Department cell (column index 2)
+        assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+
+        // Tab away from the cell without making changes
+        TestBenchElement comboBox = cell.$("vaadin-combo-box").first();
+        comboBox.sendKeys(Keys.TAB);
+
+        // Wait for editor to close
+        waitUntil(driver -> !cell.innerHTMLContains("vaadin-combo-box"));
+
+        // Assert that the cell still has the same value as initially
+        Assert.assertEquals(
+                "Department value should remain unchanged after opening and closing editor without changes",
+                initialValue, cell.getText());
+
+        // Assert that no ItemPropertyChanged events were fired
+        String finalEventsPanelText = getPanelText("events-panel");
+        int finalEventCount = finalEventsPanelText
+                .split("ItemPropertyChanged").length - 1;
+        Assert.assertEquals(
+                "No ItemPropertyChanged event should be fired when editor is closed without changes",
+                initialEventCount, finalEventCount);
+    }
+
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
             Integer colIndex, String editorTag) {
         assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,
