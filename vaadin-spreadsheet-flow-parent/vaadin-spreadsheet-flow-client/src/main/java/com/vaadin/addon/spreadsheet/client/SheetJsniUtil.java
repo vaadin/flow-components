@@ -167,4 +167,17 @@ public class SheetJsniUtil {
     /*-{
         return slot.assignedElements();
     }-*/;
+
+    /**
+     * Gets the part attribute of the given element as a {@link DOMTokenList}.
+     * This is a helper method to access the 'part' property of a web component,
+     * which is not directly available on the standard {@link Element} API.
+     *
+     * @param element
+     *            The element from which to retrieve the part names.
+     * @return A {@link DOMTokenList} containing the part names of the element.
+     */
+    public static DOMTokenList partOf(Element element) {
+        return ((ElementWithPart) element.cast()).getPart();
+    }
 }
