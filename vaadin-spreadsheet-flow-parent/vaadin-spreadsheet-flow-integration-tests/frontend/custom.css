@@ -42,7 +42,7 @@ vaadin-spreadsheet.custom::part(cell-input) {
     box-shadow: unset;
 }
 
-vaadin-spreadsheet.custom::part(scroll-tab-disabled) {
+vaadin-spreadsheet.custom::part(scroll-tabs-button-disabled) {
     color: #add8e6;
 }
 
