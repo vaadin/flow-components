@@ -58,9 +58,10 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         assertPartContains(tab, "tabsheet-tab");
 
         var scrollTabButtons = Map.of("scroll-tabs-beginning",
-                "scroll-tab-start", "scroll-tabs-left", "scroll-tab-left",
-                "scroll-tabs-right", "scroll-tab-right", "scroll-tabs-end",
-                "scroll-tab-end", "add-new-tab", "add-new-tab");
+                "scroll-tabs-button-start", "scroll-tabs-left",
+                "scroll-tabs-button-left", "scroll-tabs-right",
+                "scroll-tabs-button-right", "scroll-tabs-end",
+                "scroll-tabs-button-end", "add-new-tab", "add-new-tab-button");
 
         for (var entry : scrollTabButtons.entrySet()) {
             var button = spreadsheet.$(TestBenchElement.class)
