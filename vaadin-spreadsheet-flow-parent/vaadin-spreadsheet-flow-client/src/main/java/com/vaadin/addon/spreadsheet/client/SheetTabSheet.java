@@ -27,9 +27,9 @@ import com.vaadin.client.WidgetUtil;
 
 public class SheetTabSheet extends Widget {
 
-    private static final String SELECTED_TAB_PART = "selected-tab";
-    private static final String SCROLL_TAB_DISABLED_PART = "scroll-tab-disabled";
-    private static final String SCROLL_TAB_PART = "scroll-tab";
+    private static final String SELECTED_TAB_PART = "selected-tab-button";
+    private static final String SCROLL_TAB_DISABLED_PART = "scroll-tabs-button-disabled";
+    private static final String SCROLL_TAB_PART = "scroll-tabs-button";
     private static final String HIDDEN = "hidden";
 
     public interface SheetTabSheetHandler {
@@ -98,21 +98,21 @@ public class SheetTabSheet extends Widget {
     private void initDOM() {
         scrollBeginning.setClassName("scroll-tabs-beginning");
         SheetJsniUtil.partOf(scrollBeginning).add(SCROLL_TAB_PART,
-                "scroll-tab-start");
+                "scroll-tabs-button-start");
 
         scrollEnd.setClassName("scroll-tabs-end");
-        SheetJsniUtil.partOf(scrollEnd).add(SCROLL_TAB_PART, "scroll-tab-end");
+        SheetJsniUtil.partOf(scrollEnd).add(SCROLL_TAB_PART, "scroll-tabs-button-end");
 
         scrollLeft.setClassName("scroll-tabs-left");
         SheetJsniUtil.partOf(scrollLeft).add(SCROLL_TAB_PART,
-                "scroll-tab-left");
+                "scroll-tabs-button-left");
 
         scrollRight.setClassName("scroll-tabs-right");
         SheetJsniUtil.partOf(scrollRight).add(SCROLL_TAB_PART,
-                "scroll-tab-right");
+                "scroll-tabs-button-right");
 
         addNewSheet.setClassName("add-new-tab");
-        SheetJsniUtil.partOf(addNewSheet).add("add-new-tab");
+        SheetJsniUtil.partOf(addNewSheet).add("add-new-tab-button");
 
         options.setClassName("sheet-tabsheet-options");
         options.appendChild(scrollBeginning);
