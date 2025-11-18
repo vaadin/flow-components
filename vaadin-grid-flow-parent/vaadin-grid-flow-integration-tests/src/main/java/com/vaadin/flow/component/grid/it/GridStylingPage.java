@@ -39,49 +39,6 @@ public class GridStylingPage extends Div {
         Grid.Column<String> col1 = grid
                 .addColumn(i -> String.valueOf(i.length())).setHeader("length");
 
-        // Class name generator
-        NativeButton gridClassNameGenerator = new NativeButton(
-                "grid class name generator", e -> {
-                    grid.setClassNameGenerator(item -> "grid" + item);
-                });
-        gridClassNameGenerator.setId("grid-generator");
-
-        NativeButton columnClassNameGenerator = new NativeButton(
-                "column class name generator", e -> {
-                    col0.setClassNameGenerator(item -> "col" + item);
-                });
-        columnClassNameGenerator.setId("column-generator");
-
-        NativeButton resetGridClassNameGenerator = new NativeButton(
-                "grid: reset generator", e -> {
-                    grid.setClassNameGenerator(item -> null);
-                });
-        resetGridClassNameGenerator.setId("reset-grid-generator");
-
-        NativeButton resetColumnClassNameGenerator = new NativeButton(
-                "column: reset generator", e -> {
-                    col0.setClassNameGenerator(item -> null);
-                });
-        resetColumnClassNameGenerator.setId("reset-column-generator");
-
-        NativeButton gridMultipleClasses = new NativeButton(
-                "grid: generate multiple classes", e -> {
-                    grid.setClassNameGenerator(item -> "grid foo");
-                });
-        gridMultipleClasses.setId("grid-multiple-classes");
-
-        NativeButton columnMultipleClasses = new NativeButton(
-                "column: generate multiple classes", e -> {
-                    col0.setClassNameGenerator(item -> "col bar");
-                });
-        columnMultipleClasses.setId("column-multiple-classes");
-
-        NativeButton secondColumnClassNameGenerator = new NativeButton(
-                "second column class name generator", e -> {
-                    col1.setClassNameGenerator(item -> "baz");
-                });
-        secondColumnClassNameGenerator.setId("second-column-generator");
-
         // Part name generator
         NativeButton gridPartNameGenerator = new NativeButton(
                 "grid part name generator", e -> {
@@ -143,11 +100,6 @@ public class GridStylingPage extends Div {
         setDetailsRenderer.setId("details-renderer");
 
         add(grid,
-                new Div(gridClassNameGenerator, columnClassNameGenerator,
-                        secondColumnClassNameGenerator),
-                new Div(resetGridClassNameGenerator,
-                        resetColumnClassNameGenerator),
-                new Div(gridMultipleClasses, columnMultipleClasses),
                 new Div(gridPartNameGenerator, columnPartNameGenerator,
                         secondColumnPartNameGenerator),
                 new Div(resetGridPartNameGenerator,
