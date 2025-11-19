@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
@@ -89,6 +91,6 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
 
     @Override
     public int hashCode() {
-        return getSorted().hashCode() + getDirection().hashCode();
+        return Objects.hash(getSorted(), getDirection());
     }
 }
