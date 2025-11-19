@@ -67,31 +67,7 @@ public class AiChartOrchestrator implements Serializable {
 
     private final List<LLMProvider.Message> conversationHistory = new ArrayList<>();
 
-    private static final String SYSTEM_PROMPT = """
-            You are a chart configuration assistant. Your role is to help users create and modify charts
-            based on their database data. You have access to three tools:
-
-            1. getSchema() - Retrieves the database schema
-            2. updateChartData(query: string) - Executes a SQL query and updates the chart with the results
-            3. updateChartConfig(config: string) - Updates the chart configuration (JSON format following Highcharts API)
-
-            When a user requests a chart:
-            1. First, call getSchema() to understand the available tables and columns
-            2. Generate an appropriate SQL SELECT query and call updateChartData() with it
-            3. If needed, call updateChartConfig() to adjust the chart's visual appearance
-
-            Always use SELECT queries only. Never use INSERT, UPDATE, DELETE, or other data modification commands.
-            The SQL queries should be simple and focused on retrieving the data needed for the chart.
-
-            For chart configurations, use Highcharts JSON format. Common properties include:
-            - chart: { type: 'line' | 'bar' | 'column' | 'pie' | 'area' | 'scatter' etc. }
-            - title: { text: 'Chart Title' }
-            - xAxis: { title: { text: 'X Axis Label' }, categories: [...] }
-            - yAxis: { title: { text: 'Y Axis Label' } }
-            - series: [{ name: 'Series Name', data: [...] }]
-
-            Respond to users in a helpful, concise manner, explaining what chart you're creating.
-            """;
+    
 
     /**
      * Creates a new AI chart orchestrator.
@@ -275,12 +251,12 @@ public class AiChartOrchestrator implements Serializable {
 
             @Override
             public String getDescription() {
-                return "Retrieves the database schema including tables, columns, and data types";
+                return "Retrieves the database schema including tables, columns, and data types. Takes no parameters - call as getSchema()";
             }
 
             @Override
             public String getParametersSchema() {
-                return "{}"; // No parameters
+                return null; // No parameters
             }
 
             @Override
@@ -298,23 +274,14 @@ public class AiChartOrchestrator implements Serializable {
 
             @Override
             public String getDescription() {
-                return "Executes a SQL SELECT query and updates the chart with the results";
+                return "Executes a SQL SELECT query and updates the chart with the results. " +
+                       "Parameter: query (string) - The SQL SELECT query to execute. " +
+                       "Call as updateChartData({\"query\": \"SELECT column1, column2 FROM table\"})";
             }
 
             @Override
             public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {
-                            "query": {
-                              "type": "string",
-                              "description": "The SQL SELECT query to execute"
-                            }
-                          },
-                          "required": ["query"]
-                        }
-                        """;
+                return null; // Schema embedded in description
             }
 
             @Override
@@ -358,23 +325,14 @@ public class AiChartOrchestrator implements Serializable {
 
             @Override
             public String getDescription() {
-                return "Updates the chart configuration (title, axes labels, chart type, etc.) using Highcharts JSON format";
+                return "Updates the chart configuration (title, axes labels, chart type, etc.) using Highcharts JSON format. " +
+                       "Parameter: config (string) - The chart configuration in JSON format. " +
+                       "Call as updateChartConfig({\"config\": \"{\\\"title\\\": {\\\"text\\\": \\\"My Chart\\\"}}\"})" ;
             }
 
             @Override
             public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {
-                            "config": {
-                              "type": "string",
-                              "description": "The chart configuration in JSON format (Highcharts API)"
-                            }
-                          },
-                          "required": ["config"]
-                        }
-                        """;
+                return null; // Schema embedded in description
             }
 
             @Override
@@ -449,4 +407,30 @@ public class AiChartOrchestrator implements Serializable {
         // In production, parse JSON and apply to chart.getConfiguration()
         // For now, this is a placeholder
     }
+
+    private static final String SYSTEM_PROMPT = """
+            You are a chart configuration assistant. Your role is to help users create and modify charts
+            based on their database data. You have access to three tools:
+
+            1. getSchema() - Retrieves the database schema
+            2. updateChartData(query: string) - Executes a SQL query and updates the chart with the results
+            3. updateChartConfig(config: string) - Updates the chart configuration (JSON format following Highcharts API)
+
+            When a user requests a chart:
+            1. First, call getSchema() to understand the available tables and columns
+            2. Generate an appropriate SQL SELECT query and call updateChartData() with it
+            3. If needed, call updateChartConfig() to adjust the chart's visual appearance
+
+            Always use SELECT queries only. Never use INSERT, UPDATE, DELETE, or other data modification commands.
+            The SQL queries should be simple and focused on retrieving the data needed for the chart.
+
+            For chart configurations, use Highcharts JSON format. Common properties include:
+            - chart: { type: 'line' | 'bar' | 'column' | 'pie' | 'area' | 'scatter' etc. }
+            - title: { text: 'Chart Title' }
+            - xAxis: { title: { text: 'X Axis Label' }, categories: [...] }
+            - yAxis: { title: { text: 'Y Axis Label' } }
+            - series: [{ name: 'Series Name', data: [...] }]
+
+            Respond to users in a helpful, concise manner, explaining what chart you're creating.
+            """;
 }

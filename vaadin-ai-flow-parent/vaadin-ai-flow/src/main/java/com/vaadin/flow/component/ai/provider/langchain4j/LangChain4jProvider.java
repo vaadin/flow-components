@@ -100,18 +100,23 @@ public class LangChain4jProvider implements LLMProvider {
             Map<String, Tool> toolMap = new HashMap<>();
             if (tools != null && !tools.isEmpty()) {
                 for (Tool tool : tools) {
-                    // Build tool specification with JSON schema
-                    ToolSpecification.Builder specBuilder = ToolSpecification.builder()
-                            .name(tool.getName())
-                            .description(tool.getDescription());
-
-                    // Add parameters if provided
-                    String paramsSchema = tool.getParametersSchema();
-                    if (paramsSchema != null && !paramsSchema.trim().isEmpty() && !paramsSchema.equals("{}")) {
-                        specBuilder.addParameter(paramsSchema);
+                    if (tool == null || tool.getName() == null) {
+                        continue; // Skip invalid tools
                     }
 
-                    ToolSpecification spec = specBuilder.build();
+                    // Build tool specification
+                    // Note: Parameter schemas are not currently passed to LangChain4j
+                    // The LLM will infer parameters from the tool description
+                    String description = tool.getDescription();
+                    if (description == null) {
+                        description = tool.getName();
+                    }
+
+                    ToolSpecification spec = ToolSpecification.builder()
+                            .name(tool.getName())
+                            .description(description)
+                            .build();
+
                     toolSpecs.add(spec);
                     toolMap.put(tool.getName(), tool);
                 }
