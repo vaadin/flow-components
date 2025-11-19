@@ -16,9 +16,12 @@
 package com.vaadin.flow.component.ai.provider.langchain4j;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -28,6 +31,8 @@ import reactor.core.publisher.FluxSink;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * LangChain4j implementation of the LLMProvider interface.
@@ -90,15 +95,29 @@ public class LangChain4jProvider implements LLMProvider {
                 }
             }
 
-            // Note: Tool support would require LangChain4j's tool APIs
-            // For now, tools are not implemented in this basic version
+            // Convert tools to LangChain4j format
+            List<ToolSpecification> toolSpecs = new ArrayList<>();
+            Map<String, Tool> toolMap = new HashMap<>();
             if (tools != null && !tools.isEmpty()) {
-                sink.error(new UnsupportedOperationException(
-                        "Tool support is not yet implemented in LangChain4jProvider"));
-                return;
+                for (Tool tool : tools) {
+                    // Build tool specification with JSON schema
+                    ToolSpecification.Builder specBuilder = ToolSpecification.builder()
+                            .name(tool.getName())
+                            .description(tool.getDescription());
+
+                    // Add parameters if provided
+                    String paramsSchema = tool.getParametersSchema();
+                    if (paramsSchema != null && !paramsSchema.trim().isEmpty() && !paramsSchema.equals("{}")) {
+                        specBuilder.addParameter(paramsSchema);
+                    }
+
+                    ToolSpecification spec = specBuilder.build();
+                    toolSpecs.add(spec);
+                    toolMap.put(tool.getName(), tool);
+                }
             }
 
-            // Create streaming response handler
+            // Create streaming response handler with tool execution support
             StreamingResponseHandler<AiMessage> handler = new StreamingResponseHandler<AiMessage>() {
                 @Override
                 public void onNext(String token) {
@@ -107,7 +126,67 @@ public class LangChain4jProvider implements LLMProvider {
 
                 @Override
                 public void onComplete(Response<AiMessage> response) {
-                    sink.complete();
+                    AiMessage aiMessage = response.content();
+
+                    // Check if the AI wants to call tools
+                    if (aiMessage.hasToolExecutionRequests()) {
+                        List<ToolExecutionRequest> toolRequests = aiMessage.toolExecutionRequests();
+                        List<ChatMessage> updatedMessages = new ArrayList<>(chatMessages);
+                        updatedMessages.add(aiMessage);
+
+                        // Execute each tool
+                        for (ToolExecutionRequest request : toolRequests) {
+                            String toolName = request.name();
+                            String arguments = request.arguments();
+
+                            Tool tool = toolMap.get(toolName);
+                            if (tool != null) {
+                                try {
+                                    String result = tool.execute(arguments);
+                                    ToolExecutionResultMessage resultMessage =
+                                        ToolExecutionResultMessage.from(request, result);
+                                    updatedMessages.add(resultMessage);
+                                } catch (Exception e) {
+                                    ToolExecutionResultMessage errorMessage =
+                                        ToolExecutionResultMessage.from(request,
+                                            "Error executing tool: " + e.getMessage());
+                                    updatedMessages.add(errorMessage);
+                                }
+                            }
+                        }
+
+                        // Make another call with tool results
+                        StreamingResponseHandler<AiMessage> followUpHandler =
+                            new StreamingResponseHandler<AiMessage>() {
+                                @Override
+                                public void onNext(String token) {
+                                    sink.next(token);
+                                }
+
+                                @Override
+                                public void onComplete(Response<AiMessage> finalResponse) {
+                                    sink.complete();
+                                }
+
+                                @Override
+                                public void onError(Throwable error) {
+                                    sink.error(error);
+                                }
+                            };
+
+                        try {
+                            if (toolSpecs.isEmpty()) {
+                                model.generate(updatedMessages, followUpHandler);
+                            } else {
+                                model.generate(updatedMessages, toolSpecs, followUpHandler);
+                            }
+                        } catch (Exception e) {
+                            sink.error(e);
+                        }
+                    } else {
+                        // No tools to execute, complete
+                        sink.complete();
+                    }
                 }
 
                 @Override
@@ -118,12 +197,17 @@ public class LangChain4jProvider implements LLMProvider {
 
             // Generate the streaming response
             try {
-                model.generate(chatMessages, handler);
+                if (toolSpecs.isEmpty()) {
+                    model.generate(chatMessages, handler);
+                } else {
+                    model.generate(chatMessages, toolSpecs, handler);
+                }
             } catch (Exception e) {
                 sink.error(e);
             }
         }, FluxSink.OverflowStrategy.BUFFER);
     }
+
 
     /**
      * Converts a generic Message to a LangChain4j ChatMessage.
