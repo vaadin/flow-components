@@ -76,7 +76,6 @@ public class AiChartDemoView extends VerticalLayout {
         // Create message input
         MessageInput messageInput = new MessageInput();
         messageInput.setWidthFull();
-        messageInput.setPlaceholder("Ask for a chart...");
 
         Button clearButton = new Button("Clear Conversation",
                 e -> clearConversation());
