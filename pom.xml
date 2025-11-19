@@ -70,7 +70,7 @@
     </scm>
     <properties>
         <flow.version>25.0-SNAPSHOT</flow.version>
-        <testbench.version>10.0.0-beta2</testbench.version>
+        <testbench.version>10.0.0-beta4</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -95,7 +95,7 @@
         <cvdlName/>
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>4.0.0-RC1</spring-data-commons.version>
+        <spring-data-commons.version>4.0.0-RC2</spring-data-commons.version>
 
         <!-- spreadsheet -->
         <poi.version>5.4.1</poi.version>
@@ -204,7 +204,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.19.0</version>
+                <version>3.20.0</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -524,7 +524,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>

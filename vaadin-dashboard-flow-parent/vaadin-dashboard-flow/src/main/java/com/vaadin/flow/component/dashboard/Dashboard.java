@@ -59,7 +59,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-beta4")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -610,7 +610,7 @@ public class Dashboard extends Component
             }
         }
 
-        String appId = UI.getCurrent().getInternals().getAppId();
+        String appId = UI.getCurrentOrThrow().getInternals().getAppId();
         getElement().executeJs(
                 """
                         const items = $0;

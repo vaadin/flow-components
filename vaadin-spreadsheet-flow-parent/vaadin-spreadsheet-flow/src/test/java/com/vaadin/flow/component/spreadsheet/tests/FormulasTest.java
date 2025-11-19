@@ -83,10 +83,10 @@ public class FormulasTest {
         spreadsheet.refreshCells(A1, A2);
 
         // Check that the event was fired with the correct values
-        Assert.assertEquals(event.get().getChangedCells().size(), 1);
-        Assert.assertEquals(event.get().getChangedCells().iterator().next()
-                .formatAsString(), "Sheet1!A1");
-        // Sanity check for the forumula cell effective value
+        Assert.assertEquals(1, event.get().getChangedCells().size());
+        Assert.assertEquals("Sheet1!A1", event.get().getChangedCells()
+                .iterator().next().formatAsString());
+        // Sanity check for the formula cell effective value
         Assert.assertEquals(2.0, A1.getNumericCellValue(), 0.0);
     }
 

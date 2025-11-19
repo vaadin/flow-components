@@ -46,7 +46,7 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-beta4")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -148,7 +148,7 @@ public class GridPro<E> extends Grid<E> {
                         .setValue(column.getValueProvider().apply(e.getItem()));
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
-                UI.getCurrent().getPage().executeJs(
+                UI.getCurrentOrThrow().getPage().executeJs(
                         "window.Vaadin.Flow.gridProConnector.selectAll($0, $1, $2)",
                         column.getEditorField().getElement(), itemKey,
                         this.getElement());

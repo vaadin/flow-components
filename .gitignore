@@ -36,3 +36,4 @@ error-screenshots
 **/frontend/*.tsx
 dev-bundle
 prod.bundle
+.vaadin-node-tasks.lock

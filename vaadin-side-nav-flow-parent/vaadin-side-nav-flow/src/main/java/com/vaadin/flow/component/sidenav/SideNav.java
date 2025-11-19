@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -39,10 +40,10 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-beta4")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
-public class SideNav extends Component
-        implements HasSideNavItems, HasSize, HasStyle {
+public class SideNav extends Component implements HasSideNavItems, HasSize,
+        HasStyle, HasThemeVariant<SideNavVariant> {
 
     private Element labelElement;
 

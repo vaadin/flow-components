@@ -106,7 +106,7 @@ public class DefaultHyperlinkCellClickHandler
             // "#!" is an invalid start to an inter-sheet address
             // (null sheet name)
             if (address.startsWith("#!")) {
-                UI ui = UI.getCurrent();
+                UI ui = UI.getCurrentOrThrow();
                 // non-push fragment navigation - requires navigator
                 ui.getPage().open(address.substring(2));
                 // final Navigator navigator = ui == null ? null :
@@ -264,7 +264,7 @@ public class DefaultHyperlinkCellClickHandler
         NewTab {
             @Override
             public void openExternalLink(String address) {
-                UI.getCurrent().getPage().open(address, "_new");
+                UI.getCurrentOrThrow().getPage().open(address, "_new");
             }
         },
 
@@ -275,7 +275,7 @@ public class DefaultHyperlinkCellClickHandler
         Replace {
             @Override
             public void openExternalLink(String address) {
-                UI.getCurrent().getPage().setLocation(address);
+                UI.getCurrentOrThrow().getPage().setLocation(address);
             }
         },;
 

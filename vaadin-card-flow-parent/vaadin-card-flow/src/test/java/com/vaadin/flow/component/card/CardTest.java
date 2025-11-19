@@ -410,11 +410,6 @@ public class CardTest {
     }
 
     @Test
-    public void cardThemeVariantsEmptyByDefault() {
-        Assert.assertTrue(card.getThemeNames().isEmpty());
-    }
-
-    @Test
     public void ariaRoleEmptyByDefault() {
         Assert.assertTrue(card.getAriaRole().isEmpty());
     }

@@ -1098,41 +1098,29 @@ public class TreeGrid<T> extends Grid<T>
      * based on the data provider types.
      * <table>
      * <tr>
-     * <th>HierarchicalDataProvider</th>
+     * <th>DataProvider</th>
      * <th>{@link HierarchicalDataProvider#isInMemory() isInMemory()}</th>
      * <th>{@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)
      * getItemIndex()}</th>
      * <th>{@link HierarchicalDataProvider#getParent(T) getParent()}</th>
      * </tr>
      * <tr>
-     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
-     * <td>true</td>
-     * <td>not required</td>
-     * <td>required</td>
-     * </tr>
-     * <tr>
-     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
-     * <td>false</td>
-     * <td>required</td>
-     * <td>required</td>
-     * </tr>
-     * <tr>
-     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
-     * <td>true</td>
-     * <td>not required</td>
-     * <td>required</td>
-     * </tr>
-     * <tr>
-     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
-     * <td>false</td>
-     * <td>required</td>
-     * <td>required</td>
-     * </tr>
-     * <tr>
      * <td>{@link TreeDataProvider}</td>
      * <td>true</td>
      * <td>not required</td>
      * <td>not required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchicalDataProvider}</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchicalDataProvider}</td>
+     * <td>false</td>
+     * <td>required</td>
+     * <td>required</td>
      * </tr>
      * </table>
      *
