@@ -27,6 +27,9 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.ai.input.AiInput;
+import com.vaadin.flow.component.ai.input.InputSubmitEvent;
+import com.vaadin.flow.component.ai.input.InputSubmitListener;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -51,7 +54,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/message-input", version = "25.0.0-beta5")
 public class MessageInput extends Component
         implements Focusable<MessageInput>, HasSize, HasStyle, HasEnabled,
-        HasTooltip, HasThemeVariant<MessageInputVariant> {
+        HasTooltip, HasThemeVariant<MessageInputVariant>, AiInput {
 
     private MessageInputI18n i18n;
 
@@ -152,5 +155,27 @@ public class MessageInput extends Component
         Objects.requireNonNull(i18n, "The i18n object should not be null");
         this.i18n = i18n;
         getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    // AiInput interface implementation
+
+    /**
+     * Adds a listener that is called when the user submits input.
+     * This is an adapter method for AI orchestrators.
+     *
+     * @param listener
+     *            the listener to add
+     */
+    @Override
+    public void addSubmitListener(InputSubmitListener listener) {
+        addSubmitListener((ComponentEventListener<SubmitEvent>) event -> {
+            InputSubmitEvent aiEvent = new InputSubmitEvent() {
+                @Override
+                public String getValue() {
+                    return event.getValue();
+                }
+            };
+            listener.onSubmit(aiEvent);
+        });
     }
 }

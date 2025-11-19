@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
@@ -49,7 +50,7 @@ import tools.jackson.databind.ser.std.ToStringSerializer;
  * @author Vaadin Ltd.
  * @see MessageList#setItems(Collection)
  */
-public class MessageListItem implements Serializable {
+public class MessageListItem implements Serializable, AiMessage {
 
     private MessageList host;
 

@@ -8,13 +8,14 @@
  */
 package com.vaadin.flow.component.ai.pro.chart;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.input.AiInput;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.messages.MessageInput;
 import reactor.core.publisher.Flux;
 
 import java.io.Serializable;
@@ -26,7 +27,7 @@ import java.util.Objects;
 /**
  * Orchestrator for AI-powered chart generation.
  * <p>
- * This class connects a {@link Chart}, {@link MessageInput},
+ * This class connects a {@link Chart}, {@link AiInput},
  * {@link LLMProvider}, and {@link DatabaseProvider} to enable users to generate
  * and modify charts using natural language. The orchestrator:
  * </p>
@@ -51,8 +52,10 @@ import java.util.Objects;
  * LLMProvider llmProvider = new LangChain4jProvider(model);
  * DatabaseProvider dbProvider = new MyDatabaseProvider();
  *
- * AiChartOrchestrator orchestrator = new AiChartOrchestrator(llmProvider,
- *         dbProvider, chart, messageInput);
+ * AiChartOrchestrator orchestrator = AiChartOrchestrator.create(llmProvider, dbProvider)
+ *         .withChart(chart)
+ *         .withInput(messageInput)
+ *         .build();
  * </pre>
  *
  * @author Vaadin Ltd
@@ -61,13 +64,11 @@ public class AiChartOrchestrator implements Serializable {
 
     private final LLMProvider llmProvider;
     private final DatabaseProvider databaseProvider;
-    private final Chart chart;
-    private final MessageInput messageInput;
-    private final DataConverter dataConverter;
+    private Chart chart;
+    private AiInput input;
+    private DataConverter dataConverter;
 
     private final List<LLMProvider.Message> conversationHistory = new ArrayList<>();
-
-    
 
     /**
      * Creates a new AI chart orchestrator.
@@ -76,51 +77,101 @@ public class AiChartOrchestrator implements Serializable {
      *            the LLM provider for natural language processing
      * @param databaseProvider
      *            the database provider for schema and query execution
-     * @param chart
-     *            the chart component to update
-     * @param messageInput
-     *            the message input for user requests
      */
-    public AiChartOrchestrator(LLMProvider llmProvider,
-            DatabaseProvider databaseProvider, Chart chart,
-            MessageInput messageInput) {
-        this(llmProvider, databaseProvider, chart, messageInput,
-                new DefaultDataConverter());
-    }
-
-    /**
-     * Creates a new AI chart orchestrator with a custom data converter.
-     *
-     * @param llmProvider
-     *            the LLM provider for natural language processing
-     * @param databaseProvider
-     *            the database provider for schema and query execution
-     * @param chart
-     *            the chart component to update
-     * @param messageInput
-     *            the message input for user requests
-     * @param dataConverter
-     *            the data converter for transforming query results to chart
-     *            data
-     */
-    public AiChartOrchestrator(LLMProvider llmProvider,
-            DatabaseProvider databaseProvider, Chart chart,
-            MessageInput messageInput, DataConverter dataConverter) {
+    private AiChartOrchestrator(LLMProvider llmProvider,
+            DatabaseProvider databaseProvider) {
         Objects.requireNonNull(llmProvider, "LLM provider cannot be null");
         Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-        Objects.requireNonNull(chart, "Chart cannot be null");
-        Objects.requireNonNull(messageInput, "Message input cannot be null");
-        Objects.requireNonNull(dataConverter, "Data converter cannot be null");
 
         this.llmProvider = llmProvider;
         this.databaseProvider = databaseProvider;
-        this.chart = chart;
-        this.messageInput = messageInput;
-        this.dataConverter = dataConverter;
+    }
 
-        // Listen to message input submissions
-        messageInput.addSubmitListener(this::handleUserRequest);
+    /**
+     * Creates a new builder for AiChartOrchestrator.
+     *
+     * @param llmProvider
+     *            the LLM provider
+     * @param databaseProvider
+     *            the database provider
+     * @return a new builder
+     */
+    public static Builder create(LLMProvider llmProvider,
+            DatabaseProvider databaseProvider) {
+        return new Builder(llmProvider, databaseProvider);
+    }
+
+    /**
+     * Builder for AiChartOrchestrator.
+     */
+    public static class Builder {
+        private final LLMProvider llmProvider;
+        private final DatabaseProvider databaseProvider;
+        private Chart chart;
+        private AiInput input;
+        private DataConverter dataConverter = new DefaultDataConverter();
+
+        private Builder(LLMProvider llmProvider,
+                DatabaseProvider databaseProvider) {
+            this.llmProvider = llmProvider;
+            this.databaseProvider = databaseProvider;
+        }
+
+        /**
+         * Sets the chart component.
+         *
+         * @param chart
+         *            the chart
+         * @return this builder
+         */
+        public Builder withChart(Chart chart) {
+            this.chart = chart;
+            return this;
+        }
+
+        /**
+         * Sets the input component.
+         *
+         * @param input
+         *            the input component
+         * @return this builder
+         */
+        public Builder withInput(AiInput input) {
+            this.input = input;
+            return this;
+        }
+
+        /**
+         * Sets the data converter.
+         *
+         * @param dataConverter
+         *            the data converter
+         * @return this builder
+         */
+        public Builder withDataConverter(DataConverter dataConverter) {
+            this.dataConverter = dataConverter;
+            return this;
+        }
+
+        /**
+         * Builds the orchestrator.
+         *
+         * @return the configured orchestrator
+         */
+        public AiChartOrchestrator build() {
+            AiChartOrchestrator orchestrator = new AiChartOrchestrator(
+                    llmProvider, databaseProvider);
+            orchestrator.chart = chart;
+            orchestrator.input = input;
+            orchestrator.dataConverter = dataConverter;
+
+            if (input != null) {
+                input.addSubmitListener(orchestrator::handleUserRequest);
+            }
+
+            return orchestrator;
+        }
     }
 
     /**
@@ -133,12 +184,12 @@ public class AiChartOrchestrator implements Serializable {
     }
 
     /**
-     * Gets the message input component.
+     * Gets the input component.
      *
-     * @return the message input
+     * @return the input component
      */
-    public MessageInput getMessageInput() {
-        return messageInput;
+    public AiInput getInput() {
+        return input;
     }
 
     /**
@@ -181,7 +232,7 @@ public class AiChartOrchestrator implements Serializable {
      * @param event
      *            the submit event
      */
-    private void handleUserRequest(MessageInput.SubmitEvent event) {
+    private void handleUserRequest(com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
         String userRequest = event.getValue();
         if (userRequest == null || userRequest.trim().isEmpty()) {
             return;

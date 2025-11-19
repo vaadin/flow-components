@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -31,6 +32,9 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.upload.AiFileReceiver;
+import com.vaadin.flow.component.ai.upload.FileUploadEvent;
+import com.vaadin.flow.component.ai.upload.FileUploadListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -66,7 +70,7 @@ import tools.jackson.databind.node.ObjectNode;
 @NpmPackage(value = "@vaadin/upload", version = "25.0.0-beta5")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
-        HasThemeVariant<UploadVariant> {
+        HasThemeVariant<UploadVariant>, AiFileReceiver {
 
     /**
      * Server-side component for the default {@code <vaadin-upload>} icon.
@@ -962,5 +966,47 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
                     "Upload cannot be performed without a upload handler set. "
                             + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
         }
+    }
+
+    // AiFileReceiver interface implementation
+
+    /**
+     * Adds a listener that is called when a file upload succeeds.
+     * This is an adapter method for AI orchestrators.
+     * <p>
+     * Note: The Upload component streams file content and does not keep it in
+     * memory by default. To use this with AI orchestrators, you need to
+     * configure an UploadHandler that stores the uploaded data and makes it
+     * accessible via an InputStream.
+     *
+     * @param listener
+     *            the listener to add
+     */
+    @Override
+    public void addSucceededListener(FileUploadListener listener) {
+        addListener(SucceededEvent.class,
+                (ComponentEventListener<SucceededEvent>) event -> {
+            FileUploadEvent aiEvent = new FileUploadEvent() {
+                @Override
+                public String getFileName() {
+                    return event.getFileName();
+                }
+
+                @Override
+                public String getMimeType() {
+                    return event.getMIMEType();
+                }
+
+                @Override
+                public InputStream getInputStream() {
+                    // The Upload component streams content and doesn't keep it
+                    // in memory. Applications need to handle storage in their
+                    // UploadHandler and provide access to the data.
+                    // This is a limitation of the adapter pattern.
+                    return null;
+                }
+            };
+            listener.onFileUploaded(aiEvent);
+        });
     }
 }

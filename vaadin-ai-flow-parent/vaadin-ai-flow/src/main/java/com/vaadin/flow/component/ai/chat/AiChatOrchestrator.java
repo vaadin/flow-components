@@ -17,15 +17,14 @@ package com.vaadin.flow.component.ai.chat;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.input.AiInput;
+import com.vaadin.flow.component.ai.messagelist.AiMessage;
+import com.vaadin.flow.component.ai.messagelist.AiMessageList;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.messages.MessageInput;
-import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.server.Command;
+import com.vaadin.flow.component.ai.upload.AiFileReceiver;
 import reactor.core.publisher.Flux;
 
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,13 +32,14 @@ import java.util.Objects;
 /**
  * Orchestrator for AI-powered chat interfaces.
  * <p>
- * This class connects a {@link MessageList}, {@link MessageInput}, and an
+ * This class connects an {@link AiMessageList}, {@link AiInput}, and an
  * {@link LLMProvider} to create an interactive AI chat experience. It handles:
  * </p>
  * <ul>
  * <li>Conversation history management</li>
- * <li>Streaming responses from the LLM to the MessageList</li>
+ * <li>Streaming responses from the LLM to the message list</li>
  * <li>Automatic UI updates via server push</li>
+ * <li>Optional file upload support</li>
  * </ul>
  * <p>
  * Example usage:
@@ -50,8 +50,10 @@ import java.util.Objects;
  * MessageInput messageInput = new MessageInput();
  *
  * LLMProvider provider = new LangChain4jProvider(model);
- * AiChatOrchestrator orchestrator = new AiChatOrchestrator(provider,
- *         messageList, messageInput);
+ * AiChatOrchestrator orchestrator = AiChatOrchestrator.create(provider)
+ *         .withMessageList(messageList)
+ *         .withInput(messageInput)
+ *         .build();
  * orchestrator.setSystemPrompt("You are a helpful assistant.");
  * orchestrator.setUserName("User");
  * orchestrator.setAssistantName("AI Assistant");
@@ -62,8 +64,9 @@ import java.util.Objects;
 public class AiChatOrchestrator implements Serializable {
 
     private final LLMProvider provider;
-    private final MessageList messageList;
-    private final MessageInput messageInput;
+    private AiMessageList messageList;
+    private AiInput input;
+    private AiFileReceiver fileReceiver;
 
     private String systemPrompt = "";
     private String userName = "User";
@@ -76,23 +79,89 @@ public class AiChatOrchestrator implements Serializable {
      *
      * @param provider
      *            the LLM provider to use for generating responses
-     * @param messageList
-     *            the message list component to display messages
-     * @param messageInput
-     *            the message input component for user input
      */
-    public AiChatOrchestrator(LLMProvider provider, MessageList messageList,
-            MessageInput messageInput) {
+    private AiChatOrchestrator(LLMProvider provider) {
         Objects.requireNonNull(provider, "Provider cannot be null");
-        Objects.requireNonNull(messageList, "MessageList cannot be null");
-        Objects.requireNonNull(messageInput, "MessageInput cannot be null");
-
         this.provider = provider;
-        this.messageList = messageList;
-        this.messageInput = messageInput;
+    }
 
-        // Listen to message input submissions
-        messageInput.addSubmitListener(this::handleUserMessage);
+    /**
+     * Creates a new builder for AiChatOrchestrator.
+     *
+     * @param provider
+     *            the LLM provider
+     * @return a new builder
+     */
+    public static Builder create(LLMProvider provider) {
+        return new Builder(provider);
+    }
+
+    /**
+     * Builder for AiChatOrchestrator.
+     */
+    public static class Builder {
+        private final LLMProvider provider;
+        private AiMessageList messageList;
+        private AiInput input;
+        private AiFileReceiver fileReceiver;
+
+        private Builder(LLMProvider provider) {
+            this.provider = provider;
+        }
+
+        /**
+         * Sets the message list component.
+         *
+         * @param messageList
+         *            the message list
+         * @return this builder
+         */
+        public Builder withMessageList(AiMessageList messageList) {
+            this.messageList = messageList;
+            return this;
+        }
+
+        /**
+         * Sets the input component.
+         *
+         * @param input
+         *            the input component
+         * @return this builder
+         */
+        public Builder withInput(AiInput input) {
+            this.input = input;
+            return this;
+        }
+
+        /**
+         * Sets the file receiver component for file uploads.
+         *
+         * @param fileReceiver
+         *            the file receiver
+         * @return this builder
+         */
+        public Builder withFileReceiver(AiFileReceiver fileReceiver) {
+            this.fileReceiver = fileReceiver;
+            return this;
+        }
+
+        /**
+         * Builds the orchestrator.
+         *
+         * @return the configured orchestrator
+         */
+        public AiChatOrchestrator build() {
+            AiChatOrchestrator orchestrator = new AiChatOrchestrator(provider);
+            orchestrator.messageList = messageList;
+            orchestrator.input = input;
+            orchestrator.fileReceiver = fileReceiver;
+
+            if (input != null) {
+                input.addSubmitListener(orchestrator::handleUserMessage);
+            }
+
+            return orchestrator;
+        }
     }
 
     /**
@@ -167,17 +236,26 @@ public class AiChatOrchestrator implements Serializable {
      *
      * @return the message list
      */
-    public MessageList getMessageList() {
+    public AiMessageList getMessageList() {
         return messageList;
     }
 
     /**
-     * Gets the message input component.
+     * Gets the input component.
      *
-     * @return the message input
+     * @return the input component
      */
-    public MessageInput getMessageInput() {
-        return messageInput;
+    public AiInput getInput() {
+        return input;
+    }
+
+    /**
+     * Gets the file receiver component.
+     *
+     * @return the file receiver, or null if not configured
+     */
+    public AiFileReceiver getFileReceiver() {
+        return fileReceiver;
     }
 
     /**
@@ -194,7 +272,7 @@ public class AiChatOrchestrator implements Serializable {
      */
     public void clearConversation() {
         conversationHistory.clear();
-        messageList.setItems(new ArrayList<>());
+        // Note: Clearing message list would need to be implemented by the component
     }
 
     /**
@@ -203,7 +281,7 @@ public class AiChatOrchestrator implements Serializable {
      * @param event
      *            the submit event
      */
-    private void handleUserMessage(MessageInput.SubmitEvent event) {
+    private void handleUserMessage(com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
         String userMessage = event.getValue();
         if (userMessage == null || userMessage.trim().isEmpty()) {
             return;
@@ -215,9 +293,10 @@ public class AiChatOrchestrator implements Serializable {
         conversationHistory.add(message);
 
         // Add user message to UI
-        MessageListItem userItem = new MessageListItem(userMessage,
-                Instant.now(), userName);
-        addMessageToList(userItem);
+        if (messageList != null) {
+            AiMessage userItem = messageList.createMessage(userMessage, userName);
+            messageList.addMessage(userItem);
+        }
 
         // Generate AI response
         generateAiResponse();
@@ -227,6 +306,10 @@ public class AiChatOrchestrator implements Serializable {
      * Generates an AI response based on the conversation history.
      */
     private void generateAiResponse() {
+        if (messageList == null) {
+            return;
+        }
+
         UI ui = UI.getCurrent();
         if (ui == null) {
             throw new IllegalStateException(
@@ -234,9 +317,8 @@ public class AiChatOrchestrator implements Serializable {
         }
 
         // Create a placeholder for the assistant's message
-        MessageListItem assistantItem = new MessageListItem("",
-                Instant.now(), assistantName);
-        addMessageToList(assistantItem);
+        AiMessage assistantMessage = messageList.createMessage("", assistantName);
+        messageList.addMessage(assistantMessage);
 
         StringBuilder fullResponse = new StringBuilder();
 
@@ -250,47 +332,22 @@ public class AiChatOrchestrator implements Serializable {
 
             // Update UI with the accumulated response
             ui.access(() -> {
-                assistantItem.setText(fullResponse.toString());
-                updateMessageInList(assistantItem);
+                assistantMessage.setText(fullResponse.toString());
+                messageList.updateMessage(assistantMessage);
             });
         }, error -> {
             // Handle error
             ui.access(() -> {
-                assistantItem.setText(
-                        "Error: " + error.getMessage());
-                updateMessageInList(assistantItem);
+                assistantMessage.setText("Error: " + error.getMessage());
+                messageList.updateMessage(assistantMessage);
             });
         }, () -> {
             // When complete, add to conversation history
             ui.access(() -> {
-                LLMProvider.Message assistantMessage = LLMProvider
+                LLMProvider.Message llmMessage = LLMProvider
                         .createMessage("assistant", fullResponse.toString());
-                conversationHistory.add(assistantMessage);
+                conversationHistory.add(llmMessage);
             });
         });
-    }
-
-    /**
-     * Adds a message to the message list.
-     *
-     * @param item
-     *            the message item to add
-     */
-    private void addMessageToList(MessageListItem item) {
-        List<MessageListItem> items = new ArrayList<>(messageList.getItems());
-        items.add(item);
-        messageList.setItems(items);
-    }
-
-    /**
-     * Updates a message in the message list (triggers re-render).
-     *
-     * @param item
-     *            the message item that was updated
-     */
-    private void updateMessageInList(MessageListItem item) {
-        // Trigger update by setting items again
-        List<MessageListItem> items = new ArrayList<>(messageList.getItems());
-        messageList.setItems(items);
     }
 }
