@@ -27,11 +27,15 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.messagelist.AiMessage;
+import com.vaadin.flow.component.ai.messagelist.AiMessageList;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import java.time.Instant;
 
 /**
  * Message List allows you to show a list of messages, for example, a chat log.
@@ -46,7 +50,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
 @NpmPackage(value = "@vaadin/message-list", version = "25.0.0-beta5")
 public class MessageList extends Component
-        implements HasStyle, HasSize, LocaleChangeObserver {
+        implements HasStyle, HasSize, LocaleChangeObserver, AiMessageList {
 
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
@@ -313,5 +317,62 @@ public class MessageList extends Component
      */
     public boolean isAnnounceMessages() {
         return getElement().getProperty("announceMessages", false);
+    }
+
+    // AiMessageList interface implementation
+
+    /**
+     * Adds a message to the list.
+     * This is an adapter method for AI orchestrators.
+     *
+     * @param message
+     *            the message to add
+     */
+    @Override
+    public void addMessage(AiMessage message) {
+        if (message instanceof MessageListItem) {
+            // Direct use if it's already a MessageListItem
+            List<MessageListItem> newItems = new ArrayList<>(getItems());
+            newItems.add((MessageListItem) message);
+            setItems(newItems);
+        } else {
+            // Convert from generic AiMessage
+            MessageListItem item = new MessageListItem(
+                message.getText(),
+                message.getTime(),
+                message.getUserName()
+            );
+            List<MessageListItem> newItems = new ArrayList<>(getItems());
+            newItems.add(item);
+            setItems(newItems);
+        }
+    }
+
+    /**
+     * Updates an existing message in the list.
+     * This triggers a re-render of the list.
+     *
+     * @param message
+     *            the message to update
+     */
+    @Override
+    public void updateMessage(AiMessage message) {
+        // Trigger re-render by setting items again
+        List<MessageListItem> currentItems = new ArrayList<>(getItems());
+        setItems(currentItems);
+    }
+
+    /**
+     * Creates a new message with the given parameters.
+     *
+     * @param text
+     *            the message text
+     * @param userName
+     *            the user name
+     * @return the created message
+     */
+    @Override
+    public AiMessage createMessage(String text, String userName) {
+        return new MessageListItem(text, Instant.now(), userName);
     }
 }

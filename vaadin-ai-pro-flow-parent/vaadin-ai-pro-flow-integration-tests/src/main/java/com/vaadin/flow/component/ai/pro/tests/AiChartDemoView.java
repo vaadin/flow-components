@@ -87,9 +87,11 @@ public class AiChartDemoView extends VerticalLayout {
         LLMProvider llmProvider = new LangChain4jProvider(model);
         DatabaseProvider databaseProvider = new DummyDatabaseProvider();
 
-        // Create orchestrator
-        orchestrator = new AiChartOrchestrator(llmProvider, databaseProvider,
-                chart, messageInput);
+        // Create orchestrator using builder pattern
+        orchestrator = AiChartOrchestrator.create(llmProvider, databaseProvider)
+                .withChart(chart)
+                .withInput(messageInput)
+                .build();
 
         add(messageInput, clearButton);
     }

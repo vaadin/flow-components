@@ -90,9 +90,12 @@ public class AiChatDemoView extends VerticalLayout {
                 .apiKey(apiKey).modelName("gpt-4").build();
         LLMProvider provider = new LangChain4jProvider(model);
 
-        // Create and configure orchestrator
-        AiChatOrchestrator orchestrator = new AiChatOrchestrator(provider,
-                messageList, messageInput);
+        // Create and configure orchestrator using builder pattern
+        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(provider)
+                .withMessageList(messageList)
+                .withInput(messageInput)
+                .withFileReceiver(upload)
+                .build();
         orchestrator.setSystemPrompt(
                 "You are a helpful AI assistant. Be concise and friendly.");
         orchestrator.setUserName("User");
