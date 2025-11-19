@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
@@ -91,7 +89,6 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(getSorted()).append(getDirection())
-                .toHashCode();
+        return getSorted().hashCode() + getDirection().hashCode();
     }
 }
