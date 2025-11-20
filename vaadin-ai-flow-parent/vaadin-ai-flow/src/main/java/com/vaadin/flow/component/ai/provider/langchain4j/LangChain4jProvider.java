@@ -37,14 +37,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * LangChain4j implementation of LLMProvider.
  * <p>
  * Handles conversation memory internally using LangChain4j's ChatMemory. Each
- * conversation is identified by a conversationId and has its own memory
- * instance.
+ * provider instance maintains its own conversation memory, so multiple
+ * provider instances can be used for different conversations.
  * </p>
  * <p>
  * Example usage:
@@ -57,8 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * LLMProvider provider = new LangChain4jProvider(model);
  * provider.setSystemPrompt("You are a helpful assistant.");
  *
- * LLMRequest request = LLMRequest.of("conversationId1",
- *         "Hello, how are you?");
+ * LLMRequest request = LLMRequest.of("Hello, how are you?");
  * Flux&lt;String&gt; response = provider.stream(request);
  * </pre>
  *
@@ -67,8 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LangChain4jProvider implements LLMProvider {
 
     private final StreamingChatLanguageModel model;
-    private final Map<String, ChatMemory> conversations = new ConcurrentHashMap<>();
-    private final int maxMessages;
+    private final ChatMemory chatMemory;
     private String defaultSystemPrompt;
 
     /**
@@ -97,7 +94,7 @@ public class LangChain4jProvider implements LLMProvider {
             throw new IllegalArgumentException("Model cannot be null");
         }
         this.model = model;
-        this.maxMessages = maxMessages;
+        this.chatMemory = MessageWindowChatMemory.withMaxMessages(maxMessages);
     }
 
     @Override
@@ -114,14 +111,6 @@ public class LangChain4jProvider implements LLMProvider {
 
         return Flux.create(sink -> {
             try {
-                // Get or create chat memory for this conversation
-                String conversationId = request.conversationId() != null
-                        ? request.conversationId()
-                        : "default";
-                ChatMemory chatMemory = conversations.computeIfAbsent(
-                        conversationId, id -> MessageWindowChatMemory
-                                .withMaxMessages(maxMessages));
-
                 // Add user message with attachments to memory
                 chatMemory.add(buildUserMessage(request));
 
@@ -316,19 +305,9 @@ public class LangChain4jProvider implements LLMProvider {
     }
 
     /**
-     * Clears the conversation memory for the specified conversation ID.
-     *
-     * @param conversationId
-     *            the conversation ID
+     * Clears the conversation memory for this provider instance.
      */
-    public void clearConversation(String conversationId) {
-        conversations.remove(conversationId);
-    }
-
-    /**
-     * Clears all conversation memories.
-     */
-    public void clearAllConversations() {
-        conversations.clear();
+    public void clearConversation() {
+        chatMemory.clear();
     }
 }

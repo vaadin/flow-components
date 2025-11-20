@@ -33,11 +33,15 @@ import java.util.Objects;
  * {@link LLMProvider} to create an interactive AI chat experience. It handles:
  * </p>
  * <ul>
- * <li>Conversation history management</li>
  * <li>Streaming responses from the LLM to the message list</li>
  * <li>Automatic UI updates via server push</li>
  * <li>Optional file upload support</li>
  * </ul>
+ * <p>
+ * Conversation history is managed internally by the {@link LLMProvider}
+ * instance. Each orchestrator maintains its own conversation context through
+ * its provider instance.
+ * </p>
  * <p>
  * Example usage:
  * </p>
@@ -52,8 +56,6 @@ import java.util.Objects;
  *         .withInput(messageInput)
  *         .build();
  * orchestrator.setSystemPrompt("You are a helpful assistant.");
- * orchestrator.setUserName("User");
- * orchestrator.setAssistantName("AI Assistant");
  * </pre>
  *
  * @author Vaadin Ltd
@@ -65,7 +67,6 @@ public class AiChatOrchestrator implements Serializable {
     private AiInput input;
     private AiFileReceiver fileReceiver;
 
-    private String conversationId = "default";
     private String systemPrompt;
 
     /**
@@ -195,27 +196,6 @@ public class AiChatOrchestrator implements Serializable {
     }
 
     /**
-     * Sets the conversation ID for this chat session. The provider uses this
-     * to manage conversation memory.
-     *
-     * @param conversationId
-     *            the conversation ID
-     */
-    public void setConversationId(String conversationId) {
-        this.conversationId = conversationId != null ? conversationId
-                : "default";
-    }
-
-    /**
-     * Gets the conversation ID.
-     *
-     * @return the conversation ID
-     */
-    public String getConversationId() {
-        return conversationId;
-    }
-
-    /**
      * Sets the system prompt for this chat. This overrides any default system
      * prompt configured in the provider.
      *
@@ -283,7 +263,7 @@ public class AiChatOrchestrator implements Serializable {
 
         // Build LLM request
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .conversationId(conversationId).userMessage(userMessage)
+                .userMessage(userMessage)
                 .systemPrompt(systemPrompt).build();
 
         // Get streaming response from LLM

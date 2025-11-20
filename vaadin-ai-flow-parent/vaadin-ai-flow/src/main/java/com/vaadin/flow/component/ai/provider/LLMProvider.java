@@ -25,7 +25,7 @@ import java.util.List;
  * <p>
  * This interface can be used by any AI-powered component to communicate with
  * LLMs, not just chat components. Implementations handle conversation memory
- * internally based on the conversationId provided in the request.
+ * internally, managing conversation context per provider instance.
  * </p>
  *
  * @author Vaadin Ltd
@@ -96,15 +96,6 @@ public interface LLMProvider extends Serializable {
      */
     interface LLMRequest extends Serializable {
         /**
-         * Gets the conversation ID for memory management. If null, the
-         * provider may use a default conversation or treat it as a new
-         * conversation.
-         *
-         * @return the conversation ID
-         */
-        String conversationId();
-
-        /**
          * Gets the user message.
          *
          * @return the user message
@@ -149,25 +140,7 @@ public interface LLMProvider extends Serializable {
          * @return a new LLMRequest instance
          */
         static LLMRequest of(String userMessage) {
-            return of(null, userMessage);
-        }
-
-        /**
-         * Creates an LLM request with conversation ID for memory management.
-         *
-         * @param conversationId
-         *            the conversation ID
-         * @param userMessage
-         *            the user message
-         * @return a new LLMRequest instance
-         */
-        static LLMRequest of(String conversationId, String userMessage) {
             return new LLMRequest() {
-                @Override
-                public String conversationId() {
-                    return conversationId;
-                }
-
                 @Override
                 public String userMessage() {
                     return userMessage;
@@ -200,24 +173,11 @@ public interface LLMProvider extends Serializable {
      * Builder for creating LLMRequest instances with a fluent API.
      */
     class LLMRequestBuilder implements Serializable {
-        private String conversationId;
         private String userMessage;
         private List<Attachment> attachments = List.of();
         private String systemPrompt;
         private Tool[] tools = new Tool[0];
         private String modelName;
-
-        /**
-         * Sets the conversation ID.
-         *
-         * @param conversationId
-         *            the conversation ID
-         * @return this builder
-         */
-        public LLMRequestBuilder conversationId(String conversationId) {
-            this.conversationId = conversationId;
-            return this;
-        }
 
         /**
          * Sets the user message.
@@ -285,7 +245,6 @@ public interface LLMProvider extends Serializable {
          * @return the LLMRequest instance
          */
         public LLMRequest build() {
-            String finalConversationId = conversationId;
             String finalUserMessage = userMessage;
             List<Attachment> finalAttachments = attachments;
             String finalSystemPrompt = systemPrompt;
@@ -293,11 +252,6 @@ public interface LLMProvider extends Serializable {
             String finalModelName = modelName;
 
             return new LLMRequest() {
-                @Override
-                public String conversationId() {
-                    return finalConversationId;
-                }
-
                 @Override
                 public String userMessage() {
                     return finalUserMessage;

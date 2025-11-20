@@ -563,11 +563,10 @@ public class AiChatOrchestratorTest {
 
         LLMProvider.LLMRequest request = requestCaptor.getValue();
 
-        // The provider manages conversation history internally via conversationId
-        // We verify that the request has the correct user message and conversationId
+        // The provider manages conversation history internally
+        // We verify that the request has the correct user message
         assertNotNull("Request should not be null", request);
         assertEquals("User message should match", "Message 2", request.userMessage());
-        assertNotNull("Conversation ID should be set for history", request.conversationId());
     }
 
     @Test
@@ -734,9 +733,10 @@ public class AiChatOrchestratorTest {
         listenerCaptor.getValue().onSubmit(() -> "Message 1");
         Thread.sleep(150);
 
-        // Capture the conversation ID from the first call
+        // Verify first call
         verify(mockProvider).stream(requestCaptor.capture());
-        String conversationId = requestCaptor.getValue().conversationId();
+        LLMProvider.LLMRequest firstRequest = requestCaptor.getValue();
+        assertEquals("First message should match", "Message 1", firstRequest.userMessage());
 
         // Reset and prepare for second message
         reset(mockProvider);
@@ -749,9 +749,8 @@ public class AiChatOrchestratorTest {
         verify(mockProvider).stream(requestCaptor.capture());
         LLMProvider.LLMRequest secondRequest = requestCaptor.getValue();
 
-        // Verify that the conversation ID is maintained across calls
-        assertNotNull("Conversation ID should be set", secondRequest.conversationId());
-        assertEquals("Conversation ID should match first call", conversationId, secondRequest.conversationId());
+        // Verify that both messages use the same provider instance (conversation history is maintained internally)
+        assertEquals("Second message should match", "Message 2", secondRequest.userMessage());
     }
 
     // ===== Tests for edge cases =====
