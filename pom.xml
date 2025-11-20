@@ -37,6 +37,7 @@
         <module>vaadin-virtual-list-flow-parent</module>
         <module>vaadin-list-box-flow-parent</module>
         <module>vaadin-login-flow-parent</module>
+        <module>vaadin-ai-flow-parent</module>
         <module>vaadin-markdown-flow-parent</module>
         <module>vaadin-menu-bar-flow-parent</module>
         <module>vaadin-messages-flow-parent</module>
@@ -62,8 +63,6 @@
         <module>vaadin-field-highlighter-flow-parent</module>
         <module>vaadin-side-nav-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
-        <module>vaadin-ai-flow-parent</module>
-        <module>vaadin-ai-pro-flow-parent</module>
     </modules>
     <scm>
         <connection>scm:https:https://github.com/vaadin/flow-components.git</connection>
