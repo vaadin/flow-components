@@ -220,13 +220,6 @@ public class AiChartOrchestrator implements Serializable {
     }
 
     /**
-     * Clears the conversation history.
-     */
-    public void clearConversation() {
-        conversationHistory.clear();
-    }
-
-    /**
      * Handles a user request.
      *
      * @param event

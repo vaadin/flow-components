@@ -680,60 +680,6 @@ public class AiChartOrchestratorTest {
     // ===== CONVERSATION HISTORY TESTS =====
 
     @Test
-    public void clearConversation_clearsHistory() throws Exception {
-        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
-                .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Message>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        when(mockLlmProvider.generateStream(anyList(), anyString(), anyList()))
-                .thenReturn(Flux.just("Response"));
-
-        AiChartOrchestrator orchestrator = AiChartOrchestrator
-                .create(mockLlmProvider, mockDatabaseProvider)
-                .withInput(mockInput)
-                .build();
-
-        verify(mockInput).addSubmitListener(listenerCaptor.capture());
-
-        // Add first message
-        InputSubmitEvent event1 = () -> "First request";
-        listenerCaptor.getValue().onSubmit(event1);
-
-        Thread.sleep(100);
-
-        verify(mockLlmProvider, times(1)).generateStream(
-                messagesCaptor.capture(), anyString(), anyList());
-
-        int messagesAfterFirst = messagesCaptor.getValue().size();
-        assertTrue("Should have at least one message after first request",
-                messagesAfterFirst >= 1);
-
-        // Clear conversation
-        orchestrator.clearConversation();
-
-        // Add second message
-        InputSubmitEvent event2 = () -> "Second request";
-        listenerCaptor.getValue().onSubmit(event2);
-
-        Thread.sleep(100);
-
-        verify(mockLlmProvider, times(2)).generateStream(
-                messagesCaptor.capture(), anyString(), anyList());
-
-        List<List<LLMProvider.Message>> allCaptures = messagesCaptor
-                .getAllValues();
-        int messagesAfterClear = allCaptures.get(allCaptures.size() - 1).size();
-
-        // After clearing, the second request adds the user message to history
-        // After streaming completes, the assistant response is also added
-        // So we expect at least 1 message (user), but may have 2 after streaming completes
-        assertTrue(
-                "Should have 1-2 messages after clear (user message, possibly + assistant response)",
-                messagesAfterClear >= 1 && messagesAfterClear <= 2);
-    }
-
-    @Test
     public void multipleRequests_buildsConversationHistory() throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
