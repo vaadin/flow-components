@@ -37,6 +37,12 @@ public class UploadTest {
     }
 
     @Test
+    public void implementsAiFileReceiver() {
+        Assert.assertTrue(com.vaadin.flow.component.ai.upload.AiFileReceiver.class
+                .isAssignableFrom(Upload.class));
+    }
+
+    @Test
     public void switchBetweenSingleAndMultiFileReceiver_assertMaxFilesProperty() {
         Upload upload = new Upload();
 

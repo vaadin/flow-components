@@ -80,4 +80,23 @@ public class MessageInputTest {
         Assert.assertTrue("MessageInput should be focusable",
                 Focusable.class.isAssignableFrom(messageInput.getClass()));
     }
+
+    @Test
+    public void implementsAiInput() {
+        Assert.assertTrue(com.vaadin.flow.component.ai.input.AiInput.class
+                .isAssignableFrom(MessageInput.class));
+    }
+
+    @Test
+    public void addSubmitListener_aiListenerCalled() {
+        AtomicReference<String> valueRef = new AtomicReference<>();
+        messageInput.addSubmitListener(
+                (com.vaadin.flow.component.ai.input.InputSubmitListener) event -> valueRef.set(event.getValue()));
+
+        MessageInput.SubmitEvent event = new MessageInput.SubmitEvent(
+                messageInput, false, "foo");
+        ComponentUtil.fireEvent(messageInput, event);
+
+        Assert.assertEquals("foo", valueRef.get());
+    }
 }
