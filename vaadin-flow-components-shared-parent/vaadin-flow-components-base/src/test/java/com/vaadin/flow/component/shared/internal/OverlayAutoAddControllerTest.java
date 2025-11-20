@@ -208,6 +208,76 @@ public class OverlayAutoAddControllerTest {
                 false);
     }
 
+    @Test
+    public void open_insideModalComponent_dataSlotIgnoreAttributeSet() {
+        // Open a modal component first
+        TestComponent modal = new TestComponent(() -> true);
+        modal.setOpened(true);
+        fakeClientResponse();
+
+        // Open another component inside the modal
+        TestComponent innerComponent = new TestComponent();
+        innerComponent.setOpened(true);
+        fakeClientResponse();
+
+        // Verify the inner component has data-slot-ignore attribute
+        Assert.assertTrue(
+                innerComponent.getElement().hasAttribute("data-slot-ignore"));
+    }
+
+    @Test
+    public void open_notInsideModalComponent_dataSlotIgnoreAttributeNotSet() {
+        // Open a component without a modal parent
+        TestComponent component = new TestComponent();
+        component.setOpened(true);
+        fakeClientResponse();
+
+        // Verify the component does not have data-slot-ignore attribute
+        Assert.assertFalse(
+                component.getElement().hasAttribute("data-slot-ignore"));
+    }
+
+    @Test
+    public void open_insideModalComponent_close_dataSlotIgnoreAttributeRemoved() {
+        // Open a modal component first
+        TestComponent modal = new TestComponent(() -> true);
+        modal.setOpened(true);
+        fakeClientResponse();
+
+        // Open another component inside the modal
+        TestComponent innerComponent = new TestComponent();
+        innerComponent.setOpened(true);
+        fakeClientResponse();
+
+        // Verify the attribute is set
+        Assert.assertTrue(
+                innerComponent.getElement().hasAttribute("data-slot-ignore"));
+
+        // Close the component
+        innerComponent.setOpened(false);
+
+        // Verify the attribute is removed
+        Assert.assertFalse(
+                innerComponent.getElement().hasAttribute("data-slot-ignore"));
+    }
+
+    @Test
+    public void add_insideModalComponent_dataSlotIgnoreAttributeSet() {
+        // Open a modal component first
+        TestComponent modal = new TestComponent(() -> true);
+        modal.setOpened(true);
+        fakeClientResponse();
+
+        // Add another component by opening it
+        TestComponent innerComponent = new TestComponent();
+        innerComponent.setOpened(true);
+        fakeClientResponse();
+
+        // Verify the inner component has data-slot-ignore attribute
+        Assert.assertTrue(
+                innerComponent.getElement().hasAttribute("data-slot-ignore"));
+    }
+
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
