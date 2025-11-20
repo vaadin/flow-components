@@ -55,7 +55,6 @@ import static org.mockito.Mockito.*;
  * <li>Error handling</li>
  * </ul>
  */
-@SuppressWarnings("unchecked")
 public class AiChartOrchestratorTest {
 
     private LLMProvider mockLlmProvider;
@@ -86,7 +85,7 @@ public class AiChartOrchestratorTest {
         ui.getInternals().setSession(session);
 
         // Default mock behavior - return empty Flux
-        when(mockLlmProvider.generateStream(anyList(), anyString(), anyList()))
+        when(mockLlmProvider.stream(any()))
                 .thenReturn(Flux.empty());
     }
 
@@ -247,7 +246,7 @@ public class AiChartOrchestratorTest {
     // ===== USER REQUEST HANDLING TESTS =====
 
     @Test
-    public void handleUserRequest_withValidMessage_addsToConversationHistory()
+    public void handleUserRequest_withValidMessage_callsLlmProvider()
             throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
@@ -263,8 +262,7 @@ public class AiChartOrchestratorTest {
 
         Thread.sleep(100);
 
-        verify(mockLlmProvider, times(1)).generateStream(anyList(), anyString(),
-                anyList());
+        verify(mockLlmProvider, times(1)).stream(any());
     }
 
     @Test
@@ -281,8 +279,7 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider, never()).generateStream(anyList(), anyString(),
-                anyList());
+        verify(mockLlmProvider, never()).stream(any());
     }
 
     @Test
@@ -299,8 +296,7 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "   ";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider, never()).generateStream(anyList(), anyString(),
-                anyList());
+        verify(mockLlmProvider, never()).stream(any());
     }
 
     @Test
@@ -317,16 +313,15 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> null;
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider, never()).generateStream(anyList(), anyString(),
-                anyList());
+        verify(mockLlmProvider, never()).stream(any());
     }
 
     @Test
     public void handleUserRequest_callsLlmProviderWithSystemPrompt() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<String> systemPromptCaptor = ArgumentCaptor
-                .forClass(String.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withInput(mockInput)
@@ -337,10 +332,10 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Create a bar chart";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider, times(1)).generateStream(anyList(),
-                systemPromptCaptor.capture(), anyList());
+        verify(mockLlmProvider, times(1)).stream(requestCaptor.capture());
 
-        String systemPrompt = systemPromptCaptor.getValue();
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        String systemPrompt = request.systemPrompt();
         assertNotNull("System prompt should not be null", systemPrompt);
         assertTrue("System prompt should mention chart configuration",
                 systemPrompt.contains("chart configuration"));
@@ -350,8 +345,8 @@ public class AiChartOrchestratorTest {
     public void handleUserRequest_callsLlmProviderWithTools() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withInput(mockInput)
@@ -362,12 +357,12 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Show sales data";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider, times(1)).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider, times(1)).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        assertNotNull("Tools list should not be null", tools);
-        assertEquals("Should have 3 tools", 3, tools.size());
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        assertNotNull("Tools array should not be null", tools);
+        assertEquals("Should have 3 tools", 3, tools.length);
     }
 
     @Test
@@ -400,8 +395,8 @@ public class AiChartOrchestratorTest {
     public void tools_hasGetSchemaTool() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withInput(mockInput)
@@ -412,12 +407,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        boolean hasGetSchema = tools.stream()
-                .anyMatch(tool -> "getSchema".equals(tool.getName()));
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        boolean hasGetSchema = false;
+        for (LLMProvider.Tool tool : tools) {
+            if ("getSchema".equals(tool.getName())) {
+                hasGetSchema = true;
+                break;
+            }
+        }
 
         assertTrue("Should have getSchema tool", hasGetSchema);
     }
@@ -426,8 +426,8 @@ public class AiChartOrchestratorTest {
     public void tools_hasUpdateChartDataTool() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withInput(mockInput)
@@ -438,12 +438,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        boolean hasUpdateChartData = tools.stream()
-                .anyMatch(tool -> "updateChartData".equals(tool.getName()));
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        boolean hasUpdateChartData = false;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                hasUpdateChartData = true;
+                break;
+            }
+        }
 
         assertTrue("Should have updateChartData tool", hasUpdateChartData);
     }
@@ -452,8 +457,8 @@ public class AiChartOrchestratorTest {
     public void tools_hasUpdateChartConfigTool() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withInput(mockInput)
@@ -464,12 +469,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        boolean hasUpdateChartConfig = tools.stream()
-                .anyMatch(tool -> "updateChartConfig".equals(tool.getName()));
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        boolean hasUpdateChartConfig = false;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartConfig".equals(tool.getName())) {
+                hasUpdateChartConfig = true;
+                break;
+            }
+        }
 
         assertTrue("Should have updateChartConfig tool", hasUpdateChartConfig);
     }
@@ -478,8 +488,8 @@ public class AiChartOrchestratorTest {
     public void getSchemaToolExecution_callsDatabaseProvider() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         when(mockDatabaseProvider.getSchema()).thenReturn(
                 "CREATE TABLE sales (id INT, amount DECIMAL)");
@@ -493,14 +503,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        LLMProvider.Tool getSchemaTool = tools.stream()
-                .filter(tool -> "getSchema".equals(tool.getName()))
-                .findFirst()
-                .orElse(null);
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        LLMProvider.Tool getSchemaTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("getSchema".equals(tool.getName())) {
+                getSchemaTool = tool;
+                break;
+            }
+        }
 
         assertNotNull("getSchema tool should exist", getSchemaTool);
 
@@ -515,8 +528,8 @@ public class AiChartOrchestratorTest {
     public void updateChartDataToolExecution_executesQueryAndUpdatesChart() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         List<Map<String, Object>> mockResults = new ArrayList<>();
         Map<String, Object> row1 = new HashMap<>();
@@ -542,14 +555,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        LLMProvider.Tool updateChartDataTool = tools.stream()
-                .filter(tool -> "updateChartData".equals(tool.getName()))
-                .findFirst()
-                .orElse(null);
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        LLMProvider.Tool updateChartDataTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                updateChartDataTool = tool;
+                break;
+            }
+        }
 
         assertNotNull("updateChartData tool should exist", updateChartDataTool);
 
@@ -567,8 +583,8 @@ public class AiChartOrchestratorTest {
     public void updateChartDataToolExecution_withError_returnsErrorMessage() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         when(mockDatabaseProvider.executeQuery(anyString()))
                 .thenThrow(new RuntimeException("Database error"));
@@ -583,14 +599,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        LLMProvider.Tool updateChartDataTool = tools.stream()
-                .filter(tool -> "updateChartData".equals(tool.getName()))
-                .findFirst()
-                .orElse(null);
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        LLMProvider.Tool updateChartDataTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                updateChartDataTool = tool;
+                break;
+            }
+        }
 
         assertNotNull("updateChartData tool should exist", updateChartDataTool);
 
@@ -606,8 +625,8 @@ public class AiChartOrchestratorTest {
     public void updateChartConfigToolExecution_updatesChart() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withChart(mockChart)
@@ -619,14 +638,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        LLMProvider.Tool updateChartConfigTool = tools.stream()
-                .filter(tool -> "updateChartConfig".equals(tool.getName()))
-                .findFirst()
-                .orElse(null);
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        LLMProvider.Tool updateChartConfigTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartConfig".equals(tool.getName())) {
+                updateChartConfigTool = tool;
+                break;
+            }
+        }
 
         assertNotNull("updateChartConfig tool should exist",
                 updateChartConfigTool);
@@ -642,8 +664,8 @@ public class AiChartOrchestratorTest {
     public void updateChartConfigToolExecution_withError_returnsErrorMessage() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         // Make chart.drawChart() throw an exception
         doThrow(new RuntimeException("Chart error")).when(mockChart)
@@ -659,14 +681,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        LLMProvider.Tool updateChartConfigTool = tools.stream()
-                .filter(tool -> "updateChartConfig".equals(tool.getName()))
-                .findFirst()
-                .orElse(null);
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        LLMProvider.Tool updateChartConfigTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartConfig".equals(tool.getName())) {
+                updateChartConfigTool = tool;
+                break;
+            }
+        }
 
         assertNotNull("updateChartConfig tool should exist",
                 updateChartConfigTool);
@@ -680,13 +705,11 @@ public class AiChartOrchestratorTest {
     // ===== CONVERSATION HISTORY TESTS =====
 
     @Test
-    public void multipleRequests_buildsConversationHistory() throws Exception {
+    public void multipleRequests_callsProviderMultipleTimes() throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Message>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
 
-        when(mockLlmProvider.generateStream(anyList(), anyString(), anyList()))
+        when(mockLlmProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
@@ -707,16 +730,8 @@ public class AiChartOrchestratorTest {
 
         Thread.sleep(100);
 
-        verify(mockLlmProvider, atLeast(2)).generateStream(
-                messagesCaptor.capture(), anyString(), anyList());
-
-        List<List<LLMProvider.Message>> allCaptures = messagesCaptor
-                .getAllValues();
-        int messagesInSecondCall = allCaptures.get(allCaptures.size() - 1)
-                .size();
-
-        assertTrue("Second call should have more messages than first",
-                messagesInSecondCall >= 2);
+        // Verify provider was called twice (conversation history managed internally by provider)
+        verify(mockLlmProvider, atLeast(2)).stream(any());
     }
 
     // ===== STREAMING TESTS =====
@@ -726,7 +741,7 @@ public class AiChartOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockLlmProvider.generateStream(anyList(), anyString(), anyList()))
+        when(mockLlmProvider.stream(any()))
                 .thenReturn(Flux.just("token1", "token2", "token3"));
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
@@ -740,8 +755,7 @@ public class AiChartOrchestratorTest {
 
         Thread.sleep(100);
 
-        verify(mockLlmProvider, times(1)).generateStream(anyList(), anyString(),
-                anyList());
+        verify(mockLlmProvider, times(1)).stream(any());
     }
 
     @Test
@@ -750,7 +764,7 @@ public class AiChartOrchestratorTest {
                 .forClass(InputSubmitListener.class);
 
         RuntimeException error = new RuntimeException("LLM error");
-        when(mockLlmProvider.generateStream(anyList(), anyString(), anyList()))
+        when(mockLlmProvider.stream(any()))
                 .thenReturn(Flux.<String>error(error));
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
@@ -764,19 +778,18 @@ public class AiChartOrchestratorTest {
 
         Thread.sleep(100);
 
-        verify(mockLlmProvider, times(1)).generateStream(anyList(), anyString(),
-                anyList());
+        verify(mockLlmProvider, times(1)).stream(any());
     }
 
     @Test
-    public void streaming_onComplete_addsAssistantMessageToHistory()
+    public void streaming_onComplete_verifyUserMessage()
             throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Message>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
-        when(mockLlmProvider.generateStream(anyList(), anyString(), anyList()))
+        when(mockLlmProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
@@ -790,14 +803,13 @@ public class AiChartOrchestratorTest {
 
         Thread.sleep(100);
 
-        verify(mockLlmProvider, times(1)).generateStream(
-                messagesCaptor.capture(), anyString(), anyList());
+        verify(mockLlmProvider, times(1)).stream(requestCaptor.capture());
 
-        List<LLMProvider.Message> messages = messagesCaptor.getValue();
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        String userMessage = request.userMessage();
 
-        assertTrue("Should have at least user message", messages.size() >= 1);
-        assertEquals("First message should be from user", "user",
-                messages.get(0).getRole());
+        assertNotNull("User message should not be null", userMessage);
+        assertEquals("User message should match input", "Create chart", userMessage);
     }
 
     // ===== EDGE CASES =====
@@ -810,9 +822,9 @@ public class AiChartOrchestratorTest {
         AiInput mockInput1 = Mockito.mock(AiInput.class);
         AiInput mockInput2 = Mockito.mock(AiInput.class);
 
-        when(mockProvider1.generateStream(anyList(), anyString(), anyList()))
+        when(mockProvider1.stream(any()))
                 .thenReturn(Flux.just("Response1"));
-        when(mockProvider2.generateStream(anyList(), anyString(), anyList()))
+        when(mockProvider2.stream(any()))
                 .thenReturn(Flux.just("Response2"));
 
         ArgumentCaptor<InputSubmitListener> listener1Captor = ArgumentCaptor
@@ -841,18 +853,16 @@ public class AiChartOrchestratorTest {
 
         Thread.sleep(100);
 
-        verify(mockProvider1, times(1)).generateStream(anyList(), anyString(),
-                anyList());
-        verify(mockProvider2, times(1)).generateStream(anyList(), anyString(),
-                anyList());
+        verify(mockProvider1, times(1)).stream(any());
+        verify(mockProvider2, times(1)).stream(any());
     }
 
     @Test
     public void getSchemaToolDescription_mentionsNoParameters() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withInput(mockInput)
@@ -863,14 +873,17 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
-        LLMProvider.Tool getSchemaTool = tools.stream()
-                .filter(tool -> "getSchema".equals(tool.getName()))
-                .findFirst()
-                .orElse(null);
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
+        LLMProvider.Tool getSchemaTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("getSchema".equals(tool.getName())) {
+                getSchemaTool = tool;
+                break;
+            }
+        }
 
         assertNotNull("getSchema tool should exist", getSchemaTool);
         assertNull("getSchema should have no parameters schema",
@@ -881,8 +894,8 @@ public class AiChartOrchestratorTest {
     public void toolDescriptions_includeUsageInstructions() {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<List<LLMProvider.Tool>> toolsCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         AiChartOrchestrator.create(mockLlmProvider, mockDatabaseProvider)
                 .withInput(mockInput)
@@ -893,10 +906,10 @@ public class AiChartOrchestratorTest {
         InputSubmitEvent event = () -> "Test";
         listenerCaptor.getValue().onSubmit(event);
 
-        verify(mockLlmProvider).generateStream(anyList(), anyString(),
-                toolsCaptor.capture());
+        verify(mockLlmProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Tool> tools = toolsCaptor.getValue();
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        LLMProvider.Tool[] tools = request.tools();
 
         for (LLMProvider.Tool tool : tools) {
             String description = tool.getDescription();

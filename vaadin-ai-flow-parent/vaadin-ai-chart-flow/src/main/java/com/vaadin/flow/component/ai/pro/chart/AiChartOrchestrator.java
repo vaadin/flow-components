@@ -68,7 +68,8 @@ public class AiChartOrchestrator implements Serializable {
     private AiInput input;
     private DataConverter dataConverter;
 
-    private final List<LLMProvider.Message> conversationHistory = new ArrayList<>();
+    private String conversationId = "default";
+    private String currentUserRequest;
 
     /**
      * Creates a new AI chart orchestrator.
@@ -225,18 +226,15 @@ public class AiChartOrchestrator implements Serializable {
      * @param event
      *            the submit event
      */
-    private void handleUserRequest(com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
+    private void handleUserRequest(
+            com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
         String userRequest = event.getValue();
         if (userRequest == null || userRequest.trim().isEmpty()) {
             return;
         }
 
-        // Add user message to conversation history
-        LLMProvider.Message message = LLMProvider.createMessage("user",
-                userRequest);
-        conversationHistory.add(message);
-
-        // Process the request with the LLM
+        // Store current request and process it
+        this.currentUserRequest = userRequest;
         processRequest();
     }
 
@@ -251,43 +249,43 @@ public class AiChartOrchestrator implements Serializable {
         }
 
         // Create tools
-        List<LLMProvider.Tool> tools = createTools();
+        LLMProvider.Tool[] tools = createTools();
+
+        // Build LLM request
+        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
+                .conversationId(conversationId).userMessage(currentUserRequest)
+                .systemPrompt(SYSTEM_PROMPT).tools(tools).build();
 
         // Get streaming response from LLM
-        Flux<String> responseStream = llmProvider
-                .generateStream(conversationHistory, SYSTEM_PROMPT, tools);
+        Flux<String> responseStream = llmProvider.stream(request);
 
         StringBuilder fullResponse = new StringBuilder();
 
         responseStream.subscribe(token -> {
             fullResponse.append(token);
-            // Note: Tool calls would be handled here in a full implementation
-            // For now, we just collect the response
+            // Note: Tool calls are handled internally by the provider
         }, error -> {
             ui.access(() -> {
                 // Handle error - could show in a notification or message
-                System.err.println("Error processing request: " + error.getMessage());
+                System.err
+                        .println("Error processing request: " + error.getMessage());
             });
         }, () -> {
-            ui.access(() -> {
-                // Add assistant response to history
-                LLMProvider.Message assistantMessage = LLMProvider
-                        .createMessage("assistant", fullResponse.toString());
-                conversationHistory.add(assistantMessage);
-            });
+            // Streaming complete - provider has already managed the
+            // conversation history
         });
     }
 
     /**
      * Creates the tools available to the LLM.
      *
-     * @return the list of tools
+     * @return the array of tools
      */
-    private List<LLMProvider.Tool> createTools() {
-        List<LLMProvider.Tool> tools = new ArrayList<>();
+    private LLMProvider.Tool[] createTools() {
+        List<LLMProvider.Tool> toolsList = new ArrayList<>();
 
         // Tool 1: getSchema
-        tools.add(new LLMProvider.Tool() {
+        toolsList.add(new LLMProvider.Tool() {
             @Override
             public String getName() {
                 return "getSchema";
@@ -310,7 +308,7 @@ public class AiChartOrchestrator implements Serializable {
         });
 
         // Tool 2: updateChartData
-        tools.add(new LLMProvider.Tool() {
+        toolsList.add(new LLMProvider.Tool() {
             @Override
             public String getName() {
                 return "updateChartData";
@@ -361,7 +359,7 @@ public class AiChartOrchestrator implements Serializable {
         });
 
         // Tool 3: updateChartConfig
-        tools.add(new LLMProvider.Tool() {
+        toolsList.add(new LLMProvider.Tool() {
             @Override
             public String getName() {
                 return "updateChartConfig";
@@ -401,7 +399,7 @@ public class AiChartOrchestrator implements Serializable {
             }
         });
 
-        return tools;
+        return toolsList.toArray(new LLMProvider.Tool[0]);
     }
 
     /**

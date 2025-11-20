@@ -24,8 +24,6 @@ import com.vaadin.flow.component.ai.upload.AiFileReceiver;
 import reactor.core.publisher.Flux;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -67,7 +65,8 @@ public class AiChatOrchestrator implements Serializable {
     private AiInput input;
     private AiFileReceiver fileReceiver;
 
-    private final List<LLMProvider.Message> conversationHistory = new ArrayList<>();
+    private String conversationId = "default";
+    private String systemPrompt;
 
     /**
      * Creates a new AI chat orchestrator.
@@ -195,6 +194,46 @@ public class AiChatOrchestrator implements Serializable {
         return fileReceiver;
     }
 
+    /**
+     * Sets the conversation ID for this chat session. The provider uses this
+     * to manage conversation memory.
+     *
+     * @param conversationId
+     *            the conversation ID
+     */
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId != null ? conversationId
+                : "default";
+    }
+
+    /**
+     * Gets the conversation ID.
+     *
+     * @return the conversation ID
+     */
+    public String getConversationId() {
+        return conversationId;
+    }
+
+    /**
+     * Sets the system prompt for this chat. This overrides any default system
+     * prompt configured in the provider.
+     *
+     * @param systemPrompt
+     *            the system prompt
+     */
+    public void setSystemPrompt(String systemPrompt) {
+        this.systemPrompt = systemPrompt;
+    }
+
+    /**
+     * Gets the system prompt.
+     *
+     * @return the system prompt
+     */
+    public String getSystemPrompt() {
+        return systemPrompt;
+    }
 
     /**
      * Handles a user message submission.
@@ -202,16 +241,12 @@ public class AiChatOrchestrator implements Serializable {
      * @param event
      *            the submit event
      */
-    private void handleUserMessage(com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
+    private void handleUserMessage(
+            com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
         String userMessage = event.getValue();
         if (userMessage == null || userMessage.trim().isEmpty()) {
             return;
         }
-
-        // Add user message to conversation history
-        LLMProvider.Message message = LLMProvider.createMessage("user",
-                userMessage);
-        conversationHistory.add(message);
 
         // Add user message to UI
         if (messageList != null) {
@@ -220,13 +255,16 @@ public class AiChatOrchestrator implements Serializable {
         }
 
         // Generate AI response
-        generateAiResponse();
+        generateAiResponse(userMessage);
     }
 
     /**
-     * Generates an AI response based on the conversation history.
+     * Generates an AI response based on the user message.
+     *
+     * @param userMessage
+     *            the user's message
      */
-    private void generateAiResponse() {
+    private void generateAiResponse(String userMessage) {
         if (messageList == null) {
             return;
         }
@@ -243,9 +281,13 @@ public class AiChatOrchestrator implements Serializable {
 
         StringBuilder fullResponse = new StringBuilder();
 
+        // Build LLM request
+        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
+                .conversationId(conversationId).userMessage(userMessage)
+                .systemPrompt(systemPrompt).build();
+
         // Get streaming response from LLM
-        Flux<String> responseStream = provider.generateStream(
-                conversationHistory, null, null);
+        Flux<String> responseStream = provider.stream(request);
 
         responseStream.subscribe(token -> {
             // Append token to the full response
@@ -263,12 +305,8 @@ public class AiChatOrchestrator implements Serializable {
                 messageList.updateMessage(assistantMessage);
             });
         }, () -> {
-            // When complete, add to conversation history
-            ui.access(() -> {
-                LLMProvider.Message llmMessage = LLMProvider
-                        .createMessage("assistant", fullResponse.toString());
-                conversationHistory.add(llmMessage);
-            });
+            // Streaming complete - provider has already added the response to
+            // conversation history
         });
     }
 }

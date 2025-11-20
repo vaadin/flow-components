@@ -22,18 +22,38 @@ vaadin-ai-flow-parent/
 ### Key Interfaces
 
 #### LLMProvider (`com.vaadin.flow.component.ai.provider.LLMProvider`)
-- Interface for integrating Large Language Model services
+- Framework-agnostic interface for integrating Large Language Model services
 - Provides streaming response generation via Reactor `Flux<String>`
-- Supports system prompts, conversation history, and tool calling
-- Contains nested interfaces:
-  - `Message` - represents conversation messages with role and content
-  - `Tool` - represents callable tools with name, description, parameters, and execution logic
+- Uses `LLMRequest` interface for request configuration containing:
+  - `conversationId` - for conversation memory management
+  - `userMessage` - the user's input text
+  - `attachments` - list of file attachments (images, PDFs, text files)
+  - `systemPrompt` - optional system prompt override
+  - `tools` - array of `Tool` instances (vendor-agnostic)
+  - `modelName` - optional model name override
+- Uses vendor-agnostic `Tool` interface with:
+  - `getName()` - tool identifier
+  - `getDescription()` - what the tool does and its parameters
+  - `getParametersSchema()` - optional JSON schema for parameters
+  - `execute(String arguments)` - executes the tool with JSON arguments
+- Implementations handle conversation memory internally based on conversationId
 
-**Implementation**: [LangChain4jProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4jProvider.java)
-- Bridges Vaadin AI components with LangChain4j library
-- Converts between generic `LLMProvider` types and LangChain4j-specific types
-- Handles tool execution and follow-up requests automatically
-- **Testing**: [LangChain4jProviderTest](vaadin-ai-flow/src/test/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4jProviderTest.java) (23 tests)
+**Implementations**:
+
+1. **[LangChain4jProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4jProvider.java)**
+   - Bridges Vaadin AI components with LangChain4j library
+   - Manages conversation memory per conversationId using `ChatMemory`
+   - Converts vendor-agnostic `Tool` instances to LangChain4j `ToolSpecification`
+   - Handles multimodal inputs (text, images, PDFs)
+   - Automatic tool execution and follow-up requests
+   - **Testing**: [LangChain4jProviderTest](vaadin-ai-flow/src/test/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4jProviderTest.java)
+
+2. **[SpringAiProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/springai/SpringAiProvider.java)**
+   - Integration with Spring AI's chat models
+   - Template implementation (requires Spring AI dependencies)
+   - Will convert vendor-agnostic `Tool` instances to Spring AI function calling
+   - Supports RAG via VectorStore integration
+   - Multimodal input support
 
 #### DatabaseProvider (`com.vaadin.flow.component.ai.provider.DatabaseProvider`)
 - Interface for database operations (schema introspection, query execution)
@@ -76,18 +96,21 @@ vaadin-ai-flow-parent/
 **Flow**:
 1. User submits input via `AiInput`
 2. Orchestrator adds user message to `AiMessageList`
-3. Calls `LLMProvider.generateStream()` with conversation history
+3. Calls `LLMProvider.stream()` with `LLMRequest` containing conversationId and userMessage
 4. Streams tokens to assistant message in real-time
-5. Updates conversation history on completion
+5. Provider manages conversation history internally based on conversationId
 
 **Key Features**:
-- Maintains conversation history (user + assistant messages)
+- Delegates conversation history management to LLMProvider via conversationId
 - Streaming responses with incremental UI updates
 - Error handling with error messages displayed in chat
 - UI.access() for thread-safe Vaadin updates
 - Validates UI context exists before operations
 
 **Testing**: [AiChatOrchestratorTest](vaadin-ai-chat-flow/src/test/java/com/vaadin/flow/component/ai/chat/AiChatOrchestratorTest.java) (extensive, ~40+ tests)
+- Tests verify LLMRequest properties (conversationId, userMessage) instead of message history
+- Uses ArgumentCaptor<LLMProvider.LLMRequest> to capture and validate requests
+- Verifies conversationId consistency across multiple messages
 
 ## Chart Module: vaadin-ai-chart-flow (Commercial)
 
@@ -244,11 +267,11 @@ Both orchestrators use `UI.access()` for Vaadin's server push:
 All orchestrators and providers implement `Serializable` for Vaadin session storage.
 
 ### Conversation History
-Chat orchestrator maintains full conversation history in memory:
-- User messages
-- Assistant responses
-- Used for context in subsequent requests
-- Consider memory implications for long conversations
+Conversation history is now managed by LLM providers:
+- Orchestrator uses conversationId to identify conversations
+- Providers maintain message history internally (e.g., using ChatMemory in LangChain4j)
+- Each request includes conversationId for context continuity
+- Memory management is delegated to the provider implementation
 
 ### Tool Execution Safety
 Chart orchestrator tools execute database queries:
