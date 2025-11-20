@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.chat;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.input.AiInput;
 import com.vaadin.flow.component.ai.messagelist.AiMessage;
