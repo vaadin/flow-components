@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
+import com.vaadin.flow.internal.StringUtil;
 
 public class FileBufferTest {
 
@@ -35,8 +35,8 @@ public class FileBufferTest {
         try (OutputStream os = fileBuffer.receiveUpload("uploadData", "text")) {
             os.write(dataBytes);
         }
-        final String readData = IOUtils.toString(fileBuffer.getInputStream(),
-                Charset.defaultCharset());
+        final String readData = StringUtil
+                .toUTF8String(fileBuffer.getInputStream());
         Assert.assertEquals(data, readData);
     }
 }
