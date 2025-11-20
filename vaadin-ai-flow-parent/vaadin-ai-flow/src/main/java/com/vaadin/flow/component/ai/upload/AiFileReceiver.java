@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.upload;
 
+import com.vaadin.flow.server.streams.UploadHandler;
+
 import java.io.Serializable;
 
 /**
@@ -35,4 +37,60 @@ public interface AiFileReceiver extends Serializable {
      *            the listener to add
      */
     void addSucceededListener(FileUploadListener listener);
+
+    /**
+     * Sets the upload handler for this file receiver.
+     * <p>
+     * The upload handler processes uploaded files and stores them in memory or
+     * on disk. This method should be called to configure how files are handled
+     * when uploaded.
+     * </p>
+     * <p>
+     * Default implementation does nothing. Components implementing this
+     * interface should override this method if they support upload handlers.
+     * </p>
+     *
+     * @param uploadHandler
+     *            the upload handler to use
+     */
+    default void setUploadHandler(UploadHandler uploadHandler) {
+        // Default implementation - no-op
+    }
+
+    /**
+     * Adds a listener for file removed events.
+     * <p>
+     * This listener is called when a user removes a file from the upload
+     * component before submitting.
+     * </p>
+     * <p>
+     * Default implementation does nothing. Components implementing this
+     * interface should override this method if they support file removal
+     * events. The implementation should extract the file name from the event
+     * and pass it to the listener.
+     * </p>
+     *
+     * @param listener
+     *            the listener to add, receives the removed file name
+     */
+    default void addFileRemovedListener(
+            java.util.function.Consumer<String> listener) {
+        // Default implementation - no-op
+    }
+
+    /**
+     * Clears the list of uploaded files from the UI.
+     * <p>
+     * This should be called after files have been processed to reset the
+     * upload component state.
+     * </p>
+     * <p>
+     * Default implementation does nothing. Components implementing this
+     * interface should override this method if they support clearing the file
+     * list.
+     * </p>
+     */
+    default void clearFileList() {
+        // Default implementation - no-op
+    }
 }
