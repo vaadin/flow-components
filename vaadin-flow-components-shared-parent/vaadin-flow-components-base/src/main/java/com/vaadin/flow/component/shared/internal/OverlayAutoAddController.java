@@ -73,6 +73,14 @@ public class OverlayAutoAddController<C extends Component>
         StateTree.ExecutionRegistration addToUiRegistration = ui
                 .beforeClientResponse(ui, context -> {
                     if (isOpened() && !isAttached()) {
+                        // Mark component as slot-ignored if being added inside
+                        // another modal. This prevents web component
+                        // SlotController from treating auto-added overlays as
+                        // custom content that should hide default slot content
+                        if (ui.hasModalComponent()) {
+                            component.getElement()
+                                    .setAttribute("data-slot-ignore", "");
+                        }
                         ui.addToModalComponent(component);
                         ui.setChildComponentModal(component,
                                 isModalSupplier.get());
@@ -98,6 +106,7 @@ public class OverlayAutoAddController<C extends Component>
     private void handleClose() {
         if (autoAdded) {
             autoAdded = false;
+            component.getElement().removeAttribute("data-slot-ignore");
             component.getElement().removeFromParent();
         }
     }
