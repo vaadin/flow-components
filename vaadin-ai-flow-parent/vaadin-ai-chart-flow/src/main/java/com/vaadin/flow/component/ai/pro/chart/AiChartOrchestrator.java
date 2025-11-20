@@ -10,10 +10,12 @@ package com.vaadin.flow.component.ai.pro.chart;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.input.AiInput;
+import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import reactor.core.publisher.Flux;
@@ -66,6 +68,7 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
     private DataConverter dataConverter;
 
     private String currentUserRequest;
+    private UI currentUI;
 
     /**
      * Creates a new AI chart orchestrator.
@@ -207,6 +210,12 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
             return;
         }
 
+        // Add user message to UI
+        if (messageList != null) {
+            AiMessage userItem = messageList.createMessage(userRequest, "User");
+            messageList.addMessage(userItem);
+        }
+
         // Store current request and process it
         this.currentUserRequest = userRequest;
         processRequest();
@@ -216,15 +225,31 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
      * Processes the current request using the LLM with tool support.
      */
     private void processRequest() {
+        if (messageList == null) {
+            System.err.println("Warning: messageList is null, cannot show responses");
+        }
+
         UI ui = validateUiContext();
+        this.currentUI = ui; // Store UI reference for tools to use
+
+        // Create a placeholder for the assistant's message
+        AiMessage assistantMessage = null;
+        if (messageList != null) {
+            assistantMessage = messageList.createMessage("", "Assistant");
+            messageList.addMessage(assistantMessage);
+        }
+        final AiMessage finalAssistantMessage = assistantMessage;
 
         // Create tools
         LLMProvider.Tool[] tools = createTools();
+        System.out.println("Chart orchestrator: Created " + tools.length + " tools for LLM");
 
         // Build LLM request
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
                 .userMessage(currentUserRequest)
                 .systemPrompt(SYSTEM_PROMPT).tools(tools).build();
+
+        System.out.println("Chart orchestrator: Sending request to LLM with user message: " + currentUserRequest);
 
         // Get streaming response from LLM
         Flux<String> responseStream = provider.stream(request);
@@ -232,15 +257,29 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
         StringBuilder fullResponse = new StringBuilder();
 
         responseStream.subscribe(token -> {
+            // Append token to the full response
             fullResponse.append(token);
-            // Note: Tool calls are handled internally by the provider
+            System.out.println("Chart orchestrator: Received token: " + token);
+
+            // Update UI with the accumulated response
+            if (finalAssistantMessage != null) {
+                ui.access(() -> {
+                    finalAssistantMessage.setText(fullResponse.toString());
+                    messageList.updateMessage(finalAssistantMessage);
+                });
+            }
         }, error -> {
+            System.err.println("Chart orchestrator: Error processing request: " + error.getMessage());
+            error.printStackTrace();
+
             ui.access(() -> {
-                // Handle error - could show in a notification or message
-                System.err
-                        .println("Error processing request: " + error.getMessage());
+                if (finalAssistantMessage != null) {
+                    finalAssistantMessage.setText("Error: " + error.getMessage());
+                    messageList.updateMessage(finalAssistantMessage);
+                }
             });
         }, () -> {
+            System.out.println("Chart orchestrator: Streaming complete. Full response: " + fullResponse.toString());
             // Streaming complete - provider has already managed the
             // conversation history
         });
@@ -273,7 +312,10 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
 
             @Override
             public String execute(String arguments) {
-                return databaseProvider.getSchema();
+                System.out.println("Chart orchestrator: Tool 'getSchema' called");
+                String schema = databaseProvider.getSchema();
+                System.out.println("Chart orchestrator: Tool 'getSchema' returned schema with length: " + schema.length());
+                return schema;
             }
         });
 
@@ -298,32 +340,54 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
 
             @Override
             public String execute(String arguments) {
+                System.out.println("Chart orchestrator: Tool 'updateChartData' called with arguments: " + arguments);
                 try {
                     // Parse arguments to extract query
                     // This is a simplified version - in production, use proper JSON parsing
                     String query = extractQueryFromArguments(arguments);
+                    System.out.println("Chart orchestrator: Executing query: " + query);
 
                     // Execute query
                     List<Map<String, Object>> results = databaseProvider
                             .executeQuery(query);
+                    System.out.println("Chart orchestrator: Query returned " + results.size() + " rows");
 
                     // Convert results to chart data
                     DataSeries series = dataConverter.convertToDataSeries(results);
+                    System.out.println("Chart orchestrator: Converted data to series with " + series.size() + " items");
 
-                    // Update chart
-                    UI ui = UI.getCurrent();
-                    if (ui != null) {
-                        ui.access(() -> {
+                    // Update chart using stored UI reference
+                    if (currentUI != null) {
+                        currentUI.access(() -> {
+                            System.out.println("Chart orchestrator: Updating chart in UI thread");
                             Configuration config = chart.getConfiguration();
+
+                            // Set default chart type if not set
+                            if (config.getChart() == null) {
+                                config.getChart().setType(ChartType.COLUMN);
+                                System.out.println("Chart orchestrator: Set default chart type to COLUMN");
+                            }
+
                             config.setSeries(series);
+
+                            // Log the series data
+                            System.out.println("Chart orchestrator: Chart configuration updated. Series count: " + config.getSeries().size());
+
                             chart.drawChart();
+                            System.out.println("Chart orchestrator: chart.drawChart() called");
                         });
+                    } else {
+                        System.err.println("Chart orchestrator: currentUI is null! Cannot update chart.");
                     }
 
-                    return "Chart data updated successfully with " + results.size()
-                            + " rows";
+                    String result = "Chart data updated successfully with " + results.size() + " rows";
+                    System.out.println("Chart orchestrator: Tool 'updateChartData' completed: " + result);
+                    return result;
                 } catch (Exception e) {
-                    return "Error updating chart data: " + e.getMessage();
+                    String error = "Error updating chart data: " + e.getMessage();
+                    System.err.println("Chart orchestrator: " + error);
+                    e.printStackTrace();
+                    return error;
                 }
             }
         });
@@ -349,22 +413,30 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
 
             @Override
             public String execute(String arguments) {
+                System.out.println("Chart orchestrator: Tool 'updateChartConfig' called with arguments: " + arguments);
                 try {
                     // Parse and apply configuration
                     // This is a simplified version - in production, use proper JSON parsing
                     String config = extractConfigFromArguments(arguments);
+                    System.out.println("Chart orchestrator: Applying config: " + config);
 
-                    UI ui = UI.getCurrent();
-                    if (ui != null) {
-                        ui.access(() -> {
+                    if (currentUI != null) {
+                        currentUI.access(() -> {
                             applyChartConfig(config);
                             chart.drawChart();
                         });
+                    } else {
+                        System.err.println("Chart orchestrator: currentUI is null! Cannot update chart config.");
                     }
 
-                    return "Chart configuration updated successfully";
+                    String result = "Chart configuration updated successfully";
+                    System.out.println("Chart orchestrator: Tool 'updateChartConfig' completed: " + result);
+                    return result;
                 } catch (Exception e) {
-                    return "Error updating chart config: " + e.getMessage();
+                    String error = "Error updating chart config: " + e.getMessage();
+                    System.err.println("Chart orchestrator: " + error);
+                    e.printStackTrace();
+                    return error;
                 }
             }
         });
@@ -385,9 +457,10 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
         if (queryStart == -1) {
             throw new IllegalArgumentException("No query found in arguments");
         }
-        int valueStart = arguments.indexOf(":", queryStart) + 1;
-        int valueEnd = arguments.indexOf("\"", valueStart + 2);
-        return arguments.substring(valueStart + 2, valueEnd).trim();
+        int valueStart = arguments.indexOf(":", queryStart);
+        int openQuote = arguments.indexOf("\"", valueStart);
+        int closeQuote = arguments.indexOf("\"", openQuote + 1);
+        return arguments.substring(openQuote + 1, closeQuote).trim();
     }
 
     /**
@@ -403,9 +476,10 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
         if (configStart == -1) {
             throw new IllegalArgumentException("No config found in arguments");
         }
-        int valueStart = arguments.indexOf(":", configStart) + 1;
-        int valueEnd = arguments.lastIndexOf("\"");
-        return arguments.substring(valueStart + 2, valueEnd).trim();
+        int valueStart = arguments.indexOf(":", configStart);
+        int openQuote = arguments.indexOf("\"", valueStart);
+        int closeQuote = arguments.lastIndexOf("\"");
+        return arguments.substring(openQuote + 1, closeQuote).trim();
     }
 
     /**

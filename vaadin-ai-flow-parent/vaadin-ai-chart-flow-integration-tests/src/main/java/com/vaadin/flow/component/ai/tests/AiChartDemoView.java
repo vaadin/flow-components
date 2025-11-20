@@ -17,6 +17,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.messages.MessageInput;
+import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
@@ -76,9 +77,12 @@ public class AiChartDemoView extends VerticalLayout {
         MessageInput messageInput = new MessageInput();
         messageInput.setWidthFull();
 
+        MessageList messageList = new MessageList();
+        messageList.setWidthFull();
+
         // Create providers
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
-                .apiKey(apiKey).modelName("gpt-4").build();
+                .apiKey(apiKey).modelName("gpt-4o-mini").build();
         LLMProvider llmProvider = new LangChain4JLLMProvider(model);
         DatabaseProvider databaseProvider = new DummyDatabaseProvider();
 
@@ -86,8 +90,9 @@ public class AiChartDemoView extends VerticalLayout {
         orchestrator = AiChartOrchestrator.create(llmProvider, databaseProvider)
                 .withChart(chart)
                 .withInput(messageInput)
+                .withMessageList(messageList)
                 .build();
 
-        add(messageInput);
+        add(messageList, messageInput);
     }
 }
