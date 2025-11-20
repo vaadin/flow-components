@@ -198,6 +198,40 @@ public class MessageListTest {
                 .getProperty("announceMessages", false));
     }
 
+    @Test
+    public void implementsAiMessageList() {
+        Assert.assertTrue(com.vaadin.flow.component.ai.messagelist.AiMessageList.class
+                .isAssignableFrom(MessageList.class));
+    }
+
+    @Test
+    public void addMessage_addsItem() {
+        com.vaadin.flow.component.ai.messagelist.AiMessage message = new MessageListItem("Hello",
+                java.time.Instant.now(), "User");
+        messageList.addMessage(message);
+        Assert.assertEquals(1, messageList.getItems().size());
+        Assert.assertEquals(message, messageList.getItems().get(0));
+    }
+
+    @Test
+    public void createMessage_returnsMessageListItem() {
+        com.vaadin.flow.component.ai.messagelist.AiMessage message = messageList.createMessage("Hello", "User");
+        Assert.assertTrue(message instanceof MessageListItem);
+        Assert.assertEquals("Hello", message.getText());
+        Assert.assertEquals("User", message.getUserName());
+    }
+
+    @Test
+    public void updateMessage_refreshesItems() {
+        MessageListItem item = new MessageListItem("Hello", java.time.Instant.now(), "User");
+        messageList.addMessage(item);
+
+        item.setText("Updated");
+        messageList.updateMessage(item);
+
+        Assert.assertEquals("Updated", messageList.getItems().get(0).getText());
+    }
+
     private String getSerializedThemeProperty(MessageListItem item) {
         JsonNode theme = JacksonUtils.beanToJson(item).get("theme");
         if (theme.isNull()) {

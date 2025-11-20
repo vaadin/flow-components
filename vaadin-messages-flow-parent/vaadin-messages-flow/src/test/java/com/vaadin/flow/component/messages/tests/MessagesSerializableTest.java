@@ -18,4 +18,11 @@ package com.vaadin.flow.component.messages.tests;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
 public class MessagesSerializableTest extends ClassesSerializableTest {
+
+    // TODO: langchain4j shouldn't leak here
+    @Override
+    protected java.util.stream.Stream<String> getExcludedPatterns() {
+        return java.util.stream.Stream.concat(super.getExcludedPatterns(), java.util.stream.Stream.of(
+                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.langchain4j\\..*"));
+    }
 }
