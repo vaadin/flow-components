@@ -51,11 +51,12 @@ import java.util.Objects;
  * MessageInput messageInput = new MessageInput();
  *
  * LLMProvider provider = new LangChain4jProvider(model);
+ * provider.setSystemPrompt("You are a helpful assistant.");
+ *
  * AiChatOrchestrator orchestrator = AiChatOrchestrator.create(provider)
  *         .withMessageList(messageList)
  *         .withInput(messageInput)
  *         .build();
- * orchestrator.setSystemPrompt("You are a helpful assistant.");
  * </pre>
  *
  * @author Vaadin Ltd
@@ -66,8 +67,6 @@ public class AiChatOrchestrator implements Serializable {
     private AiMessageList messageList;
     private AiInput input;
     private AiFileReceiver fileReceiver;
-
-    private String systemPrompt;
 
     /**
      * Creates a new AI chat orchestrator.
@@ -196,26 +195,6 @@ public class AiChatOrchestrator implements Serializable {
     }
 
     /**
-     * Sets the system prompt for this chat. This overrides any default system
-     * prompt configured in the provider.
-     *
-     * @param systemPrompt
-     *            the system prompt
-     */
-    public void setSystemPrompt(String systemPrompt) {
-        this.systemPrompt = systemPrompt;
-    }
-
-    /**
-     * Gets the system prompt.
-     *
-     * @return the system prompt
-     */
-    public String getSystemPrompt() {
-        return systemPrompt;
-    }
-
-    /**
      * Handles a user message submission.
      *
      * @param event
@@ -264,7 +243,7 @@ public class AiChatOrchestrator implements Serializable {
         // Build LLM request
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
                 .userMessage(userMessage)
-                .systemPrompt(systemPrompt).build();
+                .build();
 
         // Get streaming response from LLM
         Flux<String> responseStream = provider.stream(request);

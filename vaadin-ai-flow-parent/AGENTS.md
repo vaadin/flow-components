@@ -102,13 +102,14 @@ vaadin-ai-flow-parent/
 
 **Key Features**:
 - Conversation history managed internally by the provider instance
+- System prompts configured at the provider level (via `provider.setSystemPrompt()`)
 - Streaming responses with incremental UI updates
 - Error handling with error messages displayed in chat
 - UI.access() for thread-safe Vaadin updates
 - Validates UI context exists before operations
 
 **Testing**: [AiChatOrchestratorTest](vaadin-ai-chat-flow/src/test/java/com/vaadin/flow/component/ai/chat/AiChatOrchestratorTest.java) (extensive, ~40+ tests)
-- Tests verify LLMRequest properties (userMessage, systemPrompt) instead of message history
+- Tests verify LLMRequest properties (userMessage) instead of message history
 - Uses ArgumentCaptor<LLMProvider.LLMRequest> to capture and validate requests
 - Verifies that multiple messages use the same provider instance for conversation continuity
 
