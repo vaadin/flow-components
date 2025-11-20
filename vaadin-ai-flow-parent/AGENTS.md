@@ -39,21 +39,28 @@ vaadin-ai-flow-parent/
 
 **Implementations**:
 
-1. **[LangChain4jProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4jProvider.java)**
+1. **[LangChain4JLLMProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4JLLMProvider.java)**
    - Bridges Vaadin AI components with LangChain4j library
    - Manages conversation memory internally per provider instance using `ChatMemory`
    - Each provider instance maintains its own conversation context
    - Converts vendor-agnostic `Tool` instances to LangChain4j `ToolSpecification`
    - Handles multimodal inputs (text, images, PDFs)
    - Automatic tool execution and follow-up requests
-   - **Testing**: [LangChain4jProviderTest](vaadin-ai-flow/src/test/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4jProviderTest.java)
+   - **Testing**: [LangChain4JLLMProviderTest](vaadin-ai-flow/src/test/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4JLLMProviderTest.java)
+   - **Dependency**: `dev.langchain4j:langchain4j:0.36.2` (optional)
 
-2. **[SpringAiProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/springai/SpringAiProvider.java)**
-   - Integration with Spring AI's chat models
-   - Template implementation (requires Spring AI dependencies)
-   - Will convert vendor-agnostic `Tool` instances to Spring AI function calling
-   - Supports RAG via VectorStore integration
-   - Multimodal input support
+2. **[SpringAILLMProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/springai/SpringAILLMProvider.java)**
+   - Integration with Spring AI's chat models (fully implemented)
+   - Manages conversation memory using Spring AI's `ChatMemory` and `MessageChatMemoryAdvisor`
+   - Supports multimodal inputs (text, images, PDFs) via `Media` objects
+   - Document processing with Apache Tika for PDF and text attachments
+   - Each provider instance maintains its own conversation context
+   - **Note**: Tool/function calling requires configuration at ChatModel level or via FunctionCallback
+   - **Testing**: [SpringAILLMProviderTest](vaadin-ai-flow/src/test/java/com/vaadin/flow/component/ai/provider/springai/SpringAILLMProviderTest.java)
+   - **Dependencies**:
+     - `org.springframework.ai:spring-ai-core:1.0.0-M2` (optional)
+     - `org.springframework.ai:spring-ai-tika-document-reader:1.0.0-M2` (optional)
+   - **Repository**: Requires Spring Milestones repository (`https://repo.spring.io/milestone`)
 
 #### DatabaseProvider (`com.vaadin.flow.component.ai.provider.DatabaseProvider`)
 - Interface for database operations (schema introspection, query execution)

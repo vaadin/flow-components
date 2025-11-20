@@ -53,7 +53,7 @@ import java.util.Map;
  * StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
  *         .apiKey(System.getenv("OPENAI_API_KEY")).modelName("gpt-4")
  *         .build();
- * LLMProvider provider = new LangChain4jProvider(model);
+ * LLMProvider provider = new LangChain4JLLMProvider(model);
  * provider.setSystemPrompt("You are a helpful assistant.");
  *
  * LLMRequest request = LLMRequest.of("Hello, how are you?");
@@ -62,7 +62,7 @@ import java.util.Map;
  *
  * @author Vaadin Ltd
  */
-public class LangChain4jProvider implements LLMProvider {
+public class LangChain4JLLMProvider implements LLMProvider {
 
     private final StreamingChatLanguageModel model;
     private final ChatMemory chatMemory;
@@ -75,7 +75,7 @@ public class LangChain4jProvider implements LLMProvider {
      * @param model
      *            the LangChain4j streaming chat model to use
      */
-    public LangChain4jProvider(StreamingChatLanguageModel model) {
+    public LangChain4JLLMProvider(StreamingChatLanguageModel model) {
         this(model, 10);
     }
 
@@ -88,7 +88,7 @@ public class LangChain4jProvider implements LLMProvider {
      * @param maxMessages
      *            the maximum number of messages to keep in conversation memory
      */
-    public LangChain4jProvider(StreamingChatLanguageModel model,
+    public LangChain4JLLMProvider(StreamingChatLanguageModel model,
             int maxMessages) {
         if (model == null) {
             throw new IllegalArgumentException("Model cannot be null");
