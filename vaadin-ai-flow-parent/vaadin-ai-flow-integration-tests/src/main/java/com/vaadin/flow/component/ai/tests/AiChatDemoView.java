@@ -18,7 +18,6 @@ package com.vaadin.flow.component.ai.tests;
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4jProvider;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.messages.MessageInput;
@@ -81,28 +80,18 @@ public class AiChatDemoView extends VerticalLayout {
         // Using element API to nest MessageInput inside Upload
         upload.getElement().appendChild(messageInput.getElement());
 
-        Button clearButton = new Button("Clear Conversation",
-                e -> clearConversation());
-        clearButton.setId("clear-button");
-
         // Create LLM provider
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey).modelName("gpt-4").build();
         LLMProvider provider = new LangChain4jProvider(model);
 
         // Create and configure orchestrator using builder pattern
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(provider)
+        AiChatOrchestrator.create(provider)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)
                 .build();
-        orchestrator.setSystemPrompt(
-                "You are a helpful AI assistant. Be concise and friendly.");
-        orchestrator.setUserName("User");
-        orchestrator.setAssistantName("AI Assistant");
 
-        // Store orchestrator for clear button
-        this.orchestrator = orchestrator;
 
         // Layout
         Div chatContainer = new Div(messageList);
@@ -112,15 +101,7 @@ public class AiChatDemoView extends VerticalLayout {
         Div inputContainer = new Div(upload);
         inputContainer.setWidthFull();
 
-        add(chatContainer, inputContainer, clearButton);
+        add(chatContainer, inputContainer);
         setFlexGrow(1, chatContainer);
-    }
-
-    private AiChatOrchestrator orchestrator;
-
-    private void clearConversation() {
-        if (orchestrator != null) {
-            orchestrator.clearConversation();
-        }
     }
 }
