@@ -11,7 +11,7 @@ package com.vaadin.flow.component.ai.tests;
 import com.vaadin.flow.component.ai.pro.chart.AiChartOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4jProvider;
+import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -79,7 +79,7 @@ public class AiChartDemoView extends VerticalLayout {
         // Create providers
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey).modelName("gpt-4").build();
-        LLMProvider llmProvider = new LangChain4jProvider(model);
+        LLMProvider llmProvider = new LangChain4JLLMProvider(model);
         DatabaseProvider databaseProvider = new DummyDatabaseProvider();
 
         // Create orchestrator using builder pattern

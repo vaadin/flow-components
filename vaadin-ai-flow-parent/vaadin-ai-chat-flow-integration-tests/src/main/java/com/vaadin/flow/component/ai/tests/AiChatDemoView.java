@@ -17,7 +17,7 @@ package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4jProvider;
+import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.messages.MessageInput;
@@ -71,7 +71,7 @@ public class AiChatDemoView extends VerticalLayout {
         // Create LLM provider
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey).modelName("gpt-4").build();
-        LLMProvider provider = new LangChain4jProvider(model);
+        LLMProvider provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator using builder pattern
         AiChatOrchestrator.create(provider)

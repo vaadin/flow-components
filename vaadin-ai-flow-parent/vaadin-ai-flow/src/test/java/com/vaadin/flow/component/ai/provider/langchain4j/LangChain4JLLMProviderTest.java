@@ -35,27 +35,27 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for {@link LangChain4jProvider}.
+ * Tests for {@link LangChain4JLLMProvider}.
  */
-public class LangChain4jProviderTest {
+public class LangChain4JLLMProviderTest {
 
     private StreamingChatLanguageModel mockModel;
-    private LangChain4jProvider provider;
+    private LangChain4JLLMProvider provider;
 
     @Before
     public void setUp() {
         mockModel = mock(StreamingChatLanguageModel.class);
-        provider = new LangChain4jProvider(mockModel);
+        provider = new LangChain4JLLMProvider(mockModel);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void constructor_withNullModel_throwsException() {
-        new LangChain4jProvider(null);
+        new LangChain4JLLMProvider(null);
     }
 
     @Test
     public void constructor_withValidModel_createsProvider() {
-        LangChain4jProvider p = new LangChain4jProvider(mockModel);
+        LangChain4JLLMProvider p = new LangChain4JLLMProvider(mockModel);
         assertNotNull("Provider should not be null", p);
         assertEquals("Model should be set", mockModel, p.getModel());
     }
