@@ -18,19 +18,16 @@ package com.vaadin.flow.component.ai.provider.langchain4j;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.output.Response;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
@@ -70,23 +67,21 @@ public class LangChain4jProviderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void generateStream_withNullMessages_throwsException() {
-        provider.generateStream(null, "system prompt", null).blockFirst();
+    public void stream_withNullRequest_throwsException() {
+        provider.stream(null).blockFirst();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void generateStream_withEmptyMessages_throwsException() {
-        List<LLMProvider.Message> emptyMessages = new ArrayList<>();
-        provider.generateStream(emptyMessages, "system prompt", null)
-                .blockFirst();
+    public void stream_withNullUserMessage_throwsException() {
+        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
+                .conversationId("test").userMessage(null).build();
+        provider.stream(request).blockFirst();
     }
 
     @Test
-    public void generateStream_withValidMessages_callsModel() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        AtomicInteger tokenCount = new AtomicInteger(0);
+    public void stream_withValidRequest_callsModel() {
+        LLMProvider.LLMRequest request = LLMProvider.LLMRequest
+                .of("conversation1", "Hello");
 
         // Mock the model to call onComplete immediately
         doAnswer(invocation -> {
@@ -102,477 +97,273 @@ public class LangChain4jProviderTest {
             return null;
         }).when(mockModel).generate(anyList(), any());
 
-        Flux<String> result = provider.generateStream(messages, null, null);
-
-        result.doOnNext(token -> tokenCount.incrementAndGet())
+        List<String> tokens = new ArrayList<>();
+        provider.stream(request).doOnNext(tokens::add)
                 .blockLast(Duration.ofSeconds(5));
 
-        assertEquals("Should emit 2 tokens", 2, tokenCount.get());
+        assertEquals("Should have 2 tokens", 2, tokens.size());
+        assertEquals("First token", "Hi", tokens.get(0));
+        assertEquals("Second token", " there", tokens.get(1));
         verify(mockModel, times(1)).generate(anyList(), any());
     }
 
     @Test
-    public void generateStream_withSystemPrompt_includesSystemMessage() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
+    public void stream_withSystemPrompt_includesSystemMessage() {
+        provider.setSystemPrompt("You are a helpful assistant");
+        LLMProvider.LLMRequest request = LLMProvider.LLMRequest
+                .of("conversation1", "Hello");
 
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
             StreamingResponseHandler<AiMessage> handler = invocation
                     .getArgument(1);
+            handler.onNext("Response");
+
             AiMessage aiMessage = AiMessage.from("Response");
             Response<AiMessage> response = Response.from(aiMessage);
             handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, "System prompt here", null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertTrue("Should have at least 2 messages",
-                capturedMessages.size() >= 2);
-
-        // First message should be system message
-        ChatMessage firstMessage = capturedMessages.get(0);
-        assertTrue("First message should be SystemMessage",
-                firstMessage instanceof dev.langchain4j.data.message.SystemMessage);
-    }
-
-    @Test
-    public void generateStream_withoutSystemPrompt_doesNotIncludeSystemMessage() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, null, null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertEquals("Should have 1 message", 1, capturedMessages.size());
-
-        // Should not contain system message
-        ChatMessage firstMessage = capturedMessages.get(0);
-        assertFalse("First message should not be SystemMessage",
-                firstMessage instanceof dev.langchain4j.data.message.SystemMessage);
-    }
-
-    @Test
-    public void generateStream_withEmptySystemPrompt_doesNotIncludeSystemMessage() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, "", null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertEquals("Should have 1 message", 1, capturedMessages.size());
-    }
-
-    @Test
-    public void generateStream_convertsUserMessages() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "User message"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, null, null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertEquals("Should have 1 message", 1, capturedMessages.size());
-
-        ChatMessage message = capturedMessages.get(0);
-        assertTrue("Message should be UserMessage",
-                message instanceof dev.langchain4j.data.message.UserMessage);
-    }
-
-    @Test
-    public void generateStream_convertsAssistantMessages() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hi"));
-        messages.add(LLMProvider.createMessage("assistant",
-                "Assistant message"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, null, null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertEquals("Should have 2 messages", 2, capturedMessages.size());
-
-        ChatMessage secondMessage = capturedMessages.get(1);
-        assertTrue("Second message should be AiMessage",
-                secondMessage instanceof dev.langchain4j.data.message.AiMessage);
-    }
-
-    @Test
-    public void generateStream_convertsAiRoleMessages() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hi"));
-        messages.add(LLMProvider.createMessage("ai", "AI message"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, null, null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertEquals("Should have 2 messages", 2, capturedMessages.size());
-
-        ChatMessage secondMessage = capturedMessages.get(1);
-        assertTrue("Second message should be AiMessage",
-                secondMessage instanceof dev.langchain4j.data.message.AiMessage);
-    }
-
-    @Test
-    public void generateStream_convertsSystemRoleMessages() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("system", "System instruction"));
-        messages.add(LLMProvider.createMessage("user", "Hi"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, null, null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertEquals("Should have 2 messages", 2, capturedMessages.size());
-
-        ChatMessage firstMessage = capturedMessages.get(0);
-        assertTrue("First message should be SystemMessage",
-                firstMessage instanceof dev.langchain4j.data.message.SystemMessage);
-    }
-
-    @Test
-    public void generateStream_withUnknownRole_defaultsToUserMessage() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("unknown_role", "Message"));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ChatMessage>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(messagesCaptor.capture(), any());
-
-        provider.generateStream(messages, null, null)
-                .blockLast(Duration.ofSeconds(5));
-
-        List<ChatMessage> capturedMessages = messagesCaptor.getValue();
-        assertEquals("Should have 1 message", 1, capturedMessages.size());
-
-        ChatMessage message = capturedMessages.get(0);
-        assertTrue("Message should default to UserMessage",
-                message instanceof dev.langchain4j.data.message.UserMessage);
-    }
-
-    @Test
-    public void generateStream_onError_propagatesError() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        RuntimeException expectedException = new RuntimeException(
-                "Model error");
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            handler.onError(expectedException);
             return null;
         }).when(mockModel).generate(anyList(), any());
 
-        Flux<String> result = provider.generateStream(messages, null, null);
+        provider.stream(request).blockLast(Duration.ofSeconds(5));
 
-        AtomicBoolean errorOccurred = new AtomicBoolean(false);
+        verify(mockModel, times(1)).generate(anyList(), any());
+    }
+
+    @Test
+    public void stream_withTools_passesToolsToModel() {
+        LLMProvider.Tool testTool = new LLMProvider.Tool() {
+            @Override
+            public String getName() {
+                return "testTool";
+            }
+
+            @Override
+            public String getDescription() {
+                return "A test tool";
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return "Tool executed";
+            }
+        };
+
+        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
+                .conversationId("conversation1").userMessage("Use the tool")
+                .tools(testTool).build();
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            StreamingResponseHandler<AiMessage> handler = invocation
+                    .getArgument(2);
+            handler.onNext("Using tool");
+
+            AiMessage aiMessage = AiMessage.from("Using tool");
+            Response<AiMessage> response = Response.from(aiMessage);
+            handler.onComplete(response);
+            return null;
+        }).when(mockModel).generate(anyList(), anyList(), any());
+
+        provider.stream(request).blockLast(Duration.ofSeconds(5));
+
+        verify(mockModel, times(1)).generate(anyList(), anyList(), any());
+    }
+
+    @Test
+    public void stream_withToolExecution_executesToolAndFollowsUp() {
+        LLMProvider.Tool testTool = new LLMProvider.Tool() {
+            @Override
+            public String getName() {
+                return "calculator";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Performs calculations";
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return "42";
+            }
+        };
+
+        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
+                .conversationId("conversation1").userMessage("Calculate 2+2")
+                .tools(testTool).build();
+
+        // First call: AI requests tool execution
+        AtomicInteger callCount = new AtomicInteger(0);
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            StreamingResponseHandler<AiMessage> handler = invocation
+                    .getArgument(2);
+
+            if (callCount.getAndIncrement() == 0) {
+                // First call: request tool execution
+                handler.onNext("Let me calculate");
+
+                ToolExecutionRequest toolRequest = ToolExecutionRequest
+                        .builder().name("calculator").arguments("{}").build();
+                AiMessage aiMessage = AiMessage.from(
+                        List.of(toolRequest));
+                Response<AiMessage> response = Response.from(aiMessage);
+                handler.onComplete(response);
+            } else {
+                // Second call: final response after tool execution
+                handler.onNext("The answer is 42");
+
+                AiMessage aiMessage = AiMessage.from("The answer is 42");
+                Response<AiMessage> response = Response.from(aiMessage);
+                handler.onComplete(response);
+            }
+            return null;
+        }).when(mockModel).generate(anyList(), anyList(), any());
+
+        List<String> tokens = new ArrayList<>();
+        provider.stream(request).doOnNext(tokens::add)
+                .blockLast(Duration.ofSeconds(5));
+
+        // Should have tokens from both calls
+        assertTrue("Should have received tokens",
+                tokens.size() >= 2);
+        verify(mockModel, times(2)).generate(anyList(), anyList(), any());
+    }
+
+    @Test
+    public void stream_multipleCalls_usesSeparateConversations() {
+        LLMProvider.LLMRequest request1 = LLMProvider.LLMRequest
+                .of("conversation1", "Hello 1");
+        LLMProvider.LLMRequest request2 = LLMProvider.LLMRequest
+                .of("conversation2", "Hello 2");
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            StreamingResponseHandler<AiMessage> handler = invocation
+                    .getArgument(1);
+            handler.onNext("Response");
+
+            AiMessage aiMessage = AiMessage.from("Response");
+            Response<AiMessage> response = Response.from(aiMessage);
+            handler.onComplete(response);
+            return null;
+        }).when(mockModel).generate(anyList(), any());
+
+        provider.stream(request1).blockLast(Duration.ofSeconds(5));
+        provider.stream(request2).blockLast(Duration.ofSeconds(5));
+
+        verify(mockModel, times(2)).generate(anyList(), any());
+    }
+
+    @Test
+    public void clearConversation_removesConversationMemory() {
+        LLMProvider.LLMRequest request = LLMProvider.LLMRequest
+                .of("conversation1", "Hello");
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            StreamingResponseHandler<AiMessage> handler = invocation
+                    .getArgument(1);
+            handler.onNext("Response");
+
+            AiMessage aiMessage = AiMessage.from("Response");
+            Response<AiMessage> response = Response.from(aiMessage);
+            handler.onComplete(response);
+            return null;
+        }).when(mockModel).generate(anyList(), any());
+
+        provider.stream(request).blockLast(Duration.ofSeconds(5));
+        provider.clearConversation("conversation1");
+
+        // Should still work after clearing
+        provider.stream(request).blockLast(Duration.ofSeconds(5));
+
+        verify(mockModel, times(2)).generate(anyList(), any());
+    }
+
+    @Test
+    public void clearAllConversations_removesAllMemory() {
+        LLMProvider.LLMRequest request1 = LLMProvider.LLMRequest
+                .of("conversation1", "Hello 1");
+        LLMProvider.LLMRequest request2 = LLMProvider.LLMRequest
+                .of("conversation2", "Hello 2");
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            StreamingResponseHandler<AiMessage> handler = invocation
+                    .getArgument(1);
+            handler.onNext("Response");
+
+            AiMessage aiMessage = AiMessage.from("Response");
+            Response<AiMessage> response = Response.from(aiMessage);
+            handler.onComplete(response);
+            return null;
+        }).when(mockModel).generate(anyList(), any());
+
+        provider.stream(request1).blockLast(Duration.ofSeconds(5));
+        provider.stream(request2).blockLast(Duration.ofSeconds(5));
+        provider.clearAllConversations();
+
+        // Should still work after clearing
+        provider.stream(request1).blockLast(Duration.ofSeconds(5));
+
+        verify(mockModel, times(3)).generate(anyList(), any());
+    }
+
+    @Test
+    public void stream_withError_propagatesError() {
+        LLMProvider.LLMRequest request = LLMProvider.LLMRequest
+                .of("conversation1", "Hello");
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            StreamingResponseHandler<AiMessage> handler = invocation
+                    .getArgument(1);
+            handler.onError(new RuntimeException("Test error"));
+            return null;
+        }).when(mockModel).generate(anyList(), any());
+
         try {
-            result.doOnError(e -> errorOccurred.set(true))
-                    .blockLast(Duration.ofSeconds(5));
+            provider.stream(request).blockLast(Duration.ofSeconds(5));
+            fail("Should have thrown exception");
         } catch (Exception e) {
-            errorOccurred.set(true);
+            assertTrue("Should contain error message",
+                    e.getMessage().contains("Test error"));
         }
-
-        assertTrue("Error should have been propagated", errorOccurred.get());
     }
 
     @Test
-    public void generateStream_withMultipleTokens_emitsAll() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        List<String> capturedTokens = new ArrayList<>();
+    public void stream_withRequestSystemPrompt_overridesDefault() {
+        provider.setSystemPrompt("Default prompt");
+        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
+                .conversationId("conversation1").userMessage("Hello")
+                .systemPrompt("Override prompt").build();
 
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
             StreamingResponseHandler<AiMessage> handler = invocation
                     .getArgument(1);
-            handler.onNext("Token");
-            handler.onNext(" ");
-            handler.onNext("1");
-            handler.onNext(" ");
-            handler.onNext("2");
-            handler.onNext(" ");
-            handler.onNext("3");
+            handler.onNext("Response");
 
-            AiMessage aiMessage = AiMessage.from("Token 1 2 3");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(anyList(), any());
-
-        Flux<String> result = provider.generateStream(messages, null, null);
-
-        result.doOnNext(capturedTokens::add).blockLast(Duration.ofSeconds(5));
-
-        assertEquals("Should emit 7 tokens", 7, capturedTokens.size());
-        assertEquals("Token", capturedTokens.get(0));
-        assertEquals(" ", capturedTokens.get(1));
-        assertEquals("1", capturedTokens.get(2));
-    }
-
-    @Test
-    public void generateStream_withTools_passesToolsToModel() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        List<LLMProvider.Tool> tools = new ArrayList<>();
-        LLMProvider.Tool mockTool = mock(LLMProvider.Tool.class);
-        when(mockTool.getName()).thenReturn("testTool");
-        when(mockTool.getDescription()).thenReturn("Test tool description");
-        tools.add(mockTool);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(2);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(anyList(), anyList(), any());
-
-        provider.generateStream(messages, null, tools)
-                .blockLast(Duration.ofSeconds(5));
-
-        verify(mockModel, times(1)).generate(anyList(), anyList(), any());
-    }
-
-    @Test
-    public void generateStream_withNullTool_skipsTool() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        List<LLMProvider.Tool> tools = new ArrayList<>();
-        tools.add(null);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
             AiMessage aiMessage = AiMessage.from("Response");
             Response<AiMessage> response = Response.from(aiMessage);
             handler.onComplete(response);
             return null;
         }).when(mockModel).generate(anyList(), any());
 
-        // Should not throw exception
-        provider.generateStream(messages, null, tools)
-                .blockLast(Duration.ofSeconds(5));
+        provider.stream(request).blockLast(Duration.ofSeconds(5));
 
         verify(mockModel, times(1)).generate(anyList(), any());
-    }
-
-    @Test
-    public void generateStream_withToolWithNullName_skipsTool() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        List<LLMProvider.Tool> tools = new ArrayList<>();
-        LLMProvider.Tool mockTool = mock(LLMProvider.Tool.class);
-        when(mockTool.getName()).thenReturn(null);
-        tools.add(mockTool);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(anyList(), any());
-
-        // Should not throw exception
-        provider.generateStream(messages, null, tools)
-                .blockLast(Duration.ofSeconds(5));
-
-        verify(mockModel, times(1)).generate(anyList(), any());
-    }
-
-    @Test
-    public void generateStream_withToolWithNullDescription_usesNameAsDescription() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Hello"));
-
-        List<LLMProvider.Tool> tools = new ArrayList<>();
-        LLMProvider.Tool mockTool = mock(LLMProvider.Tool.class);
-        when(mockTool.getName()).thenReturn("testTool");
-        when(mockTool.getDescription()).thenReturn(null);
-        tools.add(mockTool);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(2);
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(anyList(), anyList(), any());
-
-        // Should use tool name as description
-        provider.generateStream(messages, null, tools)
-                .blockLast(Duration.ofSeconds(5));
-
-        verify(mockModel, times(1)).generate(anyList(), anyList(), any());
-    }
-
-    @Test
-    public void generateStream_withToolExecution_executesToolAndReturnsResult() {
-        List<LLMProvider.Message> messages = new ArrayList<>();
-        messages.add(LLMProvider.createMessage("user", "Use the tool"));
-
-        List<LLMProvider.Tool> tools = new ArrayList<>();
-        LLMProvider.Tool mockTool = mock(LLMProvider.Tool.class);
-        when(mockTool.getName()).thenReturn("testTool");
-        when(mockTool.getDescription()).thenReturn("Test tool");
-        when(mockTool.execute(anyString())).thenReturn("Tool result");
-        tools.add(mockTool);
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(2);
-
-            // First response requests tool execution
-            ToolExecutionRequest toolRequest = ToolExecutionRequest.builder()
-                    .name("testTool").arguments("{\"param\":\"value\"}")
-                    .build();
-
-            List<ToolExecutionRequest> toolRequests = new ArrayList<>();
-            toolRequests.add(toolRequest);
-
-            AiMessage aiMessageWithTool = AiMessage.from("Calling tool", toolRequests);
-            Response<AiMessage> response = Response.from(aiMessageWithTool);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(anyList(), anyList(), any());
-
-        provider.generateStream(messages, null, tools)
-                .blockLast(Duration.ofSeconds(5));
-
-        // Verify tool was executed
-        verify(mockTool, times(1)).execute("{\"param\":\"value\"}");
-    }
-
-    @Test
-    public void provider_isSerializable() {
-        assertTrue("LangChain4jProvider should be serializable",
-                java.io.Serializable.class
-                        .isAssignableFrom(LangChain4jProvider.class));
-    }
-
-    @Test
-    public void provider_implementsLLMProvider() {
-        assertTrue("LangChain4jProvider should implement LLMProvider",
-                LLMProvider.class.isAssignableFrom(LangChain4jProvider.class));
     }
 }

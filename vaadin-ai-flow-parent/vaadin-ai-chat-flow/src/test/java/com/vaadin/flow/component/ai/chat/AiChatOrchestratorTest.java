@@ -178,7 +178,7 @@ public class AiChatOrchestratorTest {
         listenerCaptor.getValue().onSubmit(emptyEvent);
 
         verify(mockMessageList, never()).addMessage(any());
-        verify(mockProvider, never()).generateStream(any(), any(), any());
+        verify(mockProvider, never()).stream(any());
     }
 
     @Test
@@ -197,7 +197,7 @@ public class AiChatOrchestratorTest {
         listenerCaptor.getValue().onSubmit(nullEvent);
 
         verify(mockMessageList, never()).addMessage(any());
-        verify(mockProvider, never()).generateStream(any(), any(), any());
+        verify(mockProvider, never()).stream(any());
     }
 
     @Test
@@ -216,7 +216,7 @@ public class AiChatOrchestratorTest {
         listenerCaptor.getValue().onSubmit(whitespaceEvent);
 
         verify(mockMessageList, never()).addMessage(any());
-        verify(mockProvider, never()).generateStream(any(), any(), any());
+        verify(mockProvider, never()).stream(any());
     }
 
     @Test
@@ -226,7 +226,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<AiMessage> messageCaptor = ArgumentCaptor
                 .forClass(AiMessage.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -254,11 +254,10 @@ public class AiChatOrchestratorTest {
     public void userMessageSubmit_withValidMessage_generatesAiResponse() throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<LLMProvider.Message>> messagesCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("AI", " ", "response"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -274,14 +273,12 @@ public class AiChatOrchestratorTest {
         // Wait for async operations
         Thread.sleep(200);
 
-        verify(mockProvider).generateStream(messagesCaptor.capture(), isNull(), isNull());
+        verify(mockProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Message> messages = messagesCaptor.getValue();
-        // The first call should have only the user message
-        // (the assistant response is added to history after streaming completes)
-        assertTrue("Should have at least one user message", messages.size() >= 1);
-        assertEquals("First message role should be user", "user", messages.get(0).getRole());
-        assertEquals("First message content should match", "Hello", messages.get(0).getContent());
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+        // Verify the request contains the user message
+        assertNotNull("Request should not be null", request);
+        assertEquals("User message should match", "Hello", request.userMessage());
     }
 
     @Test
@@ -289,7 +286,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Hello", " ", "World"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -306,7 +303,7 @@ public class AiChatOrchestratorTest {
         Thread.sleep(100);
 
         // Verify the provider was called
-        verify(mockProvider).generateStream(any(), any(), any());
+        verify(mockProvider).stream(any());
         // Verify assistant message placeholder was created
         verify(mockMessageList).createMessage("", "Assistant");
     }
@@ -316,7 +313,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response 1"))
                 .thenReturn(Flux.just("Response 2"));
 
@@ -338,7 +335,7 @@ public class AiChatOrchestratorTest {
         Thread.sleep(200);
 
         // Verify provider was called twice
-        verify(mockProvider, times(2)).generateStream(any(), any(), any());
+        verify(mockProvider, times(2)).stream(any());
     }
 
     @Test
@@ -348,7 +345,7 @@ public class AiChatOrchestratorTest {
 
         RuntimeException error = new RuntimeException("Provider error");
         Flux<String> errorFlux = Flux.<String>error(error);
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(errorFlux);
 
         AiChatOrchestrator.create(mockProvider)
@@ -365,7 +362,7 @@ public class AiChatOrchestratorTest {
         Thread.sleep(100);
 
         // Verify the provider was called and assistant message was created
-        verify(mockProvider).generateStream(any(), any(), any());
+        verify(mockProvider).stream(any());
         verify(mockMessageList).createMessage("", "Assistant");
         verify(mockMessageList, times(2)).addMessage(any()); // User + Assistant
     }
@@ -375,7 +372,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -460,7 +457,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Hello", " ", "World"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -500,7 +497,7 @@ public class AiChatOrchestratorTest {
 
         RuntimeException error = new RuntimeException("Test error");
         Flux<String> errorFlux = Flux.<String>error(error);
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(errorFlux);
 
         AiChatOrchestrator.create(mockProvider)
@@ -533,8 +530,10 @@ public class AiChatOrchestratorTest {
     public void streaming_onComplete_addsToConversationHistory() throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response", " ", "text"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -551,31 +550,24 @@ public class AiChatOrchestratorTest {
 
         // Reset to clear the first call
         reset(mockProvider);
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Second", " ", "response"));
 
-        // Second message - should include history
+        // Second message - should use same conversation ID
         InputSubmitEvent event2 = () -> "Message 2";
         listenerCaptor.getValue().onSubmit(event2);
         Thread.sleep(150);
 
-        // Verify the second call includes conversation history
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<LLMProvider.Message>> historyCaptor = ArgumentCaptor
-                .forClass(List.class);
-        verify(mockProvider).generateStream(historyCaptor.capture(), any(), any());
+        // Verify the second call uses conversation history
+        verify(mockProvider).stream(requestCaptor.capture());
 
-        List<LLMProvider.Message> history = historyCaptor.getValue();
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
 
-        // Should have 3 messages in the second call: user1, assistant1, user2
-        // (The second assistant response is added after this call completes)
-        assertTrue("Should have conversation history", history.size() >= 3);
-        assertEquals("First message should be user", "user", history.get(0).getRole());
-        assertEquals("First message content", "Message 1", history.get(0).getContent());
-        assertEquals("Second message should be assistant", "assistant", history.get(1).getRole());
-        assertEquals("Second message content", "Response text", history.get(1).getContent());
-        assertEquals("Third message should be user", "user", history.get(2).getRole());
-        assertEquals("Third message content", "Message 2", history.get(2).getContent());
+        // The provider manages conversation history internally via conversationId
+        // We verify that the request has the correct user message and conversationId
+        assertNotNull("Request should not be null", request);
+        assertEquals("User message should match", "Message 2", request.userMessage());
+        assertNotNull("Conversation ID should be set for history", request.conversationId());
     }
 
     @Test
@@ -583,7 +575,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("The", " ", "quick", " ", "brown", " ", "fox"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -613,7 +605,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.empty());
 
         AiChatOrchestrator.create(mockProvider)
@@ -642,7 +634,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("SingleToken"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -670,7 +662,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -695,7 +687,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("First"))
                 .thenReturn(Flux.just("Second"))
                 .thenReturn(Flux.just("Third"));
@@ -718,19 +710,18 @@ public class AiChatOrchestratorTest {
         Thread.sleep(100);
 
         // Verify provider was called three times
-        verify(mockProvider, times(3)).generateStream(any(), any(), any());
+        verify(mockProvider, times(3)).stream(any());
     }
 
     @Test
     public void conversationHistory_includesOnlyCompletedMessages() throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<LLMProvider.Message>> historyCaptor = ArgumentCaptor
-                .forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
         // First message completes successfully
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response 1"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -743,19 +734,24 @@ public class AiChatOrchestratorTest {
         listenerCaptor.getValue().onSubmit(() -> "Message 1");
         Thread.sleep(150);
 
+        // Capture the conversation ID from the first call
+        verify(mockProvider).stream(requestCaptor.capture());
+        String conversationId = requestCaptor.getValue().conversationId();
+
         // Reset and prepare for second message
         reset(mockProvider);
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response 2"));
 
         listenerCaptor.getValue().onSubmit(() -> "Message 2");
         Thread.sleep(150);
 
-        verify(mockProvider).generateStream(historyCaptor.capture(), any(), any());
-        List<LLMProvider.Message> history = historyCaptor.getValue();
+        verify(mockProvider).stream(requestCaptor.capture());
+        LLMProvider.LLMRequest secondRequest = requestCaptor.getValue();
 
-        // Should have: user1, assistant1, user2
-        assertTrue("History should include completed messages", history.size() >= 3);
+        // Verify that the conversation ID is maintained across calls
+        assertNotNull("Conversation ID should be set", secondRequest.conversationId());
+        assertEquals("Conversation ID should match first call", conversationId, secondRequest.conversationId());
     }
 
     // ===== Tests for edge cases =====
@@ -793,7 +789,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -818,7 +814,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -838,7 +834,7 @@ public class AiChatOrchestratorTest {
         Thread.sleep(500);
 
         // Verify provider was called 5 times
-        verify(mockProvider, times(5)).generateStream(any(), any(), any());
+        verify(mockProvider, times(5)).stream(any());
     }
 
     @Test
@@ -846,7 +842,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         // Build without message list
@@ -861,7 +857,7 @@ public class AiChatOrchestratorTest {
         listenerCaptor.getValue().onSubmit(event);
 
         // Provider should still be called even without message list
-        verify(mockProvider, never()).generateStream(any(), any(), any());
+        verify(mockProvider, never()).stream(any());
     }
 
     @Test
@@ -875,7 +871,7 @@ public class AiChatOrchestratorTest {
             tokens[i] = "token" + i + " ";
         }
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.fromArray(tokens));
 
         AiChatOrchestrator.create(mockProvider)
@@ -897,14 +893,13 @@ public class AiChatOrchestratorTest {
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public void streaming_withNullSystemPromptAndTools_worksCorrectly() throws Exception {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
-        ArgumentCaptor<String> systemPromptCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<List> toolsCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
 
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
         AiChatOrchestrator.create(mockProvider)
@@ -919,14 +914,14 @@ public class AiChatOrchestratorTest {
 
         Thread.sleep(100);
 
-        verify(mockProvider).generateStream(
-                any(),
-                systemPromptCaptor.capture(),
-                toolsCaptor.capture());
+        verify(mockProvider).stream(requestCaptor.capture());
 
-        // Verify system prompt and tools are null
-        assertNull("System prompt should be null", systemPromptCaptor.getValue());
-        assertNull("Tools should be null", toolsCaptor.getValue());
+        LLMProvider.LLMRequest request = requestCaptor.getValue();
+
+        // Verify system prompt and tools are null/empty
+        assertNull("System prompt should be null", request.systemPrompt());
+        assertNotNull("Tools should not be null", request.tools());
+        assertEquals("Tools array should be empty", 0, request.tools().length);
     }
 
     @Test
@@ -941,7 +936,7 @@ public class AiChatOrchestratorTest {
                 .forClass(InputSubmitListener.class);
 
         // First message fails
-        when(mockProvider.generateStream(any(), any(), any()))
+        when(mockProvider.stream(any()))
                 .thenReturn(Flux.<String>error(new RuntimeException("Error")))
                 .thenReturn(Flux.just("Success"));
 
@@ -961,6 +956,6 @@ public class AiChatOrchestratorTest {
         Thread.sleep(150);
 
         // Verify both calls were made
-        verify(mockProvider, times(2)).generateStream(any(), any(), any());
+        verify(mockProvider, times(2)).stream(any());
     }
 }

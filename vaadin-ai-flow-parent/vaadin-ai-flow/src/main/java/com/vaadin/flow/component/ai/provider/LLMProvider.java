@@ -21,10 +21,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Interface for Large Language Model (LLM) providers.
+ * Framework-agnostic interface for Large Language Model providers.
  * <p>
- * Implementations of this interface provide access to LLM services that can
- * generate responses based on user messages and system instructions.
+ * This interface can be used by any AI-powered component to communicate with
+ * LLMs, not just chat components. Implementations handle conversation memory
+ * internally based on the conversationId provided in the request.
  * </p>
  *
  * @author Vaadin Ltd
@@ -32,23 +33,24 @@ import java.util.List;
 public interface LLMProvider extends Serializable {
 
     /**
-     * Represents a message in a conversation with an LLM.
+     * Streams a response from the LLM based on the provided request.
+     *
+     * @param request
+     *            The LLM request containing user message, context, and
+     *            configuration
+     * @return A Flux stream of response tokens
      */
-    interface Message extends Serializable {
-        /**
-         * Gets the role of the message sender (e.g., "user", "assistant",
-         * "system").
-         *
-         * @return the role
-         */
-        String getRole();
+    Flux<String> stream(LLMRequest request);
 
-        /**
-         * Gets the content of the message.
-         *
-         * @return the message content
-         */
-        String getContent();
+    /**
+     * Sets the default system prompt for this provider. This will be used for
+     * all requests unless overridden in the request itself.
+     *
+     * @param systemPrompt
+     *            The system prompt
+     */
+    default void setSystemPrompt(String systemPrompt) {
+        // Default implementation does nothing
     }
 
     /**
@@ -63,16 +65,18 @@ public interface LLMProvider extends Serializable {
         String getName();
 
         /**
-         * Gets the description of what the tool does.
+         * Gets the description of what the tool does. This should clearly
+         * explain the tool's purpose and parameters.
          *
          * @return the tool description
          */
         String getDescription();
 
         /**
-         * Gets the JSON schema for the tool's parameters.
+         * Gets the JSON schema for the tool's parameters. Can be null if the
+         * tool has no parameters.
          *
-         * @return the parameters schema
+         * @return the parameters schema as a JSON string, or null
          */
         String getParametersSchema();
 
@@ -87,39 +91,296 @@ public interface LLMProvider extends Serializable {
     }
 
     /**
-     * Generates a streaming response from the LLM.
-     *
-     * @param messages
-     *            the conversation history
-     * @param systemPrompt
-     *            the system prompt to guide the LLM's behavior
-     * @param tools
-     *            optional tools that the LLM can call
-     * @return a Flux that emits response tokens as they are generated
+     * Represents a request to the LLM with all necessary context and
+     * configuration.
      */
-    Flux<String> generateStream(List<Message> messages, String systemPrompt,
-            List<Tool> tools);
+    interface LLMRequest extends Serializable {
+        /**
+         * Gets the conversation ID for memory management. If null, the
+         * provider may use a default conversation or treat it as a new
+         * conversation.
+         *
+         * @return the conversation ID
+         */
+        String conversationId();
+
+        /**
+         * Gets the user message.
+         *
+         * @return the user message
+         */
+        String userMessage();
+
+        /**
+         * Gets the list of attachments.
+         *
+         * @return the attachments
+         */
+        List<Attachment> attachments();
+
+        /**
+         * Gets the system prompt for this request. If null, the provider
+         * should use its default system prompt.
+         *
+         * @return the system prompt
+         */
+        String systemPrompt();
+
+        /**
+         * Gets the tools available for this request.
+         *
+         * @return the tools
+         */
+        Tool[] tools();
+
+        /**
+         * Gets the model name to use for this request. If null, the provider
+         * should use its default model.
+         *
+         * @return the model name
+         */
+        String modelName();
+
+        /**
+         * Creates a simple LLM request with just a user message.
+         *
+         * @param userMessage
+         *            the user message
+         * @return a new LLMRequest instance
+         */
+        static LLMRequest of(String userMessage) {
+            return of(null, userMessage);
+        }
+
+        /**
+         * Creates an LLM request with conversation ID for memory management.
+         *
+         * @param conversationId
+         *            the conversation ID
+         * @param userMessage
+         *            the user message
+         * @return a new LLMRequest instance
+         */
+        static LLMRequest of(String conversationId, String userMessage) {
+            return new LLMRequest() {
+                @Override
+                public String conversationId() {
+                    return conversationId;
+                }
+
+                @Override
+                public String userMessage() {
+                    return userMessage;
+                }
+
+                @Override
+                public List<Attachment> attachments() {
+                    return List.of();
+                }
+
+                @Override
+                public String systemPrompt() {
+                    return null;
+                }
+
+                @Override
+                public Tool[] tools() {
+                    return new Tool[0];
+                }
+
+                @Override
+                public String modelName() {
+                    return null;
+                }
+            };
+        }
+    }
 
     /**
-     * Creates a simple text message.
-     *
-     * @param role
-     *            the message role (e.g., "user", "assistant", "system")
-     * @param content
-     *            the message content
-     * @return a new Message instance
+     * Builder for creating LLMRequest instances with a fluent API.
      */
-    static Message createMessage(String role, String content) {
-        return new Message() {
-            @Override
-            public String getRole() {
-                return role;
-            }
+    class LLMRequestBuilder implements Serializable {
+        private String conversationId;
+        private String userMessage;
+        private List<Attachment> attachments = List.of();
+        private String systemPrompt;
+        private Tool[] tools = new Tool[0];
+        private String modelName;
 
-            @Override
-            public String getContent() {
-                return content;
-            }
-        };
+        /**
+         * Sets the conversation ID.
+         *
+         * @param conversationId
+         *            the conversation ID
+         * @return this builder
+         */
+        public LLMRequestBuilder conversationId(String conversationId) {
+            this.conversationId = conversationId;
+            return this;
+        }
+
+        /**
+         * Sets the user message.
+         *
+         * @param userMessage
+         *            the user message
+         * @return this builder
+         */
+        public LLMRequestBuilder userMessage(String userMessage) {
+            this.userMessage = userMessage;
+            return this;
+        }
+
+        /**
+         * Sets the attachments.
+         *
+         * @param attachments
+         *            the attachments
+         * @return this builder
+         */
+        public LLMRequestBuilder attachments(List<Attachment> attachments) {
+            this.attachments = attachments;
+            return this;
+        }
+
+        /**
+         * Sets the system prompt.
+         *
+         * @param systemPrompt
+         *            the system prompt
+         * @return this builder
+         */
+        public LLMRequestBuilder systemPrompt(String systemPrompt) {
+            this.systemPrompt = systemPrompt;
+            return this;
+        }
+
+        /**
+         * Sets the tools.
+         *
+         * @param tools
+         *            the tools
+         * @return this builder
+         */
+        public LLMRequestBuilder tools(Tool... tools) {
+            this.tools = tools;
+            return this;
+        }
+
+        /**
+         * Sets the model name.
+         *
+         * @param modelName
+         *            the model name
+         * @return this builder
+         */
+        public LLMRequestBuilder modelName(String modelName) {
+            this.modelName = modelName;
+            return this;
+        }
+
+        /**
+         * Builds the LLMRequest.
+         *
+         * @return the LLMRequest instance
+         */
+        public LLMRequest build() {
+            String finalConversationId = conversationId;
+            String finalUserMessage = userMessage;
+            List<Attachment> finalAttachments = attachments;
+            String finalSystemPrompt = systemPrompt;
+            Tool[] finalTools = tools;
+            String finalModelName = modelName;
+
+            return new LLMRequest() {
+                @Override
+                public String conversationId() {
+                    return finalConversationId;
+                }
+
+                @Override
+                public String userMessage() {
+                    return finalUserMessage;
+                }
+
+                @Override
+                public List<Attachment> attachments() {
+                    return finalAttachments;
+                }
+
+                @Override
+                public String systemPrompt() {
+                    return finalSystemPrompt;
+                }
+
+                @Override
+                public Tool[] tools() {
+                    return finalTools;
+                }
+
+                @Override
+                public String modelName() {
+                    return finalModelName;
+                }
+            };
+        }
     }
+
+    /**
+     * Represents an attachment file that can be sent to the LLM.
+     */
+    interface Attachment extends Serializable {
+        /**
+         * Gets the file name.
+         *
+         * @return the file name
+         */
+        String fileName();
+
+        /**
+         * Gets the content type (MIME type).
+         *
+         * @return the content type
+         */
+        String contentType();
+
+        /**
+         * Gets the file data.
+         *
+         * @return the file data
+         */
+        byte[] data();
+
+        /**
+         * Creates a new Attachment instance.
+         *
+         * @param fileName
+         *            the file name
+         * @param contentType
+         *            the content type
+         * @param data
+         *            the file data
+         * @return a new Attachment instance
+         */
+        static Attachment of(String fileName, String contentType,
+                byte[] data) {
+            return new Attachment() {
+                @Override
+                public String fileName() {
+                    return fileName;
+                }
+
+                @Override
+                public String contentType() {
+                    return contentType;
+                }
+
+                @Override
+                public byte[] data() {
+                    return data;
+                }
+            };
+        }
+    }
+
 }
