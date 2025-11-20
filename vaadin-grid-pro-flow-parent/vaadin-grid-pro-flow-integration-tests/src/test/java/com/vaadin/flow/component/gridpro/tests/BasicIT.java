@@ -401,15 +401,16 @@ public class BasicIT extends AbstractComponentIT {
     }
 
     @Test
-    public void departmentColumn_openAndCloseEditorWithoutChange_valueUnchangedAndNoEventFired() {
-        // Record the initial value of the first cell in Department column
+    public void comboBoxColumn_openAndCloseEditorWithoutChange_valueUnchangedAndNoEventFired() {
+        // Record the initial value of the first cell in the custom column using
+        // combo box editor (for "Department" property)
         GridTHTDElement cell = grid.getCell(0, 2);
         String initialValue = cell.getText();
 
         // Verify the initial value
-        Assert.assertNotNull("Initial department value should not be null",
+        Assert.assertNotNull("Initial cell value should not be null",
                 initialValue);
-        Assert.assertFalse("Initial department value should not be empty",
+        Assert.assertFalse("Initial cell value should not be empty",
                 initialValue.isEmpty());
 
         // Get initial events panel text to count events
@@ -417,7 +418,7 @@ public class BasicIT extends AbstractComponentIT {
         int initialEventCount = initialEventsPanelText
                 .split("ItemPropertyChanged").length - 1;
 
-        // Open the editor for the Department cell (column index 2)
+        // Open the editor for the cell (column index 2)
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
 
         // Tab away from the cell without making changes
@@ -429,7 +430,7 @@ public class BasicIT extends AbstractComponentIT {
 
         // Assert that the cell still has the same value as initially
         Assert.assertEquals(
-                "Department value should remain unchanged after opening and closing editor without changes",
+                "Cell value should remain unchanged after opening and closing editor without changes",
                 initialValue, cell.getText());
 
         // Assert that no ItemPropertyChanged events were fired
