@@ -74,14 +74,14 @@ public class LangChain4jProviderTest {
     @Test(expected = IllegalArgumentException.class)
     public void stream_withNullUserMessage_throwsException() {
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .conversationId("test").userMessage(null).build();
+                .userMessage(null).build();
         provider.stream(request).blockFirst();
     }
 
     @Test
     public void stream_withValidRequest_callsModel() {
         LLMProvider.LLMRequest request = LLMProvider.LLMRequest
-                .of("conversation1", "Hello");
+                .of("Hello");
 
         // Mock the model to call onComplete immediately
         doAnswer(invocation -> {
@@ -111,7 +111,7 @@ public class LangChain4jProviderTest {
     public void stream_withSystemPrompt_includesSystemMessage() {
         provider.setSystemPrompt("You are a helpful assistant");
         LLMProvider.LLMRequest request = LLMProvider.LLMRequest
-                .of("conversation1", "Hello");
+                .of("Hello");
 
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
@@ -155,7 +155,7 @@ public class LangChain4jProviderTest {
         };
 
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .conversationId("conversation1").userMessage("Use the tool")
+                .userMessage("Use the tool")
                 .tools(testTool).build();
 
         doAnswer(invocation -> {
@@ -200,7 +200,7 @@ public class LangChain4jProviderTest {
         };
 
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .conversationId("conversation1").userMessage("Calculate 2+2")
+                .userMessage("Calculate 2+2")
                 .tools(testTool).build();
 
         // First call: AI requests tool execution
@@ -242,11 +242,11 @@ public class LangChain4jProviderTest {
     }
 
     @Test
-    public void stream_multipleCalls_usesSeparateConversations() {
+    public void stream_multipleCalls_maintainsConversationHistory() {
         LLMProvider.LLMRequest request1 = LLMProvider.LLMRequest
-                .of("conversation1", "Hello 1");
+                .of("Hello 1");
         LLMProvider.LLMRequest request2 = LLMProvider.LLMRequest
-                .of("conversation2", "Hello 2");
+                .of("Hello 2");
 
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
@@ -263,13 +263,14 @@ public class LangChain4jProviderTest {
         provider.stream(request1).blockLast(Duration.ofSeconds(5));
         provider.stream(request2).blockLast(Duration.ofSeconds(5));
 
+        // Both calls should use the same provider instance's conversation memory
         verify(mockModel, times(2)).generate(anyList(), any());
     }
 
     @Test
     public void clearConversation_removesConversationMemory() {
         LLMProvider.LLMRequest request = LLMProvider.LLMRequest
-                .of("conversation1", "Hello");
+                .of("Hello");
 
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
@@ -284,7 +285,7 @@ public class LangChain4jProviderTest {
         }).when(mockModel).generate(anyList(), any());
 
         provider.stream(request).blockLast(Duration.ofSeconds(5));
-        provider.clearConversation("conversation1");
+        provider.clearConversation();
 
         // Should still work after clearing
         provider.stream(request).blockLast(Duration.ofSeconds(5));
@@ -292,39 +293,11 @@ public class LangChain4jProviderTest {
         verify(mockModel, times(2)).generate(anyList(), any());
     }
 
-    @Test
-    public void clearAllConversations_removesAllMemory() {
-        LLMProvider.LLMRequest request1 = LLMProvider.LLMRequest
-                .of("conversation1", "Hello 1");
-        LLMProvider.LLMRequest request2 = LLMProvider.LLMRequest
-                .of("conversation2", "Hello 2");
-
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            StreamingResponseHandler<AiMessage> handler = invocation
-                    .getArgument(1);
-            handler.onNext("Response");
-
-            AiMessage aiMessage = AiMessage.from("Response");
-            Response<AiMessage> response = Response.from(aiMessage);
-            handler.onComplete(response);
-            return null;
-        }).when(mockModel).generate(anyList(), any());
-
-        provider.stream(request1).blockLast(Duration.ofSeconds(5));
-        provider.stream(request2).blockLast(Duration.ofSeconds(5));
-        provider.clearAllConversations();
-
-        // Should still work after clearing
-        provider.stream(request1).blockLast(Duration.ofSeconds(5));
-
-        verify(mockModel, times(3)).generate(anyList(), any());
-    }
 
     @Test
     public void stream_withError_propagatesError() {
         LLMProvider.LLMRequest request = LLMProvider.LLMRequest
-                .of("conversation1", "Hello");
+                .of("Hello");
 
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
@@ -347,7 +320,7 @@ public class LangChain4jProviderTest {
     public void stream_withRequestSystemPrompt_overridesDefault() {
         provider.setSystemPrompt("Default prompt");
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .conversationId("conversation1").userMessage("Hello")
+                .userMessage("Hello")
                 .systemPrompt("Override prompt").build();
 
         doAnswer(invocation -> {

@@ -68,7 +68,6 @@ public class AiChartOrchestrator implements Serializable {
     private AiInput input;
     private DataConverter dataConverter;
 
-    private String conversationId = "default";
     private String currentUserRequest;
 
     /**
@@ -253,7 +252,7 @@ public class AiChartOrchestrator implements Serializable {
 
         // Build LLM request
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .conversationId(conversationId).userMessage(currentUserRequest)
+                .userMessage(currentUserRequest)
                 .systemPrompt(SYSTEM_PROMPT).tools(tools).build();
 
         // Get streaming response from LLM
