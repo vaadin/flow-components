@@ -19,12 +19,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.input.AiInput;
 import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.component.ai.messagelist.AiMessageList;
+import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.upload.AiFileReceiver;
 import reactor.core.publisher.Flux;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -61,12 +58,7 @@ import java.util.Objects;
  *
  * @author Vaadin Ltd
  */
-public class AiChatOrchestrator implements Serializable {
-
-    private final LLMProvider provider;
-    private AiMessageList messageList;
-    private AiInput input;
-    private AiFileReceiver fileReceiver;
+public class AiChatOrchestrator extends BaseAiOrchestrator {
 
     /**
      * Creates a new AI chat orchestrator.
@@ -75,8 +67,7 @@ public class AiChatOrchestrator implements Serializable {
      *            the LLM provider to use for generating responses
      */
     private AiChatOrchestrator(LLMProvider provider) {
-        Objects.requireNonNull(provider, "Provider cannot be null");
-        this.provider = provider;
+        super(provider);
     }
 
     /**
@@ -93,50 +84,10 @@ public class AiChatOrchestrator implements Serializable {
     /**
      * Builder for AiChatOrchestrator.
      */
-    public static class Builder {
-        private final LLMProvider provider;
-        private AiMessageList messageList;
-        private AiInput input;
-        private AiFileReceiver fileReceiver;
+    public static class Builder extends BaseBuilder<AiChatOrchestrator, Builder> {
 
         private Builder(LLMProvider provider) {
-            this.provider = provider;
-        }
-
-        /**
-         * Sets the message list component.
-         *
-         * @param messageList
-         *            the message list
-         * @return this builder
-         */
-        public Builder withMessageList(AiMessageList messageList) {
-            this.messageList = messageList;
-            return this;
-        }
-
-        /**
-         * Sets the input component.
-         *
-         * @param input
-         *            the input component
-         * @return this builder
-         */
-        public Builder withInput(AiInput input) {
-            this.input = input;
-            return this;
-        }
-
-        /**
-         * Sets the file receiver component for file uploads.
-         *
-         * @param fileReceiver
-         *            the file receiver
-         * @return this builder
-         */
-        public Builder withFileReceiver(AiFileReceiver fileReceiver) {
-            this.fileReceiver = fileReceiver;
-            return this;
+            super(provider);
         }
 
         /**
@@ -144,11 +95,12 @@ public class AiChatOrchestrator implements Serializable {
          *
          * @return the configured orchestrator
          */
+        @Override
         public AiChatOrchestrator build() {
             AiChatOrchestrator orchestrator = new AiChatOrchestrator(provider);
-            orchestrator.messageList = messageList;
-            orchestrator.input = input;
-            orchestrator.fileReceiver = fileReceiver;
+
+            // Apply common configuration from base builder
+            applyCommonConfiguration(orchestrator);
 
             if (input != null) {
                 input.addSubmitListener(orchestrator::handleUserMessage);
@@ -159,39 +111,12 @@ public class AiChatOrchestrator implements Serializable {
     }
 
     /**
-     * Gets the LLM provider.
-     *
-     * @return the provider
-     */
-    public LLMProvider getProvider() {
-        return provider;
-    }
-
-    /**
      * Gets the message list component.
      *
      * @return the message list
      */
     public AiMessageList getMessageList() {
         return messageList;
-    }
-
-    /**
-     * Gets the input component.
-     *
-     * @return the input component
-     */
-    public AiInput getInput() {
-        return input;
-    }
-
-    /**
-     * Gets the file receiver component.
-     *
-     * @return the file receiver, or null if not configured
-     */
-    public AiFileReceiver getFileReceiver() {
-        return fileReceiver;
     }
 
     /**
@@ -228,11 +153,7 @@ public class AiChatOrchestrator implements Serializable {
             return;
         }
 
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException(
-                    "No UI found. Make sure the orchestrator is used within a UI context.");
-        }
+        UI ui = validateUiContext();
 
         // Create a placeholder for the assistant's message
         AiMessage assistantMessage = messageList.createMessage("", "Assistant");

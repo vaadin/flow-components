@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.ai.pro.chart;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.input.AiInput;
+import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -18,7 +18,6 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import reactor.core.publisher.Flux;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,12 +59,10 @@ import java.util.Objects;
  *
  * @author Vaadin Ltd
  */
-public class AiChartOrchestrator implements Serializable {
+public class AiChartOrchestrator extends BaseAiOrchestrator {
 
-    private final LLMProvider llmProvider;
     private final DatabaseProvider databaseProvider;
     private Chart chart;
-    private AiInput input;
     private DataConverter dataConverter;
 
     private String currentUserRequest;
@@ -80,11 +77,9 @@ public class AiChartOrchestrator implements Serializable {
      */
     private AiChartOrchestrator(LLMProvider llmProvider,
             DatabaseProvider databaseProvider) {
-        Objects.requireNonNull(llmProvider, "LLM provider cannot be null");
+        super(llmProvider);
         Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-
-        this.llmProvider = llmProvider;
         this.databaseProvider = databaseProvider;
     }
 
@@ -105,16 +100,14 @@ public class AiChartOrchestrator implements Serializable {
     /**
      * Builder for AiChartOrchestrator.
      */
-    public static class Builder {
-        private final LLMProvider llmProvider;
+    public static class Builder extends BaseBuilder<AiChartOrchestrator, Builder> {
         private final DatabaseProvider databaseProvider;
         private Chart chart;
-        private AiInput input;
         private DataConverter dataConverter = new DefaultDataConverter();
 
         private Builder(LLMProvider llmProvider,
                 DatabaseProvider databaseProvider) {
-            this.llmProvider = llmProvider;
+            super(llmProvider);
             this.databaseProvider = databaseProvider;
         }
 
@@ -127,18 +120,6 @@ public class AiChartOrchestrator implements Serializable {
          */
         public Builder withChart(Chart chart) {
             this.chart = chart;
-            return this;
-        }
-
-        /**
-         * Sets the input component.
-         *
-         * @param input
-         *            the input component
-         * @return this builder
-         */
-        public Builder withInput(AiInput input) {
-            this.input = input;
             return this;
         }
 
@@ -159,12 +140,15 @@ public class AiChartOrchestrator implements Serializable {
          *
          * @return the configured orchestrator
          */
+        @Override
         public AiChartOrchestrator build() {
             AiChartOrchestrator orchestrator = new AiChartOrchestrator(
-                    llmProvider, databaseProvider);
+                    provider, databaseProvider);
             orchestrator.chart = chart;
-            orchestrator.input = input;
             orchestrator.dataConverter = dataConverter;
+
+            // Apply common configuration from base builder
+            applyCommonConfiguration(orchestrator);
 
             if (input != null) {
                 input.addSubmitListener(orchestrator::handleUserRequest);
@@ -184,21 +168,12 @@ public class AiChartOrchestrator implements Serializable {
     }
 
     /**
-     * Gets the input component.
-     *
-     * @return the input component
-     */
-    public AiInput getInput() {
-        return input;
-    }
-
-    /**
      * Gets the LLM provider.
      *
      * @return the LLM provider
      */
     public LLMProvider getLlmProvider() {
-        return llmProvider;
+        return provider;
     }
 
     /**
@@ -241,11 +216,7 @@ public class AiChartOrchestrator implements Serializable {
      * Processes the current request using the LLM with tool support.
      */
     private void processRequest() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException(
-                    "No UI found. Make sure the orchestrator is used within a UI context.");
-        }
+        UI ui = validateUiContext();
 
         // Create tools
         LLMProvider.Tool[] tools = createTools();
@@ -256,7 +227,7 @@ public class AiChartOrchestrator implements Serializable {
                 .systemPrompt(SYSTEM_PROMPT).tools(tools).build();
 
         // Get streaming response from LLM
-        Flux<String> responseStream = llmProvider.stream(request);
+        Flux<String> responseStream = provider.stream(request);
 
         StringBuilder fullResponse = new StringBuilder();
 
