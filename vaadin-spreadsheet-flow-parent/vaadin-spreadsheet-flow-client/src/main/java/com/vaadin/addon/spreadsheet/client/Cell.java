@@ -49,6 +49,7 @@ public class Cell {
         this.row = row;
 
         element = Document.get().createDivElement();
+        SheetJsniUtil.partOf(element).add("cell");
         updateCellValues();
     }
 
@@ -57,6 +58,7 @@ public class Cell {
         this.col = col;
         this.row = row;
         element = Document.get().createDivElement();
+        SheetJsniUtil.partOf(element).add("cell");
         if (cellData == null) {
             value = null;
         } else {
@@ -270,6 +272,7 @@ public class Cell {
         if (cellCommentTriangle == null) {
             cellCommentTriangle = Document.get().createDivElement();
             cellCommentTriangle.setClassName(CELL_COMMENT_TRIANGLE_CLASSNAME);
+            SheetJsniUtil.partOf(cellCommentTriangle).add("comment-triangle");
             element.appendChild(cellCommentTriangle);
         }
     }
@@ -285,6 +288,8 @@ public class Cell {
         if (invalidFormulaTriangle == null) {
             invalidFormulaTriangle = Document.get().createDivElement();
             invalidFormulaTriangle.setClassName(CELL_INVALID_FORMULA_CLASSNAME);
+            SheetJsniUtil.partOf(invalidFormulaTriangle)
+                    .add("invalid-triangle");
             element.appendChild(invalidFormulaTriangle);
         }
     }
