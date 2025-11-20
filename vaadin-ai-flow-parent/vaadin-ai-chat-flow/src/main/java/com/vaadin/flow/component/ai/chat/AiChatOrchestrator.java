@@ -21,7 +21,11 @@ import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.component.ai.messagelist.AiMessageList;
 import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.server.streams.UploadHandler;
 import reactor.core.publisher.Flux;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -59,6 +63,8 @@ import reactor.core.publisher.Flux;
  * @author Vaadin Ltd
  */
 public class AiChatOrchestrator extends BaseAiOrchestrator {
+
+    private final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
 
     /**
      * Creates a new AI chat orchestrator.
@@ -106,8 +112,34 @@ public class AiChatOrchestrator extends BaseAiOrchestrator {
                 input.addSubmitListener(orchestrator::handleUserMessage);
             }
 
+            // Configure file receiver if provided
+            if (fileReceiver != null) {
+                orchestrator.configureFileReceiver();
+            }
+
             return orchestrator;
         }
+    }
+
+    /**
+     * Configures the file receiver with the appropriate upload handler.
+     */
+    private void configureFileReceiver() {
+        if (fileReceiver == null) {
+            return;
+        }
+
+        fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
+            pendingAttachments.add(LLMProvider.Attachment.of(
+                    meta.fileName(),
+                    meta.contentType(),
+                    data));
+        }));
+
+        fileReceiver.addFileRemovedListener(fileName -> {
+            pendingAttachments.removeIf(
+                    attachment -> attachment.fileName().equals(fileName));
+        });
     }
 
     /**
@@ -161,10 +193,17 @@ public class AiChatOrchestrator extends BaseAiOrchestrator {
 
         StringBuilder fullResponse = new StringBuilder();
 
-        // Build LLM request
+        // Build LLM request with any pending attachments
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
                 .userMessage(userMessage)
+                .attachments(new ArrayList<>(pendingAttachments))
                 .build();
+
+        // Clear pending attachments after building the request
+        pendingAttachments.clear();
+        if (fileReceiver != null) {
+            fileReceiver.clearFileList();
+        }
 
         // Get streaming response from LLM
         Flux<String> responseStream = provider.stream(request);

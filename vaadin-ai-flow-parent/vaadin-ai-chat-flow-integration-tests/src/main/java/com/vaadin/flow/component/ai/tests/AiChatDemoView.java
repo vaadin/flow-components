@@ -23,6 +23,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -60,6 +61,15 @@ public class AiChatDemoView extends VerticalLayout {
             return;
         }
 
+        // Upload Component for attachments
+        Upload upload = new Upload();
+        upload.setWidthFull();
+        upload.setMaxFiles(5);
+        upload.setMaxFileSize(5 * 1024 * 1024); // 5 MB
+        upload.setAcceptedFileTypes("image/*", "application/pdf",
+                "text/plain");
+        
+
         // Create UI components
         MessageList messageList = new MessageList();
         messageList.setWidthFull();
@@ -70,13 +80,14 @@ public class AiChatDemoView extends VerticalLayout {
 
         // Create LLM provider
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
-                .apiKey(apiKey).modelName("gpt-4").build();
+                .apiKey(apiKey).modelName("gpt-4o-mini").build();
         LLMProvider provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator using builder pattern
         AiChatOrchestrator.create(provider)
                 .withMessageList(messageList)
                 .withInput(messageInput)
+                .withFileReceiver(upload)
                 .build();
 
         // Layout
@@ -87,7 +98,8 @@ public class AiChatDemoView extends VerticalLayout {
         Div inputContainer = new Div(messageInput);
         inputContainer.setWidthFull();
 
-        add(chatContainer, inputContainer);
+        upload.getElement().appendChild(inputContainer.getElement());
+        add(chatContainer, upload);
         setFlexGrow(1, chatContainer);
     }
 }
