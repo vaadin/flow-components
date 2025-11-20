@@ -68,10 +68,6 @@ public class AiChatOrchestrator implements Serializable {
     private AiInput input;
     private AiFileReceiver fileReceiver;
 
-    private String systemPrompt = "";
-    private String userName = "User";
-    private String assistantName = "Assistant";
-
     private final List<LLMProvider.Message> conversationHistory = new ArrayList<>();
 
     /**
@@ -165,64 +161,6 @@ public class AiChatOrchestrator implements Serializable {
     }
 
     /**
-     * Sets the system prompt that guides the LLM's behavior.
-     *
-     * @param systemPrompt
-     *            the system prompt
-     */
-    public void setSystemPrompt(String systemPrompt) {
-        this.systemPrompt = systemPrompt != null ? systemPrompt : "";
-    }
-
-    /**
-     * Gets the system prompt.
-     *
-     * @return the system prompt
-     */
-    public String getSystemPrompt() {
-        return systemPrompt;
-    }
-
-    /**
-     * Sets the name to display for user messages.
-     *
-     * @param userName
-     *            the user name
-     */
-    public void setUserName(String userName) {
-        this.userName = userName != null ? userName : "User";
-    }
-
-    /**
-     * Gets the user name.
-     *
-     * @return the user name
-     */
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * Sets the name to display for assistant messages.
-     *
-     * @param assistantName
-     *            the assistant name
-     */
-    public void setAssistantName(String assistantName) {
-        this.assistantName = assistantName != null ? assistantName
-                : "Assistant";
-    }
-
-    /**
-     * Gets the assistant name.
-     *
-     * @return the assistant name
-     */
-    public String getAssistantName() {
-        return assistantName;
-    }
-
-    /**
      * Gets the LLM provider.
      *
      * @return the provider
@@ -258,22 +196,6 @@ public class AiChatOrchestrator implements Serializable {
         return fileReceiver;
     }
 
-    /**
-     * Gets the conversation history.
-     *
-     * @return an unmodifiable list of messages in the conversation
-     */
-    public List<LLMProvider.Message> getConversationHistory() {
-        return List.copyOf(conversationHistory);
-    }
-
-    /**
-     * Clears the conversation history and message list.
-     */
-    public void clearConversation() {
-        conversationHistory.clear();
-        // Note: Clearing message list would need to be implemented by the component
-    }
 
     /**
      * Handles a user message submission.
@@ -294,7 +216,7 @@ public class AiChatOrchestrator implements Serializable {
 
         // Add user message to UI
         if (messageList != null) {
-            AiMessage userItem = messageList.createMessage(userMessage, userName);
+            AiMessage userItem = messageList.createMessage(userMessage, "User");
             messageList.addMessage(userItem);
         }
 
@@ -317,14 +239,14 @@ public class AiChatOrchestrator implements Serializable {
         }
 
         // Create a placeholder for the assistant's message
-        AiMessage assistantMessage = messageList.createMessage("", assistantName);
+        AiMessage assistantMessage = messageList.createMessage("", "Assistant");
         messageList.addMessage(assistantMessage);
 
         StringBuilder fullResponse = new StringBuilder();
 
         // Get streaming response from LLM
         Flux<String> responseStream = provider.generateStream(
-                conversationHistory, systemPrompt, null);
+                conversationHistory, null, null);
 
         responseStream.subscribe(token -> {
             // Append token to the full response
