@@ -9,15 +9,19 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.pro.chart.AiChartOrchestrator;
+import com.vaadin.flow.component.ai.pro.chart.ChartState;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
@@ -33,6 +37,7 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 public class AiChartDemoView extends VerticalLayout {
 
     private AiChartOrchestrator orchestrator;
+    private ChartState savedState;
 
     public AiChartDemoView() {
         // Enable push for streaming responses
@@ -93,6 +98,51 @@ public class AiChartDemoView extends VerticalLayout {
                 .withMessageList(messageList)
                 .build();
 
-        add(messageList, messageInput);
+        // Add state change listener to log changes
+        orchestrator.addStateChangeListener(event -> {
+            System.out.println("=== Chart State Changed ===");
+            System.out.println("Change Type: " + event.getChangeType());
+            ChartState state = event.getChartState();
+            if (state.getSqlQuery() != null) {
+                System.out.println("SQL Query: " + state.getSqlQuery());
+            }
+            if (state.getChartConfig() != null) {
+                System.out.println("Chart Config: " + state.getChartConfig());
+            }
+            System.out.println("===========================");
+        });
+
+        // Create control buttons
+        Button restoreStateButton = new Button("Restore Saved State");
+        restoreStateButton.setEnabled(false);
+        restoreStateButton.addClickListener(e -> {
+            if (savedState != null) {
+                try {
+                    orchestrator.restoreState(savedState);
+                    System.out.println("State restored successfully");
+                } catch (Exception ex) {
+                    System.err.println("Failed to restore state: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        Button saveStateButton = new Button("Save Current State", e -> {
+            savedState = orchestrator.captureState();
+            if (savedState != null) {
+                System.out.println("State saved successfully");
+                System.out.println("SQL Query: " + savedState.getSqlQuery());
+                System.out.println("Chart Config: " + savedState.getChartConfig());
+                restoreStateButton.setEnabled(true);
+            } else {
+                System.out.println("No state to save (chart not yet configured)");
+            }
+        });
+        saveStateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        HorizontalLayout buttonBar = new HorizontalLayout(saveStateButton, restoreStateButton);
+        buttonBar.setSpacing(true);
+
+        add(messageList, messageInput, buttonBar);
     }
 }

@@ -66,6 +66,13 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
     private String currentUserRequest;
     private UI currentUI;
 
+    // State tracking for capture/restore
+    private String currentSqlQuery;
+    private String currentChartConfig;
+
+    // Event listeners
+    private final List<ChartStateChangeListener> stateChangeListeners = new ArrayList<>();
+
     /**
      * Creates a new AI chart orchestrator.
      *
@@ -188,6 +195,152 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
      */
     public DataConverter getDataConverter() {
         return dataConverter;
+    }
+
+    /**
+     * Captures the current state of the chart, including SQL query and
+     * configuration.
+     * <p>
+     * This method creates an immutable snapshot of the chart's current state
+     * that can be persisted and later restored. The state includes:
+     * </p>
+     * <ul>
+     * <li>The SQL query used to fetch chart data</li>
+     * <li>The Highcharts JSON configuration</li>
+     * </ul>
+     * <p>
+     * Returns null if no state has been set (i.e., if the AI tools have not
+     * yet been called to configure the chart).
+     * </p>
+     *
+     * @return the current chart state, or null if no state exists
+     */
+    public ChartState captureState() {
+        if (currentSqlQuery == null && currentChartConfig == null) {
+            return null;
+        }
+        return ChartState.of(currentSqlQuery, currentChartConfig);
+    }
+
+    /**
+     * Restores the chart to a previously captured state.
+     * <p>
+     * This method:
+     * </p>
+     * <ol>
+     * <li>Executes the saved SQL query to fetch fresh data from the
+     * database</li>
+     * <li>Applies the saved chart configuration</li>
+     * <li>Renders the chart</li>
+     * </ol>
+     * <p>
+     * If the database schema has changed and the SQL query fails, an exception
+     * will be thrown.
+     * </p>
+     *
+     * @param state
+     *            the state to restore (must not be null)
+     * @throws IllegalArgumentException
+     *             if state is null
+     * @throws IllegalStateException
+     *             if no UI context is available
+     * @throws RuntimeException
+     *             if the SQL query fails or data conversion fails
+     */
+    public void restoreState(ChartState state) {
+        Objects.requireNonNull(state, "Chart state cannot be null");
+
+        UI ui = validateUiContext();
+
+        // Restore SQL query and data
+        if (state.getSqlQuery() != null && !state.getSqlQuery().isEmpty()) {
+            try {
+                List<Map<String, Object>> results = databaseProvider
+                        .executeQuery(state.getSqlQuery());
+                DataSeries series = dataConverter.convertToDataSeries(results);
+
+                ui.access(() -> {
+                    if (chart != null) {
+                        Configuration config = chart.getConfiguration();
+                        config.setSeries(series);
+                        chart.drawChart();
+                    }
+                });
+
+                // Update current state
+                this.currentSqlQuery = state.getSqlQuery();
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Failed to restore chart data: " + e.getMessage(), e);
+            }
+        }
+
+        // Restore chart configuration
+        if (state.getChartConfig() != null
+                && !state.getChartConfig().isEmpty()) {
+            try {
+                ui.access(() -> {
+                    if (chart != null) {
+                        applyChartConfig(state.getChartConfig());
+                        chart.drawChart();
+                    }
+                });
+
+                // Update current state
+                this.currentChartConfig = state.getChartConfig();
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Failed to restore chart configuration: "
+                                + e.getMessage(),
+                        e);
+            }
+        }
+    }
+
+    /**
+     * Adds a listener for chart state change events.
+     * <p>
+     * The listener will be notified whenever the chart's SQL query or
+     * configuration is updated by AI tools.
+     * </p>
+     *
+     * @param listener
+     *            the listener to add
+     */
+    public void addStateChangeListener(ChartStateChangeListener listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        stateChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes a previously registered state change listener.
+     *
+     * @param listener
+     *            the listener to remove
+     */
+    public void removeStateChangeListener(ChartStateChangeListener listener) {
+        stateChangeListeners.remove(listener);
+    }
+
+    /**
+     * Fires a state change event to all registered listeners.
+     *
+     * @param changeType
+     *            the type of change that occurred
+     */
+    private void fireStateChangeEvent(
+            ChartStateChangeEvent.StateChangeType changeType) {
+        if (!stateChangeListeners.isEmpty()) {
+            ChartState state = captureState();
+            if (state != null) {
+                ChartStateChangeEvent event = new ChartStateChangeEvent(this,
+                        state, changeType);
+                for (ChartStateChangeListener listener : new ArrayList<>(
+                        stateChangeListeners)) {
+                    listener.onStateChange(event);
+                }
+            }
+        }
     }
 
     /**
@@ -323,6 +476,13 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
                         System.err.println("Chart orchestrator: currentUI is null! Cannot update chart.");
                     }
 
+                    // Capture state
+                    currentSqlQuery = query;
+
+                    // Fire state change event
+                    fireStateChangeEvent(
+                            ChartStateChangeEvent.StateChangeType.DATA_QUERY_UPDATED);
+
                     String result = "Chart data updated successfully with " + results.size() + " rows";
                     System.out.println("Chart orchestrator: Tool 'updateChartData' completed: " + result);
                     return result;
@@ -371,6 +531,12 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
                     } else {
                         System.err.println("Chart orchestrator: currentUI is null! Cannot update chart config.");
                     }
+
+                    // Capture state
+                    currentChartConfig = config;
+
+                    // Fire state change event
+                    fireStateChangeEvent(ChartStateChangeEvent.StateChangeType.CONFIGURATION_UPDATED);
 
                     String result = "Chart configuration updated successfully";
                     System.out.println("Chart orchestrator: Tool 'updateChartConfig' completed: " + result);
