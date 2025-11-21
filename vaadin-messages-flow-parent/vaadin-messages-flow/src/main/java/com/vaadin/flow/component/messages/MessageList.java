@@ -349,20 +349,6 @@ public class MessageList extends Component
     }
 
     /**
-     * Updates an existing message in the list.
-     * This triggers a re-render of the list.
-     *
-     * @param message
-     *            the message to update
-     */
-    @Override
-    public void updateMessage(AiMessage message) {
-        // Trigger re-render by setting items again
-        List<MessageListItem> currentItems = new ArrayList<>(getItems());
-        setItems(currentItems);
-    }
-
-    /**
      * Creates a new message with the given parameters.
      *
      * @param text

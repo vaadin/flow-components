@@ -38,14 +38,6 @@ public interface AiMessageList extends Serializable {
     void addMessage(AiMessage message);
 
     /**
-     * Updates an existing message in the list.
-     *
-     * @param message
-     *            the message to update
-     */
-    void updateMessage(AiMessage message);
-
-    /**
      * Creates a new message with the given parameters.
      *
      * @param text
