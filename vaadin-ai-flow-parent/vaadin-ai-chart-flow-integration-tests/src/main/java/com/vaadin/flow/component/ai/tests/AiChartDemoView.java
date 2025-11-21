@@ -88,6 +88,7 @@ public class AiChartDemoView extends VerticalLayout {
         upload.setMaxFiles(5);
         upload.setMaxFileSize(5 * 1024 * 1024); // 5 MB
         upload.setAcceptedFileTypes("image/*", "application/pdf", "text/plain");
+        setFlexShrink(0, upload);
 
         // Create message input
         MessageInput messageInput = new MessageInput();
