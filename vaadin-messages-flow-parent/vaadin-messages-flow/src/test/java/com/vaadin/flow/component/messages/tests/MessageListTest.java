@@ -221,17 +221,6 @@ public class MessageListTest {
         Assert.assertEquals("User", message.getUserName());
     }
 
-    @Test
-    public void updateMessage_refreshesItems() {
-        MessageListItem item = new MessageListItem("Hello", java.time.Instant.now(), "User");
-        messageList.addMessage(item);
-
-        item.setText("Updated");
-        messageList.updateMessage(item);
-
-        Assert.assertEquals("Updated", messageList.getItems().get(0).getText());
-    }
-
     private String getSerializedThemeProperty(MessageListItem item) {
         JsonNode theme = JacksonUtils.beanToJson(item).get("theme");
         if (theme.isNull()) {

@@ -163,19 +163,13 @@ public abstract class BaseAiOrchestrator implements Serializable {
             AiMessage assistantMessage, Runnable onComplete) {
         UI ui = validateUiContext();
 
-        StringBuilder fullResponse = new StringBuilder();
-
         Flux<String> responseStream = provider.stream(request);
 
         responseStream.subscribe(token -> {
-            // Append token to the full response
-            fullResponse.append(token);
-
             // Update UI with the accumulated response
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> {
-                    assistantMessage.setText(fullResponse.toString());
-                    messageList.updateMessage(assistantMessage);
+                    assistantMessage.appendText(token);
                 });
             }
         }, error -> {
@@ -183,7 +177,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> {
                     assistantMessage.setText("Error: " + error.getMessage());
-                    messageList.updateMessage(assistantMessage);
                 });
             }
         }, () -> {

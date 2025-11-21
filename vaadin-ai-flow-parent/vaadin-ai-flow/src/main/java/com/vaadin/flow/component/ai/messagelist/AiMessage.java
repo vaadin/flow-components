@@ -53,4 +53,12 @@ public interface AiMessage extends Serializable {
      * @return the sender name
      */
     String getUserName();
+
+    /**
+     * Appends text to the existing message content.
+     *
+     * @param token
+     *            the text to append
+     */
+    void appendText(String token);
 }
