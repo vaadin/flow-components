@@ -416,6 +416,10 @@ public abstract class BaseAiOrchestrator implements Serializable {
                 input.addSubmitListener(orchestrator::handleUserInput);
             }
 
+            if (messageList != null) {
+                messageList.setMarkdown(true);
+            }
+
             // Configure file receiver if provided
             if (fileReceiver != null) {
                 orchestrator.configureFileReceiver();

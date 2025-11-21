@@ -55,4 +55,12 @@ public interface AiMessageList extends Serializable {
      * @return the created message
      */
     AiMessage createMessage(String text, String userName);
+    
+    /**
+     * Sets whether the message list should render messages in Markdown format.
+     *
+     * @param b
+     *            true to enable Markdown rendering, false to disable
+     */
+    void setMarkdown(boolean markdown);
 }
