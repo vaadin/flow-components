@@ -25,6 +25,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageInput.SubmitEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -78,14 +79,22 @@ public class AiChartDemoView extends VerticalLayout {
         Chart chart = new Chart();
         chart.setWidthFull();
         chart.setHeight("400px");
+        setFlexShrink(0, chart);
         add(chart);
+
+        // Upload Component for attachments
+        Upload upload = new Upload();
+        upload.setWidthFull();
+        upload.setMaxFiles(5);
+        upload.setMaxFileSize(5 * 1024 * 1024); // 5 MB
+        upload.setAcceptedFileTypes("image/*", "application/pdf", "text/plain");
 
         // Create message input
         MessageInput messageInput = new MessageInput();
         messageInput.setWidthFull();
 
         MessageList messageList = new MessageList();
-        messageList.setWidthFull();
+        messageList.setSizeFull();
 
         // Create providers
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
@@ -98,6 +107,7 @@ public class AiChartDemoView extends VerticalLayout {
                 .withChart(chart)
                 .withInput(messageInput)
                 .withMessageList(messageList)
+                .withFileReceiver(upload)
                 .build();
 
         // Add state change listener to log changes
@@ -197,6 +207,11 @@ public class AiChartDemoView extends VerticalLayout {
         examplesLabel.getStyle().set("margin-top", "20px").set("margin-bottom", "5px")
                 .set("font-weight", "bold");
 
-        add(messageList, messageInput, buttonBar, examplesLabel, exampleQueriesBar1, exampleQueriesBar2);
+        // Create input container with upload wrapping message input
+        Div inputContainer = new Div(messageInput);
+        inputContainer.setWidthFull();
+        upload.getElement().appendChild(inputContainer.getElement());
+
+        add(messageList, upload, buttonBar, examplesLabel, exampleQueriesBar1, exampleQueriesBar2);
     }
 }
