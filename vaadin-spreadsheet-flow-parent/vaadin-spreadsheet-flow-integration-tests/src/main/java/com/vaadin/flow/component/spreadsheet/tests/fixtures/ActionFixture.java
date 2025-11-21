@@ -11,10 +11,12 @@ package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.tests.SpreadsheetActionHandler;
 import com.vaadin.flow.component.spreadsheet.tests.SpreadsheetHelper;
+import com.vaadin.flow.theme.lumo.LumoIcon;
 
 public class ActionFixture implements SpreadsheetFixture {
 
@@ -43,7 +45,8 @@ public class ActionFixture implements SpreadsheetFixture {
             public Action[] getActions(
                     Spreadsheet.SelectionChangeEvent selection,
                     Spreadsheet sender) {
-                return new Action[] { new Action("Double cell values"), };
+                return new Action[] { new Action("Double cell values",
+                        LumoIcon.ANGLE_UP.create()), };
             }
 
             private void doubleValue(Cell cell) {
@@ -69,7 +72,8 @@ public class ActionFixture implements SpreadsheetFixture {
             @Override
             public Action[] getActions(Spreadsheet.SelectionChangeEvent target,
                     Spreadsheet sender) {
-                return new Action[] { new Action("Number"), };
+                return new Action[] { new Action("Number",
+                        VaadinIcon.ACADEMY_CAP.create()), };
             }
         });
 

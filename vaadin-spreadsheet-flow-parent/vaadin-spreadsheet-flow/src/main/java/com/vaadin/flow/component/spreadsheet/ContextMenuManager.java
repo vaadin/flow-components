@@ -226,6 +226,16 @@ public class ContextMenuManager implements Serializable {
                     spreadsheetActionDetails.caption = action.getCaption();
                     spreadsheetActionDetails.key = key;
                     spreadsheetActionDetails.type = 0;
+                    // Attach icon as virtual child and record node id
+                    if (action.getIcon() != null) {
+                        if (action.getIcon().getElement()
+                                .getParent() != spreadsheet.getElement()) {
+                            spreadsheet.getElement().appendVirtualChild(
+                                    action.getIcon().getElement());
+                        }
+                        spreadsheetActionDetails.iconNodeId = action.getIcon()
+                                .getElement().getNode().getId();
+                    }
                     actions.add(spreadsheetActionDetails);
                 }
             }
@@ -252,6 +262,15 @@ public class ContextMenuManager implements Serializable {
                 spreadsheetActionDetails.caption = action.getCaption();
                 spreadsheetActionDetails.key = key;
                 spreadsheetActionDetails.type = 2;
+                if (action.getIcon() != null) {
+                    if (action.getIcon().getElement().getParent() != spreadsheet
+                            .getElement()) {
+                        spreadsheet.getElement().appendVirtualChild(
+                                action.getIcon().getElement());
+                    }
+                    spreadsheetActionDetails.iconNodeId = action.getIcon()
+                            .getElement().getNode().getId();
+                }
                 actions.add(spreadsheetActionDetails);
             }
         }
@@ -277,6 +296,15 @@ public class ContextMenuManager implements Serializable {
                 spreadsheetActionDetails.caption = action.getCaption();
                 spreadsheetActionDetails.key = key;
                 spreadsheetActionDetails.type = 1;
+                if (action.getIcon() != null) {
+                    if (action.getIcon().getElement().getParent() != spreadsheet
+                            .getElement()) {
+                        spreadsheet.getElement().appendVirtualChild(
+                                action.getIcon().getElement());
+                    }
+                    spreadsheetActionDetails.iconNodeId = action.getIcon()
+                            .getElement().getNode().getId();
+                }
                 actions.add(spreadsheetActionDetails);
             }
         }

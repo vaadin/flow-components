@@ -16,4 +16,6 @@ public class SpreadsheetActionDetails implements Serializable {
     public String key;
     /** 0 = cell, 1 = row, 2 = column TODO replace with enum type */
     public int type;
+    /** Node id of the icon virtual child, 0 if no icon provided */
+    public int iconNodeId;
 }

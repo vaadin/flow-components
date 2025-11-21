@@ -107,12 +107,22 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     SpreadsheetServerRpc rpcProxy = getRpcProxy(
                             SpreadsheetServerRpc.class);
                     for (SpreadsheetActionDetails actionDetail : actionDetails) {
+                        Element iconElement = null;
+                        if (actionDetail.iconNodeId > 0) {
+                            iconElement = SheetJsniUtil.getVirtualChild(
+                                    String.valueOf(actionDetail.iconNodeId),
+                                    host.getPropertyString("appId"));
+                        }
                         SpreadsheetAction spreadsheetAction = new SpreadsheetAction(
                                 this, rpcProxy, actionDetail.key,
-                                actionDetail.type, widget);
+                                actionDetail.type, widget, iconElement);
                         spreadsheetAction.setCaption(actionDetail.caption);
-                        spreadsheetAction
-                                .setIconUrl(getResourceUrl(actionDetail.key));
+                        // Backwards compatibility: if no node id provided, use
+                        // resource icon URL
+                        if (actionDetail.iconNodeId == 0) {
+                            spreadsheetAction.setIconUrl(
+                                    getResourceUrl(actionDetail.key));
+                        }
                         actions.add(spreadsheetAction);
                     }
                     return actions.toArray(new Action[actions.size()]);
