@@ -9,16 +9,12 @@
 package com.vaadin.flow.component.ai.pro.chart;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.input.AiInput;
-import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
-import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,12 +146,9 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
             orchestrator.chart = chart;
             orchestrator.dataConverter = dataConverter;
 
-            // Apply common configuration from base builder
+            // Apply common configuration from base builder (includes input
+            // listener and file receiver configuration)
             applyCommonConfiguration(orchestrator);
-
-            if (input != null) {
-                input.addSubmitListener(orchestrator::handleUserRequest);
-            }
 
             return orchestrator;
         }
@@ -198,91 +191,55 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
     }
 
     /**
-     * Handles a user request.
+     * Prepares for processing by storing the user request and UI context.
      *
-     * @param event
-     *            the submit event
+     * @param userMessage
+     *            the user's input message
      */
-    private void handleUserRequest(
-            com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
-        String userRequest = event.getValue();
-        if (userRequest == null || userRequest.trim().isEmpty()) {
-            return;
-        }
-
-        // Add user message to UI
-        if (messageList != null) {
-            AiMessage userItem = messageList.createMessage(userRequest, "User");
-            messageList.addMessage(userItem);
-        }
-
-        // Store current request and process it
-        this.currentUserRequest = userRequest;
-        processRequest();
-    }
-
-    /**
-     * Processes the current request using the LLM with tool support.
-     */
-    private void processRequest() {
-        if (messageList == null) {
-            System.err.println("Warning: messageList is null, cannot show responses");
-        }
+    @Override
+    protected void processUserInput(String userMessage) {
+        this.currentUserRequest = userMessage;
 
         UI ui = validateUiContext();
         this.currentUI = ui; // Store UI reference for tools to use
 
-        // Create a placeholder for the assistant's message
-        AiMessage assistantMessage = null;
-        if (messageList != null) {
-            assistantMessage = messageList.createMessage("", "Assistant");
-            messageList.addMessage(assistantMessage);
+        if (messageList == null) {
+            System.err.println("Warning: messageList is null, cannot show responses");
         }
-        final AiMessage finalAssistantMessage = assistantMessage;
-
-        // Create tools
-        LLMProvider.Tool[] tools = createTools();
-        System.out.println("Chart orchestrator: Created " + tools.length + " tools for LLM");
-
-        // Build LLM request
-        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .userMessage(currentUserRequest)
-                .systemPrompt(SYSTEM_PROMPT).tools(tools).build();
 
         System.out.println("Chart orchestrator: Sending request to LLM with user message: " + currentUserRequest);
 
-        // Get streaming response from LLM
-        Flux<String> responseStream = provider.stream(request);
+        // Use base class implementation for the rest
+        super.processUserInput(userMessage);
+    }
 
-        StringBuilder fullResponse = new StringBuilder();
+    /**
+     * Returns the system prompt for chart generation.
+     *
+     * @return the system prompt
+     */
+    @Override
+    protected String getSystemPrompt() {
+        return SYSTEM_PROMPT;
+    }
 
-        responseStream.subscribe(token -> {
-            // Append token to the full response
-            fullResponse.append(token);
-            System.out.println("Chart orchestrator: Received token: " + token);
+    /**
+     * Chart orchestrator can process without message list since tools directly
+     * update the chart component.
+     *
+     * @return true to allow processing without message list
+     */
+    @Override
+    protected boolean shouldProcessWithoutMessageList() {
+        return true;
+    }
 
-            // Update UI with the accumulated response
-            if (finalAssistantMessage != null) {
-                ui.access(() -> {
-                    finalAssistantMessage.setText(fullResponse.toString());
-                    messageList.updateMessage(finalAssistantMessage);
-                });
-            }
-        }, error -> {
-            System.err.println("Chart orchestrator: Error processing request: " + error.getMessage());
-            error.printStackTrace();
-
-            ui.access(() -> {
-                if (finalAssistantMessage != null) {
-                    finalAssistantMessage.setText("Error: " + error.getMessage());
-                    messageList.updateMessage(finalAssistantMessage);
-                }
-            });
-        }, () -> {
-            System.out.println("Chart orchestrator: Streaming complete. Full response: " + fullResponse.toString());
-            // Streaming complete - provider has already managed the
-            // conversation history
-        });
+    /**
+     * Called when processing completes.
+     */
+    @Override
+    protected void onProcessingComplete() {
+        System.out.println("Chart orchestrator: Streaming complete");
     }
 
     /**
@@ -290,7 +247,9 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
      *
      * @return the array of tools
      */
-    private LLMProvider.Tool[] createTools() {
+    @Override
+    protected LLMProvider.Tool[] createTools() {
+        System.out.println("Chart orchestrator: Creating tools for LLM");
         List<LLMProvider.Tool> toolsList = new ArrayList<>();
 
         // Tool 1: getSchema
@@ -361,12 +320,6 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
                         currentUI.access(() -> {
                             System.out.println("Chart orchestrator: Updating chart in UI thread");
                             Configuration config = chart.getConfiguration();
-
-                            // Set default chart type if not set
-                            if (config.getChart() == null) {
-                                config.getChart().setType(ChartType.COLUMN);
-                                System.out.println("Chart orchestrator: Set default chart type to COLUMN");
-                            }
 
                             config.setSeries(series);
 
@@ -441,7 +394,9 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
             }
         });
 
-        return toolsList.toArray(new LLMProvider.Tool[0]);
+        LLMProvider.Tool[] tools = toolsList.toArray(new LLMProvider.Tool[0]);
+        System.out.println("Chart orchestrator: Created " + tools.length + " tools for LLM");
+        return tools;
     }
 
     /**

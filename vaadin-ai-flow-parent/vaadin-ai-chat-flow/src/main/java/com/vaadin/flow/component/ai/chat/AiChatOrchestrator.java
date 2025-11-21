@@ -15,17 +15,9 @@
  */
 package com.vaadin.flow.component.ai.chat;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.input.AiInput;
-import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.component.ai.messagelist.AiMessageList;
 import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.server.streams.UploadHandler;
-import reactor.core.publisher.Flux;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -63,8 +55,6 @@ import java.util.List;
  * @author Vaadin Ltd
  */
 public class AiChatOrchestrator extends BaseAiOrchestrator {
-
-    private final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
 
     /**
      * Creates a new AI chat orchestrator.
@@ -105,127 +95,11 @@ public class AiChatOrchestrator extends BaseAiOrchestrator {
         public AiChatOrchestrator build() {
             AiChatOrchestrator orchestrator = new AiChatOrchestrator(provider);
 
-            // Apply common configuration from base builder
+            // Apply common configuration from base builder (includes input
+            // listener and file receiver configuration)
             applyCommonConfiguration(orchestrator);
-
-            if (input != null) {
-                input.addSubmitListener(orchestrator::handleUserMessage);
-            }
-
-            // Configure file receiver if provided
-            if (fileReceiver != null) {
-                orchestrator.configureFileReceiver();
-            }
 
             return orchestrator;
         }
-    }
-
-    /**
-     * Configures the file receiver with the appropriate upload handler.
-     */
-    private void configureFileReceiver() {
-        if (fileReceiver == null) {
-            return;
-        }
-
-        fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
-            pendingAttachments.add(LLMProvider.Attachment.of(
-                    meta.fileName(),
-                    meta.contentType(),
-                    data));
-        }));
-
-        fileReceiver.addFileRemovedListener(fileName -> {
-            pendingAttachments.removeIf(
-                    attachment -> attachment.fileName().equals(fileName));
-        });
-    }
-
-    /**
-     * Gets the message list component.
-     *
-     * @return the message list
-     */
-    public AiMessageList getMessageList() {
-        return messageList;
-    }
-
-    /**
-     * Handles a user message submission.
-     *
-     * @param event
-     *            the submit event
-     */
-    private void handleUserMessage(
-            com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
-        String userMessage = event.getValue();
-        if (userMessage == null || userMessage.trim().isEmpty()) {
-            return;
-        }
-
-        // Add user message to UI
-        if (messageList != null) {
-            AiMessage userItem = messageList.createMessage(userMessage, "User");
-            messageList.addMessage(userItem);
-        }
-
-        // Generate AI response
-        generateAiResponse(userMessage);
-    }
-
-    /**
-     * Generates an AI response based on the user message.
-     *
-     * @param userMessage
-     *            the user's message
-     */
-    private void generateAiResponse(String userMessage) {
-        if (messageList == null) {
-            return;
-        }
-
-        UI ui = validateUiContext();
-
-        // Create a placeholder for the assistant's message
-        AiMessage assistantMessage = messageList.createMessage("", "Assistant");
-        messageList.addMessage(assistantMessage);
-
-        StringBuilder fullResponse = new StringBuilder();
-
-        // Build LLM request with any pending attachments
-        LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
-                .userMessage(userMessage)
-                .attachments(new ArrayList<>(pendingAttachments))
-                .build();
-
-        // Clear pending attachments after building the request
-        pendingAttachments.clear();
-        if (fileReceiver != null) {
-            fileReceiver.clearFileList();
-        }
-
-        // Get streaming response from LLM
-        Flux<String> responseStream = provider.stream(request);
-
-        responseStream.subscribe(token -> {
-            // Append token to the full response
-            fullResponse.append(token);
-
-            // Update UI with the accumulated response
-            ui.access(() -> {
-                assistantMessage.setText(fullResponse.toString());
-                messageList.updateMessage(assistantMessage);
-            });
-        }, error -> {
-            // Handle error
-            ui.access(() -> {
-                assistantMessage.setText("Error: " + error.getMessage());
-                messageList.updateMessage(assistantMessage);
-            });
-        }, () -> {
-            // Streaming complete - provider has already added the response to
-            // conversation history
-        });
     }
 }

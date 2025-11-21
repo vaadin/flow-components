@@ -17,12 +17,18 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.input.AiInput;
+import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.component.ai.messagelist.AiMessageList;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.upload.AiFileReceiver;
+import com.vaadin.flow.server.streams.UploadHandler;
+import reactor.core.publisher.Flux;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Base class for AI orchestrators providing common functionality.
@@ -44,6 +50,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
     protected AiMessageList messageList;
     protected AiInput input;
     protected AiFileReceiver fileReceiver;
+    protected final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
 
     /**
      * Creates a new base orchestrator.
@@ -139,6 +146,241 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
+     * Adds a user message to the message list.
+     *
+     * @param userMessage
+     *            the user's message text
+     */
+    protected void addUserMessageToList(String userMessage) {
+        if (messageList != null) {
+            AiMessage userItem = messageList.createMessage(userMessage, "User");
+            messageList.addMessage(userItem);
+        }
+    }
+
+    /**
+     * Creates and adds an assistant message placeholder to the message list.
+     *
+     * @return the created assistant message, or null if messageList is not
+     *         configured
+     */
+    protected AiMessage createAssistantMessagePlaceholder() {
+        if (messageList == null) {
+            return null;
+        }
+        AiMessage assistantMessage = messageList.createMessage("", "Assistant");
+        messageList.addMessage(assistantMessage);
+        return assistantMessage;
+    }
+
+    /**
+     * Streams a response from the LLM and updates the assistant message in
+     * real-time.
+     *
+     * @param request
+     *            the LLM request to process
+     * @param assistantMessage
+     *            the assistant message to update (can be null if messageList is
+     *            not configured)
+     * @param onComplete
+     *            optional callback to execute when streaming completes
+     *            successfully (can be null)
+     */
+    protected void streamResponseToMessage(LLMProvider.LLMRequest request,
+            AiMessage assistantMessage, Runnable onComplete) {
+        UI ui = validateUiContext();
+
+        StringBuilder fullResponse = new StringBuilder();
+
+        Flux<String> responseStream = provider.stream(request);
+
+        responseStream.subscribe(token -> {
+            // Append token to the full response
+            fullResponse.append(token);
+
+            // Update UI with the accumulated response
+            if (assistantMessage != null && messageList != null) {
+                ui.access(() -> {
+                    assistantMessage.setText(fullResponse.toString());
+                    messageList.updateMessage(assistantMessage);
+                });
+            }
+        }, error -> {
+            // Handle error
+            if (assistantMessage != null && messageList != null) {
+                ui.access(() -> {
+                    assistantMessage.setText("Error: " + error.getMessage());
+                    messageList.updateMessage(assistantMessage);
+                });
+            }
+        }, () -> {
+            // Streaming complete - provider has already added the response to
+            // conversation history
+            if (onComplete != null) {
+                onComplete.run();
+            }
+        });
+    }
+
+    /**
+     * Streams a response with custom token processing.
+     *
+     * @param request
+     *            the LLM request to process
+     * @param onToken
+     *            callback to process each token
+     * @param onError
+     *            callback to handle errors
+     * @param onComplete
+     *            callback when streaming completes
+     */
+    protected void streamResponse(LLMProvider.LLMRequest request,
+            Consumer<String> onToken, Consumer<Throwable> onError,
+            Runnable onComplete) {
+        Flux<String> responseStream = provider.stream(request);
+        responseStream.subscribe(onToken::accept, onError::accept,
+                onComplete);
+    }
+
+    /**
+     * Handles a user input submission event. This method implements the common
+     * pattern of validating input, adding the user message to the UI, and
+     * delegating to the subclass for processing.
+     * <p>
+     * Subclasses must implement {@link #processUserInput(String)} to define
+     * their specific processing logic.
+     * </p>
+     *
+     * @param event
+     *            the input submit event containing the user's message
+     */
+    protected void handleUserInput(
+            com.vaadin.flow.component.ai.input.InputSubmitEvent event) {
+        String userMessage = event.getValue();
+        if (userMessage == null || userMessage.trim().isEmpty()) {
+            return;
+        }
+
+        // Add user message to UI
+        addUserMessageToList(userMessage);
+
+        // Delegate to subclass for specific processing
+        processUserInput(userMessage);
+    }
+
+    /**
+     * Processes the user's input message by building an LLM request and
+     * streaming the response. This method implements the common pattern shared
+     * by all orchestrators.
+     *
+     * @param userMessage
+     *            the user's input message
+     */
+    protected void processUserInput(String userMessage) {
+        // Check if processing should continue without a message list
+        if (messageList == null && !shouldProcessWithoutMessageList()) {
+            return;
+        }
+
+        // Create a placeholder for the assistant's message (may be null if no
+        // messageList)
+        AiMessage assistantMessage = createAssistantMessagePlaceholder();
+
+        // Get tools from subclass
+        LLMProvider.Tool[] tools = createTools();
+
+        // Build LLM request with any pending attachments
+        LLMProvider.LLMRequestBuilder requestBuilder = new LLMProvider.LLMRequestBuilder()
+                .userMessage(userMessage)
+                .attachments(new ArrayList<>(pendingAttachments));
+
+        // Add system prompt if provided by subclass
+        String systemPrompt = getSystemPrompt();
+        if (systemPrompt != null && !systemPrompt.isEmpty()) {
+            requestBuilder.systemPrompt(systemPrompt);
+        }
+
+        // Add tools if provided by subclass
+        if (tools != null && tools.length > 0) {
+            requestBuilder.tools(tools);
+        }
+
+        LLMProvider.LLMRequest request = requestBuilder.build();
+
+        // Clear pending attachments after building the request
+        pendingAttachments.clear();
+        if (fileReceiver != null) {
+            fileReceiver.clearFileList();
+        }
+
+        // Stream response using base class method
+        streamResponseToMessage(request, assistantMessage,
+                () -> onProcessingComplete());
+    }
+
+    /**
+     * Creates tools for the LLM to use. Subclasses that need tool support
+     * should override this method.
+     *
+     * @return array of tools, or empty array if no tools needed
+     */
+    protected LLMProvider.Tool[] createTools() {
+        return new LLMProvider.Tool[0];
+    }
+
+    /**
+     * Returns the system prompt for the LLM. Subclasses that need a system
+     * prompt should override this method.
+     *
+     * @return the system prompt, or null if no system prompt needed
+     */
+    protected String getSystemPrompt() {
+        return null;
+    }
+
+    /**
+     * Determines if processing should continue when no message list is
+     * configured. By default, returns false (do not process without message
+     * list). Subclasses that have other ways to handle responses (e.g., tools
+     * that directly update components) can override to return true.
+     *
+     * @return true to process even without message list, false otherwise
+     */
+    protected boolean shouldProcessWithoutMessageList() {
+        return false;
+    }
+
+    /**
+     * Called when processing is complete. Subclasses can override to perform
+     * additional actions after streaming completes.
+     */
+    protected void onProcessingComplete() {
+        // Default: do nothing
+    }
+
+    /**
+     * Configures the file receiver with the appropriate upload handler for
+     * managing file attachments.
+     */
+    protected void configureFileReceiver() {
+        if (fileReceiver == null) {
+            return;
+        }
+
+        fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
+            pendingAttachments.add(LLMProvider.Attachment.of(
+                    meta.fileName(),
+                    meta.contentType(),
+                    data));
+        }));
+
+        fileReceiver.addFileRemovedListener(fileName -> {
+            pendingAttachments.removeIf(
+                    attachment -> attachment.fileName().equals(fileName));
+        });
+    }
+
+    /**
      * Base builder for orchestrators.
      *
      * @param <T>
@@ -212,6 +454,16 @@ public abstract class BaseAiOrchestrator implements Serializable {
             orchestrator.setMessageList(messageList);
             orchestrator.setInput(input);
             orchestrator.setFileReceiver(fileReceiver);
+
+            // Configure input listener if provided
+            if (input != null) {
+                input.addSubmitListener(orchestrator::handleUserInput);
+            }
+
+            // Configure file receiver if provided
+            if (fileReceiver != null) {
+                orchestrator.configureFileReceiver();
+            }
         }
 
         /**
