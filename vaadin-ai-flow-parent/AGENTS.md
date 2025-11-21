@@ -17,7 +17,7 @@ vaadin-ai-flow-parent/
 
 ## Core Module: vaadin-ai-flow
 
-**Purpose**: Provides core interfaces and abstractions for AI-powered components.
+**Purpose**: Provides core interfaces and abstractions for AI-powered components, including the base orchestrator class.
 
 ### Key Interfaces
 
@@ -84,6 +84,40 @@ vaadin-ai-flow-parent/
 - Interface representing a single message in a conversation
 - Properties: text, time, userName
 
+#### BaseAiOrchestrator (`com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator`)
+- Abstract base class for all AI orchestrators providing common functionality
+- **Shared Functionality**:
+  - LLM provider management
+  - Message list, input, and file receiver integration
+  - UI context validation
+  - User message handling (`addUserMessageToList()`)
+  - Assistant message placeholder creation (`createAssistantMessagePlaceholder()`)
+  - Streaming response handling with real-time UI updates (`streamResponseToMessage()`)
+  - Complete input processing logic (`processUserInput()`)
+  - Input event handling with Template Method pattern (`handleUserInput()`)
+  - File attachment management (`configureFileReceiver()`, `pendingAttachments`)
+  - Thread-safe UI updates via `UI.access()`
+  - Error handling for streaming responses
+- **Template Method Pattern**:
+  - `handleUserInput(event)` validates input, adds user message, then calls `processUserInput(message)`
+  - `processUserInput(message)` builds LLM request, handles attachments, streams response
+  - Subclasses customize behavior by overriding hook methods
+- **Hook Methods** (subclasses override for customization):
+  - `createTools()` - returns array of tools for the LLM (default: empty array)
+  - `getSystemPrompt()` - returns system prompt for the LLM (default: null)
+  - `shouldProcessWithoutMessageList()` - allow processing without messageList (default: false)
+  - `onProcessingComplete()` - called after streaming completes (default: no-op)
+- **File Attachment Support**:
+  - Manages `pendingAttachments` list for both orchestrators
+  - Automatically configures file receiver upload handlers
+  - Clears attachments after including them in LLM requests
+- **Builder Pattern**:
+  - Provides `BaseBuilder` abstract class for fluent API configuration
+  - Automatically registers input listeners in `applyCommonConfiguration()`
+  - Automatically configures file receivers when provided
+- **Benefits**: Eliminates code duplication between ChatOrchestrator and ChartOrchestrator
+- Both chat and chart orchestrators extend this base class and inherit common behavior
+
 ## Chat Module: vaadin-ai-chat-flow
 
 **Purpose**: Orchestrates AI chat interactions between user input, LLM, and message display.
@@ -102,18 +136,21 @@ vaadin-ai-flow-parent/
 
 **Flow**:
 1. User submits input via `AiInput`
-2. Orchestrator adds user message to `AiMessageList`
-3. Calls `LLMProvider.stream()` with `LLMRequest` containing userMessage
-4. Streams tokens to assistant message in real-time
+2. Base class `handleUserInput()` validates input and adds user message to `AiMessageList`
+3. Base class `processUserInput()` builds LLM request and calls `LLMProvider.stream()`
+4. Base class streams tokens to assistant message in real-time
 5. Provider manages conversation history internally
 
 **Key Features**:
+- Extends `BaseAiOrchestrator` for all functionality
+- Uses base class `processUserInput()` implementation with default hook methods
+- No tools (returns empty array from `createTools()`)
+- No system prompt override (returns null from `getSystemPrompt()`)
+- Requires messageList to process (default `shouldProcessWithoutMessageList()` = false)
 - Conversation history managed internally by the provider instance
 - System prompts configured at the provider level (via `provider.setSystemPrompt()`)
-- Streaming responses with incremental UI updates
-- Error handling with error messages displayed in chat
-- UI.access() for thread-safe Vaadin updates
-- Validates UI context exists before operations
+- All streaming, error handling, and file attachment support inherited from base class
+- Minimal code - just constructor, builder, and getter
 
 **Testing**: [AiChatOrchestratorTest](vaadin-ai-chat-flow/src/test/java/com/vaadin/flow/component/ai/chat/AiChatOrchestratorTest.java) (extensive, ~40+ tests)
 - Tests verify LLMRequest properties (userMessage) instead of message history
@@ -137,23 +174,37 @@ vaadin-ai-flow-parent/
 - `DatabaseProvider` (required) - database access
 - `Chart` (optional) - Vaadin Charts component to update
 - `AiInput` (optional) - user input for queries
+- `AiFileReceiver` (optional) - handles file uploads
 - `DataConverter` (optional) - converts query results to chart data
 
 **Flow**:
 1. User submits natural language query (e.g., "Show sales by region")
-2. Orchestrator provides AI with three tools:
+2. Base class `handleUserInput()` validates input and adds user message to `AiMessageList`
+3. Override `processUserInput()` stores currentUserRequest and currentUI, then calls super
+4. Base class `processUserInput()` calls hook methods to get tools and system prompt
+5. Base class builds LLM request with tools and streams response
+6. AI generates SQL queries and chart configurations using provided tools:
    - `getSchema` - retrieve database schema
    - `updateChartData` - execute SQL and update chart with data
    - `updateChartConfig` - update chart configuration (title, colors, etc.)
-3. AI generates SQL queries and chart configurations
-4. Tools execute and update the chart
-5. System prompt guides AI on proper chart configuration
+7. Tools execute and update the chart directly
+8. Base class handles streaming and calls `onProcessingComplete()` when done
+
+**Key Features**:
+- Extends `BaseAiOrchestrator` and uses base class `processUserInput()` implementation
+- Overrides hook methods for customization:
+  - `createTools()` - returns 3 tools (getSchema, updateChartData, updateChartConfig)
+  - `getSystemPrompt()` - returns SYSTEM_PROMPT with chart generation instructions
+  - `shouldProcessWithoutMessageList()` - returns true (tools update chart directly)
+  - `onProcessingComplete()` - logs completion
+- Overrides `processUserInput()` to store currentUserRequest and currentUI for tool use
+- All streaming, error handling, and file attachment support inherited from base class
 
 **Tools Implementation**:
 - Tools use JSON for parameter passing
 - Each tool returns success/error messages to AI
 - AI can make follow-up tool calls based on results
-- Thread-safe updates via UI.access()
+- Thread-safe updates via UI.access() for chart manipulation
 
 **Testing**: [AiChartOrchestratorTest](vaadin-ai-chart-flow/src/test/java/com/vaadin/flow/component/ai/pro/chart/AiChartOrchestratorTest.java) (37 tests)
 
@@ -203,10 +254,11 @@ AI Chart orchestrator demonstrates tool/function calling:
 - Supports multi-step workflows
 
 ### 5. Thread Safety
-Both orchestrators use `UI.access()` for Vaadin's server push:
+All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server push:
 - All UI updates wrapped in access() calls
 - Validates UI context exists before operations
 - Throws `IllegalStateException` if no UI context
+- Thread-safe message list updates during streaming
 
 ## Testing Strategy
 
@@ -324,12 +376,51 @@ mvn install -DskipTests
 
 ### Code Locations
 - Core interfaces: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/`
+- Base orchestrator: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/`
 - Providers: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/`
 - Chat orchestrator: `vaadin-ai-chat-flow/src/main/java/com/vaadin/flow/component/ai/chat/`
 - Chart orchestrator: `vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/`
 - Tests: `*/src/test/java/` (mirrors main structure)
 
+## Recent Changes
+
+### 2025-11-21: Complete BaseAiOrchestrator Refactoring
+- Created `BaseAiOrchestrator` abstract base class to eliminate ALL code duplication
+- Moved complete processing logic to base class:
+  - User message handling (`addUserMessageToList()`)
+  - Assistant message placeholder creation (`createAssistantMessagePlaceholder()`)
+  - Streaming response handling with real-time UI updates (`streamResponseToMessage()`)
+  - Complete input processing implementation (`processUserInput()`)
+  - Input event handling using Template Method pattern (`handleUserInput()`)
+  - Input listener registration (automatic in builder)
+  - File attachment management (`configureFileReceiver()`, `pendingAttachments`)
+  - Thread-safe UI updates and error handling
+- Hook Method pattern implementation:
+  - Base class provides complete `processUserInput()` implementation
+  - Subclasses customize via hook methods: `createTools()`, `getSystemPrompt()`, `shouldProcessWithoutMessageList()`, `onProcessingComplete()`
+  - AiChatOrchestrator uses all default hook implementations (no tools, no system prompt)
+  - AiChartOrchestrator overrides all hooks for tool support and chart-specific behavior
+  - Eliminates need for subclasses to duplicate processing logic
+- Builder improvements:
+  - Input listeners registered automatically in `applyCommonConfiguration()`
+  - File receivers configured automatically when provided
+  - Subclass builders simplified to just orchestrator-specific configuration
+- File receiver support:
+  - Moved file attachment logic to base class
+  - Both orchestrators now support file uploads automatically
+  - Chart orchestrator gained file attachment capability
+- Message list handling:
+  - Added `shouldProcessWithoutMessageList()` hook for flexible behavior
+  - Chat orchestrator requires messageList (default false)
+  - Chart orchestrator can work without messageList (returns true, tools update chart directly)
+- Code reduction:
+  - AiChatOrchestrator reduced to minimal code (~20 lines - just constructor, builder, getter)
+  - AiChartOrchestrator simplified significantly with hook method overrides
+  - Eliminated ~150+ lines of duplicate code
+- All existing tests pass (129 tests total: 33 + 42 + 54)
+- No breaking changes to public API
+
 ---
 
-**Last Updated**: 2025-11-20
+**Last Updated**: 2025-11-21
 **Vaadin Version**: 25.0-SNAPSHOT
