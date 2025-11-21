@@ -26,10 +26,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 public class BinderValidationTest {
 
@@ -119,6 +123,52 @@ public class BinderValidationTest {
 
     }
 
+    @Test
+    public void validValue_enterUnparsableInput_valueIsPreserved() {
+        var binder = attachBinderToField();
+        var bean = new Bean();
+        var validDate = LocalDate.of(2025, 1, 15);
+        bean.setDate(validDate);
+        binder.setBean(bean);
+
+        // Simulate setting unparsable input
+        fakeClientPropertyChange(field, "_inputElementValue", "foobar");
+        fakeClientPropertyChange(field, "value", null);
+        fakeClientDomEvent("change");
+
+        Assert.assertEquals(
+                "Field value should be preserved after entering unparsable input",
+                validDate, field.getValue());
+        Assert.assertEquals(
+                "Binder value should be preserved after entering unparsable input",
+                validDate, bean.getDate());
+    }
+
+    @Test
+    public void validValue_enterUnparsableInput_clearInput_binderValueChangesToNull() {
+        var binder = attachBinderToField();
+        var bean = new Bean();
+        var validDate = LocalDate.of(2025, 1, 15);
+        bean.setDate(validDate);
+        binder.setBean(bean);
+
+        // Simulate setting an invalid input
+        fakeClientPropertyChange(field, "_inputElementValue", "foobar");
+        fakeClientPropertyChange(field, "value", null);
+        fakeClientDomEvent("change");
+
+        // Simulate setting clearing the invalid input
+        fakeClientPropertyChange(field, "_inputElementValue", "");
+        fakeClientDomEvent("unparsable-change");
+
+        Assert.assertNull(
+                "Field value should be null after clearing unparsable input",
+                field.getValue());
+        Assert.assertNull(
+                "Binder value should be null after clearing unparsable input",
+                bean.getDate());
+    }
+
     private Binder<Bean> attachBinderToField() {
         return attachBinderToField(false);
     }
@@ -139,5 +189,19 @@ public class BinderValidationTest {
         binding.bind("date");
 
         return binder;
+    }
+
+    private void fakeClientDomEvent(String eventName) {
+        var element = field.getElement();
+        var event = new DomEvent(element, eventName,
+                JacksonUtils.createObjectNode());
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
+    }
+
+    private void fakeClientPropertyChange(Component component, String property,
+            String value) {
+        var element = component.getElement();
+        element.getStateProvider().setProperty(element.getNode(), property,
+                value, false);
     }
 }
