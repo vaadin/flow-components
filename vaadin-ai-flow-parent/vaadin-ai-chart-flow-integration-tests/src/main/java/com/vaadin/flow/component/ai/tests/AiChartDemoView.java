@@ -91,7 +91,7 @@ public class AiChartDemoView extends VerticalLayout {
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey).modelName("gpt-4o-mini").build();
         LLMProvider llmProvider = new LangChain4JLLMProvider(model);
-        DatabaseProvider databaseProvider = new DummyDatabaseProvider();
+        DatabaseProvider databaseProvider = new InMemoryDatabaseProvider();
 
         // Create orchestrator using builder pattern
         orchestrator = AiChartOrchestrator.create(llmProvider, databaseProvider)
@@ -146,15 +146,57 @@ public class AiChartDemoView extends VerticalLayout {
         HorizontalLayout buttonBar = new HorizontalLayout(saveStateButton, restoreStateButton);
         buttonBar.setSpacing(true);
 
-
-
-        Button showMonthlyRevenueButton = new Button("\"Show me monthly revenue\"");
-        showMonthlyRevenueButton.addClickListener(e -> {
+        // Create example query buttons
+        Button revenueByMonthButton = new Button("Monthly Revenue");
+        revenueByMonthButton.addClickListener(e -> {
             SubmitEvent event = new SubmitEvent(messageInput, false, "Show me monthly revenue");
             ComponentUtil.fireEvent(messageInput, event);
         });
 
+        Button revenueByRegionButton = new Button("Revenue by Region");
+        revenueByRegionButton.addClickListener(e -> {
+            SubmitEvent event = new SubmitEvent(messageInput, false, "Show total revenue by region");
+            ComponentUtil.fireEvent(messageInput, event);
+        });
 
-        add(messageList, messageInput, buttonBar, showMonthlyRevenueButton);
+        Button salaryByDeptButton = new Button("Salaries by Department");
+        salaryByDeptButton.addClickListener(e -> {
+            SubmitEvent event = new SubmitEvent(messageInput, false, "Show average salary by department");
+            ComponentUtil.fireEvent(messageInput, event);
+        });
+
+        Button topProductsButton = new Button("Top Selling Products");
+        topProductsButton.addClickListener(e -> {
+            SubmitEvent event = new SubmitEvent(messageInput, false, "Show the top 5 products by units sold");
+            ComponentUtil.fireEvent(messageInput, event);
+        });
+
+        Button productRevenueButton = new Button("Product Revenue");
+        productRevenueButton.addClickListener(e -> {
+            SubmitEvent event = new SubmitEvent(messageInput, false, "Calculate total revenue for each product category");
+            ComponentUtil.fireEvent(messageInput, event);
+        });
+
+        Button employeeAgeButton = new Button("Employees by Age");
+        employeeAgeButton.addClickListener(e -> {
+            SubmitEvent event = new SubmitEvent(messageInput, false, "Show employee distribution by age ranges");
+            ComponentUtil.fireEvent(messageInput, event);
+        });
+
+        HorizontalLayout exampleQueriesBar1 = new HorizontalLayout(revenueByMonthButton,
+                revenueByRegionButton, salaryByDeptButton);
+        exampleQueriesBar1.setSpacing(true);
+        exampleQueriesBar1.getStyle().set("flex-wrap", "wrap");
+
+        HorizontalLayout exampleQueriesBar2 = new HorizontalLayout(topProductsButton,
+                productRevenueButton, employeeAgeButton);
+        exampleQueriesBar2.setSpacing(true);
+        exampleQueriesBar2.getStyle().set("flex-wrap", "wrap");
+
+        Paragraph examplesLabel = new Paragraph("Example queries:");
+        examplesLabel.getStyle().set("margin-top", "20px").set("margin-bottom", "5px")
+                .set("font-weight", "bold");
+
+        add(messageList, messageInput, buttonBar, examplesLabel, exampleQueriesBar1, exampleQueriesBar2);
     }
 }
