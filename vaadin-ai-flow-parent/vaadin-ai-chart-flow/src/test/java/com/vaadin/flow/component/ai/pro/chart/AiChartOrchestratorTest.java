@@ -135,17 +135,6 @@ public class AiChartOrchestratorTest {
     }
 
     @Test
-    public void build_withInput_configuresInput() {
-        AiChartOrchestrator orchestrator = AiChartOrchestrator
-                .create(mockLlmProvider, mockDatabaseProvider)
-                .withInput(mockInput)
-                .build();
-
-        assertEquals("Input should be configured", mockInput,
-                orchestrator.getInput());
-    }
-
-    @Test
     public void build_withDataConverter_configuresDataConverter() {
         AiChartOrchestrator orchestrator = AiChartOrchestrator
                 .create(mockLlmProvider, mockDatabaseProvider)
@@ -185,8 +174,6 @@ public class AiChartOrchestratorTest {
         assertNotNull("Orchestrator should not be null", orchestrator);
         assertEquals("Chart should be configured", mockChart,
                 orchestrator.getChart());
-        assertEquals("Input should be configured", mockInput,
-                orchestrator.getInput());
         assertEquals("DataConverter should be configured", mockDataConverter,
                 orchestrator.getDataConverter());
     }
@@ -221,16 +208,6 @@ public class AiChartOrchestratorTest {
 
         assertNull("Should return null when no chart configured",
                 orchestrator.getChart());
-    }
-
-    @Test
-    public void getInput_withoutInput_returnsNull() {
-        AiChartOrchestrator orchestrator = AiChartOrchestrator
-                .create(mockLlmProvider, mockDatabaseProvider)
-                .build();
-
-        assertNull("Should return null when no input configured",
-                orchestrator.getInput());
     }
 
     @Test

@@ -22,6 +22,7 @@ vaadin-ai-flow-parent/
 ### Key Interfaces
 
 #### LLMProvider (`com.vaadin.flow.component.ai.provider.LLMProvider`)
+
 - Framework-agnostic interface for integrating Large Language Model services
 - Provides streaming response generation via Reactor `Flux<String>`
 - Uses `LLMRequest` interface for request configuration containing:
@@ -40,6 +41,7 @@ vaadin-ai-flow-parent/
 **Implementations**:
 
 1. **[LangChain4JLLMProvider](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/langchain4j/LangChain4JLLMProvider.java)**
+
    - Bridges Vaadin AI components with LangChain4j library
    - Manages conversation memory internally per provider instance using `ChatMemory`
    - Each provider instance maintains its own conversation context
@@ -63,28 +65,34 @@ vaadin-ai-flow-parent/
    - **Repository**: Requires Spring Milestones repository (`https://repo.spring.io/milestone`)
 
 #### DatabaseProvider (`com.vaadin.flow.component.ai.provider.DatabaseProvider`)
+
 - Interface for database operations (schema introspection, query execution)
 - Used by AI Chart orchestrator to query data sources
 - Returns: schema as String, query results as `List<Map<String, Object>>`
 
 #### AiMessageList (`com.vaadin.flow.component.ai.messagelist.AiMessageList`)
+
 - Interface for UI components that display conversation messages
 - Methods: `addMessage()`, `updateMessage()`, `createMessage()`
 - Used by chat orchestrator for real-time message updates
 
 #### AiInput (`com.vaadin.flow.component.ai.input.AiInput`)
+
 - Interface for input components with submit capabilities
 - Uses listener pattern via `InputSubmitListener` and `InputSubmitEvent`
 
 #### AiFileReceiver (`com.vaadin.flow.component.ai.upload.AiFileReceiver`)
+
 - Interface for file upload components
 - Uses listener pattern via `FileUploadListener` and `FileUploadEvent`
 
 #### AiMessage (`com.vaadin.flow.component.ai.messagelist.AiMessage`)
+
 - Interface representing a single message in a conversation
 - Properties: text, time, userName
 
 #### BaseAiOrchestrator (`com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator`)
+
 - Abstract base class for all AI orchestrators providing common functionality
 - **Shared Functionality**:
   - LLM provider management
@@ -103,10 +111,12 @@ vaadin-ai-flow-parent/
   - `processUserInput(message)` builds LLM request, handles attachments, streams response
   - Subclasses customize behavior by overriding hook methods
 - **Hook Methods** (subclasses override for customization):
+
   - `createTools()` - returns array of tools for the LLM (default: empty array)
   - `getSystemPrompt()` - returns system prompt for the LLM (default: null)
-  - `shouldProcessWithoutMessageList()` - allow processing without messageList (default: false)
+
   - `onProcessingComplete()` - called after streaming completes (default: no-op)
+
 - **File Attachment Support**:
   - Manages `pendingAttachments` list for both orchestrators
   - Automatically configures file receiver upload handlers
@@ -129,12 +139,14 @@ vaadin-ai-flow-parent/
 **Pattern**: Builder pattern for configuration
 
 **Components**:
+
 - `LLMProvider` (required) - handles AI generation
 - `AiMessageList` (optional) - displays messages
 - `AiInput` (optional) - captures user input
 - `AiFileReceiver` (optional) - handles file uploads
 
 **Flow**:
+
 1. User submits input via `AiInput`
 2. Base class `handleUserInput()` validates input and adds user message to `AiMessageList`
 3. Base class `processUserInput()` builds LLM request and calls `LLMProvider.stream()`
@@ -142,17 +154,18 @@ vaadin-ai-flow-parent/
 5. Provider manages conversation history internally
 
 **Key Features**:
+
 - Extends `BaseAiOrchestrator` for all functionality
 - Uses base class `processUserInput()` implementation with default hook methods
 - No tools (returns empty array from `createTools()`)
 - No system prompt override (returns null from `getSystemPrompt()`)
-- Requires messageList to process (default `shouldProcessWithoutMessageList()` = false)
 - Conversation history managed internally by the provider instance
 - System prompts configured at the provider level (via `provider.setSystemPrompt()`)
 - All streaming, error handling, and file attachment support inherited from base class
 - Minimal code - just constructor, builder, and getter
 
 **Testing**: [AiChatOrchestratorTest](vaadin-ai-chat-flow/src/test/java/com/vaadin/flow/component/ai/chat/AiChatOrchestratorTest.java) (extensive, ~40+ tests)
+
 - Tests verify LLMRequest properties (userMessage) instead of message history
 - Uses ArgumentCaptor<LLMProvider.LLMRequest> to capture and validate requests
 - Verifies that multiple messages use the same provider instance for conversation continuity
@@ -170,6 +183,7 @@ vaadin-ai-flow-parent/
 **Pattern**: Builder pattern for configuration
 
 **Components**:
+
 - `LLMProvider` (required) - AI model for chart generation
 - `DatabaseProvider` (required) - database access
 - `Chart` (optional) - Vaadin Charts component to update
@@ -178,6 +192,7 @@ vaadin-ai-flow-parent/
 - `DataConverter` (optional) - converts query results to chart data
 
 **Flow**:
+
 1. User submits natural language query (e.g., "Show sales by region")
 2. Base class `handleUserInput()` validates input and adds user message to `AiMessageList`
 3. Override `processUserInput()` stores currentUserRequest and currentUI, then calls super
@@ -191,16 +206,17 @@ vaadin-ai-flow-parent/
 8. Base class handles streaming and calls `onProcessingComplete()` when done
 
 **Key Features**:
+
 - Extends `BaseAiOrchestrator` and uses base class `processUserInput()` implementation
 - Overrides hook methods for customization:
   - `createTools()` - returns 3 tools (getSchema, updateChartData, updateChartConfig)
   - `getSystemPrompt()` - returns SYSTEM_PROMPT with chart generation instructions
-  - `shouldProcessWithoutMessageList()` - returns true (tools update chart directly)
   - `onProcessingComplete()` - logs completion
 - Overrides `processUserInput()` to store currentUserRequest and currentUI for tool use
 - All streaming, error handling, and file attachment support inherited from base class
 
 **Tools Implementation**:
+
 - Tools use JSON for parameter passing
 - Each tool returns success/error messages to AI
 - AI can make follow-up tool calls based on results
@@ -215,6 +231,7 @@ vaadin-ai-flow-parent/
 **Purpose**: Converts database query results to Vaadin Charts `DataSeries`
 
 **Default Implementation**: [DefaultDataConverter](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/DefaultDataConverter.java)
+
 - Assumes first column = category/label
 - Second column = numeric value
 - Handles null values (category→"Unknown", value→0)
@@ -226,13 +243,17 @@ vaadin-ai-flow-parent/
 ## Architecture Patterns
 
 ### 1. Interface-Based Design
+
 All core components are interfaces, allowing flexible implementations:
+
 - UI components (MessageList, Input) can be any Vaadin component
 - LLM providers can be any AI service (OpenAI, Anthropic, local models)
 - Database providers can use any data source
 
 ### 2. Builder Pattern
+
 Both orchestrators use builders for clean, fluent configuration:
+
 ```java
 AiChatOrchestrator orchestrator = AiChatOrchestrator.create(provider)
     .withMessageList(messageList)
@@ -241,20 +262,26 @@ AiChatOrchestrator orchestrator = AiChatOrchestrator.create(provider)
 ```
 
 ### 3. Reactive Streaming
+
 Uses Project Reactor `Flux<String>` for:
+
 - Token-by-token streaming responses
 - Backpressure handling
 - Async operations with error propagation
 
 ### 4. Tool Calling Pattern
+
 AI Chart orchestrator demonstrates tool/function calling:
+
 - Tools defined as `LLMProvider.Tool` with JSON schemas
 - AI decides when and how to call tools
 - Results fed back to AI for next steps
 - Supports multi-step workflows
 
 ### 5. Thread Safety
+
 All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server push:
+
 - All UI updates wrapped in access() calls
 - Validates UI context exists before operations
 - Throws `IllegalStateException` if no UI context
@@ -263,17 +290,20 @@ All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server
 ## Testing Strategy
 
 ### Unit Tests
+
 - Mock external dependencies (LLM, Database, UI components)
 - Test orchestrator logic and state management
 - Verify conversation history handling
 - Test error scenarios
 
 **Key Test Utilities**:
+
 - Custom `TestUI` class that executes `UI.access()` synchronously
 - Mockito for mocking LLM providers and components
 - ArgumentCaptor for verifying method calls and parameters
 
 ### Integration Tests
+
 - Separate modules: `*-integration-tests`
 - Full component integration with real UI
 - Typically run in development mode only
@@ -281,11 +311,13 @@ All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server
 ## Dependencies
 
 ### vaadin-ai-flow
+
 - `reactor-core` (3.6.11) - Reactive streams
 - `langchain4j` (0.36.2, optional) - LangChain4j integration
 - `flow-data`, `flow-html-components` - Vaadin core
 
 ### vaadin-ai-chart-flow
+
 - Inherits from vaadin-ai-flow
 - `vaadin-charts-flow` - Vaadin Charts component
 - Additional commercial license
@@ -293,6 +325,7 @@ All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server
 ## Common Development Tasks
 
 ### Adding a New Orchestrator
+
 1. Create new module under `vaadin-ai-flow-parent`
 2. Depend on `vaadin-ai-flow` for core interfaces
 3. Implement orchestrator with builder pattern
@@ -302,6 +335,7 @@ All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server
 7. Create integration test module
 
 ### Adding a New LLM Provider
+
 1. Implement `LLMProvider` interface
 2. Handle message conversion to provider's format
 3. Convert streaming response to `Flux<String>`
@@ -310,6 +344,7 @@ All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server
 6. Document configuration in JavaDoc
 
 ### Extending DataConverter
+
 1. Implement `DataConverter` interface
 2. Handle various data structures (multi-series, time-series, etc.)
 3. Consider edge cases (nulls, empty results, type mismatches)
@@ -319,15 +354,19 @@ All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server
 ## Important Notes
 
 ### Licensing
+
 - `vaadin-ai-flow` - Apache 2.0 (standard)
 - `vaadin-ai-chat-flow` - Apache 2.0 (standard)
 - `vaadin-ai-chart-flow` - Commercial license (Pro tier)
 
 ### Serialization
+
 All orchestrators and providers implement `Serializable` for Vaadin session storage.
 
 ### Conversation History
+
 Conversation history is managed internally by LLM provider instances:
+
 - Each provider instance maintains its own conversation memory
 - Orchestrators use a dedicated provider instance for each conversation
 - Providers maintain message history internally (e.g., using ChatMemory in LangChain4j)
@@ -335,7 +374,9 @@ Conversation history is managed internally by LLM provider instances:
 - For multiple separate conversations, create multiple provider instances
 
 ### Tool Execution Safety
+
 Chart orchestrator tools execute database queries:
+
 - Validate/sanitize SQL if needed
 - Consider query timeouts
 - Handle database errors gracefully
@@ -344,6 +385,7 @@ Chart orchestrator tools execute database queries:
 ## Future Development Areas
 
 ### Potential Enhancements
+
 1. **Memory Management**: Implement conversation summarization for long chats
 2. **Tool Schema**: Use proper JSON schemas for tool parameters
 3. **Streaming Charts**: Support incremental chart updates during data queries
@@ -352,6 +394,7 @@ Chart orchestrator tools execute database queries:
 6. **Caching**: Implement response caching for repeated queries
 
 ### Breaking Changes to Avoid
+
 - Keep interfaces stable - extend with new methods if needed
 - Maintain builder pattern compatibility
 - Preserve conversation history format
@@ -360,6 +403,7 @@ Chart orchestrator tools execute database queries:
 ## Quick Reference
 
 ### Building and Testing
+
 ```bash
 # Build all modules
 mvn clean install
@@ -375,6 +419,7 @@ mvn install -DskipTests
 ```
 
 ### Code Locations
+
 - Core interfaces: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/`
 - Base orchestrator: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/`
 - Providers: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/`
@@ -385,6 +430,7 @@ mvn install -DskipTests
 ## Recent Changes
 
 ### 2025-11-21: Complete BaseAiOrchestrator Refactoring
+
 - Created `BaseAiOrchestrator` abstract base class to eliminate ALL code duplication
 - Moved complete processing logic to base class:
   - User message handling (`addUserMessageToList()`)
@@ -397,7 +443,7 @@ mvn install -DskipTests
   - Thread-safe UI updates and error handling
 - Hook Method pattern implementation:
   - Base class provides complete `processUserInput()` implementation
-  - Subclasses customize via hook methods: `createTools()`, `getSystemPrompt()`, `shouldProcessWithoutMessageList()`, `onProcessingComplete()`
+  - Subclasses customize via hook methods: `createTools()`, `getSystemPrompt()`, `onProcessingComplete()`
   - AiChatOrchestrator uses all default hook implementations (no tools, no system prompt)
   - AiChartOrchestrator overrides all hooks for tool support and chart-specific behavior
   - Eliminates need for subclasses to duplicate processing logic
@@ -410,7 +456,6 @@ mvn install -DskipTests
   - Both orchestrators now support file uploads automatically
   - Chart orchestrator gained file attachment capability
 - Message list handling:
-  - Added `shouldProcessWithoutMessageList()` hook for flexible behavior
   - Chat orchestrator requires messageList (default false)
   - Chart orchestrator can work without messageList (returns true, tools update chart directly)
 - Code reduction:

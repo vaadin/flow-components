@@ -104,51 +104,15 @@ public class AiChatOrchestratorTest {
 
         assertNotNull("Orchestrator should not be null", orchestrator);
         assertEquals("Provider should be set", mockProvider, orchestrator.getProvider());
-        assertNull("MessageList should be null", orchestrator.getMessageList());
-        assertNull("Input should be null", orchestrator.getInput());
-        assertNull("FileReceiver should be null", orchestrator.getFileReceiver());
-    }
-
-    @Test
-    public void build_withMessageList_setsMessageList() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .withMessageList(mockMessageList)
-                .build();
-
-        assertEquals("MessageList should be set", mockMessageList, orchestrator.getMessageList());
     }
 
     @Test
     public void build_withInput_setsInputAndRegistersListener() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
+        AiChatOrchestrator.create(mockProvider)
                 .withInput(mockInput)
                 .build();
 
-        assertEquals("Input should be set", mockInput, orchestrator.getInput());
         verify(mockInput, times(1)).addSubmitListener(any(InputSubmitListener.class));
-    }
-
-    @Test
-    public void build_withFileReceiver_setsFileReceiver() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .withFileReceiver(mockFileReceiver)
-                .build();
-
-        assertEquals("FileReceiver should be set", mockFileReceiver, orchestrator.getFileReceiver());
-    }
-
-    @Test
-    public void build_withAllComponents_setsAllComponents() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .withMessageList(mockMessageList)
-                .withInput(mockInput)
-                .withFileReceiver(mockFileReceiver)
-                .build();
-
-        assertEquals("Provider should be set", mockProvider, orchestrator.getProvider());
-        assertEquals("MessageList should be set", mockMessageList, orchestrator.getMessageList());
-        assertEquals("Input should be set", mockInput, orchestrator.getInput());
-        assertEquals("FileReceiver should be set", mockFileReceiver, orchestrator.getFileReceiver());
     }
 
     @Test
@@ -409,45 +373,6 @@ public class AiChatOrchestratorTest {
 
         assertSame("Should return the same provider instance", mockProvider,
                 orchestrator.getProvider());
-    }
-
-    @Test
-    public void getMessageList_returnsConfiguredMessageList() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .withMessageList(mockMessageList)
-                .build();
-
-        assertSame("Should return the same messageList instance", mockMessageList,
-                orchestrator.getMessageList());
-    }
-
-    @Test
-    public void getInput_returnsConfiguredInput() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .withInput(mockInput)
-                .build();
-
-        assertSame("Should return the same input instance", mockInput,
-                orchestrator.getInput());
-    }
-
-    @Test
-    public void getFileReceiver_returnsConfiguredFileReceiver() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .withFileReceiver(mockFileReceiver)
-                .build();
-
-        assertSame("Should return the same fileReceiver instance", mockFileReceiver,
-                orchestrator.getFileReceiver());
-    }
-
-    @Test
-    public void getFileReceiver_withoutConfiguration_returnsNull() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .build();
-
-        assertNull("Should return null when not configured",
-                orchestrator.getFileReceiver());
     }
 
     // ===== Tests for streaming behavior =====
@@ -756,20 +681,6 @@ public class AiChatOrchestratorTest {
     // ===== Tests for edge cases =====
 
     @Test
-    public void builder_canSetComponentsInAnyOrder() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
-                .withFileReceiver(mockFileReceiver)
-                .withInput(mockInput)
-                .withMessageList(mockMessageList)
-                .build();
-
-        assertNotNull("Orchestrator should be created", orchestrator);
-        assertEquals("MessageList should be set", mockMessageList, orchestrator.getMessageList());
-        assertEquals("Input should be set", mockInput, orchestrator.getInput());
-        assertEquals("FileReceiver should be set", mockFileReceiver, orchestrator.getFileReceiver());
-    }
-
-    @Test
     public void builder_canBeReused() {
         AiChatOrchestrator.Builder builder = AiChatOrchestrator.create(mockProvider);
 
@@ -856,7 +767,7 @@ public class AiChatOrchestratorTest {
         listenerCaptor.getValue().onSubmit(event);
 
         // Provider should still be called even without message list
-        verify(mockProvider, never()).stream(any());
+        verify(mockProvider).stream(any());
     }
 
     @Test

@@ -73,15 +73,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
-     * Gets the message list component.
-     *
-     * @return the message list, or null if not configured
-     */
-    public AiMessageList getMessageList() {
-        return messageList;
-    }
-
-    /**
      * Sets the message list component.
      *
      * @param messageList
@@ -92,15 +83,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
-     * Gets the input component.
-     *
-     * @return the input component, or null if not configured
-     */
-    public AiInput getInput() {
-        return input;
-    }
-
-    /**
      * Sets the input component.
      *
      * @param input
@@ -108,15 +90,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
      */
     protected void setInput(AiInput input) {
         this.input = input;
-    }
-
-    /**
-     * Gets the file receiver component.
-     *
-     * @return the file receiver, or null if not configured
-     */
-    public AiFileReceiver getFileReceiver() {
-        return fileReceiver;
     }
 
     /**
@@ -277,11 +250,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
      *            the user's input message
      */
     protected void processUserInput(String userMessage) {
-        // Check if processing should continue without a message list
-        if (messageList == null && !shouldProcessWithoutMessageList()) {
-            return;
-        }
-
         // Create a placeholder for the assistant's message (may be null if no
         // messageList)
         AiMessage assistantMessage = createAssistantMessagePlaceholder();
@@ -336,18 +304,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
      */
     protected String getSystemPrompt() {
         return null;
-    }
-
-    /**
-     * Determines if processing should continue when no message list is
-     * configured. By default, returns false (do not process without message
-     * list). Subclasses that have other ways to handle responses (e.g., tools
-     * that directly update components) can override to return true.
-     *
-     * @return true to process even without message list, false otherwise
-     */
-    protected boolean shouldProcessWithoutMessageList() {
-        return false;
     }
 
     /**
