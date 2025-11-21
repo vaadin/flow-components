@@ -9,12 +9,16 @@
 package com.vaadin.flow.component.ai.pro.chart;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.input.AiInput;
 import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -447,45 +451,22 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
                     // Parse arguments to extract query
                     // This is a simplified version - in production, use proper JSON parsing
                     String query = extractQueryFromArguments(arguments);
-                    System.out.println("Chart orchestrator: Executing query: " + query);
-
-                    // Execute query
-                    List<Map<String, Object>> results = databaseProvider
-                            .executeQuery(query);
-                    System.out.println("Chart orchestrator: Query returned " + results.size() + " rows");
-
-                    // Convert results to chart data
-                    DataSeries series = dataConverter.convertToDataSeries(results);
-                    System.out.println("Chart orchestrator: Converted data to series with " + series.size() + " items");
-
-                    // Update chart using stored UI reference
-                    if (currentUI != null) {
-                        currentUI.access(() -> {
-                            System.out.println("Chart orchestrator: Updating chart in UI thread");
-                            Configuration config = chart.getConfiguration();
-
-                            config.setSeries(series);
-
-                            // Log the series data
-                            System.out.println("Chart orchestrator: Chart configuration updated. Series count: " + config.getSeries().size());
-
-                            chart.drawChart();
-                            System.out.println("Chart orchestrator: chart.drawChart() called");
-                        });
-                    } else {
-                        System.err.println("Chart orchestrator: currentUI is null! Cannot update chart.");
-                    }
-
                     // Capture state
                     currentSqlQuery = query;
+
+                    if (currentUI != null) {
+                        currentUI.access(() -> {
+                            restoreState(captureState());
+                        });
+                    } else {
+                        throw new IllegalStateException("No UI context available for updating chart");
+                    }
 
                     // Fire state change event
                     fireStateChangeEvent(
                             ChartStateChangeEvent.StateChangeType.DATA_QUERY_UPDATED);
 
-                    String result = "Chart data updated successfully with " + results.size() + " rows";
-                    System.out.println("Chart orchestrator: Tool 'updateChartData' completed: " + result);
-                    return result;
+                    return query;
                 } catch (Exception e) {
                     String error = "Error updating chart data: " + e.getMessage();
                     System.err.println("Chart orchestrator: " + error);
@@ -505,8 +486,8 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
             @Override
             public String getDescription() {
                 return "Updates the chart configuration (title, axes labels, chart type, etc.) using Highcharts JSON format. " +
-                       "Parameter: config (string) - The chart configuration in JSON format. " +
-                       "Call as updateChartConfig({\"config\": \"{\\\"title\\\": {\\\"text\\\": \\\"My Chart\\\"}}\"})" ;
+                       "Parameter: config (object) - The chart configuration as a JSON object. " +
+                       "Call as updateChartConfig({\"config\": {\"title\": {\"text\": \"My Chart\"}}})" ;
             }
 
             @Override
@@ -521,19 +502,17 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
                     // Parse and apply configuration
                     // This is a simplified version - in production, use proper JSON parsing
                     String config = extractConfigFromArguments(arguments);
-                    System.out.println("Chart orchestrator: Applying config: " + config);
-
-                    if (currentUI != null) {
-                        currentUI.access(() -> {
-                            applyChartConfig(config);
-                            chart.drawChart();
-                        });
-                    } else {
-                        System.err.println("Chart orchestrator: currentUI is null! Cannot update chart config.");
-                    }
-
+                   
                     // Capture state
                     currentChartConfig = config;
+                    
+                    if (currentUI != null) {
+                        currentUI.access(() -> {
+                            restoreState(captureState());
+                        });
+                    } else {
+                        throw new IllegalStateException("No UI context available for updating chart");
+                    }
 
                     // Fire state change event
                     fireStateChangeEvent(ChartStateChangeEvent.StateChangeType.CONFIGURATION_UPDATED);
@@ -556,53 +535,75 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
     }
 
     /**
-     * Extracts the query from tool arguments (simplified JSON parsing).
+     * Extracts the query from tool arguments using proper JSON parsing.
      *
      * @param arguments
      *            the JSON arguments
      * @return the query string
      */
     private String extractQueryFromArguments(String arguments) {
-        // Simplified extraction - in production, use proper JSON parser
-        int queryStart = arguments.indexOf("\"query\"");
-        if (queryStart == -1) {
-            throw new IllegalArgumentException("No query found in arguments");
+        try {
+            ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
+            if (!node.has("query")) {
+                throw new IllegalArgumentException("No query found in arguments");
+            }
+            return node.get("query").asString();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Failed to parse query from arguments: " + e.getMessage(), e);
         }
-        int valueStart = arguments.indexOf(":", queryStart);
-        int openQuote = arguments.indexOf("\"", valueStart);
-        int closeQuote = arguments.indexOf("\"", openQuote + 1);
-        return arguments.substring(openQuote + 1, closeQuote).trim();
     }
 
     /**
-     * Extracts the config from tool arguments (simplified JSON parsing).
+     * Extracts the config from tool arguments using proper JSON parsing.
      *
      * @param arguments
      *            the JSON arguments
      * @return the config string
      */
     private String extractConfigFromArguments(String arguments) {
-        // Simplified extraction - in production, use proper JSON parser
-        int configStart = arguments.indexOf("\"config\"");
-        if (configStart == -1) {
-            throw new IllegalArgumentException("No config found in arguments");
+        try {
+            ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
+            if (!node.has("config")) {
+                throw new IllegalArgumentException("No config found in arguments");
+            }
+
+            var configNode = node.get("config");
+
+            // If config is already a JSON object, serialize it to string
+            if (configNode.isObject() || configNode.isArray()) {
+                return configNode.toString();
+            }
+
+            // Otherwise, extract it as a string
+            return configNode.asString();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Failed to parse config from arguments: " + e.getMessage(), e);
         }
-        int valueStart = arguments.indexOf(":", configStart);
-        int openQuote = arguments.indexOf("\"", valueStart);
-        int closeQuote = arguments.lastIndexOf("\"");
-        return arguments.substring(openQuote + 1, closeQuote).trim();
     }
 
     /**
-     * Applies a chart configuration (simplified).
+     * Applies a chart configuration.
+     * Removes the 'series' property to prevent overwriting chart data,
+     * then redraws the chart to ensure data remains visible.
      *
      * @param configJson
      *            the configuration JSON
      */
     private void applyChartConfig(String configJson) {
-        // This is a simplified version
-        // In production, parse JSON and apply to chart.getConfiguration()
-        // For now, this is a placeholder
+        var configurationNode = (ObjectNode) JacksonUtils
+                .readTree(configJson);
+
+        // Remove 'series' property to prevent overwriting data that was set separately
+        configurationNode.remove("series");
+
+        // Apply the configuration via additionalOptions
+        chart.getElement().setPropertyJson("additionalOptions", configurationNode);
+
+        // Force a redraw with the complete configuration including existing series
+        // Use drawChart(false) to update without resetting the entire chart
+        // chart.drawChart(false);
     }
 
     private static final String SYSTEM_PROMPT = """
@@ -611,7 +612,7 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
 
             1. getSchema() - Retrieves the database schema
             2. updateChartData(query: string) - Executes a SQL query and updates the chart with the results
-            3. updateChartConfig(config: string) - Updates the chart configuration (JSON format following Highcharts API)
+            3. updateChartConfig(config: object) - Updates the chart configuration (JSON format following Highcharts API)
 
             When a user requests a chart:
             1. First, call getSchema() to understand the available tables and columns
@@ -626,7 +627,9 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
             - title: { text: 'Chart Title' }
             - xAxis: { title: { text: 'X Axis Label' }, categories: [...] }
             - yAxis: { title: { text: 'Y Axis Label' } }
-            - series: [{ name: 'Series Name', data: [...] }]
+
+            IMPORTANT: Do NOT include 'series' property in the chart configuration passed to updateChartConfig().
+            Series data is managed separately through updateChartData().
 
             Respond to users in a helpful, concise manner, explaining what chart you're creating.
             """;

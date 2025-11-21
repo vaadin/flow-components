@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.ai.pro.chart.AiChartOrchestrator;
 import com.vaadin.flow.component.ai.pro.chart.ChartState;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
@@ -21,6 +22,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageInput.SubmitEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -140,9 +142,19 @@ public class AiChartDemoView extends VerticalLayout {
         });
         saveStateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
+
         HorizontalLayout buttonBar = new HorizontalLayout(saveStateButton, restoreStateButton);
         buttonBar.setSpacing(true);
 
-        add(messageList, messageInput, buttonBar);
+
+
+        Button showMonthlyRevenueButton = new Button("\"Show me monthly revenue\"");
+        showMonthlyRevenueButton.addClickListener(e -> {
+            SubmitEvent event = new SubmitEvent(messageInput, false, "Show me monthly revenue");
+            ComponentUtil.fireEvent(messageInput, event);
+        });
+
+
+        add(messageList, messageInput, buttonBar, showMonthlyRevenueButton);
     }
 }
