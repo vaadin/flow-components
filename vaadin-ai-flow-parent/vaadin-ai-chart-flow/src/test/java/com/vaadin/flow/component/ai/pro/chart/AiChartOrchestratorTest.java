@@ -976,7 +976,9 @@ public class AiChartOrchestratorTest {
 
         assertNotNull(updateConfigTool);
         String config = "{\"title\": {\"text\": \"Sales Chart\"}}";
-        updateConfigTool.execute("{\"config\": \"" + config + "\"}");
+        // Escape the config JSON for passing as a string value
+        String escapedConfig = config.replace("\"", "\\\"");
+        updateConfigTool.execute("{\"config\": \"" + escapedConfig + "\"}");
 
         // Capture state
         ChartState state = orchestrator.captureState();
@@ -1019,9 +1021,11 @@ public class AiChartOrchestratorTest {
 
         // Update config
         String config = "{\"chart\": {\"type\": \"bar\"}}";
+        // Escape the config JSON for passing as a string value
+        String escapedConfig = config.replace("\"", "\\\"");
         for (LLMProvider.Tool tool : tools) {
             if ("updateChartConfig".equals(tool.getName())) {
-                tool.execute("{\"config\": \"" + config + "\"}");
+                tool.execute("{\"config\": \"" + escapedConfig + "\"}");
                 break;
             }
         }
@@ -1234,7 +1238,7 @@ public class AiChartOrchestratorTest {
                 capturedEvent[0].getChangeType());
         assertNotNull("Event should have chart state",
                 capturedEvent[0].getChartState());
-        assertEquals("{\\\"chart\\\": {\\\"type\\\": \\\"bar\\\"}}",
+        assertEquals("{\"chart\": {\"type\": \"bar\"}}",
                 capturedEvent[0].getChartState().getChartConfig());
     }
 
