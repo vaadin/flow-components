@@ -398,21 +398,18 @@ public class AiChatOrchestratorTest {
         // Wait for async Flux processing
         Thread.sleep(100);
 
-        // Verify message was updated multiple times with accumulated text
+        // Verify message was updated multiple times by appending tokens
         ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mockMessage, atLeast(3)).setText(textCaptor.capture());
+        verify(mockMessage, atLeast(3)).appendText(textCaptor.capture());
 
         List<String> capturedTexts = textCaptor.getAllValues();
-        assertTrue("Should have accumulated text", capturedTexts.size() >= 3);
+        assertTrue("Should have appended tokens", capturedTexts.size() >= 3);
 
-        // Verify progressive accumulation
-        assertTrue("First update should contain 'Hello'",
-                capturedTexts.get(0).contains("Hello"));
-        assertTrue("Last update should contain full message",
-                capturedTexts.get(capturedTexts.size() - 1).equals("Hello World"));
-
-        // Verify updateMessage was called for each token
-        verify(mockMessageList, atLeast(3)).updateMessage(mockMessage);
+        // Verify individual tokens were appended
+        assertTrue("First token should be 'Hello'",
+                capturedTexts.get(0).equals("Hello"));
+        assertTrue("Last token should be 'World'",
+                capturedTexts.get(capturedTexts.size() - 1).equals("World"));
     }
 
     @Test
@@ -446,9 +443,6 @@ public class AiChatOrchestratorTest {
         assertTrue("Error message should contain 'Error'", errorText.contains("Error"));
         assertTrue("Error message should contain error details",
                 errorText.contains("Test error"));
-
-        // Verify updateMessage was called to show error
-        verify(mockMessageList, atLeastOnce()).updateMessage(mockMessage);
     }
 
     @Test
@@ -515,13 +509,13 @@ public class AiChatOrchestratorTest {
         // Wait for streaming to complete
         Thread.sleep(200);
 
-        // Verify final message text
+        // Verify tokens were appended
         ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mockMessage, atLeast(7)).setText(textCaptor.capture());
+        verify(mockMessage, atLeast(7)).appendText(textCaptor.capture());
 
-        List<String> texts = textCaptor.getAllValues();
-        String finalText = texts.get(texts.size() - 1);
-        assertEquals("Should accumulate all tokens", "The quick brown fox", finalText);
+        List<String> tokens = textCaptor.getAllValues();
+        // Verify individual tokens were appended
+        assertTrue("Should have received all tokens", tokens.containsAll(List.of("The", " ", "quick", " ", "brown", " ", "fox")));
     }
 
     @Test
@@ -575,8 +569,7 @@ public class AiChatOrchestratorTest {
         Thread.sleep(100);
 
         // Verify message was updated once
-        verify(mockMessage, atLeastOnce()).setText("SingleToken");
-        verify(mockMessageList, atLeastOnce()).updateMessage(mockMessage);
+        verify(mockMessage, atLeastOnce()).appendText("SingleToken");
     }
 
     // ===== Tests for UI context validation =====
@@ -798,8 +791,7 @@ public class AiChatOrchestratorTest {
         Thread.sleep(500);
 
         // Verify message was updated many times
-        verify(mockMessage, atLeast(50)).setText(anyString());
-        verify(mockMessageList, atLeast(50)).updateMessage(mockMessage);
+        verify(mockMessage, atLeast(50)).appendText(any());
     }
 
     @Test

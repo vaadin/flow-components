@@ -466,7 +466,9 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
                     fireStateChangeEvent(
                             ChartStateChangeEvent.StateChangeType.DATA_QUERY_UPDATED);
 
-                    return query;
+                    String result = "Chart data updated successfully with query: " + query;
+                    System.out.println("Chart orchestrator: Tool 'updateChartData' completed: " + result);
+                    return result;
                 } catch (Exception e) {
                     String error = "Error updating chart data: " + e.getMessage();
                     System.err.println("Chart orchestrator: " + error);
@@ -599,11 +601,13 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
         configurationNode.remove("series");
 
         // Apply the configuration via additionalOptions
-        chart.getElement().setPropertyJson("additionalOptions", configurationNode);
+        // Check if element is available (may be null in tests or before chart is attached)
+        if (chart.getElement() != null) {
+            chart.getElement().setPropertyJson("additionalOptions", configurationNode);
+        }
 
-        // Force a redraw with the complete configuration including existing series
-        // Use drawChart(false) to update without resetting the entire chart
-        // chart.drawChart(false);
+        // Note: drawChart() is called by the caller after this method
+        // This allows the chart to be redrawn with the complete configuration including existing series
     }
 
     private static final String SYSTEM_PROMPT = """
