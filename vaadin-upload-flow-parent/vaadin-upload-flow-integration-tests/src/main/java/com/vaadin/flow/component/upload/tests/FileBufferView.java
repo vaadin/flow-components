@@ -19,13 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 
-import org.apache.commons.io.IOUtils;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.SucceededEvent;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileBuffer;
+import com.vaadin.flow.internal.StringUtil;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -71,7 +70,7 @@ public class FileBufferView extends Div {
             try {
                 output.add(event.getFileName());
                 output.add(
-                        IOUtils.toString(streamProvider.apply(event), "UTF-8"));
+                        StringUtil.toUTF8String(streamProvider.apply(event)));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
