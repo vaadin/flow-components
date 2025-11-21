@@ -240,6 +240,91 @@ vaadin-ai-flow-parent/
 
 **Testing**: [DefaultDataConverterTest](vaadin-ai-chart-flow/src/test/java/com/vaadin/flow/component/ai/pro/chart/DefaultDataConverterTest.java) (17 tests)
 
+#### ChartState Interface
+
+**Location**: [ChartState.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/ChartState.java)
+
+**Purpose**: Represents a serializable snapshot of a chart's state for persistence and restoration
+
+**Key Features**:
+
+- Immutable snapshot containing SQL query and chart configuration
+- Includes timestamps (created and last modified)
+- Serializable for database/session storage
+- Factory methods for easy creation
+
+**Properties**:
+
+- `sqlQuery` - The SQL SELECT query to fetch chart data
+- `chartConfig` - Highcharts JSON configuration for visual appearance
+- `createdAt` - When the state was originally created
+- `lastModifiedAt` - When the state was last modified
+
+**Implementation**: [DefaultChartState](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/DefaultChartState.java)
+
+**Testing**: [ChartStateTest](vaadin-ai-chart-flow/src/test/java/com/vaadin/flow/component/ai/pro/chart/ChartStateTest.java) (22 tests)
+
+**Usage Example**:
+
+```java
+// After AI has configured a chart, capture its state
+ChartState state = orchestrator.captureState();
+
+// Serialize and store (e.g., in database, session, file system)
+// The state is fully serializable via Java Serialization
+stateManager.saveState("my-chart-id", state);
+
+// Later, on next visit, restore the chart
+ChartState savedState = stateManager.loadState("my-chart-id");
+orchestrator.restoreState(savedState);
+// Chart is now restored with fresh data from database
+```
+
+**Integration with AiChartOrchestrator**:
+
+The orchestrator provides `captureState()` and `restoreState()` methods for easy state management:
+
+- `captureState()` - Creates an immutable snapshot of current chart state (returns null if no state exists)
+- `restoreState(ChartState)` - Restores chart by re-executing SQL query and reapplying configuration
+- State is automatically captured when AI tools (`updateChartData`, `updateChartConfig`) execute
+- Restoration updates the orchestrator's internal state, allowing subsequent captures
+
+**Event-Driven State Management**:
+
+The orchestrator fires `ChartStateChangeEvent` whenever the chart state changes, enabling reactive behaviors:
+
+```java
+// Auto-save example: persist state changes to database
+orchestrator.addStateChangeListener(event -> {
+    ChartState state = event.getChartState();
+    String chartId = getCurrentChartId();
+
+    // Save to database
+    chartRepository.save(chartId, state);
+
+    // Log the change type
+    System.out.println("Chart updated: " + event.getChangeType());
+});
+
+// Undo/Redo example: track state history
+List<ChartState> stateHistory = new ArrayList<>();
+orchestrator.addStateChangeListener(event -> {
+    stateHistory.add(event.getChartState());
+});
+
+// Analytics example: monitor chart usage
+orchestrator.addStateChangeListener(event -> {
+    if (event.getChangeType() == ChartStateChangeEvent.StateChangeType.DATA_QUERY_UPDATED) {
+        analyticsService.trackQueryExecution(event.getChartState().getSqlQuery());
+    }
+});
+```
+
+Event types:
+- `DATA_QUERY_UPDATED` - Fired when SQL query is updated via `updateChartData` tool
+- `CONFIGURATION_UPDATED` - Fired when chart config is updated via `updateChartConfig` tool
+- `BOTH_UPDATED` - Reserved for future use when both are updated simultaneously
+
 ## Architecture Patterns
 
 ### 1. Interface-Based Design
@@ -428,6 +513,72 @@ mvn install -DskipTests
 - Tests: `*/src/test/java/` (mirrors main structure)
 
 ## Recent Changes
+
+### 2025-11-21: Chart State Persistence API (Phase 1, 2 & 3 - Complete)
+
+**Phase 1 - Core State Model**:
+- Created `ChartState` interface for chart state snapshots
+- Implemented `DefaultChartState` with full serialization support
+- Added comprehensive test suite (16 tests) covering:
+  - Factory method creation
+  - Null value handling
+  - Equality and hashing
+  - Java serialization/deserialization
+  - Immutability guarantees
+- Key design decisions:
+  - Only SQL query and chart config are persisted (not conversation history or timestamps)
+  - Immutable snapshots for safe persistence
+  - Fully serializable for flexible storage options
+
+**Phase 2 - Orchestrator Integration**:
+- Added state tracking fields (`currentSqlQuery`, `currentChartConfig`) to `AiChartOrchestrator`
+- Implemented `captureState()` method - creates immutable snapshot of current chart state
+- Implemented `restoreState(ChartState)` method - restores chart by:
+  - Re-executing SQL query to get fresh data
+  - Reapplying Highcharts configuration
+  - Updating internal state for subsequent captures
+- Modified AI tools to automatically capture state:
+  - `updateChartData` tool captures SQL query after successful execution
+  - `updateChartConfig` tool captures configuration after successful application
+- Added 8 new integration tests (total 43 orchestrator tests) covering:
+  - State capture after data updates
+  - State capture after config updates
+  - State capture after both updates
+  - State restoration with SQL query only
+  - State restoration with config only
+  - State restoration with both
+  - Null state handling
+- Complete dashboard persistence use case now supported
+
+**Phase 3 - Event System**:
+- Created `ChartStateChangeEvent` class extending `EventObject`:
+  - Contains chart state snapshot
+  - Includes `StateChangeType` enum (DATA_QUERY_UPDATED, CONFIGURATION_UPDATED, BOTH_UPDATED)
+  - Provides typed `getSource()` method returning `AiChartOrchestrator`
+- Created `ChartStateChangeListener` functional interface:
+  - Single method: `onStateChange(ChartStateChangeEvent)`
+  - Serializable for session persistence
+  - Enables lambda expressions for clean listener code
+- Added event listener management to `AiChartOrchestrator`:
+  - `addStateChangeListener(ChartStateChangeListener)` - register listener (validates non-null)
+  - `removeStateChangeListener(ChartStateChangeListener)` - unregister listener
+  - `fireStateChangeEvent(StateChangeType)` - internal method to notify all listeners
+- Modified AI tools to fire events after state changes:
+  - `updateChartData` fires `DATA_QUERY_UPDATED` event after capturing SQL query
+  - `updateChartConfig` fires `CONFIGURATION_UPDATED` event after capturing config
+- Added 6 comprehensive event tests (total 49 orchestrator tests) covering:
+  - Event firing on data update with correct state and type
+  - Event firing on config update with correct state and type
+  - Multiple listeners all receiving events
+  - Listener removal preventing notification
+  - Null listener validation
+  - Event source verification
+- Use cases enabled:
+  - Auto-save: Listen to state changes and persist to database/file
+  - Undo/Redo: Track state change history
+  - Analytics: Monitor chart usage and modifications
+  - Real-time collaboration: Notify other users of chart changes
+- Updated AGENTS.md documentation with event system usage
 
 ### 2025-11-21: Complete BaseAiOrchestrator Refactoring
 

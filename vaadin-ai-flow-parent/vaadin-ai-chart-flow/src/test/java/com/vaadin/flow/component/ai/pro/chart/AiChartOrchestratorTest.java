@@ -896,6 +896,528 @@ public class AiChartOrchestratorTest {
         }
     }
 
+    @Test
+    public void captureState_withNoState_returnsNull() {
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).build();
+
+        ChartState state = orchestrator.captureState();
+
+        assertNull("State should be null when no data/config has been set",
+                state);
+    }
+
+    @Test
+    public void captureState_afterDataUpdate_capturesSqlQuery() {
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        Chart chart = new Chart();
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).withChart(chart)
+                .withInput(mockInput).build();
+
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+
+        // Provide 2-column data as required by DefaultDataConverter
+        when(mockDatabaseProvider.executeQuery(anyString()))
+                .thenReturn(List.of(Map.of("category", "Q1", "value", 100)));
+
+        // Set up UI context by triggering input
+        InputSubmitEvent event = () -> "Test";
+        listenerCaptor.getValue().onSubmit(event);
+
+        // Now trigger the updateChartData tool directly
+        LLMProvider.Tool[] tools = orchestrator.createTools();
+        LLMProvider.Tool updateDataTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                updateDataTool = tool;
+                break;
+            }
+        }
+
+        assertNotNull(updateDataTool);
+        updateDataTool.execute("{\"query\": \"SELECT * FROM sales\"}");
+
+        // Capture state
+        ChartState state = orchestrator.captureState();
+
+        assertNotNull("State should not be null after data update", state);
+        assertEquals("SELECT * FROM sales", state.getSqlQuery());
+        assertNull("Config should be null if not set", state.getChartConfig());
+    }
+
+    @Test
+    public void captureState_afterConfigUpdate_capturesChartConfig() {
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        Chart chart = new Chart();
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).withChart(chart)
+                .withInput(mockInput).build();
+
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+
+        // Set up UI context by triggering input
+        InputSubmitEvent event = () -> "Test";
+        listenerCaptor.getValue().onSubmit(event);
+
+        // Now trigger the updateChartConfig tool
+        LLMProvider.Tool[] tools = orchestrator.createTools();
+        LLMProvider.Tool updateConfigTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartConfig".equals(tool.getName())) {
+                updateConfigTool = tool;
+                break;
+            }
+        }
+
+        assertNotNull(updateConfigTool);
+        String config = "{\"title\": {\"text\": \"Sales Chart\"}}";
+        updateConfigTool.execute("{\"config\": \"" + config + "\"}");
+
+        // Capture state
+        ChartState state = orchestrator.captureState();
+
+        assertNotNull("State should not be null after config update", state);
+        assertNull("SQL should be null if not set", state.getSqlQuery());
+        assertEquals(config, state.getChartConfig());
+    }
+
+    @Test
+    public void captureState_afterBothUpdates_capturesBoth() {
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        Chart chart = new Chart();
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).withChart(chart)
+                .withInput(mockInput).build();
+
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+
+        // Provide 2-column data as required by DefaultDataConverter
+        when(mockDatabaseProvider.executeQuery(anyString()))
+                .thenReturn(List.of(Map.of("month", "January", "revenue", 5000)));
+
+        // Set up UI context by triggering input
+        InputSubmitEvent event = () -> "Test";
+        listenerCaptor.getValue().onSubmit(event);
+
+        // Trigger both tools
+        LLMProvider.Tool[] tools = orchestrator.createTools();
+
+        // Update data
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                tool.execute("{\"query\": \"SELECT * FROM revenue\"}");
+                break;
+            }
+        }
+
+        // Update config
+        String config = "{\"chart\": {\"type\": \"bar\"}}";
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartConfig".equals(tool.getName())) {
+                tool.execute("{\"config\": \"" + config + "\"}");
+                break;
+            }
+        }
+
+        // Capture state
+        ChartState state = orchestrator.captureState();
+
+        assertNotNull("State should not be null", state);
+        assertEquals("SELECT * FROM revenue", state.getSqlQuery());
+        assertEquals(config, state.getChartConfig());
+    }
+
+    @Test
+    public void restoreState_withNullState_throwsException() {
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).build();
+
+        try {
+            orchestrator.restoreState(null);
+            fail("Should throw NullPointerException");
+        } catch (NullPointerException e) {
+            assertTrue(e.getMessage().contains("Chart state cannot be null"));
+        }
+    }
+
+    @Test
+    public void restoreState_withSqlQuery_executesQueryAndUpdatesChart() {
+        Chart chart = new Chart();
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).withChart(chart)
+                .build();
+
+        when(mockDatabaseProvider.executeQuery("SELECT * FROM products"))
+                .thenReturn(List.of(Map.of("product", "Widget", "sales", 100)));
+
+        ChartState state = ChartState.of("SELECT * FROM products", null);
+
+        orchestrator.restoreState(state);
+
+        verify(mockDatabaseProvider).executeQuery("SELECT * FROM products");
+        // Chart should be updated with new data
+        assertNotNull(chart.getConfiguration().getSeries());
+    }
+
+    @Test
+    public void restoreState_withChartConfig_appliesConfig() {
+        Chart chart = new Chart();
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).withChart(chart)
+                .build();
+
+        String config = "{\"title\": {\"text\": \"Restored Chart\"}}";
+        ChartState state = ChartState.of(null, config);
+
+        orchestrator.restoreState(state);
+
+        // Config should be applied (verified by no exceptions thrown)
+        ChartState capturedState = orchestrator.captureState();
+        assertNotNull(capturedState);
+        assertEquals(config, capturedState.getChartConfig());
+    }
+
+    @Test
+    public void restoreState_withBothSqlAndConfig_restoresBoth() {
+        Chart chart = new Chart();
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider).withChart(chart)
+                .build();
+
+        when(mockDatabaseProvider.executeQuery("SELECT * FROM orders"))
+                .thenReturn(List.of(Map.of("month", "Jan", "total", 5000)));
+
+        String config = "{\"chart\": {\"type\": \"line\"}}";
+        ChartState state = ChartState.of("SELECT * FROM orders", config);
+
+        orchestrator.restoreState(state);
+
+        verify(mockDatabaseProvider).executeQuery("SELECT * FROM orders");
+
+        // Verify state was captured
+        ChartState capturedState = orchestrator.captureState();
+        assertNotNull(capturedState);
+        assertEquals("SELECT * FROM orders", capturedState.getSqlQuery());
+        assertEquals(config, capturedState.getChartConfig());
+    }
+
+    // ===== STATE CHANGE EVENT TESTS =====
+
+    @Test
+    public void updateChartData_firesDataQueryUpdatedEvent() throws Exception {
+        // Setup mock responses
+        List<Map<String, Object>> mockResults = List.of(
+                Map.of("category", "Q1", "value", 100),
+                Map.of("category", "Q2", "value", 150));
+        when(mockDatabaseProvider.executeQuery(anyString()))
+                .thenReturn(mockResults);
+
+        // Setup event listener
+        final ChartStateChangeEvent[] capturedEvent = new ChartStateChangeEvent[1];
+        ChartStateChangeListener listener = event -> {
+            capturedEvent[0] = event;
+        };
+
+        // Build orchestrator
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider)
+                .withChart(mockChart)
+                .withDataConverter(new DefaultDataConverter())
+                .withInput(mockInput)
+                .build();
+
+        orchestrator.addStateChangeListener(listener);
+
+        // Trigger input to set up UI context
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+        InputSubmitListener capturedListener = listenerCaptor.getValue();
+        InputSubmitEvent mockEvent = mock(InputSubmitEvent.class);
+        when(mockEvent.getValue()).thenReturn("Show sales by region");
+        capturedListener.onSubmit(mockEvent);
+
+        // Get the updateChartData tool and execute it
+        verify(mockLlmProvider).stream(any());
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
+        verify(mockLlmProvider).stream(requestCaptor.capture());
+
+        LLMProvider.Tool[] tools = requestCaptor.getValue().tools();
+        LLMProvider.Tool updateChartDataTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                updateChartDataTool = tool;
+                break;
+            }
+        }
+
+        assertNotNull("updateChartData tool should exist", updateChartDataTool);
+
+        // Execute the tool
+        updateChartDataTool.execute("{\"query\": \"SELECT * FROM sales\"}");
+
+        // Verify event was fired
+        assertNotNull("Event should have been fired", capturedEvent[0]);
+        assertEquals("Event should have DATA_QUERY_UPDATED type",
+                ChartStateChangeEvent.StateChangeType.DATA_QUERY_UPDATED,
+                capturedEvent[0].getChangeType());
+        assertNotNull("Event should have chart state",
+                capturedEvent[0].getChartState());
+        assertEquals("SELECT * FROM sales",
+                capturedEvent[0].getChartState().getSqlQuery());
+    }
+
+    @Test
+    public void updateChartConfig_firesConfigurationUpdatedEvent()
+            throws Exception {
+        // Setup event listener
+        final ChartStateChangeEvent[] capturedEvent = new ChartStateChangeEvent[1];
+        ChartStateChangeListener listener = event -> {
+            capturedEvent[0] = event;
+        };
+
+        // Build orchestrator
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider)
+                .withChart(mockChart)
+                .withDataConverter(new DefaultDataConverter())
+                .withInput(mockInput)
+                .build();
+
+        orchestrator.addStateChangeListener(listener);
+
+        // Trigger input to set up UI context
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+        InputSubmitListener capturedListener = listenerCaptor.getValue();
+        InputSubmitEvent mockEvent = mock(InputSubmitEvent.class);
+        when(mockEvent.getValue()).thenReturn("Make it a bar chart");
+        capturedListener.onSubmit(mockEvent);
+
+        // Get the updateChartConfig tool and execute it
+        verify(mockLlmProvider).stream(any());
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
+        verify(mockLlmProvider).stream(requestCaptor.capture());
+
+        LLMProvider.Tool[] tools = requestCaptor.getValue().tools();
+        LLMProvider.Tool updateChartConfigTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartConfig".equals(tool.getName())) {
+                updateChartConfigTool = tool;
+                break;
+            }
+        }
+
+        assertNotNull("updateChartConfig tool should exist",
+                updateChartConfigTool);
+
+        // Execute the tool
+        updateChartConfigTool.execute(
+                "{\"config\": \"{\\\"chart\\\": {\\\"type\\\": \\\"bar\\\"}}\"}");
+
+        // Verify event was fired
+        assertNotNull("Event should have been fired", capturedEvent[0]);
+        assertEquals("Event should have CONFIGURATION_UPDATED type",
+                ChartStateChangeEvent.StateChangeType.CONFIGURATION_UPDATED,
+                capturedEvent[0].getChangeType());
+        assertNotNull("Event should have chart state",
+                capturedEvent[0].getChartState());
+        assertEquals("{\\\"chart\\\": {\\\"type\\\": \\\"bar\\\"}}",
+                capturedEvent[0].getChartState().getChartConfig());
+    }
+
+    @Test
+    public void multipleListeners_allReceiveEvent() throws Exception {
+        // Setup mock responses
+        List<Map<String, Object>> mockResults = List.of(
+                Map.of("category", "Q1", "value", 100));
+        when(mockDatabaseProvider.executeQuery(anyString()))
+                .thenReturn(mockResults);
+
+        // Setup multiple listeners
+        final int[] eventCount = { 0 };
+        ChartStateChangeListener listener1 = event -> eventCount[0]++;
+        ChartStateChangeListener listener2 = event -> eventCount[0]++;
+        ChartStateChangeListener listener3 = event -> eventCount[0]++;
+
+        // Build orchestrator
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider)
+                .withChart(mockChart)
+                .withDataConverter(new DefaultDataConverter())
+                .withInput(mockInput)
+                .build();
+
+        orchestrator.addStateChangeListener(listener1);
+        orchestrator.addStateChangeListener(listener2);
+        orchestrator.addStateChangeListener(listener3);
+
+        // Trigger input to set up UI context
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+        InputSubmitListener capturedListener = listenerCaptor.getValue();
+        InputSubmitEvent mockEvent = mock(InputSubmitEvent.class);
+        when(mockEvent.getValue()).thenReturn("Show data");
+        capturedListener.onSubmit(mockEvent);
+
+        // Get and execute the updateChartData tool
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
+        verify(mockLlmProvider).stream(requestCaptor.capture());
+
+        LLMProvider.Tool[] tools = requestCaptor.getValue().tools();
+        LLMProvider.Tool updateChartDataTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                updateChartDataTool = tool;
+                break;
+            }
+        }
+
+        updateChartDataTool.execute("{\"query\": \"SELECT 1\"}");
+
+        // Verify all listeners were called
+        assertEquals("All 3 listeners should have been called", 3,
+                eventCount[0]);
+    }
+
+    @Test
+    public void removeStateChangeListener_listenerNotCalled() throws Exception {
+        // Setup mock responses
+        List<Map<String, Object>> mockResults = List.of(
+                Map.of("category", "Q1", "value", 100));
+        when(mockDatabaseProvider.executeQuery(anyString()))
+                .thenReturn(mockResults);
+
+        // Setup listener
+        final int[] eventCount = { 0 };
+        ChartStateChangeListener listener = event -> eventCount[0]++;
+
+        // Build orchestrator
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider)
+                .withChart(mockChart)
+                .withDataConverter(new DefaultDataConverter())
+                .withInput(mockInput)
+                .build();
+
+        orchestrator.addStateChangeListener(listener);
+        orchestrator.removeStateChangeListener(listener);
+
+        // Trigger input to set up UI context
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+        InputSubmitListener capturedListener = listenerCaptor.getValue();
+        InputSubmitEvent mockEvent = mock(InputSubmitEvent.class);
+        when(mockEvent.getValue()).thenReturn("Show data");
+        capturedListener.onSubmit(mockEvent);
+
+        // Get and execute the updateChartData tool
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
+        verify(mockLlmProvider).stream(requestCaptor.capture());
+
+        LLMProvider.Tool[] tools = requestCaptor.getValue().tools();
+        LLMProvider.Tool updateChartDataTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                updateChartDataTool = tool;
+                break;
+            }
+        }
+
+        updateChartDataTool.execute("{\"query\": \"SELECT 1\"}");
+
+        // Verify listener was not called
+        assertEquals("Listener should not have been called", 0, eventCount[0]);
+    }
+
+    @Test
+    public void addStateChangeListener_withNullListener_throwsException() {
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider)
+                .withChart(mockChart)
+                .withDataConverter(new DefaultDataConverter())
+                .build();
+
+        try {
+            orchestrator.addStateChangeListener(null);
+            fail("Should throw NullPointerException");
+        } catch (NullPointerException e) {
+            assertEquals("Listener cannot be null", e.getMessage());
+        }
+    }
+
+    @Test
+    public void eventSource_isOrchestrator() throws Exception {
+        // Setup mock responses
+        List<Map<String, Object>> mockResults = List.of(
+                Map.of("category", "Q1", "value", 100));
+        when(mockDatabaseProvider.executeQuery(anyString()))
+                .thenReturn(mockResults);
+
+        // Build orchestrator
+        ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
+                .forClass(InputSubmitListener.class);
+
+        AiChartOrchestrator orchestrator = AiChartOrchestrator
+                .create(mockLlmProvider, mockDatabaseProvider)
+                .withChart(mockChart)
+                .withDataConverter(new DefaultDataConverter())
+                .withInput(mockInput)
+                .build();
+
+        // Setup event listener
+        final ChartStateChangeEvent[] capturedEvent = new ChartStateChangeEvent[1];
+        orchestrator.addStateChangeListener(event -> {
+            capturedEvent[0] = event;
+        });
+
+        // Trigger input to set up UI context
+        verify(mockInput).addSubmitListener(listenerCaptor.capture());
+        InputSubmitListener capturedListener = listenerCaptor.getValue();
+        InputSubmitEvent mockEvent = mock(InputSubmitEvent.class);
+        when(mockEvent.getValue()).thenReturn("Show data");
+        capturedListener.onSubmit(mockEvent);
+
+        // Get and execute the updateChartData tool
+        ArgumentCaptor<LLMProvider.LLMRequest> requestCaptor = ArgumentCaptor
+                .forClass(LLMProvider.LLMRequest.class);
+        verify(mockLlmProvider).stream(requestCaptor.capture());
+
+        LLMProvider.Tool[] tools = requestCaptor.getValue().tools();
+        LLMProvider.Tool updateChartDataTool = null;
+        for (LLMProvider.Tool tool : tools) {
+            if ("updateChartData".equals(tool.getName())) {
+                updateChartDataTool = tool;
+                break;
+            }
+        }
+
+        updateChartDataTool.execute("{\"query\": \"SELECT 1\"}");
+
+        // Verify event source
+        assertNotNull("Event should have been fired", capturedEvent[0]);
+        assertSame("Event source should be the orchestrator", orchestrator,
+                capturedEvent[0].getSource());
+    }
+
     /**
      * Custom UI for testing that executes UI.access() commands synchronously.
      */
