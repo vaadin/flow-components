@@ -223,16 +223,6 @@ public class AiChartOrchestrator extends BaseAiOrchestrator {
         return SYSTEM_PROMPT;
     }
 
-    /**
-     * Chart orchestrator can process without message list since tools directly
-     * update the chart component.
-     *
-     * @return true to allow processing without message list
-     */
-    @Override
-    protected boolean shouldProcessWithoutMessageList() {
-        return true;
-    }
 
     /**
      * Called when processing completes.
