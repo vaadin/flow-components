@@ -186,13 +186,131 @@ vaadin-ai-flow-parent/
 
 ## Chart Module: vaadin-ai-chart-flow (Commercial)
 
-**Purpose**: Orchestrates AI-powered chart generation from natural language queries.
+**Purpose**: Orchestrates AI-powered data visualization from natural language queries.
+
+This module now supports multiple visualization types through two orchestrators:
+- `AiDataVisualizationOrchestrator` (recommended) - supports charts, grids, and KPIs with dynamic type switching
+- `AiChartOrchestrator` (legacy) - chart-only orchestrator, maintained for backward compatibility
 
 ### Key Classes
 
-#### AiChartOrchestrator
+#### AiDataVisualizationOrchestrator (Recommended)
+
+**Location**: [AiDataVisualizationOrchestrator.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/AiDataVisualizationOrchestrator.java)
+
+**Pattern**: Builder pattern for configuration
+
+**Purpose**: Generic orchestrator supporting multiple visualization types (charts, grids, KPIs) with dynamic type switching.
+
+**Components**:
+
+- `LLMProvider` (required) - AI model for visualization generation
+- `DatabaseProvider` (required) - database access
+- `Component visualizationContainer` (optional) - container where visualizations are rendered (can be Div, Chart, or any Component)
+- `AiInput` (optional) - user input for queries
+- `AiMessageList` (optional) - displays conversation
+- `AiFileReceiver` (optional) - handles file uploads
+- `DataConverter chartDataConverter` (optional) - converts query results to chart data (only used for chart visualizations)
+- `VisualizationType initialType` (optional) - initial visualization type (defaults to CHART)
+
+**Supported Visualization Types**:
+
+- **CHART**: Line, bar, column, pie, area charts using Vaadin Charts
+  - Requires 2-column data (label, value) after conversion
+  - Uses DataConverter for data transformation
+- **GRID**: Tabular data with sortable columns using Vaadin Grid
+  - Works directly with raw query results
+  - No conversion needed - shows all returned columns
+- **KPI**: Key Performance Indicator cards showing single metrics
+  - Extracts first value from query results
+  - Supports custom formatting and labels
+
+**Flow**:
+
+1. User submits natural language request (e.g., "Show sales by region as a chart")
+2. Orchestrator processes input and calls appropriate tool based on visualization type
+3. AI generates SQL queries using database schema
+4. Tool executes query and renders visualization based on current type
+5. User can dynamically switch types: "Show this as a table instead"
+6. AI calls `changeVisualizationType` tool - same data, different rendering
+
+**Key Features**:
+
+- **Dynamic Type Switching**: Users can change visualization types without re-querying
+- **Type-Specific Rendering**: Smart rendering based on visualization type
+  - Chart: Converts data via DataConverter, applies Highcharts config
+  - Grid: Direct rendering with auto-generated columns
+  - KPI: Extracts and formats single value
+- **State Management**: `VisualizationState` captures type, SQL query, and configuration
+- **Backward Compatible**: Can be used as drop-in replacement for AiChartOrchestrator
+- **Flexible Container**: Works with any Component container, not just Chart
+
+**Tools**:
+
+1. `getSchema()` - Retrieves database schema
+2. `updateChart(query, config)` - Creates/updates chart visualization
+3. `updateGrid(query)` - Creates/updates grid/table visualization
+4. `updateKpi(query, label, format)` - Creates/updates KPI card
+5. `changeVisualizationType(type, config)` - Changes type while keeping current data
+
+**System Prompt**: Instructs AI on available visualization types and when to use each
+
+**Example Usage**:
+
+```java
+// Create orchestrator
+Div container = new Div();
+AiDataVisualizationOrchestrator orchestrator = AiDataVisualizationOrchestrator
+    .create(llmProvider, databaseProvider)
+    .withVisualizationContainer(container)
+    .withInput(messageInput)
+    .withMessageList(messageList)
+    .withInitialType(VisualizationType.CHART)
+    .build();
+
+// User can now say:
+// - "Show monthly revenue as a chart"
+// - "Convert this to a table"
+// - "Show total revenue as a KPI"
+```
+
+**Dashboard Integration**:
+
+Perfect for dashboard applications where each widget needs different visualization types:
+
+```java
+Dashboard dashboard = new Dashboard();
+
+// Create widget with its own orchestrator
+DashboardWidget widget = new DashboardWidget("Sales Data");
+Div content = new Div();
+widget.setContent(content);
+
+AiDataVisualizationOrchestrator orchestrator = AiDataVisualizationOrchestrator
+    .create(llm, db)
+    .withVisualizationContainer(content)
+    .build();
+
+dashboard.add(widget);
+```
+
+**State Persistence**:
+
+```java
+// Capture state
+VisualizationState state = orchestrator.captureState();
+// State contains: type, sqlQuery, configuration
+
+// Later, restore
+orchestrator.restoreState(state);
+// Re-executes query and renders with saved type/config
+```
+
+#### AiChartOrchestrator (Legacy)
 
 **Location**: [AiChartOrchestrator.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/AiChartOrchestrator.java)
+
+**Note**: For new projects, use `AiDataVisualizationOrchestrator` instead. This class is maintained for backward compatibility.
 
 **Pattern**: Builder pattern for configuration
 

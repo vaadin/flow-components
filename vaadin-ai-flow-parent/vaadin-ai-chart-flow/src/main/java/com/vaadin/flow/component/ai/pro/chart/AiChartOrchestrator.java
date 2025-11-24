@@ -28,7 +28,7 @@ import java.util.Objects;
 /**
  * Orchestrator for AI-powered chart generation.
  * <p>
- * This class connects a {@link Chart}, {@link AiInput},
+ * This class connects a {@link Chart}, {@link com.vaadin.flow.component.ai.input.AiInput},
  * {@link LLMProvider}, and {@link DatabaseProvider} to enable users to generate
  * and modify charts using natural language. The orchestrator:
  * </p>
@@ -38,6 +38,11 @@ import java.util.Objects;
  * <li>Executes queries and converts results to chart data</li>
  * <li>Generates and applies Highcharts configurations</li>
  * </ul>
+ * <p>
+ * <strong>Note:</strong> For new projects, consider using {@link AiDataVisualizationOrchestrator}
+ * which supports multiple visualization types (charts, grids, KPIs) and allows dynamic
+ * type switching. This class is maintained for backward compatibility.
+ * </p>
  * <p>
  * <strong>Security Notice:</strong> Always use read-only database credentials
  * with access restricted to only necessary tables and views.
@@ -60,6 +65,7 @@ import java.util.Objects;
  * </pre>
  *
  * @author Vaadin Ltd
+ * @see AiDataVisualizationOrchestrator
  */
 public class AiChartOrchestrator extends BaseAiOrchestrator {
 
