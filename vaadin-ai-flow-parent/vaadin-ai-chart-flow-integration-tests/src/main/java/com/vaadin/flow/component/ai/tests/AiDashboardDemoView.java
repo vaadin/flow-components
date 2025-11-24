@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.pro.chart.AiDataVisualizationOrchestrator;
+import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
+import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
 import com.vaadin.flow.component.ai.pro.chart.VisualizationType;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
@@ -49,7 +49,7 @@ import java.util.Map;
 public class AiDashboardDemoView extends VerticalLayout {
 
     private Dashboard dashboard;
-    private Map<String, AiDataVisualizationOrchestrator> orchestrators = new HashMap<>();
+    private Map<String, DataVisualizationPlugin> plugins = new HashMap<>();
     private String apiKey;
 
     public AiDashboardDemoView() {
@@ -183,30 +183,30 @@ public class AiDashboardDemoView extends VerticalLayout {
         widget.setContent(visualizationContainer);
 
         // Create orchestrator for this widget
-        AiDataVisualizationOrchestrator orchestrator = createOrchestrator(
-                visualizationContainer, type);
-        orchestrators.put(widgetId, orchestrator);
+        DataVisualizationPlugin plugin = createPlugin(visualizationContainer,
+                type);
+        plugins.put(widgetId, plugin);
 
         // Add configure button
-        addConfigureButton(widget, widgetId, orchestrator);
+        addConfigureButton(widget, widgetId, plugin);
 
         return widget;
     }
 
     private void addConfigureButton(DashboardWidget widget, String widgetId,
-            AiDataVisualizationOrchestrator orchestrator) {
+            DataVisualizationPlugin plugin) {
         Button configureButton = new Button(VaadinIcon.COG.create());
         configureButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
                 ButtonVariant.LUMO_SMALL);
         configureButton.getStyle().setMargin("0");
         configureButton.addClickListener(e -> {
-            openWidgetChat(widgetId, widget.getTitle(), orchestrator);
+            openWidgetChat(widgetId, widget.getTitle(), plugin);
         });
         widget.setHeaderContent(configureButton);
     }
 
     private void openWidgetChat(String widgetId, String widgetTitle,
-            AiDataVisualizationOrchestrator orchestrator) {
+            DataVisualizationPlugin plugin) {
         // Create chat dialog for widget configuration
         Div chatContainer = new Div();
         chatContainer.setWidth("600px");
@@ -224,9 +224,9 @@ public class AiDashboardDemoView extends VerticalLayout {
         MessageInput messageInput = new MessageInput();
         messageInput.setWidthFull();
 
-        // Create or update orchestrator with chat UI
-        if (orchestrator == null) {
-            // Create new orchestrator for empty widget
+        // Create or update plugin with chat UI
+        if (plugin == null) {
+            // Create new plugin for empty widget
             Div visualizationContainer = new Div();
             visualizationContainer.setSizeFull();
 
@@ -239,13 +239,20 @@ public class AiDashboardDemoView extends VerticalLayout {
                         w.setContent(visualizationContainer);
                     });
 
-            orchestrator = createOrchestrator(visualizationContainer,
+            plugin = createPlugin(visualizationContainer,
                     VisualizationType.CHART);
-            orchestrators.put(widgetId, orchestrator);
+            plugins.put(widgetId, plugin);
         }
 
-        // Note: In a full implementation, you would reconfigure the orchestrator
-        // with the messageList and messageInput here
+        // Create LLM provider for orchestrator
+        StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
+                .apiKey(apiKey).modelName("gpt-4o-mini").build();
+        LLMProvider llmProvider = new LangChain4JLLMProvider(model);
+
+        // Create chat orchestrator with plugin
+        AiChatOrchestrator orchestrator = AiChatOrchestrator
+                .create(llmProvider).withMessageList(messageList)
+                .withInput(messageInput).withPlugin(plugin).build();
 
         chatContainer.add(chatTitle, messageList, messageInput);
 
@@ -283,19 +290,10 @@ public class AiDashboardDemoView extends VerticalLayout {
         add(overlay);
     }
 
-    private AiDataVisualizationOrchestrator createOrchestrator(
+    private DataVisualizationPlugin createPlugin(
             Div visualizationContainer, VisualizationType initialType) {
-        // Create LLM provider
-        StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
-                .apiKey(apiKey).modelName("gpt-4o-mini").build();
-        LLMProvider llmProvider = new LangChain4JLLMProvider(model);
-
-        // Create database provider
-        DatabaseProvider databaseProvider = new InMemoryDatabaseProvider();
-
-        // Create orchestrator
-        return AiDataVisualizationOrchestrator
-                .create(llmProvider, databaseProvider)
+        // Create plugin
+        return DataVisualizationPlugin.create(new InMemoryDatabaseProvider())
                 .withVisualizationContainer(visualizationContainer)
                 .withInitialType(initialType).build();
     }

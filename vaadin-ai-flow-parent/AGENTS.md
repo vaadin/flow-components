@@ -186,30 +186,24 @@ vaadin-ai-flow-parent/
 
 ## Chart Module: vaadin-ai-chart-flow (Commercial)
 
-**Purpose**: Orchestrates AI-powered data visualization from natural language queries.
+**Purpose**: Provides data visualization capabilities as a plugin for AI orchestrators.
 
-This module now supports multiple visualization types through two orchestrators:
-- `AiDataVisualizationOrchestrator` (recommended) - supports charts, grids, and KPIs with dynamic type switching
-- `AiChartOrchestrator` (legacy) - chart-only orchestrator, maintained for backward compatibility
+This module provides the `DataVisualizationPlugin` which can be added to any orchestrator (like `AiChatOrchestrator`) to enable AI-powered data visualization from natural language queries.
 
 ### Key Classes
 
-#### AiDataVisualizationOrchestrator (Recommended)
+#### DataVisualizationPlugin
 
-**Location**: [AiDataVisualizationOrchestrator.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/AiDataVisualizationOrchestrator.java)
+**Location**: [DataVisualizationPlugin.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/DataVisualizationPlugin.java)
 
-**Pattern**: Builder pattern for configuration
+**Pattern**: Plugin architecture with builder pattern for configuration
 
-**Purpose**: Generic orchestrator supporting multiple visualization types (charts, grids, KPIs) with dynamic type switching.
+**Purpose**: Plugin that adds data visualization capabilities (charts, grids, KPIs) to AI orchestrators with dynamic type switching.
 
-**Components**:
+**Configuration (Builder)**:
 
-- `LLMProvider` (required) - AI model for visualization generation
-- `DatabaseProvider` (required) - database access
+- `DatabaseProvider` (required) - database access for querying data
 - `Component visualizationContainer` (optional) - container where visualizations are rendered (can be Div, Chart, or any Component)
-- `AiInput` (optional) - user input for queries
-- `AiMessageList` (optional) - displays conversation
-- `AiFileReceiver` (optional) - handles file uploads
 - `DataConverter chartDataConverter` (optional) - converts query results to chart data (only used for chart visualizations)
 - `VisualizationType initialType` (optional) - initial visualization type (defaults to CHART)
 
@@ -228,7 +222,7 @@ This module now supports multiple visualization types through two orchestrators:
 **Flow**:
 
 1. User submits natural language request (e.g., "Show sales by region as a chart")
-2. Orchestrator processes input and calls appropriate tool based on visualization type
+2. Orchestrator routes to plugin's tools
 3. AI generates SQL queries using database schema
 4. Tool executes query and renders visualization based on current type
 5. User can dynamically switch types: "Show this as a table instead"
@@ -236,14 +230,15 @@ This module now supports multiple visualization types through two orchestrators:
 
 **Key Features**:
 
+- **Plugin Architecture**: Can be added to any orchestrator (AiChatOrchestrator, custom orchestrators)
 - **Dynamic Type Switching**: Users can change visualization types without re-querying
 - **Type-Specific Rendering**: Smart rendering based on visualization type
   - Chart: Converts data via DataConverter, applies Highcharts config
   - Grid: Direct rendering with auto-generated columns
   - KPI: Extracts and formats single value
 - **State Management**: `VisualizationState` captures type, SQL query, and configuration
-- **Backward Compatible**: Can be used as drop-in replacement for AiChartOrchestrator
 - **Flexible Container**: Works with any Component container, not just Chart
+- **Composable**: Can be combined with other plugins in the same orchestrator
 
 **Tools**:
 
@@ -253,25 +248,32 @@ This module now supports multiple visualization types through two orchestrators:
 4. `updateKpi(query, label, format)` - Creates/updates KPI card
 5. `changeVisualizationType(type, config)` - Changes type while keeping current data
 
-**System Prompt**: Instructs AI on available visualization types and when to use each
+**System Prompt Contribution**: Instructs AI on available visualization types and when to use each
 
 **Example Usage**:
 
 ```java
-// Create orchestrator
+// Create plugin
 Div container = new Div();
-AiDataVisualizationOrchestrator orchestrator = AiDataVisualizationOrchestrator
-    .create(llmProvider, databaseProvider)
+DataVisualizationPlugin plugin = DataVisualizationPlugin
+    .create(databaseProvider)
     .withVisualizationContainer(container)
-    .withInput(messageInput)
-    .withMessageList(messageList)
     .withInitialType(VisualizationType.CHART)
+    .build();
+
+// Add to orchestrator
+AiChatOrchestrator orchestrator = AiChatOrchestrator
+    .create(llmProvider)
+    .withMessageList(messageList)
+    .withInput(messageInput)
+    .withPlugin(plugin)
     .build();
 
 // User can now say:
 // - "Show monthly revenue as a chart"
 // - "Convert this to a table"
 // - "Show total revenue as a KPI"
+// - "Tell me a joke" (regular chat, no visualization)
 ```
 
 **Dashboard Integration**:
@@ -281,14 +283,20 @@ Perfect for dashboard applications where each widget needs different visualizati
 ```java
 Dashboard dashboard = new Dashboard();
 
-// Create widget with its own orchestrator
+// Create widget with its own plugin
 DashboardWidget widget = new DashboardWidget("Sales Data");
 Div content = new Div();
 widget.setContent(content);
 
-AiDataVisualizationOrchestrator orchestrator = AiDataVisualizationOrchestrator
-    .create(llm, db)
+DataVisualizationPlugin plugin = DataVisualizationPlugin
+    .create(databaseProvider)
     .withVisualizationContainer(content)
+    .build();
+
+// Create orchestrator for this widget with the plugin
+AiChatOrchestrator orchestrator = AiChatOrchestrator
+    .create(llm)
+    .withPlugin(plugin)
     .build();
 
 dashboard.add(widget);
@@ -298,165 +306,57 @@ dashboard.add(widget);
 
 ```java
 // Capture state
-VisualizationState state = orchestrator.captureState();
+Object state = plugin.captureState();
 // State contains: type, sqlQuery, configuration
 
 // Later, restore
-orchestrator.restoreState(state);
+plugin.restoreState(state);
 // Re-executes query and renders with saved type/config
 ```
 
-#### AiChartOrchestrator (Legacy)
+#### AiPlugin Interface
 
-**Location**: [AiChartOrchestrator.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/AiChartOrchestrator.java)
+**Location**: [AiPlugin.java](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/AiPlugin.java)
 
-**Note**: For new projects, use `AiDataVisualizationOrchestrator` instead. This class is maintained for backward compatibility.
+**Purpose**: Base interface for all AI plugins that extend orchestrator capabilities
 
-**Pattern**: Builder pattern for configuration
+**Key Methods**:
 
-**Components**:
+- `getTools()` - Returns list of tools this plugin provides to the LLM
+- `getSystemPromptContribution()` - Returns text to add to the system prompt
+- `onAttached(BaseAiOrchestrator)` - Called when plugin is attached to an orchestrator
+- `onDetached()` - Called when plugin is detached (cleanup)
+- `captureState()` - Returns serializable state object for persistence
+- `restoreState(Object)` - Restores plugin from a previously captured state
+- `getPluginId()` - Returns unique identifier for this plugin type
 
-- `LLMProvider` (required) - AI model for chart generation
-- `DatabaseProvider` (required) - database access
-- `Chart` (optional) - Vaadin Charts component to update
-- `AiInput` (optional) - user input for queries
-- `AiFileReceiver` (optional) - handles file uploads
-- `DataConverter` (optional) - converts query results to chart data
-
-**Flow**:
-
-1. User submits natural language query (e.g., "Show sales by region")
-2. Base class `handleUserInput()` validates input and adds user message to `AiMessageList`
-3. Override `processUserInput()` stores currentUserRequest and currentUI, then calls super
-4. Base class `processUserInput()` calls hook methods to get tools and system prompt
-5. Base class builds LLM request with tools and streams response
-6. AI generates SQL queries and chart configurations using provided tools:
-   - `getSchema` - retrieve database schema
-   - `updateChartData` - execute SQL and update chart with data
-   - `updateChartConfig` - update chart configuration (title, colors, etc.)
-7. Tools execute and update the chart directly
-8. Base class handles streaming and calls `onProcessingComplete()` when done
-
-**Key Features**:
-
-- Extends `BaseAiOrchestrator` and uses base class `processUserInput()` implementation
-- Overrides hook methods for customization:
-  - `createTools()` - returns 3 tools (getSchema, updateChartData, updateChartConfig)
-  - `getSystemPrompt()` - returns SYSTEM_PROMPT with chart generation instructions
-  - `onProcessingComplete()` - logs completion
-- Overrides `processUserInput()` to store currentUserRequest and currentUI for tool use
-- All streaming, error handling, and file attachment support inherited from base class
-
-**Tools Implementation**:
-
-- Tools use JSON for parameter passing
-- Each tool returns success/error messages to AI
-- AI can make follow-up tool calls based on results
-- Thread-safe updates via UI.access() for chart manipulation
-
-**Testing**: [AiChartOrchestratorTest](vaadin-ai-chart-flow/src/test/java/com/vaadin/flow/component/ai/pro/chart/AiChartOrchestratorTest.java) (37 tests)
-
-#### DataConverter Interface
-
-**Location**: [DataConverter.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/DataConverter.java)
-
-**Purpose**: Converts database query results to Vaadin Charts `DataSeries`
-
-**Default Implementation**: [DefaultDataConverter](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/DefaultDataConverter.java)
-
-- Assumes first column = category/label
-- Second column = numeric value
-- Handles null values (category→"Unknown", value→0)
-- Parses string numbers
-- Supports Integer, Long, Double types
-
-**Testing**: [DefaultDataConverterTest](vaadin-ai-chart-flow/src/test/java/com/vaadin/flow/component/ai/pro/chart/DefaultDataConverterTest.java) (17 tests)
-
-#### ChartState Interface
-
-**Location**: [ChartState.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/ChartState.java)
-
-**Purpose**: Represents a serializable snapshot of a chart's state for persistence and restoration
-
-**Key Features**:
-
-- Immutable snapshot containing SQL query and chart configuration
-- Includes timestamps (created and last modified)
-- Serializable for database/session storage
-- Factory methods for easy creation
-
-**Properties**:
-
-- `sqlQuery` - The SQL SELECT query to fetch chart data
-- `chartConfig` - Highcharts JSON configuration for visual appearance
-- `createdAt` - When the state was originally created
-- `lastModifiedAt` - When the state was last modified
-
-**Implementation**: [DefaultChartState](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/DefaultChartState.java)
-
-**Testing**: [ChartStateTest](vaadin-ai-chart-flow/src/test/java/com/vaadin/flow/component/ai/pro/chart/ChartStateTest.java) (22 tests)
-
-**Usage Example**:
+**Example Custom Plugin**:
 
 ```java
-// After AI has configured a chart, capture its state
-ChartState state = orchestrator.captureState();
-
-// Serialize and store (e.g., in database, session, file system)
-// The state is fully serializable via Java Serialization
-stateManager.saveState("my-chart-id", state);
-
-// Later, on next visit, restore the chart
-ChartState savedState = stateManager.loadState("my-chart-id");
-orchestrator.restoreState(savedState);
-// Chart is now restored with fresh data from database
-```
-
-**Integration with AiChartOrchestrator**:
-
-The orchestrator provides `captureState()` and `restoreState()` methods for easy state management:
-
-- `captureState()` - Creates an immutable snapshot of current chart state (returns null if no state exists)
-- `restoreState(ChartState)` - Restores chart by re-executing SQL query and reapplying configuration
-- State is automatically captured when AI tools (`updateChartData`, `updateChartConfig`) execute
-- Restoration updates the orchestrator's internal state, allowing subsequent captures
-
-**Event-Driven State Management**:
-
-The orchestrator fires `ChartStateChangeEvent` whenever the chart state changes, enabling reactive behaviors:
-
-```java
-// Auto-save example: persist state changes to database
-orchestrator.addStateChangeListener(event -> {
-    ChartState state = event.getChartState();
-    String chartId = getCurrentChartId();
-
-    // Save to database
-    chartRepository.save(chartId, state);
-
-    // Log the change type
-    System.out.println("Chart updated: " + event.getChangeType());
-});
-
-// Undo/Redo example: track state history
-List<ChartState> stateHistory = new ArrayList<>();
-orchestrator.addStateChangeListener(event -> {
-    stateHistory.add(event.getChartState());
-});
-
-// Analytics example: monitor chart usage
-orchestrator.addStateChangeListener(event -> {
-    if (event.getChangeType() == ChartStateChangeEvent.StateChangeType.DATA_QUERY_UPDATED) {
-        analyticsService.trackQueryExecution(event.getChartState().getSqlQuery());
+public class MyCustomPlugin implements AiPlugin {
+    @Override
+    public List<LLMProvider.Tool> getTools() {
+        return List.of(new MyTool());
     }
-});
+
+    @Override
+    public String getSystemPromptContribution() {
+        return "You have access to myTool which does X, Y, Z.";
+    }
+
+    @Override
+    public void onAttached(BaseAiOrchestrator orchestrator) {
+        // Initialize plugin
+    }
+}
+
+// Use in orchestrator
+AiChatOrchestrator orchestrator = AiChatOrchestrator
+    .create(llmProvider)
+    .withPlugin(new MyCustomPlugin())
+    .withPlugin(dataVizPlugin)  // Multiple plugins!
+    .build();
 ```
-
-Event types:
-- `DATA_QUERY_UPDATED` - Fired when SQL query is updated via `updateChartData` tool
-- `CONFIGURATION_UPDATED` - Fired when chart config is updated via `updateChartConfig` tool
-- `BOTH_UPDATED` - Reserved for future use when both are updated simultaneously
-
 ## Architecture Patterns
 
 ### 1. Interface-Based Design

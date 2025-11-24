@@ -55,6 +55,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
     protected AiFileReceiver fileReceiver;
     protected final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
     protected final List<Object> toolObjects = new ArrayList<>();
+    protected final List<AiPlugin> plugins = new ArrayList<>();
     private UI ui;
 
     /**
@@ -75,6 +76,15 @@ public abstract class BaseAiOrchestrator implements Serializable {
      */
     public LLMProvider getProvider() {
         return provider;
+    }
+
+    /**
+     * Gets the input component.
+     *
+     * @return the input component, or null if not set
+     */
+    public AiInput getInput() {
+        return input;
     }
 
     /**
@@ -300,8 +310,8 @@ public abstract class BaseAiOrchestrator implements Serializable {
                 .userMessage(userMessage)
                 .attachments(new ArrayList<>(pendingAttachments));
 
-        // Add system prompt if provided by subclass
-        String systemPrompt = getSystemPrompt();
+        // Build system prompt from subclass and plugins
+        String systemPrompt = buildSystemPrompt();
         if (systemPrompt != null && !systemPrompt.isEmpty()) {
             requestBuilder.systemPrompt(systemPrompt);
         }
@@ -335,14 +345,21 @@ public abstract class BaseAiOrchestrator implements Serializable {
      * @return array of tools, or empty array if no tools needed
      */
     protected LLMProvider.Tool[] createTools() {
-        if (toolObjects.isEmpty()) {
-            return new LLMProvider.Tool[0];
-        }
-
         List<LLMProvider.Tool> tools = new ArrayList<>();
+
+        // Add tools from @Tool annotated objects
         for (Object toolObject : toolObjects) {
             tools.addAll(convertObjectToTools(toolObject));
         }
+
+        // Add tools from plugins
+        for (AiPlugin plugin : plugins) {
+            List<LLMProvider.Tool> pluginTools = plugin.getTools();
+            if (pluginTools != null) {
+                tools.addAll(pluginTools);
+            }
+        }
+
         return tools.toArray(new LLMProvider.Tool[0]);
     }
 
@@ -693,6 +710,35 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
+     * Builds the complete system prompt by aggregating contributions from the
+     * subclass and all plugins.
+     *
+     * @return the combined system prompt, or null if no prompt needed
+     */
+    private String buildSystemPrompt() {
+        StringBuilder prompt = new StringBuilder();
+
+        // Add subclass system prompt
+        String subclassPrompt = getSystemPrompt();
+        if (subclassPrompt != null && !subclassPrompt.trim().isEmpty()) {
+            prompt.append(subclassPrompt);
+        }
+
+        // Add plugin system prompt contributions
+        for (AiPlugin plugin : plugins) {
+            String pluginContribution = plugin.getSystemPromptContribution();
+            if (pluginContribution != null && !pluginContribution.trim().isEmpty()) {
+                if (prompt.length() > 0) {
+                    prompt.append("\n\n");
+                }
+                prompt.append(pluginContribution);
+            }
+        }
+
+        return prompt.length() > 0 ? prompt.toString() : null;
+    }
+
+    /**
      * Called when processing is complete. Subclasses can override to perform
      * additional actions after streaming completes.
      */
@@ -736,6 +782,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
         protected AiInput input;
         protected AiFileReceiver fileReceiver;
         protected List<Object> toolObjects = new ArrayList<>();
+        protected List<AiPlugin> plugins = new ArrayList<>();
 
         protected BaseBuilder(LLMProvider provider) {
             this.provider = provider;
@@ -799,6 +846,25 @@ public abstract class BaseAiOrchestrator implements Serializable {
         }
 
         /**
+         * Adds a plugin to extend the orchestrator with additional capabilities.
+         * <p>
+         * Plugins provide tools, system prompt contributions, and can manage
+         * their own state. Multiple plugins can be added and they will all be
+         * active simultaneously.
+         * </p>
+         *
+         * @param plugin
+         *            the plugin to add
+         * @return this builder
+         */
+        public B withPlugin(AiPlugin plugin) {
+            if (plugin != null) {
+                this.plugins.add(plugin);
+            }
+            return self();
+        }
+
+        /**
          * Returns this builder instance with the correct type.
          *
          * @return this builder
@@ -819,6 +885,12 @@ public abstract class BaseAiOrchestrator implements Serializable {
             orchestrator.setInput(input);
             orchestrator.setFileReceiver(fileReceiver);
             orchestrator.setToolObjects(toolObjects);
+
+            // Attach plugins and call their lifecycle hooks
+            for (AiPlugin plugin : plugins) {
+                orchestrator.plugins.add(plugin);
+                plugin.onAttached(orchestrator);
+            }
 
             // Configure input listener if provided
             if (input != null) {

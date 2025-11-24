@@ -9,14 +9,13 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.ai.pro.chart.AiChartOrchestrator;
-import com.vaadin.flow.component.ai.pro.chart.ChartState;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
+import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
+import com.vaadin.flow.component.ai.pro.chart.VisualizationType;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -39,8 +38,8 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 @Route("vaadin-ai/ai-chart-demo")
 public class AiChartDemoView extends VerticalLayout {
 
-    private AiChartOrchestrator orchestrator;
-    private ChartState savedState;
+    private AiChatOrchestrator orchestrator;
+    private DataVisualizationPlugin dataVizPlugin;
 
     public AiChartDemoView() {
         // Enable push for streaming responses
@@ -75,12 +74,15 @@ public class AiChartDemoView extends VerticalLayout {
         instructions.getStyle().set("color", "gray");
         add(instructions);
 
-        // Create chart
-        Chart chart = new Chart();
-        chart.setWidthFull();
-        chart.setHeight("400px");
-        setFlexShrink(0, chart);
-        add(chart);
+        // Create chart container
+        Div chartContainer = new Div();
+        chartContainer.setWidthFull();
+        chartContainer.setHeight("400px");
+        chartContainer.getStyle().set("border",
+                "1px solid var(--lumo-contrast-10pct)").set("border-radius",
+                        "var(--lumo-border-radius-m)");
+        setFlexShrink(0, chartContainer);
+        add(chartContainer);
 
         // Upload Component for attachments
         Upload upload = new Upload();
@@ -101,54 +103,43 @@ public class AiChartDemoView extends VerticalLayout {
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey).modelName("gpt-4o-mini").build();
         LLMProvider llmProvider = new LangChain4JLLMProvider(model);
-        DatabaseProvider databaseProvider = new InMemoryDatabaseProvider();
 
-        // Create orchestrator using builder pattern
-        orchestrator = AiChartOrchestrator.create(llmProvider, databaseProvider)
-                .withChart(chart)
-                .withInput(messageInput)
-                .withMessageList(messageList)
-                .withFileReceiver(upload)
-                .build();
+        // Create data visualization plugin
+        dataVizPlugin = DataVisualizationPlugin
+                .create(new InMemoryDatabaseProvider())
+                .withVisualizationContainer(chartContainer)
+                .withInitialType(VisualizationType.CHART).build();
 
-        // Add state change listener to log changes
-        orchestrator.addStateChangeListener(event -> {
-            System.out.println("=== Chart State Changed ===");
-            System.out.println("Change Type: " + event.getChangeType());
-            ChartState state = event.getChartState();
-            if (state.getSqlQuery() != null) {
-                System.out.println("SQL Query: " + state.getSqlQuery());
-            }
-            if (state.getChartConfig() != null) {
-                System.out.println("Chart Config: " + state.getChartConfig());
-            }
-            System.out.println("===========================");
-        });
+        // Create orchestrator using builder pattern with plugin
+        orchestrator = AiChatOrchestrator.create(llmProvider)
+                .withInput(messageInput).withMessageList(messageList)
+                .withFileReceiver(upload).withPlugin(dataVizPlugin).build();
 
         // Create control buttons
         Button restoreStateButton = new Button("Restore Saved State");
         restoreStateButton.setEnabled(false);
         restoreStateButton.addClickListener(e -> {
+            Object savedState = dataVizPlugin.captureState();
             if (savedState != null) {
                 try {
-                    orchestrator.restoreState(savedState);
+                    dataVizPlugin.restoreState(savedState);
                     System.out.println("State restored successfully");
                 } catch (Exception ex) {
-                    System.err.println("Failed to restore state: " + ex.getMessage());
+                    System.err.println(
+                            "Failed to restore state: " + ex.getMessage());
                     ex.printStackTrace();
                 }
             }
         });
 
         Button saveStateButton = new Button("Save Current State", e -> {
-            savedState = orchestrator.captureState();
+            Object savedState = dataVizPlugin.captureState();
             if (savedState != null) {
                 System.out.println("State saved successfully");
-                System.out.println("SQL Query: " + savedState.getSqlQuery());
-                System.out.println("Chart Config: " + savedState.getChartConfig());
                 restoreStateButton.setEnabled(true);
             } else {
-                System.out.println("No state to save (chart not yet configured)");
+                System.out.println(
+                        "No state to save (chart not yet configured)");
             }
         });
         saveStateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
