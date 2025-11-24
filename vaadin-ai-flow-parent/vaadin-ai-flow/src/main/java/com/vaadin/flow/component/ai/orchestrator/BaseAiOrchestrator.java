@@ -433,10 +433,48 @@ public abstract class BaseAiOrchestrator implements Serializable {
             @Override
             public String execute(String arguments) {
                 try {
-                    // Parse arguments and invoke method
+                    // Parse arguments
                     Object[] args = parseArguments(method, arguments);
-                    Object result = method.invoke(toolObject, args);
-                    return result != null ? result.toString() : "";
+
+                    // Try to get UI from input component
+                    com.vaadin.flow.component.UI ui = null;
+                    if (input instanceof com.vaadin.flow.component.Component) {
+                        java.util.Optional<com.vaadin.flow.component.UI> optionalUi =
+                            ((com.vaadin.flow.component.Component) input).getUI();
+                        if (optionalUi.isPresent()) {
+                            ui = optionalUi.get();
+                        }
+                    }
+
+                    // Execute with UI.access() if UI is available, otherwise execute directly
+                    if (ui != null) {
+                        final com.vaadin.flow.component.UI finalUi = ui;
+                        final java.util.concurrent.atomic.AtomicReference<Object> resultRef =
+                            new java.util.concurrent.atomic.AtomicReference<>();
+                        final java.util.concurrent.atomic.AtomicReference<Exception> exceptionRef =
+                            new java.util.concurrent.atomic.AtomicReference<>();
+
+                        finalUi.access(() -> {
+                            try {
+                                Object result = method.invoke(toolObject, args);
+                                resultRef.set(result);
+                            } catch (Exception e) {
+                                exceptionRef.set(e);
+                            }
+                        });
+
+                        // Check if an exception occurred during execution
+                        if (exceptionRef.get() != null) {
+                            throw exceptionRef.get();
+                        }
+
+                        Object result = resultRef.get();
+                        return result != null ? result.toString() : "";
+                    } else {
+                        // No UI available, execute directly
+                        Object result = method.invoke(toolObject, args);
+                        return result != null ? result.toString() : "";
+                    }
                 } catch (Exception e) {
                     return "Error executing tool: " + e.getMessage();
                 }

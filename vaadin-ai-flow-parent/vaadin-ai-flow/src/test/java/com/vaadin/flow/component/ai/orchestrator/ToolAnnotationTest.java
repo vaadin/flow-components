@@ -404,4 +404,37 @@ public class ToolAnnotationTest {
         assertTrue("Schema should contain parameters",
                 schema.contains("\"arg0\"") || schema.contains("\"a\""));
     }
+
+    @Test
+    public void testToolExecutionWithoutUI() {
+        // Test that tools can execute successfully even when no UI is available
+        class SimpleToolClass {
+            private boolean executed = false;
+
+            @Tool("Simple tool for testing execution")
+            public String simpleTool() {
+                executed = true;
+                return "executed";
+            }
+
+            public boolean wasExecuted() {
+                return executed;
+            }
+        }
+
+        SimpleToolClass toolObj = new SimpleToolClass();
+        TestOrchestrator orchestrator = new TestOrchestrator.Builder(
+                mockProvider).setTools(toolObj).build();
+
+        LLMProvider.Tool[] tools = orchestrator.createTools();
+        assertEquals("Should discover 1 tool", 1, tools.length);
+
+        // Execute the tool without UI
+        String result = tools[0].execute("{}");
+        assertEquals("Tool should execute successfully", "executed", result);
+
+        // Verify it was executed
+        assertTrue("Tool should have been executed",
+                toolObj.wasExecuted());
+    }
 }
