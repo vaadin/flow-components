@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ParameterDescription;
+import com.vaadin.flow.component.ai.orchestrator.Tool;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.html.Div;
@@ -88,6 +90,7 @@ public class AiChatDemoView extends VerticalLayout {
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)
+                .setTools(this)
                 .build();
 
         // Layout
@@ -101,5 +104,15 @@ public class AiChatDemoView extends VerticalLayout {
         upload.getElement().appendChild(inputContainer.getElement());
         add(chatContainer, upload);
         setFlexGrow(1, chatContainer);
+    }
+
+
+    @Tool("Fetches weather information for a given city")
+    private String getWeather(@ParameterDescription("Name of the city") String city) {
+        System.out.println("getWeather called with city: " + city);
+        if ("Turku".equalsIgnoreCase(city)) {
+            return "The current weather in " + city + " is rainy with a temperature of 0°C.";
+        }
+        return "The current weather in " + city + " is sunny with a temperature of 25°C.";
     }
 }

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.provider.langchain4j;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.internal.JacksonUtils;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
@@ -29,12 +30,18 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.output.Response;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -147,10 +154,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 // Add parameters schema if available
                 String parametersSchema = tool.getParametersSchema();
                 if (parametersSchema != null && !parametersSchema.isEmpty()) {
-                    // For LangChain4j, we need to parse the schema and add
-                    // parameters
-                    // For now, we'll rely on the description containing
-                    // parameter info
+                    try {
+                        // Parse JSON schema and convert to JsonObjectSchema
+                        JsonObjectSchema schema = parseToolParametersSchema(
+                                parametersSchema);
+                        if (schema != null) {
+                            specBuilder.parameters(schema);
+                        }
+                    } catch (Exception e) {
+                        // If schema parsing fails, continue without parameters
+                        System.err.println(
+                                "Failed to parse tool parameters schema for "
+                                        + tool.getName() + ": "
+                                        + e.getMessage());
+                    }
                 }
 
                 toolSpecifications.add(specBuilder.build());
@@ -293,6 +310,105 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         return UserMessage.from(contents);
+    }
+
+    /**
+     * Parses a JSON schema string and converts it to LangChain4j
+     * JsonObjectSchema.
+     *
+     * @param schemaJson
+     *            the JSON schema string
+     * @return the JsonObjectSchema, or null if parsing fails
+     */
+    private JsonObjectSchema parseToolParametersSchema(String schemaJson) {
+        try {
+            ObjectNode schemaNode = (ObjectNode) JacksonUtils
+                    .readTree(schemaJson);
+
+            // Extract properties
+            JsonNode propertiesNode = schemaNode.get("properties");
+            if (propertiesNode == null || !propertiesNode.isObject()) {
+                return null;
+            }
+
+            JsonObjectSchema.Builder builder = JsonObjectSchema.builder();
+
+            // Extract required fields
+            List<String> required = new ArrayList<>();
+            JsonNode requiredNode = schemaNode.get("required");
+            if (requiredNode != null && requiredNode.isArray()) {
+                ArrayNode requiredArray = (ArrayNode) requiredNode;
+                requiredArray.forEach(node -> {
+                    required.add(node.asText());
+                });
+            }
+
+            // Add properties
+            ObjectNode propertiesObj = (ObjectNode) propertiesNode;
+            Iterator<Map.Entry<String, JsonNode>> fields = propertiesObj
+                    .properties().iterator();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                String propName = entry.getKey();
+                JsonNode propValue = entry.getValue();
+
+                if (propValue.isObject()) {
+                    ObjectNode propObj = (ObjectNode) propValue;
+                    String type = propObj.has("type")
+                            ? propObj.get("type").asText()
+                            : "string";
+                    String description = propObj.has("description")
+                            ? propObj.get("description").asText()
+                            : null;
+
+                    JsonSchemaElement element = createSchemaElement(type,
+                            description);
+                    if (element != null) {
+                        builder.addProperty(propName, element);
+                        if (required.contains(propName)) {
+                            builder.required(propName);
+                        }
+                    }
+                }
+            }
+
+            return builder.build();
+        } catch (Exception e) {
+            System.err.println(
+                    "Error parsing tool parameters: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Creates a JsonSchemaElement based on the type.
+     *
+     * @param type
+     *            the JSON schema type
+     * @param description
+     *            the description (can be null)
+     * @return the JsonSchemaElement
+     */
+    private JsonSchemaElement createSchemaElement(String type,
+            String description) {
+        switch (type) {
+        case "string":
+            return dev.langchain4j.model.chat.request.json.JsonStringSchema
+                    .builder().description(description).build();
+        case "integer":
+            return dev.langchain4j.model.chat.request.json.JsonIntegerSchema
+                    .builder().description(description).build();
+        case "number":
+            return dev.langchain4j.model.chat.request.json.JsonNumberSchema
+                    .builder().description(description).build();
+        case "boolean":
+            return dev.langchain4j.model.chat.request.json.JsonBooleanSchema
+                    .builder().description(description).build();
+        default:
+            return dev.langchain4j.model.chat.request.json.JsonStringSchema
+                    .builder().description(description).build();
+        }
     }
 
     /**

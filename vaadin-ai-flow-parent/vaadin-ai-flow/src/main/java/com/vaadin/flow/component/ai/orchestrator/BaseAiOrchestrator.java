@@ -25,6 +25,8 @@ import com.vaadin.flow.server.streams.UploadHandler;
 import reactor.core.publisher.Flux;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,6 +53,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
     protected AiInput input;
     protected AiFileReceiver fileReceiver;
     protected final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
+    protected final List<Object> toolObjects = new ArrayList<>();
 
     /**
      * Creates a new base orchestrator.
@@ -100,6 +103,19 @@ public abstract class BaseAiOrchestrator implements Serializable {
      */
     protected void setFileReceiver(AiFileReceiver fileReceiver) {
         this.fileReceiver = fileReceiver;
+    }
+
+    /**
+     * Sets the tool objects that contain {@link Tool}-annotated methods.
+     *
+     * @param toolObjects
+     *            the objects containing tool methods
+     */
+    protected void setToolObjects(List<Object> toolObjects) {
+        this.toolObjects.clear();
+        if (toolObjects != null) {
+            this.toolObjects.addAll(toolObjects);
+        }
     }
 
     /**
@@ -280,13 +296,339 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
-     * Creates tools for the LLM to use. Subclasses that need tool support
-     * should override this method.
+     * Creates tools for the LLM to use. This method converts any
+     * {@link Tool}-annotated methods from tool objects into LLMProvider.Tool
+     * instances. Subclasses can override this method to add additional custom
+     * tools.
      *
      * @return array of tools, or empty array if no tools needed
      */
     protected LLMProvider.Tool[] createTools() {
-        return new LLMProvider.Tool[0];
+        if (toolObjects.isEmpty()) {
+            return new LLMProvider.Tool[0];
+        }
+
+        List<LLMProvider.Tool> tools = new ArrayList<>();
+        for (Object toolObject : toolObjects) {
+            tools.addAll(convertObjectToTools(toolObject));
+        }
+        return tools.toArray(new LLMProvider.Tool[0]);
+    }
+
+    /**
+     * Converts an object with {@link Tool}-annotated methods into
+     * LLMProvider.Tool instances.
+     *
+     * @param toolObject
+     *            the object containing tool methods
+     * @return list of converted tools
+     */
+    private List<LLMProvider.Tool> convertObjectToTools(Object toolObject) {
+        List<LLMProvider.Tool> tools = new ArrayList<>();
+
+        for (Method method : toolObject.getClass().getDeclaredMethods()) {
+            Tool toolAnnotation = method.getAnnotation(Tool.class);
+            if (toolAnnotation == null) {
+                continue;
+            }
+
+            // Make method accessible if it's private
+            method.setAccessible(true);
+
+            tools.add(createToolFromMethod(toolObject, method, toolAnnotation));
+        }
+
+        return tools;
+    }
+
+    /**
+     * Creates an LLMProvider.Tool from an annotated method.
+     *
+     * @param toolObject
+     *            the object containing the method
+     * @param method
+     *            the tool method
+     * @param toolAnnotation
+     *            the tool annotation
+     * @return the created tool
+     */
+    private LLMProvider.Tool createToolFromMethod(Object toolObject,
+            Method method, Tool toolAnnotation) {
+        return new LLMProvider.Tool() {
+            @Override
+            public String getName() {
+                return method.getName();
+            }
+
+            @Override
+            public String getDescription() {
+                StringBuilder description = new StringBuilder(
+                        toolAnnotation.value());
+
+                // Add parameter descriptions
+                Parameter[] parameters = method.getParameters();
+                if (parameters.length > 0) {
+                    description.append("\n\nParameters:");
+                    for (int i = 0; i < parameters.length; i++) {
+                        Parameter param = parameters[i];
+                        ParameterDescription paramDesc = param
+                                .getAnnotation(ParameterDescription.class);
+                        String paramName = getParameterName(param, i);
+                        String paramType = param.getType().getSimpleName();
+                        description.append("\n- ").append(paramName)
+                                .append(" (").append(paramType).append(")");
+                        if (paramDesc != null) {
+                            description.append(": ").append(paramDesc.value());
+                        }
+                    }
+                }
+
+                return description.toString();
+            }
+
+            @Override
+            public String getParametersSchema() {
+                Parameter[] parameters = method.getParameters();
+                if (parameters.length == 0) {
+                    return null;
+                }
+
+                // Build a simple JSON schema
+                StringBuilder schema = new StringBuilder();
+                schema.append("{\"type\":\"object\",\"properties\":{");
+
+                for (int i = 0; i < parameters.length; i++) {
+                    Parameter param = parameters[i];
+                    if (i > 0) {
+                        schema.append(",");
+                    }
+                    String paramName = getParameterName(param, i);
+                    schema.append("\"").append(paramName).append("\":{");
+                    schema.append("\"type\":\"")
+                            .append(getJsonType(param.getType())).append("\"");
+
+                    ParameterDescription paramDesc = param
+                            .getAnnotation(ParameterDescription.class);
+                    if (paramDesc != null) {
+                        schema.append(",\"description\":\"")
+                                .append(escapeJson(paramDesc.value()))
+                                .append("\"");
+                    }
+                    schema.append("}");
+                }
+
+                schema.append("},\"required\":[");
+                for (int i = 0; i < parameters.length; i++) {
+                    if (i > 0) {
+                        schema.append(",");
+                    }
+                    schema.append("\"").append(getParameterName(parameters[i], i))
+                            .append("\"");
+                }
+                schema.append("]}");
+
+                return schema.toString();
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    // Parse arguments and invoke method
+                    Object[] args = parseArguments(method, arguments);
+                    Object result = method.invoke(toolObject, args);
+                    return result != null ? result.toString() : "";
+                } catch (Exception e) {
+                    return "Error executing tool: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    /**
+     * Gets the parameter name, falling back to arg{index} if the name is not
+     * available.
+     *
+     * @param param
+     *            the parameter
+     * @param index
+     *            the parameter index
+     * @return the parameter name
+     */
+    private String getParameterName(Parameter param, int index) {
+        String name = param.getName();
+        // If parameter name is not available (e.g., arg0, arg1), use numbered
+        // names
+        if (name.matches("arg\\d+")) {
+            return "arg" + index;
+        }
+        return name;
+    }
+
+    /**
+     * Gets the JSON type name for a Java type.
+     *
+     * @param type
+     *            the Java type
+     * @return the JSON type name
+     */
+    private String getJsonType(Class<?> type) {
+        if (type == String.class) {
+            return "string";
+        } else if (type == int.class || type == Integer.class
+                || type == long.class || type == Long.class
+                || type == short.class || type == Short.class
+                || type == byte.class || type == Byte.class) {
+            return "integer";
+        } else if (type == double.class || type == Double.class
+                || type == float.class || type == Float.class) {
+            return "number";
+        } else if (type == boolean.class || type == Boolean.class) {
+            return "boolean";
+        }
+        return "string"; // Default to string for unknown types
+    }
+
+    /**
+     * Escapes a string for use in JSON.
+     *
+     * @param value
+     *            the string to escape
+     * @return the escaped string
+     */
+    private String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+    }
+
+    /**
+     * Parses JSON arguments and converts them to method parameter values.
+     *
+     * @param method
+     *            the method to invoke
+     * @param arguments
+     *            the JSON arguments string
+     * @return array of parsed argument values
+     */
+    private Object[] parseArguments(Method method, String arguments) {
+        Parameter[] parameters = method.getParameters();
+        if (parameters.length == 0) {
+            return new Object[0];
+        }
+
+        // Simple JSON parsing - extract values by parameter names
+        Object[] args = new Object[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter param = parameters[i];
+            String paramName = getParameterName(param, i);
+            Class<?> paramType = param.getType();
+
+            // Extract value from JSON
+            String value = extractJsonValue(arguments, paramName);
+            args[i] = convertValue(value, paramType);
+        }
+
+        return args;
+    }
+
+    /**
+     * Extracts a value from a JSON string by key.
+     *
+     * @param json
+     *            the JSON string
+     * @param key
+     *            the key to extract
+     * @return the extracted value as a string
+     */
+    private String extractJsonValue(String json, String key) {
+        if (json == null || key == null) {
+            return null;
+        }
+
+        // Look for "key": in the JSON
+        String searchPattern = "\"" + key + "\"";
+        int keyIndex = json.indexOf(searchPattern);
+        if (keyIndex == -1) {
+            return null;
+        }
+
+        // Find the colon after the key
+        int colonIndex = json.indexOf(':', keyIndex + searchPattern.length());
+        if (colonIndex == -1) {
+            return null;
+        }
+
+        // Skip whitespace after colon
+        int valueStart = colonIndex + 1;
+        while (valueStart < json.length()
+                && Character.isWhitespace(json.charAt(valueStart))) {
+            valueStart++;
+        }
+
+        if (valueStart >= json.length()) {
+            return null;
+        }
+
+        // Check if value is a string (starts with ")
+        if (json.charAt(valueStart) == '"') {
+            valueStart++; // Skip opening quote
+            // Find closing quote, handling escaped quotes
+            int valueEnd = valueStart;
+            while (valueEnd < json.length()) {
+                if (json.charAt(valueEnd) == '"'
+                        && (valueEnd == 0 || json.charAt(valueEnd - 1) != '\\')) {
+                    return json.substring(valueStart, valueEnd);
+                }
+                valueEnd++;
+            }
+            return null;
+        } else {
+            // Non-string value - find end (comma, brace, bracket, or whitespace)
+            int valueEnd = valueStart;
+            while (valueEnd < json.length()) {
+                char c = json.charAt(valueEnd);
+                if (c == ',' || c == '}' || c == ']'
+                        || Character.isWhitespace(c)) {
+                    break;
+                }
+                valueEnd++;
+            }
+            return json.substring(valueStart, valueEnd).trim();
+        }
+    }
+
+    /**
+     * Converts a string value to the target type.
+     *
+     * @param value
+     *            the string value
+     * @param targetType
+     *            the target type
+     * @return the converted value
+     */
+    private Object convertValue(String value, Class<?> targetType) {
+        if (value == null || value.equals("null")) {
+            return null;
+        }
+
+        if (targetType == String.class) {
+            return value;
+        } else if (targetType == int.class || targetType == Integer.class) {
+            return Integer.parseInt(value);
+        } else if (targetType == long.class || targetType == Long.class) {
+            return Long.parseLong(value);
+        } else if (targetType == double.class || targetType == Double.class) {
+            return Double.parseDouble(value);
+        } else if (targetType == float.class || targetType == Float.class) {
+            return Float.parseFloat(value);
+        } else if (targetType == boolean.class || targetType == Boolean.class) {
+            return Boolean.parseBoolean(value);
+        } else if (targetType == short.class || targetType == Short.class) {
+            return Short.parseShort(value);
+        } else if (targetType == byte.class || targetType == Byte.class) {
+            return Byte.parseByte(value);
+        }
+
+        return value; // Default to string
     }
 
     /**
@@ -342,6 +684,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
         protected AiMessageList messageList;
         protected AiInput input;
         protected AiFileReceiver fileReceiver;
+        protected List<Object> toolObjects = new ArrayList<>();
 
         protected BaseBuilder(LLMProvider provider) {
             this.provider = provider;
@@ -384,6 +727,27 @@ public abstract class BaseAiOrchestrator implements Serializable {
         }
 
         /**
+         * Sets the objects containing {@link Tool}-annotated methods that will
+         * be available to the LLM.
+         * <p>
+         * Methods annotated with {@link Tool} will be automatically discovered
+         * and converted into LLM tools. Parameters can be documented using
+         * {@link ParameterDescription} annotations.
+         * </p>
+         *
+         * @param toolObjects
+         *            the objects containing tool methods
+         * @return this builder
+         */
+        public B setTools(Object... toolObjects) {
+            this.toolObjects.clear();
+            if (toolObjects != null) {
+                this.toolObjects.addAll(List.of(toolObjects));
+            }
+            return self();
+        }
+
+        /**
          * Returns this builder instance with the correct type.
          *
          * @return this builder
@@ -403,6 +767,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
             orchestrator.setMessageList(messageList);
             orchestrator.setInput(input);
             orchestrator.setFileReceiver(fileReceiver);
+            orchestrator.setToolObjects(toolObjects);
 
             // Configure input listener if provided
             if (input != null) {
