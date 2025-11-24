@@ -92,13 +92,14 @@ window.Vaadin.Flow.gridProConnector = {
     // When stopping editing, getting the updated cell value for columns with
     // custom editors requires a server round-trip. During this time, we hide
     // the cell content and show an update animation.
-    grid.addEventListener('item-property-changed', () => {
+    grid.addEventListener('item-property-changed', (e) => {
       const { column, model } = grid.__edited;
 
       if (column.editorType !== 'custom') {
         return;
       }
 
+      e.preventDefault();
       grid.__pendingCellUpdate = `${model.item.key}:${column.path}`;
       grid.requestContentUpdate();
     });
