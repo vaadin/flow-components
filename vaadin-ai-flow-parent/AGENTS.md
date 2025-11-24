@@ -103,13 +103,19 @@ vaadin-ai-flow-parent/
   - Streaming response handling with real-time UI updates (`streamResponseToMessage()`)
   - Complete input processing logic (`processUserInput()`)
   - Input event handling with Template Method pattern (`handleUserInput()`)
+  - Programmatic message sending (`sendMessage(String userMessage)`)
   - File attachment management (`configureFileReceiver()`, `pendingAttachments`)
   - Thread-safe UI updates via `UI.access()`
   - Error handling for streaming responses
+  - Automatic UI.access() wrapping for @Tool annotated methods
 - **Template Method Pattern**:
   - `handleUserInput(event)` validates input, adds user message, then calls `processUserInput(message)`
   - `processUserInput(message)` builds LLM request, handles attachments, streams response
   - Subclasses customize behavior by overriding hook methods
+- **Programmatic Message API**:
+  - `sendMessage(String userMessage)` - send messages without requiring an input component
+  - Useful for triggering AI interaction from button clicks or other UI events
+  - Example: `orchestrator.sendMessage("Analyze the uploaded file");`
 - **Hook Methods** (subclasses override for customization):
 
   - `createTools()` - returns array of tools for the LLM (default: empty array)
@@ -117,6 +123,14 @@ vaadin-ai-flow-parent/
 
   - `onProcessingComplete()` - called after streaming completes (default: no-op)
 
+- **Tool Annotation Support**:
+  - Use `@Tool` annotation to define methods that can be called by the LLM
+  - Use `@ParameterDescription` to describe method parameters
+  - Configure tools via builder: `.setTools(this)` or `.setTools(toolObject)`
+  - Automatic UI.access() wrapping: Tool methods are automatically executed within UI.access() if a UI is available
+  - UI is obtained from the input component's getUI() method
+  - If no UI is available, tools execute directly (no warning)
+  - Developers don't need to manually wrap tool code in UI.access()
 - **File Attachment Support**:
   - Manages `pendingAttachments` list for both orchestrators
   - Automatically configures file receiver upload handlers

@@ -21,13 +21,12 @@ import com.vaadin.flow.component.ai.orchestrator.ParameterDescription;
 import com.vaadin.flow.component.ai.orchestrator.Tool;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.messages.MessageInput;
-import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -123,16 +122,7 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         formLayout.add(firstNameField, lastNameField, emailField, phoneField,
                 dateOfBirthField, addressField);
 
-        Div instructions = new Div();
-        instructions.setText(
-                "Ask the AI to fill the form by providing information in the chat, "
-                        + "or upload a document/image with person information.");
-        instructions.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("margin-top", "var(--lumo-space-m)");
-
-        section.add(formLayout, instructions);
-        return section;
+        return formLayout;
     }
 
     private Component createChatSection(String apiKey) {
@@ -152,39 +142,37 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         upload.setAcceptedFileTypes("image/*", "application/pdf",
                 "text/plain");
 
-        // Create chat components
-        MessageList messageList = new MessageList();
-        messageList.setWidthFull();
-        messageList.getStyle().set("flex-grow", "1");
-
-        MessageInput messageInput = new MessageInput();
-        messageInput.setWidthFull();
-
         // Create LLM provider
         StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey).modelName("gpt-4o-mini").build();
         LLMProvider provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator with form filling tools
-        AiChatOrchestrator.create(provider).withMessageList(messageList)
-                .withInput(messageInput).withFileReceiver(upload)
+        var orchestrator = AiChatOrchestrator.create(provider)
+                .withFileReceiver(upload)
                 .setTools(this).build();
 
-        // Chat container
-        Div chatContainer = new Div(messageList);
-        chatContainer.setWidthFull();
-        chatContainer.getStyle().set("flex-grow", "1").set("overflow", "auto");
+        // Fill button to trigger AI form filling
+        Button fillButton = new Button("Fill");
+        fillButton.setWidthFull();
+        fillButton.addClickListener(event -> {
+            orchestrator.sendMessage(
+                    "Please analyze the uploaded files and fill the person information form with any data you can extract.");
+        });
 
-        Div inputContainer = new Div(messageInput);
-        inputContainer.setWidthFull();
+        Div instructions = new Div();
+        instructions.setText(
+                "Upload a document or image containing person information, then click the 'Fill' button to let the AI extract and fill the form.");
+        instructions.getStyle().set("color", "var(--lumo-secondary-text-color)")
+                .set("font-size", "var(--lumo-font-size-s)")
+                .set("margin-bottom", "var(--lumo-space-m)");
 
-        upload.getElement().appendChild(inputContainer.getElement());
-        section.add(chatContainer, upload);
-        section.setFlexGrow(1, chatContainer);
+        section.add(instructions, upload, fillButton);
 
         return section;
     }
 
+    // TODO: Instead of defining custom Tool annotations, consider allowing the user to just use SpringAi/Langchain annotations directly.
     @Tool("Fills the person information form with the provided data. Use this when the user provides person details.")
     private String fillFormFields(
             @ParameterDescription("Person's first name") String firstName,

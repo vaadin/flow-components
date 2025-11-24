@@ -30,6 +30,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -54,6 +55,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
     protected AiFileReceiver fileReceiver;
     protected final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
     protected final List<Object> toolObjects = new ArrayList<>();
+    private UI ui;
 
     /**
      * Creates a new base orchestrator.
@@ -177,8 +179,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
      */
     protected void streamResponseToMessage(LLMProvider.LLMRequest request,
             AiMessage assistantMessage, Runnable onComplete) {
-        UI ui = validateUiContext();
-
+    
         Flux<String> responseStream = provider.stream(request);
 
         responseStream.subscribe(token -> {
@@ -225,6 +226,30 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
+     * Sends a message to the AI orchestrator programmatically. This method
+     * allows sending messages without requiring an input component.
+     * <p>
+     * This is useful for scenarios where you want to trigger AI interaction
+     * from button clicks or other UI events without using a message input
+     * component.
+     * </p>
+     *
+     * @param userMessage
+     *            the message to send to the AI
+     */
+    public void sendMessage(String userMessage) {
+        if (userMessage == null || userMessage.trim().isEmpty()) {
+            return;
+        }
+
+        // Add user message to UI if messageList is configured
+        addUserMessageToList(userMessage);
+
+        // Process the message through the LLM
+        processUserInput(userMessage);
+    }
+
+    /**
      * Handles a user input submission event. This method implements the common
      * pattern of validating input, adding the user message to the UI, and
      * delegating to the subclass for processing.
@@ -259,6 +284,10 @@ public abstract class BaseAiOrchestrator implements Serializable {
      *            the user's input message
      */
     protected void processUserInput(String userMessage) {
+        if (this.ui == null) {
+            this.ui = validateUiContext();
+        }
+        
         // Create a placeholder for the assistant's message (may be null if no
         // messageList)
         AiMessage assistantMessage = createAssistantMessagePlaceholder();
@@ -287,7 +316,9 @@ public abstract class BaseAiOrchestrator implements Serializable {
         // Clear pending attachments after building the request
         pendingAttachments.clear();
         if (fileReceiver != null) {
-            fileReceiver.clearFileList();
+            ui.access(() -> {
+                fileReceiver.clearFileList();
+            });
         }
 
         // Stream response using base class method
@@ -436,45 +467,27 @@ public abstract class BaseAiOrchestrator implements Serializable {
                     // Parse arguments
                     Object[] args = parseArguments(method, arguments);
 
-                    // Try to get UI from input component
-                    com.vaadin.flow.component.UI ui = null;
-                    if (input instanceof com.vaadin.flow.component.Component) {
-                        java.util.Optional<com.vaadin.flow.component.UI> optionalUi =
-                            ((com.vaadin.flow.component.Component) input).getUI();
-                        if (optionalUi.isPresent()) {
-                            ui = optionalUi.get();
+                    
+                    final AtomicReference<Object> resultRef = new AtomicReference<>();
+                    final AtomicReference<Exception> exceptionRef = new AtomicReference<>();
+
+                    ui.access(() -> {
+                        try {
+                            Object result = method.invoke(toolObject, args);
+                            resultRef.set(result);
+                        } catch (Exception e) {
+                            exceptionRef.set(e);
                         }
+                    });
+
+                    // Check if an exception occurred during execution
+                    if (exceptionRef.get() != null) {
+                        throw exceptionRef.get();
                     }
 
-                    // Execute with UI.access() if UI is available, otherwise execute directly
-                    if (ui != null) {
-                        final com.vaadin.flow.component.UI finalUi = ui;
-                        final java.util.concurrent.atomic.AtomicReference<Object> resultRef =
-                            new java.util.concurrent.atomic.AtomicReference<>();
-                        final java.util.concurrent.atomic.AtomicReference<Exception> exceptionRef =
-                            new java.util.concurrent.atomic.AtomicReference<>();
-
-                        finalUi.access(() -> {
-                            try {
-                                Object result = method.invoke(toolObject, args);
-                                resultRef.set(result);
-                            } catch (Exception e) {
-                                exceptionRef.set(e);
-                            }
-                        });
-
-                        // Check if an exception occurred during execution
-                        if (exceptionRef.get() != null) {
-                            throw exceptionRef.get();
-                        }
-
-                        Object result = resultRef.get();
-                        return result != null ? result.toString() : "";
-                    } else {
-                        // No UI available, execute directly
-                        Object result = method.invoke(toolObject, args);
-                        return result != null ? result.toString() : "";
-                    }
+                    Object result = resultRef.get();
+                    return result != null ? result.toString() : "";
+                   
                 } catch (Exception e) {
                     return "Error executing tool: " + e.getMessage();
                 }
