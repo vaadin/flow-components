@@ -22,10 +22,12 @@ import java.util.Map;
  * This converter uses the following logic:
  * </p>
  * <ul>
+ * <li>For one column: counts occurrences of each unique value (useful for
+ * histograms)</li>
  * <li>For two columns: treats first column as categories and second as
  * values</li>
- * <li>For more than two columns: treats first column as categories and
- * remaining as multiple series</li>
+ * <li>For more than two columns: treats first column as categories and second
+ * as values (additional columns are ignored)</li>
  * <li>Handles numeric and string data types</li>
  * </ul>
  *
@@ -46,12 +48,34 @@ public class DefaultDataConverter implements DataConverter {
         Map<String, Object> firstRow = queryResults.get(0);
         List<String> columnNames = new ArrayList<>(firstRow.keySet());
 
-        if (columnNames.size() < 2) {
+        if (columnNames.size() < 1) {
             throw new IllegalArgumentException(
-                    "Query results must have at least 2 columns");
+                    "Query results must have at least 1 column");
         }
 
-        // Simple conversion: assume first column is category/name,
+        // Handle single column case: treat each value as a category with count of 1
+        // This is useful for histogram-type charts where raw data is provided
+        if (columnNames.size() == 1) {
+            String columnName = columnNames.get(0);
+            Map<String, Integer> valueCounts = new java.util.LinkedHashMap<>();
+
+            // Count occurrences of each value
+            for (Map<String, Object> row : queryResults) {
+                Object valueObj = row.get(columnName);
+                String category = valueObj != null ? valueObj.toString() : "Unknown";
+                valueCounts.put(category, valueCounts.getOrDefault(category, 0) + 1);
+            }
+
+            // Convert counts to data series
+            for (Map.Entry<String, Integer> entry : valueCounts.entrySet()) {
+                DataSeriesItem item = new DataSeriesItem(entry.getKey(), entry.getValue());
+                series.add(item);
+            }
+
+            return series;
+        }
+
+        // Two or more columns: assume first column is category/name,
         // second column is value
         String categoryColumn = columnNames.get(0);
         String valueColumn = columnNames.get(1);

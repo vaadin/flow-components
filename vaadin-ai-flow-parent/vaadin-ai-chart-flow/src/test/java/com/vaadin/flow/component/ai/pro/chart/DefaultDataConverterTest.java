@@ -50,14 +50,51 @@ public class DefaultDataConverterTest {
         assertEquals("Series should be empty", 0, series.size());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void convertToDataSeries_withSingleColumn_throwsException() {
+    @Test
+    public void convertToDataSeries_withSingleColumn_countsOccurrences() {
         List<Map<String, Object>> results = new ArrayList<>();
-        Map<String, Object> row = new LinkedHashMap<>();
-        row.put("column1", "value1");
-        results.add(row);
 
-        converter.convertToDataSeries(results);
+        // Add multiple rows with some repeated values
+        Map<String, Object> row1 = new LinkedHashMap<>();
+        row1.put("age", 25);
+        results.add(row1);
+
+        Map<String, Object> row2 = new LinkedHashMap<>();
+        row2.put("age", 30);
+        results.add(row2);
+
+        Map<String, Object> row3 = new LinkedHashMap<>();
+        row3.put("age", 25);
+        results.add(row3);
+
+        Map<String, Object> row4 = new LinkedHashMap<>();
+        row4.put("age", 35);
+        results.add(row4);
+
+        Map<String, Object> row5 = new LinkedHashMap<>();
+        row5.put("age", 25);
+        results.add(row5);
+
+        DataSeries series = converter.convertToDataSeries(results);
+
+        assertNotNull("Series should not be null", series);
+        assertEquals("Series should have 3 unique values", 3, series.size());
+
+        // Should count: 25 appears 3 times, 30 appears 1 time, 35 appears 1 time
+        DataSeriesItem item1 = series.get(0);
+        assertEquals("First item should be '25'", "25", item1.getName());
+        assertEquals("First item count should be 3", 3.0,
+                item1.getY().doubleValue(), 0.001);
+
+        DataSeriesItem item2 = series.get(1);
+        assertEquals("Second item should be '30'", "30", item2.getName());
+        assertEquals("Second item count should be 1", 1.0,
+                item2.getY().doubleValue(), 0.001);
+
+        DataSeriesItem item3 = series.get(2);
+        assertEquals("Third item should be '35'", "35", item3.getName());
+        assertEquals("Third item count should be 1", 1.0,
+                item3.getY().doubleValue(), 0.001);
     }
 
     @Test
