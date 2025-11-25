@@ -20,5 +20,5 @@ public class SpreadsheetActionDetails implements Serializable {
     /** 0 = cell, 1 = row, 2 = column */
     public int type;
     /** Node id of the icon virtual child, 0 if no icon provided */
-    public int iconNodeId;
+    public String iconNodeId;
 }
