@@ -4590,24 +4590,11 @@ public class Spreadsheet extends Component
      */
     private void loadCustomComponents() {
         if (customComponentFactory != null) {
+            // Preserve custom editor mappings to maintain StateNode connections
             HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap() != null
                     ? new HashMap<>(getCellKeysToEditorIdMap())
-                    : null;
-            if (_cellKeysToEditorIdMap == null) {
-                _cellKeysToEditorIdMap = new HashMap<String, String>();
-            } else {
-                _cellKeysToEditorIdMap.clear();
-            }
-            setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
-            HashMap<String, String> _componentIDtoCellKeysMap = getComponentIDtoCellKeysMap() != null
-                    ? new HashMap<>(getComponentIDtoCellKeysMap())
-                    : null;
-            if (_componentIDtoCellKeysMap == null) {
-                _componentIDtoCellKeysMap = new HashMap<String, String>();
-            } else {
-                _componentIDtoCellKeysMap.clear();
-            }
-            setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
+                    : new HashMap<>();
+            HashMap<String, String> _componentIDtoCellKeysMap = new HashMap<>();
             if (customComponents == null) {
                 customComponents = new HashSet<Component>();
             }
@@ -4618,31 +4605,45 @@ public class Spreadsheet extends Component
             int horizontalSplitPosition = getLastFrozenColumn();
             if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
                 // top left pane
-                loadRangeComponents(newCustomComponents, rowsWithComponents, 1,
-                        1, verticalSplitPosition, horizontalSplitPosition);
+                loadRangeComponents(newCustomComponents, rowsWithComponents,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1, 1,
+                        verticalSplitPosition, horizontalSplitPosition);
             }
             if (verticalSplitPosition > 0) {
                 // top right pane
-                loadRangeComponents(newCustomComponents, rowsWithComponents, 1,
+                loadRangeComponents(newCustomComponents, rowsWithComponents,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1,
                         firstColumn, verticalSplitPosition, lastColumn);
             }
             if (horizontalSplitPosition > 0) {
                 // bottom left pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap,
                         firstRow, 1, lastRow, horizontalSplitPosition);
             }
             loadRangeComponents(newCustomComponents, rowsWithComponents,
-                    firstRow, firstColumn, lastRow, lastColumn);
-            // unregister old
+                    _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, firstRow,
+                    firstColumn, lastRow, lastColumn);
+
+            // Keep custom editors registered to preserve StateNode connections
             for (Iterator<Component> i = customComponents.iterator(); i
                     .hasNext();) {
                 Component c = i.next();
                 if (!newCustomComponents.contains(c)) {
-                    unRegisterCustomComponent(c);
-                    i.remove();
+                    String nodeId = getComponentNodeId(c);
+                    if (_cellKeysToEditorIdMap.containsValue(nodeId)) {
+                        newCustomComponents.add(c);
+                    } else {
+                        unRegisterCustomComponent(c);
+                        _componentIDtoCellKeysMap.remove(nodeId);
+                        i.remove();
+                    }
                 }
             }
             customComponents = newCustomComponents;
+
+            setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
+            setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
 
             if (!rowsWithComponents.isEmpty()) {
                 handleRowSizes(rowsWithComponents);
@@ -4662,10 +4663,10 @@ public class Spreadsheet extends Component
     }
 
     void loadRangeComponents(HashSet<Component> newCustomComponents,
-            Set<Integer> rowsWithComponents, int row1, int col1, int row2,
-            int col2) {
-        HashMap<String, String> _componentIDtoCellKeysMap = getComponentIDtoCellKeysMap();
-        HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap();
+            Set<Integer> rowsWithComponents,
+            HashMap<String, String> cellKeysToEditorIdMap,
+            HashMap<String, String> componentIDtoCellKeysMap, int row1,
+            int col1, int row2, int col2) {
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {
@@ -4687,7 +4688,7 @@ public class Spreadsheet extends Component
                         if (!customComponents.contains(customComponent)) {
                             registerCustomComponent(customComponent);
                         }
-                        _componentIDtoCellKeysMap
+                        componentIDtoCellKeysMap
                                 .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
@@ -4705,7 +4706,7 @@ public class Spreadsheet extends Component
                                             .contains(customEditor)) {
                                 registerCustomComponent(customEditor);
                             }
-                            _cellKeysToEditorIdMap.put(key,
+                            cellKeysToEditorIdMap.put(key,
                                     getComponentNodeId(customEditor));
                             newCustomComponents.add(customEditor);
                             rowsWithComponents.add(r);
@@ -4717,8 +4718,6 @@ public class Spreadsheet extends Component
                 }
             }
         }
-        setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
-        setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
     }
 
     private String getComponentNodeId(Component component) {
