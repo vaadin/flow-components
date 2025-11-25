@@ -45,6 +45,8 @@ public class AiChatDemoView extends VerticalLayout {
         upload.setWidthFull();
         upload.setMaxFiles(5);
         upload.setMaxFileSize(5 * 1024 * 1024); // 5 MB
+        upload.getThemeNames().add("compact");
+        upload.getElement().setProperty("fileListAbove", true);
         upload.setAcceptedFileTypes("image/*", "application/pdf",
                 "text/plain");
 
