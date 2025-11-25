@@ -473,7 +473,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             HashMap<String, String> cellKeysToEditorIdMap) {
 
         // Store reference for use in onSheetRelayoutComplete
-        this.lastCellKeysToEditorIdMap = cellKeysToEditorIdMap;
+        this.lastCellKeysToEditorIdMap = cellKeysToEditorIdMap == null ? null
+                : new HashMap<>(cellKeysToEditorIdMap);
 
         if (cellKeysToEditorIdMap == null || customEditorFactory == null) {
             return;
