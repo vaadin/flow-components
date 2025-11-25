@@ -53,6 +53,19 @@ public class Lumo implements AbstractTheme {
      */
     public static final String UTILITY_STYLESHEET = "lumo/utility.css";
 
+    /**
+     * The path to the stylesheet that contains the Lumo compact preset. Can be
+     * used as argument to a {@link StyleSheet} on an
+     * {@link AppShellConfigurator} class to apply the compact preset to an
+     * application.
+     * <p>
+     * The compact preset needs to be loaded in addition to the main Lumo
+     * stylesheet referenced by {@link #STYLESHEET}, not instead of it. Make
+     * sure to load the compact preset after the main Lumo stylesheet so that it
+     * can override the relevant CSS custom properties.
+     */
+    public static final String COMPACT_STYLESHEET = "lumo/presets/compact.css";
+
     @Override
     public String getBaseUrl() {
         return "src/";
