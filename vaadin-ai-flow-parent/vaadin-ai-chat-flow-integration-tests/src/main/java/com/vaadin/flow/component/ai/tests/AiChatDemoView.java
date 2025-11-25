@@ -50,11 +50,13 @@ public class AiChatDemoView extends VerticalLayout {
 
         // Create UI components
         var messageList = new MessageList();
+        messageList.setSizeFull();
         var messageInput = new MessageInput();
 
         upload.getElement().appendChild(messageInput.getElement());
         add(messageList, upload);
         setFlexGrow(1, messageList);
+        setFlexShrink(0, upload);
 
         // Create LLM provider
         var model = OpenAiStreamingChatModel.builder()
@@ -62,11 +64,12 @@ public class AiChatDemoView extends VerticalLayout {
                 .modelName("gpt-4o-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
-        // Create and configure orchestrator using builder pattern
+        // Create and configure orchestrator with input validation
         AiChatOrchestrator.create(provider)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)
-                .build();        
+                .withInputValidator(new PromptInjectionValidator())
+                .build();
     }
 }

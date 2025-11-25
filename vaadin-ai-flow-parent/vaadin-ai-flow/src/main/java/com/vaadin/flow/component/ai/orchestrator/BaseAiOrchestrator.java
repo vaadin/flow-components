@@ -53,6 +53,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
     protected AiMessageList messageList;
     protected AiInput input;
     protected AiFileReceiver fileReceiver;
+    protected InputValidator inputValidator;
     protected final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
     protected final List<Object> toolObjects = new ArrayList<>();
     protected final List<AiPlugin> plugins = new ArrayList<>();
@@ -118,6 +119,16 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
+     * Sets the input validator for security checks.
+     *
+     * @param inputValidator
+     *            the input validator
+     */
+    protected void setInputValidator(InputValidator inputValidator) {
+        this.inputValidator = inputValidator;
+    }
+
+    /**
      * Sets the tool objects that contain {@link Tool}-annotated methods.
      *
      * @param toolObjects
@@ -144,6 +155,21 @@ public abstract class BaseAiOrchestrator implements Serializable {
                     "No UI found. Make sure the orchestrator is used within a UI context.");
         }
         return ui;
+    }
+
+    /**
+     * Handles a validation rejection by displaying an error message to the
+     * user.
+     *
+     * @param rejectionMessage
+     *            the reason for rejection
+     */
+    protected void handleValidationRejection(String rejectionMessage) {
+        if (messageList != null) {
+            AiMessage errorMessage = messageList.createMessage(
+                    "⚠️ " + rejectionMessage, "System");
+            messageList.addMessage(errorMessage);
+        }
     }
 
     /**
@@ -297,7 +323,29 @@ public abstract class BaseAiOrchestrator implements Serializable {
         if (this.ui == null) {
             this.ui = validateUiContext();
         }
-        
+
+        // Validate user input if validator is configured
+        if (inputValidator != null) {
+            InputValidator.ValidationResult result = inputValidator
+                    .validateInput(userMessage);
+            if (!result.isAccepted()) {
+                handleValidationRejection(result.getRejectionMessage());
+                return;
+            }
+        }
+
+        // Validate attachments if validator is configured
+        if (inputValidator != null && !pendingAttachments.isEmpty()) {
+            for (LLMProvider.Attachment attachment : pendingAttachments) {
+                InputValidator.ValidationResult result = inputValidator
+                        .validateAttachment(attachment);
+                if (!result.isAccepted()) {
+                    handleValidationRejection(result.getRejectionMessage());
+                    return;
+                }
+            }
+        }
+
         // Create a placeholder for the assistant's message (may be null if no
         // messageList)
         AiMessage assistantMessage = createAssistantMessagePlaceholder();
@@ -781,6 +829,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
         protected AiMessageList messageList;
         protected AiInput input;
         protected AiFileReceiver fileReceiver;
+        protected InputValidator inputValidator;
         protected List<Object> toolObjects = new ArrayList<>();
         protected List<AiPlugin> plugins = new ArrayList<>();
 
@@ -821,6 +870,23 @@ public abstract class BaseAiOrchestrator implements Serializable {
          */
         public B withFileReceiver(AiFileReceiver fileReceiver) {
             this.fileReceiver = fileReceiver;
+            return self();
+        }
+
+        /**
+         * Sets the input validator for security checks.
+         * <p>
+         * Validators can prevent prompt injection attacks and enforce content
+         * policies by checking both text input and file attachments before
+         * they are sent to the LLM.
+         * </p>
+         *
+         * @param inputValidator
+         *            the input validator
+         * @return this builder
+         */
+        public B withInputValidator(InputValidator inputValidator) {
+            this.inputValidator = inputValidator;
             return self();
         }
 
@@ -884,6 +950,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
             orchestrator.setMessageList(messageList);
             orchestrator.setInput(input);
             orchestrator.setFileReceiver(fileReceiver);
+            orchestrator.setInputValidator(inputValidator);
             orchestrator.setToolObjects(toolObjects);
 
             // Attach plugins and call their lifecycle hooks
