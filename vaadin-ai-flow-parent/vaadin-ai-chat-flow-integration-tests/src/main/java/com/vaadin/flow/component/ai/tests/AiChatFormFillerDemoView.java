@@ -15,18 +15,13 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ParameterDescription;
 import com.vaadin.flow.component.ai.orchestrator.Tool;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -34,7 +29,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 import java.time.LocalDate;
@@ -57,95 +51,38 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
     private TextField addressField;
 
     public AiChatFormFillerDemoView() {
-
+        setSizeFull();
         // Enable push for streaming responses
         getUI().ifPresent(ui -> ui.getPushConfiguration()
                 .setPushMode(PushMode.AUTOMATIC));
 
-        setSpacing(true);
-        setPadding(true);
-        setHeightFull();
-
-        H2 title = new H2("AI Chat Form Filler Demo");
-        add(title);
-
-        // Check for API key
-        String apiKey = System.getenv("OPENAI_API_KEY");
-        if (apiKey == null || apiKey.isEmpty()) {
-            Div error = new Div();
-            error.setText(
-                    "Error: OPENAI_API_KEY environment variable is not set. "
-                            + "Please set it to use this demo.");
-            error.getStyle().set("color", "red").set("padding", "20px");
-            add(error);
-            return;
-        }
-
         // Create layout with form and chat side by side
-        HorizontalLayout mainLayout = new HorizontalLayout();
-        mainLayout.setWidthFull();
-        mainLayout.setHeightFull();
-        mainLayout.setSpacing(true);
+        var mainLayout = new HorizontalLayout();
+        mainLayout.setSizeFull();
 
         // Create form section
-        Component formSection = createFormSection();
-        formSection.getElement().getStyle().set("flex", "1");
-
-        // Create chat section
-        Component chatSection = createChatSection(apiKey);
-        chatSection.getElement().getStyle().set("flex", "1");
-
-        mainLayout.add(formSection, chatSection);
-        add(mainLayout);
-        setFlexGrow(1, mainLayout);
-    }
-
-    private Component createFormSection() {
-        VerticalLayout section = new VerticalLayout();
-        section.setSpacing(false);
-        section.setPadding(false);
-        section.setHeightFull();
-
-        H3 formTitle = new H3("Person Information Form");
-        section.add(formTitle);
-
-        // Create form
-        FormLayout formLayout = new FormLayout();
-
+        var formLayout = new FormLayout();
         firstNameField = new TextField("First Name");
         lastNameField = new TextField("Last Name");
         emailField = new EmailField("Email");
         phoneField = new TextField("Phone");
         dateOfBirthField = new DatePicker("Date of Birth");
         addressField = new TextField("Address");
-
         formLayout.add(firstNameField, lastNameField, emailField, phoneField,
                 dateOfBirthField, addressField);
 
-        return formLayout;
-    }
-
-    private Component createChatSection(String apiKey) {
-        VerticalLayout section = new VerticalLayout();
-        section.setSpacing(false);
-        section.setPadding(false);
-        section.setHeightFull();
-
-        H3 chatTitle = new H3("AI Assistant");
-        section.add(chatTitle);
-
         // Upload component for attachments
-        Upload upload = new Upload();
+        var upload = new Upload();
         upload.setWidthFull();
         upload.setMaxFiles(5);
         upload.setMaxFileSize(5 * 1024 * 1024); // 5 MB
-        upload.setAcceptedFileTypes("image/*", "application/pdf",
-                "text/plain");
+        upload.setAcceptedFileTypes("image/*", "application/pdf", "text/plain");
 
         // Create LLM provider
-        StreamingChatLanguageModel model = OpenAiStreamingChatModel.builder()
-                .apiKey(apiKey).modelName("gpt-4o-mini").build();
-        LLMProvider provider = new LangChain4JLLMProvider(model);
+        var model = OpenAiStreamingChatModel.builder()
+                .apiKey(System.getenv("OPENAI_API_KEY"))
+                .modelName("gpt-4o-mini").build();
+        var provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator with form filling tools
         var orchestrator = AiChatOrchestrator.create(provider)
@@ -153,23 +90,16 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
                 .setTools(this).build();
 
         // Fill button to trigger AI form filling
-        Button fillButton = new Button("Fill");
+        var fillButton = new Button("Fill");
         fillButton.setWidthFull();
         fillButton.addClickListener(event -> {
             orchestrator.sendMessage(
                     "Please analyze the uploaded files and fill the person information form with any data you can extract.");
         });
 
-        Div instructions = new Div();
-        instructions.setText(
-                "Upload a document or image containing person information, then click the 'Fill' button to let the AI extract and fill the form.");
-        instructions.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("margin-bottom", "var(--lumo-space-m)");
-
-        section.add(instructions, upload, fillButton);
-
-        return section;
+        mainLayout.add(formLayout, new VerticalLayout(upload, fillButton));
+        mainLayout.setFlexGrow(1, formLayout);
+        add(mainLayout);
     }
 
     // TODO: Instead of defining custom Tool annotations, consider allowing the user to just use SpringAi/Langchain annotations directly.
