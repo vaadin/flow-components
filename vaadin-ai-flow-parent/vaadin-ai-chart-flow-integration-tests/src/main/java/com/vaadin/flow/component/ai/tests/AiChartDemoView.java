@@ -40,6 +40,7 @@ public class AiChartDemoView extends VerticalLayout {
 
     private AiChatOrchestrator orchestrator;
     private DataVisualizationPlugin dataVizPlugin;
+    private Object savedState;
 
     public AiChartDemoView() {
         // Enable push for streaming responses
@@ -119,7 +120,6 @@ public class AiChartDemoView extends VerticalLayout {
         Button restoreStateButton = new Button("Restore Saved State");
         restoreStateButton.setEnabled(false);
         restoreStateButton.addClickListener(e -> {
-            Object savedState = dataVizPlugin.captureState();
             if (savedState != null) {
                 try {
                     dataVizPlugin.restoreState(savedState);
@@ -133,7 +133,7 @@ public class AiChartDemoView extends VerticalLayout {
         });
 
         Button saveStateButton = new Button("Save Current State", e -> {
-            Object savedState = dataVizPlugin.captureState();
+            savedState = dataVizPlugin.captureState();
             if (savedState != null) {
                 System.out.println("State saved successfully");
                 restoreStateButton.setEnabled(true);

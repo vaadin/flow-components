@@ -250,12 +250,27 @@ public class DataVisualizationPlugin implements AiPlugin {
                     this.currentConfiguration = new HashMap<>(
                             visualizationState.getConfiguration());
 
+                    // Try to render with UI access, or directly if no UI
                     if (currentUI != null) {
                         currentUI.access(() -> {
                             renderVisualization(visualizationState.getType(),
                                     results,
                                     visualizationState.getConfiguration());
                         });
+                    } else {
+                        // Try to get UI from visualization container at execution time
+                        if (visualizationContainer != null) {
+                            visualizationContainer.getUI().ifPresentOrElse(
+                                    ui -> ui.access(() -> renderVisualization(
+                                            visualizationState.getType(), results,
+                                            visualizationState.getConfiguration())),
+                                    () -> renderVisualization(
+                                            visualizationState.getType(), results,
+                                            visualizationState.getConfiguration()));
+                        } else {
+                            renderVisualization(visualizationState.getType(), results,
+                                    visualizationState.getConfiguration());
+                        }
                     }
                 } catch (Exception e) {
                     System.err.println("Failed to restore visualization: "
@@ -400,11 +415,26 @@ public class DataVisualizationPlugin implements AiPlugin {
                     currentType = VisualizationType.GRID;
                     currentConfiguration = new HashMap<>();
 
+                    // Try to render with UI access, or directly if no UI
                     if (currentUI != null) {
                         currentUI.access(() -> {
                             renderVisualization(VisualizationType.GRID, results,
                                     currentConfiguration);
                         });
+                    } else {
+                        // Try to get UI from visualization container at execution time
+                        if (visualizationContainer != null) {
+                            visualizationContainer.getUI().ifPresentOrElse(
+                                    ui -> ui.access(() -> renderVisualization(
+                                            VisualizationType.GRID, results,
+                                            currentConfiguration)),
+                                    () -> renderVisualization(
+                                            VisualizationType.GRID, results,
+                                            currentConfiguration));
+                        } else {
+                            renderVisualization(VisualizationType.GRID, results,
+                                    currentConfiguration);
+                        }
                     }
 
                     return "Grid updated successfully with " + results.size()
@@ -463,11 +493,26 @@ public class DataVisualizationPlugin implements AiPlugin {
                     currentType = VisualizationType.KPI;
                     currentConfiguration = config;
 
+                    // Try to render with UI access, or directly if no UI
                     if (currentUI != null) {
                         currentUI.access(() -> {
                             renderVisualization(VisualizationType.KPI, results,
                                     config);
                         });
+                    } else {
+                        // Try to get UI from visualization container at execution time
+                        if (visualizationContainer != null) {
+                            visualizationContainer.getUI().ifPresentOrElse(
+                                    ui -> ui.access(() -> renderVisualization(
+                                            VisualizationType.KPI, results,
+                                            config)),
+                                    () -> renderVisualization(
+                                            VisualizationType.KPI, results,
+                                            config));
+                        } else {
+                            renderVisualization(VisualizationType.KPI, results,
+                                    config);
+                        }
                     }
 
                     return "KPI updated successfully";
@@ -522,11 +567,25 @@ public class DataVisualizationPlugin implements AiPlugin {
                     currentType = newType;
                     currentConfiguration = config;
 
+                    // Try to render with UI access, or directly if no UI
                     if (currentUI != null) {
                         currentUI.access(() -> {
                             renderVisualization(newType, currentQueryResults,
                                     config);
                         });
+                    } else {
+                        // Try to get UI from visualization container at execution time
+                        if (visualizationContainer != null) {
+                            visualizationContainer.getUI().ifPresentOrElse(
+                                    ui -> ui.access(() -> renderVisualization(
+                                            newType, currentQueryResults,
+                                            config)),
+                                    () -> renderVisualization(newType,
+                                            currentQueryResults, config));
+                        } else {
+                            renderVisualization(newType, currentQueryResults,
+                                    config);
+                        }
                     }
 
                     return "Visualization type changed to " + newType;
