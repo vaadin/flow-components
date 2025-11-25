@@ -4591,10 +4591,10 @@ public class Spreadsheet extends Component
     private void loadCustomComponents() {
         if (customComponentFactory != null) {
             // Preserve custom editor mappings to maintain StateNode connections
-            HashMap<String, String> cellKeysToEditorIdMap = getCellKeysToEditorIdMap() != null
+            HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap() != null
                     ? new HashMap<>(getCellKeysToEditorIdMap())
                     : new HashMap<>();
-            HashMap<String, String> componentIDtoCellKeysMap = new HashMap<>();
+            HashMap<String, String> _componentIDtoCellKeysMap = new HashMap<>();
             if (customComponents == null) {
                 customComponents = new HashSet<Component>();
             }
@@ -4606,23 +4606,23 @@ public class Spreadsheet extends Component
             if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
                 // top left pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
-                        cellKeysToEditorIdMap, componentIDtoCellKeysMap, 1, 1,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1, 1,
                         verticalSplitPosition, horizontalSplitPosition);
             }
             if (verticalSplitPosition > 0) {
                 // top right pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
-                        cellKeysToEditorIdMap, componentIDtoCellKeysMap, 1,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1,
                         firstColumn, verticalSplitPosition, lastColumn);
             }
             if (horizontalSplitPosition > 0) {
                 // bottom left pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
-                        cellKeysToEditorIdMap, componentIDtoCellKeysMap,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap,
                         firstRow, 1, lastRow, horizontalSplitPosition);
             }
             loadRangeComponents(newCustomComponents, rowsWithComponents,
-                    cellKeysToEditorIdMap, componentIDtoCellKeysMap, firstRow,
+                    _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, firstRow,
                     firstColumn, lastRow, lastColumn);
 
             // Keep custom editors registered to preserve StateNode connections
@@ -4631,19 +4631,19 @@ public class Spreadsheet extends Component
                 Component c = i.next();
                 if (!newCustomComponents.contains(c)) {
                     String nodeId = getComponentNodeId(c);
-                    if (cellKeysToEditorIdMap.containsValue(nodeId)) {
+                    if (_cellKeysToEditorIdMap.containsValue(nodeId)) {
                         newCustomComponents.add(c);
                     } else {
                         unRegisterCustomComponent(c);
-                        componentIDtoCellKeysMap.remove(nodeId);
+                        _componentIDtoCellKeysMap.remove(nodeId);
                         i.remove();
                     }
                 }
             }
             customComponents = newCustomComponents;
 
-            setCellKeysToEditorIdMap(cellKeysToEditorIdMap);
-            setComponentIDtoCellKeysMap(componentIDtoCellKeysMap);
+            setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
+            setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
 
             if (!rowsWithComponents.isEmpty()) {
                 handleRowSizes(rowsWithComponents);
