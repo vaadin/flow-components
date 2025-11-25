@@ -745,7 +745,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
                                 parentComponent.getElement()
                                         .appendChild(getElement());
                             }
-                        }, () -> ui.addToModalComponent(this));
+                        }, () -> ui.add(this));
 
                 autoAddedToTheUi = true;
             }
