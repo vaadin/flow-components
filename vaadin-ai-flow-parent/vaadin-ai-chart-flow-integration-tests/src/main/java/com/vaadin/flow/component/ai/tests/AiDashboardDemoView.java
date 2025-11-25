@@ -25,6 +25,9 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.popover.Popover;
+import com.vaadin.flow.component.popover.PopoverPosition;
+import com.vaadin.flow.component.popover.PopoverVariant;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -200,22 +203,22 @@ public class AiDashboardDemoView extends VerticalLayout {
                 ButtonVariant.LUMO_SMALL);
         configureButton.getStyle().setMargin("0");
         configureButton.addClickListener(e -> {
-            openWidgetChat(widgetId, widget.getTitle(), plugin);
+            openWidgetChat(widgetId, widget.getTitle(), plugin, configureButton);
         });
         widget.setHeaderContent(configureButton);
     }
 
     private void openWidgetChat(String widgetId, String widgetTitle,
-            DataVisualizationPlugin plugin) {
-        // Create chat dialog for widget configuration
-        Div chatContainer = new Div();
+            DataVisualizationPlugin plugin, Button configureButton) {
+        // Create chat container
+        VerticalLayout chatContainer = new VerticalLayout();
+        chatContainer.setPadding(false);
+        chatContainer.setSpacing(true);
         chatContainer.setWidth("600px");
         chatContainer.setHeight("500px");
-        chatContainer.getStyle().set("display", "flex").set("flex-direction",
-                "column");
 
         H2 chatTitle = new H2("Configure: " + widgetTitle);
-        chatTitle.getStyle().set("margin", "0 0 var(--lumo-space-m) 0");
+        chatTitle.getStyle().set("margin", "0");
 
         MessageList messageList = new MessageList();
         messageList.setWidthFull();
@@ -254,40 +257,27 @@ public class AiDashboardDemoView extends VerticalLayout {
                 .create(llmProvider).withMessageList(messageList)
                 .withInput(messageInput).withPlugin(plugin).build();
 
-        chatContainer.add(chatTitle, messageList, messageInput);
+        Button closeButton = new Button("Close");
+        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-        // Create dialog (simplified - in production use Dialog component)
-        Div overlay = new Div();
-        overlay.getStyle().set("position", "fixed").set("top", "0")
-                .set("left", "0").set("right", "0").set("bottom", "0")
-                .set("background", "rgba(0,0,0,0.5)").set("z-index", "1000")
-                .set("display", "flex").set("align-items", "center")
-                .set("justify-content", "center");
+        HorizontalLayout footer = new HorizontalLayout(closeButton);
+        footer.setWidthFull();
+        footer.setJustifyContentMode(JustifyContentMode.END);
 
-        Div dialog = new Div();
-        dialog.getStyle().set("background", "var(--lumo-base-color)")
-                .set("padding", "var(--lumo-space-l)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("box-shadow", "var(--lumo-box-shadow-xl)");
+        chatContainer.add(chatTitle, messageList, messageInput, footer);
 
-        Button closeButton = new Button("Close",
-                e -> getUI().ifPresent(ui -> ui.access(() -> {
-                    remove(overlay);
-                })));
+        // Create popover attached to the configure button
+        Popover popover = new Popover();
+        popover.setTarget(configureButton);
+        popover.setPosition(PopoverPosition.END_TOP);
+        popover.addThemeVariants(PopoverVariant.ARROW);
+        popover.setModal(true);
+        popover.setCloseOnOutsideClick(false);
+        popover.add(chatContainer);
 
-        HorizontalLayout dialogFooter = new HorizontalLayout(closeButton);
-        dialogFooter.setWidthFull();
-        dialogFooter.setJustifyContentMode(JustifyContentMode.END);
+        closeButton.addClickListener(e -> popover.close());
 
-        VerticalLayout dialogContent = new VerticalLayout(chatContainer,
-                dialogFooter);
-        dialogContent.setSpacing(true);
-        dialogContent.setPadding(false);
-
-        dialog.add(dialogContent);
-        overlay.add(dialog);
-
-        add(overlay);
+        popover.open();
     }
 
     private DataVisualizationPlugin createPlugin(
