@@ -184,6 +184,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      */
     private int tempSelectionStartRow;
 
+    /**
+     * Stored reference to the map for use in onSheetRelayoutComplete
+     */
+    private HashMap<String, String> lastCellKeysToEditorIdMap;
+
     public SpreadsheetWidget() {
 
         setTouchMode(TouchEvent.isSupported());
@@ -436,9 +441,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public SpreadsheetCustomEditorFactory getCustomEditorFactory() {
         return customEditorFactory;
     }
-
-    // Stored reference to the map for use in onSheetRelayoutComplete
-    private HashMap<String, String> lastCellKeysToEditorIdMap;
 
     @Override
     public void onSheetRelayoutComplete() {
