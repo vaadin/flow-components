@@ -184,6 +184,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      */
     private int tempSelectionStartRow;
 
+    /**
+     * Stored reference to the map for use in onSheetRelayoutComplete
+     */
+    private HashMap<String, String> lastCellKeysToEditorIdMap;
+
     public SpreadsheetWidget() {
 
         setTouchMode(TouchEvent.isSupported());
@@ -437,6 +442,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return customEditorFactory;
     }
 
+    @Override
+    public void onSheetRelayoutComplete() {
+        // Refresh custom editors after relayout (e.g., after scroll)
+        // This is needed because cell DOM elements are recycled/recreated
+        if (!isShowCustomEditorOnFocus() && customEditorFactory != null
+                && lastCellKeysToEditorIdMap != null) {
+            showCellCustomEditors(lastCellKeysToEditorIdMap);
+        }
+    }
+
     /**
      * @param customEditorFactory
      *            the customEditorFactory to set
@@ -457,6 +472,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void showCellCustomEditors(
             HashMap<String, String> cellKeysToEditorIdMap) {
 
+        // Store reference for use in onSheetRelayoutComplete
+        this.lastCellKeysToEditorIdMap = cellKeysToEditorIdMap == null ? null
+                : new HashMap<>(cellKeysToEditorIdMap);
+
         if (cellKeysToEditorIdMap == null || customEditorFactory == null) {
             return;
         }
@@ -470,7 +489,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 var col = jsniUtil.getParsedCol();
                 var row = jsniUtil.getParsedRow();
                 var cell = sheetWidget.getCell(col, row);
-                sheetWidget.displayCustomCellEditor(customEditor, false, cell);
+                // Only display if the cell is currently visible (not scrolled
+                // out of view)
+                if (cell != null) {
+                    sheetWidget.displayCustomCellEditor(customEditor, false,
+                            cell);
+                }
             }
         }
     }
