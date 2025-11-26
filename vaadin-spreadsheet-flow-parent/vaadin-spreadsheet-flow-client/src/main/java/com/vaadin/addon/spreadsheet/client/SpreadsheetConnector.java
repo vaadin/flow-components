@@ -121,7 +121,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                             var iconContainerId = "spreadsheet-icon-container-"
                                     + actionDetail.iconNodeId;
                             iconsToAppend.put(iconContainerId,
-                                            SheetJsniUtil.getVirtualChild(
+                                    SheetJsniUtil.getVirtualChild(
                                             actionDetail.iconNodeId, APP_ID));
                             spreadsheetAction
                                     .setIconContainerId(iconContainerId);
@@ -129,26 +129,25 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
                         actions.add(spreadsheetAction);
                     }
-                    appendIconsToContainer(iconsToAppend);
+
+                    if (!iconsToAppend.isEmpty()) {
+                        // Need to wait for the actions to be rendered to the
+                        // context menu to then attach the icons to their
+                        // containers
+                        AnimationScheduler.get()
+                                .requestAnimationFrame((timestamp) -> {
+                                    for (String nodeId : iconsToAppend
+                                            .keySet()) {
+                                        var container = DOM
+                                                .getElementById(nodeId);
+                                        container.appendChild(
+                                                iconsToAppend.get(nodeId));
+                                    }
+                                });
+                    }
                     return actions.toArray(new Action[actions.size()]);
                 }
 
-                private void appendIconsToContainer(
-                        HashMap<String, Element> iconsToAppend) {
-                    if (iconsToAppend.isEmpty()) {
-                        return;
-                    }
-                    // Need to wait for the actions to be rendered to the
-                    // context menu to then attach the icons to their containers
-                    AnimationScheduler.get()
-                            .requestAnimationFrame((timestamp) -> {
-                                for (String nodeId : iconsToAppend.keySet()) {
-                                    var container = DOM.getElementById(nodeId);
-                                    container.appendChild(
-                                            iconsToAppend.get(nodeId));
-                                }
-                            });
-                }
             }, left, top);
         }
 
