@@ -8,12 +8,13 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
-import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
-import com.vaadin.flow.component.ai.pro.chart.VisualizationType;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
+import com.vaadin.flow.component.ai.pro.chart.ChartTools;
+import com.vaadin.flow.component.ai.pro.chart.DefaultDataConverter;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -25,9 +26,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.popover.PopoverPosition;
-import com.vaadin.flow.component.popover.PopoverVariant;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 import java.util.HashMap;
@@ -36,7 +35,9 @@ import java.util.Map;
 /**
  * Demo view for AI Dashboard with multiple visualization types.
  * <p>
- * Demonstrates the new AiDataVisualizationOrchestrator which supports:
+ * Demonstrates one orchestrator per widget pattern where each widget has its
+ * own AiOrchestrator and tools, but the dashboard uses a single shared chat
+ * interface. Supports:
  * - Charts (line, bar, pie, column, area)
  * - Grids (tables with sortable columns)
  * - KPIs (key performance indicator cards)
@@ -50,7 +51,7 @@ import java.util.Map;
 public class AiDashboardDemoView extends VerticalLayout {
 
     private Dashboard dashboard;
-    private Map<String, DataVisualizationPlugin> plugins = new HashMap<>();
+    private Map<String, AiOrchestrator> orchestrators = new HashMap<>();
     private String apiKey;
 
     public AiDashboardDemoView() {
@@ -93,18 +94,15 @@ public class AiDashboardDemoView extends VerticalLayout {
 
     private void addSampleWidgets() {
         // Add a chart widget
-        DashboardWidget chartWidget = createWidget("Revenue by Month",
-                VisualizationType.CHART);
+        DashboardWidget chartWidget = createWidget("Revenue by Month");
         dashboard.add(chartWidget);
 
         // Add a grid widget
-        DashboardWidget gridWidget = createWidget("Sales Data",
-                VisualizationType.GRID);
+        DashboardWidget gridWidget = createWidget("Sales Data");
         dashboard.add(gridWidget);
 
         // Add a KPI widget
-        DashboardWidget kpiWidget = createWidget("Total Revenue",
-                VisualizationType.KPI);
+        DashboardWidget kpiWidget = createWidget("Total Revenue");
         dashboard.add(kpiWidget);
     }
 
@@ -125,13 +123,12 @@ public class AiDashboardDemoView extends VerticalLayout {
         widget.setContent(content);
 
         // Add configure button
-        addConfigureButton(widget, widgetId, null);
+        addConfigureButton(widget, widgetId);
 
         return widget;
     }
 
-    private DashboardWidget createWidget(String title,
-            VisualizationType type) {
+    private DashboardWidget createWidget(String title) {
         var widgetId = "widget-" + System.currentTimeMillis();
 
         // Create visualization container
@@ -144,29 +141,24 @@ public class AiDashboardDemoView extends VerticalLayout {
         widget.setRowspan(2);
         widget.setContent(visualizationContainer);
 
-        // Create plugin for this widget
-        var plugin = createPlugin(visualizationContainer, type);
-        plugins.put(widgetId, plugin);
-
         // Add configure button
-        addConfigureButton(widget, widgetId, plugin);
+        addConfigureButton(widget, widgetId);
 
         return widget;
     }
 
-    private void addConfigureButton(DashboardWidget widget, String widgetId,
-            DataVisualizationPlugin plugin) {
+    private void addConfigureButton(DashboardWidget widget, String widgetId) {
         var configureButton = new Button(VaadinIcon.COG.create());
         configureButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
                 ButtonVariant.LUMO_SMALL);
         configureButton.addClickListener(e -> {
-            openWidgetChat(widgetId, widget.getTitle(), plugin, configureButton);
+            openWidgetChat(widgetId, widget.getTitle(), configureButton);
         });
         widget.setHeaderContent(configureButton);
     }
 
     private void openWidgetChat(String widgetId, String widgetTitle,
-            DataVisualizationPlugin plugin, Button configureButton) {
+            Button configureButton) {
         // Create chat container
         var chatContainer = new VerticalLayout();
         chatContainer.setPadding(false);
@@ -178,33 +170,56 @@ public class AiDashboardDemoView extends VerticalLayout {
         var messageInput = new MessageInput();
         messageInput.setWidthFull();
 
-        // Create or update plugin with chat UI
-        if (plugin == null) {
-            var visualizationContainer = new Div();
-            visualizationContainer.setSizeFull();
-
-            // Get the widget and update its content
-            dashboard.getChildren()
+        // Get or create orchestrator for this widget
+        AiOrchestrator orchestrator = orchestrators.get(widgetId);
+        if (orchestrator == null) {
+            // Get the widget's visualization container
+            var visualizationContainer = dashboard.getChildren()
                     .filter(c -> c instanceof DashboardWidget)
                     .map(c -> (DashboardWidget) c)
                     .filter(w -> widgetId.equals(w.getId().orElse(null)))
-                    .findFirst().ifPresent(w -> w.setContent(visualizationContainer));
+                    .findFirst()
+                    .map(w -> (Div) w.getContent())
+                    .orElseGet(() -> {
+                        var container = new Div();
+                        container.setSizeFull();
+                        return container;
+                    });
 
-            plugin = createPlugin(visualizationContainer, VisualizationType.CHART);
-            plugins.put(widgetId, plugin);
+            var chart = new Chart();
+            visualizationContainer.add(chart);
+
+            // Create database provider and data converter
+            var databaseProvider = new InMemoryDatabaseProvider();
+            var dataConverter = new DefaultDataConverter();
+
+            // Create chart tools for this widget
+            var chartTools = ChartTools.createTools(chart,
+                    databaseProvider, dataConverter);
+            var systemPrompt = ChartTools.defaultPrompt();
+
+            // Create LLM provider
+            var model = OpenAiStreamingChatModel.builder()
+                    .apiKey(apiKey).modelName("gpt-4o-mini").build();
+            var provider = new LangChain4JLLMProvider(model);
+
+            // Create orchestrator for this widget
+            // NOTE: we do NOT call .withInput(...) here, because input is shared
+            orchestrator = AiOrchestrator.builder(provider)
+                    .withSystemPrompt(systemPrompt)
+                    .withTools(chartTools)
+                    .withMessageList(messageList)
+                    .build();
+
+            orchestrators.put(widgetId, orchestrator);
         }
 
-        // Create LLM provider
-        var model = OpenAiStreamingChatModel.builder()
-                .apiKey(apiKey).modelName("gpt-4o-mini").build();
-        var provider = new LangChain4JLLMProvider(model);
-
-        // Create chat orchestrator with plugin
-        AiChatOrchestrator.create(provider)
-                .withMessageList(messageList)
-                .withInput(messageInput)
-                .withPlugin(plugin)
-                .build();
+        // Route input to the widget's orchestrator
+        var finalOrchestrator = orchestrator;
+        messageInput.addSubmitListener(
+                (com.vaadin.flow.component.messages.MessageInput.SubmitEvent e) -> {
+                    finalOrchestrator.prompt(e.getValue());
+                });
 
         var closeButton = new Button("Close");
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -219,7 +234,6 @@ public class AiDashboardDemoView extends VerticalLayout {
         var popover = new Popover();
         popover.setTarget(configureButton);
         popover.setPosition(PopoverPosition.END_TOP);
-        popover.addThemeVariants(PopoverVariant.ARROW);
         popover.setModal(true);
         popover.setCloseOnOutsideClick(true);
         popover.add(chatContainer);
@@ -227,13 +241,5 @@ public class AiDashboardDemoView extends VerticalLayout {
         closeButton.addClickListener(e -> popover.close());
 
         popover.open();
-    }
-
-    private DataVisualizationPlugin createPlugin(
-            Div visualizationContainer, VisualizationType initialType) {
-        // Create plugin
-        return DataVisualizationPlugin.create(new InMemoryDatabaseProvider())
-                .withVisualizationContainer(visualizationContainer)
-                .withInitialType(initialType).build();
     }
 }

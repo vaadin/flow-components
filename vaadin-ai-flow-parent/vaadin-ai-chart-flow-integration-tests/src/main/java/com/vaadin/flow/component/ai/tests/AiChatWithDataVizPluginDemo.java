@@ -8,11 +8,15 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
-import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
+import com.vaadin.flow.component.ai.pro.chart.ChartStateSupport;
+import com.vaadin.flow.component.ai.pro.chart.ChartTools;
+import com.vaadin.flow.component.ai.pro.chart.DefaultDataConverter;
+import com.vaadin.flow.component.ai.pro.chart.VisualizationState;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
@@ -20,15 +24,14 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
- * Demo showing how to use DataVisualizationPlugin with AiChatOrchestrator.
+ * Demo showing how to use ChartTools with AiOrchestrator.
  * <p>
- * This demonstrates the plugin architecture where a single chat orchestrator
- * can be extended with data visualization capabilities. Users can chat
- * naturally and also request data visualizations.
+ * This demonstrates the tool-based architecture where an orchestrator is
+ * configured with chart visualization tools. Users can chat naturally and also
+ * request data visualizations.
  * </p>
  * <p>
  * Example queries:
@@ -46,7 +49,7 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
 
-    private Object savedState;
+    private VisualizationState savedState;
 
     public AiChatWithDataVizPluginDemo() {
         setSizeFull();
@@ -61,15 +64,24 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         chatSection.setPadding(false);
         chatSection.setFlexGrow(1, messageList);
 
+        var chart = new Chart();
+
         // Visualization section
-        var visualizationContainer = new Div();
+        var visualizationContainer = new Div(chart);
         visualizationContainer.setSizeFull();
 
-        // Create data visualization plugin
-        var dataVizPlugin = DataVisualizationPlugin
-                .create(new InMemoryDatabaseProvider())
-                .withVisualizationContainer(visualizationContainer)
-                .build();
+        // Create database provider and data converter
+        var databaseProvider = new InMemoryDatabaseProvider();
+        var dataConverter = new DefaultDataConverter();
+
+        // Create chart tools
+        var chartTools = ChartTools.createTools(chart,
+                databaseProvider, dataConverter);
+        var systemPrompt = ChartTools.defaultPrompt();
+
+        // Create state support for persistence
+        var chartStateSupport = new ChartStateSupport(chart,
+                databaseProvider, dataConverter);
 
         // Create LLM provider
         var model = OpenAiStreamingChatModel.builder()
@@ -77,24 +89,22 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
                 .modelName("gpt-4o-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
-        // Create chat orchestrator with plugin
-        AiChatOrchestrator.create(provider)
-                .withMessageList(messageList)
-                .withInput(messageInput)
-                .withPlugin(dataVizPlugin)
-                .build();
+        // Create orchestrator with chart tools
+        AiOrchestrator.builder(provider).withSystemPrompt(systemPrompt)
+                .withTools(chartTools).withMessageList(messageList)
+                .withInput(messageInput).build();
 
         // State management buttons
         var restoreStateButton = new Button("Restore Saved State");
         restoreStateButton.setEnabled(false);
         restoreStateButton.addClickListener(e -> {
             if (savedState != null) {
-                dataVizPlugin.restoreState(savedState);
+                chartStateSupport.restore(savedState);
             }
         });
 
         var saveStateButton = new Button("Save Current State", e -> {
-            savedState = dataVizPlugin.captureState();
+            savedState = chartStateSupport.capture();
             if (savedState != null) {
                 restoreStateButton.setEnabled(true);
             }

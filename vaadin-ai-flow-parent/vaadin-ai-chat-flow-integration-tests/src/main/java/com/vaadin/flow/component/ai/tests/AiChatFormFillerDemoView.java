@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -83,15 +83,15 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator with form filling tools
-        var orchestrator = AiChatOrchestrator.create(provider)
+        var orchestrator = AiOrchestrator.builder(provider)
                 .withFileReceiver(upload)
-                .withTools(this).build();
+                .withToolObjects(this).build();
 
         // Fill button to trigger AI form filling
         var fillButton = new Button("Fill");
         fillButton.setWidthFull();
         fillButton.addClickListener(event -> {
-            orchestrator.sendMessage(
+            orchestrator.prompt(
                     "Please analyze the uploaded files and fill the person information form with any data you can extract.");
         });
 
