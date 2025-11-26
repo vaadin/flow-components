@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -697,6 +698,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     public Registration addFileRemovedListener(
             ComponentEventListener<FileRemovedEvent> listener) {
         return addListener(FileRemovedEvent.class, listener);
+    }
+
+    @Override
+    public void addFileRemovedListener(Consumer<String> listener) {
+        addFileRemovedListener(
+                (ComponentEventListener<FileRemovedEvent>)event -> listener.accept(event.getFileName()));
     }
 
     /**
