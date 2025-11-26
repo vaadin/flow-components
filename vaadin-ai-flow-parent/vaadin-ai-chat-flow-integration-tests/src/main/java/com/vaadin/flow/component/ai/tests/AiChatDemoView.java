@@ -42,6 +42,11 @@ public class AiChatDemoView extends VerticalLayout {
     public AiChatDemoView() {
         setSizeFull();
 
+        // Create UI components
+        var messageList = new MessageList();
+        messageList.setSizeFull();
+        var messageInput = new MessageInput();
+
         // Upload Component for attachments
         var upload = new Upload();
         upload.setWidthFull();
@@ -52,14 +57,8 @@ public class AiChatDemoView extends VerticalLayout {
         upload.setAcceptedFileTypes("image/*", "application/pdf",
                 "text/plain");
         upload.setUploadButton(new Button(LumoIcon.UPLOAD.create()));
-
-        // Create UI components
-        var messageList = new MessageList();
-        messageList.setSizeFull();
-        var messageInput = new MessageInput();
-        SlotUtils.setSlot(upload, "drop-area-content", messageInput.getElement());
+        upload.setDropAreaContent(messageInput);
         
-
         add(messageList, upload);
         setFlexGrow(1, messageList);
         setFlexShrink(0, upload);

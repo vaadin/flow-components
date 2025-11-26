@@ -428,6 +428,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         return dropLabel;
     }
 
+    public void setDropAreaContent(Component dropAreaContent) {
+        SlotUtils.setSlot(this, "drop-area-content", dropAreaContent);
+    }
+
     /**
      * Set the component to show as the drop label icon. The icon is visible
      * when the user can drop files to this upload component. Despite of the
