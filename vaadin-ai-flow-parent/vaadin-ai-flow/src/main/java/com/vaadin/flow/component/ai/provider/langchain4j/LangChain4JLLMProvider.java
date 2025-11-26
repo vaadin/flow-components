@@ -161,9 +161,39 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
         // Add tools from LLMProvider.Tool[] (convert to LangChain4j format)
         if (request.tools() != null && request.tools().length > 0) {
+            // Capture current UI if available
+            UI currentUI = UI.getCurrent();
+
             for (Tool tool : request.tools()) {
                 // Create executor wrapper for LLMProvider.Tool
-                toolExecutors.put(tool.getName(), (toolExecRequest, memoryId) -> tool.execute(toolExecRequest.arguments()));
+                ToolExecutor wrappedExecutor = (toolExecRequest, memoryId) -> {
+                    if (currentUI != null) {
+                        // Execute in UI context synchronously
+                        String[] result = new String[1];
+                        Exception[] error = new Exception[1];
+
+                        try {
+                            currentUI.access(() -> {
+                                try {
+                                    result[0] = tool.execute(toolExecRequest.arguments());
+                                } catch (Exception e) {
+                                    error[0] = e;
+                                }
+                            }).get(); // Wait for completion
+                        } catch (Exception e) {
+                            throw new RuntimeException("Failed to execute tool in UI context", e);
+                        }
+
+                        if (error[0] != null) {
+                            throw new RuntimeException(error[0]);
+                        }
+                        return result[0];
+                    } else {
+                        // No UI context, execute directly
+                        return tool.execute(toolExecRequest.arguments());
+                    }
+                };
+                toolExecutors.put(tool.getName(), wrappedExecutor);
             }
         }
 
