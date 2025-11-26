@@ -109,41 +109,43 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     SpreadsheetServerRpc rpcProxy = getRpcProxy(
                             SpreadsheetServerRpc.class);
                     final String APP_ID = host.getPropertyString("appId");
-                    final HashMap<String, Element> renderedIconNodeIds = new HashMap<>();
+                    final HashMap<String, Element> iconsToAppend = new HashMap<>();
 
                     for (SpreadsheetActionDetails actionDetail : actionDetails) {
-                        String iconContainerId = null;
-                        if (actionDetail.iconNodeId != null) {
-                            iconContainerId = "spreadsheet-icon-container-"
-                                    + actionDetail.iconNodeId;
-                            renderedIconNodeIds.put(iconContainerId,
-                                    SheetJsniUtil.getVirtualChild(
-                                            actionDetail.iconNodeId, APP_ID));
-                        }
                         SpreadsheetAction spreadsheetAction = new SpreadsheetAction(
                                 this, rpcProxy, actionDetail.key,
-                                actionDetail.type, widget, iconContainerId);
+                                actionDetail.type, widget);
                         spreadsheetAction.setCaption(actionDetail.caption);
+
+                        if (actionDetail.iconNodeId != null) {
+                            var iconContainerId = "spreadsheet-icon-container-"
+                                    + actionDetail.iconNodeId;
+                            iconsToAppend.put(iconContainerId,
+                                            SheetJsniUtil.getVirtualChild(
+                                            actionDetail.iconNodeId, APP_ID));
+                            spreadsheetAction
+                                    .setIconContainerId(iconContainerId);
+                        }
+
                         actions.add(spreadsheetAction);
                     }
-                    attachIconsToContainers(renderedIconNodeIds);
+                    appendIconsToContainer(iconsToAppend);
                     return actions.toArray(new Action[actions.size()]);
                 }
 
-                private void attachIconsToContainers(
-                        HashMap<String, Element> renderedIconNodeIds) {
-                    if (renderedIconNodeIds.isEmpty()) {
+                private void appendIconsToContainer(
+                        HashMap<String, Element> iconsToAppend) {
+                    if (iconsToAppend.isEmpty()) {
                         return;
                     }
                     // Need to wait for the actions to be rendered to the
                     // context menu to then attach the icons to their containers
                     AnimationScheduler.get()
                             .requestAnimationFrame((timestamp) -> {
-                                for (String nodeId : renderedIconNodeIds
-                                        .keySet()) {
+                                for (String nodeId : iconsToAppend.keySet()) {
                                     var container = DOM.getElementById(nodeId);
                                     container.appendChild(
-                                            renderedIconNodeIds.get(nodeId));
+                                            iconsToAppend.get(nodeId));
                                 }
                             });
                 }

@@ -29,13 +29,15 @@ public class SpreadsheetAction extends Action {
     }
 
     public SpreadsheetAction(ActionOwner owner, SpreadsheetServerRpc rpc,
-            String key, int type, SpreadsheetWidget widget,
-            String iconContainerId) {
+            String key, int type, SpreadsheetWidget widget) {
         this(owner);
         this.rpc = rpc;
         this.type = type;
         this.widget = widget;
         actionKey = key;
+    }
+
+    public void setIconContainerId(String iconContainerId) {
         this.iconContainerId = iconContainerId;
     }
 
@@ -52,6 +54,10 @@ public class SpreadsheetAction extends Action {
         widget.focusSheet();
     }
 
+    /**
+     * Overriding the {@link Action#getHTML()} to add a container for the icon
+     * if present.
+     */
     @Override
     public String getHTML() {
         StringBuilder sb = new StringBuilder();
