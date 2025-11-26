@@ -171,6 +171,32 @@ public class MessageList extends Component
     }
 
     /**
+     * Updates the prefix component for a specific item.
+     *
+     * @param item
+     *            the item to update the prefix for
+     */
+    void updateItemPrefix(MessageListItem item) {
+        int index = items.indexOf(item);
+        if (index < 0) {
+            return;
+        }
+
+        Component prefix = item.getPrefix();
+        if (prefix != null && !prefix.isAttached()) {
+            // Attach the prefix component to this message list
+            getElement().appendVirtualChild(prefix.getElement());
+
+            // Call JavaScript to set the prefix for this item
+            getElement().getNode().runWhenAttached(ui -> {
+                getElement().executeJs(
+                        CONNECTOR_OBJECT + ".setItemPrefix(this, $0, $1)",
+                        prefix.getElement(), index);
+            });
+        }
+    }
+
+    /**
      * Schedules a client sync of the message list items to be run before the
      * next client response.
      */
@@ -224,6 +250,9 @@ public class MessageList extends Component
         var itemsJson = JacksonUtils.listToJson(items);
         getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
                 itemsJson, ui.getLocale().toLanguageTag());
+
+        items.forEach(this::updateItemPrefix);
+
     }
 
     /**
@@ -269,6 +298,8 @@ public class MessageList extends Component
         // Call the connector function to add items
         getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
                 newItemsJson, ui.getLocale().toLanguageTag());
+
+        newItems.forEach(this::updateItemPrefix);
     }
 
     @Override

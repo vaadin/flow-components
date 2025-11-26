@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.component.ai.messagelist.AiMessageList;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.upload.AiFileReceiver;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.streams.UploadHandler;
 import reactor.core.publisher.Flux;
 
@@ -182,6 +183,18 @@ public abstract class BaseAiOrchestrator implements Serializable {
         if (messageList != null) {
             AiMessage userItem = messageList.createMessage(userMessage, "User");
             messageList.addMessage(userItem);
+
+            if (pendingAttachments.isEmpty()) {
+                return;
+            }
+            var attachmentsLayout = new Div();
+            for (LLMProvider.Attachment attachment : pendingAttachments) {
+                var fileDiv = new Div();
+                fileDiv.setText("📎 " + attachment.fileName());
+                attachmentsLayout.add(fileDiv);
+            }
+
+            userItem.setPrefix(attachmentsLayout);
         }
     }
 

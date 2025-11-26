@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.messagelist.AiMessage;
 import com.vaadin.flow.internal.NodeOwner;
@@ -71,6 +72,8 @@ public class MessageListItem implements Serializable, AiMessage {
 
     private Set<String> themeNames = new LinkedHashSet<>();
     private Set<String> classNames = new LinkedHashSet<>();
+
+    private Component prefix;
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -609,6 +612,34 @@ public class MessageListItem implements Serializable, AiMessage {
     @JsonIgnore
     MessageList getHost() {
         return host;
+    }
+
+    /**
+     * Gets the prefix component that will be rendered before the message
+     * content.
+     *
+     * @return the prefix component, or {@code null} if none is set
+     */
+    @JsonIgnore
+    public Component getPrefix() {
+        return prefix;
+    }
+
+    /**
+     * Sets a component to be rendered as a prefix before the message content.
+     * <p>
+     * The prefix component will be rendered using a custom renderer in the
+     * message list. This allows adding custom UI elements like icons, badges,
+     * or other components to messages.
+     * </p>
+     *
+     * @param prefix
+     *            the component to render as prefix, or {@code null} to remove
+     *            the prefix
+     */
+    public void setPrefix(Component prefix) {
+        this.prefix = prefix;
+        propsChanged();
     }
 
 }

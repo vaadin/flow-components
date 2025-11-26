@@ -37,9 +37,29 @@ function formatItems(items, locale) {
 
 window.Vaadin.Flow.messageListConnector = {
   /**
+   * Initializes the prefix renderer for rendering component prefixes in messages.
+   */
+  initPrefixRenderer(list) {
+    if (list._prefixRendererInitialized) {
+      return;
+    }
+    list._prefixRendererInitialized = true;
+
+    list.prefixRenderer = (root, _, { index }) => {
+      const item = list.items[index];
+
+      if (item._prefixComponent && root.firstChild !== item._prefixComponent) {
+        root.innerHTML = '';
+        root.appendChild(item._prefixComponent);
+      }
+    };
+  },
+
+  /**
    * Fully replaces the items in the list with the given items.
    */
   setItems(list, items, locale) {
+    this.initPrefixRenderer(list);
     list.items = formatItems(items, locale);
   },
 
@@ -63,6 +83,18 @@ window.Vaadin.Flow.messageListConnector = {
    * Adds the given items to the end of the list.
    */
   addItems(list, newItems, locale) {
+    this.initPrefixRenderer(list);
     list.items = [...(list.items || []), ...formatItems(newItems, locale)];
+  },
+
+  /**
+   * Sets the prefix component for an item at the given index.
+   */
+  setItemPrefix(list, prefixElement, index) {
+    this.initPrefixRenderer(list);
+    if (!list.items[index]) {
+      return;
+    }
+    list.items[index]._prefixComponent = prefixElement;
   }
 };

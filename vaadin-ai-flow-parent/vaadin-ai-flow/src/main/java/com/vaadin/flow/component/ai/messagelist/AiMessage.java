@@ -18,6 +18,8 @@ package com.vaadin.flow.component.ai.messagelist;
 import java.io.Serializable;
 import java.time.Instant;
 
+import com.vaadin.flow.component.Component;
+
 /**
  * Represents a message in an AI conversation.
  *
@@ -61,4 +63,6 @@ public interface AiMessage extends Serializable {
      *            the text to append
      */
     void appendText(String token);
+
+    void setPrefix(Component component);
 }
