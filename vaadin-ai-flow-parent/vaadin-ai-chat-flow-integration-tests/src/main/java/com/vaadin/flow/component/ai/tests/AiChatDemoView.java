@@ -17,12 +17,17 @@ package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.flow.theme.lumo.LumoIcon;
+
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
@@ -49,13 +54,15 @@ public class AiChatDemoView extends VerticalLayout {
         upload.getElement().setProperty("fileListAbove", true);
         upload.setAcceptedFileTypes("image/*", "application/pdf",
                 "text/plain");
+        upload.setUploadButton(new Button(LumoIcon.UPLOAD.create()));
 
         // Create UI components
         var messageList = new MessageList();
         messageList.setSizeFull();
         var messageInput = new MessageInput();
+        SlotUtils.setSlot(upload, "drop-area-content", messageInput.getElement());
+        
 
-        upload.getElement().appendChild(messageInput.getElement());
         add(messageList, upload);
         setFlexGrow(1, messageList);
         setFlexShrink(0, upload);
