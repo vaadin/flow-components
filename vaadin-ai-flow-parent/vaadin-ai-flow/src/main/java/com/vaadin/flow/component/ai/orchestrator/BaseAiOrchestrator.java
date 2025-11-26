@@ -57,7 +57,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
     protected AiFileReceiver fileReceiver;
     protected InputValidator inputValidator;
     protected final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
-    protected final List<Object> toolObjects = new ArrayList<>();
+    protected Object[] toolObjects = new Object[0];
     protected final List<AiPlugin> plugins = new ArrayList<>();
     private UI ui;
 
@@ -136,11 +136,8 @@ public abstract class BaseAiOrchestrator implements Serializable {
      * @param toolObjects
      *            the objects containing tool methods
      */
-    protected void setToolObjects(List<Object> toolObjects) {
-        this.toolObjects.clear();
-        if (toolObjects != null) {
-            this.toolObjects.addAll(toolObjects);
-        }
+    protected void setToolObjects(Object[] toolObjects) {
+        this.toolObjects = toolObjects != null ? toolObjects : new Object[0];
     }
 
     /**
@@ -384,6 +381,10 @@ public abstract class BaseAiOrchestrator implements Serializable {
             requestBuilder.tools(tools);
         }
 
+        if (toolObjects.length > 0) {
+            requestBuilder.toolObjects(toolObjects);
+        }
+
         LLMProvider.LLMRequest request = requestBuilder.build();
 
         // Clear pending attachments after building the request
@@ -410,11 +411,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
     protected LLMProvider.Tool[] createTools() {
         List<LLMProvider.Tool> tools = new ArrayList<>();
 
-        // Add tools from @Tool annotated objects
-        for (Object toolObject : toolObjects) {
-            tools.addAll(convertObjectToTools(toolObject));
-        }
-
         // Add tools from plugins
         for (AiPlugin plugin : plugins) {
             List<LLMProvider.Tool> pluginTools = plugin.getTools();
@@ -426,154 +422,6 @@ public abstract class BaseAiOrchestrator implements Serializable {
         return tools.toArray(new LLMProvider.Tool[0]);
     }
 
-    /**
-     * Converts an object with {@link Tool}-annotated methods into
-     * LLMProvider.Tool instances.
-     *
-     * @param toolObject
-     *            the object containing tool methods
-     * @return list of converted tools
-     */
-    private List<LLMProvider.Tool> convertObjectToTools(Object toolObject) {
-        List<LLMProvider.Tool> tools = new ArrayList<>();
-
-        for (Method method : toolObject.getClass().getDeclaredMethods()) {
-            Tool toolAnnotation = method.getAnnotation(Tool.class);
-            if (toolAnnotation == null) {
-                continue;
-            }
-
-            // Make method accessible if it's private
-            method.setAccessible(true);
-
-            tools.add(createToolFromMethod(toolObject, method, toolAnnotation));
-        }
-
-        return tools;
-    }
-
-    /**
-     * Creates an LLMProvider.Tool from an annotated method.
-     *
-     * @param toolObject
-     *            the object containing the method
-     * @param method
-     *            the tool method
-     * @param toolAnnotation
-     *            the tool annotation
-     * @return the created tool
-     */
-    private LLMProvider.Tool createToolFromMethod(Object toolObject,
-            Method method, Tool toolAnnotation) {
-        return new LLMProvider.Tool() {
-            @Override
-            public String getName() {
-                return method.getName();
-            }
-
-            @Override
-            public String getDescription() {
-                StringBuilder description = new StringBuilder(
-                        toolAnnotation.value());
-
-                // Add parameter descriptions
-                Parameter[] parameters = method.getParameters();
-                if (parameters.length > 0) {
-                    description.append("\n\nParameters:");
-                    for (int i = 0; i < parameters.length; i++) {
-                        Parameter param = parameters[i];
-                        ParameterDescription paramDesc = param
-                                .getAnnotation(ParameterDescription.class);
-                        String paramName = getParameterName(param, i);
-                        String paramType = param.getType().getSimpleName();
-                        description.append("\n- ").append(paramName)
-                                .append(" (").append(paramType).append(")");
-                        if (paramDesc != null) {
-                            description.append(": ").append(paramDesc.value());
-                        }
-                    }
-                }
-
-                return description.toString();
-            }
-
-            @Override
-            public String getParametersSchema() {
-                Parameter[] parameters = method.getParameters();
-                if (parameters.length == 0) {
-                    return null;
-                }
-
-                // Build a simple JSON schema
-                StringBuilder schema = new StringBuilder();
-                schema.append("{\"type\":\"object\",\"properties\":{");
-
-                for (int i = 0; i < parameters.length; i++) {
-                    Parameter param = parameters[i];
-                    if (i > 0) {
-                        schema.append(",");
-                    }
-                    String paramName = getParameterName(param, i);
-                    schema.append("\"").append(paramName).append("\":{");
-                    schema.append("\"type\":\"")
-                            .append(getJsonType(param.getType())).append("\"");
-
-                    ParameterDescription paramDesc = param
-                            .getAnnotation(ParameterDescription.class);
-                    if (paramDesc != null) {
-                        schema.append(",\"description\":\"")
-                                .append(escapeJson(paramDesc.value()))
-                                .append("\"");
-                    }
-                    schema.append("}");
-                }
-
-                schema.append("},\"required\":[");
-                for (int i = 0; i < parameters.length; i++) {
-                    if (i > 0) {
-                        schema.append(",");
-                    }
-                    schema.append("\"").append(getParameterName(parameters[i], i))
-                            .append("\"");
-                }
-                schema.append("]}");
-
-                return schema.toString();
-            }
-
-            @Override
-            public String execute(String arguments) {
-                try {
-                    // Parse arguments
-                    Object[] args = parseArguments(method, arguments);
-
-                    
-                    final AtomicReference<Object> resultRef = new AtomicReference<>();
-                    final AtomicReference<Exception> exceptionRef = new AtomicReference<>();
-
-                    ui.access(() -> {
-                        try {
-                            Object result = method.invoke(toolObject, args);
-                            resultRef.set(result);
-                        } catch (Exception e) {
-                            exceptionRef.set(e);
-                        }
-                    });
-
-                    // Check if an exception occurred during execution
-                    if (exceptionRef.get() != null) {
-                        throw exceptionRef.get();
-                    }
-
-                    Object result = resultRef.get();
-                    return result != null ? result.toString() : "";
-                   
-                } catch (Exception e) {
-                    return "Error executing tool: " + e.getMessage();
-                }
-            }
-        };
-    }
 
     /**
      * Gets the parameter name, falling back to arg{index} if the name is not
@@ -845,7 +693,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
         protected AiInput input;
         protected AiFileReceiver fileReceiver;
         protected InputValidator inputValidator;
-        protected List<Object> toolObjects = new ArrayList<>();
+        protected Object[] toolObjects = new Object[0];
         protected List<AiPlugin> plugins = new ArrayList<>();
 
         protected BaseBuilder(LLMProvider provider) {
@@ -906,23 +754,16 @@ public abstract class BaseAiOrchestrator implements Serializable {
         }
 
         /**
-         * Sets the objects containing {@link Tool}-annotated methods that will
+         * Sets the objects containing vendor-specific {@link Tool}-annotated methods that will
          * be available to the LLM.
-         * <p>
-         * Methods annotated with {@link Tool} will be automatically discovered
-         * and converted into LLM tools. Parameters can be documented using
-         * {@link ParameterDescription} annotations.
          * </p>
          *
          * @param toolObjects
          *            the objects containing tool methods
          * @return this builder
          */
-        public B setTools(Object... toolObjects) {
-            this.toolObjects.clear();
-            if (toolObjects != null) {
-                this.toolObjects.addAll(List.of(toolObjects));
-            }
+        public B withTools(Object... toolObjects) {
+            this.toolObjects = toolObjects != null ? toolObjects : new Object[0];
             return self();
         }
 

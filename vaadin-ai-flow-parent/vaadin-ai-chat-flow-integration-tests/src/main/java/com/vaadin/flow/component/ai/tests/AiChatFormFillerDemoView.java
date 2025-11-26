@@ -16,8 +16,6 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
-import com.vaadin.flow.component.ai.orchestrator.ParameterDescription;
-import com.vaadin.flow.component.ai.orchestrator.Tool;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -29,7 +27,8 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.communication.PushMode;
+
+import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 import java.time.LocalDate;
@@ -86,7 +85,7 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         // Create and configure orchestrator with form filling tools
         var orchestrator = AiChatOrchestrator.create(provider)
                 .withFileReceiver(upload)
-                .setTools(this).build();
+                .withTools(this).build();
 
         // Fill button to trigger AI form filling
         var fillButton = new Button("Fill");
@@ -103,13 +102,7 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
 
     // TODO: Instead of defining custom Tool annotations, consider allowing the user to just use SpringAi/Langchain annotations directly.
     @Tool("Fills the person information form with the provided data. Use this when the user provides person details.")
-    private String fillFormFields(
-            @ParameterDescription("Person's first name") String firstName,
-            @ParameterDescription("Person's last name") String lastName,
-            @ParameterDescription("Person's email address") String email,
-            @ParameterDescription("Person's phone number") String phone,
-            @ParameterDescription("Person's date of birth in ISO format (YYYY-MM-DD)") String dateOfBirth,
-            @ParameterDescription("Person's address") String address) {
+    private String fillFormFields(String firstName, String lastName, String emailAddress, String phoneNumber, String dateOfBirth, String address) {
 
         // Update fields if values are provided
         // Note: UI.access() is automatically handled by BaseAiOrchestrator
@@ -119,11 +112,11 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         if (lastName != null && !lastName.trim().isEmpty()) {
             lastNameField.setValue(lastName.trim());
         }
-        if (email != null && !email.trim().isEmpty()) {
-            emailField.setValue(email.trim());
+        if (emailAddress != null && !emailAddress.trim().isEmpty()) {
+            emailField.setValue(emailAddress.trim());
         }
-        if (phone != null && !phone.trim().isEmpty()) {
-            phoneField.setValue(phone.trim());
+        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+            phoneField.setValue(phoneNumber.trim());
         }
         if (dateOfBirth != null && !dateOfBirth.trim().isEmpty()) {
             try {

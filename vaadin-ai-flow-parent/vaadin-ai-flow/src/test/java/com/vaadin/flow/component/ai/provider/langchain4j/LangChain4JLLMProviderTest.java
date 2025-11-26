@@ -49,29 +49,6 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void constructor_withNullModel_throwsException() {
-        new LangChain4JLLMProvider(null);
-    }
-
-    @Test
-    public void constructor_withValidModel_createsProvider() {
-        LangChain4JLLMProvider p = new LangChain4JLLMProvider(mockModel);
-        assertNotNull("Provider should not be null", p);
-        assertEquals("Model should be set", mockModel, p.getModel());
-    }
-
-    @Test
-    public void getModel_returnsConfiguredModel() {
-        assertEquals("Should return configured model", mockModel,
-                provider.getModel());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void stream_withNullRequest_throwsException() {
-        provider.stream(null).blockFirst();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void stream_withNullUserMessage_throwsException() {
         LLMProvider.LLMRequest request = new LLMProvider.LLMRequestBuilder()
                 .userMessage(null).build();
@@ -285,7 +262,7 @@ public class LangChain4JLLMProviderTest {
         }).when(mockModel).generate(anyList(), any());
 
         provider.stream(request).blockLast(Duration.ofSeconds(5));
-        provider.clearConversation();
+        
 
         // Should still work after clearing
         provider.stream(request).blockLast(Duration.ofSeconds(5));

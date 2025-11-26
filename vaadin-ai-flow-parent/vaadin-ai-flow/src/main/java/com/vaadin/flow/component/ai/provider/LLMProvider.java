@@ -132,6 +132,8 @@ public interface LLMProvider extends Serializable {
          */
         String modelName();
 
+        Object[] toolObjects();
+
         /**
          * Creates a simple LLM request with just a user message.
          *
@@ -165,6 +167,11 @@ public interface LLMProvider extends Serializable {
                 public String modelName() {
                     return null;
                 }
+
+                @Override
+                public Object[] toolObjects() {
+                    return new Object[0];
+                }
             };
         }
     }
@@ -177,6 +184,7 @@ public interface LLMProvider extends Serializable {
         private List<Attachment> attachments = List.of();
         private String systemPrompt;
         private Tool[] tools = new Tool[0];
+        private Object[] toolObjects = new Object[0];
         private String modelName;
 
         /**
@@ -227,6 +235,13 @@ public interface LLMProvider extends Serializable {
             return this;
         }
 
+        
+
+        public LLMRequestBuilder toolObjects(Object[] toolObjects) {
+            this.toolObjects = toolObjects;
+            return this;
+        }
+
         /**
          * Sets the model name.
          *
@@ -250,6 +265,7 @@ public interface LLMProvider extends Serializable {
             String finalSystemPrompt = systemPrompt;
             Tool[] finalTools = tools;
             String finalModelName = modelName;
+            Object[] finalToolObjects = toolObjects;
 
             return new LLMRequest() {
                 @Override
@@ -275,6 +291,11 @@ public interface LLMProvider extends Serializable {
                 @Override
                 public String modelName() {
                     return finalModelName;
+                }
+
+                @Override
+                public Object[] toolObjects() {
+                    return finalToolObjects;
                 }
             };
         }
