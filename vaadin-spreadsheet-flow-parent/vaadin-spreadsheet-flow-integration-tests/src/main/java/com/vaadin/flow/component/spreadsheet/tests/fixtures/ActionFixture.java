@@ -11,12 +11,10 @@ package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.tests.SpreadsheetActionHandler;
 import com.vaadin.flow.component.spreadsheet.tests.SpreadsheetHelper;
-import com.vaadin.flow.theme.lumo.LumoIcon;
 
 public class ActionFixture implements SpreadsheetFixture {
 
@@ -24,21 +22,6 @@ public class ActionFixture implements SpreadsheetFixture {
     public void loadFixture(Spreadsheet spreadsheet) {
 
         SpreadsheetActionHandler handler = new SpreadsheetActionHandler();
-
-        handler.addRowHandler(new SpreadsheetActionHandler.Row() {
-            @Override
-            public Action[] getActions(CellRangeAddress target,
-                    Spreadsheet sender) {
-                return new Action[] { new Action("Do something",
-                        LumoIcon.CALENDAR.create()) };
-            }
-
-            @Override
-            public void handleAction(Action action, CellRangeAddress sender,
-                    Spreadsheet target) {
-                System.out.println("Received action: " + action.getCaption());
-            }
-        });
 
         handler.addCellHandler(new SpreadsheetActionHandler.Cell() {
             @Override
@@ -60,8 +43,7 @@ public class ActionFixture implements SpreadsheetFixture {
             public Action[] getActions(
                     Spreadsheet.SelectionChangeEvent selection,
                     Spreadsheet sender) {
-                return new Action[] { new Action("Double cell values",
-                        LumoIcon.ANGLE_UP.create()), };
+                return new Action[] { new Action("Double cell values"), };
             }
 
             private void doubleValue(Cell cell) {
@@ -87,8 +69,7 @@ public class ActionFixture implements SpreadsheetFixture {
             @Override
             public Action[] getActions(Spreadsheet.SelectionChangeEvent target,
                     Spreadsheet sender) {
-                return new Action[] { new Action("Number",
-                        VaadinIcon.ACADEMY_CAP.create()), };
+                return new Action[] { new Action("Number"), };
             }
         });
 
