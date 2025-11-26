@@ -189,6 +189,20 @@ public class PopoverAutoAddTest {
     }
 
     @Test
+    public void openModal_setTargetOutsideOfModal_popoverIsAttachedToUi() {
+        Div modal = new Div();
+        ui.add(modal);
+        ui.setChildComponentModal(modal, true);
+
+        Div target = new Div();
+        Popover popover = new Popover();
+        popover.setTarget(target);
+        ui.add(target);
+
+        Assert.assertEquals(ui, popover.getParent().orElseThrow());
+    }
+
+    @Test
     public void popoverWithTargetInModalComponent_popoverAttachedToModal() {
         var modal = new TestModalComponent();
         ui.add(modal);

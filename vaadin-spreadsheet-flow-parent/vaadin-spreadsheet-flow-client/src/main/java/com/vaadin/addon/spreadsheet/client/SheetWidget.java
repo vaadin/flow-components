@@ -3023,6 +3023,9 @@ public class SheetWidget extends Panel {
         resetRowAndColumnStyles();
         updateCells(vScrollDiff, hScrollDiff);
         ensureCellSelectionStyles();
+
+        // Notify handler to refresh custom editors after scroll
+        actionHandler.onSheetRelayoutComplete();
     }
 
     private void ensureCellSelectionStyles() {
