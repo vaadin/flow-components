@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,23 @@ public class ContextMenuManager implements Serializable {
     private final ArrayList<Icon> attachedActionIcons = new ArrayList<>();
 
     private int contextMenuHeaderIndex = -1;
+
+    /**
+     * Enum for spreadsheet action types.
+     */
+    enum ActionType {
+        CELL(0), ROW(1), COLUMN(2);
+
+        private final int value;
+
+        ActionType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
 
     /**
      * Constructs a new ContextMenuManager and ties it to the given Spreadsheet.
@@ -219,30 +238,11 @@ public class ContextMenuManager implements Serializable {
     protected ArrayList<SpreadsheetActionDetails> createActionsListForSelection() {
         ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
         for (Handler handler : actionHandlers) {
-            Action[] actions2 = handler.getActions(spreadsheet
+            Action[] handlerActions = handler.getActions(spreadsheet
                     .getCellSelectionManager().getLatestSelectionEvent(),
                     spreadsheet);
-            if (actions2 != null) {
-                for (Action action : actions2) {
-                    String key = actionMapper.key(action);
-                    SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
-                    spreadsheetActionDetails.caption = action.getCaption();
-                    spreadsheetActionDetails.key = key;
-                    spreadsheetActionDetails.type = 0;
-                    // Attach icon as virtual child and record node id
-                    if (action.getIcon() != null) {
-                        if (action.getIcon().getElement()
-                                .getParent() != spreadsheet.getElement()) {
-                            spreadsheet.getElement().appendVirtualChild(
-                                    action.getIcon().getElement());
-                        }
-                        spreadsheetActionDetails.iconNodeId = action.getIcon()
-                                .getElement().getNode().getId();
-                        attachedActionIcons.add(action.getIcon());
-                    }
-                    actions.add(spreadsheetActionDetails);
-                }
-            }
+            actions.addAll(
+                    createActionDetailsList(handlerActions, ActionType.CELL));
         }
         return actions;
     }
@@ -260,24 +260,9 @@ public class ContextMenuManager implements Serializable {
         final CellRangeAddress column = new CellRangeAddress(-1, -1,
                 columnIndex - 1, columnIndex - 1);
         for (Handler handler : actionHandlers) {
-            for (Action action : handler.getActions(column, spreadsheet)) {
-                String key = actionMapper.key(action);
-                SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
-                spreadsheetActionDetails.caption = action.getCaption();
-                spreadsheetActionDetails.key = key;
-                spreadsheetActionDetails.type = 2;
-                if (action.getIcon() != null) {
-                    if (action.getIcon().getElement().getParent() != spreadsheet
-                            .getElement()) {
-                        spreadsheet.getElement().appendVirtualChild(
-                                action.getIcon().getElement());
-                    }
-                    spreadsheetActionDetails.iconNodeId = action.getIcon()
-                            .getElement().getNode().getId();
-                    attachedActionIcons.add(action.getIcon());
-                }
-                actions.add(spreadsheetActionDetails);
-            }
+            Action[] handlerActions = handler.getActions(column, spreadsheet);
+            actions.addAll(
+                    createActionDetailsList(handlerActions, ActionType.COLUMN));
         }
         return actions;
     }
@@ -295,24 +280,9 @@ public class ContextMenuManager implements Serializable {
         final CellRangeAddress row = new CellRangeAddress(rowIndex - 1,
                 rowIndex - 1, -1, -1);
         for (Handler handler : actionHandlers) {
-            for (Action action : handler.getActions(row, spreadsheet)) {
-                String key = actionMapper.key(action);
-                SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
-                spreadsheetActionDetails.caption = action.getCaption();
-                spreadsheetActionDetails.key = key;
-                spreadsheetActionDetails.type = 1;
-                if (action.getIcon() != null) {
-                    if (action.getIcon().getElement().getParent() != spreadsheet
-                            .getElement()) {
-                        spreadsheet.getElement().appendVirtualChild(
-                                action.getIcon().getElement());
-                    }
-                    spreadsheetActionDetails.iconNodeId = action.getIcon()
-                            .getElement().getNode().getId();
-                    attachedActionIcons.add(action.getIcon());
-                }
-                actions.add(spreadsheetActionDetails);
-            }
+            Action[] handlerActions = handler.getActions(row, spreadsheet);
+            actions.addAll(
+                    createActionDetailsList(handlerActions, ActionType.ROW));
         }
         return actions;
     }
@@ -326,5 +296,33 @@ public class ContextMenuManager implements Serializable {
             spreadsheet.getElement().removeVirtualChild(icon.getElement());
         }
         attachedActionIcons.clear();
+    /**
+     * Helper method to create SpreadsheetActionDetails from actions.
+     *
+     * @param actions
+     *            Array of actions to convert
+     * @param actionType
+     *            Type of the action (cell, row, or column)
+     * @return List of SpreadsheetActionDetails
+     */
+    private ArrayList<SpreadsheetActionDetails> createActionDetailsList(
+            Action[] actions, ActionType actionType) {
+        ArrayList<SpreadsheetActionDetails> actionDetailsList = new ArrayList<SpreadsheetActionDetails>();
+        if (actions != null) {
+            for (Action action : actions) {
+                String key = actionMapper.key(action);
+                SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
+                String caption = action.getCaption();
+                if (caption == null) {
+                    caption = "";
+                }
+                spreadsheetActionDetails.caption = Jsoup.clean(caption,
+                        Safelist.relaxed());
+                spreadsheetActionDetails.key = key;
+                spreadsheetActionDetails.type = actionType.getValue();
+                actionDetailsList.add(spreadsheetActionDetails);
+            }
+        }
+        return actionDetailsList;
     }
 }
