@@ -35,16 +35,17 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
  *
  * @author Vaadin Ltd
  */
-@Route("vaadin-ai/ai-chat-demo")
+@Route("vaadin-ai/ai-chat-demo-experimental-component-features")
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
-public class AiChatDemoView extends VerticalLayout {
+public class AiChatExperimentalComponentFeaturesDemoView extends VerticalLayout {
 
-    public AiChatDemoView() {
+    public AiChatExperimentalComponentFeaturesDemoView() {
         setSizeFull();
 
         // Create UI components
         var messageList = new MessageList();
         messageList.setSizeFull();
+        messageList.setSnapToBottom(true);
         var messageInput = new MessageInput();
 
         // Upload Component for attachments
@@ -52,9 +53,12 @@ public class AiChatDemoView extends VerticalLayout {
         upload.setWidthFull();
         upload.setMaxFiles(5);
         upload.setMaxFileSize(5 * 1024 * 1024); // 5 MB
+        upload.getThemeNames().add("compact");
+        upload.getElement().setProperty("fileListAbove", true);
         upload.setAcceptedFileTypes("image/*", "application/pdf",
                 "text/plain");
-        upload.getElement().appendChild(messageInput.getElement());
+        upload.setUploadButton(new Button(LumoIcon.UPLOAD.create()));
+        upload.setDropAreaContent(messageInput);
         
         add(messageList, upload);
         setFlexGrow(1, messageList);
