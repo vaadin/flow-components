@@ -10,10 +10,10 @@ package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
 import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
-import com.vaadin.flow.component.ai.pro.chart.VisualizationType;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
@@ -43,15 +43,13 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
  * @author Vaadin Ltd
  */
 @Route("vaadin-ai/chat-with-dataviz-plugin")
+@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
 
     private Object savedState;
 
     public AiChatWithDataVizPluginDemo() {
         setSizeFull();
-        // Enable push for streaming
-        getUI().ifPresent(
-                ui -> ui.getPushConfiguration().setPushMode(PushMode.AUTOMATIC));
 
         // Chat section
         var messageList = new MessageList();

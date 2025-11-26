@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ai.orchestrator.Tool;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -41,6 +42,7 @@ import java.time.format.DateTimeParseException;
  * @author Vaadin Ltd
  */
 @Route("vaadin-ai/ai-chat-form-filler-demo")
+@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class AiChatFormFillerDemoView extends VerticalLayout {
 
     private TextField firstNameField;
@@ -52,9 +54,6 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
 
     public AiChatFormFillerDemoView() {
         setSizeFull();
-        // Enable push for streaming responses
-        getUI().ifPresent(ui -> ui.getPushConfiguration()
-                .setPushMode(PushMode.AUTOMATIC));
 
         // Create layout with form and chat side by side
         var mainLayout = new HorizontalLayout();

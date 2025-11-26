@@ -18,7 +18,7 @@ package com.vaadin.flow.component.ai.tests;
 import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -36,14 +36,11 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
  * @author Vaadin Ltd
  */
 @Route("vaadin-ai/ai-chat-demo")
+@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class AiChatDemoView extends VerticalLayout {
 
     public AiChatDemoView() {
         setSizeFull();
-        // Enable push for streaming responses
-        getUI().ifPresent(ui -> ui.getPushConfiguration()
-                .setPushMode(PushMode.AUTOMATIC));
-        
 
         // Upload Component for attachments
         var upload = new Upload();

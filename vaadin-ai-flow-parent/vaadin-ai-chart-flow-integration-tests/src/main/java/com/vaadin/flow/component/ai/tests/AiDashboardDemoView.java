@@ -16,6 +16,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
@@ -45,6 +46,7 @@ import java.util.Map;
  * @author Vaadin Ltd
  */
 @Route("vaadin-ai/ai-dashboard-demo")
+@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class AiDashboardDemoView extends VerticalLayout {
 
     private Dashboard dashboard;
@@ -53,9 +55,6 @@ public class AiDashboardDemoView extends VerticalLayout {
 
     public AiDashboardDemoView() {
         setSizeFull();
-        // Enable push for streaming responses
-        getUI().ifPresent(ui -> ui.getPushConfiguration()
-                .setPushMode(PushMode.AUTOMATIC));
 
         apiKey = System.getenv("OPENAI_API_KEY");
 
