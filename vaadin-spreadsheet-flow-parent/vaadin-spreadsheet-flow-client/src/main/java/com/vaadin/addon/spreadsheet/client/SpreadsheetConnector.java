@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -28,6 +29,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -106,19 +108,44 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     SpreadsheetWidget widget = getWidget();
                     SpreadsheetServerRpc rpcProxy = getRpcProxy(
                             SpreadsheetServerRpc.class);
-                    final String APP_ID =host.getPropertyString("appId");
+                    final String APP_ID = host.getPropertyString("appId");
+                    final HashMap<String, Element> renderedIconNodeIds = new HashMap<>();
+
                     for (SpreadsheetActionDetails actionDetail : actionDetails) {
-                        Element iconElement = null;
+                        String iconContainerId = null;
                         if (actionDetail.iconNodeId != null) {
-                            iconElement = SheetJsniUtil.getVirtualChild(actionDetail.iconNodeId, APP_ID);
+                            iconContainerId = "spreadsheet-icon-container-"
+                                    + actionDetail.iconNodeId;
+                            renderedIconNodeIds.put(iconContainerId,
+                                    SheetJsniUtil.getVirtualChild(
+                                            actionDetail.iconNodeId, APP_ID));
                         }
                         SpreadsheetAction spreadsheetAction = new SpreadsheetAction(
                                 this, rpcProxy, actionDetail.key,
-                                actionDetail.type, widget, iconElement);
+                                actionDetail.type, widget, iconContainerId);
                         spreadsheetAction.setCaption(actionDetail.caption);
                         actions.add(spreadsheetAction);
                     }
+                    attachIconsToContainers(renderedIconNodeIds);
                     return actions.toArray(new Action[actions.size()]);
+                }
+
+                private void attachIconsToContainers(
+                        HashMap<String, Element> renderedIconNodeIds) {
+                    if (renderedIconNodeIds.isEmpty()) {
+                        return;
+                    }
+                    // Need to wait for the actions to be rendered to the
+                    // context menu to then attach the icons to their containers
+                    AnimationScheduler.get()
+                            .requestAnimationFrame((timestamp) -> {
+                                for (String nodeId : renderedIconNodeIds
+                                        .keySet()) {
+                                    var container = DOM.getElementById(nodeId);
+                                    container.appendChild(
+                                            renderedIconNodeIds.get(nodeId));
+                                }
+                            });
                 }
             }, left, top);
         }
@@ -261,6 +288,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                         event.stopPropagation();
                     }
                 }, ContextMenuEvent.getType());
+
+        getConnection().getContextMenu().addCloseHandler(handler -> {
+            getRpcProxy(SpreadsheetServerRpc.class).contextMenuClosed();
+        });
 
         getRpcProxy(SpreadsheetServerRpc.class).onConnectorInit();
     }

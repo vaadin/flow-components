@@ -23,7 +23,7 @@ public class SpreadsheetAction extends Action {
 
     private SpreadsheetWidget widget;
 
-    private Element iconElement;
+    private String iconContainerId;
 
     public SpreadsheetAction(ActionOwner owner) {
         super(owner);
@@ -31,13 +31,13 @@ public class SpreadsheetAction extends Action {
 
     public SpreadsheetAction(ActionOwner owner, SpreadsheetServerRpc rpc,
             String key, int type, SpreadsheetWidget widget,
-            Element iconElement) {
+            String iconContainerId) {
         this(owner);
         this.rpc = rpc;
         this.type = type;
         this.widget = widget;
         actionKey = key;
-        this.iconElement = iconElement;
+        this.iconContainerId = iconContainerId;
     }
 
     @Override
@@ -57,16 +57,9 @@ public class SpreadsheetAction extends Action {
     public String getHTML() {
         StringBuilder sb = new StringBuilder();
         sb.append("<div>");
-        boolean iconRendered = false;
-        if (iconElement != null) {
-            sb.append(getOuterHTML(iconElement));
-            iconRendered = true;
-        }
-        if (!iconRendered) {
-            // Fallback to legacy iconUrl mechanism if present, else no icon
-            if (getIconUrl() != null) {
-                return super.getHTML();
-            }
+        if (iconContainerId != null && !iconContainerId.isEmpty()) {
+            sb.append("<div id=\"").append(iconContainerId)
+                    .append("\" style=\"display:contents\"></div>");
         }
         sb.append(getCaption());
         sb.append("</div>");

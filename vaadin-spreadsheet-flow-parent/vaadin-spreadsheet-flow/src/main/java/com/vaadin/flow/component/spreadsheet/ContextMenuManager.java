@@ -16,6 +16,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.Action.Handler;
@@ -39,6 +40,8 @@ public class ContextMenuManager implements Serializable {
     private KeyMapper<Action> actionMapper;
 
     private final Spreadsheet spreadsheet;
+
+    private final ArrayList<Icon> attachedActionIcons = new ArrayList<>();
 
     private int contextMenuHeaderIndex = -1;
 
@@ -235,6 +238,7 @@ public class ContextMenuManager implements Serializable {
                         }
                         spreadsheetActionDetails.iconNodeId = action.getIcon()
                                 .getElement().getNode().getId();
+                        attachedActionIcons.add(action.getIcon());
                     }
                     actions.add(spreadsheetActionDetails);
                 }
@@ -270,6 +274,7 @@ public class ContextMenuManager implements Serializable {
                     }
                     spreadsheetActionDetails.iconNodeId = action.getIcon()
                             .getElement().getNode().getId();
+                    attachedActionIcons.add(action.getIcon());
                 }
                 actions.add(spreadsheetActionDetails);
             }
@@ -304,6 +309,7 @@ public class ContextMenuManager implements Serializable {
                     }
                     spreadsheetActionDetails.iconNodeId = action.getIcon()
                             .getElement().getNode().getId();
+                    attachedActionIcons.add(action.getIcon());
                 }
                 actions.add(spreadsheetActionDetails);
             }
@@ -311,4 +317,14 @@ public class ContextMenuManager implements Serializable {
         return actions;
     }
 
+    public void onContextMenuClosed() {
+        removeActionIcons();
+    }
+
+    private void removeActionIcons() {
+        for (Icon icon : attachedActionIcons) {
+            spreadsheet.getElement().removeVirtualChild(icon.getElement());
+        }
+        attachedActionIcons.clear();
+    }
 }
