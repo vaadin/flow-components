@@ -296,6 +296,8 @@ public class ContextMenuManager implements Serializable {
             spreadsheet.getElement().removeVirtualChild(icon.getElement());
         }
         attachedActionIcons.clear();
+    }
+
     /**
      * Helper method to create SpreadsheetActionDetails from actions.
      *
@@ -318,6 +320,16 @@ public class ContextMenuManager implements Serializable {
                 }
                 spreadsheetActionDetails.caption = Jsoup.clean(caption,
                         Safelist.relaxed());
+                if (action.getIcon() != null) {
+                    Icon icon = action.getIcon();
+                    // Attach the icon to the spreadsheet so that it is
+                    // rendered in the DOM and can be referenced by id.
+                    spreadsheet.getElement()
+                            .appendVirtualChild(icon.getElement());
+                    attachedActionIcons.add(icon);
+                    int iconNodeId = icon.getElement().getNode().getId();
+                    spreadsheetActionDetails.iconNodeId = iconNodeId;
+                }
                 spreadsheetActionDetails.key = key;
                 spreadsheetActionDetails.type = actionType.getValue();
                 actionDetailsList.add(spreadsheetActionDetails);
