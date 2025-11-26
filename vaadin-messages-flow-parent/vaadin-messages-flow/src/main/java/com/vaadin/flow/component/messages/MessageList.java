@@ -392,4 +392,8 @@ public class MessageList extends Component
     public AiMessage createMessage(String text, String userName) {
         return new MessageListItem(text, Instant.now(), userName);
     }
+
+    public void setSnapToBottom(boolean snapToBottom) {
+        getElement().setProperty("snapToBottom", snapToBottom);
+    }
 }

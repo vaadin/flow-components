@@ -45,6 +45,7 @@ public class AiChatDemoView extends VerticalLayout {
         // Create UI components
         var messageList = new MessageList();
         messageList.setSizeFull();
+        messageList.setSnapToBottom(true);
         var messageInput = new MessageInput();
 
         // Upload Component for attachments
