@@ -8,7 +8,6 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
-import com.google.gwt.dom.client.Element;
 import com.vaadin.client.ui.Action;
 import com.vaadin.client.ui.ActionOwner;
 
@@ -65,9 +64,5 @@ public class SpreadsheetAction extends Action {
         sb.append("</div>");
         return sb.toString();
     }
-
-    private native String getOuterHTML(Element element) /*-{
-        return element.outerHTML;
-    }-*/;
 
 }

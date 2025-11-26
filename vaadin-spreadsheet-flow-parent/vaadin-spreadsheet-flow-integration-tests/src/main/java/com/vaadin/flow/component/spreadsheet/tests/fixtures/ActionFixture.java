@@ -26,15 +26,16 @@ public class ActionFixture implements SpreadsheetFixture {
         SpreadsheetActionHandler handler = new SpreadsheetActionHandler();
 
         handler.addRowHandler(new SpreadsheetActionHandler.Row() {
-            @Override public Action[] getActions(CellRangeAddress target,
-                Spreadsheet sender) {
-                return new Action[] {
-                    new Action("Do something", LumoIcon.CALENDAR.create())
-                };
+            @Override
+            public Action[] getActions(CellRangeAddress target,
+                    Spreadsheet sender) {
+                return new Action[] { new Action("Do something",
+                        LumoIcon.CALENDAR.create()) };
             }
 
-            @Override public void handleAction(Action action,
-                CellRangeAddress sender, Spreadsheet target) {
+            @Override
+            public void handleAction(Action action, CellRangeAddress sender,
+                    Spreadsheet target) {
                 System.out.println("Received action: " + action.getCaption());
             }
         });

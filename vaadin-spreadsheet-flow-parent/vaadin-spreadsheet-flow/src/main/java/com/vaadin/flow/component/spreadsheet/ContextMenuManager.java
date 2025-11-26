@@ -18,11 +18,11 @@ import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.Action.Handler;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.dom.Element;
 
 /**
  * ContextMenuManager is an utility class for the Spreadsheet component. This
@@ -43,7 +43,7 @@ public class ContextMenuManager implements Serializable {
 
     private final Spreadsheet spreadsheet;
 
-    private final ArrayList<Icon> attachedActionIcons = new ArrayList<>();
+    private final ArrayList<Element> iconsInContextMenu = new ArrayList<>();
 
     private int contextMenuHeaderIndex = -1;
 
@@ -291,13 +291,6 @@ public class ContextMenuManager implements Serializable {
         removeActionIcons();
     }
 
-    private void removeActionIcons() {
-        for (Icon icon : attachedActionIcons) {
-            spreadsheet.getElement().removeVirtualChild(icon.getElement());
-        }
-        attachedActionIcons.clear();
-    }
-
     /**
      * Helper method to create SpreadsheetActionDetails from actions.
      *
@@ -321,14 +314,13 @@ public class ContextMenuManager implements Serializable {
                 spreadsheetActionDetails.caption = Jsoup.clean(caption,
                         Safelist.relaxed());
                 if (action.getIcon() != null) {
-                    Icon icon = action.getIcon();
-                    // Attach the icon to the spreadsheet so that it is
-                    // rendered in the DOM and can be referenced by id.
-                    spreadsheet.getElement()
-                            .appendVirtualChild(icon.getElement());
-                    attachedActionIcons.add(icon);
-                    int iconNodeId = icon.getElement().getNode().getId();
-                    spreadsheetActionDetails.iconNodeId = iconNodeId;
+                    var icon = action.getIcon().getElement();
+                    // Attach the icon to the spreadsheet as a virtual child so
+                    // that it can be fetched by the client-side context menu.
+                    spreadsheet.getElement().appendVirtualChild(icon);
+                    iconsInContextMenu.add(icon);
+                    spreadsheetActionDetails.iconNodeId = icon.getNode()
+                            .getId();
                 }
                 spreadsheetActionDetails.key = key;
                 spreadsheetActionDetails.type = actionType.getValue();
@@ -336,5 +328,12 @@ public class ContextMenuManager implements Serializable {
             }
         }
         return actionDetailsList;
+    }
+
+    private void removeActionIcons() {
+        for (var icon : iconsInContextMenu) {
+            spreadsheet.getElement().removeVirtualChild(icon);
+        }
+        iconsInContextMenu.clear();
     }
 }
