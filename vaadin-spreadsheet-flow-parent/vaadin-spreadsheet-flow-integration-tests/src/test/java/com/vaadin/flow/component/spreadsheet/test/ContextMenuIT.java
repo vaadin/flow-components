@@ -92,7 +92,7 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
 
     @Test
     public void testHeaders() throws InterruptedException {
-        loadTestFixture(TestFixtures.IconAction);
+        loadTestFixture(TestFixtures.Action);
 
         getSpreadsheet().getColumnHeader(3).contextClick();
         clickItem("Column action");
