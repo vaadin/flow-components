@@ -108,11 +108,11 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         var cell = getSpreadsheet().getCellAt("B2");
         cell.contextClick();
 
-        var vaadinIcon = getIconFromAction("Vaadin number");
+        var vaadinIcon = getIconFromAction("Vaadin icon");
         Assert.assertEquals("vaadin:academy-cap",
                 vaadinIcon.getAttribute("icon"));
 
-        var lumoIcon = getIconFromAction("Lumo number");
+        var lumoIcon = getIconFromAction("Lumo icon");
         String lumoAttr = lumoIcon.getAttribute("icon");
         Assert.assertEquals("lumo:angle-up", lumoAttr);
     }

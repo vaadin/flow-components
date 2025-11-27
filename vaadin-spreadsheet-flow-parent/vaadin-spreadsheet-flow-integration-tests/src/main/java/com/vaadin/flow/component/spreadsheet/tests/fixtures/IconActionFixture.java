@@ -8,14 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.tests.SpreadsheetActionHandler;
-import com.vaadin.flow.component.spreadsheet.tests.SpreadsheetHelper;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 
 /**
@@ -51,14 +49,7 @@ public class IconActionFixture implements SpreadsheetFixture {
             public void handleAction(Action action,
                     Spreadsheet.SelectionChangeEvent sender,
                     Spreadsheet target) {
-                SpreadsheetHelper helper = new SpreadsheetHelper(
-                        sender.getSpreadsheet());
-
-                for (Cell cell : helper.selectedCell(sender).values()) {
-                    cell.setCellValue(7);
-                }
-
-                sender.getSpreadsheet().refreshAllCellValues();
+                // no-op
             }
 
             @Override
@@ -66,7 +57,7 @@ public class IconActionFixture implements SpreadsheetFixture {
                     Spreadsheet.SelectionChangeEvent selection,
                     Spreadsheet sender) {
                 return new Action[] {
-                        new Action("Lumo number", LumoIcon.ANGLE_UP.create()) };
+                        new Action("Lumo icon", LumoIcon.ANGLE_UP.create()) };
             }
         });
 
@@ -76,20 +67,13 @@ public class IconActionFixture implements SpreadsheetFixture {
             public void handleAction(Action action,
                     Spreadsheet.SelectionChangeEvent sender,
                     Spreadsheet target) {
-                SpreadsheetHelper helper = new SpreadsheetHelper(
-                        sender.getSpreadsheet());
-
-                for (Cell cell : helper.selectedCell(sender).values()) {
-                    cell.setCellValue(42);
-                }
-
-                sender.getSpreadsheet().refreshAllCellValues();
+                // no-op
             }
 
             @Override
             public Action[] getActions(Spreadsheet.SelectionChangeEvent target,
                     Spreadsheet sender) {
-                return new Action[] { new Action("Vaadin number",
+                return new Action[] { new Action("Vaadin icon",
                         VaadinIcon.ACADEMY_CAP.create()) };
             }
         });
@@ -99,13 +83,7 @@ public class IconActionFixture implements SpreadsheetFixture {
             @Override
             public void handleAction(Action action, CellRangeAddress sender,
                     Spreadsheet target) {
-                SpreadsheetHelper helper = new SpreadsheetHelper(target);
-                helper.retrieveCell(2, sender.getFirstColumn())
-                        .setCellValue("first column");
-                helper.retrieveCell(3, sender.getFirstColumn())
-                        .setCellValue("last column");
-
-                target.refreshAllCellValues();
+                // no-op
             }
 
             @Override
