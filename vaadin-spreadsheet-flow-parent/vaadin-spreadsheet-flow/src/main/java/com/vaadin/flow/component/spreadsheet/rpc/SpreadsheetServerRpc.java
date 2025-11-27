@@ -72,4 +72,8 @@ public interface SpreadsheetServerRpc extends SpreadsheetHandler {
      */
     void actionOnColumnHeader(String actionKey);
 
+    /**
+     * Context menu was closed.
+     */
+    void contextMenuClosed();
 }
