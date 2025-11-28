@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.ai.pro.chart;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.tool.AiToolBuilder;
@@ -16,7 +15,6 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -175,22 +173,10 @@ public final class ChartTools {
 
     // ===== Private Rendering Methods =====
 
-    private static void renderChart(Component visualizationContainer,
+    private static void renderChart(Chart chart,
             List<Map<String, Object>> queryResults,
             Map<String, Object> config, DataConverter dataConverter) {
         DataSeries series = dataConverter.convertToDataSeries(queryResults);
-
-        Chart chart;
-        if (visualizationContainer instanceof Chart) {
-            chart = (Chart) visualizationContainer;
-        } else {
-            chart = new Chart();
-            chart.setSizeFull();
-            if (visualizationContainer instanceof Div) {
-                ((Div) visualizationContainer).removeAll();
-                ((Div) visualizationContainer).add(chart);
-            }
-        }
 
         Configuration chartConfig = chart.getConfiguration();
         chartConfig.setSeries(series);

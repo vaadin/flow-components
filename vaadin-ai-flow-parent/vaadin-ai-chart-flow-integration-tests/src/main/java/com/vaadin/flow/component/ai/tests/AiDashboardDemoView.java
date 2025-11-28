@@ -173,21 +173,26 @@ public class AiDashboardDemoView extends VerticalLayout {
         // Get or create orchestrator for this widget
         AiOrchestrator orchestrator = orchestrators.get(widgetId);
         if (orchestrator == null) {
-            // Get the widget's visualization container
-            var visualizationContainer = dashboard.getChildren()
+            // Get the widget's chart
+            var widget = dashboard.getChildren()
                     .filter(c -> c instanceof DashboardWidget)
                     .map(c -> (DashboardWidget) c)
                     .filter(w -> widgetId.equals(w.getId().orElse(null)))
                     .findFirst()
-                    .map(w -> (Div) w.getContent())
-                    .orElseGet(() -> {
-                        var container = new Div();
-                        container.setSizeFull();
-                        return container;
-                    });
+                    .orElseThrow();
 
-            var chart = new Chart();
-            visualizationContainer.add(chart);
+            // Get or create chart in the widget
+            var content = (Div) widget.getContent();
+            var chart = content.getChildren()
+                    .filter(c -> c instanceof Chart)
+                    .map(c -> (Chart) c)
+                    .findFirst()
+                    .orElseGet(() -> {
+                        var newChart = new Chart();
+                        newChart.setSizeFull();
+                        content.add(newChart);
+                        return newChart;
+                    });
 
             // Create database provider and data converter
             var databaseProvider = new InMemoryDatabaseProvider();

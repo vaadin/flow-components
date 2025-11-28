@@ -9,10 +9,10 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
+import com.vaadin.flow.component.ai.pro.chart.ChartState;
 import com.vaadin.flow.component.ai.pro.chart.ChartStateSupport;
 import com.vaadin.flow.component.ai.pro.chart.ChartTools;
 import com.vaadin.flow.component.ai.pro.chart.DefaultDataConverter;
-import com.vaadin.flow.component.ai.pro.chart.VisualizationState;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -49,7 +49,7 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
 
-    private VisualizationState savedState;
+    private ChartState savedState;
 
     public AiChatWithDataVizPluginDemo() {
         setSizeFull();
@@ -65,6 +65,7 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         chatSection.setFlexGrow(1, messageList);
 
         var chart = new Chart();
+        chart.setSizeFull();
 
         // Visualization section
         var visualizationContainer = new Div(chart);
@@ -80,8 +81,7 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         var systemPrompt = ChartTools.defaultPrompt();
 
         // Create state support for persistence
-        var chartStateSupport = new ChartStateSupport(chart,
-                databaseProvider, dataConverter);
+        var chartStateSupport = new ChartStateSupport(chart);
 
         // Create LLM provider
         var model = OpenAiStreamingChatModel.builder()
@@ -105,9 +105,7 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
 
         var saveStateButton = new Button("Save Current State", e -> {
             savedState = chartStateSupport.capture();
-            if (savedState != null) {
-                restoreStateButton.setEnabled(true);
-            }
+            restoreStateButton.setEnabled(true);
         });
         saveStateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
