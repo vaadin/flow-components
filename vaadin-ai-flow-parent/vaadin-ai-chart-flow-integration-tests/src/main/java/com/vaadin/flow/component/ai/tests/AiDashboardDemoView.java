@@ -110,11 +110,8 @@ public class AiDashboardDemoView extends VerticalLayout {
         var widgetId = "widget-" + System.currentTimeMillis();
 
         // Create empty content
-        var content = new VerticalLayout();
+        var content = new Div();
         content.setSizeFull();
-        content.setJustifyContentMode(JustifyContentMode.CENTER);
-        content.setAlignItems(Alignment.CENTER);
-        content.add(VaadinIcon.DASHBOARD.create());
 
         // Create widget
         var widget = new DashboardWidget("Empty Widget");

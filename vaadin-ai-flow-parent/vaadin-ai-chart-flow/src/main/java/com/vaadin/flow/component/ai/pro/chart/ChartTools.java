@@ -247,6 +247,8 @@ public final class ChartTools {
             // Apply any remaining options as additional options
             if (!configurationNode.isEmpty()) {
                 if (chart.getElement() != null) {
+                    // TODO: all the above should not be needed. We should be able to
+                    // just set all options (except for series) via additionalOptions
                     chart.getElement().setPropertyJson("additionalOptions",
                             configurationNode);
                 }
