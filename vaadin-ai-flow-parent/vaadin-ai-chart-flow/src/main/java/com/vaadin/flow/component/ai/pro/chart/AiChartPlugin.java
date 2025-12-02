@@ -8,12 +8,12 @@
  */
 package com.vaadin.flow.component.ai.pro.chart;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.orchestrator.AiPlugin;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.*;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -71,10 +71,6 @@ public class AiChartPlugin implements AiPlugin {
 
     // State tracking for persistence
     private String currentSqlQuery;
-    private String currentConfiguration;
-
-    // UI reference for thread-safe updates
-    private transient UI currentUI;
 
     /**
      * Creates a new AI chart plugin.
@@ -147,23 +143,23 @@ public class AiChartPlugin implements AiPlugin {
         );
     }
 
-    
-    public ChartState captureState() {
+
+    public ChartState getState() {
         if (currentSqlQuery == null) {
             return null;
         }
-        return new ChartState(currentSqlQuery, currentConfiguration);
+        // Get configuration from chart as JSON
+        String configJson = ChartSerialization.toJSON(chart.getConfiguration());
+        return new ChartState(currentSqlQuery, configJson);
     }
 
-    
-    public void restoreState(ChartState state) {
-        
-        this.currentSqlQuery = state.sqlQuery;
-        this.currentConfiguration = state.configuration;
 
-        if (currentSqlQuery != null && currentConfiguration != null) {
+    public void restoreState(ChartState state) {
+        this.currentSqlQuery = state.sqlQuery;
+
+        if (currentSqlQuery != null && state.configuration != null) {
             try {
-                renderChart(currentSqlQuery, currentConfiguration);
+                renderChart(currentSqlQuery, state.configuration);
             } catch (Exception e) {
                 System.err.println("Failed to restore chart: " + e.getMessage());
             }
@@ -222,23 +218,18 @@ public class AiChartPlugin implements AiPlugin {
 
             @Override
             public String execute(String arguments) {
-                if (currentSqlQuery == null && currentConfiguration == null) {
+                ChartState state = getState();
+
+                if (state == null) {
                     return "{\"status\":\"empty\",\"message\":\"No chart has been created yet\"}";
                 }
 
-                StringBuilder state = new StringBuilder("{");
-                if (currentSqlQuery != null) {
-                    state.append("\"query\":\"").append(currentSqlQuery.replace("\"", "\\\"")).append("\"");
-                }
-                if (currentConfiguration != null && !currentConfiguration.equals("{}")) {
-                    if (currentSqlQuery != null) {
-                        state.append(",");
-                    }
-                    state.append("\"configuration\":").append(currentConfiguration);
-                }
-                state.append("}");
+                StringBuilder result = new StringBuilder("{");
+                result.append("\"query\":\"").append(state.sqlQuery().replace("\"", "\\\"")).append("\"");
+                result.append(",\"configuration\":").append(state.configuration());
+                result.append("}");
 
-                return state.toString();
+                return result.toString();
             }
         };
     }
@@ -268,8 +259,8 @@ public class AiChartPlugin implements AiPlugin {
 
                     currentSqlQuery = query;
 
-                    // Use existing configuration or empty config
-                    String config = currentConfiguration != null ? currentConfiguration : "{}";
+                    // Get existing configuration from chart
+                    String config = ChartSerialization.toJSON(chart.getConfiguration());
                     renderChart(query, config);
 
                     return "Chart data updated successfully";
@@ -303,11 +294,13 @@ public class AiChartPlugin implements AiPlugin {
                     ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
                     String config = node.get("config").toString();
 
-                    currentConfiguration = config;
+                    // Apply configuration directly to the chart
+                    applyChartConfig(chart, config);
 
-                    // If we have data, re-render with new config
+                    // If we have data, re-render to apply changes
                     if (currentSqlQuery != null) {
-                        renderChart(currentSqlQuery, config);
+                        String currentConfig = ChartSerialization.toJSON(chart.getConfiguration());
+                        renderChart(currentSqlQuery, currentConfig);
                         return "Chart configuration updated successfully";
                     } else {
                         return "Chart configuration saved. Use updateData to add data to the chart.";
@@ -328,21 +321,19 @@ public class AiChartPlugin implements AiPlugin {
 
         DataSeries series = chartDataConverter.convertToDataSeries(results);
 
-        // Update chart on UI thread
-        Runnable updateChart = () -> {
-            Configuration config = chart.getConfiguration();
-            config.setSeries(series);
+        chart.getUI().ifPresentOrElse(currentUI -> {
+            currentUI.access(() -> {
+                 Configuration config = chart.getConfiguration();
+                config.setSeries(series);
 
-            applyChartConfig(chart, configJson);
+                applyChartConfig(chart, configJson);
 
-            chart.drawChart();
-        };
-
-        if (currentUI != null) {
-            currentUI.access(() -> updateChart.run());
-        } else {
-            updateChart.run();
-        }
+                chart.drawChart();
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Chart is not attached to a UI");
+        });
     }
 
     private void applyChartConfig(Chart chart, String configJson) {

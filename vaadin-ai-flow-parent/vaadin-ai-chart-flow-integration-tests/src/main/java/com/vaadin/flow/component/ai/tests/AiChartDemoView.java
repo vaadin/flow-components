@@ -90,7 +90,7 @@ public class AiChartDemoView extends HorizontalLayout {
         });
 
         var saveStateButton = new Button("Save Current State", e -> {
-            savedState = chartPlugin.captureState();
+            savedState = chartPlugin.getState();
             if (savedState != null) {
                 restoreStateButton.setEnabled(true);
             }
