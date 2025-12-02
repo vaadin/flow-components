@@ -195,116 +195,104 @@ AiOrchestrator orchestrator = AiOrchestrator.create(provider)
 
 ## Chart Module: vaadin-ai-chart-flow (Commercial)
 
-**Purpose**: Provides data visualization capabilities as a plugin for AI orchestrators.
+**Purpose**: Provides chart visualization capabilities as a plugin for AI orchestrators.
 
-This module provides the `DataVisualizationPlugin` which can be added to any orchestrator (like `AiOrchestrator`) to enable AI-powered data visualization from natural language queries.
+This module provides the `AiChartPlugin` which can be added to any orchestrator (like `AiOrchestrator`) to enable AI-powered chart visualizations from natural language queries.
 
 ### Key Classes
 
-#### DataVisualizationPlugin
+#### AiChartPlugin
 
-**Location**: [DataVisualizationPlugin.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/DataVisualizationPlugin.java)
+**Location**: [AiChartPlugin.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/AiChartPlugin.java)
 
-**Pattern**: Plugin architecture with builder pattern for configuration
+**Pattern**: Direct constructor-based configuration (simple API)
 
-**Purpose**: Plugin that adds data visualization capabilities (charts, grids, KPIs) to AI orchestrators with dynamic type switching.
+**Purpose**: Plugin that adds AI-powered chart visualization capabilities to orchestrators using Vaadin Charts.
 
-**Configuration (Builder)**:
+**Configuration (Constructor)**:
 
-- `DatabaseProvider` (required) - database access for querying data
-- `Component visualizationContainer` (optional) - container where visualizations are rendered (can be Div, Chart, or any Component)
-- `DataConverter chartDataConverter` (optional) - converts query results to chart data (only used for chart visualizations)
-- `VisualizationType initialType` (optional) - initial visualization type (defaults to CHART)
+- `Chart chart` (required) - Vaadin Chart component instance where visualizations are rendered
+- `DatabaseProvider databaseProvider` (required) - provides database access for schema introspection and query execution
 
-**Supported Visualization Types**:
+**Supported Chart Types**:
 
-- **CHART**: Line, bar, column, pie, area charts using Vaadin Charts
-  - Requires 2-column data (label, value) after conversion
-  - Uses DataConverter for data transformation
-- **GRID**: Tabular data with sortable columns using Vaadin Grid
-  - Works directly with raw query results
-  - No conversion needed - shows all returned columns
-- **KPI**: Key Performance Indicator cards showing single metrics
-  - Extracts first value from query results
-  - Supports custom formatting and labels
+- **Line charts**: For trends over time
+- **Bar/Column charts**: For comparisons between categories
+- **Pie charts**: For showing proportions
+- **Area charts**: For cumulative values over time
 
 **Flow**:
 
-1. User submits natural language request (e.g., "Show sales by region as a chart")
+1. User submits natural language request (e.g., "Show sales by region as a bar chart")
 2. Orchestrator routes to plugin's tools
-3. AI generates SQL queries using database schema
-4. Tool executes query and renders visualization based on current type
-5. User can dynamically switch types: "Show this as a table instead"
-6. AI calls `changeVisualizationType` tool - same data, different rendering
+3. AI uses `getSchema()` to understand available data
+4. AI generates appropriate SQL query
+5. AI calls `updateChart()` with query and chart configuration
+6. Tool executes query, converts data, and updates the Chart component
+7. User can request changes: "Change that to a line chart"
+8. AI calls `updateChart()` again with new configuration
 
 **Key Features**:
 
+- **Simple API**: Direct constructor - `new AiChartPlugin(chart, databaseProvider)`
 - **Plugin Architecture**: Can be added to any orchestrator (AiOrchestrator, custom orchestrators)
-- **Dynamic Type Switching**: Users can change visualization types without re-querying
-- **Type-Specific Rendering**: Smart rendering based on visualization type
-  - Chart: Converts data via DataConverter, applies Highcharts config
-  - Grid: Direct rendering with auto-generated columns
-  - KPI: Extracts and formats single value
-- **State Management**: `VisualizationState` captures type, SQL query, and configuration
-- **Flexible Container**: Works with any Component container, not just Chart
+- **Chart-Focused**: Dedicated to chart visualizations (line, bar, column, pie, area)
+- **State Management**: `ChartState` captures SQL query and chart configuration for persistence
+- **Data Conversion**: Built-in `DefaultDataConverter` handles common query result formats
+- **Thread-Safe**: Automatic UI.access() wrapping for safe chart updates
 - **Composable**: Can be combined with other plugins in the same orchestrator
 
 **Tools**:
 
-1. `getSchema()` - Retrieves database schema
-2. `updateChart(query, config)` - Creates/updates chart visualization
-3. `updateGrid(query)` - Creates/updates grid/table visualization
-4. `updateKpi(query, label, format)` - Creates/updates KPI card
-5. `changeVisualizationType(type, config)` - Changes type while keeping current data
+1. `getSchema()` - Retrieves database schema (tables, columns, data types)
+2. `updateChart(query, config)` - Executes SQL query and creates/updates chart with specified type and configuration
 
-**System Prompt Contribution**: Instructs AI on available visualization types and when to use each
+**System Prompt**: Use static method `AiChartPlugin.getSystemPrompt()` to get the recommended system prompt text that describes chart capabilities to the AI
 
 **Example Usage**:
 
 ```java
-// Create plugin
-Div container = new Div();
-DataVisualizationPlugin plugin = DataVisualizationPlugin
-    .create(databaseProvider)
-    .withVisualizationContainer(container)
-    .withInitialType(VisualizationType.CHART)
-    .build();
+// Create chart component and plugin
+Chart chart = new Chart();
+AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
 
-// Add to orchestrator
+// Compose system prompt
+String systemPrompt = "You are a data visualization assistant. "
+        + AiChartPlugin.getSystemPrompt();
+
+// Create orchestrator with plugin
 AiOrchestrator orchestrator = AiOrchestrator
-    .create(llmProvider)
+    .create(llmProvider, systemPrompt)
     .withMessageList(messageList)
     .withInput(messageInput)
     .withPlugin(plugin)
     .build();
 
 // User can now say:
-// - "Show monthly revenue as a chart"
-// - "Convert this to a table"
-// - "Show total revenue as a KPI"
+// - "Show monthly revenue as a line chart"
+// - "Change that to a bar chart"
+// - "Display sales by region as a pie chart"
 // - "Tell me a joke" (regular chat, no visualization)
 ```
 
 **Dashboard Integration**:
 
-Perfect for dashboard applications where each widget needs different visualization types:
+Perfect for dashboard applications where each widget contains a chart:
 
 ```java
 Dashboard dashboard = new Dashboard();
 
-// Create widget with its own plugin
+// Create widget with chart
 DashboardWidget widget = new DashboardWidget("Sales Data");
-Div content = new Div();
-widget.setContent(content);
+Chart chart = new Chart();
+widget.setContent(chart);
 
-DataVisualizationPlugin plugin = DataVisualizationPlugin
-    .create(databaseProvider)
-    .withVisualizationContainer(content)
-    .build();
+// Create plugin for this chart
+AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
 
 // Create orchestrator for this widget with the plugin
 AiOrchestrator orchestrator = AiOrchestrator
-    .create(llm)
+    .create(llm, AiChartPlugin.getSystemPrompt())
     .withPlugin(plugin)
     .build();
 
@@ -316,11 +304,11 @@ dashboard.add(widget);
 ```java
 // Capture state
 Object state = plugin.captureState();
-// State contains: type, sqlQuery, configuration
+// State contains: sqlQuery, configuration (as ChartState record)
 
 // Later, restore
 plugin.restoreState(state);
-// Re-executes query and renders with saved type/config
+// Re-executes query and renders with saved configuration
 ```
 
 #### AiPlugin Interface
@@ -338,7 +326,7 @@ plugin.restoreState(state);
 - `restoreState(Object)` - Restores plugin from a previously captured state
 - `getPluginId()` - Returns unique identifier for this plugin type
 
-**System Prompts**: System prompts are now provided when creating the orchestrator, not via plugins. Built-in plugins like `DataVisualizationPlugin` provide a static helper method (e.g., `DataVisualizationPlugin.getSystemPrompt()`) to get the recommended prompt text.
+**System Prompts**: System prompts are now provided when creating the orchestrator, not via plugins. Built-in plugins like `AiChartPlugin` provide a static helper method (e.g., `AiChartPlugin.getSystemPrompt()`) to get the recommended prompt text.
 
 **Example Custom Plugin**:
 
@@ -363,12 +351,12 @@ public class MyCustomPlugin implements AiPlugin {
 // Use in orchestrator - provide system prompt at creation
 String systemPrompt = "You are a helpful assistant. "
     + MyCustomPlugin.getSystemPrompt()
-    + DataVisualizationPlugin.getSystemPrompt();
+    + AiChartPlugin.getSystemPrompt();
 
 AiOrchestrator orchestrator = AiOrchestrator
     .create(llmProvider, systemPrompt)
     .withPlugin(new MyCustomPlugin())
-    .withPlugin(dataVizPlugin)  // Multiple plugins!
+    .withPlugin(chartPlugin)  // Multiple plugins!
     .build();
 ```
 ## Architecture Patterns
@@ -557,6 +545,65 @@ mvn install -DskipTests
 - Tests: `*/src/test/java/` (mirrors main structure)
 
 ## Recent Changes
+
+### 2025-12-02: AiChartPlugin Simplification
+
+**Goal**: Simplify the chart plugin by focusing exclusively on chart visualizations and removing unnecessary complexity.
+
+**Changes**:
+- **Renamed**: `DataVisualizationPlugin` → `AiChartPlugin`
+  - Clearer name reflecting chart-focused purpose
+  - Updated all imports and references in demo views
+- **Removed Builder Pattern**: Replaced with simple direct constructor
+  - Old: `DataVisualizationPlugin.create(provider).withVisualizationContainer(div).build()`
+  - New: `new AiChartPlugin(chart, databaseProvider)`
+  - Chart component must be instantiated by user and passed to constructor
+- **Removed Grid and KPI Support**: Plugin now exclusively handles charts
+  - Removed `VisualizationType` enum
+  - Removed `updateGrid()` and `updateKpi()` tools
+  - Removed `changeVisualizationType()` tool
+  - Simplified to 2 tools only: `getSchema()` and `updateChart()`
+- **Simplified Constructor**:
+  - Takes `Chart` component directly (not a generic container)
+  - Takes `DatabaseProvider` for data access
+  - No optional parameters or builder configuration
+- **Updated State Management**:
+  - `ChartState` record now stores only: `sqlQuery` and `configuration`
+  - Removed visualization type from state
+  - Plugin ID changed from "DataVisualization" to "AiChart"
+- **Simplified Data Conversion**:
+  - Kept `DefaultDataConverter` for common cases
+  - Removed complex multi-type rendering logic
+- **Updated Demo Views**:
+  - `AiChatWithDataVizPluginDemo`: Now uses Chart component directly
+  - `AiDashboardDemoView`: Each widget creates its own Chart instance
+
+**Benefits**:
+- **Simpler API**: Just `new AiChartPlugin(chart, provider)` - no builder needed
+- **Clearer Purpose**: Chart-focused, not generic visualization
+- **Less Code**: ~370 lines vs ~800 lines (54% reduction)
+- **Better User Control**: Users instantiate and configure Chart component themselves
+- **Easier to Understand**: Single responsibility - chart visualization only
+
+**Migration**:
+```java
+// Old way (no longer supported)
+Div container = new Div();
+DataVisualizationPlugin plugin = DataVisualizationPlugin
+    .create(databaseProvider)
+    .withVisualizationContainer(container)
+    .withInitialType(VisualizationType.CHART)
+    .build();
+
+// New way
+Chart chart = new Chart();
+AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
+
+String systemPrompt = "You are helpful. " + AiChartPlugin.getSystemPrompt();
+AiOrchestrator.create(provider, systemPrompt)
+    .withPlugin(plugin)
+    .build();
+```
 
 ### 2025-12-02: Plugin System Prompt Simplification
 

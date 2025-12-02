@@ -9,12 +9,12 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
-import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
+import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -23,20 +23,19 @@ import com.vaadin.flow.router.Route;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
- * Demo showing how to use DataVisualizationPlugin with AiOrchestrator.
+ * Demo showing how to use AiChartPlugin with AiOrchestrator.
  * <p>
  * This demonstrates the plugin architecture where a single chat orchestrator
- * can be extended with data visualization capabilities. Users can chat
- * naturally and also request data visualizations.
+ * can be extended with chart visualization capabilities. Users can chat
+ * naturally and also request chart visualizations from database data.
  * </p>
  * <p>
  * Example queries:
  * </p>
  * <ul>
- * <li>"Show me the sales data by region as a chart"</li>
- * <li>"Convert that to a table"</li>
- * <li>"What's the total revenue?" (shows as KPI)</li>
- * <li>"Tell me a joke" (regular chat - no visualization)</li>
+ * <li>"Show me the sales data by region as a bar chart"</li>
+ * <li>"Change that to a line chart"</li>
+ * <li>"Display monthly revenue as a pie chart"</li>
  * </ul>
  *
  * @author Vaadin Ltd
@@ -60,15 +59,12 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         chatSection.setPadding(false);
         chatSection.setFlexGrow(1, messageList);
 
-        // Visualization section
-        var visualizationContainer = new Div();
-        visualizationContainer.setSizeFull();
+        // Chart visualization section
+        var chart = new Chart();
+        chart.setSizeFull();
 
-        // Create data visualization plugin
-        var dataVizPlugin = DataVisualizationPlugin
-                .create(new InMemoryDatabaseProvider())
-                .withVisualizationContainer(visualizationContainer)
-                .build();
+        // Create AI chart plugin
+        var chartPlugin = new AiChartPlugin(chart, new InMemoryDatabaseProvider());
 
         // Create LLM provider
         var model = OpenAiStreamingChatModel.builder()
@@ -77,10 +73,10 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with plugin
-        AiOrchestrator.create(provider, DataVisualizationPlugin.getSystemPrompt())
+        AiOrchestrator.create(provider, AiChartPlugin.getSystemPrompt())
                 .withMessageList(messageList)
                 .withInput(messageInput)
-                .withPlugin(dataVizPlugin)
+                .withPlugin(chartPlugin)
                 .build();
 
         // State management buttons
@@ -88,12 +84,12 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         restoreStateButton.setEnabled(false);
         restoreStateButton.addClickListener(e -> {
             if (savedState != null) {
-                dataVizPlugin.restoreState(savedState);
+                chartPlugin.restoreState(savedState);
             }
         });
 
         var saveStateButton = new Button("Save Current State", e -> {
-            savedState = dataVizPlugin.captureState();
+            savedState = chartPlugin.captureState();
             if (savedState != null) {
                 restoreStateButton.setEnabled(true);
             }
@@ -102,12 +98,12 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
 
         var buttonBar = new HorizontalLayout(saveStateButton, restoreStateButton);
 
-        var vizSection = new VerticalLayout(visualizationContainer, buttonBar);
-        vizSection.setWidth("50%");
-        vizSection.setPadding(false);
-        vizSection.setFlexGrow(1, visualizationContainer);
-        vizSection.setFlexGrow(0, buttonBar);
+        var chartSection = new VerticalLayout(chart, buttonBar);
+        chartSection.setWidth("50%");
+        chartSection.setPadding(false);
+        chartSection.setFlexGrow(1, chart);
+        chartSection.setFlexGrow(0, buttonBar);
 
-        add(chatSection, vizSection);       
+        add(chatSection, chartSection);
     }
 }

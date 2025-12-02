@@ -9,15 +9,14 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
-import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
-import com.vaadin.flow.component.ai.pro.chart.VisualizationType;
+import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
@@ -27,20 +26,20 @@ import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.popover.PopoverPosition;
 import com.vaadin.flow.component.popover.PopoverVariant;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Demo view for AI Dashboard with multiple visualization types.
+ * Demo view for AI Dashboard with chart visualizations.
  * <p>
- * Demonstrates the new AiDataVisualizationOrchestrator which supports:
- * - Charts (line, bar, pie, column, area)
- * - Grids (tables with sortable columns)
- * - KPIs (key performance indicator cards)
- * - Dynamic type switching ("show this as a table")
+ * Demonstrates the AiChartPlugin with a dashboard layout where each widget
+ * can contain an AI-powered chart visualization. Charts support multiple types:
+ * - Line charts (for trends over time)
+ * - Bar/Column charts (for comparisons)
+ * - Pie charts (for proportions)
+ * - Area charts (for cumulative values)
  * </p>
  *
  * @author Vaadin Ltd
@@ -50,7 +49,7 @@ import java.util.Map;
 public class AiDashboardDemoView extends VerticalLayout {
 
     private Dashboard dashboard;
-    private Map<String, DataVisualizationPlugin> plugins = new HashMap<>();
+    private Map<String, AiChartPlugin> plugins = new HashMap<>();
     private String apiKey;
 
     public AiDashboardDemoView() {
@@ -92,20 +91,15 @@ public class AiDashboardDemoView extends VerticalLayout {
     }
 
     private void addSampleWidgets() {
-        // Add a chart widget
-        DashboardWidget chartWidget = createWidget("Revenue by Month",
-                VisualizationType.CHART);
-        dashboard.add(chartWidget);
+        // Add sample chart widgets
+        DashboardWidget chartWidget1 = createWidget("Revenue by Month");
+        dashboard.add(chartWidget1);
 
-        // Add a grid widget
-        DashboardWidget gridWidget = createWidget("Sales Data",
-                VisualizationType.GRID);
-        dashboard.add(gridWidget);
+        DashboardWidget chartWidget2 = createWidget("Sales by Region");
+        dashboard.add(chartWidget2);
 
-        // Add a KPI widget
-        DashboardWidget kpiWidget = createWidget("Total Revenue",
-                VisualizationType.KPI);
-        dashboard.add(kpiWidget);
+        DashboardWidget chartWidget3 = createWidget("Product Performance");
+        dashboard.add(chartWidget3);
     }
 
     private DashboardWidget createEmptyWidget() {
@@ -130,22 +124,21 @@ public class AiDashboardDemoView extends VerticalLayout {
         return widget;
     }
 
-    private DashboardWidget createWidget(String title,
-            VisualizationType type) {
+    private DashboardWidget createWidget(String title) {
         var widgetId = "widget-" + System.currentTimeMillis();
 
-        // Create visualization container
-        var visualizationContainer = new Div();
-        visualizationContainer.setSizeFull();
+        // Create chart component
+        var chart = new Chart();
+        chart.setSizeFull();
 
         // Create widget
         var widget = new DashboardWidget(title);
         widget.setId(widgetId);
         widget.setRowspan(2);
-        widget.setContent(visualizationContainer);
+        widget.setContent(chart);
 
         // Create plugin for this widget
-        var plugin = createPlugin(visualizationContainer, type);
+        var plugin = createPlugin(chart);
         plugins.put(widgetId, plugin);
 
         // Add configure button
@@ -155,7 +148,7 @@ public class AiDashboardDemoView extends VerticalLayout {
     }
 
     private void addConfigureButton(DashboardWidget widget, String widgetId,
-            DataVisualizationPlugin plugin) {
+            AiChartPlugin plugin) {
         var configureButton = new Button(VaadinIcon.COG.create());
         configureButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
                 ButtonVariant.LUMO_SMALL);
@@ -166,7 +159,7 @@ public class AiDashboardDemoView extends VerticalLayout {
     }
 
     private void openWidgetChat(String widgetId, String widgetTitle,
-            DataVisualizationPlugin plugin, Button configureButton) {
+            AiChartPlugin plugin, Button configureButton) {
         // Create chat container
         var chatContainer = new VerticalLayout();
         chatContainer.setPadding(false);
@@ -180,17 +173,17 @@ public class AiDashboardDemoView extends VerticalLayout {
 
         // Create or update plugin with chat UI
         if (plugin == null) {
-            var visualizationContainer = new Div();
-            visualizationContainer.setSizeFull();
+            var chart = new Chart();
+            chart.setSizeFull();
 
             // Get the widget and update its content
             dashboard.getChildren()
                     .filter(c -> c instanceof DashboardWidget)
                     .map(c -> (DashboardWidget) c)
                     .filter(w -> widgetId.equals(w.getId().orElse(null)))
-                    .findFirst().ifPresent(w -> w.setContent(visualizationContainer));
+                    .findFirst().ifPresent(w -> w.setContent(chart));
 
-            plugin = createPlugin(visualizationContainer, VisualizationType.CHART);
+            plugin = createPlugin(chart);
             plugins.put(widgetId, plugin);
         }
 
@@ -200,7 +193,7 @@ public class AiDashboardDemoView extends VerticalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with plugin
-        AiOrchestrator.create(provider, DataVisualizationPlugin.getSystemPrompt())
+        AiOrchestrator.create(provider, AiChartPlugin.getSystemPrompt())
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withPlugin(plugin)
@@ -229,11 +222,8 @@ public class AiDashboardDemoView extends VerticalLayout {
         popover.open();
     }
 
-    private DataVisualizationPlugin createPlugin(
-            Div visualizationContainer, VisualizationType initialType) {
-        // Create plugin
-        return DataVisualizationPlugin.create(new InMemoryDatabaseProvider())
-                .withVisualizationContainer(visualizationContainer)
-                .withInitialType(initialType).build();
+    private AiChartPlugin createPlugin(Chart chart) {
+        // Create plugin with chart and database provider
+        return new AiChartPlugin(chart, new InMemoryDatabaseProvider());
     }
 }
