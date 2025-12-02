@@ -78,4 +78,36 @@ public interface AiPlugin extends Serializable {
     default List<LLMProvider.Tool> getTools() {
         return Collections.emptyList();
     }
+
+    /**
+     * Called by the orchestrator when an LLM request cycle has completed.
+     * <p>
+     * This method is invoked after all tool executions for a given user request
+     * have finished and the LLM has generated its final response. Plugins can
+     * use this callback to perform deferred operations, such as rendering UI
+     * updates or committing state changes.
+     * </p>
+     * <p>
+     * The default implementation does nothing.
+     * </p>
+     *
+     * <h3>Example Usage:</h3>
+     *
+     * <pre>
+     * public class MyPlugin implements AiPlugin {
+     *     private PendingOperation pendingOp;
+     *
+     *     &#64;Override
+     *     public void onRequestCompleted() {
+     *         if (pendingOp != null) {
+     *             pendingOp.execute();
+     *             pendingOp = null;
+     *         }
+     *     }
+     * }
+     * </pre>
+     */
+    default void onRequestCompleted() {
+        // Default: do nothing
+    }
 }

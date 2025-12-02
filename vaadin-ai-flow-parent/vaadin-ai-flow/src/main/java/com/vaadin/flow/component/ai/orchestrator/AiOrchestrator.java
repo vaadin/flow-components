@@ -675,7 +675,15 @@ public class AiOrchestrator implements Serializable {
      * additional actions after streaming completes.
      */
     protected void onProcessingComplete() {
-        // Default: do nothing
+        // Notify all plugins that the request has completed
+        for (AiPlugin plugin : plugins) {
+            try {
+                plugin.onRequestCompleted();
+            } catch (Exception e) {
+                System.err.println("Error in plugin onRequestCompleted: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

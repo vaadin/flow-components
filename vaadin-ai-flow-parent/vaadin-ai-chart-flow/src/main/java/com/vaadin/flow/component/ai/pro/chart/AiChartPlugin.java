@@ -76,6 +76,19 @@ public class AiChartPlugin implements AiPlugin {
     // State change listeners
     private final List<ChartStateChangeListener> stateChangeListeners = new ArrayList<>();
 
+    // Pending chart rendering (deferred until request completes)
+    private PendingRender pendingRender;
+
+    private static class PendingRender {
+        final String sqlQuery;
+        final String configJson;
+
+        PendingRender(String sqlQuery, String configJson) {
+            this.sqlQuery = sqlQuery;
+            this.configJson = configJson;
+        }
+    }
+
     /**
      * Creates a new AI chart plugin.
      *
@@ -210,6 +223,27 @@ public class AiChartPlugin implements AiPlugin {
         );
     }
 
+    @Override
+    public void onRequestCompleted() {
+        // Execute any pending chart render
+        if (pendingRender != null) {
+            try {
+                // If we have data, render with data; otherwise just apply config
+                if (pendingRender.sqlQuery != null) {
+                    renderChart(pendingRender.sqlQuery, pendingRender.configJson);
+                } else {
+                    applyChartConfig(chart, pendingRender.configJson);
+                }
+                // Fire state change event after rendering
+                fireStateChangeEvent();
+            } catch (Exception e) {
+                System.err.println("Error rendering chart: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                pendingRender = null;
+            }
+        }
+    }
 
     public ChartState getState() {
         if (currentSqlQuery == null) {
@@ -338,12 +372,11 @@ public class AiChartPlugin implements AiPlugin {
 
                     // Get existing configuration from chart
                     String config = ChartSerialization.toJSON(chart.getConfiguration());
-                    renderChart(query, config);
 
-                    // Fire state change event
-                    AiChartPlugin.this.fireStateChangeEvent();
+                    // Defer rendering until request completes
+                    pendingRender = new PendingRender(query, config);
 
-                    return "Chart data updated successfully";
+                    return "Chart data update queued successfully";
                 } catch (Exception e) {
                     return "Error updating chart data: " + e.getMessage();
                 }
@@ -524,16 +557,10 @@ public class AiChartPlugin implements AiPlugin {
                         ? node.get("config").toString()
                         : node.toString();
 
-                    // If we have data, re-render to apply changes
-                    if (currentSqlQuery != null) {
-                        renderChart(currentSqlQuery, config);
-                        
-                    } else {
-                        // Apply configuration directly to the chart
-                        applyChartConfig(chart, config);
-                    }
-                    AiChartPlugin.this.fireStateChangeEvent();
-                    return "Chart configuration updated successfully";
+                    // Queue the configuration update for deferred execution
+                    pendingRender = new PendingRender(currentSqlQuery, config);
+
+                    return "Chart configuration update queued successfully";
                 } catch (Exception e) {
                     return "Error updating chart configuration: " + e.getMessage();
                 }
