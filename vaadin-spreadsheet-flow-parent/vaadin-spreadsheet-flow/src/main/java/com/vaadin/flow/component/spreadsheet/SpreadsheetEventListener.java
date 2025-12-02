@@ -175,6 +175,8 @@ public class SpreadsheetEventListener
             handler.onPopupButtonClick(toInt(pars, 0), toInt(pars, 1));
         } else if ("popupClose".equals(type)) {
             handler.onPopupClose(toInt(pars, 0), toInt(pars, 1));
+        } else if ("contextMenuClosed".equals(type)) {
+            handler.contextMenuClosed();
         }
     }
 
