@@ -115,25 +115,36 @@ public class AiChartPlugin implements AiPlugin {
 
                 TOOLS:
                 1. getSchema() - Retrieves database schema (tables, columns, types)
-                2. updateChart(query, config) - Creates/updates a chart visualization
+                2. getCurrentState() - Returns current chart state (query and configuration)
+                3. updateData(query) - Updates chart data with SQL SELECT query
+                4. updateConfig(config) - Updates chart configuration (type, title, tooltip, etc.)
                    - Supports: line, bar, column, pie, area charts
                    - Config includes chart type and Highcharts options
 
                 WORKFLOW:
-                1. Use getSchema() to understand available data
-                2. Create appropriate SQL queries (SELECT only)
-                3. Choose the right chart type based on user request and data
+                1. ALWAYS call getCurrentState() FIRST before making any changes
+                2. Use getSchema() if you need to understand available data
+                3. Use updateData() to change data source
+                4. Use updateConfig() to change chart appearance
 
-                GUIDELINES:
+                IMPORTANT:
+                - ALWAYS check getCurrentState() before making any modifications
+                - This helps you understand what's already configured and make informed changes
                 - For trends over time: use line or area charts
                 - For comparisons: use bar or column charts
                 - For proportions: use pie charts
+                - You can update data and config independently
                 """;
     }
 
     @Override
     public List<LLMProvider.Tool> getTools() {
-        return List.of(createGetSchemaTool(), createUpdateChartTool());
+        return List.of(
+                createGetSchemaTool(),
+                createGetCurrentStateTool(),
+                createUpdateDataTool(),
+                createUpdateConfigTool()
+        );
     }
 
     
@@ -192,18 +203,56 @@ public class AiChartPlugin implements AiPlugin {
         };
     }
 
-    private LLMProvider.Tool createUpdateChartTool() {
+    private LLMProvider.Tool createGetCurrentStateTool() {
         return new LLMProvider.Tool() {
             @Override
             public String getName() {
-                return "updateChart";
+                return "getCurrentState";
             }
 
             @Override
             public String getDescription() {
-                return "Creates or updates a chart visualization. Parameters: "
-                        + "query (string) - SQL SELECT query, "
-                        + "config (object, optional) - Chart configuration with 'type' (line/bar/column/pie/area) and Highcharts options.";
+                return "Returns the current state of the chart including the SQL query and configuration. Takes no parameters.";
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                if (currentSqlQuery == null && currentConfiguration == null) {
+                    return "{\"status\":\"empty\",\"message\":\"No chart has been created yet\"}";
+                }
+
+                StringBuilder state = new StringBuilder("{");
+                if (currentSqlQuery != null) {
+                    state.append("\"query\":\"").append(currentSqlQuery.replace("\"", "\\\"")).append("\"");
+                }
+                if (currentConfiguration != null && !currentConfiguration.equals("{}")) {
+                    if (currentSqlQuery != null) {
+                        state.append(",");
+                    }
+                    state.append("\"configuration\":").append(currentConfiguration);
+                }
+                state.append("}");
+
+                return state.toString();
+            }
+        };
+    }
+
+    private LLMProvider.Tool createUpdateDataTool() {
+        return new LLMProvider.Tool() {
+            @Override
+            public String getName() {
+                return "updateData";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Updates the chart data using a SQL SELECT query. Parameters: query (string) - SQL SELECT query to retrieve data.";
             }
 
             @Override
@@ -214,23 +263,57 @@ public class AiChartPlugin implements AiPlugin {
             @Override
             public String execute(String arguments) {
                 try {
-                    ObjectNode node = (ObjectNode) JacksonUtils
-                            .readTree(arguments);
+                    ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
                     String query = node.get("query").asString();
 
-                    // Store configuration for persistence
-                    String config = node.has("config")
-                            ? node.get("config").toString()
-                            : "{}";
-
                     currentSqlQuery = query;
-                    currentConfiguration = config;
 
+                    // Use existing configuration or empty config
+                    String config = currentConfiguration != null ? currentConfiguration : "{}";
                     renderChart(query, config);
 
-                    return "Chart updated successfully";
+                    return "Chart data updated successfully";
                 } catch (Exception e) {
-                    return "Error updating chart: " + e.getMessage();
+                    return "Error updating chart data: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    private LLMProvider.Tool createUpdateConfigTool() {
+        return new LLMProvider.Tool() {
+            @Override
+            public String getName() {
+                return "updateConfig";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Updates the chart configuration (type, title, tooltip, etc.). Parameters: config (object) - Chart configuration with 'type' (line/bar/column/pie/area) and Highcharts options.";
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
+                    String config = node.get("config").toString();
+
+                    currentConfiguration = config;
+
+                    // If we have data, re-render with new config
+                    if (currentSqlQuery != null) {
+                        renderChart(currentSqlQuery, config);
+                        return "Chart configuration updated successfully";
+                    } else {
+                        return "Chart configuration saved. Use updateData to add data to the chart.";
+                    }
+                } catch (Exception e) {
+                    return "Error updating chart configuration: " + e.getMessage();
                 }
             }
         };
