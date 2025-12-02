@@ -11,7 +11,7 @@ package com.vaadin.flow.component.ai.pro.chart;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.orchestrator.AiPlugin;
-import com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -50,7 +50,7 @@ import java.util.*;
  *     .build();
  *
  * // Add to orchestrator
- * AiChatOrchestrator orchestrator = AiChatOrchestrator.create(llmProvider)
+ * AiOrchestrator orchestrator = AiOrchestrator.create(llmProvider)
  *     .withMessageList(messageList)
  *     .withInput(messageInput)
  *     .withPlugin(plugin)
@@ -75,7 +75,7 @@ public class DataVisualizationPlugin implements AiPlugin {
 
     // UI reference for thread-safe updates
     private transient UI currentUI;
-    private transient BaseAiOrchestrator orchestrator;
+    private transient AiOrchestrator orchestrator;
 
     private DataVisualizationPlugin(DatabaseProvider databaseProvider) {
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
@@ -161,7 +161,7 @@ public class DataVisualizationPlugin implements AiPlugin {
     }
 
     @Override
-    public void onAttached(BaseAiOrchestrator orchestrator) {
+    public void onAttached(AiOrchestrator orchestrator) {
         this.orchestrator = orchestrator;
 
         // Get UI context - try multiple sources

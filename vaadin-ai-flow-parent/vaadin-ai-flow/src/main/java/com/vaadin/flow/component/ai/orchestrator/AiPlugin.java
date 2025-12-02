@@ -115,7 +115,7 @@ public interface AiPlugin extends Serializable {
      * @param orchestrator
      *            the orchestrator this plugin is attached to
      */
-    default void onAttached(BaseAiOrchestrator orchestrator) {
+    default void onAttached(AiOrchestrator orchestrator) {
         // Default: no action
     }
 

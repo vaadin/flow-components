@@ -36,20 +36,43 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * Base class for AI orchestrators providing common functionality.
+ * Orchestrator for AI-powered chat interfaces.
  * <p>
- * This abstract class handles:
+ * This class connects an {@link AiMessageList}, {@link AiInput}, and an
+ * {@link LLMProvider} to create an interactive AI chat experience. It handles:
  * </p>
  * <ul>
- * <li>LLM provider management</li>
- * <li>Input component integration</li>
- * <li>File upload integration</li>
- * <li>UI context validation</li>
+ * <li>Streaming responses from the LLM to the message list</li>
+ * <li>Automatic UI updates via server push</li>
+ * <li>Optional file upload support</li>
+ * <li>Plugin architecture for extending functionality</li>
+ * <li>Input validation for security</li>
  * </ul>
+ * <p>
+ * Conversation history is managed internally by the {@link LLMProvider}
+ * instance. Each orchestrator maintains its own conversation context through
+ * its provider instance.
+ * </p>
+ * <p>
+ * Example usage:
+ * </p>
+ *
+ * <pre>
+ * MessageList messageList = new MessageList();
+ * MessageInput messageInput = new MessageInput();
+ *
+ * LLMProvider provider = new LangChain4jProvider(model);
+ * provider.setSystemPrompt("You are a helpful assistant.");
+ *
+ * AiOrchestrator orchestrator = AiOrchestrator.create(provider)
+ *         .withMessageList(messageList)
+ *         .withInput(messageInput)
+ *         .build();
+ * </pre>
  *
  * @author Vaadin Ltd
  */
-public abstract class BaseAiOrchestrator implements Serializable {
+public class AiOrchestrator implements Serializable {
 
     protected final LLMProvider provider;
     protected AiMessageList messageList;
@@ -62,14 +85,25 @@ public abstract class BaseAiOrchestrator implements Serializable {
     private UI ui;
 
     /**
-     * Creates a new base orchestrator.
+     * Creates a new AI orchestrator.
      *
      * @param provider
      *            the LLM provider to use for generating responses
      */
-    protected BaseAiOrchestrator(LLMProvider provider) {
+    private AiOrchestrator(LLMProvider provider) {
         Objects.requireNonNull(provider, "Provider cannot be null");
         this.provider = provider;
+    }
+
+    /**
+     * Creates a new builder for AiOrchestrator.
+     *
+     * @param provider
+     *            the LLM provider
+     * @return a new builder
+     */
+    public static Builder create(LLMProvider provider) {
+        return new Builder(provider);
     }
 
     /**
@@ -680,14 +714,9 @@ public abstract class BaseAiOrchestrator implements Serializable {
     }
 
     /**
-     * Base builder for orchestrators.
-     *
-     * @param <T>
-     *            the orchestrator type being built
-     * @param <B>
-     *            the builder type (for method chaining)
+     * Builder for AiOrchestrator.
      */
-    protected abstract static class BaseBuilder<T extends BaseAiOrchestrator, B extends BaseBuilder<T, B>> {
+    public static class Builder {
         protected final LLMProvider provider;
         protected AiMessageList messageList;
         protected AiInput input;
@@ -696,7 +725,7 @@ public abstract class BaseAiOrchestrator implements Serializable {
         protected Object[] toolObjects = new Object[0];
         protected List<AiPlugin> plugins = new ArrayList<>();
 
-        protected BaseBuilder(LLMProvider provider) {
+        private Builder(LLMProvider provider) {
             this.provider = provider;
         }
 
@@ -707,9 +736,9 @@ public abstract class BaseAiOrchestrator implements Serializable {
          *            the message list
          * @return this builder
          */
-        public B withMessageList(AiMessageList messageList) {
+        public Builder withMessageList(AiMessageList messageList) {
             this.messageList = messageList;
-            return self();
+            return this;
         }
 
         /**
@@ -719,9 +748,9 @@ public abstract class BaseAiOrchestrator implements Serializable {
          *            the input component
          * @return this builder
          */
-        public B withInput(AiInput input) {
+        public Builder withInput(AiInput input) {
             this.input = input;
-            return self();
+            return this;
         }
 
         /**
@@ -731,9 +760,9 @@ public abstract class BaseAiOrchestrator implements Serializable {
          *            the file receiver
          * @return this builder
          */
-        public B withFileReceiver(AiFileReceiver fileReceiver) {
+        public Builder withFileReceiver(AiFileReceiver fileReceiver) {
             this.fileReceiver = fileReceiver;
-            return self();
+            return this;
         }
 
         /**
@@ -748,9 +777,9 @@ public abstract class BaseAiOrchestrator implements Serializable {
          *            the input validator
          * @return this builder
          */
-        public B withInputValidator(InputValidator inputValidator) {
+        public Builder withInputValidator(InputValidator inputValidator) {
             this.inputValidator = inputValidator;
-            return self();
+            return this;
         }
 
         /**
@@ -762,9 +791,9 @@ public abstract class BaseAiOrchestrator implements Serializable {
          *            the objects containing tool methods
          * @return this builder
          */
-        public B withTools(Object... toolObjects) {
+        public Builder withTools(Object... toolObjects) {
             this.toolObjects = toolObjects != null ? toolObjects : new Object[0];
-            return self();
+            return this;
         }
 
         /**
@@ -779,30 +808,21 @@ public abstract class BaseAiOrchestrator implements Serializable {
          *            the plugin to add
          * @return this builder
          */
-        public B withPlugin(AiPlugin plugin) {
+        public Builder withPlugin(AiPlugin plugin) {
             if (plugin != null) {
                 this.plugins.add(plugin);
             }
-            return self();
+            return this;
         }
 
         /**
-         * Returns this builder instance with the correct type.
+         * Builds the orchestrator.
          *
-         * @return this builder
+         * @return the configured orchestrator
          */
-        @SuppressWarnings("unchecked")
-        protected B self() {
-            return (B) this;
-        }
+        public AiOrchestrator build() {
+            AiOrchestrator orchestrator = new AiOrchestrator(provider);
 
-        /**
-         * Applies common configuration to the orchestrator being built.
-         *
-         * @param orchestrator
-         *            the orchestrator to configure
-         */
-        protected void applyCommonConfiguration(T orchestrator) {
             orchestrator.setMessageList(messageList);
             orchestrator.setInput(input);
             orchestrator.setFileReceiver(fileReceiver);
@@ -828,13 +848,8 @@ public abstract class BaseAiOrchestrator implements Serializable {
             if (fileReceiver != null) {
                 orchestrator.configureFileReceiver();
             }
-        }
 
-        /**
-         * Builds the orchestrator.
-         *
-         * @return the configured orchestrator
-         */
-        public abstract T build();
+            return orchestrator;
+        }
     }
 }

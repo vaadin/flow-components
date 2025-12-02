@@ -8,7 +8,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
 import com.vaadin.flow.component.ai.pro.chart.VisualizationType;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
@@ -200,7 +200,7 @@ public class AiDashboardDemoView extends VerticalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with plugin
-        AiChatOrchestrator.create(provider)
+        AiOrchestrator.create(provider)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withPlugin(plugin)

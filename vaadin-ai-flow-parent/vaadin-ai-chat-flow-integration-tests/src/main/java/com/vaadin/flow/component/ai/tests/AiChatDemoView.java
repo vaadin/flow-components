@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -67,7 +67,7 @@ public class AiChatDemoView extends VerticalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator with input validation
-        AiChatOrchestrator.create(provider)
+        AiOrchestrator.create(provider)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)

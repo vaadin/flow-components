@@ -8,16 +8,15 @@ The `vaadin-ai-flow-parent` is a multi-module Maven project containing AI-powere
 
 ```
 vaadin-ai-flow-parent/
-├── vaadin-ai-flow/              # Core AI abstractions and base components
-├── vaadin-ai-chat-flow/         # AI Chat orchestrator (standard)
-├── vaadin-ai-chart-flow/        # AI Chart orchestrator (commercial)
+├── vaadin-ai-flow/              # Core AI abstractions, orchestrator, and components
+├── vaadin-ai-chart-flow/        # AI Chart data visualization plugin (commercial)
 ├── vaadin-ai-chat-flow-integration-tests/   # Integration tests for chat
 └── vaadin-ai-chart-flow-integration-tests/  # Integration tests for charts
 ```
 
 ## Core Module: vaadin-ai-flow
 
-**Purpose**: Provides core interfaces and abstractions for AI-powered components, including the base orchestrator class.
+**Purpose**: Provides core interfaces, abstractions, and the main `AiOrchestrator` class for AI-powered components.
 
 ### Key Interfaces
 
@@ -91,10 +90,22 @@ vaadin-ai-flow-parent/
 - Interface representing a single message in a conversation
 - Properties: text, time, userName
 
-#### BaseAiOrchestrator (`com.vaadin.flow.component.ai.orchestrator.BaseAiOrchestrator`)
+### AiOrchestrator (`com.vaadin.flow.component.ai.orchestrator.AiOrchestrator`)
 
-- Abstract base class for all AI orchestrators providing common functionality
-- **Shared Functionality**:
+**Location**: [AiOrchestrator.java](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/AiOrchestrator.java)
+
+**Purpose**: Main orchestrator class for AI-powered chat interfaces that connects user input, LLM providers, and message display.
+
+**Pattern**: Builder pattern for configuration
+
+**Components**:
+
+- `LLMProvider` (required) - handles AI generation
+- `AiMessageList` (optional) - displays messages
+- `AiInput` (optional) - captures user input
+- `AiFileReceiver` (optional) - handles file uploads
+
+**Core Functionality**:
   - LLM provider management
   - Message list, input, and file receiver integration
   - UI context validation
@@ -108,87 +119,85 @@ vaadin-ai-flow-parent/
   - Thread-safe UI updates via `UI.access()`
   - Error handling for streaming responses
   - Automatic UI.access() wrapping for @Tool annotated methods
-- **Template Method Pattern**:
+
+**Template Method Pattern**:
   - `handleUserInput(event)` validates input, adds user message, then calls `processUserInput(message)`
   - `processUserInput(message)` builds LLM request, handles attachments, streams response
-  - Subclasses customize behavior by overriding hook methods
-- **Programmatic Message API**:
+  - Hook methods available for customization
+
+**Programmatic Message API**:
   - `sendMessage(String userMessage)` - send messages without requiring an input component
   - Useful for triggering AI interaction from button clicks or other UI events
   - Example: `orchestrator.sendMessage("Analyze the uploaded file");`
-- **Hook Methods** (subclasses override for customization):
 
-  - `createTools()` - returns array of tools for the LLM (default: empty array)
+**Hook Methods** (can be overridden for customization):
+  - `createTools()` - returns array of tools for the LLM (default: from plugins only)
   - `getSystemPrompt()` - returns system prompt for the LLM (default: null)
-
   - `onProcessingComplete()` - called after streaming completes (default: no-op)
 
-- **Tool Annotation Support**:
+**Tool Annotation Support**:
   - Use `@Tool` annotation to define methods that can be called by the LLM
   - Use `@ParameterDescription` to describe method parameters
-  - Configure tools via builder: `.setTools(this)` or `.setTools(toolObject)`
+  - Configure tools via builder: `.withTools(this)` or `.withTools(toolObject)`
   - Automatic UI.access() wrapping: Tool methods are automatically executed within UI.access() if a UI is available
   - UI is obtained from the input component's getUI() method
   - If no UI is available, tools execute directly (no warning)
   - Developers don't need to manually wrap tool code in UI.access()
-- **File Attachment Support**:
-  - Manages `pendingAttachments` list for both orchestrators
+
+**Plugin Support**:
+  - Extensible via `AiPlugin` interface
+  - Plugins can contribute tools, system prompts, and manage state
+  - Add plugins via builder: `.withPlugin(new MyPlugin())`
+  - Multiple plugins can be active simultaneously
+
+**File Attachment Support**:
+  - Manages `pendingAttachments` list
   - Automatically configures file receiver upload handlers
   - Clears attachments after including them in LLM requests
-- **Builder Pattern**:
-  - Provides `BaseBuilder` abstract class for fluent API configuration
-  - Automatically registers input listeners in `applyCommonConfiguration()`
-  - Automatically configures file receivers when provided
-- **Benefits**: Eliminates code duplication between ChatOrchestrator and ChartOrchestrator
-- Both chat and chart orchestrators extend this base class and inherit common behavior
 
-## Chat Module: vaadin-ai-chat-flow
-
-**Purpose**: Orchestrates AI chat interactions between user input, LLM, and message display.
-
-### Key Class: AiChatOrchestrator
-
-**Location**: [AiChatOrchestrator.java](vaadin-ai-chat-flow/src/main/java/com/vaadin/flow/component/ai/chat/AiChatOrchestrator.java)
-
-**Pattern**: Builder pattern for configuration
-
-**Components**:
-
-- `LLMProvider` (required) - handles AI generation
-- `AiMessageList` (optional) - displays messages
-- `AiInput` (optional) - captures user input
-- `AiFileReceiver` (optional) - handles file uploads
+**Builder Pattern**:
+  - Use `AiOrchestrator.create(provider)` to start building
+  - Fluent API for configuration: `.withMessageList()`, `.withInput()`, `.withFileReceiver()`, `.withPlugin()`, `.withTools()`
+  - Call `.build()` to construct the orchestrator
+  - Automatically registers input listeners and configures file receivers
 
 **Flow**:
-
 1. User submits input via `AiInput`
-2. Base class `handleUserInput()` validates input and adds user message to `AiMessageList`
-3. Base class `processUserInput()` builds LLM request and calls `LLMProvider.stream()`
-4. Base class streams tokens to assistant message in real-time
+2. `handleUserInput()` validates input and adds user message to `AiMessageList`
+3. `processUserInput()` builds LLM request and calls `LLMProvider.stream()`
+4. Streams tokens to assistant message in real-time
 5. Provider manages conversation history internally
 
-**Key Features**:
-
-- Extends `BaseAiOrchestrator` for all functionality
-- Uses base class `processUserInput()` implementation with default hook methods
-- No tools (returns empty array from `createTools()`)
-- No system prompt override (returns null from `getSystemPrompt()`)
-- Conversation history managed internally by the provider instance
+**Conversation History**:
+- Managed internally by the provider instance
+- Each orchestrator maintains its own conversation context through its provider
 - System prompts configured at the provider level (via `provider.setSystemPrompt()`)
-- All streaming, error handling, and file attachment support inherited from base class
-- Minimal code - just constructor, builder, and getter
 
-**Testing**: [AiChatOrchestratorTest](vaadin-ai-chat-flow/src/test/java/com/vaadin/flow/component/ai/chat/AiChatOrchestratorTest.java) (extensive, ~40+ tests)
-
+**Testing**: [AiOrchestratorTest](vaadin-ai-flow/src/test/java/com/vaadin/flow/component/ai/orchestrator/AiOrchestratorTest.java) (extensive, 50+ tests)
 - Tests verify LLMRequest properties (userMessage) instead of message history
 - Uses ArgumentCaptor<LLMProvider.LLMRequest> to capture and validate requests
 - Verifies that multiple messages use the same provider instance for conversation continuity
+
+**Example Usage**:
+
+```java
+MessageList messageList = new MessageList();
+MessageInput messageInput = new MessageInput();
+
+LLMProvider provider = new LangChain4jProvider(model);
+provider.setSystemPrompt("You are a helpful assistant.");
+
+AiOrchestrator orchestrator = AiOrchestrator.create(provider)
+        .withMessageList(messageList)
+        .withInput(messageInput)
+        .build();
+```
 
 ## Chart Module: vaadin-ai-chart-flow (Commercial)
 
 **Purpose**: Provides data visualization capabilities as a plugin for AI orchestrators.
 
-This module provides the `DataVisualizationPlugin` which can be added to any orchestrator (like `AiChatOrchestrator`) to enable AI-powered data visualization from natural language queries.
+This module provides the `DataVisualizationPlugin` which can be added to any orchestrator (like `AiOrchestrator`) to enable AI-powered data visualization from natural language queries.
 
 ### Key Classes
 
@@ -230,7 +239,7 @@ This module provides the `DataVisualizationPlugin` which can be added to any orc
 
 **Key Features**:
 
-- **Plugin Architecture**: Can be added to any orchestrator (AiChatOrchestrator, custom orchestrators)
+- **Plugin Architecture**: Can be added to any orchestrator (AiOrchestrator, custom orchestrators)
 - **Dynamic Type Switching**: Users can change visualization types without re-querying
 - **Type-Specific Rendering**: Smart rendering based on visualization type
   - Chart: Converts data via DataConverter, applies Highcharts config
@@ -262,7 +271,7 @@ DataVisualizationPlugin plugin = DataVisualizationPlugin
     .build();
 
 // Add to orchestrator
-AiChatOrchestrator orchestrator = AiChatOrchestrator
+AiOrchestrator orchestrator = AiOrchestrator
     .create(llmProvider)
     .withMessageList(messageList)
     .withInput(messageInput)
@@ -294,7 +303,7 @@ DataVisualizationPlugin plugin = DataVisualizationPlugin
     .build();
 
 // Create orchestrator for this widget with the plugin
-AiChatOrchestrator orchestrator = AiChatOrchestrator
+AiOrchestrator orchestrator = AiOrchestrator
     .create(llm)
     .withPlugin(plugin)
     .build();
@@ -324,7 +333,7 @@ plugin.restoreState(state);
 
 - `getTools()` - Returns list of tools this plugin provides to the LLM
 - `getSystemPromptContribution()` - Returns text to add to the system prompt
-- `onAttached(BaseAiOrchestrator)` - Called when plugin is attached to an orchestrator
+- `onAttached(AiOrchestrator)` - Called when plugin is attached to an orchestrator
 - `onDetached()` - Called when plugin is detached (cleanup)
 - `captureState()` - Returns serializable state object for persistence
 - `restoreState(Object)` - Restores plugin from a previously captured state
@@ -345,13 +354,13 @@ public class MyCustomPlugin implements AiPlugin {
     }
 
     @Override
-    public void onAttached(BaseAiOrchestrator orchestrator) {
+    public void onAttached(AiOrchestrator orchestrator) {
         // Initialize plugin
     }
 }
 
 // Use in orchestrator
-AiChatOrchestrator orchestrator = AiChatOrchestrator
+AiOrchestrator orchestrator = AiOrchestrator
     .create(llmProvider)
     .withPlugin(new MyCustomPlugin())
     .withPlugin(dataVizPlugin)  // Multiple plugins!
@@ -372,7 +381,7 @@ All core components are interfaces, allowing flexible implementations:
 Both orchestrators use builders for clean, fluent configuration:
 
 ```java
-AiChatOrchestrator orchestrator = AiChatOrchestrator.create(provider)
+AiOrchestrator orchestrator = AiOrchestrator.create(provider)
     .withMessageList(messageList)
     .withInput(input)
     .build();
@@ -397,7 +406,7 @@ AI Chart orchestrator demonstrates tool/function calling:
 
 ### 5. Thread Safety
 
-All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server push:
+All orchestrators (via AiOrchestrator) use `UI.access()` for Vaadin's server push:
 
 - All UI updates wrapped in access() calls
 - Validates UI context exists before operations
@@ -472,8 +481,7 @@ All orchestrators (via BaseAiOrchestrator) use `UI.access()` for Vaadin's server
 
 ### Licensing
 
-- `vaadin-ai-flow` - Apache 2.0 (standard)
-- `vaadin-ai-chat-flow` - Apache 2.0 (standard)
+- `vaadin-ai-flow` - Apache 2.0 (includes core orchestrator)
 - `vaadin-ai-chart-flow` - Commercial license (Pro tier)
 
 ### Serialization
@@ -526,10 +534,10 @@ Chart orchestrator tools execute database queries:
 mvn clean install
 
 # Run unit tests only
-mvn test -pl vaadin-ai-flow,vaadin-ai-chat-flow,vaadin-ai-chart-flow
+mvn test -pl vaadin-ai-flow,vaadin-ai-chart-flow
 
 # Run specific test
-mvn test -Dtest=AiChatOrchestratorTest
+mvn test -Dtest=AiOrchestratorTest -pl vaadin-ai-flow
 
 # Skip integration tests
 mvn install -DskipTests
@@ -538,13 +546,40 @@ mvn install -DskipTests
 ### Code Locations
 
 - Core interfaces: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/`
-- Base orchestrator: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/`
+- AiOrchestrator: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/`
 - Providers: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/`
-- Chat orchestrator: `vaadin-ai-chat-flow/src/main/java/com/vaadin/flow/component/ai/chat/`
-- Chart orchestrator: `vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/`
+- Chart plugin: `vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/`
 - Tests: `*/src/test/java/` (mirrors main structure)
 
 ## Recent Changes
+
+### 2025-12-02: Orchestrator Consolidation
+
+**Goal**: Simplify the architecture by removing redundancy and making `AiOrchestrator` the single entry point for chat orchestration.
+
+**Changes**:
+- **Removed**: `AiChatOrchestrator` class from `vaadin-ai-chat-flow` module
+  - Was a thin wrapper that only provided a builder around `BaseAiOrchestrator`
+  - All functionality moved to the base class
+- **Renamed**: `BaseAiOrchestrator` → `AiOrchestrator`
+  - Changed from abstract class to concrete class
+  - Made constructor private, added public `create()` factory method
+  - Simplified builder from generic `BaseBuilder<T, B>` to concrete `Builder`
+  - Updated all references in demo views and plugins
+- **Moved**: Test class from `vaadin-ai-chat-flow` to `vaadin-ai-flow`
+  - `AiChatOrchestratorTest` → `AiOrchestratorTest`
+  - Updated package from `com.vaadin.flow.component.ai.chat` to `com.vaadin.flow.component.ai.orchestrator`
+- **Module simplification**: `vaadin-ai-chat-flow` module no longer needed
+  - Core orchestrator now lives in `vaadin-ai-flow` alongside interfaces
+  - Chart functionality remains as a plugin in `vaadin-ai-chart-flow`
+
+**Benefits**:
+- Single, clear entry point: `AiOrchestrator.create(provider).build()`
+- No confusion between base class and concrete implementation
+- Cleaner module structure - core orchestrator in core module
+- Plugin pattern more prominent (chart functionality as plugin)
+
+**API Impact**: Minimal - users now use `AiOrchestrator` instead of `AiChatOrchestrator`, but the builder API remains identical.
 
 ### 2025-11-21: Chart State Persistence API (Phase 1, 2 & 3 - Complete)
 
@@ -612,9 +647,9 @@ mvn install -DskipTests
   - Real-time collaboration: Notify other users of chart changes
 - Updated AGENTS.md documentation with event system usage
 
-### 2025-11-21: Complete BaseAiOrchestrator Refactoring
+### 2025-11-21: Complete AiOrchestrator Refactoring
 
-- Created `BaseAiOrchestrator` abstract base class to eliminate ALL code duplication
+- Created `AiOrchestrator` abstract base class to eliminate ALL code duplication
 - Moved complete processing logic to base class:
   - User message handling (`addUserMessageToList()`)
   - Assistant message placeholder creation (`createAssistantMessagePlaceholder()`)
@@ -627,7 +662,7 @@ mvn install -DskipTests
 - Hook Method pattern implementation:
   - Base class provides complete `processUserInput()` implementation
   - Subclasses customize via hook methods: `createTools()`, `getSystemPrompt()`, `onProcessingComplete()`
-  - AiChatOrchestrator uses all default hook implementations (no tools, no system prompt)
+  - AiOrchestrator uses all default hook implementations (no tools, no system prompt)
   - AiChartOrchestrator overrides all hooks for tool support and chart-specific behavior
   - Eliminates need for subclasses to duplicate processing logic
 - Builder improvements:
@@ -642,7 +677,7 @@ mvn install -DskipTests
   - Chat orchestrator requires messageList (default false)
   - Chart orchestrator can work without messageList (returns true, tools update chart directly)
 - Code reduction:
-  - AiChatOrchestrator reduced to minimal code (~20 lines - just constructor, builder, getter)
+  - AiOrchestrator reduced to minimal code (~20 lines - just constructor, builder, getter)
   - AiChartOrchestrator simplified significantly with hook method overrides
   - Eliminated ~150+ lines of duplicate code
 - All existing tests pass (129 tests total: 33 + 42 + 54)

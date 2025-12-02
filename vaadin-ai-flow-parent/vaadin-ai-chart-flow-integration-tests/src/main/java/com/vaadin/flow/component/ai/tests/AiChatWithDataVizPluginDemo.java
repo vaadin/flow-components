@@ -8,7 +8,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.chat.AiChatOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.pro.chart.DataVisualizationPlugin;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
@@ -24,7 +24,7 @@ import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
- * Demo showing how to use DataVisualizationPlugin with AiChatOrchestrator.
+ * Demo showing how to use DataVisualizationPlugin with AiOrchestrator.
  * <p>
  * This demonstrates the plugin architecture where a single chat orchestrator
  * can be extended with data visualization capabilities. Users can chat
@@ -78,7 +78,7 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with plugin
-        AiChatOrchestrator.create(provider)
+        AiOrchestrator.create(provider)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withPlugin(dataVizPlugin)

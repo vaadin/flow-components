@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.chat;
+package com.vaadin.flow.component.ai.orchestrator;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.input.AiInput;
@@ -38,9 +38,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for {@link AiChatOrchestrator}.
+ * Tests for {@link AiOrchestrator}.
  */
-public class AiChatOrchestratorTest {
+public class AiOrchestratorTest {
 
     private LLMProvider mockProvider;
     private AiMessageList mockMessageList;
@@ -88,18 +88,18 @@ public class AiChatOrchestratorTest {
 
     @Test
     public void create_withProvider_returnsBuilder() {
-        AiChatOrchestrator.Builder builder = AiChatOrchestrator.create(mockProvider);
+        AiOrchestrator.Builder builder = AiOrchestrator.create(mockProvider);
         assertNotNull("Builder should not be null", builder);
     }
 
     @Test(expected = NullPointerException.class)
     public void build_withNullProvider_throwsException() {
-        AiChatOrchestrator.create(null).build();
+        AiOrchestrator.create(null).build();
     }
 
     @Test
     public void build_withMinimalConfiguration_createsOrchestrator() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator orchestrator = AiOrchestrator.create(mockProvider)
                 .build();
 
         assertNotNull("Orchestrator should not be null", orchestrator);
@@ -108,7 +108,7 @@ public class AiChatOrchestratorTest {
 
     @Test
     public void build_withInput_setsInputAndRegistersListener() {
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withInput(mockInput)
                 .build();
 
@@ -117,7 +117,7 @@ public class AiChatOrchestratorTest {
 
     @Test
     public void builderPattern_allowsFluentChaining() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator orchestrator = AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .withFileReceiver(mockFileReceiver)
@@ -131,7 +131,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -150,7 +150,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -169,7 +169,7 @@ public class AiChatOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -193,7 +193,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -224,7 +224,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("AI", " ", "response"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -253,7 +253,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Hello", " ", "World"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -281,7 +281,7 @@ public class AiChatOrchestratorTest {
                 .thenReturn(Flux.just("Response 1"))
                 .thenReturn(Flux.just("Response 2"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -312,7 +312,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(errorFlux);
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -339,7 +339,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withInput(mockInput)
                 .build();
 
@@ -353,7 +353,7 @@ public class AiChatOrchestratorTest {
 
     @Test
     public void build_withoutInput_doesNotRegisterListener() {
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .build();
 
@@ -362,13 +362,13 @@ public class AiChatOrchestratorTest {
 
     @Test
     public void orchestrator_isSerializable() {
-        assertTrue("AiChatOrchestrator should be serializable",
-                java.io.Serializable.class.isAssignableFrom(AiChatOrchestrator.class));
+        assertTrue("AiOrchestrator should be serializable",
+                java.io.Serializable.class.isAssignableFrom(AiOrchestrator.class));
     }
 
     @Test
     public void getProvider_returnsConfiguredProvider() {
-        AiChatOrchestrator orchestrator = AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator orchestrator = AiOrchestrator.create(mockProvider)
                 .build();
 
         assertSame("Should return the same provider instance", mockProvider,
@@ -385,7 +385,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Hello", " ", "World"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -422,7 +422,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(errorFlux);
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -455,7 +455,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response", " ", "text"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -496,7 +496,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("The", " ", "quick", " ", "brown", " ", "fox"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -526,7 +526,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.empty());
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -555,7 +555,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("SingleToken"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -582,7 +582,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -609,7 +609,7 @@ public class AiChatOrchestratorTest {
                 .thenReturn(Flux.just("Second"))
                 .thenReturn(Flux.just("Third"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -641,7 +641,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response 1"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -675,10 +675,10 @@ public class AiChatOrchestratorTest {
 
     @Test
     public void builder_canBeReused() {
-        AiChatOrchestrator.Builder builder = AiChatOrchestrator.create(mockProvider);
+        AiOrchestrator.Builder builder = AiOrchestrator.create(mockProvider);
 
-        AiChatOrchestrator orchestrator1 = builder.withMessageList(mockMessageList).build();
-        AiChatOrchestrator orchestrator2 = builder.withInput(mockInput).build();
+        AiOrchestrator orchestrator1 = builder.withMessageList(mockMessageList).build();
+        AiOrchestrator orchestrator2 = builder.withInput(mockInput).build();
 
         assertNotNull("First orchestrator should be created", orchestrator1);
         assertNotNull("Second orchestrator should be created", orchestrator2);
@@ -695,7 +695,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -720,7 +720,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -749,7 +749,7 @@ public class AiChatOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         // Build without message list
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withInput(mockInput)
                 .build();
 
@@ -777,7 +777,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.fromArray(tokens));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -804,7 +804,7 @@ public class AiChatOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -828,8 +828,8 @@ public class AiChatOrchestratorTest {
 
     @Test
     public void orchestrator_serializableCompliance() {
-        assertTrue("AiChatOrchestrator should implement Serializable",
-                Serializable.class.isAssignableFrom(AiChatOrchestrator.class));
+        assertTrue("AiOrchestrator should implement Serializable",
+                Serializable.class.isAssignableFrom(AiOrchestrator.class));
     }
 
     @Test
@@ -842,7 +842,7 @@ public class AiChatOrchestratorTest {
                 .thenReturn(Flux.<String>error(new RuntimeException("Error")))
                 .thenReturn(Flux.just("Success"));
 
-        AiChatOrchestrator.create(mockProvider)
+        AiOrchestrator.create(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
