@@ -67,7 +67,7 @@ public class AiChartPlugin implements AiPlugin {
 
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
-    private final DataConverter chartDataConverter;
+    private DataConverter chartDataConverter;
 
     // State tracking for persistence
     private String currentSqlQuery;
@@ -85,6 +85,21 @@ public class AiChartPlugin implements AiPlugin {
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
         this.chartDataConverter = new DefaultDataConverter();
+    }
+
+    /**
+     * Sets a custom data converter for transforming query results into chart data.
+     * <p>
+     * Use this to customize how database query results are converted to chart series.
+     * If not set, the default converter is used which assumes the first column is the
+     * category/X-axis and remaining columns are values/Y-axis.
+     * </p>
+     *
+     * @param dataConverter the data converter to use, cannot be null
+     */
+    public void setDataConverter(DataConverter dataConverter) {
+        this.chartDataConverter = Objects.requireNonNull(dataConverter,
+                "Data converter cannot be null");
     }
 
     /**
