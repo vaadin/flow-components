@@ -73,7 +73,7 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with plugin
-        AiOrchestrator.create(provider, AiChartPlugin.getSystemPrompt())
+        AiOrchestrator.builder(provider, AiChartPlugin.getSystemPrompt())
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withPlugin(chartPlugin)

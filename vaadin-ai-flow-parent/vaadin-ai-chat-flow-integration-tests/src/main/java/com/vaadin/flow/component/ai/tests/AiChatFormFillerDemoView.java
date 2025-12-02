@@ -83,7 +83,7 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator with form filling tools
-        var orchestrator = AiOrchestrator.create(provider)
+        var orchestrator = AiOrchestrator.builder(provider)
                 .withFileReceiver(upload)
                 .withTools(this).build();
 

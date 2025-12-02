@@ -69,7 +69,7 @@ import java.util.List;
  * }
  *
  * // Use the plugin
- * AiOrchestrator orchestrator = AiOrchestrator.create(llmProvider)
+ * AiOrchestrator orchestrator = AiOrchestrator.builder(llmProvider)
  *     .withPlugin(new MyPlugin())
  *     .build();
  * </pre>

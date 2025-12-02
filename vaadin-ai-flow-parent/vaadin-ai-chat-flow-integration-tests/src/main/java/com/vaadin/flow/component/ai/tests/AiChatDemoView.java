@@ -68,7 +68,7 @@ public class AiChatDemoView extends VerticalLayout {
                 + "If you don't know the answer, say so honestly.";
 
         // Create and configure orchestrator with input validation
-        AiOrchestrator.create(provider, systemPrompt)
+        AiOrchestrator.builder(provider, systemPrompt)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)

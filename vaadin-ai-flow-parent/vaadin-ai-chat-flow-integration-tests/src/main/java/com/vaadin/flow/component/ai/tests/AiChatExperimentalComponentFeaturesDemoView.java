@@ -71,7 +71,7 @@ public class AiChatExperimentalComponentFeaturesDemoView extends VerticalLayout 
         var provider = new LangChain4JLLMProvider(model);
 
         // Create and configure orchestrator with input validation
-        AiOrchestrator.create(provider)
+        AiOrchestrator.builder(provider)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)

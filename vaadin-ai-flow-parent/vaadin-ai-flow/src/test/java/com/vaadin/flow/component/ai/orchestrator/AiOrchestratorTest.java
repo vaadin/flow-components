@@ -88,18 +88,18 @@ public class AiOrchestratorTest {
 
     @Test
     public void create_withProvider_returnsBuilder() {
-        AiOrchestrator.Builder builder = AiOrchestrator.create(mockProvider);
+        AiOrchestrator.Builder builder = AiOrchestrator.builder(mockProvider);
         assertNotNull("Builder should not be null", builder);
     }
 
     @Test(expected = NullPointerException.class)
     public void build_withNullProvider_throwsException() {
-        AiOrchestrator.create(null).build();
+        AiOrchestrator.builder(null).build();
     }
 
     @Test
     public void build_withMinimalConfiguration_createsOrchestrator() {
-        AiOrchestrator orchestrator = AiOrchestrator.create(mockProvider)
+        AiOrchestrator orchestrator = AiOrchestrator.builder(mockProvider)
                 .build();
 
         assertNotNull("Orchestrator should not be null", orchestrator);
@@ -108,7 +108,7 @@ public class AiOrchestratorTest {
 
     @Test
     public void build_withInput_setsInputAndRegistersListener() {
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withInput(mockInput)
                 .build();
 
@@ -117,7 +117,7 @@ public class AiOrchestratorTest {
 
     @Test
     public void builderPattern_allowsFluentChaining() {
-        AiOrchestrator orchestrator = AiOrchestrator.create(mockProvider)
+        AiOrchestrator orchestrator = AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .withFileReceiver(mockFileReceiver)
@@ -131,7 +131,7 @@ public class AiOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -150,7 +150,7 @@ public class AiOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -169,7 +169,7 @@ public class AiOrchestratorTest {
         ArgumentCaptor<InputSubmitListener> listenerCaptor = ArgumentCaptor
                 .forClass(InputSubmitListener.class);
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -193,7 +193,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -224,7 +224,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("AI", " ", "response"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -253,7 +253,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Hello", " ", "World"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -281,7 +281,7 @@ public class AiOrchestratorTest {
                 .thenReturn(Flux.just("Response 1"))
                 .thenReturn(Flux.just("Response 2"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -312,7 +312,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(errorFlux);
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -339,7 +339,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withInput(mockInput)
                 .build();
 
@@ -353,7 +353,7 @@ public class AiOrchestratorTest {
 
     @Test
     public void build_withoutInput_doesNotRegisterListener() {
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .build();
 
@@ -368,7 +368,7 @@ public class AiOrchestratorTest {
 
     @Test
     public void getProvider_returnsConfiguredProvider() {
-        AiOrchestrator orchestrator = AiOrchestrator.create(mockProvider)
+        AiOrchestrator orchestrator = AiOrchestrator.builder(mockProvider)
                 .build();
 
         assertSame("Should return the same provider instance", mockProvider,
@@ -385,7 +385,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Hello", " ", "World"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -422,7 +422,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(errorFlux);
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -455,7 +455,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response", " ", "text"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -496,7 +496,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("The", " ", "quick", " ", "brown", " ", "fox"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -526,7 +526,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.empty());
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -555,7 +555,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("SingleToken"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -582,7 +582,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -609,7 +609,7 @@ public class AiOrchestratorTest {
                 .thenReturn(Flux.just("Second"))
                 .thenReturn(Flux.just("Third"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -641,7 +641,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response 1"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -675,7 +675,7 @@ public class AiOrchestratorTest {
 
     @Test
     public void builder_canBeReused() {
-        AiOrchestrator.Builder builder = AiOrchestrator.create(mockProvider);
+        AiOrchestrator.Builder builder = AiOrchestrator.builder(mockProvider);
 
         AiOrchestrator orchestrator1 = builder.withMessageList(mockMessageList).build();
         AiOrchestrator orchestrator2 = builder.withInput(mockInput).build();
@@ -695,7 +695,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -720,7 +720,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -749,7 +749,7 @@ public class AiOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         // Build without message list
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withInput(mockInput)
                 .build();
 
@@ -777,7 +777,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.fromArray(tokens));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -804,7 +804,7 @@ public class AiOrchestratorTest {
         when(mockProvider.stream(any()))
                 .thenReturn(Flux.just("Response"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();
@@ -842,7 +842,7 @@ public class AiOrchestratorTest {
                 .thenReturn(Flux.<String>error(new RuntimeException("Error")))
                 .thenReturn(Flux.just("Success"));
 
-        AiOrchestrator.create(mockProvider)
+        AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
                 .withInput(mockInput)
                 .build();

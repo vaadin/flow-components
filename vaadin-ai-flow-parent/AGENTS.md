@@ -156,7 +156,7 @@ vaadin-ai-flow-parent/
   - Clears attachments after including them in LLM requests
 
 **Builder Pattern**:
-  - Use `AiOrchestrator.create(provider)` to start building
+  - Use `AiOrchestrator.builder(provider)` to start building
   - Fluent API for configuration: `.withMessageList()`, `.withInput()`, `.withFileReceiver()`, `.withPlugin()`, `.withTools()`
   - Call `.build()` to construct the orchestrator
   - Automatically registers input listeners and configures file receivers
@@ -187,7 +187,7 @@ MessageInput messageInput = new MessageInput();
 LLMProvider provider = new LangChain4jProvider(model);
 provider.setSystemPrompt("You are a helpful assistant.");
 
-AiOrchestrator orchestrator = AiOrchestrator.create(provider)
+AiOrchestrator orchestrator = AiOrchestrator.builder(provider)
         .withMessageList(messageList)
         .withInput(messageInput)
         .build();
@@ -374,7 +374,7 @@ All core components are interfaces, allowing flexible implementations:
 Both orchestrators use builders for clean, fluent configuration:
 
 ```java
-AiOrchestrator orchestrator = AiOrchestrator.create(provider)
+AiOrchestrator orchestrator = AiOrchestrator.builder(provider)
     .withMessageList(messageList)
     .withInput(input)
     .build();
@@ -600,7 +600,7 @@ Chart chart = new Chart();
 AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
 
 String systemPrompt = "You are helpful. " + AiChartPlugin.getSystemPrompt();
-AiOrchestrator.create(provider, systemPrompt)
+AiOrchestrator.builder(provider, systemPrompt)
     .withPlugin(plugin)
     .build();
 ```
@@ -614,8 +614,8 @@ AiOrchestrator.create(provider, systemPrompt)
   - System prompts are no longer aggregated from plugins
   - This was confusing - users couldn't see what the final prompt would be
 - **Updated**: `AiOrchestrator` now accepts system prompt as a creation parameter
-  - New signature: `AiOrchestrator.create(provider, systemPrompt)`
-  - Original signature still works: `AiOrchestrator.create(provider)` (no system prompt)
+  - New signature: `AiOrchestrator.builder(provider, systemPrompt)`
+  - Original signature still works: `AiOrchestrator.builder(provider)` (no system prompt)
   - System prompt is stored as a final field in the orchestrator
 - **Added**: Static helper methods for built-in plugins
   - `DataVisualizationPlugin.getSystemPrompt()` - returns recommended prompt text
@@ -647,7 +647,7 @@ public class MyPlugin implements AiPlugin {
 
 // Usage
 String systemPrompt = "You are helpful. " + MyPlugin.getSystemPrompt();
-AiOrchestrator.create(provider, systemPrompt)
+AiOrchestrator.builder(provider, systemPrompt)
     .withPlugin(new MyPlugin())
     .build();
 ```
@@ -673,7 +673,7 @@ AiOrchestrator.create(provider, systemPrompt)
   - Chart functionality remains as a plugin in `vaadin-ai-chart-flow`
 
 **Benefits**:
-- Single, clear entry point: `AiOrchestrator.create(provider).build()`
+- Single, clear entry point: `AiOrchestrator.builder(provider).build()`
 - No confusion between base class and concrete implementation
 - Cleaner module structure - core orchestrator in core module
 - Plugin pattern more prominent (chart functionality as plugin)

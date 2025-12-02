@@ -106,7 +106,7 @@ public class AiOrchestrator implements Serializable {
      *            the LLM provider
      * @return a new builder
      */
-    public static Builder create(LLMProvider provider) {
+    public static Builder builder(LLMProvider provider) {
         return new Builder(provider, null);
     }
 
@@ -119,7 +119,7 @@ public class AiOrchestrator implements Serializable {
      *            the system prompt for the LLM
      * @return a new builder
      */
-    public static Builder create(LLMProvider provider, String systemPrompt) {
+    public static Builder builder(LLMProvider provider, String systemPrompt) {
         return new Builder(provider, systemPrompt);
     }
 

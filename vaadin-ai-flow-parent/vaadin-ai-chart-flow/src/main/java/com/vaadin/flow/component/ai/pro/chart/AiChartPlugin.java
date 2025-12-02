@@ -38,7 +38,7 @@ import java.util.*;
  * String systemPrompt = "You are a data visualization assistant. "
  *         + AiChartPlugin.getSystemPrompt();
  *
- * AiOrchestrator.create(provider, systemPrompt)
+ * AiOrchestrator.builder(provider, systemPrompt)
  *         .withMessageList(messageList)
  *         .withInput(messageInput)
  *         .withPlugin(plugin)
@@ -103,7 +103,7 @@ public class AiChartPlugin implements AiPlugin {
      * String systemPrompt = "You are a helpful assistant. "
      *         + AiChartPlugin.getSystemPrompt();
      *
-     * AiOrchestrator orchestrator = AiOrchestrator.create(provider, systemPrompt)
+     * AiOrchestrator orchestrator = AiOrchestrator.builder(provider, systemPrompt)
      *         .withPlugin(plugin)
      *         .build();
      * </pre>
