@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.ai.pro.chart;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.AiPlugin;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -133,54 +132,37 @@ public class AiChartPlugin implements AiPlugin {
     }
 
     @Override
-    public void onAttached(AiOrchestrator orchestrator) {
-        // Capture UI context from the chart component
-        chart.getUI().ifPresent(ui -> this.currentUI = ui);
-    }
-
-    @Override
-    public void onDetached() {
-        this.currentUI = null;
-    }
-
-    @Override
     public List<LLMProvider.Tool> getTools() {
         return List.of(createGetSchemaTool(), createUpdateChartTool());
     }
 
-    @Override
-    public Object captureState() {
+    
+    public ChartState captureState() {
         if (currentSqlQuery == null) {
             return null;
         }
         return new ChartState(currentSqlQuery, currentConfiguration);
     }
 
-    @Override
-    public void restoreState(Object state) {
-        if (state instanceof ChartState chartState) {
-            this.currentSqlQuery = chartState.sqlQuery;
-            this.currentConfiguration = chartState.configuration;
+    
+    public void restoreState(ChartState state) {
+        
+        this.currentSqlQuery = state.sqlQuery;
+        this.currentConfiguration = state.configuration;
 
-            if (currentSqlQuery != null && currentConfiguration != null) {
-                try {
-                    renderChart(currentSqlQuery, currentConfiguration);
-                } catch (Exception e) {
-                    System.err.println("Failed to restore chart: " + e.getMessage());
-                }
+        if (currentSqlQuery != null && currentConfiguration != null) {
+            try {
+                renderChart(currentSqlQuery, currentConfiguration);
+            } catch (Exception e) {
+                System.err.println("Failed to restore chart: " + e.getMessage());
             }
         }
     }
-
-    @Override
-    public String getPluginId() {
-        return "AiChart";
-    }
-
+    
     /**
      * State record for persistence.
      */
-    private record ChartState(String sqlQuery,
+    public record ChartState(String sqlQuery,
             String configuration) implements java.io.Serializable {
     }
 

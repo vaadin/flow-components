@@ -10,6 +10,7 @@ package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin;
+import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin.ChartState;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -40,13 +41,13 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
  *
  * @author Vaadin Ltd
  */
-@Route("vaadin-ai/chat-with-dataviz-plugin")
+@Route("vaadin-ai/ai-chart-demo")
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
-public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
+public class AiChartDemoView extends HorizontalLayout {
 
-    private Object savedState;
+    private ChartState savedState;
 
-    public AiChatWithDataVizPluginDemo() {
+    public AiChartDemoView() {
         setSizeFull();
 
         // Chat section

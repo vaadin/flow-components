@@ -299,34 +299,17 @@ AiOrchestrator orchestrator = AiOrchestrator
 dashboard.add(widget);
 ```
 
-**State Persistence**:
-
-```java
-// Capture state
-Object state = plugin.captureState();
-// State contains: sqlQuery, configuration (as ChartState record)
-
-// Later, restore
-plugin.restoreState(state);
-// Re-executes query and renders with saved configuration
-```
-
 #### AiPlugin Interface
 
 **Location**: [AiPlugin.java](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/AiPlugin.java)
 
-**Purpose**: Base interface for all AI plugins that extend orchestrator capabilities
+**Purpose**: Base interface for all AI plugins that extend orchestrator capabilities by providing tools to the LLM
 
 **Key Methods**:
 
-- `getTools()` - Returns list of tools this plugin provides to the LLM
-- `onAttached(AiOrchestrator)` - Called when plugin is attached to an orchestrator
-- `onDetached()` - Called when plugin is detached (cleanup)
-- `captureState()` - Returns serializable state object for persistence
-- `restoreState(Object)` - Restores plugin from a previously captured state
-- `getPluginId()` - Returns unique identifier for this plugin type
+- `getTools()` - Returns list of tools this plugin provides to the LLM (default: empty list)
 
-**System Prompts**: System prompts are now provided when creating the orchestrator, not via plugins. Built-in plugins like `AiChartPlugin` provide a static helper method (e.g., `AiChartPlugin.getSystemPrompt()`) to get the recommended prompt text.
+**System Prompts**: System prompts are provided when creating the orchestrator. Built-in plugins like `AiChartPlugin` provide a static helper method (e.g., `AiChartPlugin.getSystemPrompt()`) to get the recommended prompt text.
 
 **Example Custom Plugin**:
 
@@ -340,11 +323,6 @@ public class MyCustomPlugin implements AiPlugin {
     @Override
     public List<LLMProvider.Tool> getTools() {
         return List.of(new MyTool());
-    }
-
-    @Override
-    public void onAttached(AiOrchestrator orchestrator) {
-        // Initialize plugin
     }
 }
 
@@ -696,25 +674,11 @@ AiOrchestrator.builder(provider, systemPrompt)
   - Immutable snapshots for safe persistence
   - Fully serializable for flexible storage options
 
-**Phase 2 - Orchestrator Integration**:
-- Added state tracking fields (`currentSqlQuery`, `currentChartConfig`) to `AiChartOrchestrator`
-- Implemented `captureState()` method - creates immutable snapshot of current chart state
-- Implemented `restoreState(ChartState)` method - restores chart by:
-  - Re-executing SQL query to get fresh data
-  - Reapplying Highcharts configuration
-  - Updating internal state for subsequent captures
-- Modified AI tools to automatically capture state:
-  - `updateChartData` tool captures SQL query after successful execution
-  - `updateChartConfig` tool captures configuration after successful application
-- Added 8 new integration tests (total 43 orchestrator tests) covering:
-  - State capture after data updates
-  - State capture after config updates
-  - State capture after both updates
-  - State restoration with SQL query only
-  - State restoration with config only
-  - State restoration with both
-  - Null state handling
-- Complete dashboard persistence use case now supported
+**Phase 2 - Orchestrator Integration** (Removed 2025-12-02):
+- State management functionality removed from AiPlugin interface
+- Plugins simplified to only provide tools via `getTools()` method
+- Lifecycle methods (`onAttached`, `onDetached`) removed
+- Persistence methods (`captureState`, `restoreState`, `getPluginId`) removed
 
 **Phase 3 - Event System**:
 - Created `ChartStateChangeEvent` class extending `EventObject`:

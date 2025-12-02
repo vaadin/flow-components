@@ -22,20 +22,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Interface for AI plugins that extend orchestrator capabilities.
+ * Interface for AI plugins that extend orchestrator capabilities by providing
+ * tools that the LLM can use.
  * <p>
  * Plugins provide domain-specific tools and functionality to the AI
- * orchestrator. Each plugin can:
- * </p>
- * <ul>
- * <li>Contribute tools that the LLM can use</li>
- * <li>Add context to the system prompt</li>
- * <li>Manage its own state for persistence</li>
- * <li>React to lifecycle events</li>
- * </ul>
- * <p>
- * Example plugins: data visualization, form filling, document analysis, code
- * generation.
+ * orchestrator. Tools are functions that the AI can call to perform actions
+ * like querying databases, creating visualizations, filling forms, etc.
  * </p>
  *
  * <h3>Example Usage:</h3>
@@ -61,15 +53,11 @@ import java.util.List;
  *             }
  *         );
  *     }
- *
- *     &#64;Override
- *     public String getSystemPromptContribution() {
- *         return "You have access to myTool which does X, Y, Z.";
- *     }
  * }
  *
  * // Use the plugin
- * AiOrchestrator orchestrator = AiOrchestrator.builder(llmProvider)
+ * String systemPrompt = "You are helpful. " + MyPlugin.getSystemPrompt();
+ * AiOrchestrator orchestrator = AiOrchestrator.builder(llmProvider, systemPrompt)
  *     .withPlugin(new MyPlugin())
  *     .build();
  * </pre>
@@ -89,69 +77,5 @@ public interface AiPlugin extends Serializable {
      */
     default List<LLMProvider.Tool> getTools() {
         return Collections.emptyList();
-    }
-
-    /**
-     * Called when this plugin is attached to an orchestrator.
-     * <p>
-     * Plugins can use this to initialize resources, register listeners, or
-     * access orchestrator features.
-     * </p>
-     *
-     * @param orchestrator
-     *            the orchestrator this plugin is attached to
-     */
-    default void onAttached(AiOrchestrator orchestrator) {
-        // Default: no action
-    }
-
-    /**
-     * Called when this plugin is detached from an orchestrator.
-     * <p>
-     * Plugins should clean up any resources, unregister listeners, etc.
-     * </p>
-     */
-    default void onDetached() {
-        // Default: no action
-    }
-
-    /**
-     * Captures the current state of this plugin for persistence.
-     * <p>
-     * The returned object should be serializable and contain all information
-     * needed to restore the plugin to its current state.
-     * </p>
-     *
-     * @return plugin state object, or null if plugin has no state
-     */
-    default Object captureState() {
-        return null;
-    }
-
-    /**
-     * Restores this plugin to a previously captured state.
-     * <p>
-     * The state object should match what was returned by
-     * {@link #captureState()}.
-     * </p>
-     *
-     * @param state
-     *            the state to restore
-     */
-    default void restoreState(Object state) {
-        // Default: no action
-    }
-
-    /**
-     * Returns a unique identifier for this plugin type.
-     * <p>
-     * Used for state persistence and plugin management. Default implementation
-     * uses the class name.
-     * </p>
-     *
-     * @return plugin identifier
-     */
-    default String getPluginId() {
-        return getClass().getSimpleName();
     }
 }

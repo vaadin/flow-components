@@ -818,10 +818,9 @@ public class AiOrchestrator implements Serializable {
             orchestrator.setInputValidator(inputValidator);
             orchestrator.setToolObjects(toolObjects);
 
-            // Attach plugins and call their lifecycle hooks
+            // Add plugins
             for (AiPlugin plugin : plugins) {
                 orchestrator.plugins.add(plugin);
-                plugin.onAttached(orchestrator);
             }
 
             // Configure input listener if provided
