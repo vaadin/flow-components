@@ -45,7 +45,7 @@ import java.util.function.Consumer;
  * <li>Streaming responses from the LLM to the message list</li>
  * <li>Automatic UI updates via server push</li>
  * <li>Optional file upload support</li>
- * <li>Plugin architecture for extending functionality</li>
+ * <li>Controller architecture for extending functionality</li>
  * <li>Input validation for security</li>
  * </ul>
  * <p>
@@ -82,7 +82,7 @@ public class AiOrchestrator implements Serializable {
     protected InputValidator inputValidator;
     protected final List<LLMProvider.Attachment> pendingAttachments = new ArrayList<>();
     protected Object[] toolObjects = new Object[0];
-    protected final List<AiPlugin> plugins = new ArrayList<>();
+    protected final List<AiController> controllers = new ArrayList<>();
     private UI ui;
 
     /**
@@ -461,11 +461,11 @@ public class AiOrchestrator implements Serializable {
     protected LLMProvider.Tool[] createTools() {
         List<LLMProvider.Tool> tools = new ArrayList<>();
 
-        // Add tools from plugins
-        for (AiPlugin plugin : plugins) {
-            List<LLMProvider.Tool> pluginTools = plugin.getTools();
-            if (pluginTools != null) {
-                tools.addAll(pluginTools);
+        // Add tools from controllers
+        for (AiController controller : controllers) {
+            List<LLMProvider.Tool> controllerTools = controller.getTools();
+            if (controllerTools != null) {
+                tools.addAll(controllerTools);
             }
         }
 
@@ -675,12 +675,12 @@ public class AiOrchestrator implements Serializable {
      * additional actions after streaming completes.
      */
     protected void onProcessingComplete() {
-        // Notify all plugins that the request has completed
-        for (AiPlugin plugin : plugins) {
+        // Notify all controllers that the request has completed
+        for (AiController controller : controllers) {
             try {
-                plugin.onRequestCompleted();
+                controller.onRequestCompleted();
             } catch (Exception e) {
-                System.err.println("Error in plugin onRequestCompleted: " + e.getMessage());
+                System.err.println("Error in controller onRequestCompleted: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -719,7 +719,7 @@ public class AiOrchestrator implements Serializable {
         protected AiFileReceiver fileReceiver;
         protected InputValidator inputValidator;
         protected Object[] toolObjects = new Object[0];
-        protected List<AiPlugin> plugins = new ArrayList<>();
+        protected List<AiController> controllers = new ArrayList<>();
 
         private Builder(LLMProvider provider, String systemPrompt) {
             this.provider = provider;
@@ -794,20 +794,20 @@ public class AiOrchestrator implements Serializable {
         }
 
         /**
-         * Adds a plugin to extend the orchestrator with additional capabilities.
+         * Adds a controller to extend the orchestrator with additional capabilities.
          * <p>
-         * Plugins provide tools, system prompt contributions, and can manage
-         * their own state. Multiple plugins can be added and they will all be
+         * Controllers provide tools, system prompt contributions, and can manage
+         * their own state. Multiple controllers can be added and they will all be
          * active simultaneously.
          * </p>
          *
-         * @param plugin
-         *            the plugin to add
+         * @param controller
+         *            the controller to add
          * @return this builder
          */
-        public Builder withPlugin(AiPlugin plugin) {
-            if (plugin != null) {
-                this.plugins.add(plugin);
+        public Builder withController(AiController controller) {
+            if (controller != null) {
+                this.controllers.add(controller);
             }
             return this;
         }
@@ -826,9 +826,9 @@ public class AiOrchestrator implements Serializable {
             orchestrator.setInputValidator(inputValidator);
             orchestrator.setToolObjects(toolObjects);
 
-            // Add plugins
-            for (AiPlugin plugin : plugins) {
-                orchestrator.plugins.add(plugin);
+            // Add controllers
+            for (AiController controller : controllers) {
+                orchestrator.controllers.add(controller);
             }
 
             // Configure input listener if provided

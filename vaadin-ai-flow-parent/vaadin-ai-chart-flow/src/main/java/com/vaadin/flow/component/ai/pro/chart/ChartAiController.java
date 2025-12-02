@@ -8,7 +8,7 @@
  */
 package com.vaadin.flow.component.ai.pro.chart;
 
-import com.vaadin.flow.component.ai.orchestrator.AiPlugin;
+import com.vaadin.flow.component.ai.orchestrator.AiController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -20,9 +20,9 @@ import tools.jackson.databind.node.ObjectNode;
 import java.util.*;
 
 /**
- * AI plugin for creating interactive chart visualizations from database data.
+ * AI controller for creating interactive chart visualizations from database data.
  * <p>
- * This plugin enables AI-powered chart generation by providing tools that allow
+ * This controller enables AI-powered chart generation by providing tools that allow
  * the LLM to query database schemas and create/update chart visualizations
  * based on natural language requests.
  * </p>
@@ -32,15 +32,15 @@ import java.util.*;
  * <pre>
  * Chart chart = new Chart();
  * DatabaseProvider dbProvider = new MyDatabaseProvider();
- * AiChartPlugin plugin = new AiChartPlugin(chart, dbProvider);
+ * ChartAiController controller = new ChartAiController(chart, dbProvider);
  *
  * String systemPrompt = "You are a data visualization assistant. "
- *         + AiChartPlugin.getSystemPrompt();
+ *         + ChartAiController.getSystemPrompt();
  *
  * AiOrchestrator.builder(provider, systemPrompt)
  *         .withMessageList(messageList)
  *         .withInput(messageInput)
- *         .withPlugin(plugin)
+ *         .withController(controller)
  *         .build();
  *
  * // User can now say: "Show me monthly revenue as a line chart"
@@ -48,7 +48,7 @@ import java.util.*;
  *
  * @author Vaadin Ltd
  */
-public class AiChartPlugin implements AiPlugin {
+public class ChartAiController implements AiController {
 
     /**
      * Interface for converting database query results to chart-compatible data
@@ -90,14 +90,14 @@ public class AiChartPlugin implements AiPlugin {
     }
 
     /**
-     * Creates a new AI chart plugin.
+     * Creates a new AI chart controller.
      *
      * @param chart
      *            the chart component to update
      * @param databaseProvider
      *            the database provider for schema and query execution
      */
-    public AiChartPlugin(Chart chart, DatabaseProvider databaseProvider) {
+    public ChartAiController(Chart chart, DatabaseProvider databaseProvider) {
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
@@ -124,13 +124,13 @@ public class AiChartPlugin implements AiPlugin {
      * Adds a listener for chart state changes.
      * <p>
      * The listener will be notified whenever the chart's SQL query or configuration
-     * is updated through the plugin's tools.
+     * is updated through the controller's tools.
      * </p>
      *
      * <h3>Example Usage:</h3>
      *
      * <pre>
-     * plugin.addStateChangeListener(event -> {
+     * controller.addStateChangeListener(event -> {
      *     ChartState state = event.getState();
      *     System.out.println("Chart updated - Query: " + state.sqlQuery());
      *
@@ -160,15 +160,15 @@ public class AiChartPlugin implements AiPlugin {
      * Returns the recommended system prompt for chart visualization
      * capabilities.
      * <p>
-     * Use this when creating an orchestrator with the AiChartPlugin:
+     * Use this when creating an orchestrator with the ChartAiController:
      * </p>
      *
      * <pre>
      * String systemPrompt = "You are a helpful assistant. "
-     *         + AiChartPlugin.getSystemPrompt();
+     *         + ChartAiController.getSystemPrompt();
      *
      * AiOrchestrator orchestrator = AiOrchestrator.builder(provider, systemPrompt)
-     *         .withPlugin(plugin)
+     *         .withController(controller)
      *         .build();
      * </pre>
      *

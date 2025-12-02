@@ -20,9 +20,9 @@ import java.io.Serializable;
  * <h3>Example Usage:</h3>
  *
  * <pre>
- * AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
+ * ChartAiController controller = new ChartAiController(chart, databaseProvider);
  *
- * plugin.addStateChangeListener(event -> {
+ * controller.addStateChangeListener(event -> {
  *     ChartState state = event.getState();
  *     System.out.println("Chart updated: " + state.sqlQuery());
  *

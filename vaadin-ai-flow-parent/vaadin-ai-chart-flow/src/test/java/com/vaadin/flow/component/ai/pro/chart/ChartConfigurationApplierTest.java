@@ -530,7 +530,7 @@ public class ChartConfigurationApplierTest {
 
     /**
      * Serializes a chart configuration and removes the series field,
-     * mimicking what AiChartPlugin does.
+     * mimicking what ChartAiController does.
      */
     private String serializeAndClean(Chart chart) throws Exception {
         String json = ChartSerialization.toJSON(chart.getConfiguration());

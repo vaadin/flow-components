@@ -22,10 +22,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Interface for AI plugins that extend orchestrator capabilities by providing
+ * Interface for AI controllers that extend orchestrator capabilities by providing
  * tools that the LLM can use.
  * <p>
- * Plugins provide domain-specific tools and functionality to the AI
+ * Controllers provide domain-specific tools and functionality to the AI
  * orchestrator. Tools are functions that the AI can call to perform actions
  * like querying databases, creating visualizations, filling forms, etc.
  * </p>
@@ -33,8 +33,8 @@ import java.util.List;
  * <h3>Example Usage:</h3>
  *
  * <pre>
- * // Create a custom plugin
- * public class MyPlugin implements AiPlugin {
+ * // Create a custom controller
+ * public class MyController implements AiController {
  *     &#64;Override
  *     public List&lt;LLMProvider.Tool&gt; getTools() {
  *         return List.of(
@@ -55,25 +55,25 @@ import java.util.List;
  *     }
  * }
  *
- * // Use the plugin
- * String systemPrompt = "You are helpful. " + MyPlugin.getSystemPrompt();
+ * // Use the controller
+ * String systemPrompt = "You are helpful. " + MyController.getSystemPrompt();
  * AiOrchestrator orchestrator = AiOrchestrator.builder(llmProvider, systemPrompt)
- *     .withPlugin(new MyPlugin())
+ *     .withController(new MyController())
  *     .build();
  * </pre>
  *
  * @author Vaadin Ltd
  */
-public interface AiPlugin extends Serializable {
+public interface AiController extends Serializable {
 
     /**
-     * Returns the tools this plugin provides to the LLM.
+     * Returns the tools this controller provides to the LLM.
      * <p>
      * Tools are functions that the AI can call to perform actions. Each tool
      * should have a clear name, description, and parameter schema.
      * </p>
      *
-     * @return list of tools, or empty list if plugin provides no tools
+     * @return list of tools, or empty list if controller provides no tools
      */
     default List<LLMProvider.Tool> getTools() {
         return Collections.emptyList();
@@ -83,7 +83,7 @@ public interface AiPlugin extends Serializable {
      * Called by the orchestrator when an LLM request cycle has completed.
      * <p>
      * This method is invoked after all tool executions for a given user request
-     * have finished and the LLM has generated its final response. Plugins can
+     * have finished and the LLM has generated its final response. Controllers can
      * use this callback to perform deferred operations, such as rendering UI
      * updates or committing state changes.
      * </p>
@@ -94,7 +94,7 @@ public interface AiPlugin extends Serializable {
      * <h3>Example Usage:</h3>
      *
      * <pre>
-     * public class MyPlugin implements AiPlugin {
+     * public class MyController implements AiController {
      *     private PendingOperation pendingOp;
      *
      *     &#64;Override

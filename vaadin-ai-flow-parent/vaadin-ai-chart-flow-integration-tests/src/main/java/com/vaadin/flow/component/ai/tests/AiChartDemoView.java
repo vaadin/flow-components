@@ -10,8 +10,8 @@ package com.vaadin.flow.component.ai.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
-import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin;
-import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin.ChartState;
+import com.vaadin.flow.component.ai.pro.chart.ChartAiController;
+import com.vaadin.flow.component.ai.pro.chart.ChartAiController.ChartState;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -25,9 +25,9 @@ import com.vaadin.flow.router.Route;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
- * Demo showing how to use AiChartPlugin with AiOrchestrator.
+ * Demo showing how to use ChartAiController with AiOrchestrator.
  * <p>
- * This demonstrates the plugin architecture where a single chat orchestrator
+ * This demonstrates the controller architecture where a single chat orchestrator
  * can be extended with chart visualization capabilities. Users can chat
  * naturally and also request chart visualizations from database data.
  * </p>
@@ -65,11 +65,11 @@ public class AiChartDemoView extends HorizontalLayout {
         var chart = new Chart();
         chart.setSizeFull();
 
-        // Create AI chart plugin
-        var chartPlugin = new AiChartPlugin(chart, new InMemoryDatabaseProvider());
+        // Create AI chart controller
+        var chartController = new ChartAiController(chart, new InMemoryDatabaseProvider());
 
         // Add state change listener to log state changes
-        chartPlugin.addStateChangeListener(event -> {
+        chartController.addStateChangeListener(event -> {
             ChartState state = event.getState();
             System.out.println("=== Chart State Changed ===");
             System.out.println("SQL Query: " + state.sqlQuery());
@@ -91,11 +91,11 @@ public class AiChartDemoView extends HorizontalLayout {
                 .modelName("gpt-4o-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
-        // Create chat orchestrator with plugin
-        AiOrchestrator.builder(provider, AiChartPlugin.getSystemPrompt())
+        // Create chat orchestrator with controller
+        AiOrchestrator.builder(provider, ChartAiController.getSystemPrompt())
                 .withMessageList(messageList)
                 .withInput(messageInput)
-                .withPlugin(chartPlugin)
+                .withController(chartController)
                 .build();
 
         // State management buttons
@@ -103,12 +103,12 @@ public class AiChartDemoView extends HorizontalLayout {
         restoreStateButton.setEnabled(false);
         restoreStateButton.addClickListener(e -> {
             if (savedState != null) {
-                chartPlugin.restoreState(savedState);
+                chartController.restoreState(savedState);
             }
         });
 
         var saveStateButton = new Button("Save Current State", e -> {
-            savedState = chartPlugin.getState();
+            savedState = chartController.getState();
             if (savedState != null) {
                 restoreStateButton.setEnabled(true);
             }

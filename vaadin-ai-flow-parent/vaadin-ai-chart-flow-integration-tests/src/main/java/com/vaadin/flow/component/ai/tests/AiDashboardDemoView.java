@@ -9,7 +9,7 @@
 package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
-import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin;
+import com.vaadin.flow.component.ai.pro.chart.ChartAiController;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Demo view for AI Dashboard with chart visualizations.
  * <p>
- * Demonstrates the AiChartPlugin with a dashboard layout where each widget
+ * Demonstrates the ChartAiController with a dashboard layout where each widget
  * can contain an AI-powered chart visualization. Charts support multiple types:
  * - Line charts (for trends over time)
  * - Bar/Column charts (for comparisons)
@@ -49,7 +49,7 @@ import java.util.Map;
 public class AiDashboardDemoView extends VerticalLayout {
 
     private Dashboard dashboard;
-    private Map<String, AiChartPlugin> plugins = new HashMap<>();
+    private Map<String, ChartAiController> controllers = new HashMap<>();
     private String apiKey;
 
     public AiDashboardDemoView() {
@@ -137,29 +137,29 @@ public class AiDashboardDemoView extends VerticalLayout {
         widget.setRowspan(2);
         widget.setContent(chart);
 
-        // Create plugin for this widget
-        var plugin = createPlugin(chart);
-        plugins.put(widgetId, plugin);
+        // Create controller for this widget
+        var controller = createController(chart);
+        controllers.put(widgetId, controller);
 
         // Add configure button
-        addConfigureButton(widget, widgetId, plugin);
+        addConfigureButton(widget, widgetId, controller);
 
         return widget;
     }
 
     private void addConfigureButton(DashboardWidget widget, String widgetId,
-            AiChartPlugin plugin) {
+            ChartAiController controller) {
         var configureButton = new Button(VaadinIcon.COG.create());
         configureButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
                 ButtonVariant.LUMO_SMALL);
         configureButton.addClickListener(e -> {
-            openWidgetChat(widgetId, widget.getTitle(), plugin, configureButton);
+            openWidgetChat(widgetId, widget.getTitle(), controller, configureButton);
         });
         widget.setHeaderContent(configureButton);
     }
 
     private void openWidgetChat(String widgetId, String widgetTitle,
-            AiChartPlugin plugin, Button configureButton) {
+            ChartAiController controller, Button configureButton) {
         // Create chat container
         var chatContainer = new VerticalLayout();
         chatContainer.setPadding(false);
@@ -171,8 +171,8 @@ public class AiDashboardDemoView extends VerticalLayout {
         var messageInput = new MessageInput();
         messageInput.setWidthFull();
 
-        // Create or update plugin with chat UI
-        if (plugin == null) {
+        // Create or update controller with chat UI
+        if (controller == null) {
             var chart = new Chart();
             chart.setSizeFull();
 
@@ -183,8 +183,8 @@ public class AiDashboardDemoView extends VerticalLayout {
                     .filter(w -> widgetId.equals(w.getId().orElse(null)))
                     .findFirst().ifPresent(w -> w.setContent(chart));
 
-            plugin = createPlugin(chart);
-            plugins.put(widgetId, plugin);
+            controller = createController(chart);
+            controllers.put(widgetId, controller);
         }
 
         // Create LLM provider
@@ -192,11 +192,11 @@ public class AiDashboardDemoView extends VerticalLayout {
                 .apiKey(apiKey).modelName("gpt-4o-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
-        // Create chat orchestrator with plugin
-        AiOrchestrator.builder(provider, AiChartPlugin.getSystemPrompt())
+        // Create chat orchestrator with controller
+        AiOrchestrator.builder(provider, ChartAiController.getSystemPrompt())
                 .withMessageList(messageList)
                 .withInput(messageInput)
-                .withPlugin(plugin)
+                .withController(controller)
                 .build();
 
         var closeButton = new Button("Close");
@@ -222,8 +222,8 @@ public class AiDashboardDemoView extends VerticalLayout {
         popover.open();
     }
 
-    private AiChartPlugin createPlugin(Chart chart) {
-        // Create plugin with chart and database provider
-        return new AiChartPlugin(chart, new InMemoryDatabaseProvider());
+    private ChartAiController createController(Chart chart) {
+        // Create controller with chart and database provider
+        return new ChartAiController(chart, new InMemoryDatabaseProvider());
     }
 }

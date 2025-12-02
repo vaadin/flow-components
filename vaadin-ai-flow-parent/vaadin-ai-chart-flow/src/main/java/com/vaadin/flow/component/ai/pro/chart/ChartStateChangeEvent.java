@@ -14,35 +14,35 @@ import java.util.EventObject;
  * Event fired when the chart state changes.
  * <p>
  * This event is triggered when either the SQL query or chart configuration
- * is updated through the plugin's tools.
+ * is updated through the controller's tools.
  * </p>
  *
  * @author Vaadin Ltd
  */
 public class ChartStateChangeEvent extends EventObject {
 
-    private final AiChartPlugin.ChartState state;
+    private final ChartAiController.ChartState state;
 
     /**
      * Creates a new chart state change event.
      *
-     * @param source the plugin that fired the event
+     * @param source the controller that fired the event
      * @param state the new chart state
      */
-    public ChartStateChangeEvent(AiChartPlugin source,
-                                  AiChartPlugin.ChartState state) {
+    public ChartStateChangeEvent(ChartAiController source,
+                                  ChartAiController.ChartState state) {
         super(source);
         this.state = state;
     }
 
     /**
-     * Gets the plugin that fired this event.
+     * Gets the controller that fired this event.
      *
-     * @return the source plugin
+     * @return the source controller
      */
     @Override
-    public AiChartPlugin getSource() {
-        return (AiChartPlugin) super.getSource();
+    public ChartAiController getSource() {
+        return (ChartAiController) super.getSource();
     }
 
     /**
@@ -50,7 +50,7 @@ public class ChartStateChangeEvent extends EventObject {
      *
      * @return the chart state
      */
-    public AiChartPlugin.ChartState getState() {
+    public ChartAiController.ChartState getState() {
         return state;
     }
 }
