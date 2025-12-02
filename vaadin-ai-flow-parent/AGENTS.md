@@ -106,62 +106,71 @@ vaadin-ai-flow-parent/
 - `AiFileReceiver` (optional) - handles file uploads
 
 **Core Functionality**:
-  - LLM provider management
-  - Message list, input, and file receiver integration
-  - UI context validation
-  - User message handling (`addUserMessageToList()`)
-  - Assistant message placeholder creation (`createAssistantMessagePlaceholder()`)
-  - Streaming response handling with real-time UI updates (`streamResponseToMessage()`)
-  - Complete input processing logic (`processUserInput()`)
-  - Input event handling with Template Method pattern (`handleUserInput()`)
-  - Programmatic message sending (`sendMessage(String userMessage)`)
-  - File attachment management (`configureFileReceiver()`, `pendingAttachments`)
-  - Thread-safe UI updates via `UI.access()`
-  - Error handling for streaming responses
-  - Automatic UI.access() wrapping for @Tool annotated methods
+
+- LLM provider management
+- Message list, input, and file receiver integration
+- UI context validation
+- User message handling (`addUserMessageToList()`)
+- Assistant message placeholder creation (`createAssistantMessagePlaceholder()`)
+- Streaming response handling with real-time UI updates (`streamResponseToMessage()`)
+- Complete input processing logic (`processUserInput()`)
+- Input event handling with Template Method pattern (`handleUserInput()`)
+- Programmatic message sending (`prompt(String userMessage)`)
+- File attachment management (`configureFileReceiver()`, `pendingAttachments`)
+- Thread-safe UI updates via `UI.access()`
+- Error handling for streaming responses
+- Automatic UI.access() wrapping for @Tool annotated methods
 
 **Template Method Pattern**:
-  - `handleUserInput(event)` validates input, adds user message, then calls `processUserInput(message)`
-  - `processUserInput(message)` builds LLM request, handles attachments, streams response
-  - Hook methods available for customization
+
+- `handleUserInput(event)` validates input, adds user message, then calls `processUserInput(message)`
+- `processUserInput(message)` builds LLM request, handles attachments, streams response
+- Hook methods available for customization
 
 **Programmatic Message API**:
-  - `sendMessage(String userMessage)` - send messages without requiring an input component
-  - Useful for triggering AI interaction from button clicks or other UI events
-  - Example: `orchestrator.sendMessage("Analyze the uploaded file");`
+
+- `prompt(String userMessage)` - send messages without requiring an input component
+- Useful for triggering AI interaction from button clicks or other UI events
+- Example: `orchestrator.prompt("Analyze the uploaded file");`
 
 **Hook Methods** (can be overridden for customization):
-  - `createTools()` - returns array of tools for the LLM (default: from plugins only)
-  - `getSystemPrompt()` - returns system prompt for the LLM (default: null)
-  - `onProcessingComplete()` - called after streaming completes (default: no-op)
+
+- `createTools()` - returns array of tools for the LLM (default: from plugins only)
+- `getSystemPrompt()` - returns system prompt for the LLM (default: null)
+- `onProcessingComplete()` - called after streaming completes (default: no-op)
 
 **Tool Annotation Support**:
-  - Use `@Tool` annotation to define methods that can be called by the LLM
-  - Use `@ParameterDescription` to describe method parameters
-  - Configure tools via builder: `.withTools(this)` or `.withTools(toolObject)`
-  - Automatic UI.access() wrapping: Tool methods are automatically executed within UI.access() if a UI is available
-  - UI is obtained from the input component's getUI() method
-  - If no UI is available, tools execute directly (no warning)
-  - Developers don't need to manually wrap tool code in UI.access()
+
+- Use `@Tool` annotation to define methods that can be called by the LLM
+- Use `@ParameterDescription` to describe method parameters
+- Configure tools via builder: `.withTools(this)` or `.withTools(toolObject)`
+- Automatic UI.access() wrapping: Tool methods are automatically executed within UI.access() if a UI is available
+- UI is obtained from the input component's getUI() method
+- If no UI is available, tools execute directly (no warning)
+- Developers don't need to manually wrap tool code in UI.access()
 
 **Plugin Support**:
-  - Extensible via `AiPlugin` interface
-  - Plugins can contribute tools, system prompts, and manage state
-  - Add plugins via builder: `.withPlugin(new MyPlugin())`
-  - Multiple plugins can be active simultaneously
+
+- Extensible via `AiPlugin` interface
+- Plugins can contribute tools, system prompts, and manage state
+- Add plugins via builder: `.withPlugin(new MyPlugin())`
+- Multiple plugins can be active simultaneously
 
 **File Attachment Support**:
-  - Manages `pendingAttachments` list
-  - Automatically configures file receiver upload handlers
-  - Clears attachments after including them in LLM requests
+
+- Manages `pendingAttachments` list
+- Automatically configures file receiver upload handlers
+- Clears attachments after including them in LLM requests
 
 **Builder Pattern**:
-  - Use `AiOrchestrator.builder(provider)` to start building
-  - Fluent API for configuration: `.withMessageList()`, `.withInput()`, `.withFileReceiver()`, `.withPlugin()`, `.withTools()`
-  - Call `.build()` to construct the orchestrator
-  - Automatically registers input listeners and configures file receivers
+
+- Use `AiOrchestrator.builder(provider)` to start building
+- Fluent API for configuration: `.withMessageList()`, `.withInput()`, `.withFileReceiver()`, `.withPlugin()`, `.withTools()`
+- Call `.build()` to construct the orchestrator
+- Automatically registers input listeners and configures file receivers
 
 **Flow**:
+
 1. User submits input via `AiInput`
 2. `handleUserInput()` validates input and adds user message to `AiMessageList`
 3. `processUserInput()` builds LLM request and calls `LLMProvider.stream()`
@@ -169,11 +178,13 @@ vaadin-ai-flow-parent/
 5. Provider manages conversation history internally
 
 **Conversation History**:
+
 - Managed internally by the provider instance
 - Each orchestrator maintains its own conversation context through its provider
 - System prompts configured at the provider level (via `provider.setSystemPrompt()`)
 
 **Testing**: [AiOrchestratorTest](vaadin-ai-flow/src/test/java/com/vaadin/flow/component/ai/orchestrator/AiOrchestratorTest.java) (extensive, 50+ tests)
+
 - Tests verify LLMRequest properties (userMessage) instead of message history
 - Uses ArgumentCaptor<LLMProvider.LLMRequest> to capture and validate requests
 - Verifies that multiple messages use the same provider instance for conversation continuity
@@ -337,6 +348,7 @@ AiOrchestrator orchestrator = AiOrchestrator
     .withPlugin(chartPlugin)  // Multiple plugins!
     .build();
 ```
+
 ## Architecture Patterns
 
 ### 1. Interface-Based Design
@@ -529,6 +541,7 @@ mvn install -DskipTests
 **Goal**: Simplify the chart plugin by focusing exclusively on chart visualizations and removing unnecessary complexity.
 
 **Changes**:
+
 - **Renamed**: `DataVisualizationPlugin` → `AiChartPlugin`
   - Clearer name reflecting chart-focused purpose
   - Updated all imports and references in demo views
@@ -557,6 +570,7 @@ mvn install -DskipTests
   - `AiDashboardDemoView`: Each widget creates its own Chart instance
 
 **Benefits**:
+
 - **Simpler API**: Just `new AiChartPlugin(chart, provider)` - no builder needed
 - **Clearer Purpose**: Chart-focused, not generic visualization
 - **Less Code**: ~370 lines vs ~800 lines (54% reduction)
@@ -564,6 +578,7 @@ mvn install -DskipTests
 - **Easier to Understand**: Single responsibility - chart visualization only
 
 **Migration**:
+
 ```java
 // Old way (no longer supported)
 Div container = new Div();
@@ -588,6 +603,7 @@ AiOrchestrator.builder(provider, systemPrompt)
 **Goal**: Simplify system prompt management by removing it from the plugin API and making it explicit at orchestrator creation time.
 
 **Changes**:
+
 - **Removed**: `getSystemPromptContribution()` method from `AiPlugin` interface
   - System prompts are no longer aggregated from plugins
   - This was confusing - users couldn't see what the final prompt would be
@@ -601,12 +617,14 @@ AiOrchestrator.builder(provider, systemPrompt)
 - **Updated**: All demo views to use new pattern
 
 **Benefits**:
+
 - **Explicit over implicit**: Users see exactly what system prompt is being used
 - **Better composability**: Easy to combine prompts from multiple sources
 - **Simpler API**: Plugins only provide tools, not hidden prompt modifications
 - **Clearer debugging**: System prompt is visible at orchestrator creation, not hidden in plugins
 
 **Migration**:
+
 ```java
 // Old way (no longer supported)
 public class MyPlugin implements AiPlugin {
@@ -635,6 +653,7 @@ AiOrchestrator.builder(provider, systemPrompt)
 **Goal**: Simplify the architecture by removing redundancy and making `AiOrchestrator` the single entry point for chat orchestration.
 
 **Changes**:
+
 - **Removed**: `AiChatOrchestrator` class from `vaadin-ai-chat-flow` module
   - Was a thin wrapper that only provided a builder around `BaseAiOrchestrator`
   - All functionality moved to the base class
@@ -651,6 +670,7 @@ AiOrchestrator.builder(provider, systemPrompt)
   - Chart functionality remains as a plugin in `vaadin-ai-chart-flow`
 
 **Benefits**:
+
 - Single, clear entry point: `AiOrchestrator.builder(provider).build()`
 - No confusion between base class and concrete implementation
 - Cleaner module structure - core orchestrator in core module
@@ -661,6 +681,7 @@ AiOrchestrator.builder(provider, systemPrompt)
 ### 2025-11-21: Chart State Persistence API (Phase 1, 2 & 3 - Complete)
 
 **Phase 1 - Core State Model**:
+
 - Created `ChartState` interface for chart state snapshots
 - Implemented `DefaultChartState` with full serialization support
 - Added comprehensive test suite (16 tests) covering:
@@ -675,12 +696,14 @@ AiOrchestrator.builder(provider, systemPrompt)
   - Fully serializable for flexible storage options
 
 **Phase 2 - Orchestrator Integration** (Removed 2025-12-02):
+
 - State management functionality removed from AiPlugin interface
 - Plugins simplified to only provide tools via `getTools()` method
 - Lifecycle methods (`onAttached`, `onDetached`) removed
 - Persistence methods (`captureState`, `restoreState`, `getPluginId`) removed
 
 **Phase 3 - Event System**:
+
 - Created `ChartStateChangeEvent` class extending `EventObject`:
   - Contains chart state snapshot
   - Includes `StateChangeType` enum (DATA_QUERY_UPDATED, CONFIGURATION_UPDATED, BOTH_UPDATED)

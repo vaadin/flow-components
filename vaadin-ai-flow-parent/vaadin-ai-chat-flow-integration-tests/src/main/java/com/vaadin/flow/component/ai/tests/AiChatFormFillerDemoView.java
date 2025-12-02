@@ -91,7 +91,7 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         var fillButton = new Button("Fill");
         fillButton.setWidthFull();
         fillButton.addClickListener(event -> {
-            orchestrator.sendMessage(
+            orchestrator.prompt(
                     "Please analyze the uploaded files and fill the person information form with any data you can extract.");
         });
 

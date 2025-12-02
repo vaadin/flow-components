@@ -325,8 +325,8 @@ public class AiOrchestrator implements Serializable {
     }
 
     /**
-     * Sends a message to the AI orchestrator programmatically. This method
-     * allows sending messages without requiring an input component.
+     * Sends a prompt to the AI orchestrator programmatically. This method
+     * allows sending prompts without requiring an input component.
      * <p>
      * This is useful for scenarios where you want to trigger AI interaction
      * from button clicks or other UI events without using a message input
@@ -334,9 +334,9 @@ public class AiOrchestrator implements Serializable {
      * </p>
      *
      * @param userMessage
-     *            the message to send to the AI
+     *            the prompt to send to the AI
      */
-    public void sendMessage(String userMessage) {
+    public void prompt(String userMessage) {
         if (userMessage == null || userMessage.trim().isEmpty()) {
             return;
         }
