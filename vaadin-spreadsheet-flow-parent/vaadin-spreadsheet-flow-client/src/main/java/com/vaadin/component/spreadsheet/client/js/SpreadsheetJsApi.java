@@ -688,6 +688,10 @@ public class SpreadsheetJsApi {
         getServerRpcInstance().setCellsAddedToRangeSelectionCallback(callback);
     }
 
+    public void setContextMenuClosedCallback(JsConsumer<Void> callback) {
+        getServerRpcInstance().setContextMenuClosedCallback(callback);
+    }
+
     public void setRowSelectedCallback(JsConsumer<String> callback) {
         getServerRpcInstance().setRowSelectedCallback(callback);
     }
