@@ -12,6 +12,7 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.internal.JacksonUtils;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 import java.io.Serializable;
@@ -48,9 +49,20 @@ class ChartConfigurationApplier implements Serializable {
 
             Configuration config = chart.getConfiguration();
 
-            // Apply chart type if specified
+            // Apply chart type if specified (check both top-level and inside chart object)
+            String chartType = null;
             if (configNode.has("type")) {
-                applyChartType(config, configNode.get("type").asString());
+                // Support top-level type for backward compatibility
+                chartType = configNode.get("type").asString();
+            } else if (configNode.has("chart") && configNode.get("chart").isObject()) {
+                JsonNode chartNode = configNode.get("chart");
+                if (chartNode.has("type")) {
+                    // This is the actual structure from ChartSerialization.toJSON()
+                    chartType = chartNode.get("type").asString();
+                }
+            }
+            if (chartType != null) {
+                applyChartType(config, chartType);
             }
 
             // Apply chart model options

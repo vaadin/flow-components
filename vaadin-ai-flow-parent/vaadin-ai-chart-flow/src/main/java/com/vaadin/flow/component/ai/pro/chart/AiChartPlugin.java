@@ -176,8 +176,18 @@ public class AiChartPlugin implements AiPlugin {
         if (currentSqlQuery == null) {
             return null;
         }
-        // Get configuration from chart as JSON
+        // Get configuration from chart as JSON and remove series field
         String configJson = ChartSerialization.toJSON(chart.getConfiguration());
+
+        // Remove series from configuration JSON since it's data, not config
+        try {
+            ObjectNode configNode = (ObjectNode) JacksonUtils.readTree(configJson);
+            configNode.remove("series");
+            configJson = configNode.toString();
+        } catch (Exception e) {
+            System.err.println("Failed to remove series from config: " + e.getMessage());
+        }
+
         return new ChartState(currentSqlQuery, configJson);
     }
 
@@ -321,15 +331,15 @@ public class AiChartPlugin implements AiPlugin {
                           "type": "object",
                           "description": "Chart configuration object. NOTE: Do NOT include 'series' - data is managed separately via updateData tool.",
                           "properties": {
-                            "type": {
-                              "type": "string",
-                              "description": "Chart type",
-                              "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
-                            },
                             "chart": {
                               "type": "object",
-                              "description": "Chart model options (dimensions, margins, spacing, borders, background)",
+                              "description": "Chart model options including type, dimensions, margins, spacing, borders, background",
                               "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "Chart type - must be inside chart object to match Vaadin Charts structure",
+                                  "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
+                                },
                                 "backgroundColor": { "type": "string", "description": "Background color (e.g., '#ffffff')" },
                                 "borderColor": { "type": "string", "description": "Border color" },
                                 "borderWidth": { "type": "number", "description": "Border width in pixels" },
@@ -467,7 +477,10 @@ public class AiChartPlugin implements AiPlugin {
             public String execute(String arguments) {
                 try {
                     ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
-                    String config = node.toString();
+                    // Extract the config object from the arguments wrapper
+                    String config = node.has("config")
+                        ? node.get("config").toString()
+                        : node.toString();
 
                     // If we have data, re-render to apply changes
                     if (currentSqlQuery != null) {
