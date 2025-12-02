@@ -73,6 +73,9 @@ public class AiChartPlugin implements AiPlugin {
     // State tracking for persistence
     private String currentSqlQuery;
 
+    // State change listeners
+    private final List<ChartStateChangeListener> stateChangeListeners = new ArrayList<>();
+
     /**
      * Creates a new AI chart plugin.
      *
@@ -102,6 +105,42 @@ public class AiChartPlugin implements AiPlugin {
     public void setDataConverter(DataConverter dataConverter) {
         this.chartDataConverter = Objects.requireNonNull(dataConverter,
                 "Data converter cannot be null");
+    }
+
+    /**
+     * Adds a listener for chart state changes.
+     * <p>
+     * The listener will be notified whenever the chart's SQL query or configuration
+     * is updated through the plugin's tools.
+     * </p>
+     *
+     * <h3>Example Usage:</h3>
+     *
+     * <pre>
+     * plugin.addStateChangeListener(event -> {
+     *     ChartState state = event.getState();
+     *     System.out.println("Chart updated - Query: " + state.sqlQuery());
+     *
+     *     // Save state to database
+     *     persistState(state);
+     * });
+     * </pre>
+     *
+     * @param listener the listener to add, cannot be null
+     */
+    public void addStateChangeListener(ChartStateChangeListener listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        stateChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes a previously added state change listener.
+     *
+     * @param listener the listener to remove
+     * @return true if the listener was found and removed, false otherwise
+     */
+    public boolean removeStateChangeListener(ChartStateChangeListener listener) {
+        return stateChangeListeners.remove(listener);
     }
 
     /**
@@ -301,6 +340,9 @@ public class AiChartPlugin implements AiPlugin {
                     String config = ChartSerialization.toJSON(chart.getConfiguration());
                     renderChart(query, config);
 
+                    // Fire state change event
+                    AiChartPlugin.this.fireStateChangeEvent();
+
                     return "Chart data updated successfully";
                 } catch (Exception e) {
                     return "Error updating chart data: " + e.getMessage();
@@ -485,16 +527,42 @@ public class AiChartPlugin implements AiPlugin {
                     // If we have data, re-render to apply changes
                     if (currentSqlQuery != null) {
                         renderChart(currentSqlQuery, config);
+                        
                     } else {
                         // Apply configuration directly to the chart
                         applyChartConfig(chart, config);
                     }
+                    AiChartPlugin.this.fireStateChangeEvent();
                     return "Chart configuration updated successfully";
                 } catch (Exception e) {
                     return "Error updating chart configuration: " + e.getMessage();
                 }
             }
         };
+    }
+
+    // ===== Event Firing =====
+
+    /**
+     * Fires a state change event to all registered listeners.
+     */
+    private void fireStateChangeEvent() {
+        if (stateChangeListeners.isEmpty()) {
+            return;
+        }
+
+        ChartState state = getState();
+        if (state != null) {
+            ChartStateChangeEvent event = new ChartStateChangeEvent(this, state);
+            for (ChartStateChangeListener listener : stateChangeListeners) {
+                try {
+                    listener.onStateChange(event);
+                } catch (Exception e) {
+                    System.err.println("Error in state change listener: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     // ===== Rendering Methods =====

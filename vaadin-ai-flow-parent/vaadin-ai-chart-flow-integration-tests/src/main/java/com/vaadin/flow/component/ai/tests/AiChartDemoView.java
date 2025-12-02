@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin;
 import com.vaadin.flow.component.ai.pro.chart.AiChartPlugin.ChartState;
@@ -66,6 +67,23 @@ public class AiChartDemoView extends HorizontalLayout {
 
         // Create AI chart plugin
         var chartPlugin = new AiChartPlugin(chart, new InMemoryDatabaseProvider());
+
+        // Add state change listener to log state changes
+        chartPlugin.addStateChangeListener(event -> {
+            ChartState state = event.getState();
+            System.out.println("=== Chart State Changed ===");
+            System.out.println("SQL Query: " + state.sqlQuery());
+            System.out.println("Configuration:");
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Object json = mapper.readValue(state.configuration(), Object.class);
+                String prettyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+                System.out.println(prettyJson);
+            } catch (Exception e) {
+                System.out.println(state.configuration());
+            }
+            System.out.println("===========================");
+        });
 
         // Create LLM provider
         var model = OpenAiStreamingChatModel.builder()
