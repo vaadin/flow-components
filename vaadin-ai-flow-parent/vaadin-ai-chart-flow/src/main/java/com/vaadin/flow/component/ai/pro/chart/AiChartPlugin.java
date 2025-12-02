@@ -68,6 +68,7 @@ public class AiChartPlugin implements AiPlugin {
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
     private DataConverter chartDataConverter;
+    private final ChartConfigurationApplier configurationApplier;
 
     // State tracking for persistence
     private String currentSqlQuery;
@@ -85,6 +86,7 @@ public class AiChartPlugin implements AiPlugin {
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
         this.chartDataConverter = new DefaultDataConverter();
+        this.configurationApplier = new ChartConfigurationApplier();
     }
 
     /**
@@ -129,8 +131,12 @@ public class AiChartPlugin implements AiPlugin {
                 2. getCurrentState() - Returns current chart state (query and configuration)
                 3. updateData(query) - Updates chart data with SQL SELECT query
                 4. updateConfig(config) - Updates chart configuration (type, title, tooltip, etc.)
-                   - Supports: line, bar, column, pie, area charts
-                   - Config includes chart type and Highcharts options
+                   - Supports 31 chart types: line, spline, area, areaspline, bar, column, pie, scatter,
+                     gauge, arearange, columnrange, areasplinerange, boxplot, errorbar, bubble, funnel,
+                     waterfall, pyramid, solidgauge, heatmap, treemap, polygon, candlestick, flags,
+                     timeline, ohlc, organization, sankey, xrange, gantt, bullet
+                   - Config includes: chart model (dimensions, margins, spacing, borders, background),
+                     axes (x, y, z, color), title, subtitle, tooltip, legend, credits, pane, exporting
 
                 WORKFLOW:
                 1. ALWAYS call getCurrentState() FIRST before making any changes
@@ -141,9 +147,16 @@ public class AiChartPlugin implements AiPlugin {
                 IMPORTANT:
                 - ALWAYS check getCurrentState() before making any modifications
                 - This helps you understand what's already configured and make informed changes
-                - For trends over time: use line or area charts
-                - For comparisons: use bar or column charts
-                - For proportions: use pie charts
+                - NEVER include 'series' data in updateConfig() - chart data comes ONLY from updateData()
+                - updateData() executes SQL and populates the chart series automatically
+                - updateConfig() only handles visual appearance (type, styling, labels, etc.)
+                - Chart type recommendations:
+                  * Trends over time: line, spline, area, areaspline
+                  * Comparisons: bar, column
+                  * Proportions: pie, funnel
+                  * Distributions: boxplot, errorbar
+                  * Relationships: scatter, bubble
+                  * Specialized: gauge, heatmap, treemap, waterfall, gantt, sankey
                 - You can update data and config independently
                 """;
     }
@@ -295,31 +308,175 @@ public class AiChartPlugin implements AiPlugin {
 
             @Override
             public String getDescription() {
-                return "Updates the chart configuration (type, title, tooltip, etc.). Parameters: config (object) - Chart configuration with 'type' (line/bar/column/pie/area) and Highcharts options.";
+                return "Updates the chart configuration (type, title, tooltip, etc.). Parameters: config (object) - Chart configuration object. IMPORTANT: Do NOT include 'series' in the config - chart data is managed separately via updateData tool.";
             }
 
             @Override
             public String getParametersSchema() {
-                return null;
+                return """
+                    {
+                      "type": "object",
+                      "properties": {
+                        "config": {
+                          "type": "object",
+                          "description": "Chart configuration object. NOTE: Do NOT include 'series' - data is managed separately via updateData tool.",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "description": "Chart type",
+                              "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
+                            },
+                            "chart": {
+                              "type": "object",
+                              "description": "Chart model options (dimensions, margins, spacing, borders, background)",
+                              "properties": {
+                                "backgroundColor": { "type": "string", "description": "Background color (e.g., '#ffffff')" },
+                                "borderColor": { "type": "string", "description": "Border color" },
+                                "borderWidth": { "type": "number", "description": "Border width in pixels" },
+                                "borderRadius": { "type": "number", "description": "Border radius in pixels" },
+                                "width": { "type": "number", "description": "Chart width in pixels" },
+                                "height": { "type": "string", "description": "Chart height (e.g., '400px', '100%')" },
+                                "marginTop": { "type": "number" },
+                                "marginRight": { "type": "number" },
+                                "marginBottom": { "type": "number" },
+                                "marginLeft": { "type": "number" },
+                                "spacingTop": { "type": "number" },
+                                "spacingRight": { "type": "number" },
+                                "spacingBottom": { "type": "number" },
+                                "spacingLeft": { "type": "number" },
+                                "plotBackgroundColor": { "type": "string" },
+                                "plotBorderColor": { "type": "string" },
+                                "plotBorderWidth": { "type": "number" },
+                                "inverted": { "type": "boolean", "description": "Invert axes" },
+                                "polar": { "type": "boolean", "description": "Polar chart" },
+                                "animation": { "type": "boolean" },
+                                "styledMode": { "type": "boolean" },
+                                "zoomType": { "type": "string", "enum": ["X", "Y", "XY"] }
+                              }
+                            },
+                            "title": {
+                              "oneOf": [
+                                { "type": "string", "description": "Title text" },
+                                { "type": "object", "properties": { "text": { "type": "string" } } }
+                              ]
+                            },
+                            "subtitle": {
+                              "oneOf": [
+                                { "type": "string", "description": "Subtitle text" },
+                                { "type": "object", "properties": { "text": { "type": "string" } } }
+                              ]
+                            },
+                            "xAxis": {
+                              "type": "object",
+                              "description": "X-axis configuration",
+                              "properties": {
+                                "title": { "type": "object", "properties": { "text": { "type": "string" } } },
+                                "categories": { "type": "array", "items": { "type": "string" } },
+                                "min": { "type": "number" },
+                                "max": { "type": "number" }
+                              }
+                            },
+                            "yAxis": {
+                              "type": "object",
+                              "description": "Y-axis configuration",
+                              "properties": {
+                                "title": { "type": "object", "properties": { "text": { "type": "string" } } },
+                                "min": { "type": "number" },
+                                "max": { "type": "number" }
+                              }
+                            },
+                            "zAxis": {
+                              "type": "object",
+                              "description": "Z-axis configuration (for 3D charts)",
+                              "properties": {
+                                "title": { "type": "object", "properties": { "text": { "type": "string" } } },
+                                "min": { "type": "number" },
+                                "max": { "type": "number" }
+                              }
+                            },
+                            "colorAxis": {
+                              "type": "object",
+                              "description": "Color axis for heatmaps",
+                              "properties": {
+                                "min": { "type": "number" },
+                                "max": { "type": "number" },
+                                "minColor": { "type": "string" },
+                                "maxColor": { "type": "string" }
+                              }
+                            },
+                            "tooltip": {
+                              "type": "object",
+                              "description": "Tooltip configuration",
+                              "properties": {
+                                "pointFormat": { "type": "string" },
+                                "headerFormat": { "type": "string" },
+                                "shared": { "type": "boolean" },
+                                "valueSuffix": { "type": "string" },
+                                "valuePrefix": { "type": "string" }
+                              }
+                            },
+                            "legend": {
+                              "type": "object",
+                              "description": "Legend configuration",
+                              "properties": {
+                                "enabled": { "type": "boolean" },
+                                "align": { "type": "string", "enum": ["LEFT", "CENTER", "RIGHT"] },
+                                "verticalAlign": { "type": "string", "enum": ["TOP", "MIDDLE", "BOTTOM"] },
+                                "layout": { "type": "string", "enum": ["HORIZONTAL", "VERTICAL"] }
+                              }
+                            },
+                            "credits": {
+                              "type": "object",
+                              "description": "Credits configuration",
+                              "properties": {
+                                "enabled": { "type": "boolean" },
+                                "text": { "type": "string" },
+                                "href": { "type": "string" }
+                              }
+                            },
+                            "pane": {
+                              "type": "object",
+                              "description": "Pane configuration (for gauges and polar charts)",
+                              "properties": {
+                                "startAngle": { "type": "number" },
+                                "endAngle": { "type": "number" },
+                                "center": { "type": "array", "items": { "type": "string" }, "description": "Center position ['50%', '50%']" },
+                                "size": { "type": "string", "description": "Size (e.g., '100%')" }
+                              }
+                            },
+                            "exporting": {
+                              "type": "object",
+                              "description": "Export configuration",
+                              "properties": {
+                                "enabled": { "type": "boolean" },
+                                "filename": { "type": "string" },
+                                "sourceWidth": { "type": "number" },
+                                "sourceHeight": { "type": "number" },
+                                "scale": { "type": "number" }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": ["config"]
+                    }
+                    """;
             }
 
             @Override
             public String execute(String arguments) {
                 try {
                     ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
-                    String config = node.get("config").toString();
-
-                    // Apply configuration directly to the chart
-                    applyChartConfig(chart, config);
+                    String config = node.toString();
 
                     // If we have data, re-render to apply changes
                     if (currentSqlQuery != null) {
-                        String currentConfig = ChartSerialization.toJSON(chart.getConfiguration());
-                        renderChart(currentSqlQuery, currentConfig);
-                        return "Chart configuration updated successfully";
+                        renderChart(currentSqlQuery, config);
                     } else {
-                        return "Chart configuration saved. Use updateData to add data to the chart.";
+                        // Apply configuration directly to the chart
+                        applyChartConfig(chart, config);
                     }
+                    return "Chart configuration updated successfully";
                 } catch (Exception e) {
                     return "Error updating chart configuration: " + e.getMessage();
                 }
@@ -341,7 +498,7 @@ public class AiChartPlugin implements AiPlugin {
                  Configuration config = chart.getConfiguration();
                 config.setSeries(series);
 
-                applyChartConfig(chart, configJson);
+                configurationApplier.applyConfiguration(chart, configJson);
 
                 chart.drawChart();
             });
@@ -352,48 +509,14 @@ public class AiChartPlugin implements AiPlugin {
     }
 
     private void applyChartConfig(Chart chart, String configJson) {
-        try {
-            ObjectNode configNode = (ObjectNode) JacksonUtils
-                    .readTree(configJson);
-
-            Configuration config = chart.getConfiguration();
-
-            // Apply chart type if specified
-            if (configNode.has("type")) {
-                String chartTypeStr = configNode.get("type").asString()
-                        .toLowerCase();
-                ChartType chartType = switch (chartTypeStr) {
-                case "line" -> ChartType.LINE;
-                case "bar" -> ChartType.BAR;
-                case "column" -> ChartType.COLUMN;
-                case "pie" -> ChartType.PIE;
-                case "area" -> ChartType.AREA;
-                default -> ChartType.LINE;
-                };
-                config.getChart().setType(chartType);
-            }
-
-            // Apply title if specified
-            if (configNode.has("title")) {
-                var titleNode = configNode.get("title");
-                if (titleNode.isObject() && titleNode.has("text")) {
-                    config.setTitle(titleNode.get("text").asString());
-                } else if (titleNode.isString()) {
-                    config.setTitle(titleNode.asString());
-                }
-            }
-
-            // Apply tooltip configuration
-            if (configNode.has("tooltip") && configNode.get("tooltip").isObject()) {
-                var tooltipNode = configNode.get("tooltip");
-                if (tooltipNode.has("pointFormat")) {
-                    config.getTooltip()
-                            .setPointFormat(tooltipNode.get("pointFormat").asString());
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error applying chart config: " + e.getMessage());
-        }
+        chart.getUI().ifPresentOrElse(currentUI -> {
+            currentUI.access(() -> {
+                configurationApplier.applyConfiguration(chart, configJson);
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Chart is not attached to a UI");
+        });
     }
 
     /**
