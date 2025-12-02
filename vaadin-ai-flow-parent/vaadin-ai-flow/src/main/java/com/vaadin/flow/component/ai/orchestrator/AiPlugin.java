@@ -92,20 +92,6 @@ public interface AiPlugin extends Serializable {
     }
 
     /**
-     * Returns this plugin's contribution to the system prompt.
-     * <p>
-     * The system prompt should describe what capabilities this plugin adds and
-     * when/how the AI should use them. All plugin contributions are combined
-     * into the final system prompt sent to the LLM.
-     * </p>
-     *
-     * @return system prompt text, or null if no contribution
-     */
-    default String getSystemPromptContribution() {
-        return null;
-    }
-
-    /**
      * Called when this plugin is attached to an orchestrator.
      * <p>
      * Plugins can use this to initialize resources, register listeners, or

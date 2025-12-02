@@ -20,7 +20,6 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.communication.PushMode;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
@@ -78,7 +77,7 @@ public class AiChatWithDataVizPluginDemo extends HorizontalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with plugin
-        AiOrchestrator.create(provider)
+        AiOrchestrator.create(provider, DataVisualizationPlugin.getSystemPrompt())
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withPlugin(dataVizPlugin)

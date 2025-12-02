@@ -75,6 +75,7 @@ import java.util.function.Consumer;
 public class AiOrchestrator implements Serializable {
 
     protected final LLMProvider provider;
+    protected final String systemPrompt;
     protected AiMessageList messageList;
     protected AiInput input;
     protected AiFileReceiver fileReceiver;
@@ -89,10 +90,13 @@ public class AiOrchestrator implements Serializable {
      *
      * @param provider
      *            the LLM provider to use for generating responses
+     * @param systemPrompt
+     *            the system prompt for the LLM (can be null)
      */
-    private AiOrchestrator(LLMProvider provider) {
+    private AiOrchestrator(LLMProvider provider, String systemPrompt) {
         Objects.requireNonNull(provider, "Provider cannot be null");
         this.provider = provider;
+        this.systemPrompt = systemPrompt;
     }
 
     /**
@@ -103,7 +107,20 @@ public class AiOrchestrator implements Serializable {
      * @return a new builder
      */
     public static Builder create(LLMProvider provider) {
-        return new Builder(provider);
+        return new Builder(provider, null);
+    }
+
+    /**
+     * Creates a new builder for AiOrchestrator with a system prompt.
+     *
+     * @param provider
+     *            the LLM provider
+     * @param systemPrompt
+     *            the system prompt for the LLM
+     * @return a new builder
+     */
+    public static Builder create(LLMProvider provider, String systemPrompt) {
+        return new Builder(provider, systemPrompt);
     }
 
     /**
@@ -404,10 +421,9 @@ public class AiOrchestrator implements Serializable {
                 .userMessage(userMessage)
                 .attachments(new ArrayList<>(pendingAttachments));
 
-        // Build system prompt from subclass and plugins
-        String systemPrompt = buildSystemPrompt();
-        if (systemPrompt != null && !systemPrompt.isEmpty()) {
-            requestBuilder.systemPrompt(systemPrompt);
+        // Add system prompt if provided
+        if (this.systemPrompt != null && !this.systemPrompt.isEmpty()) {
+            requestBuilder.systemPrompt(this.systemPrompt);
         }
 
         // Add tools if provided by subclass
@@ -651,36 +667,7 @@ public class AiOrchestrator implements Serializable {
      * @return the system prompt, or null if no system prompt needed
      */
     protected String getSystemPrompt() {
-        return null;
-    }
-
-    /**
-     * Builds the complete system prompt by aggregating contributions from the
-     * subclass and all plugins.
-     *
-     * @return the combined system prompt, or null if no prompt needed
-     */
-    private String buildSystemPrompt() {
-        StringBuilder prompt = new StringBuilder();
-
-        // Add subclass system prompt
-        String subclassPrompt = getSystemPrompt();
-        if (subclassPrompt != null && !subclassPrompt.trim().isEmpty()) {
-            prompt.append(subclassPrompt);
-        }
-
-        // Add plugin system prompt contributions
-        for (AiPlugin plugin : plugins) {
-            String pluginContribution = plugin.getSystemPromptContribution();
-            if (pluginContribution != null && !pluginContribution.trim().isEmpty()) {
-                if (prompt.length() > 0) {
-                    prompt.append("\n\n");
-                }
-                prompt.append(pluginContribution);
-            }
-        }
-
-        return prompt.length() > 0 ? prompt.toString() : null;
+        return systemPrompt;
     }
 
     /**
@@ -718,6 +705,7 @@ public class AiOrchestrator implements Serializable {
      */
     public static class Builder {
         protected final LLMProvider provider;
+        protected final String systemPrompt;
         protected AiMessageList messageList;
         protected AiInput input;
         protected AiFileReceiver fileReceiver;
@@ -725,8 +713,9 @@ public class AiOrchestrator implements Serializable {
         protected Object[] toolObjects = new Object[0];
         protected List<AiPlugin> plugins = new ArrayList<>();
 
-        private Builder(LLMProvider provider) {
+        private Builder(LLMProvider provider, String systemPrompt) {
             this.provider = provider;
+            this.systemPrompt = systemPrompt;
         }
 
         /**
@@ -821,7 +810,7 @@ public class AiOrchestrator implements Serializable {
          * @return the configured orchestrator
          */
         public AiOrchestrator build() {
-            AiOrchestrator orchestrator = new AiOrchestrator(provider);
+            AiOrchestrator orchestrator = new AiOrchestrator(provider, systemPrompt);
 
             orchestrator.setMessageList(messageList);
             orchestrator.setInput(input);

@@ -17,16 +17,12 @@ package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.provider.langchain4j.LangChain4JLLMProvider;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.communication.PushMode;
-import com.vaadin.flow.theme.lumo.LumoIcon;
 
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
@@ -66,8 +62,13 @@ public class AiChatDemoView extends VerticalLayout {
                 .modelName("gpt-4o-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
+        var systemPrompt = "You are a helpful AI assistant. "
+                + "Answer concisely and accurately. "
+                + "If the user provides any files, use them to inform your answers. "
+                + "If you don't know the answer, say so honestly.";
+
         // Create and configure orchestrator with input validation
-        AiOrchestrator.create(provider)
+        AiOrchestrator.create(provider, systemPrompt)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)

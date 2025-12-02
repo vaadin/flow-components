@@ -85,6 +85,53 @@ public class DataVisualizationPlugin implements AiPlugin {
     }
 
     /**
+     * Returns the recommended system prompt for data visualization capabilities.
+     * <p>
+     * Use this when creating an orchestrator with the DataVisualizationPlugin:
+     * </p>
+     * <pre>
+     * String systemPrompt = "You are a helpful assistant. "
+     *     + DataVisualizationPlugin.getSystemPrompt();
+     *
+     * AiOrchestrator orchestrator = AiOrchestrator.create(provider, systemPrompt)
+     *     .withPlugin(plugin)
+     *     .build();
+     * </pre>
+     *
+     * @return the system prompt text describing data visualization capabilities
+     */
+    public static String getSystemPrompt() {
+        return """
+                You have access to data visualization capabilities:
+
+                TOOLS:
+                1. getSchema() - Retrieves database schema (tables, columns, types)
+                2. updateChart(query, config) - Creates/updates a chart visualization
+                   - Supports: line, bar, column, pie, area charts
+                   - Config includes chart type and Highcharts options
+                3. updateGrid(query) - Creates/updates a grid/table visualization
+                   - Shows all columns from query results
+                4. updateKpi(query, label, format) - Creates/updates a KPI card
+                   - Shows single metric with optional formatting
+                5. changeVisualizationType(type, config) - Changes visualization type
+                   - Reuses current data, just changes display
+
+                WORKFLOW:
+                1. Use getSchema() to understand available data
+                2. Create appropriate SQL queries (SELECT only)
+                3. Choose the right visualization type based on user request and data
+                4. User can ask to change types: "show this as a table"
+
+                GUIDELINES:
+                - For trends over time: use line or area charts
+                - For comparisons: use bar or column charts
+                - For proportions: use pie charts
+                - For detailed data inspection: use grids
+                - For single metrics: use KPIs
+                """;
+    }
+
+    /**
      * Creates a new builder for DataVisualizationPlugin.
      *
      * @param databaseProvider
@@ -193,38 +240,6 @@ public class DataVisualizationPlugin implements AiPlugin {
         tools.add(createUpdateKpiTool());
         tools.add(createChangeVisualizationTypeTool());
         return tools;
-    }
-
-    @Override
-    public String getSystemPromptContribution() {
-        return """
-                You have access to data visualization capabilities:
-
-                TOOLS:
-                1. getSchema() - Retrieves database schema (tables, columns, types)
-                2. updateChart(query, config) - Creates/updates a chart visualization
-                   - Supports: line, bar, column, pie, area charts
-                   - Config includes chart type and Highcharts options
-                3. updateGrid(query) - Creates/updates a grid/table visualization
-                   - Shows all columns from query results
-                4. updateKpi(query, label, format) - Creates/updates a KPI card
-                   - Shows single metric with optional formatting
-                5. changeVisualizationType(type, config) - Changes visualization type
-                   - Reuses current data, just changes display
-
-                WORKFLOW:
-                1. Use getSchema() to understand available data
-                2. Create appropriate SQL queries (SELECT only)
-                3. Choose the right visualization type based on user request and data
-                4. User can ask to change types: "show this as a table"
-
-                GUIDELINES:
-                - For trends over time: use line or area charts
-                - For comparisons: use bar or column charts
-                - For proportions: use pie charts
-                - For detailed data inspection: use grids
-                - For single metrics: use KPIs
-                """;
     }
 
     @Override

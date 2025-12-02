@@ -332,25 +332,26 @@ plugin.restoreState(state);
 **Key Methods**:
 
 - `getTools()` - Returns list of tools this plugin provides to the LLM
-- `getSystemPromptContribution()` - Returns text to add to the system prompt
 - `onAttached(AiOrchestrator)` - Called when plugin is attached to an orchestrator
 - `onDetached()` - Called when plugin is detached (cleanup)
 - `captureState()` - Returns serializable state object for persistence
 - `restoreState(Object)` - Restores plugin from a previously captured state
 - `getPluginId()` - Returns unique identifier for this plugin type
 
+**System Prompts**: System prompts are now provided when creating the orchestrator, not via plugins. Built-in plugins like `DataVisualizationPlugin` provide a static helper method (e.g., `DataVisualizationPlugin.getSystemPrompt()`) to get the recommended prompt text.
+
 **Example Custom Plugin**:
 
 ```java
 public class MyCustomPlugin implements AiPlugin {
-    @Override
-    public List<LLMProvider.Tool> getTools() {
-        return List.of(new MyTool());
+    // Static helper for system prompt
+    public static String getSystemPrompt() {
+        return "You have access to myTool which does X, Y, Z.";
     }
 
     @Override
-    public String getSystemPromptContribution() {
-        return "You have access to myTool which does X, Y, Z.";
+    public List<LLMProvider.Tool> getTools() {
+        return List.of(new MyTool());
     }
 
     @Override
@@ -359,9 +360,13 @@ public class MyCustomPlugin implements AiPlugin {
     }
 }
 
-// Use in orchestrator
+// Use in orchestrator - provide system prompt at creation
+String systemPrompt = "You are a helpful assistant. "
+    + MyCustomPlugin.getSystemPrompt()
+    + DataVisualizationPlugin.getSystemPrompt();
+
 AiOrchestrator orchestrator = AiOrchestrator
-    .create(llmProvider)
+    .create(llmProvider, systemPrompt)
     .withPlugin(new MyCustomPlugin())
     .withPlugin(dataVizPlugin)  // Multiple plugins!
     .build();
@@ -552,6 +557,53 @@ mvn install -DskipTests
 - Tests: `*/src/test/java/` (mirrors main structure)
 
 ## Recent Changes
+
+### 2025-12-02: Plugin System Prompt Simplification
+
+**Goal**: Simplify system prompt management by removing it from the plugin API and making it explicit at orchestrator creation time.
+
+**Changes**:
+- **Removed**: `getSystemPromptContribution()` method from `AiPlugin` interface
+  - System prompts are no longer aggregated from plugins
+  - This was confusing - users couldn't see what the final prompt would be
+- **Updated**: `AiOrchestrator` now accepts system prompt as a creation parameter
+  - New signature: `AiOrchestrator.create(provider, systemPrompt)`
+  - Original signature still works: `AiOrchestrator.create(provider)` (no system prompt)
+  - System prompt is stored as a final field in the orchestrator
+- **Added**: Static helper methods for built-in plugins
+  - `DataVisualizationPlugin.getSystemPrompt()` - returns recommended prompt text
+  - Users explicitly compose system prompts: `"You are helpful. " + DataVisualizationPlugin.getSystemPrompt()`
+- **Updated**: All demo views to use new pattern
+
+**Benefits**:
+- **Explicit over implicit**: Users see exactly what system prompt is being used
+- **Better composability**: Easy to combine prompts from multiple sources
+- **Simpler API**: Plugins only provide tools, not hidden prompt modifications
+- **Clearer debugging**: System prompt is visible at orchestrator creation, not hidden in plugins
+
+**Migration**:
+```java
+// Old way (no longer supported)
+public class MyPlugin implements AiPlugin {
+    @Override
+    public String getSystemPromptContribution() {
+        return "You have access to...";
+    }
+}
+
+// New way
+public class MyPlugin implements AiPlugin {
+    public static String getSystemPrompt() {
+        return "You have access to...";
+    }
+}
+
+// Usage
+String systemPrompt = "You are helpful. " + MyPlugin.getSystemPrompt();
+AiOrchestrator.create(provider, systemPrompt)
+    .withPlugin(new MyPlugin())
+    .build();
+```
 
 ### 2025-12-02: Orchestrator Consolidation
 

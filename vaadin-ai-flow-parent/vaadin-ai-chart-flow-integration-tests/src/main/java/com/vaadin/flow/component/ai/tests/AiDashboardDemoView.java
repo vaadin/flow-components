@@ -200,7 +200,7 @@ public class AiDashboardDemoView extends VerticalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with plugin
-        AiOrchestrator.create(provider)
+        AiOrchestrator.create(provider, DataVisualizationPlugin.getSystemPrompt())
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withPlugin(plugin)
