@@ -135,7 +135,7 @@ vaadin-ai-flow-parent/
 
 **Hook Methods** (can be overridden for customization):
 
-- `createTools()` - returns array of tools for the LLM (default: from plugins only)
+- `createTools()` - returns array of tools for the LLM (default: from controllers only)
 - `getSystemPrompt()` - returns system prompt for the LLM (default: null)
 - `onProcessingComplete()` - called after streaming completes (default: no-op)
 
@@ -143,18 +143,18 @@ vaadin-ai-flow-parent/
 
 - Use `@Tool` annotation to define methods that can be called by the LLM
 - Use `@ParameterDescription` to describe method parameters
-- Configure tools via builder: `.withTools(this)` or `.withTools(toolObject)`
+- Configure tools via builder: `.withVendorToolObjects(this)` or `.withVendorToolObjects(toolObject)`
 - Automatic UI.access() wrapping: Tool methods are automatically executed within UI.access() if a UI is available
 - UI is obtained from the input component's getUI() method
 - If no UI is available, tools execute directly (no warning)
 - Developers don't need to manually wrap tool code in UI.access()
 
-**Plugin Support**:
+**Controller Support**:
 
-- Extensible via `AiPlugin` interface
-- Plugins can contribute tools, system prompts, and manage state
-- Add plugins via builder: `.withPlugin(new MyPlugin())`
-- Multiple plugins can be active simultaneously
+- Extensible via `AiController` interface
+- Controllers can contribute tools, system prompts, and manage state
+- Add controllers via builder: `.withController(new MyController())`
+- Multiple controllers can be active simultaneously
 
 **File Attachment Support**:
 
@@ -165,7 +165,7 @@ vaadin-ai-flow-parent/
 **Builder Pattern**:
 
 - Use `AiOrchestrator.builder(provider)` to start building
-- Fluent API for configuration: `.withMessageList()`, `.withInput()`, `.withFileReceiver()`, `.withPlugin()`, `.withTools()`
+- Fluent API for configuration: `.withMessageList()`, `.withInput()`, `.withFileReceiver()`, `.withController()`, `.withVendorToolObjects()`
 - Call `.build()` to construct the orchestrator
 - Automatically registers input listeners and configures file receivers
 
@@ -206,19 +206,19 @@ AiOrchestrator orchestrator = AiOrchestrator.builder(provider)
 
 ## Chart Module: vaadin-ai-chart-flow (Commercial)
 
-**Purpose**: Provides chart visualization capabilities as a plugin for AI orchestrators.
+**Purpose**: Provides chart visualization capabilities as a controller for AI orchestrators.
 
-This module provides the `AiChartPlugin` which can be added to any orchestrator (like `AiOrchestrator`) to enable AI-powered chart visualizations from natural language queries.
+This module provides the `ChartAiController` which can be added to any orchestrator (like `AiOrchestrator`) to enable AI-powered chart visualizations from natural language queries.
 
 ### Key Classes
 
-#### AiChartPlugin
+#### ChartAiController
 
-**Location**: [AiChartPlugin.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/AiChartPlugin.java)
+**Location**: [ChartAiController.java](vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/ChartAiController.java)
 
 **Pattern**: Direct constructor-based configuration (simple API)
 
-**Purpose**: Plugin that adds AI-powered chart visualization capabilities to orchestrators using Vaadin Charts.
+**Purpose**: Controller that adds AI-powered chart visualization capabilities to orchestrators using Vaadin Charts.
 
 **Configuration (Constructor)**:
 
@@ -235,7 +235,7 @@ This module provides the `AiChartPlugin` which can be added to any orchestrator 
 **Flow**:
 
 1. User submits natural language request (e.g., "Show sales by region as a bar chart")
-2. Orchestrator routes to plugin's tools
+2. Orchestrator routes to controller's tools
 3. AI uses `getSchema()` to understand available data
 4. AI generates appropriate SQL query
 5. AI calls `updateChart()` with query and chart configuration
@@ -245,38 +245,38 @@ This module provides the `AiChartPlugin` which can be added to any orchestrator 
 
 **Key Features**:
 
-- **Simple API**: Direct constructor - `new AiChartPlugin(chart, databaseProvider)`
-- **Plugin Architecture**: Can be added to any orchestrator (AiOrchestrator, custom orchestrators)
+- **Simple API**: Direct constructor - `new ChartAiController(chart, databaseProvider)`
+- **Controller Architecture**: Can be added to any orchestrator (AiOrchestrator, custom orchestrators)
 - **Chart-Focused**: Dedicated to chart visualizations (line, bar, column, pie, area)
 - **State Management**: `ChartState` captures SQL query and chart configuration for persistence
 - **Data Conversion**: Built-in `DefaultDataConverter` handles common query result formats
 - **Thread-Safe**: Automatic UI.access() wrapping for safe chart updates
-- **Composable**: Can be combined with other plugins in the same orchestrator
+- **Composable**: Can be combined with other controllers in the same orchestrator
 
 **Tools**:
 
 1. `getSchema()` - Retrieves database schema (tables, columns, data types)
 2. `updateChart(query, config)` - Executes SQL query and creates/updates chart with specified type and configuration
 
-**System Prompt**: Use static method `AiChartPlugin.getSystemPrompt()` to get the recommended system prompt text that describes chart capabilities to the AI
+**System Prompt**: Use static method `ChartAiController.getSystemPrompt()` to get the recommended system prompt text that describes chart capabilities to the AI
 
 **Example Usage**:
 
 ```java
-// Create chart component and plugin
+// Create chart component and controller
 Chart chart = new Chart();
-AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
+ChartAiController controller = new ChartAiController(chart, databaseProvider);
 
 // Compose system prompt
 String systemPrompt = "You are a data visualization assistant. "
-        + AiChartPlugin.getSystemPrompt();
+        + ChartAiController.getSystemPrompt();
 
-// Create orchestrator with plugin
+// Create orchestrator with controller
 AiOrchestrator orchestrator = AiOrchestrator
     .create(llmProvider, systemPrompt)
     .withMessageList(messageList)
     .withInput(messageInput)
-    .withPlugin(plugin)
+    .withController(controller)
     .build();
 
 // User can now say:
@@ -298,34 +298,34 @@ DashboardWidget widget = new DashboardWidget("Sales Data");
 Chart chart = new Chart();
 widget.setContent(chart);
 
-// Create plugin for this chart
-AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
+// Create controller for this chart
+ChartAiController controller = new ChartAiController(chart, databaseProvider);
 
-// Create orchestrator for this widget with the plugin
+// Create orchestrator for this widget with the controller
 AiOrchestrator orchestrator = AiOrchestrator
-    .create(llm, AiChartPlugin.getSystemPrompt())
-    .withPlugin(plugin)
+    .create(llm, ChartAiController.getSystemPrompt())
+    .withController(controller)
     .build();
 
 dashboard.add(widget);
 ```
 
-#### AiPlugin Interface
+#### AiController Interface
 
-**Location**: [AiPlugin.java](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/AiPlugin.java)
+**Location**: [AiController.java](vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/AiController.java)
 
-**Purpose**: Base interface for all AI plugins that extend orchestrator capabilities by providing tools to the LLM
+**Purpose**: Base interface for all AI controllers that extend orchestrator capabilities by providing tools to the LLM
 
 **Key Methods**:
 
-- `getTools()` - Returns list of tools this plugin provides to the LLM (default: empty list)
+- `getTools()` - Returns list of tools this controller provides to the LLM (default: empty list)
 
-**System Prompts**: System prompts are provided when creating the orchestrator. Built-in plugins like `AiChartPlugin` provide a static helper method (e.g., `AiChartPlugin.getSystemPrompt()`) to get the recommended prompt text.
+**System Prompts**: System prompts are provided when creating the orchestrator. Built-in controllers like `ChartAiController` provide a static helper method (e.g., `ChartAiController.getSystemPrompt()`) to get the recommended prompt text.
 
-**Example Custom Plugin**:
+**Example Custom Controller**:
 
 ```java
-public class MyCustomPlugin implements AiPlugin {
+public class MyCustomController implements AiController {
     // Static helper for system prompt
     public static String getSystemPrompt() {
         return "You have access to myTool which does X, Y, Z.";
@@ -339,13 +339,13 @@ public class MyCustomPlugin implements AiPlugin {
 
 // Use in orchestrator - provide system prompt at creation
 String systemPrompt = "You are a helpful assistant. "
-    + MyCustomPlugin.getSystemPrompt()
-    + AiChartPlugin.getSystemPrompt();
+    + MyCustomController.getSystemPrompt()
+    + ChartAiController.getSystemPrompt();
 
 AiOrchestrator orchestrator = AiOrchestrator
     .create(llmProvider, systemPrompt)
-    .withPlugin(new MyCustomPlugin())
-    .withPlugin(chartPlugin)  // Multiple plugins!
+    .withController(new MyCustomController())
+    .withController(chartController)  // Multiple controllers!
     .build();
 ```
 
@@ -531,25 +531,25 @@ mvn install -DskipTests
 - Core interfaces: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/`
 - AiOrchestrator: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/orchestrator/`
 - Providers: `vaadin-ai-flow/src/main/java/com/vaadin/flow/component/ai/provider/`
-- Chart plugin: `vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/`
+- Chart controller: `vaadin-ai-chart-flow/src/main/java/com/vaadin/flow/component/ai/pro/chart/`
 - Tests: `*/src/test/java/` (mirrors main structure)
 
 ## Recent Changes
 
-### 2025-12-02: AiChartPlugin Simplification
+### 2025-12-02: ChartAiController Simplification
 
-**Goal**: Simplify the chart plugin by focusing exclusively on chart visualizations and removing unnecessary complexity.
+**Goal**: Simplify the chart controller by focusing exclusively on chart visualizations and removing unnecessary complexity.
 
 **Changes**:
 
-- **Renamed**: `DataVisualizationPlugin` → `AiChartPlugin`
+- **Renamed**: `DataVisualizationPlugin` → `ChartAiController`
   - Clearer name reflecting chart-focused purpose
   - Updated all imports and references in demo views
 - **Removed Builder Pattern**: Replaced with simple direct constructor
   - Old: `DataVisualizationPlugin.create(provider).withVisualizationContainer(div).build()`
-  - New: `new AiChartPlugin(chart, databaseProvider)`
+  - New: `new ChartAiController(chart, databaseProvider)`
   - Chart component must be instantiated by user and passed to constructor
-- **Removed Grid and KPI Support**: Plugin now exclusively handles charts
+- **Removed Grid and KPI Support**: Controller now exclusively handles charts
   - Removed `VisualizationType` enum
   - Removed `updateGrid()` and `updateKpi()` tools
   - Removed `changeVisualizationType()` tool
@@ -561,7 +561,7 @@ mvn install -DskipTests
 - **Updated State Management**:
   - `ChartState` record now stores only: `sqlQuery` and `configuration`
   - Removed visualization type from state
-  - Plugin ID changed from "DataVisualization" to "AiChart"
+  - Controller ID changed from "DataVisualization" to "AiChart"
 - **Simplified Data Conversion**:
   - Kept `DefaultDataConverter` for common cases
   - Removed complex multi-type rendering logic
@@ -571,7 +571,7 @@ mvn install -DskipTests
 
 **Benefits**:
 
-- **Simpler API**: Just `new AiChartPlugin(chart, provider)` - no builder needed
+- **Simpler API**: Just `new ChartAiController(chart, provider)` - no builder needed
 - **Clearer Purpose**: Chart-focused, not generic visualization
 - **Less Code**: ~370 lines vs ~800 lines (54% reduction)
 - **Better User Control**: Users instantiate and configure Chart component themselves
@@ -590,44 +590,44 @@ DataVisualizationPlugin plugin = DataVisualizationPlugin
 
 // New way
 Chart chart = new Chart();
-AiChartPlugin plugin = new AiChartPlugin(chart, databaseProvider);
+ChartAiController controller = new ChartAiController(chart, databaseProvider);
 
-String systemPrompt = "You are helpful. " + AiChartPlugin.getSystemPrompt();
+String systemPrompt = "You are helpful. " + ChartAiController.getSystemPrompt();
 AiOrchestrator.builder(provider, systemPrompt)
-    .withPlugin(plugin)
+    .withController(controller)
     .build();
 ```
 
-### 2025-12-02: Plugin System Prompt Simplification
+### 2025-12-02: Controller System Prompt Simplification
 
-**Goal**: Simplify system prompt management by removing it from the plugin API and making it explicit at orchestrator creation time.
+**Goal**: Simplify system prompt management by removing it from the controller API and making it explicit at orchestrator creation time.
 
 **Changes**:
 
-- **Removed**: `getSystemPromptContribution()` method from `AiPlugin` interface
-  - System prompts are no longer aggregated from plugins
+- **Removed**: `getSystemPromptContribution()` method from `AiController` interface
+  - System prompts are no longer aggregated from controllers
   - This was confusing - users couldn't see what the final prompt would be
 - **Updated**: `AiOrchestrator` now accepts system prompt as a creation parameter
   - New signature: `AiOrchestrator.builder(provider, systemPrompt)`
   - Original signature still works: `AiOrchestrator.builder(provider)` (no system prompt)
   - System prompt is stored as a final field in the orchestrator
-- **Added**: Static helper methods for built-in plugins
-  - `DataVisualizationPlugin.getSystemPrompt()` - returns recommended prompt text
-  - Users explicitly compose system prompts: `"You are helpful. " + DataVisualizationPlugin.getSystemPrompt()`
+- **Added**: Static helper methods for built-in controllers
+  - `ChartAiController.getSystemPrompt()` - returns recommended prompt text
+  - Users explicitly compose system prompts: `"You are helpful. " + ChartAiController.getSystemPrompt()`
 - **Updated**: All demo views to use new pattern
 
 **Benefits**:
 
 - **Explicit over implicit**: Users see exactly what system prompt is being used
 - **Better composability**: Easy to combine prompts from multiple sources
-- **Simpler API**: Plugins only provide tools, not hidden prompt modifications
-- **Clearer debugging**: System prompt is visible at orchestrator creation, not hidden in plugins
+- **Simpler API**: Controllers only provide tools, not hidden prompt modifications
+- **Clearer debugging**: System prompt is visible at orchestrator creation, not hidden in controllers
 
 **Migration**:
 
 ```java
 // Old way (no longer supported)
-public class MyPlugin implements AiPlugin {
+public class MyController implements AiController {
     @Override
     public String getSystemPromptContribution() {
         return "You have access to...";
@@ -635,16 +635,16 @@ public class MyPlugin implements AiPlugin {
 }
 
 // New way
-public class MyPlugin implements AiPlugin {
+public class MyController implements AiController {
     public static String getSystemPrompt() {
         return "You have access to...";
     }
 }
 
 // Usage
-String systemPrompt = "You are helpful. " + MyPlugin.getSystemPrompt();
+String systemPrompt = "You are helpful. " + MyController.getSystemPrompt();
 AiOrchestrator.builder(provider, systemPrompt)
-    .withPlugin(new MyPlugin())
+    .withController(new MyController())
     .build();
 ```
 
@@ -667,14 +667,14 @@ AiOrchestrator.builder(provider, systemPrompt)
   - Updated package from `com.vaadin.flow.component.ai.chat` to `com.vaadin.flow.component.ai.orchestrator`
 - **Module simplification**: `vaadin-ai-chat-flow` module no longer needed
   - Core orchestrator now lives in `vaadin-ai-flow` alongside interfaces
-  - Chart functionality remains as a plugin in `vaadin-ai-chart-flow`
+  - Chart functionality remains as a controller in `vaadin-ai-chart-flow`
 
 **Benefits**:
 
 - Single, clear entry point: `AiOrchestrator.builder(provider).build()`
 - No confusion between base class and concrete implementation
 - Cleaner module structure - core orchestrator in core module
-- Plugin pattern more prominent (chart functionality as plugin)
+- Controller pattern more prominent (chart functionality as controller)
 
 **API Impact**: Minimal - users now use `AiOrchestrator` instead of `AiChatOrchestrator`, but the builder API remains identical.
 
@@ -697,8 +697,8 @@ AiOrchestrator.builder(provider, systemPrompt)
 
 **Phase 2 - Orchestrator Integration** (Removed 2025-12-02):
 
-- State management functionality removed from AiPlugin interface
-- Plugins simplified to only provide tools via `getTools()` method
+- State management functionality removed from AiController interface
+- Controllers simplified to only provide tools via `getTools()` method
 - Lifecycle methods (`onAttached`, `onDetached`) removed
 - Persistence methods (`captureState`, `restoreState`, `getPluginId`) removed
 
@@ -749,7 +749,7 @@ AiOrchestrator.builder(provider, systemPrompt)
   - Base class provides complete `processUserInput()` implementation
   - Subclasses customize via hook methods: `createTools()`, `getSystemPrompt()`, `onProcessingComplete()`
   - AiOrchestrator uses all default hook implementations (no tools, no system prompt)
-  - AiChartOrchestrator overrides all hooks for tool support and chart-specific behavior
+  - Controllers override hooks for tool support and specific behavior
   - Eliminates need for subclasses to duplicate processing logic
 - Builder improvements:
   - Input listeners registered automatically in `applyCommonConfiguration()`
@@ -764,7 +764,7 @@ AiOrchestrator.builder(provider, systemPrompt)
   - Chart orchestrator can work without messageList (returns true, tools update chart directly)
 - Code reduction:
   - AiOrchestrator reduced to minimal code (~20 lines - just constructor, builder, getter)
-  - AiChartOrchestrator simplified significantly with hook method overrides
+  - ChartAiController simplified significantly with hook method overrides
   - Eliminated ~150+ lines of duplicate code
 - All existing tests pass (129 tests total: 33 + 42 + 54)
 - No breaking changes to public API

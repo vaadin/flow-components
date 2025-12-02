@@ -85,7 +85,7 @@ public class AiChatFormFillerDemoView extends VerticalLayout {
         // Create and configure orchestrator with form filling tools
         var orchestrator = AiOrchestrator.builder(provider)
                 .withFileReceiver(upload)
-                .withTools(this).build();
+                .withVendorToolObjects(this).build();
 
         // Fill button to trigger AI form filling
         var fillButton = new Button("Fill");

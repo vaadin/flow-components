@@ -788,7 +788,7 @@ public class AiOrchestrator implements Serializable {
          *            the objects containing tool methods
          * @return this builder
          */
-        public Builder withTools(Object... toolObjects) {
+        public Builder withVendorToolObjects(Object... toolObjects) {
             this.toolObjects = toolObjects != null ? toolObjects : new Object[0];
             return this;
         }
