@@ -198,6 +198,11 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
+    public void contextMenuClosed() {
+        spreadsheet.getContextMenuManager().onContextMenuClosed();
+    }
+
+    @Override
     public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1,
             int row2, int col2) {
         spreadsheet.onRowResized(newRowSizes, row1, col1, row2, col2);

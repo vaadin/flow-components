@@ -378,6 +378,10 @@ export class VaadinSpreadsheet extends LitElement {
       this.dispatchEvent(this.createEvent('groupingCollapsed', e));
     });
 
+    this.api.setContextMenuClosedCallback((e) => {
+      this.dispatchEvent(this.createEvent('contextMenuClosed', e));
+    });
+
     this.api.setLevelHeaderClickedCallback((e) => {
       this.dispatchEvent(this.createEvent('levelHeaderClicked', e));
     });
