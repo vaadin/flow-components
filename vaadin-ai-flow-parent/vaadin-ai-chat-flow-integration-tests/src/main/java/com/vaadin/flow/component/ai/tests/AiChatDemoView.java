@@ -24,6 +24,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Route;
 
+import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
@@ -62,17 +63,53 @@ public class AiChatDemoView extends VerticalLayout {
                 .modelName("gpt-4o-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
-        var systemPrompt = "You are a helpful AI assistant. "
-                + "Answer concisely and accurately. "
-                + "If the user provides any files, use them to inform your answers. "
-                + "If you don't know the answer, say so honestly.";
+        var systemPrompt = "You are a helpful product return assistant for an e-commerce store. "
+                + "Help customers with return and refund questions. "
+                + "Our return policy allows returns within 30 days of purchase for most items. "
+                + "If customers upload product photos or receipts, use them to better assist with their return request. "
+                + "Be friendly and professional. Use the checkReturnEligibility tool to verify if an order is eligible for return.";
+
+        // Create return tools
+        var returnTools = new ReturnTools();
 
         // Create and configure orchestrator with input validation
         AiOrchestrator.builder(provider, systemPrompt)
                 .withMessageList(messageList)
                 .withInput(messageInput)
                 .withFileReceiver(upload)
-                .withInputValidator(new PromptInjectionValidator())
+                .withVendorToolObjects(returnTools)
                 .build();
+    }
+
+    /**
+     * Tools for handling product return operations.
+     */
+    public static class ReturnTools {
+
+        @Tool("Check if an order is eligible for return based on the order ID and days since purchase")
+        public String checkReturnEligibility(String orderId, int daysSincePurchase) {
+            if (orderId == null || orderId.trim().isEmpty()) {
+                return "Error: Order ID is required";
+            }
+
+            if (daysSincePurchase < 0) {
+                return "Error: Days since purchase cannot be negative";
+            }
+
+            // Mock return policy: 30 days for most items
+            boolean eligible = daysSincePurchase <= 30;
+
+            if (eligible) {
+                return String.format(
+                        "Order %s is ELIGIBLE for return. The order was placed %d days ago, which is within our 30-day return window. "
+                                + "The customer can proceed with the return process.",
+                        orderId, daysSincePurchase);
+            } else {
+                return String.format(
+                        "Order %s is NOT ELIGIBLE for return. The order was placed %d days ago, which exceeds our 30-day return window. "
+                                + "The return period ended %d days ago.",
+                        orderId, daysSincePurchase, daysSincePurchase - 30);
+            }
+        }
     }
 }
