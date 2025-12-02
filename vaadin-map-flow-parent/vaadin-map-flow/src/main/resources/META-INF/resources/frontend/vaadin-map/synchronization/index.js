@@ -14,6 +14,7 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import View from 'ol/View';
+import { synchronizeAttribution, synchronizeScaleLine, synchronizeZoom } from './controls.js';
 import {
   synchronizeFeatureLayer,
   synchronizeImageLayer,
@@ -47,6 +48,7 @@ function synchronizeMap(target, source, context) {
   }
 
   synchronizeCollection(target.getLayers(), source.layers, context);
+  synchronizeCollection(target.getControls(), source.visibleControls, context);
   target.setView(context.lookup.get(source.view));
 
   return target;
@@ -146,7 +148,11 @@ const synchronizerLookup = {
   'ol/style/Fill': synchronizeFill,
   'ol/style/Stroke': synchronizeStroke,
   'ol/style/Style': synchronizeStyle,
-  'ol/style/Text': synchronizeText
+  'ol/style/Text': synchronizeText,
+  // Controls
+  'ol/control/Attribution': synchronizeAttribution,
+  'ol/control/ScaleLine': synchronizeScaleLine,
+  'ol/control/Zoom': synchronizeZoom
 };
 
 /**
