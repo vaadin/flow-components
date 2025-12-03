@@ -154,29 +154,70 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
 
     @Override
     public String getSchema() {
-        return """
-                DATABASE SCHEMA:
+        StringBuilder schema = new StringBuilder("DATABASE SCHEMA:\n\n");
 
-                Table: sales
-                Columns:
-                  - MONTH (VARCHAR): Month name (use "MONTH" with quotes in queries)
-                  - revenue (INTEGER): Monthly revenue in dollars
-                  - region (VARCHAR): Sales region (North, South, East, West)
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            var dbMetaData = conn.getMetaData();
 
-                Table: employees
-                Columns:
-                  - name (VARCHAR): Employee name
-                  - department (VARCHAR): Department name
-                  - salary (INTEGER): Annual salary in dollars
-                  - age (INTEGER): Employee age
+            // Get all tables
+            try (ResultSet tables = dbMetaData.getTables(null, null, "%", new String[]{"TABLE"})) {
+                while (tables.next()) {
+                    String tableName = tables.getString("TABLE_NAME");
+                    String tableSchema = tables.getString("TABLE_SCHEM");
 
-                Table: products
-                Columns:
-                  - product_name (VARCHAR): Product name
-                  - category (VARCHAR): Product category
-                  - units_sold (INTEGER): Number of units sold
-                  - price (DECIMAL): Unit price in dollars
-                """;
+                    // Skip system tables and information schema
+                    if (tableSchema != null && !tableSchema.equalsIgnoreCase("PUBLIC")) {
+                        continue;
+                    }
+                    if (tableName.startsWith("INFORMATION_SCHEMA")) {
+                        continue;
+                    }
+
+                    schema.append("Table: ").append(tableName).append("\n");
+                    schema.append("Columns:\n");
+
+                    // Get columns for this table
+                    try (ResultSet columns = dbMetaData.getColumns(null, null, tableName, null)) {
+                        while (columns.next()) {
+                            String columnName = columns.getString("COLUMN_NAME");
+                            String columnType = columns.getString("TYPE_NAME");
+                            int columnSize = columns.getInt("COLUMN_SIZE");
+                            String isNullable = columns.getString("IS_NULLABLE");
+
+                            schema.append("  - ").append(columnName)
+                                    .append(" (").append(columnType);
+
+                            // Add size for VARCHAR and DECIMAL types
+                            if (columnType.contains("VARCHAR") || columnType.contains("CHAR")) {
+                                schema.append("(").append(columnSize).append(")");
+                            }
+
+                            schema.append(")");
+
+                            if ("NO".equals(isNullable)) {
+                                schema.append(" NOT NULL");
+                            }
+
+                            schema.append("\n");
+                        }
+                    }
+
+                    // Add a sample query for each table
+                    schema.append("Example: SELECT * FROM ").append(tableName).append(" LIMIT 5\n\n");
+                }
+            }
+
+            // Add special notes about certain columns
+            schema.append("NOTES:\n");
+            schema.append("- Use \"MONTH\" with quotes when querying the sales table (reserved word)\n");
+            schema.append("- All tables support standard SQL SELECT queries\n");
+
+        } catch (SQLException e) {
+            System.err.println("Failed to retrieve schema: " + e.getMessage());
+            return "Error retrieving database schema: " + e.getMessage();
+        }
+
+        return schema.toString();
     }
 
     @Override

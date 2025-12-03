@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.messages.MessageInput;
+import com.vaadin.flow.component.messages.MessageInput.SubmitEvent;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.router.Route;
 
@@ -34,7 +36,7 @@ public class MessageInputPage extends Div {
         input.setId("verify-field");
         add(input);
 
-        messageInput.addSubmitListener(
+        messageInput.addSubmitListener((ComponentEventListener<SubmitEvent>)
                 submitEvent -> input.setValue(submitEvent.getValue()));
 
         NativeButton toggleEnabledButton = new NativeButton("toggle-enabled",
