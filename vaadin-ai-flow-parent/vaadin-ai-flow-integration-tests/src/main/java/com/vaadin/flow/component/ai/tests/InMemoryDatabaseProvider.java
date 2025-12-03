@@ -38,7 +38,7 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
 
-    private volatile boolean initialized = false;
+    private static volatile boolean initialized = false;
 
     public InMemoryDatabaseProvider() {
         initializeDatabase();

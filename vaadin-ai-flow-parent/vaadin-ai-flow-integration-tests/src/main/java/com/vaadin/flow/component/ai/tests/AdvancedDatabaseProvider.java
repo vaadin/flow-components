@@ -39,7 +39,7 @@ public class AdvancedDatabaseProvider implements DatabaseProvider {
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
 
-    private volatile boolean initialized = false;
+    private static volatile boolean initialized = false;
 
     public AdvancedDatabaseProvider() {
         initializeDatabase();
