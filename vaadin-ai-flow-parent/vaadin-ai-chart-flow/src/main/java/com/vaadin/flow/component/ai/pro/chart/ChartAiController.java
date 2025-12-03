@@ -50,21 +50,6 @@ import java.util.*;
  */
 public class ChartAiController implements AiController {
 
-    /**
-     * Interface for converting database query results to chart-compatible data
-     * structures.
-     */
-    public interface DataConverter {
-        /**
-         * Converts database query results to a DataSeries for chart rendering.
-         *
-         * @param queryResults
-         *            the query results as a list of row maps
-         * @return a DataSeries containing the converted data
-         */
-        DataSeries convertToDataSeries(List<Map<String, Object>> queryResults);
-    }
-
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
     private DataConverter chartDataConverter;
@@ -182,6 +167,7 @@ public class ChartAiController implements AiController {
                 1. getSchema() - Retrieves database schema (tables, columns, types)
                 2. getCurrentState() - Returns current chart state (query and configuration)
                 3. updateData(query) - Updates chart data with SQL SELECT query
+                   - Query structure MUST match the chart type (see DATA REQUIREMENTS below)
                 4. updateConfig(config) - Updates chart configuration (type, title, tooltip, etc.)
                    - Supports 31 chart types: line, spline, area, areaspline, bar, column, pie, scatter,
                      gauge, arearange, columnrange, areasplinerange, boxplot, errorbar, bubble, funnel,
@@ -196,6 +182,19 @@ public class ChartAiController implements AiController {
                 3. Use updateData() to change data source
                 4. Use updateConfig() to change chart appearance
 
+                DATA REQUIREMENTS BY CHART TYPE:
+                - Basic charts (line, bar, column, pie): SELECT category, value (2 columns)
+                - Scatter: SELECT x, y (2 numeric columns)
+                - Bubble: SELECT x, y, size (3 numeric columns)
+                - Bullet: SELECT category, value, target (3 columns, name third 'target')
+                - Range (arearange, columnrange): SELECT x, low, high (3 columns, name 'low'/'high')
+                - BoxPlot: SELECT low, q1, median, q3, high (5 columns with these keywords)
+                - OHLC/Candlestick: SELECT date, open, high, low, close (5 columns with these keywords)
+                - Sankey: SELECT from, to, weight (3 columns with 'from'/'to' keywords)
+                - Xrange/Gantt: SELECT start, end, y (3 columns with 'start'/'end' keywords)
+
+                Column names matter! Use descriptive names matching the patterns above for automatic detection.
+
                 IMPORTANT:
                 - ALWAYS check getCurrentState() before making any modifications
                 - This helps you understand what's already configured and make informed changes
@@ -209,6 +208,7 @@ public class ChartAiController implements AiController {
                   * Distributions: boxplot, errorbar
                   * Relationships: scatter, bubble
                   * Specialized: gauge, heatmap, treemap, waterfall, gantt, sankey
+                - When changing chart types, ensure the data query matches the new type's requirements
                 - You can update data and config independently
                 """;
     }
@@ -354,7 +354,51 @@ public class ChartAiController implements AiController {
 
             @Override
             public String getDescription() {
-                return "Updates the chart data using a SQL SELECT query. Parameters: query (string) - SQL SELECT query to retrieve data.";
+                return """
+                    Updates the chart data using a SQL SELECT query.
+
+                    IMPORTANT: Query structure must match the chart type:
+
+                    Basic charts (line, bar, column, pie):
+                    - 2 columns: category/name, value
+                    - Example: SELECT month, revenue FROM sales
+
+                    Scatter plot:
+                    - 2 numeric columns: x, y
+                    - Example: SELECT temperature, sales FROM data
+
+                    Bubble chart:
+                    - 3 numeric columns: x, y, size
+                    - Example: SELECT gdp_per_capita, life_expectancy, population FROM countries
+
+                    Bullet chart:
+                    - 3 columns with 'target': category, value, target
+                    - Example: SELECT quarter, revenue, target FROM sales
+
+                    Range charts (arearange, columnrange, areasplinerange):
+                    - 3 columns: x/category, low/min, high/max
+                    - Example: SELECT month, temp_low, temp_high FROM weather
+
+                    BoxPlot:
+                    - 5 columns: low, q1, median, q3, high (column names should include these keywords)
+                    - Example: SELECT min_val, lower_quartile, median, upper_quartile, max_val FROM stats
+
+                    OHLC/Candlestick:
+                    - 5 columns: x/date, open, high, low, close (column names must include these keywords)
+                    - Example: SELECT date, open, high, low, close FROM stock_prices
+
+                    Sankey diagram:
+                    - 3 columns: from/source, to/target, weight/value
+                    - Example: SELECT source, destination, flow FROM energy_flow
+
+                    Xrange/Gantt:
+                    - 3 columns: start/x, end/x2, y/category
+                    - Example: SELECT start_date, end_date, task_id FROM project_tasks
+
+                    Column names are important for automatic detection. Use descriptive names that match the patterns above.
+
+                    Parameters: query (string) - SQL SELECT query to retrieve data
+                    """;
             }
 
             @Override
@@ -367,6 +411,9 @@ public class ChartAiController implements AiController {
                 try {
                     ObjectNode node = (ObjectNode) JacksonUtils.readTree(arguments);
                     String query = node.get("query").asString();
+
+                    // Test the query
+                    databaseProvider.executeQuery(query);
 
                     currentSqlQuery = query;
 
@@ -625,51 +672,5 @@ public class ChartAiController implements AiController {
             throw new IllegalStateException(
                     "Chart is not attached to a UI");
         });
-    }
-
-    /**
-     * Default implementation of DataConverter. Assumes first column is X-axis
-     * categories and remaining columns are Y-axis series.
-     */
-    private static class DefaultDataConverter implements DataConverter {
-        @Override
-        public DataSeries convertToDataSeries(
-                List<Map<String, Object>> queryResults) {
-            if (queryResults.isEmpty()) {
-                return new DataSeries();
-            }
-
-            DataSeries series = new DataSeries();
-            Map<String, Object> firstRow = queryResults.get(0);
-            List<String> columnNames = new ArrayList<>(firstRow.keySet());
-
-            // If we have 2 columns: first is category, second is value
-            if (columnNames.size() == 2) {
-                for (Map<String, Object> row : queryResults) {
-                    String category = String
-                            .valueOf(row.get(columnNames.get(0)));
-                    Object value = row.get(columnNames.get(1));
-                    Number numValue = value instanceof Number ? (Number) value
-                            : Integer.valueOf(0);
-                    DataSeriesItem item = new DataSeriesItem();
-                    item.setName(category);
-                    item.setY(numValue);
-                    series.add(item);
-                }
-            } else {
-                // For other cases, use row values directly
-                for (Map<String, Object> row : queryResults) {
-                    for (Object value : row.values()) {
-                        if (value instanceof Number) {
-                            DataSeriesItem item = new DataSeriesItem();
-                            item.setY((Number) value);
-                            series.add(item);
-                        }
-                    }
-                }
-            }
-
-            return series;
-        }
     }
 }

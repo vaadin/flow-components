@@ -88,7 +88,7 @@ public class AiChartDemoView extends HorizontalLayout {
         // Create LLM provider
         var model = OpenAiStreamingChatModel.builder()
                 .apiKey(System.getenv("OPENAI_API_KEY"))
-                .modelName("gpt-4o-mini").build();
+                .modelName("gpt-4o").build();
         var provider = new LangChain4JLLMProvider(model);
 
         // Create chat orchestrator with controller
