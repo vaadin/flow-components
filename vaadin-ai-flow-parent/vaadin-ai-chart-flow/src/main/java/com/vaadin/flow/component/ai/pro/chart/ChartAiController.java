@@ -440,7 +440,15 @@ public class ChartAiController implements AiController {
 
             @Override
             public String getDescription() {
-                return "Updates the chart configuration (type, title, tooltip, etc.). Parameters: config (object) - Chart configuration object. IMPORTANT: Do NOT include 'series' in the config - chart data is managed separately via updateData tool.";
+                return """
+                    Updates the chart configuration (type, title, tooltip, etc.).
+
+                    CRITICAL: ALWAYS specify the chart type in config.chart.type - this is essential for proper rendering.
+
+                    Parameters: config (object) - Chart configuration object.
+
+                    IMPORTANT: Do NOT include 'series' in the config - chart data is managed separately via updateData tool.
+                    """;
             }
 
             @Override
@@ -451,15 +459,15 @@ public class ChartAiController implements AiController {
                       "properties": {
                         "config": {
                           "type": "object",
-                          "description": "Chart configuration object. NOTE: Do NOT include 'series' - data is managed separately via updateData tool.",
+                          "description": "Chart configuration object. CRITICAL: Always include chart.type. NOTE: Do NOT include 'series' - data is managed separately via updateData tool.",
                           "properties": {
                             "chart": {
                               "type": "object",
-                              "description": "Chart model options including type, dimensions, margins, spacing, borders, background",
+                              "description": "Chart model options - MUST include 'type' property. Also supports dimensions, margins, spacing, borders, background",
                               "properties": {
                                 "type": {
                                   "type": "string",
-                                  "description": "Chart type - must be inside chart object to match Vaadin Charts structure",
+                                  "description": "REQUIRED: Chart type - ALWAYS specify this property. Must be inside chart object to match Vaadin Charts structure",
                                   "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
                                 },
                                 "backgroundColor": { "type": "string", "description": "Background color (e.g., '#ffffff')" },
