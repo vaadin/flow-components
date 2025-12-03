@@ -350,6 +350,7 @@ public class DefaultDataConverter implements DataConverter {
 
     /**
      * Converts an object to a Number.
+     * Handles Date objects by converting to milliseconds timestamp.
      *
      * @param obj the object to convert
      * @return the number value, or 0 if conversion fails
@@ -360,6 +361,22 @@ public class DefaultDataConverter implements DataConverter {
         }
         if (obj instanceof Number) {
             return (Number) obj;
+        }
+        // Handle java.util.Date and java.sql.Date by converting to milliseconds
+        if (obj instanceof java.util.Date) {
+            return ((java.util.Date) obj).getTime();
+        }
+        // Handle java.time types
+        if (obj instanceof java.time.Instant) {
+            return ((java.time.Instant) obj).toEpochMilli();
+        }
+        if (obj instanceof java.time.LocalDate) {
+            return ((java.time.LocalDate) obj).atStartOfDay(java.time.ZoneId.systemDefault())
+                    .toInstant().toEpochMilli();
+        }
+        if (obj instanceof java.time.LocalDateTime) {
+            return ((java.time.LocalDateTime) obj).atZone(java.time.ZoneId.systemDefault())
+                    .toInstant().toEpochMilli();
         }
         try {
             return Double.parseDouble(obj.toString());
