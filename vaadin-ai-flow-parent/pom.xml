@@ -24,8 +24,7 @@
                 </property>
             </activation>
             <modules>
-                <module>vaadin-ai-chat-flow-integration-tests</module>
-                <module>vaadin-ai-chart-flow-integration-tests</module>
+                <module>vaadin-ai-flow-integration-tests</module>
             </modules>
         </profile>
     </profiles>
