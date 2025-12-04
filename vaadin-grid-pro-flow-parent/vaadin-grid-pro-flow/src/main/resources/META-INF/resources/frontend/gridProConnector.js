@@ -113,7 +113,7 @@ window.Vaadin.Flow.gridProConnector = {
         const isUpdating =
           model && cell._column && grid.__pendingCellUpdate === `${model.item.key}:${cell._column.path}`;
         const target = cell._focusButton || cell;
-        updatePart(target, isUpdating, 'updating-cell');
+        updatePart(target, 'updating-cell', isUpdating);
       });
     };
   },
