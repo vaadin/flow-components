@@ -19,4 +19,6 @@ public class SpreadsheetActionDetails implements Serializable {
      * compatibility
      */
     public int type;
+    /** Node id of the icon virtual child, 0 if no icon provided */
+    public int iconNodeId;
 }
