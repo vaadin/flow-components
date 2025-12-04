@@ -29,6 +29,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.StreamingResponseHandler;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
@@ -45,36 +46,41 @@ import java.util.Map;
 /**
  * LangChain4j implementation of LLMProvider.
  * Handles conversation memory internally using LangChain4j's ChatMemory.
+ * Supports both streaming and non-streaming chat models.
  *
  * @author Vaadin Ltd
  */
 public class LangChain4JLLMProvider implements LLMProvider {
 
-    private final StreamingChatLanguageModel chatModel;
+    private final StreamingChatLanguageModel streamingChatModel;
+    private final ChatLanguageModel nonStreamingChatModel;
     private final ChatMemory chatMemory;
     private String defaultSystemPrompt;
 
     /**
-     * Constructor with explicit chat memory.
-     *
-     * @param chatModel
-     *            the streaming chat language model
-     * @param chatMemory
-     *            the chat memory for conversation history
-     */
-    public LangChain4JLLMProvider(StreamingChatLanguageModel chatModel, ChatMemory chatMemory) {
-        this.chatModel = chatModel;
-        this.chatMemory = chatMemory;
-    }
-
-    /**
-     * Constructor that creates a default MessageWindowChatMemory.
+     * Constructor that creates a default MessageWindowChatMemory with a
+     * streaming chat model.
      *
      * @param chatModel
      *            the streaming chat language model
      */
     public LangChain4JLLMProvider(StreamingChatLanguageModel chatModel) {
-        this(chatModel, MessageWindowChatMemory.withMaxMessages(10));
+        this.streamingChatModel = chatModel;
+        this.nonStreamingChatModel = null;
+        this.chatMemory = MessageWindowChatMemory.withMaxMessages(30);
+    }
+
+    /**
+     * Constructor that creates a default MessageWindowChatMemory with a
+     * non-streaming chat model.
+     *
+     * @param chatModel
+     *            the non-streaming chat language model
+     */
+    public LangChain4JLLMProvider(ChatLanguageModel chatModel) {
+        this.streamingChatModel = null;
+        this.nonStreamingChatModel = chatModel;
+        this.chatMemory = MessageWindowChatMemory.withMaxMessages(30);
     }
 
     @Override
@@ -195,9 +201,21 @@ public class LangChain4JLLMProvider implements LLMProvider {
             Map<String, ToolExecutor> toolExecutors, List<ToolSpecification> toolSpecifications) {
         List<ChatMessage> messages = buildMessages(request);
 
+        if (streamingChatModel != null) {
+            // Use streaming model
+            executeStreamingChatWithTools(messages, sink, toolExecutors, toolSpecifications, request);
+        } else {
+            // Use non-streaming model - return full response immediately
+            executeNonStreamingChatWithTools(messages, sink, toolExecutors, toolSpecifications, request);
+        }
+    }
+
+    private void executeStreamingChatWithTools(List<ChatMessage> messages, FluxSink<String> sink,
+            Map<String, ToolExecutor> toolExecutors, List<ToolSpecification> toolSpecifications,
+            LLMRequest request) {
         // Call LangChain4j generate method with tools
         if (!toolSpecifications.isEmpty()) {
-            chatModel.generate(messages, toolSpecifications, new StreamingResponseHandler<AiMessage>() {
+            streamingChatModel.generate(messages, toolSpecifications, new StreamingResponseHandler<AiMessage>() {
                 @Override
                 public void onNext(String token) {
                     sink.next(token);
@@ -241,7 +259,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             });
         } else {
             // No tools, just generate
-            chatModel.generate(messages, new StreamingResponseHandler<AiMessage>() {
+            streamingChatModel.generate(messages, new StreamingResponseHandler<AiMessage>() {
                 @Override
                 public void onNext(String token) {
                     sink.next(token);
@@ -261,6 +279,57 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     sink.error(error);
                 }
             });
+        }
+    }
+
+    private void executeNonStreamingChatWithTools(List<ChatMessage> messages, FluxSink<String> sink,
+            Map<String, ToolExecutor> toolExecutors, List<ToolSpecification> toolSpecifications,
+            LLMRequest request) {
+        try {
+            Response<AiMessage> response;
+
+            // Call non-streaming model
+            if (!toolSpecifications.isEmpty()) {
+                response = nonStreamingChatModel.generate(messages, toolSpecifications);
+            } else {
+                response = nonStreamingChatModel.generate(messages);
+            }
+
+            AiMessage aiMessage = response.content();
+            if (aiMessage != null) {
+                chatMemory.add(aiMessage);
+
+                // Emit the complete response immediately
+                String text = aiMessage.text();
+                if (text != null && !text.isEmpty()) {
+                    sink.next(text);
+                }
+
+                // Check if the AI wants to execute tools
+                if (aiMessage.hasToolExecutionRequests()) {
+                    for (var toolExecRequest : aiMessage.toolExecutionRequests()) {
+                        ToolExecutor executor = toolExecutors.get(toolExecRequest.name());
+
+                        String result;
+                        try {
+                            result = executor != null ? executor.execute(toolExecRequest, null)
+                                : "Tool not found: " + toolExecRequest.name();
+                        } catch (Exception e) {
+                            result = "Error executing tool: " + e.getMessage();
+                        }
+
+                        chatMemory.add(ToolExecutionResultMessage.from(toolExecRequest, result));
+                    }
+                    // Continue the conversation with tool results
+                    executeChatWithTools(request, sink, toolExecutors, toolSpecifications);
+                } else {
+                    sink.complete();
+                }
+            } else {
+                sink.complete();
+            }
+        } catch (Exception e) {
+            sink.error(e);
         }
     }
 
