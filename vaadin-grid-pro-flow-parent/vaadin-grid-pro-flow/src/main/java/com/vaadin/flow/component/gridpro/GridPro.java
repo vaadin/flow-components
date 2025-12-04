@@ -134,9 +134,6 @@ public class GridPro<E> extends Grid<E> {
                 getDataProvider().refreshItem(e.getItem());
             }
 
-            getElement().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
-                    getElement());
         });
 
         addCellEditStartedListener(e -> {
@@ -714,6 +711,10 @@ public class GridPro<E> extends Grid<E> {
             // Retrieve the pre-edit value
             var gridProPreEditValue = ComponentUtil.getData(column,
                     "gridProPreEditValue");
+
+            getElement().executeJs(
+                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
+                    getElement());
 
             if (column.getEditorField() != null) {
                 // Custom editor column
