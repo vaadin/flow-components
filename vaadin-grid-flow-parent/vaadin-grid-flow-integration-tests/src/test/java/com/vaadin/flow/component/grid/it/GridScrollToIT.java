@@ -100,6 +100,15 @@ public class GridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
+    public void grid_scrollToAlreadyVisibleItem_doesNotScroll() {
+        clickElementWithJs("scroll-to-row-499");
+        Assert.assertEquals(499, grid.getFirstVisibleRowIndex());
+
+        clickElementWithJs("scroll-to-item-500");
+        Assert.assertEquals(499, grid.getFirstVisibleRowIndex());
+    }
+
+    @Test
     public void grid_addItem_scrollToItem() {
         $("button").id("add-row-and-scroll-to-item").click();
 

@@ -4992,6 +4992,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
+        setViewportRangeByIndex(rowIndex);
+
+        // Scroll to the requested index
+        getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    private void setViewportRangeByIndex(int rowIndex) {
         // Grid's page size
         int pageSize = getPageSize();
         // A rough approximation of the viewport size in rows. This affects the
@@ -5015,18 +5022,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 + 1;
         // Preload the items
         setViewportRange(targetPageStartIndex, preloadedItemsCount);
-
-        // Scroll to the requested index
-        getElement().callJsFunction("scrollToIndex", rowIndex);
     }
 
     /**
-     * Scrolls to the row presenting the given item.
+     * Scrolls to the given item unless it is already fully visible.
      * <p>
-     * Note that the item index provider should be explicitly set using
-     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)} for lazy
-     * loading data providers. Otherwise, an
-     * {@link UnsupportedOperationException} will be thrown.
+     * For this method to work with a lazy-loading data provider, an item index
+     * provider must be supplied via
+     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)}. If none
+     * is provided, an {@link UnsupportedOperationException} will be thrown.
      *
      * @param item
      *            the item to scroll to, not {@code null}.
@@ -5043,10 +5047,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         AbstractDataView<T> dataView = getDataProvider().isInMemory()
                 ? getListDataView()
                 : getLazyDataView();
+        var itemKey = getDataCommunicator().getKeyMapper().key(item);
         int itemIndex = dataView.getItemIndex(item)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Item to scroll to cannot be found: " + item));
-        scrollToIndex(itemIndex);
+
+        setViewportRangeByIndex(itemIndex);
+
+        getElement().callJsFunction("$connector.scrollToItem", itemKey,
+                itemIndex);
     }
 
     /**
