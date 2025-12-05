@@ -5048,7 +5048,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .orElseThrow(() -> new NoSuchElementException(
                         "Item to scroll to cannot be found: " + item));
         getElement().callJsFunction("$connector.scrollToItem", itemKey,
-                new int[] { itemIndex });
+                itemIndex);
     }
 
     /**

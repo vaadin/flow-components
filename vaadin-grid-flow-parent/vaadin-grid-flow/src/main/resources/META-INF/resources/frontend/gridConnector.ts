@@ -762,7 +762,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return rowRect.top >= tableRect.top + headerRect.height && rowRect.bottom <= tableRect.bottom - footerRect.height;
   }
 
-  grid.$connector.scrollToItem = function (itemKey, path) {
+  grid.$connector.scrollToItem = function (itemKey, ...args) {
     const targetRow = grid._getRenderedRows().find((row) => {
       const { item } = grid.__getRowModel(row);
       return grid.getItemId(item) === itemKey;
@@ -771,6 +771,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    grid.scrollToIndex(...path);
+    grid.scrollToIndex(...args);
   };
 };

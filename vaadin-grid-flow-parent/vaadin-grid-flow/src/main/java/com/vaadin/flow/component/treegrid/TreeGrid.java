@@ -1005,11 +1005,9 @@ public class TreeGrid<T> extends Grid<T>
                     "At least one index should be provided.");
         }
 
-        String joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex(...$0);", path)));
     }
 
     @Override
@@ -1137,7 +1135,9 @@ public class TreeGrid<T> extends Grid<T>
         var itemKey = dataCommunicator.getKeyMapper().key(item);
         var itemIndexPath = dataCommunicator.resolveItem(item);
 
-        getElement().callJsFunction("$connector.scrollToItem", itemKey,
-                itemIndexPath);
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.$connector.scrollToItem($0, ...$1)", itemKey,
+                        itemIndexPath)));
     }
 }
