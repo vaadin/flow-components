@@ -1132,12 +1132,12 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void scrollToItem(T item) {
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
-        var indexPath = ((TreeGridDataCommunicator<T>) getDataCommunicator())
-                .resolveItem(item);
-        if (indexPath.length == 1) {
-            scrollToIndex(indexPath[0]);
-        } else {
-            scrollToIndex(indexPath);
-        }
+
+        var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
+        var itemKey = dataCommunicator.getKeyMapper().key(item);
+        var itemIndexPath = dataCommunicator.resolveItem(item);
+
+        getElement().callJsFunction("$connector.scrollToItem", itemKey,
+                itemIndexPath);
     }
 }

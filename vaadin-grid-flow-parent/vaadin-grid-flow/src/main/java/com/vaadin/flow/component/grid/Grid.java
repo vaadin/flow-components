@@ -5043,10 +5043,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         AbstractDataView<T> dataView = getDataProvider().isInMemory()
                 ? getListDataView()
                 : getLazyDataView();
+        var itemKey = getDataCommunicator().getKeyMapper().key(item);
         int itemIndex = dataView.getItemIndex(item)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Item to scroll to cannot be found: " + item));
-        scrollToIndex(itemIndex);
+        getElement().callJsFunction("$connector.scrollToItem", itemKey,
+                new int[] { itemIndex });
     }
 
     /**
