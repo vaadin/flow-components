@@ -4992,6 +4992,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
+        setViewportRangeByIndex(rowIndex);
+
+        // Scroll to the requested index
+        getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    private void setViewportRangeByIndex(int rowIndex) {
         // Grid's page size
         int pageSize = getPageSize();
         // A rough approximation of the viewport size in rows. This affects the
@@ -5015,9 +5022,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 + 1;
         // Preload the items
         setViewportRange(targetPageStartIndex, preloadedItemsCount);
-
-        // Scroll to the requested index
-        getElement().callJsFunction("scrollToIndex", rowIndex);
     }
 
     /**
@@ -5047,6 +5051,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         int itemIndex = dataView.getItemIndex(item)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Item to scroll to cannot be found: " + item));
+
+        setViewportRangeByIndex(itemIndex);
+
         getElement().callJsFunction("$connector.scrollToItem", itemKey,
                 itemIndex);
     }
