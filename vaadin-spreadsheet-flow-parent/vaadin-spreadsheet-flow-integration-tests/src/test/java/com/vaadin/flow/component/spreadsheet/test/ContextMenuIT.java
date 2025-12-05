@@ -117,12 +117,6 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("lumo:angle-up", lumoAttr);
     }
 
-    private WebElement getIconFromAction(String actionText) {
-        return findElement(By.xpath("//div[@class='popupContent']//*[text()='"
-                + actionText
-                + "']/ancestor::*[contains(@class,'gwt-MenuItem')]//*[@icon]"));
-    }
-
     @Test
     public void contextMenu_rowHeader_itemsContainExpectedIcons() {
         loadTestFixture(TestFixtures.IconAction);
@@ -144,4 +138,12 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         var colIcon = getIconFromAction("Column action");
         Assert.assertEquals("lumo:cog", colIcon.getAttribute("icon"));
     }
+
+    private WebElement getIconFromAction(String actionText) {
+        return findElements(By.className("gwt-MenuItem")).stream()
+                .filter(el -> el.getText().equals(actionText))
+                .map(el -> el.findElement(By.tagName("vaadin-icon")))
+                .findFirst().orElseThrow();
+    }
+
 }
