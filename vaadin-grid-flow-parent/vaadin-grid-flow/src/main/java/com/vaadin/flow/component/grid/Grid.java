@@ -5025,12 +5025,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Scrolls to the row presenting the given item.
+     * Scrolls to the given item unless it is already fully visible.
      * <p>
-     * Note that the item index provider should be explicitly set using
-     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)} for lazy
-     * loading data providers. Otherwise, an
-     * {@link UnsupportedOperationException} will be thrown.
+     * For this method to work with a lazy-loading data provider, an item index
+     * provider must be supplied via
+     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)}. If none
+     * is provided, an {@link UnsupportedOperationException} will be thrown.
      *
      * @param item
      *            the item to scroll to, not {@code null}.
