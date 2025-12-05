@@ -33,7 +33,6 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_ICON("icon"),
     AURA_PRIMARY("primary"),
     AURA_TERTIARY("tertiary"),
-    AURA_ACCENT("accent"),
     AURA_DANGER("danger");
 
     private final String variant;
