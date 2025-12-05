@@ -136,18 +136,20 @@ public class GridPro<E> extends Grid<E> {
                 getDataProvider().refreshItem(e.getItem());
             }
 
-            getElement().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
-                    getElement());
         });
 
         addCellEditStartedListener(e -> {
             EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
                     e.getPath());
 
+            // Store the pre-edit value
+            var gridProPreEditValue = column.getValueProvider()
+                    .apply(e.getItem());
+            ComponentUtil.setData(column, "gridProPreEditValue",
+                    gridProPreEditValue);
+
             if (column.getEditorType().equals("custom")) {
-                column.getEditorField()
-                        .setValue(column.getValueProvider().apply(e.getItem()));
+                column.getEditorField().setValue(gridProPreEditValue);
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
                 UI.getCurrent().getPage().executeJs(
@@ -709,6 +711,36 @@ public class GridPro<E> extends Grid<E> {
         ComponentEventListener<ItemPropertyChangedEvent<E>> wrapper = event -> {
             EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
                     event.getPath());
+
+            // Retrieve the pre-edit value
+            var gridProPreEditValue = ComponentUtil.getData(column,
+                    "gridProPreEditValue");
+
+            getElement().executeJs(
+                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
+                    getElement());
+
+            if (column.getEditorField() != null) {
+                // Custom editor column
+                if (Objects.equals(column.getEditorField().getValue(),
+                        gridProPreEditValue)) {
+                    // No actual change in value, skip notifying the listener
+                    return;
+                }
+            } else if (EditorType.CHECKBOX.getTypeName()
+                    .equals(column.getEditorType())) {
+                // Checkbox editor column
+                var sourceValueNode = event.getSourceItem()
+                        .get(event.getPath());
+                var sourceValue = sourceValueNode != null
+                        && sourceValueNode.asBoolean();
+
+                if (gridProPreEditValue instanceof Boolean booleanValue
+                        && booleanValue == sourceValue) {
+                    // No actual change in value, skip notifying the listener
+                    return;
+                }
+            }
 
             if (column.cellEditableProvider == null
                     || column.cellEditableProvider.test(event.getItem())) {
