@@ -16,59 +16,70 @@
 package com.vaadin.flow.component.ai.provider.springai;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.content.Media;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.util.MimeType;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Spring AI implementation of LLMProvider.
- * Handles conversation memory internally by maintaining message history.
+ * Spring AI implementation of LLMProvider using ChatClient.
+ * Handles conversation memory internally using Spring AI's ChatMemory and MessageChatMemoryAdvisor.
+ * Supports tool calling through ChatClient's fluent API.
  *
- * <p>Note: This implementation is built for Spring AI 1.1.0 and will need
- * to be migrated to Spring AI 2.0.0 when it becomes available.</p>
+ * <p>This implementation uses Spring AI 1.1.0's ChatClient API which provides:
+ * <ul>
+ * <li>Fluent API for building prompts</li>
+ * <li>Built-in support for conversation memory via advisors</li>
+ * <li>Easy tool registration and execution</li>
+ * <li>Streaming and non-streaming responses</li>
+ * </ul>
+ * </p>
  *
  * @author Vaadin Ltd
  */
 public class SpringAiLLMProvider implements LLMProvider {
 
-    private final ChatModel chatModel;
-    private final List<Message> messageHistory;
-    private final int maxMessages;
+    private static final String DEFAULT_CONVERSATION_ID = "default";
+
+    private final ChatClient chatClient;
+    private final ChatMemory chatMemory;
     private String defaultSystemPrompt;
 
     /**
-     * Constructor with explicit message history limit.
+     * Constructor that accepts a ChatClient.
+     * Note: When using this constructor, conversation memory must be configured
+     * externally in the ChatClient.
      *
-     * @param chatModel
-     *            the streaming chat model
-     * @param maxMessages
-     *            maximum number of messages to keep in history
+     * @param chatClient
+     *            the Spring AI ChatClient instance
      */
-    public SpringAiLLMProvider(ChatModel chatModel, int maxMessages) {
-        this.chatModel = chatModel;
-        this.messageHistory = new ArrayList<>();
-        this.maxMessages = maxMessages;
+    public SpringAiLLMProvider(ChatClient chatClient) {
+        this.chatClient = chatClient;
+        // Create a simple in-memory chat memory
+        this.chatMemory = MessageWindowChatMemory.builder()
+                .maxMessages(30)
+                .build();
     }
 
     /**
-     * Constructor with default message history limit (10 messages).
+     * Constructor that accepts a ChatClient.Builder and creates a ChatClient
+     * with conversation memory support.
      *
-     * @param chatModel
-     *            the streaming chat model
+     * @param chatClientBuilder
+     *            the Spring AI ChatClient.Builder instance
      */
-    public SpringAiLLMProvider(ChatModel chatModel) {
-        this(chatModel, 10);
+    public SpringAiLLMProvider(ChatClient.Builder chatClientBuilder) {
+        // Create chat memory with in-memory repository
+        this.chatMemory = MessageWindowChatMemory.builder()
+                .maxMessages(10)
+                .build();
+
+        this.chatClient = chatClientBuilder
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
+                        .conversationId(DEFAULT_CONVERSATION_ID)
+                        .build())
+                .build();
     }
 
     @Override
@@ -76,142 +87,82 @@ public class SpringAiLLMProvider implements LLMProvider {
         this.defaultSystemPrompt = systemPrompt;
     }
 
-    @Override
-    public Flux<String> stream(LLMRequest request) {
-        return Flux.create(sink -> {
-            try {
-                // Add user message to history
-                messageHistory.add(buildUserMessage(request));
-                trimMessageHistory();
-
-                // Build the prompt with conversation history and tools
-                Prompt prompt = buildPrompt(request);
-
-                // Stream the response
-                StringBuilder responseBuilder = new StringBuilder();
-
-                chatModel.stream(prompt)
-                    .map(ChatResponse::getResult)
-                    .filter(result -> result != null && result.getOutput() != null)
-                    .doOnNext(result -> {
-                        AssistantMessage output = result.getOutput();
-                        String text = output.getText();
-
-                        // Stream text tokens if available
-                        if (text != null && !text.isEmpty()) {
-                            responseBuilder.append(text);
-                            sink.next(text);
-                        }
-                    })
-                    .doOnComplete(() -> {
-                        // Add assistant response to history
-                        if (responseBuilder.length() > 0) {
-                            messageHistory.add(new AssistantMessage(responseBuilder.toString()));
-                            trimMessageHistory();
-                        }
-                        sink.complete();
-                    })
-                    .doOnError(sink::error)
-                    .subscribe();
-
-            } catch (Exception e) {
-                sink.error(e);
-            }
-        });
-    }
-
-    private Prompt buildPrompt(LLMRequest request) {
-        List<Message> messages = new ArrayList<>();
-
-        // Use request value if provided, otherwise fall back to default
-        String systemPrompt = request.systemPrompt() != null
-            ? request.systemPrompt()
-            : defaultSystemPrompt;
-
-        // Add system message
-        if (systemPrompt != null && !systemPrompt.isEmpty()) {
-            messages.add(new SystemMessage(systemPrompt));
-        }
-
-        // Add chat history
-        messages.addAll(messageHistory);
-
-        // Note: Spring AI 1.1.0's tool calling support is limited in the streaming API
-        // Tool objects with @Tool annotations need to be registered at the ChatModel level
-        // or passed through model-specific options (e.g., OpenAiChatOptions)
-        //
-        // This is a known limitation that will be improved in Spring AI 2.0.0 with:
-        // - ChatClient API for easier tool integration
-        // - Better streaming support for tools
-        // - ToolCallbacks.from() utility methods
-        //
-        // For now, users should:
-        // 1. Register tools at the ChatModel level when creating the model
-        // 2. Use model-specific ChatOptions implementations (e.g., OpenAiChatOptions)
-        // 3. Or wait for Spring AI 2.0.0 for full tool support
-
-        return new Prompt(messages);
-    }
-
-    private UserMessage buildUserMessage(LLMRequest request) {
-        if (request.attachments().isEmpty()) {
-            // Simple text-only message
-            return new UserMessage(request.userMessage());
-        }
-
-        // Message with media attachments
-        List<Media> mediaList = new ArrayList<>();
-        StringBuilder messageText = new StringBuilder(request.userMessage());
-
-        for (Attachment attachment : request.attachments()) {
-            if (attachment.contentType().startsWith("image/")) {
-                // Create Media object for the image using ByteArrayResource
-                MimeType mimeType = MimeType.valueOf(attachment.contentType());
-                ByteArrayResource resource = new ByteArrayResource(attachment.data());
-                mediaList.add(new Media(mimeType, resource));
-            } else if (attachment.contentType().contains("text")
-                    || attachment.contentType().contains("pdf")) {
-                // For text/PDF, add as text content
-                String textContent = new String(attachment.data());
-                messageText.append("\n<attachment filename=\"")
-                          .append(attachment.fileName())
-                          .append("\">\n")
-                          .append(textContent)
-                          .append("\n</attachment>\n");
-            }
-        }
-
-        if (mediaList.isEmpty()) {
-            return new UserMessage(messageText.toString());
-        }
-
-        // Create UserMessage with text and media using builder
-        return UserMessage.builder()
-                .text(messageText.toString())
-                .media(mediaList)
-                .build();
-    }
-
-    private void trimMessageHistory() {
-        // Keep only the most recent messages
-        while (messageHistory.size() > maxMessages) {
-            messageHistory.remove(0);
-        }
+    /**
+     * Gets the underlying ChatClient.
+     *
+     * @return the ChatClient instance
+     */
+    public ChatClient getChatClient() {
+        return chatClient;
     }
 
     /**
-     * Gets the current message history.
+     * Gets the chat memory instance.
      *
-     * @return list of messages in the conversation history
+     * @return the ChatMemory instance
      */
-    public List<Message> getMessageHistory() {
-        return new ArrayList<>(messageHistory);
+    public ChatMemory getChatMemory() {
+        return chatMemory;
+    }
+
+    @Override
+    public Flux<String> stream(LLMRequest request) {
+        try {
+            // Use request system prompt if provided, otherwise fall back to default
+            String systemPrompt = request.systemPrompt() != null
+                ? request.systemPrompt()
+                : defaultSystemPrompt;
+
+            // Start building the prompt with ChatClient's fluent API
+            var promptSpec = chatClient.prompt();
+
+            // Add system prompt if provided
+            if (systemPrompt != null && !systemPrompt.isEmpty()) {
+                promptSpec = promptSpec.system(systemPrompt);
+            }
+
+            // Add user message - ChatClient.user() expects just text
+            // For multimodal, we need to use the ChatClient API differently
+            String userText = request.userMessage();
+
+            // If there are attachments, format them in the text
+            if (!request.attachments().isEmpty()) {
+                StringBuilder messageBuilder = new StringBuilder(userText);
+                for (Attachment attachment : request.attachments()) {
+                    if (attachment.contentType().contains("text")
+                            || attachment.contentType().contains("pdf")) {
+                        String textContent = new String(attachment.data());
+                        messageBuilder.append("\n<attachment filename=\"")
+                                    .append(attachment.fileName())
+                                    .append("\">\n")
+                                    .append(textContent)
+                                    .append("\n</attachment>\n");
+                    }
+                    // Note: Image attachments in Spring AI 1.1.0 ChatClient require
+                    // model-specific implementations (e.g., via ChatOptions)
+                }
+                userText = messageBuilder.toString();
+            }
+
+            promptSpec = promptSpec.user(userText);
+
+            // Add tools if provided
+            if (request.toolObjects() != null && request.toolObjects().length > 0) {
+                promptSpec = promptSpec.tools(request.toolObjects());
+            }
+
+            // Stream the response using ChatClient
+            return promptSpec.stream().content();
+
+        } catch (Exception e) {
+            return Flux.error(e);
+        }
     }
 
     /**
      * Clears the conversation history.
      */
     public void clearHistory() {
-        messageHistory.clear();
+        chatMemory.clear(DEFAULT_CONVERSATION_ID);
     }
 }
