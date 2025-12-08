@@ -44,6 +44,10 @@ public class GridScrollToPage extends Div {
                 e -> grid.scrollToEnd());
         scrollToEnd.setId("scroll-to-end");
 
+        NativeButton scrollToRow499 = new NativeButton("Scroll to row 499",
+                e -> grid.scrollToIndex(499));
+        scrollToRow499.setId("scroll-to-row-499");
+
         NativeButton scrollToRow500 = new NativeButton("Scroll to row 500",
                 e -> grid.scrollToIndex(500));
         scrollToRow500.setId("scroll-to-row-500");
@@ -84,7 +88,7 @@ public class GridScrollToPage extends Div {
                 });
         setSmallPageSize.setId("set-small-page-size");
 
-        add(grid, scrollToStart, scrollToEnd, scrollToRow500,
+        add(grid, scrollToStart, scrollToEnd, scrollToRow499, scrollToRow500,
                 addRowsAndScrollToEnd, addRowAndScrollToIndex, scrollToItem500,
                 addRowAndScrollToItem, setSmallPageSize);
     }

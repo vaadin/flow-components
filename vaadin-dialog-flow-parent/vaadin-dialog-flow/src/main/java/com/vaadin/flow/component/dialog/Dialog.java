@@ -76,7 +76,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.0.0-beta5")
+@NpmPackage(value = "@vaadin/dialog", version = "25.0.0-beta7")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -525,6 +525,15 @@ public class Dialog extends Component implements HasComponents, HasSize,
         HasComponents.super.addComponentAtIndex(index, component);
 
         updateVirtualChildNodeIds();
+    }
+
+    @Override
+    public void removeAll() {
+        // HasComponents.removeAll triggers a special RPC call that clears the
+        // innerHTML of the dialog element. This results in removing the content
+        // elements created by the web component for slotting contents into its
+        // overlay. To avoid this, we manually remove all children instead.
+        getChildren().forEach(this::remove);
     }
 
     /**
