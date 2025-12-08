@@ -835,7 +835,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *            the width to set, may be {@code null}
      */
     public void setWidth(String width) {
-        getElement().setProperty("contentWidth", width);
+        getElement().setProperty("width", width);
     }
 
     /**
@@ -852,7 +852,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *            the height to set, may be {@code null}
      */
     public void setHeight(String height) {
-        getElement().setProperty("contentHeight", height);
+        getElement().setProperty("height", height);
     }
 
     /**
