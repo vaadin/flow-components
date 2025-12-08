@@ -10,11 +10,11 @@ package com.vaadin.flow.component.charts.model.serializers;
 
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
  * Custom bean serializer for {@link DataSeriesItem}
@@ -41,7 +41,7 @@ public class DataSeriesItemBeanSerializer
 
         } else if (bean instanceof OhlcItem) {
             OhlcItem ohlcBean = (OhlcItem) bean;
-            ArrayNode jsonArray = JsonNodeFactory.instance.arrayNode();
+            ArrayNode jsonArray = JacksonUtils.createArrayNode();
             jsonArray.addPOJO(ohlcBean.getX());
             jsonArray.addPOJO(ohlcBean.getOpen());
             jsonArray.addPOJO(ohlcBean.getHigh());
@@ -53,7 +53,7 @@ public class DataSeriesItemBeanSerializer
             Number x = bean.getX();
             Number y = bean.getY();
             if (x != null) {
-                ArrayNode jsonArray = JsonNodeFactory.instance.arrayNode();
+                ArrayNode jsonArray = JacksonUtils.createArrayNode();
                 jsonArray.addPOJO(x);
                 if (y != null) {
                     jsonArray.addPOJO(y);
@@ -71,7 +71,7 @@ public class DataSeriesItemBeanSerializer
                 if (y != null) {
                     jgen.writePOJO(y);
                 } else {
-                    ArrayNode jsonArray = JsonNodeFactory.instance.arrayNode();
+                    ArrayNode jsonArray = JacksonUtils.createArrayNode();
                     jsonArray.addPOJO(bean.getLow());
                     jsonArray.addPOJO(bean.getHigh());
                     jgen.writeTree(jsonArray);
