@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
@@ -25,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.CellSelectionManager;
 import com.vaadin.flow.component.spreadsheet.ContextMenuManager;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
@@ -398,5 +400,38 @@ public class ContextMenuManagerTest {
         assertEquals("<b>Action 2</b>", result.get(1).caption);
         assertEquals(0, result.get(0).type); // Both should be CELL type
         assertEquals(0, result.get(1).type);
+    }
+
+    @Test
+    public void iconVirtualChildLifecycle_rowAction_addedAndRemovedOnClose()
+            throws Exception {
+        // Use a real Spreadsheet instance to verify virtual child lifecycle
+        var realSpreadsheet = new Spreadsheet();
+        var contextMenuManager = new ContextMenuManager(realSpreadsheet);
+
+        var icon = VaadinIcon.ACADEMY_CAP.create();
+        var iconAction = new Action("Row Icon", icon);
+        Action[] actions = { iconAction };
+
+        contextMenuManager.addActionHandler(mockHandler);
+        Mockito.when(mockHandler.getActions(Mockito.any(CellRangeAddress.class),
+                Mockito.eq(realSpreadsheet))).thenReturn(actions);
+
+        var method = ContextMenuManager.class
+                .getDeclaredMethod("createActionsListForRow", int.class);
+        method.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        var result = (ArrayList<SpreadsheetActionDetails>) method
+                .invoke(contextMenuManager, 3);
+
+        assertEquals(1, result.size());
+        assertNotNull("Icon node id should be set",
+                icon.getElement().getParent());
+
+        // Close context menu simulation
+        contextMenuManager.onContextMenuClosed();
+
+        // Icon should be removed from parent
+        assertNull(icon.getElement().getParent());
     }
 }

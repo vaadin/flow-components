@@ -41,6 +41,7 @@ public class SpreadsheetServerRpcImpl
     private JsConsumer<String> rowAddedToRangeSelectionCallback;
     private JsConsumer<String> columnSelectedCallback;
     private JsConsumer<String> columnAddedToSelectionCallback;
+    private JsConsumer<Void> contextMenuClosedCallback;
     private JsConsumer<String> selectionIncreasePaintedCallback;
     private JsConsumer<String> selectionDecreasePaintedCallback;
     private JsConsumer<String> cellValueEditedCallback;
@@ -105,6 +106,10 @@ public class SpreadsheetServerRpcImpl
     public void setCellsAddedToRangeSelectionCallback(
             JsConsumer<String> callback) {
         cellsAddedToRangeSelectionCallback = callback;
+    }
+
+    public void setContextMenuClosedCallback(JsConsumer<Void> callback) {
+        contextMenuClosedCallback = callback;
     }
 
     public void setRowSelectedCallback(JsConsumer<String> callback) {
@@ -478,6 +483,10 @@ public class SpreadsheetServerRpcImpl
     @Override
     public void columnHeaderContextMenuOpen(int columnIndex) {
         call(columnHeaderContextMenuOpenCallback, columnIndex);
+    }
+
+    public void contextMenuClosed() {
+        call(contextMenuClosedCallback);
     }
 
     @Override
