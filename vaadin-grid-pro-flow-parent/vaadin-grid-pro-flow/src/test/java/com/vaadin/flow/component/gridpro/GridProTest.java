@@ -18,11 +18,18 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
@@ -39,6 +46,12 @@ public class GridProTest {
 
     @Before
     public void setup() {
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        var ui = new UI();
+        ui.getInternals().setSession(session);
+
+        UI.setCurrent(ui);
+
         grid = createFakeGridPro();
 
         // We should ensure the correct value were passed
@@ -161,5 +174,152 @@ public class GridProTest {
                 .onComponentEvent(Mockito.any());
         Mockito.verify(itemUpdater, Mockito.times(1)).accept(Mockito.any(),
                 Mockito.any());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void itemPropertyChangedListener_notCalledWhenValueUnchanged_checkbox() {
+        ComponentEventListener listener = Mockito
+                .mock(ComponentEventListener.class);
+        grid.addItemPropertyChangedListener(listener);
+
+        ItemUpdater<Person, Boolean> itemUpdater = Mockito
+                .mock(ItemUpdater.class);
+        grid.addEditColumn(p -> true).checkbox(itemUpdater);
+
+        // Create item with checkbox value true
+        JsonObject item = new JreJsonFactory()
+                .parse("{\"key\": \"1\", \"col1\":true}");
+
+        // Fire CellEditStartedEvent to store the pre-edit value
+        ComponentUtil.fireEvent(grid,
+                new GridPro.CellEditStartedEvent<>(grid, true, item, "col1"));
+
+        // Fire ItemPropertyChangedEvent with the same value true
+        ComponentUtil.fireEvent(grid, new GridPro.ItemPropertyChangedEvent<>(
+                grid, true, item, "col1"));
+
+        // Listener should NOT be called since value hasn't changed
+        Mockito.verify(listener, Mockito.never())
+                .onComponentEvent(Mockito.any());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void itemPropertyChangedListener_calledWhenValueChanged_checkbox() {
+        ComponentEventListener listener = Mockito
+                .mock(ComponentEventListener.class);
+        grid.addItemPropertyChangedListener(listener);
+
+        ItemUpdater<Person, Boolean> itemUpdater = Mockito
+                .mock(ItemUpdater.class);
+        grid.addEditColumn(p -> true).checkbox(itemUpdater);
+
+        // Create item with initial checkbox value true
+        JsonObject startItem = new JreJsonFactory()
+                .parse("{\"key\": \"1\", \"col1\":true}");
+
+        // Fire CellEditStartedEvent to store the pre-edit value
+        ComponentUtil.fireEvent(grid, new GridPro.CellEditStartedEvent<>(grid,
+                true, startItem, "col1"));
+
+        // Create item with changed value false
+        JsonObject changedItem = new JreJsonFactory()
+                .parse("{\"key\": \"1\", \"col1\":false}");
+
+        // Fire ItemPropertyChangedEvent with different value false
+        ComponentUtil.fireEvent(grid, new GridPro.ItemPropertyChangedEvent<>(
+                grid, true, changedItem, "col1"));
+
+        // Listener SHOULD be called since value has changed
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void itemPropertyChangedListener_notCalledWhenValueUnchanged_customEditor() {
+        ComponentEventListener listener = Mockito
+                .mock(ComponentEventListener.class);
+        grid.addItemPropertyChangedListener(listener);
+
+        ItemUpdater<Person, String> itemUpdater = Mockito
+                .mock(ItemUpdater.class);
+        TestCustomEditor customEditor = new TestCustomEditor();
+        grid.addEditColumn(Person::getName).custom(customEditor, itemUpdater);
+
+        // Create item
+        JsonObject item = new JreJsonFactory()
+                .parse("{\"key\": \"1\", \"col1\":\"Foo\"}");
+        // Fire CellEditStartedEvent to store the pre-edit value
+        ComponentUtil.fireEvent(grid,
+                new GridPro.CellEditStartedEvent<>(grid, true, item, "col1"));
+
+        // Simulate that custom editor still has the same value "Foo"
+        customEditor.setValue("Foo");
+
+        // Fire ItemPropertyChangedEvent
+        ComponentUtil.fireEvent(grid, new GridPro.ItemPropertyChangedEvent<>(
+                grid, true, item, "col1"));
+
+        // Listener should NOT be called since custom editor value hasn't
+        // changed
+        Mockito.verify(listener, Mockito.never())
+                .onComponentEvent(Mockito.any());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void itemPropertyChangedListener_calledWhenValueChanged_customEditor() {
+        ComponentEventListener listener = Mockito
+                .mock(ComponentEventListener.class);
+        grid.addItemPropertyChangedListener(listener);
+
+        ItemUpdater<Person, String> itemUpdater = Mockito
+                .mock(ItemUpdater.class);
+
+        TestCustomEditor customEditor = new TestCustomEditor();
+        grid.addEditColumn(Person::getName).custom(customEditor, itemUpdater);
+
+        // Create item
+        JsonObject item = new JreJsonFactory()
+                .parse("{\"key\": \"1\", \"col1\":\"Foo\"}");
+
+        // Fire CellEditStartedEvent to store the pre-edit value
+        ComponentUtil.fireEvent(grid,
+                new GridPro.CellEditStartedEvent<>(grid, true, item, "col1"));
+
+        // Set custom editor to "Bar"
+        customEditor.setValue("Bar");
+
+        ComponentUtil.fireEvent(grid, new GridPro.ItemPropertyChangedEvent<>(
+                grid, true, item, "col1"));
+
+        // Listener SHOULD be called since value changed from "Foo" (pre-edit)
+        // to "Bar" (post-edit)
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
+    }
+
+    @Tag("test-custom-editor")
+    private static class TestCustomEditor extends Component implements
+            HasValueAndElement<HasValue.ValueChangeEvent<String>, String> {
+        private String value;
+
+        @Override
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<String>> listener) {
+            return null;
+        }
     }
 }
