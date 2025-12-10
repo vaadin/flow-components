@@ -23,7 +23,7 @@ class BigDecimalField extends TextField {
   }
 
   static get lumoInjector() {
-    return { is: 'vaadin-text-field' }
+    return { ...super.lumoInjector, is: 'vaadin-text-field' };
   }
 
   static get styles() {
