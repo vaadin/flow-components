@@ -22,6 +22,10 @@ class BigDecimalField extends TextField {
     return 'vaadin-big-decimal-field';
   }
 
+  static get lumoInjector() {
+    return { is: 'vaadin-text-field' }
+  }
+
   static get styles() {
     return [
       ...super.styles,
