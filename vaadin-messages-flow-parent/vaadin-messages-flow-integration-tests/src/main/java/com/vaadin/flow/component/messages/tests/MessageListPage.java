@@ -91,6 +91,24 @@ public class MessageListPage extends Div {
             foo.setUserImageHandler(resource);
         });
 
+        addButton("addItemWithAttachments", () -> {
+            MessageListItem item = new MessageListItem("With Attachments",
+                    Instant.now(), "User");
+            item.addAttachment("proposal.pdf", "#proposal.pdf",
+                    "application/pdf");
+            item.addAttachment("budget.xlsx", "#budget.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            item.addAttachment("chart.png",
+                    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300",
+                    "image/png");
+            messageList.addItem(item);
+        });
+
+        addButton("addAttachmentToFirstItem", () -> {
+                foo.addAttachment("agenda.pdf", "#agenda.pdf",
+                        "application/pdf");
+        });
+
     }
 
     private void addButton(String id, Command action) {
