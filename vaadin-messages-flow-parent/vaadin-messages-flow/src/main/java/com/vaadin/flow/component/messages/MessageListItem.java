@@ -18,9 +18,13 @@ package com.vaadin.flow.component.messages;
 import java.io.Serializable;
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,6 +74,7 @@ public class MessageListItem implements Serializable {
 
     private Set<String> themeNames = new LinkedHashSet<>();
     private Set<String> classNames = new LinkedHashSet<>();
+    private List<Attachment> attachments = new ArrayList<>();
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -608,6 +613,152 @@ public class MessageListItem implements Serializable {
     @JsonIgnore
     MessageList getHost() {
         return host;
+    }
+
+    /**
+     * Gets the attachments of this message.
+     *
+     * @return an unmodifiable list of attachments, never {@code null}
+     */
+    public List<Attachment> getAttachments() {
+        return Collections.unmodifiableList(attachments);
+    }
+
+    /**
+     * Sets the attachments of this message. The attachments will be displayed
+     * below the message text.
+     *
+     * @param attachments
+     *            the attachments to set, or an empty list to clear attachments
+     */
+    public void setAttachments(List<Attachment> attachments) {
+        Objects.requireNonNull(attachments,
+                "Attachments list cannot be null. Use an empty list to clear attachments.");
+        this.attachments = new ArrayList<>(attachments);
+        propsChanged();
+    }
+
+    /**
+     * Adds an attachment to this message.
+     *
+     * @param attachment
+     *            the attachment to add, not {@code null}
+     */
+    public void addAttachment(Attachment attachment) {
+        Objects.requireNonNull(attachment, "Attachment cannot be null");
+        this.attachments.add(attachment);
+        propsChanged();
+    }
+
+    /**
+     * Adds an attachment with the given name, URL, and MIME type to this
+     * message.
+     *
+     * @param name
+     *            the name of the attachment (e.g., file name)
+     * @param url
+     *            the URL of the attachment
+     * @param mimeType
+     *            the MIME type of the attachment (e.g., "application/pdf",
+     *            "image/png")
+     */
+    public void addAttachment(String name, String url, String mimeType) {
+        addAttachment(new Attachment(name, url, mimeType));
+    }
+
+    /**
+     * Represents an attachment that can be associated with a message.
+     * Attachments are displayed below the message text and can represent
+     * files, images, or other resources.
+     */
+    public static class Attachment implements Serializable {
+
+        private String name;
+        private String url;
+        @JsonProperty("type")
+        private String mimeType;
+
+        /**
+         * Creates an empty attachment.
+         */
+        public Attachment() {
+        }
+
+        /**
+         * Creates an attachment with the given name, URL, and MIME type.
+         *
+         * @param name
+         *            the name of the attachment (e.g., file name)
+         * @param url
+         *            the URL of the attachment
+         * @param mimeType
+         *            the MIME type of the attachment (e.g., "application/pdf",
+         *            "image/png")
+         */
+        public Attachment(String name, String url, String mimeType) {
+            this.name = name;
+            this.url = url;
+            this.mimeType = mimeType;
+        }
+
+        /**
+         * Gets the name of the attachment.
+         *
+         * @return the attachment name, or {@code null} if not set
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * Sets the name of the attachment.
+         *
+         * @param name
+         *            the attachment name to set
+         */
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Gets the URL of the attachment.
+         *
+         * @return the attachment URL, or {@code null} if not set
+         */
+        public String getUrl() {
+            return url;
+        }
+
+        /**
+         * Sets the URL of the attachment.
+         *
+         * @param url
+         *            the attachment URL to set
+         */
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        /**
+         * Gets the MIME type of the attachment.
+         *
+         * @return the attachment MIME type, or {@code null} if not set
+         */
+        @JsonIgnore
+        public String getMimeType() {
+            return mimeType;
+        }
+
+        /**
+         * Sets the MIME type of the attachment.
+         *
+         * @param mimeType
+         *            the attachment MIME type to set (e.g., "application/pdf",
+         *            "image/png")
+         */
+        public void setMimeType(String mimeType) {
+            this.mimeType = mimeType;
+        }
     }
 
 }
