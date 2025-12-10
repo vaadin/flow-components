@@ -454,7 +454,7 @@ public class GridElement extends TestBenchElement {
      *            the row to select
      */
     public void select(int rowIndex) {
-        select(getRow(rowIndex));
+        select(getRow(rowIndex, true));
     }
 
     /**
