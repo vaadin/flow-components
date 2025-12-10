@@ -21,7 +21,9 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-upload} component.
  */
 public enum UploadVariant implements ThemeVariant {
-    AURA_NO_BORDER("no-border");
+    AURA_NO_BORDER("no-border"),
+    LUMO_THUMBNAILS("thumbnails"),
+    AURA_THUMBNAILS("thumbnails");
 
     private final String variant;
 
