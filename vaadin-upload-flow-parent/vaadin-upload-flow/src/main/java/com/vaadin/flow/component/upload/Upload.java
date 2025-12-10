@@ -329,6 +329,28 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     }
 
     /**
+     * Set whether the file list should be displayed above the drop area.
+     * By default, the file list is displayed below the drop area.
+     *
+     * @param fileListAbove
+     *            <code>true</code> to display the file list above the drop
+     *            area, <code>false</code> to display it below (default)
+     */
+    public void setFileListAbove(boolean fileListAbove) {
+        getElement().setProperty("fileListAbove", fileListAbove);
+    }
+
+    /**
+     * Get whether the file list is displayed above the drop area.
+     *
+     * @return <code>true</code> if the file list is displayed above the drop
+     *         area, <code>false</code> otherwise (default).
+     */
+    public boolean isFileListAbove() {
+        return getElement().getProperty("fileListAbove", false);
+    }
+
+    /**
      * Specify the types of files that the Upload web-component accepts. Syntax:
      * a MIME type pattern (wildcards are allowed) or file extensions. Notice
      * that MIME types are widely supported, while file extensions are only

@@ -49,4 +49,27 @@ public class UploadTest {
         upload.setReceiver(new MemoryBuffer());
         Assert.assertEquals(1, upload.getElement().getProperty("maxFiles", 0));
     }
+
+    @Test
+    public void isFileListAbove_defaultIsFalse() {
+        Upload upload = new Upload();
+        Assert.assertFalse(upload.isFileListAbove());
+    }
+
+    @Test
+    public void setFileListAbove_propertyIsSet() {
+        Upload upload = new Upload();
+        upload.setFileListAbove(true);
+        Assert.assertTrue(upload.isFileListAbove());
+        Assert.assertTrue(
+                upload.getElement().getProperty("fileListAbove", false));
+    }
+
+    @Test
+    public void setFileListAboveFalse_propertyIsUnset() {
+        Upload upload = new Upload();
+        upload.setFileListAbove(true);
+        upload.setFileListAbove(false);
+        Assert.assertFalse(upload.isFileListAbove());
+    }
 }
