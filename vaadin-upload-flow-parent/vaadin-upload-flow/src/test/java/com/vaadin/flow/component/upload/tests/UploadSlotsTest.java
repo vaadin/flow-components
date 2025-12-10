@@ -146,6 +146,36 @@ public class UploadSlotsTest {
         assertEquals(upload, getParent(defaultIcon));
     }
 
+    @Test
+    public void getDropLabelContent_defaultIsNull() {
+        Upload upload = new Upload();
+        assertEquals(null, upload.getDropLabelContent());
+    }
+
+    @Test
+    public void setDropLabelContent_contentIsAdded() {
+        Upload upload = new Upload();
+        Span content = new Span("Custom content");
+        upload.setDropLabelContent(content);
+        assertEquals(content, upload.getDropLabelContent());
+        assertEquals("drop-label-content",
+                content.getElement().getAttribute("slot"));
+        assertEquals(upload, getParent(content));
+    }
+
+    @Test
+    public void setDropLabelContentNull_slotIsCleared() {
+        Upload upload = new Upload();
+
+        Span content = new Span("Custom content");
+        upload.setDropLabelContent(content);
+
+        upload.setDropLabelContent(null);
+
+        assertEquals(null, upload.getDropLabelContent());
+        assertEquals(null, getParent(content));
+    }
+
     private static Component getParent(Component component) {
         return component.getParent().orElse(null);
     }

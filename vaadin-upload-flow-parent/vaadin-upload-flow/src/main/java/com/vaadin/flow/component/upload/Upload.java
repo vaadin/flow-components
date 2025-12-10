@@ -453,6 +453,30 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     }
 
     /**
+     * Set the component to show as custom content in the drop label area.
+     * This slot can be used to provide rich content (e.g., formatted text,
+     * icons, or other components) that appears in the drop label area.
+     * Despite the name, the content can be any component.
+     *
+     * @param content
+     *            the content to show in the drop label area, or
+     *            <code>null</code> to clear the slot
+     */
+    public void setDropLabelContent(Component content) {
+        SlotUtils.setSlot(this, "drop-label-content", content);
+    }
+
+    /**
+     * Get the component set as the drop label content.
+     *
+     * @return the drop label content component, or <code>null</code> if not
+     *         set.
+     */
+    public Component getDropLabelContent() {
+        return SlotUtils.getChildInSlot(this, "drop-label-content");
+    }
+
+    /**
      * Go into upload state. This is to prevent uploading more files than
      * accepted on same component.
      */
