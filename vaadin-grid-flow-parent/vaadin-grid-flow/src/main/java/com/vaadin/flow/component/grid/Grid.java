@@ -58,6 +58,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
+import com.vaadin.flow.component.grid.dataview.GridLazyFilterDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
@@ -86,6 +87,7 @@ import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -2824,6 +2826,140 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             BackEndDataProvider<T, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getLazyDataView();
+    }
+
+    /**
+     * Sets the items of the grid with a callback for lazily fetching items from
+     * a backend with typed filter support. The returned data view allows
+     * setting a filter that will be passed to the fetch callback.
+     * <p>
+     * This method creates a data provider that fetches items lazily from a
+     * backend. The filter type parameter {@code F} allows you to use custom
+     * filter objects that will be passed to your fetch callback through the
+     * {@link Query#getFilter()} method.
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * GridLazyFilterDataView&lt;Person, PersonFilter&gt; dataView = grid
+     *         .setItemsWithFilter(query -&gt; {
+     *             PersonFilter filter = query.getFilter().orElse(null);
+     *             return personService.fetch(query.getOffset(), query.getLimit(),
+     *                     filter);
+     *         });
+     *
+     * // Set a filter - automatically refreshes the grid
+     * dataView.setFilter(new PersonFilter("John", 25));
+     * </pre>
+     *
+     * @param <F>
+     *            the filter type
+     * @param fetchCallback
+     *            function that returns a stream of items from the backend for a
+     *            query, not {@code null}
+     * @return the data view that allows setting a typed filter
+     */
+    public <F> GridLazyFilterDataView<T, F> setItemsWithFilter(
+            CallbackDataProvider.FetchCallback<T, F> fetchCallback) {
+        Objects.requireNonNull(fetchCallback, "fetch callback cannot be null");
+        CallbackDataProvider<T, F> dataProvider = DataProvider
+                .fromFilteringCallbacks(fetchCallback, query -> {
+                    throw new IllegalStateException(
+                            "Trying to use exact size with a lazy loading component"
+                                    + " without either providing a count callback for the"
+                                    + " component to fetch the count of the items or a data"
+                                    + " provider that implements the size query. Provide the "
+                                    + "callback for fetching item count with%n"
+                                    + "dataView.setItemCountCallback(CallbackDataProvider.CountCallback);"
+                                    + "%nor switch to undefined size with%n"
+                                    + "dataView.setItemCountUnknown();");
+                });
+        GridLazyFilterDataView<T, F> dataView = setItemsWithFilter(dataProvider);
+        dataView.setItemCountUnknown();
+        return dataView;
+    }
+
+    /**
+     * Sets the items of the grid with callbacks for lazily fetching items from a
+     * backend with typed filter support. The returned data view allows setting a
+     * filter that will be passed to both the fetch and count callbacks.
+     * <p>
+     * This method creates a data provider that fetches items lazily from a
+     * backend. The filter type parameter {@code F} allows you to use custom
+     * filter objects that will be passed to your callbacks through the
+     * {@link Query#getFilter()} method.
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * GridLazyFilterDataView&lt;Person, PersonFilter&gt; dataView = grid
+     *         .setItemsWithFilter(
+     *                 query -&gt; {
+     *                     PersonFilter filter = query.getFilter().orElse(null);
+     *                     return personService.fetch(query.getOffset(),
+     *                             query.getLimit(), filter);
+     *                 }, query -&gt; {
+     *                     PersonFilter filter = query.getFilter().orElse(null);
+     *                     return personService.count(filter);
+     *                 });
+     *
+     * // Set a filter - automatically refreshes the grid
+     * dataView.setFilter(new PersonFilter("John", 25));
+     * </pre>
+     *
+     * @param <F>
+     *            the filter type
+     * @param fetchCallback
+     *            function that returns a stream of items from the backend for a
+     *            query, not {@code null}
+     * @param countCallback
+     *            function that returns the number of items in the backend for a
+     *            query, not {@code null}
+     * @return the data view that allows setting a typed filter
+     */
+    public <F> GridLazyFilterDataView<T, F> setItemsWithFilter(
+            CallbackDataProvider.FetchCallback<T, F> fetchCallback,
+            CallbackDataProvider.CountCallback<T, F> countCallback) {
+        Objects.requireNonNull(fetchCallback, "fetch callback cannot be null");
+        Objects.requireNonNull(countCallback, "count callback cannot be null");
+        return setItemsWithFilter(
+                DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
+    }
+
+    /**
+     * Sets the items of the grid from a backend data provider with typed filter
+     * support. The returned data view allows setting a filter that will be passed
+     * to the data provider.
+     * <p>
+     * This method wraps the provided data provider to enable programmatic filter
+     * setting. The filter type parameter {@code F} allows you to use custom
+     * filter objects.
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * BackEndDataProvider&lt;Person, PersonFilter&gt; dataProvider = ...;
+     * GridLazyFilterDataView&lt;Person, PersonFilter&gt; dataView = grid
+     *         .setItemsWithFilter(dataProvider);
+     *
+     * // Set a filter - automatically refreshes the grid
+     * dataView.setFilter(new PersonFilter("John", 25));
+     * </pre>
+     *
+     * @param <F>
+     *            the filter type
+     * @param dataProvider
+     *            the backend data provider, not {@code null}
+     * @return the data view that allows setting a typed filter
+     */
+    public <F> GridLazyFilterDataView<T, F> setItemsWithFilter(
+            BackEndDataProvider<T, F> dataProvider) {
+        Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        ConfigurableFilterDataProvider<T, Void, F> wrapper = dataProvider
+                .withConfigurableFilter();
+        setDataProvider(wrapper);
+        return new GridLazyFilterDataView<>(getDataCommunicator(), this,
+                wrapper);
     }
 
     public interface SpringData extends Serializable {
