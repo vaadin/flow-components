@@ -179,6 +179,39 @@ public class Dashboard extends Component
     }
 
     @Override
+    public void addWidgetAfter(DashboardWidget referenceWidget,
+            DashboardWidget newWidget) {
+        Objects.requireNonNull(referenceWidget,
+                "Reference widget cannot be null.");
+        Objects.requireNonNull(newWidget, "Widget to add cannot be null.");
+
+        // Check if reference widget is at root level
+        int rootLevelIndex = childrenComponents.indexOf(referenceWidget);
+
+        if (rootLevelIndex != -1) {
+            // Reference widget is at root level, add after it
+            doAddWidgetAtIndex(rootLevelIndex + 1, newWidget);
+            updateClient();
+            return;
+        }
+
+        // Search in sections
+        for (Component component : childrenComponents) {
+            if (component instanceof DashboardSection section) {
+                if (section.getWidgets().contains(referenceWidget)) {
+                    // Found the section containing the reference widget
+                    section.addWidgetAfter(referenceWidget, newWidget);
+                    return; // updateClient() is called by section
+                }
+            }
+        }
+
+        // Reference widget not found
+        throw new IllegalArgumentException(
+                "The reference widget is not a child of this dashboard");
+    }
+
+    @Override
     public void remove(Collection<DashboardWidget> widgets) {
         Objects.requireNonNull(widgets, "Widgets to remove cannot be null.");
         List<DashboardWidget> toRemove = new ArrayList<>(widgets.size());
