@@ -128,6 +128,13 @@ async function createPom() {
       groupId: ['com.vaadin'],
       artifactId: ['flow-test-util'],
       scope: ['compile']
+    },{
+    // This is a workaround, as lumo theme is current the default
+    // and we always add the `LumoAppShell.java` (line: 271)
+    // this logic should be updated when aura theme get the default
+      groupId: ['com.vaadin'],
+      artifactId: ['vaadin-lumo-theme'],
+      scope: ['compile']
     }
   ]));
 
