@@ -87,14 +87,19 @@ public class MergeIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void mergeCellsWithText_firstSubCellShouldNotHaveZIndex() {
+    public void mergeCellsWithText_subCellsShouldNotHaveZIndex() {
         setCellValue("A1", "A1 text");
         selectRegion("A1", "B1");
         loadTestFixture(TestFixtures.MergeCells);
-        var cellSelector = ".cell.row1.col1:not(merged-cell)";
-        var element = findElementInShadowRoot(By.cssSelector(cellSelector));
-        var style = element.getDomAttribute("style");
-        var hasZIndex = style != null && style.contains("z-index");
-        Assert.assertFalse(hasZIndex);
+
+        Assert.assertFalse(hasZIndex(".cell.row1.col1:not(.merged-cell)"));
+        Assert.assertFalse(hasZIndex(".cell.row1.col2:not(.merged-cell)"));
+        Assert.assertTrue(hasZIndex(".cell.row1.col1.merged-cell"));
+    }
+
+    private boolean hasZIndex(String cellSelector) {
+        var cellElement = findElementInShadowRoot(By.cssSelector(cellSelector));
+        var cellStyle = cellElement.getDomAttribute("style");
+        return cellStyle != null && cellStyle.contains("z-index");
     }
 }
