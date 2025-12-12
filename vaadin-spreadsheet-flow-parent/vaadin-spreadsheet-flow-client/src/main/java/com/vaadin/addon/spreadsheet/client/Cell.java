@@ -9,6 +9,7 @@
 package com.vaadin.addon.spreadsheet.client;
 
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -19,6 +20,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Overflow;
 
 public class Cell {
+
+    final Logger debugConsole = Logger.getLogger("spreadsheet Cell");
 
     public static final String CELL_COMMENT_TRIANGLE_CLASSNAME = "cell-comment-triangle";
     public static final String CELL_INVALID_FORMULA_CLASSNAME = "cell-invalidformula-triangle";
@@ -93,7 +96,9 @@ public class Cell {
             element.setInnerText("");
             element.getStyle().clearZIndex();
         } else {
-            if (sheetWidget.isMergedCell(SheetWidget.toKey(col, row))
+            if ((sheetWidget.isMergedCell(SheetWidget.toKey(col, row))
+                    || sheetWidget.actionHandler.getMergedRegion(col,
+                            row) != null)
                     && !(this instanceof MergedCell)) {
                 element.getStyle().clearZIndex();
             } else {
