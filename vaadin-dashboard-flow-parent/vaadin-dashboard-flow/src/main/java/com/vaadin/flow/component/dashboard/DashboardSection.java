@@ -114,6 +114,24 @@ public class DashboardSection extends Component implements HasWidgets {
     }
 
     @Override
+    public void addWidgetAfter(DashboardWidget referenceWidget,
+            DashboardWidget newWidget) {
+        Objects.requireNonNull(referenceWidget,
+                "Reference widget cannot be null.");
+        Objects.requireNonNull(newWidget, "Widget to add cannot be null.");
+
+        int referenceIndex = widgets.indexOf(referenceWidget);
+
+        if (referenceIndex == -1) {
+            throw new IllegalArgumentException(
+                    "The reference widget is not a child of this section");
+        }
+
+        doAddWidgetAtIndex(referenceIndex + 1, newWidget);
+        updateClient();
+    }
+
+    @Override
     public void remove(Collection<DashboardWidget> widgets) {
         Objects.requireNonNull(widgets, "Widgets to remove cannot be null.");
         var toRemove = new ArrayList<DashboardWidget>(widgets.size());
