@@ -56,10 +56,18 @@ public class DashboardTestHelper {
         fireDomEvent(dashboard, "dashboard-item-move-mode-changed", eventData);
     }
 
-    static void fireItemRemovedEvent(Dashboard dashboard, int nodeId) {
+    static void fireItemBeforeRemoveEvent(Dashboard dashboard, int nodeId,
+            Integer sectionNodeId) {
         ObjectNode eventData = JacksonUtils.createObjectNode();
         eventData.put("event.detail.item.id", nodeId);
-        fireDomEvent(dashboard, "dashboard-item-removed", eventData);
+        if (sectionNodeId != null) {
+            eventData.put("event.detail.section?.id", sectionNodeId);
+        }
+        fireDomEvent(dashboard, "dashboard-item-before-remove", eventData);
+    }
+
+    static void fireItemBeforeRemoveEvent(Dashboard dashboard, int nodeId) {
+        fireItemBeforeRemoveEvent(dashboard, nodeId, null);
     }
 
     static void fireItemSelectedChangedEvent(Dashboard dashboard,
