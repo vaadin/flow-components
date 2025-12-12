@@ -33,8 +33,8 @@ import com.vaadin.flow.data.provider.DataCommunicator;
  *
  * <pre>
  * Grid&lt;Person&gt; grid = new Grid&lt;&gt;();
- * GridLazyFilterDataView&lt;Person, PersonFilter&gt; dataView = grid.setItems(
- *         query -&gt; {
+ * GridLazyFilterDataView&lt;Person, PersonFilter&gt; dataView = grid
+ *         .setItems(query -&gt; {
  *             PersonFilter filter = query.getFilter().orElse(null);
  *             return personService.fetch(query.getOffset(), query.getLimit(),
  *                     filter);
@@ -98,8 +98,8 @@ public class GridLazyFilterDataView<T, F> extends GridLazyDataView<T> {
 
     /**
      * Sets a callback that the Grid uses to get the exact item count in the
-     * backend with access to the typed filter. Use this when it is cheap to
-     * get the exact item count and it is desired that the user sees the "full
+     * backend with access to the typed filter. Use this when it is cheap to get
+     * the exact item count and it is desired that the user sees the "full
      * scrollbar size".
      * <p>
      * The given callback will be queried for the count and will receive the
@@ -107,18 +107,17 @@ public class GridLazyFilterDataView<T, F> extends GridLazyDataView<T> {
      * allows the count callback to access the filter without type casting.
      *
      * @param callback
-     *            the callback to use for determining item count in the
-     *            backend, not {@code null}
+     *            the callback to use for determining item count in the backend,
+     *            not {@code null}
      * @see #setItemCountFromDataProvider()
      * @see #setItemCountUnknown()
      */
     public void setItemCountCallbackWithFilter(
             CallbackDataProvider.CountCallback<T, F> callback) {
-        getDataCommunicator().setCountCallback(
-                query -> callback.count(new com.vaadin.flow.data.provider.Query<>(
-                        query.getOffset(), query.getLimit(),
-                        query.getSortOrders(), query.getInMemorySorting(),
-                        currentFilter)));
+        getDataCommunicator().setCountCallback(query -> callback.count(
+                new com.vaadin.flow.data.provider.Query<>(query.getOffset(),
+                        query.getLimit(), query.getSortOrders(),
+                        query.getInMemorySorting(), currentFilter)));
     }
 
     /**

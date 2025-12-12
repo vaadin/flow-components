@@ -2844,8 +2844,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * GridLazyFilterDataView&lt;Person, PersonFilter&gt; dataView = grid
      *         .setItemsWithFilter(query -&gt; {
      *             PersonFilter filter = query.getFilter().orElse(null);
-     *             return personService.fetch(query.getOffset(), query.getLimit(),
-     *                     filter);
+     *             return personService.fetch(query.getOffset(),
+     *                     query.getLimit(), filter);
      *         });
      *
      * // Set a filter - automatically refreshes the grid
@@ -2874,15 +2874,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                                     + "%nor switch to undefined size with%n"
                                     + "dataView.setItemCountUnknown();");
                 });
-        GridLazyFilterDataView<T, F> dataView = setItemsWithFilter(dataProvider);
+        GridLazyFilterDataView<T, F> dataView = setItemsWithFilter(
+                dataProvider);
         dataView.setItemCountUnknown();
         return dataView;
     }
 
     /**
-     * Sets the items of the grid with callbacks for lazily fetching items from a
-     * backend with typed filter support. The returned data view allows setting a
-     * filter that will be passed to both the fetch and count callbacks.
+     * Sets the items of the grid with callbacks for lazily fetching items from
+     * a backend with typed filter support. The returned data view allows
+     * setting a filter that will be passed to both the fetch and count
+     * callbacks.
      * <p>
      * This method creates a data provider that fetches items lazily from a
      * backend. The filter type parameter {@code F} allows you to use custom
@@ -2893,15 +2895,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * <pre>
      * GridLazyFilterDataView&lt;Person, PersonFilter&gt; dataView = grid
-     *         .setItemsWithFilter(
-     *                 query -&gt; {
-     *                     PersonFilter filter = query.getFilter().orElse(null);
-     *                     return personService.fetch(query.getOffset(),
-     *                             query.getLimit(), filter);
-     *                 }, query -&gt; {
-     *                     PersonFilter filter = query.getFilter().orElse(null);
-     *                     return personService.count(filter);
-     *                 });
+     *         .setItemsWithFilter(query -&gt; {
+     *             PersonFilter filter = query.getFilter().orElse(null);
+     *             return personService.fetch(query.getOffset(),
+     *                     query.getLimit(), filter);
+     *         }, query -&gt; {
+     *             PersonFilter filter = query.getFilter().orElse(null);
+     *             return personService.count(filter);
+     *         });
      *
      * // Set a filter - automatically refreshes the grid
      * dataView.setFilter(new PersonFilter("John", 25));
@@ -2922,18 +2923,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             CallbackDataProvider.CountCallback<T, F> countCallback) {
         Objects.requireNonNull(fetchCallback, "fetch callback cannot be null");
         Objects.requireNonNull(countCallback, "count callback cannot be null");
-        return setItemsWithFilter(
-                DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
+        return setItemsWithFilter(DataProvider
+                .fromFilteringCallbacks(fetchCallback, countCallback));
     }
 
     /**
      * Sets the items of the grid from a backend data provider with typed filter
-     * support. The returned data view allows setting a filter that will be passed
-     * to the data provider.
+     * support. The returned data view allows setting a filter that will be
+     * passed to the data provider.
      * <p>
-     * This method wraps the provided data provider to enable programmatic filter
-     * setting. The filter type parameter {@code F} allows you to use custom
-     * filter objects.
+     * This method wraps the provided data provider to enable programmatic
+     * filter setting. The filter type parameter {@code F} allows you to use
+     * custom filter objects.
      * <p>
      * Example:
      *

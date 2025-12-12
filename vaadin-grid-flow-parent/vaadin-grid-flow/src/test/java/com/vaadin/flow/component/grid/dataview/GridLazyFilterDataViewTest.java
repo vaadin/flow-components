@@ -110,9 +110,9 @@ public class GridLazyFilterDataViewTest {
         ui.add(grid);
 
         // Create test data
-        allItems = Arrays.asList(new Person("Alice", 25),
-                new Person("Bob", 30), new Person("Charlie", 35),
-                new Person("David", 40), new Person("Eve", 45));
+        allItems = Arrays.asList(new Person("Alice", 25), new Person("Bob", 30),
+                new Person("Charlie", 35), new Person("David", 40),
+                new Person("Eve", 45));
     }
 
     @Test
@@ -332,8 +332,8 @@ public class GridLazyFilterDataViewTest {
         GridLazyFilterDataView<Person, String> dataView = grid
                 .setItemsWithFilter(query -> {
                     String filter = query.getFilter().orElse(null);
-                    return allItems.stream().filter(
-                            p -> filter == null || p.getName().contains(filter));
+                    return allItems.stream().filter(p -> filter == null
+                            || p.getName().contains(filter));
                 });
 
         dataView.setFilter("Alice");
@@ -371,7 +371,8 @@ public class GridLazyFilterDataViewTest {
 
         if (filter != null) {
             if (filter.getName() != null) {
-                stream = stream.filter(p -> p.getName().equals(filter.getName()));
+                stream = stream
+                        .filter(p -> p.getName().equals(filter.getName()));
             }
             if (filter.getMinAge() != null) {
                 stream = stream.filter(p -> p.getAge() >= filter.getMinAge());
@@ -387,7 +388,8 @@ public class GridLazyFilterDataViewTest {
 
         if (filter != null) {
             if (filter.getName() != null) {
-                stream = stream.filter(p -> p.getName().equals(filter.getName()));
+                stream = stream
+                        .filter(p -> p.getName().equals(filter.getName()));
             }
             if (filter.getMinAge() != null) {
                 stream = stream.filter(p -> p.getAge() >= filter.getMinAge());
