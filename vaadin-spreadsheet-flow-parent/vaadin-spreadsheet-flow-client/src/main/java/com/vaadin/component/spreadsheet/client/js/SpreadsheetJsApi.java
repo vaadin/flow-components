@@ -15,6 +15,7 @@ import java.util.Map;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
@@ -52,20 +53,20 @@ public class SpreadsheetJsApi {
      * receives the element where the widget must be embedded into, and
      * publishes the methods which can be used from JS
      *
-     * @param element
+     * @param renderRoot
      */
-    public SpreadsheetJsApi(Element element) {
-        if (element != null) {
-            init(element);
+    public SpreadsheetJsApi(Element host, Node renderRoot) {
+        if (host != null) {
+            init(host, renderRoot);
         }
     }
 
-    private void init(Element element) {
+    private void init(Element host, Node renderRoot) {
         spreadsheetConnector = new SpreadsheetConnector();
-        spreadsheetConnector.setHost(element);
+        spreadsheetConnector.setHost(host, renderRoot);
         spreadsheetConnector.doInit("1", new ApplicationConnection());
         spreadsheetWidget = spreadsheetConnector.getWidget();
-        RootPanel.getForElement(element).add(spreadsheetWidget);
+        RootPanel.getForElement((Element) renderRoot).add(spreadsheetWidget);
     }
 
     public void disconnected() {

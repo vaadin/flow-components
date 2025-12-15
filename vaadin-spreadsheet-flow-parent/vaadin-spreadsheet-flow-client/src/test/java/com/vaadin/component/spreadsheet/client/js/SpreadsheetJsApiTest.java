@@ -42,7 +42,7 @@ public class SpreadsheetJsApiTest {
 
     class SpreadsheetJsApiHack extends SpreadsheetJsApi {
         public SpreadsheetJsApiHack(SpreadsheetConnector connector) {
-            super(null);
+            super(null, null);
             spreadsheetConnector = connector;
         }
 

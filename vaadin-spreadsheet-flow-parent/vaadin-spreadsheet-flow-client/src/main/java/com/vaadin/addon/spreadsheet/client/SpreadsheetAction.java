@@ -61,8 +61,7 @@ public class SpreadsheetAction extends Action {
     @Override
     public String getHTML() {
         StringBuilder sb = new StringBuilder();
-        sb.append(
-                "<div style=\"display:flex; align-items: baseline; gap: 5px;\">");
+        sb.append("<div style=\"display:flex; gap: 5px;\">");
         if (iconContainerId != null && !iconContainerId.isEmpty()) {
             sb.append("<div id=\"").append(iconContainerId)
                     .append("\" style=\"display:contents\"></div>");
