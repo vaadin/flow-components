@@ -89,11 +89,13 @@ public class MergeIT extends AbstractSpreadsheetIT {
     @Test
     public void mergeCellsWithText_subCellsShouldNotHaveZIndex() {
         setCellValue("A1", "A1 text");
-        selectRegion("A1", "B1");
+        selectRegion("A1", "B2");
         loadTestFixture(TestFixtures.MergeCells);
 
         Assert.assertFalse(hasZIndex(".cell.row1.col1:not(.merged-cell)"));
         Assert.assertFalse(hasZIndex(".cell.row1.col2:not(.merged-cell)"));
+        Assert.assertFalse(hasZIndex(".cell.row2.col1:not(.merged-cell)"));
+        Assert.assertFalse(hasZIndex(".cell.row2.col2:not(.merged-cell)"));
         Assert.assertTrue(hasZIndex(".cell.row1.col1.merged-cell"));
     }
 
