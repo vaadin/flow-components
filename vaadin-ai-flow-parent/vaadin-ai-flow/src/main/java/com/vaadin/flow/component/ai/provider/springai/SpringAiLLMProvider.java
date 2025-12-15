@@ -15,13 +15,17 @@
  */
 package com.vaadin.flow.component.ai.provider.springai;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.content.Media;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
@@ -128,8 +132,14 @@ public class SpringAiLLMProvider implements LLMProvider {
             });
 
             // Add tools if provided
+            // toolObjects are Spring AI native (classes with @Tool annotated methods) -> use tools()
             if (request.toolObjects() != null && request.toolObjects().length > 0) {
                 promptSpec = promptSpec.tools(request.toolObjects());
+            }
+            // LLMProvider.Tool objects are converted to FunctionToolCallback -> use toolCallbacks()
+            if (request.tools() != null && request.tools().length > 0) {
+                var toolCallbacks = convertToToolCallbacks(request.tools());
+                promptSpec = promptSpec.toolCallbacks(toolCallbacks);
             }
 
             // Stream the response using ChatClient
@@ -177,5 +187,63 @@ public class SpringAiLLMProvider implements LLMProvider {
     }
 
     private record ProcessedAttachments(String documentContent, List<Media> mediaList) {
+    }
+
+    /**
+     * Converts LLMProvider.Tool array to Spring AI ToolCallback array.
+     */
+    private ToolCallback[] convertToToolCallbacks(Tool[] tools) {
+        List<ToolCallback> callbacks = new ArrayList<>();
+        for (Tool tool : tools) {
+            callbacks.add(convertToFunctionToolCallback(tool));
+        }
+        return callbacks.toArray(new ToolCallback[0]);
+    }
+
+    /**
+     * Converts an LLMProvider.Tool to a Spring AI FunctionToolCallback.
+     */
+    @SuppressWarnings("unchecked")
+    private ToolCallback convertToFunctionToolCallback(Tool tool) {
+        // Get the parameter schema from the tool
+        String schema = tool.getParametersSchema();
+
+        // Create a function that wraps the tool execution
+        // The function receives a Map (parsed from JSON) and converts it back to JSON
+        // string for the tool's execute method
+        Function<Object, String> toolFunction = input -> {
+            String jsonArgs;
+            if (input == null) {
+                jsonArgs = "{}";
+            } else if (input instanceof String str) {
+                jsonArgs = str;
+            } else {
+                // Convert Map/Object back to JSON string
+                try {
+                    var mapper = new tools.jackson.databind.ObjectMapper();
+                    jsonArgs = mapper.writeValueAsString(input);
+                } catch (Exception e) {
+                    jsonArgs = input.toString();
+                }
+            }
+            return tool.execute(jsonArgs);
+        };
+
+        // Default schema for tools with no parameters
+        String effectiveSchema = (schema != null && !schema.isBlank())
+                ? schema
+                : """
+                    {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": false
+                    }
+                    """;
+
+        return FunctionToolCallback.builder(tool.getName(), (Function<Object, Object>) (Function<?, ?>) toolFunction)
+                .description(tool.getDescription())
+                .inputType(Object.class)
+                .inputSchema(effectiveSchema)
+                .build();
     }
 }
