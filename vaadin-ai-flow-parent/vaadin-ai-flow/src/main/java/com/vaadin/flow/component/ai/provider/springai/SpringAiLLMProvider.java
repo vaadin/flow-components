@@ -15,11 +15,18 @@
  */
 package com.vaadin.flow.component.ai.provider.springai;
 
-import com.vaadin.flow.component.ai.provider.LLMProvider;
+import java.util.List;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.content.Media;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.util.MimeType;
+
+import com.vaadin.flow.component.ai.provider.LLMProvider;
+
 import reactor.core.publisher.Flux;
 
 /**
@@ -27,12 +34,13 @@ import reactor.core.publisher.Flux;
  * Handles conversation memory internally using Spring AI's ChatMemory and MessageChatMemoryAdvisor.
  * Supports tool calling through ChatClient's fluent API.
  *
- * <p>This implementation uses Spring AI 1.1.0's ChatClient API which provides:
+ * <p>This implementation uses Spring AI 2.0's ChatClient API which provides:
  * <ul>
  * <li>Fluent API for building prompts</li>
  * <li>Built-in support for conversation memory via advisors</li>
  * <li>Easy tool registration and execution</li>
  * <li>Streaming and non-streaming responses</li>
+ * <li>Multimodal support for image attachments</li>
  * </ul>
  * </p>
  *
@@ -59,26 +67,6 @@ public class SpringAiLLMProvider implements LLMProvider {
         // Create a simple in-memory chat memory
         this.chatMemory = MessageWindowChatMemory.builder()
                 .maxMessages(30)
-                .build();
-    }
-
-    /**
-     * Constructor that accepts a ChatClient.Builder and creates a ChatClient
-     * with conversation memory support.
-     *
-     * @param chatClientBuilder
-     *            the Spring AI ChatClient.Builder instance
-     */
-    public SpringAiLLMProvider(ChatClient.Builder chatClientBuilder) {
-        // Create chat memory with in-memory repository
-        this.chatMemory = MessageWindowChatMemory.builder()
-                .maxMessages(10)
-                .build();
-
-        this.chatClient = chatClientBuilder
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
-                        .conversationId(DEFAULT_CONVERSATION_ID)
-                        .build())
                 .build();
     }
 
@@ -116,35 +104,28 @@ public class SpringAiLLMProvider implements LLMProvider {
             // Start building the prompt with ChatClient's fluent API
             var promptSpec = chatClient.prompt();
 
+            // Always add the memory advisor to ensure chat history is maintained
+            // This is especially important when ChatClient was passed directly
+            // (without being built with default advisors)
+            promptSpec = promptSpec.advisors(MessageChatMemoryAdvisor.builder(chatMemory)
+                    .conversationId(DEFAULT_CONVERSATION_ID)
+                    .build());
+
             // Add system prompt if provided
             if (systemPrompt != null && !systemPrompt.isEmpty()) {
                 promptSpec = promptSpec.system(systemPrompt);
             }
 
-            // Add user message - ChatClient.user() expects just text
-            // For multimodal, we need to use the ChatClient API differently
-            String userText = request.userMessage();
+            // Process attachments
+            var processedAttachments = processAttachments(request.attachments());
 
-            // If there are attachments, format them in the text
-            if (!request.attachments().isEmpty()) {
-                StringBuilder messageBuilder = new StringBuilder(userText);
-                for (Attachment attachment : request.attachments()) {
-                    if (attachment.contentType().contains("text")
-                            || attachment.contentType().contains("pdf")) {
-                        String textContent = new String(attachment.data());
-                        messageBuilder.append("\n<attachment filename=\"")
-                                    .append(attachment.fileName())
-                                    .append("\">\n")
-                                    .append(textContent)
-                                    .append("\n</attachment>\n");
-                    }
-                    // Note: Image attachments in Spring AI 1.1.0 ChatClient require
-                    // model-specific implementations (e.g., via ChatOptions)
+            // Add user message with text and media attachments
+            promptSpec = promptSpec.user(u -> {
+                u.text(request.userMessage() + processedAttachments.documentContent());
+                if (!processedAttachments.mediaList().isEmpty()) {
+                    u.media(processedAttachments.mediaList().toArray(Media[]::new));
                 }
-                userText = messageBuilder.toString();
-            }
-
-            promptSpec = promptSpec.user(userText);
+            });
 
             // Add tools if provided
             if (request.toolObjects() != null && request.toolObjects().length > 0) {
@@ -164,5 +145,37 @@ public class SpringAiLLMProvider implements LLMProvider {
      */
     public void clearHistory() {
         chatMemory.clear(DEFAULT_CONVERSATION_ID);
+    }
+
+    private ProcessedAttachments processAttachments(List<Attachment> attachments) {
+        var documentBuilder = new StringBuilder();
+
+        // Process text and PDF attachments as document content
+        var documentAttachments = attachments.stream()
+                .filter(attachment -> attachment.contentType().contains("text")
+                        || attachment.contentType().contains("pdf"))
+                .toList();
+
+        for (Attachment attachment : documentAttachments) {
+            String textContent = new String(attachment.data());
+            documentBuilder.append("\n<attachment filename=\"")
+                    .append(attachment.fileName())
+                    .append("\">\n")
+                    .append(textContent)
+                    .append("\n</attachment>\n");
+        }
+
+        // Process image attachments as Media objects
+        var mediaList = attachments.stream()
+                .filter(attachment -> attachment.contentType().contains("image"))
+                .map(attachment -> new Media(
+                        MimeType.valueOf(attachment.contentType()),
+                        new ByteArrayResource(attachment.data())))
+                .toList();
+
+        return new ProcessedAttachments(documentBuilder.toString(), mediaList);
+    }
+
+    private record ProcessedAttachments(String documentContent, List<Media> mediaList) {
     }
 }
