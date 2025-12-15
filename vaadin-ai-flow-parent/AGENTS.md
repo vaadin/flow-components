@@ -29,7 +29,6 @@ vaadin-ai-flow-parent/
   - `attachments` - list of file attachments (images, PDFs, text files)
   - `systemPrompt` - optional system prompt override
   - `tools` - array of `Tool` instances (vendor-agnostic)
-  - `modelName` - optional model name override
 - Uses vendor-agnostic `Tool` interface with:
   - `getName()` - tool identifier
   - `getDescription()` - what the tool does and its parameters

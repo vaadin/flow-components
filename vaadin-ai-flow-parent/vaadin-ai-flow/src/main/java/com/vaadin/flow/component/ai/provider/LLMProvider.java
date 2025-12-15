@@ -124,14 +124,6 @@ public interface LLMProvider extends Serializable {
          */
         Tool[] tools();
 
-        /**
-         * Gets the model name to use for this request. If null, the provider
-         * should use its default model.
-         *
-         * @return the model name
-         */
-        String modelName();
-
         Object[] toolObjects();
 
         /**
@@ -164,11 +156,6 @@ public interface LLMProvider extends Serializable {
                 }
 
                 @Override
-                public String modelName() {
-                    return null;
-                }
-
-                @Override
                 public Object[] toolObjects() {
                     return new Object[0];
                 }
@@ -185,7 +172,6 @@ public interface LLMProvider extends Serializable {
         private String systemPrompt;
         private Tool[] tools = new Tool[0];
         private Object[] toolObjects = new Object[0];
-        private String modelName;
 
         /**
          * Sets the user message.
@@ -243,18 +229,6 @@ public interface LLMProvider extends Serializable {
         }
 
         /**
-         * Sets the model name.
-         *
-         * @param modelName
-         *            the model name
-         * @return this builder
-         */
-        public LLMRequestBuilder modelName(String modelName) {
-            this.modelName = modelName;
-            return this;
-        }
-
-        /**
          * Builds the LLMRequest.
          *
          * @return the LLMRequest instance
@@ -264,7 +238,6 @@ public interface LLMProvider extends Serializable {
             List<Attachment> finalAttachments = attachments;
             String finalSystemPrompt = systemPrompt;
             Tool[] finalTools = tools;
-            String finalModelName = modelName;
             Object[] finalToolObjects = toolObjects;
 
             return new LLMRequest() {
@@ -286,11 +259,6 @@ public interface LLMProvider extends Serializable {
                 @Override
                 public Tool[] tools() {
                     return finalTools;
-                }
-
-                @Override
-                public String modelName() {
-                    return finalModelName;
                 }
 
                 @Override
