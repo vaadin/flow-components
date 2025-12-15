@@ -213,6 +213,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private HandlerRegistration contextMenuHandler;
     private SpreadsheetServerRpcImpl serverRPC;
 
+    private Element host;
+
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
         return getRpcProxy(rpcInterface);
@@ -577,6 +579,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     }
 
     public void setHost(Element element) {
+        this.host = element;
         getWidget().setHost(element);
     }
 }
