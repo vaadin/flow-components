@@ -42,6 +42,7 @@ public enum TestFixtures {
     LockSheet(LockSheetFixture.class),
     CustomComponent(CustomComponentFixture.class),
     Action(ActionFixture.class),
+    IconAction(IconActionFixture.class),
     InsertRow(InsertRowFixture.class),
     DeleteRow(DeleteRowFixture.class),
     RowHeaderDoubleClick(RowHeaderDoubleClickFixture.class);
