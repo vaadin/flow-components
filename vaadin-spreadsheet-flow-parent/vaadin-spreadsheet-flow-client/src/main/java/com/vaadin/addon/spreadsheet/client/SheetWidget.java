@@ -3633,11 +3633,7 @@ public class SheetWidget extends Panel {
         }
         String key = toKey(region.col1, region.row1);
         MergedCell mergedCell = new MergedCell(this, region.col1, region.row1);
-        String cellStyle = "cs0";
-        Cell cell = getCell(region.col1, region.row1);
-        if (cell != null) {
-            cellStyle = cell.getCellStyle();
-        }
+        String cellStyle = getMergedRegionCellStyle(region);
         mergedCell.setValue(getCellValue(region.col1, region.row1), cellStyle,
                 false);
         DivElement element = mergedCell.getElement();
@@ -3664,6 +3660,18 @@ public class SheetWidget extends Panel {
             Widget customWidget = customWidgetMap.get(key);
             addCustomWidgetToCell(mergedCell, customWidget);
         }
+    }
+
+    private String getMergedRegionCellStyle(MergedRegion region) {
+        CellData cellData = getCellData(region.col1, region.row1);
+        if (cellData != null && cellData.cellStyle != null) {
+            return cellData.cellStyle;
+        }
+        Cell cell = getCell(region.col1, region.row1);
+        if (cell != null) {
+            return cell.getCellStyle();
+        }
+        return "cs0";
     }
 
     /**
