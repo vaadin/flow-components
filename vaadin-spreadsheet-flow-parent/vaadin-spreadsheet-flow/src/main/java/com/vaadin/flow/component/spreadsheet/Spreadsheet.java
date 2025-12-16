@@ -1161,6 +1161,7 @@ public class Spreadsheet extends Component
     }
 
     private void init() {
+        updateAppId();
         valueManager = createCellValueManager();
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
@@ -1185,6 +1186,12 @@ public class Spreadsheet extends Component
      */
     protected CellValueManager createCellValueManager() {
         return new CellValueManager(this);
+    }
+
+    private void updateAppId() {
+        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+            getElement().setProperty("appId", ui.getInternals().getAppId());
+        });
     }
 
     /**

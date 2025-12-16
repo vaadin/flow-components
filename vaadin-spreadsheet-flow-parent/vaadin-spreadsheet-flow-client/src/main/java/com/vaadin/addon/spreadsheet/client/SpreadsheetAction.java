@@ -22,6 +22,8 @@ public class SpreadsheetAction extends Action {
 
     private SpreadsheetWidget widget;
 
+    private String iconContainerId;
+
     public SpreadsheetAction(ActionOwner owner) {
         super(owner);
     }
@@ -35,6 +37,10 @@ public class SpreadsheetAction extends Action {
         actionKey = key;
     }
 
+    public void setIconContainerId(String iconContainerId) {
+        this.iconContainerId = iconContainerId;
+    }
+
     @Override
     public void execute() {
         if (type == 0) {
@@ -46,6 +52,23 @@ public class SpreadsheetAction extends Action {
         }
         owner.getClient().getContextMenu().hide();
         widget.focusSheet();
+    }
+
+    /**
+     * Overriding the {@link Action#getHTML()} to add a container for the icon
+     * if present.
+     */
+    @Override
+    public String getHTML() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div style=\"display:flex; gap: 5px;\">");
+        if (iconContainerId != null && !iconContainerId.isEmpty()) {
+            sb.append("<div id=\"").append(iconContainerId)
+                    .append("\" style=\"display:contents\"></div>");
+        }
+        sb.append(getCaption());
+        sb.append("</div>");
+        return sb.toString();
     }
 
 }

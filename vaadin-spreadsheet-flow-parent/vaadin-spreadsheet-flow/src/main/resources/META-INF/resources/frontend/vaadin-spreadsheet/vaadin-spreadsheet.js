@@ -176,7 +176,7 @@ export class VaadinSpreadsheet extends LitElement {
         document.body.appendChild(overlays);
       }
 
-      this.api = new Spreadsheet(this.renderRoot);
+      this.api = new Spreadsheet(this, this.renderRoot);
       this.api.setHeight('100%');
       this.api.setWidth('100%');
       this.createCallbacks();
@@ -376,6 +376,10 @@ export class VaadinSpreadsheet extends LitElement {
   createCallbacks() {
     this.api.setGroupingCollapsedCallback((e) => {
       this.dispatchEvent(this.createEvent('groupingCollapsed', e));
+    });
+
+    this.api.setContextMenuClosedCallback((e) => {
+      this.dispatchEvent(this.createEvent('contextMenuClosed', e));
     });
 
     this.api.setLevelHeaderClickedCallback((e) => {
