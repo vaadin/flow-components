@@ -22,6 +22,7 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.Action.Handler;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.dom.Element;
 
 /**
  * ContextMenuManager is an utility class for the Spreadsheet component. This
@@ -41,6 +42,8 @@ public class ContextMenuManager implements Serializable {
     private KeyMapper<Action> actionMapper;
 
     private final Spreadsheet spreadsheet;
+
+    private final ArrayList<Element> iconsInContextMenu = new ArrayList<>();
 
     private int contextMenuHeaderIndex = -1;
 
@@ -284,6 +287,10 @@ public class ContextMenuManager implements Serializable {
         return actions;
     }
 
+    public void onContextMenuClosed() {
+        removeActionIcons();
+    }
+
     /**
      * Helper method to create SpreadsheetActionDetails from actions.
      *
@@ -306,11 +313,27 @@ public class ContextMenuManager implements Serializable {
                 }
                 spreadsheetActionDetails.caption = Jsoup.clean(caption,
                         Safelist.relaxed());
+                if (action.getIcon() != null) {
+                    var icon = action.getIcon().getElement();
+                    // Attach the icon to the spreadsheet as a virtual child so
+                    // that it can be fetched by the client-side context menu.
+                    spreadsheet.getElement().appendVirtualChild(icon);
+                    iconsInContextMenu.add(icon);
+                    spreadsheetActionDetails.iconNodeId = icon.getNode()
+                            .getId();
+                }
                 spreadsheetActionDetails.key = key;
                 spreadsheetActionDetails.type = actionType.getValue();
                 actionDetailsList.add(spreadsheetActionDetails);
             }
         }
         return actionDetailsList;
+    }
+
+    private void removeActionIcons() {
+        for (var icon : iconsInContextMenu) {
+            spreadsheet.getElement().removeVirtualChild(icon);
+        }
+        iconsInContextMenu.clear();
     }
 }
