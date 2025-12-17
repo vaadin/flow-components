@@ -34,7 +34,8 @@ public class CardElement extends TestBenchElement {
      * @return the content elements
      */
     public List<TestBenchElement> getContents() {
-        return $("*").withoutAttribute("slot").all();
+        return findElements(By.cssSelector(":not([slot])")).stream()
+                .map(el -> (TestBenchElement) el).toList();
     }
 
     /**
