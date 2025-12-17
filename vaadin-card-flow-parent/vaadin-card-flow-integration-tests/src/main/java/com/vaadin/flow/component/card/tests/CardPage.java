@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.card.tests;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -35,11 +34,7 @@ public class CardPage extends Div {
                 new Image("https://vaadin.com/images/vaadin-logo.svg", ""));
         card.setHeaderPrefix(new Span("Header prefix"));
         card.setHeaderSuffix(new Span("Header suffix"));
-        card.add(new Text(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
-                        + "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
-                        + "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex "
-                        + "ea commodo consequat."),
+        card.add(new Span("Content text"),
                 new NativeButton("Interactive Content"));
         card.addToFooter(new Div("Footer text"),
                 new NativeButton("Interactive Footer Content"));
