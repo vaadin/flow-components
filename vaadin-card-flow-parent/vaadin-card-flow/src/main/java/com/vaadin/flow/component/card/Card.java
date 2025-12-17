@@ -304,8 +304,8 @@ public class Card extends Component implements HasSize,
 
     @Override
     public Stream<Component> getChildren() {
-        return super.getChildren().filter(
-                child -> child.getElement().getAttribute("slot") == null);
+        return super.getChildren()
+                .filter(child -> !child.getElement().hasAttribute("slot"));
     }
 
     @Override
