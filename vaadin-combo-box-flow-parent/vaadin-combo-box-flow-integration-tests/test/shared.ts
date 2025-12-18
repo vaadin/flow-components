@@ -1,6 +1,6 @@
 import './env-setup.js';
 import { ComboBox } from '@vaadin/combo-box';
-import '../frontend/generated/jar-resources/comboboxConnector.js';
+import '../frontend/generated/jar-resources/comboBoxConnector.js';
 import type {} from '@web/test-runner-mocha';
 import sinon from 'sinon';
 
