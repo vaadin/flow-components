@@ -972,6 +972,20 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         if (this.i18n != null) {
             setI18nWithJS();
         }
+
+        // Re-apply custom component references after re-attach
+        if (customAddButton != null) {
+            getElement().executeJs("this.addButton = $0;",
+                    customAddButton.getElement());
+        }
+        if (customDropZone != null) {
+            getElement().executeJs("this.dropZone = $0;",
+                    customDropZone.getElement());
+        }
+        if (customFileList != null) {
+            getElement().executeJs("this.fileList = $0;",
+                    ((Component) customFileList).getElement());
+        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
