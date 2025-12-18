@@ -59,6 +59,17 @@ public class UploadOrchestratorPage extends Div {
                     + ", size: " + data.length + " bytes");
         }));
 
+        // Add file removed listener
+        orchestrator.addFileRemovedListener(event -> {
+            System.out.println("Removed file: " + event.getFileName());
+        });
+
+        // Add file rejected listener
+        orchestrator.addFileRejectedListener(event -> {
+            System.out.println("Rejected file: " + event.getFileName()
+                    + ", reason: " + event.getErrorMessage());
+        });
+
         // Add UI components to the layout
         add(dropZone, addButton, fileList);
 
