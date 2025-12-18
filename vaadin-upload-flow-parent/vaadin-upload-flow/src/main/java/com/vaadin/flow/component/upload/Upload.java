@@ -367,11 +367,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public void setDropZone(UploadDropZone dropZone) {
         if (customDropZone != null) {
-            getElement().executeJs("this.dropArea = null;");
+            getElement().executeJs("this.dropZone = null;");
         }
         customDropZone = dropZone;
         if (dropZone != null) {
-            getElement().executeJs("this.dropArea = $0;",
+            getElement().executeJs("this.dropZone = $0;",
                     dropZone.getElement());
         }
     }
