@@ -16,12 +16,21 @@
 package com.vaadin.flow.component.upload;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A non-visual orchestrator that manages file uploads using external UI
@@ -74,6 +83,25 @@ public class UploadOrchestrator implements Serializable {
     private HasUploadFileList fileList;
     private UploadHandler uploadHandler;
     private String targetName = "upload";
+
+    // Configuration properties
+    private int maxFiles = 0;
+    private int maxFileSize = 0;
+    private String accept;
+    private boolean autoUpload = true;
+    private boolean dropAllowed = true;
+    private UploadI18N i18n;
+
+    // Listeners
+    private final List<SerializableConsumer<FileRemovedEventData>> fileRemovedListeners = new ArrayList<>();
+    private final List<SerializableConsumer<FileRejectedEventData>> fileRejectedListeners = new ArrayList<>();
+
+    // DOM listener registrations
+    private DomListenerRegistration fileRemoveRegistration;
+    private DomListenerRegistration fileRejectRegistration;
+
+    // Track if initialized
+    private boolean initialized;
 
     /**
      * Creates a new upload orchestrator.
@@ -189,6 +217,247 @@ public class UploadOrchestrator implements Serializable {
         initializeIfReady();
     }
 
+    /**
+     * Limit of files to upload, by default it is unlimited. If the value is set
+     * to one, the native file browser will prevent selecting multiple files.
+     *
+     * @param maxFiles
+     *            the maximum number of files allowed for the user to select, or
+     *            0 for unlimited
+     */
+    public void setMaxFiles(int maxFiles) {
+        this.maxFiles = maxFiles;
+        updateProperty("maxFiles", maxFiles == 0 ? "Infinity" : maxFiles);
+    }
+
+    /**
+     * Get the maximum number of files allowed for the user to select to upload.
+     *
+     * @return the maximum number of files, or 0 if unlimited
+     */
+    public int getMaxFiles() {
+        return maxFiles;
+    }
+
+    /**
+     * Specify the maximum file size in bytes allowed to upload. Notice that it
+     * is a client-side constraint, which will be checked before sending the
+     * request.
+     *
+     * @param maxFileSize
+     *            the maximum file size in bytes, or 0 for unlimited
+     */
+    public void setMaxFileSize(int maxFileSize) {
+        this.maxFileSize = maxFileSize;
+        updateProperty("maxFileSize", maxFileSize == 0 ? "Infinity" : maxFileSize);
+    }
+
+    /**
+     * Get the maximum allowed file size in the client-side, in bytes.
+     *
+     * @return the maximum file size in bytes, or 0 if unlimited
+     */
+    public int getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    /**
+     * Specify the types of files that the upload accepts. Syntax: a MIME type
+     * pattern (wildcards are allowed) or file extensions. Notice that MIME
+     * types are widely supported, while file extensions are only implemented in
+     * certain browsers, so it should be avoided.
+     * <p>
+     * Example: <code>"video/*","image/tiff"</code> or
+     * <code>".pdf","audio/mp3"</code>
+     *
+     * @param acceptedFileTypes
+     *            the allowed file types to be uploaded, or {@code null} to
+     *            clear any restrictions
+     */
+    public void setAcceptedFileTypes(String... acceptedFileTypes) {
+        if (acceptedFileTypes != null) {
+            this.accept = String.join(",", acceptedFileTypes);
+        } else {
+            this.accept = null;
+        }
+        updateProperty("accept", accept != null ? accept : "");
+    }
+
+    /**
+     * Get the list of accepted file types for upload.
+     *
+     * @return a list of allowed file types, never {@code null}
+     */
+    public List<String> getAcceptedFileTypes() {
+        if (accept == null || accept.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return List.of(accept.split(","));
+    }
+
+    /**
+     * When {@code false}, it prevents uploads from triggering immediately upon
+     * adding file(s). The default is {@code true}.
+     *
+     * @param autoUpload
+     *            {@code true} to allow uploads to start immediately after
+     *            selecting files, {@code false} otherwise
+     */
+    public void setAutoUpload(boolean autoUpload) {
+        this.autoUpload = autoUpload;
+        updateProperty("noAuto", !autoUpload);
+    }
+
+    /**
+     * Get the auto upload status.
+     *
+     * @return {@code true} if the upload of files should start immediately
+     *         after they are selected, {@code false} otherwise
+     */
+    public boolean isAutoUpload() {
+        return autoUpload;
+    }
+
+    /**
+     * Define whether the element supports dropping files on it for uploading.
+     * By default it's enabled in desktop and disabled in touch devices because
+     * mobile devices do not support drag events in general. Setting it
+     * {@code true} means that drop is enabled even in touch-devices, and
+     * {@code false} disables drop in all devices.
+     *
+     * @param dropAllowed
+     *            {@code true} to allow file dropping, {@code false} otherwise
+     */
+    public void setDropAllowed(boolean dropAllowed) {
+        this.dropAllowed = dropAllowed;
+        updateProperty("nodrop", !dropAllowed);
+    }
+
+    /**
+     * Get whether file dropping is allowed or not. By default it's enabled in
+     * desktop and disabled in touch devices because mobile devices do not
+     * support drag events in general.
+     *
+     * @return {@code true} if file dropping is allowed, {@code false} otherwise
+     */
+    public boolean isDropAllowed() {
+        return dropAllowed;
+    }
+
+    /**
+     * Set the internationalization properties for this orchestrator.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(UploadI18N i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        updateI18n();
+    }
+
+    /**
+     * Get the internationalization object previously set for this orchestrator.
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public UploadI18N getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Adds a listener for events fired when a file is removed.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addFileRemovedListener(
+            SerializableConsumer<FileRemovedEventData> listener) {
+        fileRemovedListeners.add(listener);
+        return () -> fileRemovedListeners.remove(listener);
+    }
+
+    /**
+     * Adds a listener for {@code file-reject} events fired when a file cannot
+     * be added due to some constraints:
+     * {@code setMaxFileSize, setMaxFiles, setAcceptedFileTypes}
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addFileRejectedListener(
+            SerializableConsumer<FileRejectedEventData> listener) {
+        fileRejectedListeners.add(listener);
+        return () -> fileRejectedListeners.remove(listener);
+    }
+
+    /**
+     * Event data for file removed events.
+     */
+    public static class FileRemovedEventData implements Serializable {
+        private final String fileName;
+
+        /**
+         * Creates file removed event data.
+         *
+         * @param fileName
+         *            the name of the removed file
+         */
+        public FileRemovedEventData(String fileName) {
+            this.fileName = fileName;
+        }
+
+        /**
+         * Gets the name of the removed file.
+         *
+         * @return the file name
+         */
+        public String getFileName() {
+            return fileName;
+        }
+    }
+
+    /**
+     * Event data for file rejected events.
+     */
+    public static class FileRejectedEventData implements Serializable {
+        private final String fileName;
+        private final String errorMessage;
+
+        /**
+         * Creates file rejected event data.
+         *
+         * @param fileName
+         *            the name of the rejected file
+         * @param errorMessage
+         *            the error message
+         */
+        public FileRejectedEventData(String fileName, String errorMessage) {
+            this.fileName = fileName;
+            this.errorMessage = errorMessage;
+        }
+
+        /**
+         * Gets the name of the rejected file.
+         *
+         * @return the file name
+         */
+        public String getFileName() {
+            return fileName;
+        }
+
+        /**
+         * Gets the error message.
+         *
+         * @return the error message
+         */
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+    }
+
     private void initializeIfReady() {
         // We need at least one component and a handler to initialize
         Element anchorElement = getAnchorElement();
@@ -211,18 +480,122 @@ public class UploadOrchestrator implements Serializable {
                     anchorElement.setAttribute("data-upload-target",
                             elementStreamResource);
 
+                    // Build configuration options
+                    StringBuilder options = new StringBuilder();
+                    options.append("{ target: target");
+                    if (maxFiles > 0) {
+                        options.append(", maxFiles: ").append(maxFiles);
+                    }
+                    if (maxFileSize > 0) {
+                        options.append(", maxFileSize: ").append(maxFileSize);
+                    }
+                    if (accept != null && !accept.isEmpty()) {
+                        options.append(", accept: '").append(escapeJs(accept)).append("'");
+                    }
+                    if (!autoUpload) {
+                        options.append(", noAuto: true");
+                    }
+                    if (!dropAllowed) {
+                        options.append(", nodrop: true");
+                    }
+                    options.append(" }");
+
                     // Create the JS orchestrator using element.executeJs
                     // This automatically handles lifecycle (cleanup on detach)
                     anchorElement.executeJs(
                             "const target = this.getAttribute('data-upload-target');" +
-                            "const orchestrator = new window.Vaadin.UploadOrchestrator({ target: target });" +
+                            "const orchestrator = new window.Vaadin.UploadOrchestrator(" + options + ");" +
                             "if ($0) orchestrator.dropZone = $0;" +
                             "if ($1) orchestrator.addButton = $1;" +
-                            "if ($2) orchestrator.fileList = $2;",
+                            "if ($2) orchestrator.fileList = $2;" +
+                            "this.__orchestrator = orchestrator;",
                             dropZone != null ? dropZone.getElement() : null,
                             addButton != null ? addButton.getElement() : null,
                             fileList != null ? ((Component) fileList).getElement() : null);
+
+                    // Set up event listeners on the anchor element
+                    setupEventListeners(anchorElement);
+
+                    // Apply i18n if set
+                    if (i18n != null) {
+                        updateI18n();
+                    }
+
+                    initialized = true;
                 }));
+    }
+
+    private void setupEventListeners(Element anchorElement) {
+        // Clean up old registrations
+        if (fileRemoveRegistration != null) {
+            fileRemoveRegistration.remove();
+        }
+        if (fileRejectRegistration != null) {
+            fileRejectRegistration.remove();
+        }
+
+        // Set up file-remove listener
+        fileRemoveRegistration = anchorElement.addEventListener("file-remove", event -> {
+            String fileName = event.getEventData().get("event.detail.file.name").asString();
+            FileRemovedEventData eventData = new FileRemovedEventData(fileName);
+            fileRemovedListeners.forEach(listener -> listener.accept(eventData));
+        }).addEventData("event.detail.file.name");
+
+        // Set up file-reject listener
+        fileRejectRegistration = anchorElement.addEventListener("file-reject", event -> {
+            String fileName = event.getEventData().get("event.detail.file.name").asString();
+            String error = event.getEventData().get("event.detail.error").asString();
+            FileRejectedEventData eventData = new FileRejectedEventData(fileName, error);
+            fileRejectedListeners.forEach(listener -> listener.accept(eventData));
+        }).addEventData("event.detail.file.name").addEventData("event.detail.error");
+
+        // Forward events from the orchestrator to the anchor element
+        anchorElement.executeJs(
+                "const orchestrator = this.__orchestrator;" +
+                "if (orchestrator) {" +
+                "  orchestrator.addEventListener('file-remove', (e) => {" +
+                "    this.dispatchEvent(new CustomEvent('file-remove', { detail: e.detail }));" +
+                "  });" +
+                "  orchestrator.addEventListener('file-reject', (e) => {" +
+                "    this.dispatchEvent(new CustomEvent('file-reject', { detail: e.detail }));" +
+                "  });" +
+                "}");
+    }
+
+    private void updateProperty(String property, Object value) {
+        Element anchorElement = getAnchorElement();
+        if (anchorElement != null && initialized) {
+            String jsValue;
+            if (value instanceof String) {
+                jsValue = "'" + escapeJs((String) value) + "'";
+            } else if (value instanceof Boolean) {
+                jsValue = value.toString();
+            } else {
+                jsValue = String.valueOf(value);
+            }
+            anchorElement.executeJs(
+                    "if (this.__orchestrator) { this.__orchestrator." + property + " = " + jsValue + "; }");
+        }
+    }
+
+    private void updateI18n() {
+        Element anchorElement = getAnchorElement();
+        if (anchorElement != null && initialized && i18n != null) {
+            ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
+            anchorElement.executeJs(
+                    "if (this.__orchestrator) { " +
+                    "  const currentI18n = this.__orchestrator.i18n || {};" +
+                    "  this.__orchestrator.i18n = Object.assign({}, currentI18n, $0);" +
+                    "}",
+                    i18nJson);
+        }
+    }
+
+    private String escapeJs(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("\\", "\\\\").replace("'", "\\'");
     }
 
     private Element getAnchorElement() {
