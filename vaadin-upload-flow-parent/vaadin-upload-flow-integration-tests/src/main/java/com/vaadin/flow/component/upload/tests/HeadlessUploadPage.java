@@ -36,53 +36,41 @@ import com.vaadin.flow.server.streams.UploadHandler;
 public class HeadlessUploadPage extends Div {
 
     public HeadlessUploadPage() {
-        setId("headless-upload-page");
-
-        add(new H2("Headless Upload Demo"));
-        add(new Paragraph(
-                "This demo shows the Upload component in headless mode with custom external components."));
-
-        // Create the upload component in headless mode with an upload handler
-        Upload upload = new Upload(UploadHandler.inMemory((metadata, data) -> {
-            System.out.println("Uploaded file: " + metadata.fileName()
-                    + ", size: " + data.length + " bytes");
-        }));
-        upload.addFileRemovedListener(event -> {
-            System.out.println("Removed file: " + event.getFileName());
-        });
+        // Create upload component in headless mode
+        var upload = new Upload();
         upload.setHeadless(true);
-        upload.setId("upload");
+
+        // Create custom drop zone
+        var dropZone = new UploadDropZone();
+        dropZone.add(new Span("Drag and drop files here or "));
 
         // Create custom add button
-        NativeButton addButton = new NativeButton("Select Files");
-        addButton.setId("add-button");
-
-        // Create custom drop zone with content
-        UploadDropZone dropZone = new UploadDropZone();
-        dropZone.setId("drop-zone");
-        dropZone.getStyle().set("border", "2px dashed #ccc");
-        dropZone.getStyle().set("padding", "40px");
-        dropZone.getStyle().set("text-align", "center");
-
-        Div dropZoneContent = new Div();
-        dropZoneContent.add(new Span("Drag and drop files here or "));
-        dropZoneContent.add(addButton);
-        dropZone.add(dropZoneContent);
+        var addButton = new NativeButton("Select Files");
 
         // Create custom file list
-        UploadFileList fileList = new UploadFileList();
-        fileList.setId("file-list");
+        var fileList = new UploadFileList();
 
         // Connect external components to upload
         upload.setAddButton(addButton);
         upload.setDropZone(dropZone);
         upload.setFileList(fileList);
 
-        // File list section
-        Div fileListSection = new Div();
-        fileListSection.add(new H3("Uploaded Files"));
-        fileListSection.add(fileList);
+        add(upload, dropZone, addButton, fileList);
 
-        add(upload, dropZone, fileListSection);
+
+        // Style the drop zone
+        dropZone.getStyle().set("border", "2px dashed #ccc");
+        dropZone.getStyle().set("padding", "40px");
+        dropZone.getStyle().set("text-align", "center");
+
+        var handler = UploadHandler.inMemory((metadata, data) -> {
+            System.out.println("Uploaded file: " + metadata.fileName()
+                    + ", size: " + data.length + " bytes");
+        });
+        upload.setUploadHandler(handler);
+        
+        upload.addFileRemovedListener(event -> {
+            System.out.println("Removed file: " + event.getFileName());
+        });
     }
 }
