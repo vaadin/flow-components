@@ -100,6 +100,11 @@ public class UploadOrchestrator implements Serializable {
     private DomListenerRegistration fileRemoveRegistration;
     private DomListenerRegistration fileRejectRegistration;
 
+    // Attach listener registrations for component reattachment handling
+    private Registration addButtonAttachRegistration;
+    private Registration dropZoneAttachRegistration;
+    private Registration fileListAttachRegistration;
+
     // Track if initialized
     private boolean initialized;
 
@@ -129,7 +134,21 @@ public class UploadOrchestrator implements Serializable {
      *            remove
      */
     public void setAddButton(Component addButton) {
+        // Remove old attach listener
+        if (addButtonAttachRegistration != null) {
+            addButtonAttachRegistration.remove();
+            addButtonAttachRegistration = null;
+        }
+
         this.addButton = addButton;
+
+        // Add attach listener for reattachment handling
+        if (addButton != null) {
+            addButtonAttachRegistration = addButton.addAttachListener(
+                    event -> updateComponentOnReattach("addButton",
+                            addButton.getElement()));
+        }
+
         initializeIfReady();
     }
 
@@ -150,7 +169,21 @@ public class UploadOrchestrator implements Serializable {
      *            the drop zone component, or {@code null} to remove
      */
     public void setDropZone(UploadDropZone dropZone) {
+        // Remove old attach listener
+        if (dropZoneAttachRegistration != null) {
+            dropZoneAttachRegistration.remove();
+            dropZoneAttachRegistration = null;
+        }
+
         this.dropZone = dropZone;
+
+        // Add attach listener for reattachment handling
+        if (dropZone != null) {
+            dropZoneAttachRegistration = dropZone.addAttachListener(
+                    event -> updateComponentOnReattach("dropZone",
+                            dropZone.getElement()));
+        }
+
         initializeIfReady();
     }
 
@@ -173,7 +206,21 @@ public class UploadOrchestrator implements Serializable {
      */
     public <T extends Component & HasUploadFileList> void setFileList(
             T fileList) {
+        // Remove old attach listener
+        if (fileListAttachRegistration != null) {
+            fileListAttachRegistration.remove();
+            fileListAttachRegistration = null;
+        }
+
         this.fileList = fileList;
+
+        // Add attach listener for reattachment handling
+        if (fileList != null) {
+            fileListAttachRegistration = fileList.addAttachListener(
+                    event -> updateComponentOnReattach("fileList",
+                            ((Component) this.fileList).getElement()));
+        }
+
         initializeIfReady();
     }
 
@@ -502,12 +549,13 @@ public class UploadOrchestrator implements Serializable {
 
                     // Create the JS orchestrator using element.executeJs
                     // This automatically handles lifecycle (cleanup on detach)
+                    // Store __orchestrator on ALL elements so any can access it
                     anchorElement.executeJs(
                             "const target = this.getAttribute('data-upload-target');" +
                             "const orchestrator = new window.Vaadin.UploadOrchestrator(" + options + ");" +
-                            "if ($0) orchestrator.dropZone = $0;" +
-                            "if ($1) orchestrator.addButton = $1;" +
-                            "if ($2) orchestrator.fileList = $2;" +
+                            "if ($0) { orchestrator.dropZone = $0; $0.__orchestrator = orchestrator; }" +
+                            "if ($1) { orchestrator.addButton = $1; $1.__orchestrator = orchestrator; }" +
+                            "if ($2) { orchestrator.fileList = $2; $2.__orchestrator = orchestrator; }" +
                             "this.__orchestrator = orchestrator;",
                             dropZone != null ? dropZone.getElement() : null,
                             addButton != null ? addButton.getElement() : null,
@@ -598,6 +646,21 @@ public class UploadOrchestrator implements Serializable {
         return value.replace("\\", "\\\\").replace("'", "\\'");
     }
 
+    private void updateComponentOnReattach(String propertyName,
+            Element reattachedElement) {
+        // Find an anchor element that is NOT the one being reattached,
+        // because the reattached element may have lost its __orchestrator reference
+        Element anchorElement = getAnchorElementExcluding(reattachedElement);
+        if (anchorElement != null && initialized) {
+            // Re-assign the element to the orchestrator to re-add listeners
+            anchorElement.executeJs(
+                    "if (this.__orchestrator) { " +
+                    "  this.__orchestrator." + propertyName + " = $0; " +
+                    "}",
+                    reattachedElement);
+        }
+    }
+
     private Element getAnchorElement() {
         if (dropZone != null) {
             return dropZone.getElement();
@@ -609,5 +672,20 @@ public class UploadOrchestrator implements Serializable {
             return ((Component) fileList).getElement();
         }
         return null;
+    }
+
+    private Element getAnchorElementExcluding(Element excludedElement) {
+        if (dropZone != null && dropZone.getElement() != excludedElement) {
+            return dropZone.getElement();
+        }
+        if (addButton != null && addButton.getElement() != excludedElement) {
+            return addButton.getElement();
+        }
+        if (fileList != null
+                && ((Component) fileList).getElement() != excludedElement) {
+            return ((Component) fileList).getElement();
+        }
+        // Fall back to the excluded element if it's the only one
+        return excludedElement;
     }
 }
