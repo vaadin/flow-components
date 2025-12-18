@@ -44,9 +44,6 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
                 grid.expand(List.of(item), true);
             }
         });
-
-        withProperty("children",
-                item -> grid.getDataCommunicator().hasChildren(item));
     }
 
     @Override
@@ -58,7 +55,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
         var clickListener = "e => requestAnimationFrame(() => { e.defaultPrevented && onClick(e) })";
 
         return "<vaadin-grid-tree-toggle @click=${" + clickListener
-                + "} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+                + "} class=${item.cssClassName} .leaf=${!model.hasChildren} .expanded=${live(model.expanded)} .level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
     }
 }

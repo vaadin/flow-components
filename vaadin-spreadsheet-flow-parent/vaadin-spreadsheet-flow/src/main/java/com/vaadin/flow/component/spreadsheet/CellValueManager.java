@@ -47,6 +47,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -216,7 +217,7 @@ public class CellValueManager implements Serializable {
         cellData.col = cell.getColumnIndex() + 1;
         CellStyle cellStyle = cell.getCellStyle();
         cellData.cellStyle = "cs" + cellStyle.getIndex();
-        cellData.locked = spreadsheet.isCellLocked(cell);
+        cellData.locked = spreadsheet.isCellLocked(cell.getAddress());
         try {
             if (!spreadsheet.isCellHidden(cell)) {
                 if (cell.getCellType() == CellType.FORMULA) {
@@ -601,7 +602,9 @@ public class CellValueManager implements Serializable {
 
         // capture cell value to history
         CellValueCommand command = new CellValueCommand(spreadsheet);
-        command.captureCellValues(new CellReference(row - 1, col - 1));
+        command.captureCellValues(
+                new CellReference(spreadsheet.getActiveSheet().getSheetName(),
+                        row - 1, col - 1, false, false));
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         boolean updateHyperlinks = false;
         boolean formulaChanged = false;
@@ -780,8 +783,9 @@ public class CellValueManager implements Serializable {
     }
 
     private void fireCellValueChangeEvent(Cell cell) {
-        Set<CellReference> cells = new HashSet<CellReference>();
-        cells.add(new CellReference(cell));
+        Set<CellReference> cells = new HashSet<>();
+        CellReference ref = new CellReference(cell);
+        cells.add(ref);
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
     }
 
@@ -806,7 +810,8 @@ public class CellValueManager implements Serializable {
         if (selectedCellReference != null) {
             Row row = activeSheet.getRow(selectedCellReference.getRow());
             if (row != null && spreadsheet.isCellLocked(
-                    row.getCell(selectedCellReference.getCol()))) {
+                    new CellAddress(selectedCellReference.getRow(),
+                            selectedCellReference.getCol()))) {
                 return;
             }
         }
@@ -814,8 +819,8 @@ public class CellValueManager implements Serializable {
                 .getIndividualSelectedCells();
         for (CellReference cr : individualSelectedCells) {
             final Row row = activeSheet.getRow(cr.getRow());
-            if (row != null
-                    && spreadsheet.isCellLocked(row.getCell(cr.getCol()))) {
+            if (row != null && spreadsheet
+                    .isCellLocked(new CellAddress(cr.getRow(), cr.getCol()))) {
                 return;
             }
         }

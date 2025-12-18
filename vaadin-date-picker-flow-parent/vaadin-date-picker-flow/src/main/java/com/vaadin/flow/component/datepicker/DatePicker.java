@@ -30,6 +30,8 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -44,12 +46,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -65,12 +64,11 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Date Picker is an input field that allows the user to enter a date by typing
@@ -128,19 +126,17 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.0.0")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
-@NpmPackage(value = "date-fns", version = "2.29.3")
+@NpmPackage(value = "date-fns", version = "4.1.0")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation,
+        HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
-        HasOverlayClassName, HasPrefix, HasThemeVariant<DatePickerVariant>,
-        HasValidationProperties, HasValidator<LocalDate>, HasPlaceholder {
+        HasPrefix, HasThemeVariant<DatePickerVariant>, HasValidationProperties,
+        HasValidator<LocalDate>, HasPlaceholder {
 
     private DatePickerI18n i18n;
 
@@ -159,6 +155,8 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
+    private String unparsableValue;
+
     private SerializableFunction<String, Result<LocalDate>> fallbackParser;
     private String fallbackParserErrorMessage = null;
     private boolean isFallbackParserRunning = false;
@@ -168,11 +166,9 @@ public class DatePicker
     private Validator<LocalDate> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasBadInput && fallbackParserErrorMessage != null) {
+        if (isInputUnparsable() && fallbackParserErrorMessage != null) {
             return ValidationResult.error(fallbackParserErrorMessage);
-        } else if (hasBadInput) {
+        } else if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     DatePickerI18n::getBadInputErrorMessage));
         }
@@ -225,7 +221,7 @@ public class DatePicker
      *
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      */
     public DatePicker(LocalDate initialDate) {
         this(initialDate, false);
@@ -246,10 +242,12 @@ public class DatePicker
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
         super("value", null, String.class, PARSER, FORMATTER);
+
+        getElement().setProperty("manualValidation", true);
 
         // Initialize property value unless it has already been set from a
         // template
@@ -264,9 +262,15 @@ public class DatePicker
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
+            // The unparsable-change event is fired in the following situations:
+            // 1. User modifies input but it remains unparsable
+            // 2. User enters unparsable input in empty field
+            // 3. User clears unparsable input
+            //
+            // In all these cases, ValueChangeEvent isn't fired, so
+            // we call setModelValue manually to run fallback parser
+            // and trigger validation.
             setModelValue(getEmptyValue(), true);
-            validate();
-            fireValidationStatusChangeEvent();
         });
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
@@ -296,7 +300,7 @@ public class DatePicker
      *            the label describing the date picker
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #setLabel(String)
      */
     public DatePicker(String label, LocalDate initialDate) {
@@ -344,7 +348,7 @@ public class DatePicker
      *            the pre-selected date in the picker
      * @param listener
      *            the listener to receive value change events
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(LocalDate initialDate,
@@ -364,7 +368,7 @@ public class DatePicker
      * @param listener
      *            the listener to receive value change events
      * @see #setLabel(String)
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label, LocalDate initialDate,
@@ -519,7 +523,6 @@ public class DatePicker
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {
@@ -572,7 +575,7 @@ public class DatePicker
      * custom date formats specified in DatePickerI18N.
      */
     private void executeI18nUpdate() {
-        JsonObject i18nObject = getI18nAsJsonObject();
+        ObjectNode i18nObject = getI18nAsJsonObject();
 
         // For ill-formed locales, Locale.toLanguageTag() will append subtag
         // "lvariant" to it, which will cause the client side
@@ -598,36 +601,18 @@ public class DatePicker
                 i18nObject);
     }
 
-    private JsonObject getI18nAsJsonObject() {
+    private ObjectNode getI18nAsJsonObject() {
         if (i18n == null) {
             return null;
         }
-        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        ObjectNode i18nObject = JacksonUtils.beanToJson(i18n);
         // LocalDate objects have to be explicitly added to the serialized i18n
         // object in order to be formatted correctly
         if (i18n.getReferenceDate() != null) {
             i18nObject.put("referenceDate",
                     i18n.getReferenceDate().format(DateTimeFormatter.ISO_DATE));
         }
-
-        // Remove the error message properties because they aren't used on
-        // the client-side.
-        i18nObject.remove("badInputErrorMessage");
-        i18nObject.remove("requiredErrorMessage");
-        i18nObject.remove("minErrorMessage");
-        i18nObject.remove("maxErrorMessage");
-
-        // Remove properties with null values to prevent errors in web component
-        removeNullValuesFromJsonObject(i18nObject);
         return i18nObject;
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -661,13 +646,29 @@ public class DatePicker
     }
 
     /**
+     * For internal use only.
+     * <p>
      * Returns whether the input element has a value or not.
      *
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
+     * @deprecated Since v24.8
      */
+    @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
         return !getInputElementValue().isEmpty();
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Returns whether the input value is unparsable.
+     *
+     * @return <code>true</code> if the input element's value is populated and
+     *         unparsable, <code>false</code> otherwise
+     */
+    protected final boolean isInputUnparsable() {
+        return unparsableValue != null;
     }
 
     /**
@@ -756,26 +757,16 @@ public class DatePicker
     @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
-        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
-        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
-        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        String oldInputElementValue = getInputElementValue();
-
-        // When the value is cleared programmatically, there is no change event
-        // that would synchronize _inputElementValue, so we reset it ourselves
-        // to prevent the following validation from treating this as bad input.
-        if (isNewValueEmpty) {
-            setInputElementValue("");
+        if (oldValue == null && value == null && isInputUnparsable()) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
+            setModelValue(getEmptyValue(), false);
+            return;
         }
 
         super.setValue(value);
-
-        // Revalidate if setValue(null) didn't result in a value change but
-        // cleared bad input
-        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
-            validate();
-            fireValidationStatusChangeEvent();
-        }
     }
 
     @Override
@@ -788,19 +779,26 @@ public class DatePicker
             return;
         }
 
+        LocalDate oldModelValue = getValue();
+        String oldUnparsableValue = unparsableValue;
+
+        if (fromClient && newModelValue == null
+                && !getInputElementValue().isEmpty()) {
+            unparsableValue = getInputElementValue();
+        } else {
+            unparsableValue = null;
+        }
+
         try {
             isFallbackParserRunning = true;
 
-            boolean isInputUnparsable = fromClient && newModelValue == null
-                    && isInputValuePresent();
-
-            if (fallbackParser != null && isInputUnparsable) {
-                Result<LocalDate> result = runFallbackParser(
-                        getInputElementValue());
+            if (fallbackParser != null && isInputUnparsable()) {
+                Result<LocalDate> result = runFallbackParser(unparsableValue);
                 if (result.isError()) {
                     fallbackParserErrorMessage = result.getMessage()
                             .orElse(null);
                 } else {
+                    unparsableValue = null;
                     fallbackParserErrorMessage = null;
                     newModelValue = result
                             .getOrThrow(IllegalStateException::new);
@@ -809,6 +807,28 @@ public class DatePicker
             }
         } finally {
             isFallbackParserRunning = false;
+        }
+
+        boolean isModelValueRemainedEmpty = newModelValue == null
+                && oldModelValue == null;
+
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        if (fromClient && isModelValueRemainedEmpty) {
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty
+                && oldUnparsableValue != null) {
+            setInputElementValue("");
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
         }
 
         super.setModelValue(newModelValue, fromClient);
@@ -1082,6 +1102,7 @@ public class DatePicker
     /**
      * The internationalization properties for {@link DatePicker}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DatePickerI18n implements Serializable {
         private List<String> monthNames;
         private List<String> weekdays;
@@ -1375,6 +1396,7 @@ public class DatePicker
          *
          * @return the error message or {@code null} if not set
          */
+        @JsonIgnore // Not used in client side
         public String getBadInputErrorMessage() {
             return badInputErrorMessage;
         }
@@ -1404,6 +1426,7 @@ public class DatePicker
          * @see DatePicker#isRequiredIndicatorVisible()
          * @see DatePicker#setRequiredIndicatorVisible(boolean)
          */
+        @JsonIgnore // Not used in client side
         public String getRequiredErrorMessage() {
             return requiredErrorMessage;
         }
@@ -1435,6 +1458,7 @@ public class DatePicker
          * @see DatePicker#getMin()
          * @see DatePicker#setMin(LocalDate)
          */
+        @JsonIgnore // Not used in client side
         public String getMinErrorMessage() {
             return minErrorMessage;
         }
@@ -1466,6 +1490,7 @@ public class DatePicker
          * @see DatePicker#getMax()
          * @see DatePicker#setMax(LocalDate)
          */
+        @JsonIgnore // Not used in client side
         public String getMaxErrorMessage() {
             return maxErrorMessage;
         }

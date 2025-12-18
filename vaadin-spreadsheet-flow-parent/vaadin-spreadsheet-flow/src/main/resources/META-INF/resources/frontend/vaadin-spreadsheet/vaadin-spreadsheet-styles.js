@@ -11,6 +11,13 @@ import { css } from 'lit';
 
 export const spreadsheetStyles = css`
   :host {
+    --_vaadin-spreadsheet-border-color: var(--vaadin-spreadsheet-border-color, #c7c7c7);
+    --_vaadin-spreadsheet-cell-border-color: var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
+    --_vaadin-spreadsheet-header-border-color: var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+    --_vaadin-spreadsheet-text-color: var(--vaadin-spreadsheet-text-color, #474747);
+  }
+
+  :host {
     display: block;
     width: 100%;
     height: 100%;
@@ -38,10 +45,10 @@ export const spreadsheetStyles = css`
     padding-left: $spreadsheet-row-header-width;
     padding-top: $spreadsheet-toolbar-height + $spreadsheet-bottom-bar-height;
      */
-    border: 1px solid #c7c7c7;
+    border: 1px solid var(--_vaadin-spreadsheet-border-color);
     font-family: Helvetica;
     font-size: 14px;
-    color: #464646;
+    color: var(--_vaadin-spreadsheet-text-color);
   }
   .v-spreadsheet.hidefunctionbar {
     padding-top: 28px;
@@ -89,7 +96,7 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .functionbar {
     background-color: white;
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     height: 29px;
     left: 0;
     position: absolute;
@@ -106,7 +113,7 @@ export const spreadsheetStyles = css`
     padding: 0;
     padding-left: 5px;
     border: none;
-    color: #474747;
+    color: var(--_vaadin-spreadsheet-text-color);
     outline: none;
     background-color: initial;
   }
@@ -129,7 +136,7 @@ export const spreadsheetStyles = css`
     float: left;
     width: 176px;
     height: 100%;
-    border-right: 1px solid #c7c7c7;
+    border-right: 1px solid var(--_vaadin-spreadsheet-border-color);
     background: #fafafa;
   }
   .v-spreadsheet .functionbar .adjusting-right-panel {
@@ -164,8 +171,8 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .sheet .cell {
     box-sizing: border-box;
-    border-right: 1px solid #c7c7c7;
-    border-bottom: 1px solid #c7c7c7;
+    border-right: 1px solid var(--_vaadin-spreadsheet-cell-border-color);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-cell-border-color);
     overflow: visible;
     padding: 0 2px;
     position: absolute;
@@ -329,7 +336,7 @@ export const spreadsheetStyles = css`
     box-sizing: border-box;
     -webkit-user-select: none;
     user-select: none;
-    border-right: 1px solid #c7c7c7;
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     cursor: e-resize;
     -webkit-touch-callout: none;
     width: 50px;
@@ -358,11 +365,11 @@ export const spreadsheetStyles = css`
     top: 0;
   }
   .v-spreadsheet .rh .header-resize-dnd-second {
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     bottom: 0;
   }
   .v-spreadsheet .rh.resize-extra {
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
   .v-spreadsheet .ch {
     background-color: #fafafa;
@@ -395,11 +402,11 @@ export const spreadsheetStyles = css`
     left: 0;
   }
   .v-spreadsheet .ch .header-resize-dnd-second {
-    border-right: 1px solid #c7c7c7;
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     right: 0;
   }
   .v-spreadsheet .ch.resize-extra {
-    border-right: 1px solid #c7c7c7;
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
   .v-spreadsheet.protected.lock-format-columns .ch .header-resize-dnd-first,
   .v-spreadsheet.protected.lock-format-columns .ch .header-resize-dnd-second,
@@ -468,8 +475,8 @@ export const spreadsheetStyles = css`
     left: 0;
     width: 50px;
     height: 27px;
-    border-bottom: 1px solid #c7c7c7;
-    border-right: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     z-index: 1;
   }
   .v-spreadsheet .sheet > div.sheet-image {
@@ -682,7 +689,7 @@ export const spreadsheetStyles = css`
     font-weight: 300;
     background: #fafafa;
     color: #6a6a6a;
-    border: 1px solid #c7c7c7;
+    border: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     border-top: none;
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
@@ -736,7 +743,7 @@ export const spreadsheetStyles = css`
     right: 0;
     font-weight: bold;
     font-size: 11px;
-    border-left: 1px solid #c7c7c7;
+    border-left: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     padding-left: 5px;
     padding-right: 5px;
     width: 200px;
@@ -849,15 +856,15 @@ export const spreadsheetStyles = css`
     width: 100%;
     z-index: 1;
     background-color: #fafafa;
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     box-sizing: border-box;
   }
   .v-spreadsheet .col-group-pane .grouping,
   .v-spreadsheet .col-group-freeze-pane .grouping {
     position: absolute;
     height: 7px;
-    border-top: 2px solid #c7c7c7;
-    border-left: 2px solid #c7c7c7;
+    border-top: 2px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-left: 2px solid var(--_vaadin-spreadsheet-header-border-color);
     cursor: pointer;
   }
   .v-spreadsheet .col-group-pane .grouping .expand,
@@ -868,7 +875,7 @@ export const spreadsheetStyles = css`
     right: -4px;
     height: 12px;
     width: 12px;
-    background-color: #c7c7c7;
+    background-color: var(--_vaadin-spreadsheet-border-color);
     color: white;
     border: none;
     line-height: 11px;
@@ -887,7 +894,7 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .col-group-pane .grouping.inversed,
   .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
-    border-right: 2px solid #c7c7c7;
+    border-right: 2px solid var(--_vaadin-spreadsheet-header-border-color);
     border-left: none;
   }
   .v-spreadsheet .col-group-pane .grouping.inversed .expand,
@@ -907,7 +914,7 @@ export const spreadsheetStyles = css`
     position: absolute;
     width: 100%;
     z-index: 1;
-    border-bottom: 1px dotted #c7c7c7;
+    border-bottom: 1px dotted var(--_vaadin-spreadsheet-header-border-color);
     margin-top: 20px;
   }
   .v-spreadsheet .row-group-pane,
@@ -917,15 +924,15 @@ export const spreadsheetStyles = css`
     height: 100%;
     z-index: 1;
     background-color: #fafafa;
-    border-right: 1px solid #c7c7c7;
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     box-sizing: border-box;
   }
   .v-spreadsheet .row-group-pane .grouping,
   .v-spreadsheet .row-group-freeze-pane .grouping {
     position: absolute;
     width: 8px;
-    border-top: 2px solid #c7c7c7;
-    border-left: 2px solid #c7c7c7;
+    border-top: 2px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-left: 2px solid var(--_vaadin-spreadsheet-header-border-color);
     cursor: pointer;
   }
   .v-spreadsheet .row-group-pane .grouping.plus,
@@ -955,7 +962,7 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .row-group-pane .grouping.inversed,
   .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
     border-top: none;
-    border-bottom: 2px solid #c7c7c7;
+    border-bottom: 2px solid var(--_vaadin-spreadsheet-header-border-color);
   }
   .v-spreadsheet .row-group-pane .grouping.inversed .expand,
   .v-spreadsheet .row-group-freeze-pane .grouping.inversed .expand {
@@ -973,7 +980,7 @@ export const spreadsheetStyles = css`
     position: absolute;
     height: 100%;
     z-index: 1;
-    border-right: 1px dotted #c7c7c7;
+    border-right: 1px dotted var(--_vaadin-spreadsheet-header-border-color);
     /*margin-top: 20px;*/
   }
   .v-spreadsheet .expandbutton {
@@ -1004,24 +1011,24 @@ export const spreadsheetStyles = css`
     position: absolute;
     left: 0;
     z-index: 1;
-    border-right: 1px solid #c7c7c7;
-    border-bottom: 1px solid #c7c7c7;
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     box-sizing: border-box;
     background-color: #fafafa;
   }
   .v-spreadsheet .col-group-summary {
     position: absolute;
     box-sizing: border-box;
-    border-bottom: 1px solid #c7c7c7;
-    border-right: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     background-color: #fafafa;
     z-index: 1;
   }
   .v-spreadsheet .row-group-summary {
     position: absolute;
     box-sizing: border-box;
-    border-bottom: 1px solid #c7c7c7;
-    border-right: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     background-color: #fafafa;
     left: 0;
     z-index: 1;
@@ -1062,203 +1069,214 @@ export const spreadsheetStyles = css`
   /*
    * Lumo theme variant styles
    */
-  :host([theme~="lumo"]) {
-	--default-background-color: var(--lumo-base-color);
-	--default-color: var(--lumo-body-text-color);
+  :host([theme~='lumo']) {
+    --_vaadin-spreadsheet-border-color: var(--vaadin-spreadsheet-border-color, var(--lumo-contrast-20pct));
+    --_vaadin-spreadsheet-cell-border-color: var(--vaadin-spreadsheet-cell-border-color, var(--lumo-contrast-20pct));
+    --_vaadin-spreadsheet-header-border-color: var(
+      --vaadin-spreadsheet-header-border-color,
+      var(--lumo-contrast-20pct)
+    );
+    --_vaadin-spreadsheet-text-color: var(--vaadin-spreadsheet-text-color, var(--lumo-body-text-color));
+  }
+
+  :host([theme~='lumo']) {
+    --default-background-color: var(--lumo-base-color);
+    --default-color: var(--_vaadin-spreadsheet-text-color);
     background-color: var(--lumo-base-color);
   }
 
-  :where(:host([theme~="lumo"])) .v-spreadsheet .sheet .cell {
+  :where(:host([theme~='lumo'])) .v-spreadsheet .sheet .cell {
     font-family: var(--lumo-font-family);
     color: var(--lumo-body-text-color);
     background-color: var(--lumo-base-color);
-    font-size: var(--lump-font-size-s);
-    border-right: 1px solid var(--lumo-contrast-20pct);
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    font-size: var(--lumo-font-size-s);
+    border-right: 1px solid var(--_vaadin-spreadsheet-cell-border-color);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-cell-border-color);
     padding: 0 var(--lumo-space-xs);
     --default-font-family: var(--lumo-font-family) !important;
     --default-font-size: var(--lumo-font-size-s) !important;
-  } 
+  }
 
-  :host([theme~="lumo"]) .v-spreadsheet {
-    border: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet {
+    border: 1px solid var(--_vaadin-spreadsheet-border-color);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-m);
-    color: var(--lumo-body-text-color);
+    color: var(--_vaadin-spreadsheet-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar {
     background-color: var(--lumo-base-color);
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield,
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .functionfield,
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .addressfield {
     font-size: var(--lumo-font-size-s);
     font-family: var(--lumo-font-family);
-    color: var(--lumo-body-text-color);
+    color: var(--_vaadin-spreadsheet-text-color);
     background-color: var(--lumo-base-color);
-    padding: 0px 0px 0px var(--lumo-space-s);  }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .arrow {
+    padding: 0px 0px 0px var(--lumo-space-s);
+  }
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .arrow {
     font-size: var(--lumo-font-size-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .fixed-left-panel {
-    border-right: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .fixed-left-panel {
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .adjusting-right-panel {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .adjusting-right-panel {
     padding-right: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .addressfield {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .formulaoverlay {
     color: var(--lumo-contrast-20pct);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay span {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .formulaoverlay span {
     border-radius: var(--lumo-border-radius-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell.selected-cell-highlight {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell.selected-cell-highlight {
     outline: solid var(--lumo-contrast-80pct) 1px;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet div.custom-editor-cell {
+  :host([theme~='lumo']) .v-spreadsheet .sheet div.custom-editor-cell {
     padding: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet > input[type='text'] {
+  :host([theme~='lumo']) .v-spreadsheet .sheet > input[type='text'] {
     margin-left: -1px;
     margin-top: -1px;
     box-shadow: var(--lumo-box-shadow-s);
-    color: var(--lumo-body-text-color);
+    color: var(--_vaadin-spreadsheet-text-color);
     outline: 1px solid var(--lumo-primary-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .floater {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .floater {
     background-color: var(--lumo-base-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .top-left-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .top-right-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .bottom-left-pane {
+  :host([theme~='lumo']) .v-spreadsheet .top-left-pane,
+  :host([theme~='lumo']) .v-spreadsheet .top-right-pane,
+  :host([theme~='lumo']) .v-spreadsheet .bottom-left-pane {
     border-right: 1px solid var(--lumo-contrast-50pct);
-    border-bottom: 1px solid  var(--lumo-contrast-50pct);
+    border-bottom: 1px solid var(--lumo-contrast-50pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .top-left-pane.inactive,
-  :host([theme~="lumo"]) .v-spreadsheet .top-right-pane.inactive,
-  :host([theme~="lumo"]) .v-spreadsheet .bottom-left-pane.inactive {
+  :host([theme~='lumo']) .v-spreadsheet .top-left-pane.inactive,
+  :host([theme~='lumo']) .v-spreadsheet .top-right-pane.inactive,
+  :host([theme~='lumo']) .v-spreadsheet .bottom-left-pane.inactive {
     border-right: 0;
     border-bottom: 0;
-  }  
-  :host([theme~="lumo"]) .v-spreadsheet .ch,
-  :host([theme~="lumo"]) .v-spreadsheet .rh,
-  :host([theme~="lumo"]) .v-spreadsheet .corner {
+  }
+  :host([theme~='lumo']) .v-spreadsheet .ch,
+  :host([theme~='lumo']) .v-spreadsheet .rh,
+  :host([theme~='lumo']) .v-spreadsheet .corner {
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     background-color: var(--lumo-base-color);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh {
-    border-right: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .rh {
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh.selected-row-header {
+  :host([theme~='lumo']) .v-spreadsheet .rh.selected-row-header {
     border-right: 2px solid var(--lumo-primary-color-50pct);
     background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct)) !important;
     background-color: var(--lumo-base-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh .header-resize-dnd-second {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .rh .header-resize-dnd-second {
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh.resize-extra {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .rh.resize-extra {
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch {
+  :host([theme~='lumo']) .v-spreadsheet .ch {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch.selected-column-header {
+  :host([theme~='lumo']) .v-spreadsheet .ch.selected-column-header {
     border-bottom: 2px solid var(--lumo-primary-color-50pct);
     background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct)) !important;
     background-color: var(--lumo-base-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch .header-resize-dnd-second {
-    border-right: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .ch .header-resize-dnd-second {
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch.resize-extra {
-    border-right: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .ch.resize-extra {
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet > div.resize-line {
+  :host([theme~='lumo']) .v-spreadsheet > div.resize-line {
     background: var(--lumo-primary-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .corner {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    border-right: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .corner {
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell-comment-triangle {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell-comment-triangle {
     border-color: transparent var(--lumo-warning-color) transparent transparent;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell-invalidformula-triangle {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell-invalidformula-triangle {
     border-color: transparent var(--lumo-error-color) transparent transparent;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .comment-overlay-line {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .comment-overlay-line {
     background-color: var(--lumo-contrast-10pct) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-left,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-bottom,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-right {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-top,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-left,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-bottom,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-right {
     background-color: var(--lumo-primary-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top.extend,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-left.extend,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-bottom.extend,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-right.extend {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-top.extend,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-left.extend,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-bottom.extend,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-right.extend {
     background-color: var(--lumo-success-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-corner {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-corner {
     background-color: var(--lumo-success-color);
     outline: 2px solid var(--lumo-base-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode {
     background-color: var(--lumo-success-color-10pct) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-top,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-left,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-bottom,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-right {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-top,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-left,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-bottom,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-right {
     background-color: var(--lumo-success-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet {
     background: var(--lumo-base-color);
     border-top: 1px solid var(--lumo-contrast-20pct);
     height: calc(var(--lumo-font-size-s) + 14px);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
     background: var(--lumo-base-color);
     cursor: var(--lumo-clickable-cursor);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
     cursor: var(--lumo-clickable-cursor);
     color: var(--lumo-primary-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
     background: var(--lumo-primary-color-10pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
     color: var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container {
     height: calc(var(--lumo-font-size-s) + 12px);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
     font-weight: 400;
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     color: var(--lumo-body-text-color);
-    border-right: 1px solid var(--lumo-contrast-20pct);
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    border-left: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-left: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     border-bottom-right-radius: var(--lumo-border-radius-m);
     border-bottom-left-radius: var(--lumo-border-radius-m);
     cursor: var(--lumo-clickable-cursor);
@@ -1266,148 +1284,153 @@ export const spreadsheetStyles = css`
     margin-left: var(--lumo-space-s);
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab {
     background: var(--lumo-base-color);
     color: var(--lumo-primary-text-color);
     box-shadow: var(--lumo-box-shadow-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab input[type='text'] {
+  :host([theme~='lumo'])
+    .v-spreadsheet
+    .sheet-tabsheet
+    .sheet-tabsheet-container
+    .sheet-tabsheet-tab.selected-tab
+    input[type='text'] {
     font-family: var(--lumo-font-familty);
     font-size: var(--lumo-font-size-s);
     color: var(--lumo-primary-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-temp {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-temp {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-infolabel {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-infolabel {
     background: var(--lumo-contrast-5pct);
     font-size: var(--lumo-font-size-s);
-    border-left: 1px solid var(--lumo-contrast-20pct);
+    border-left: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     padding-left: var(--lumo-space-xs);
     padding-right: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet div div.popupbutton {
-    color: var(--lumo-body-text-color);
+  :host([theme~='lumo']) .v-spreadsheet .sheet div div.popupbutton {
+    color: var(--_vaadin-spreadsheet-text-color);
     cursor: var(--lumo-clickable-cursor);
     height: 100%;
     aspect-ratio: 1 / 1;
     width: auto;
-    border: solid 1px var(--lump-contrast-20pct);
+    border: solid 1px var(--_vaadin-spreadsheet-header-border-color);
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-radius: var(--lumo-border-radius-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet div div.popupbutton:after {
+  :host([theme~='lumo']) .v-spreadsheet .sheet div div.popupbutton:after {
     font-family: 'lumo-icons';
     content: var(--lumo-icons-angle-down);
     font-size: var(--lumo-font-size-xs);
-    color: var(--lumo-body-text-color);
+    color: var(--_vaadin-spreadsheet-text-color);
     vertical-align: top;
   }
-  :host([theme~="lumo"]) .popupbutton.active {
+  :host([theme~='lumo']) .popupbutton.active {
     box-shadow: var(--lumo-box-shadow-xs) inset;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square > .square {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square > .square {
     background-color: var(--lumo-success-color);
     border: 2px solid var(--lumo-base-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.touch .s-corner {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.touch .s-corner {
     background-color: var(--lumo-primary-color);
     border-radius: var(--lumo-border-radius-m);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping {
-    border-top: 2px solid var(--lumo-contrast-20pct);
-    border-left: 2px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane .grouping,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane .grouping {
+    border-top: 2px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-left: 2px solid var(--_vaadin-spreadsheet-header-border-color);
     cursor: var(--lumo-clickable-cursor);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping .expand,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping .expand {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane .grouping .expand,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane .grouping .expand {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping.inversed,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
-    border-right: 2px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane .grouping.inversed,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
+    border-right: 2px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane {
     border-right: 1px solid var(--lumo-contrast-50pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-border .border {
-    border-bottom: 1px dotted var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .col-group-border .border {
+    border-bottom: 1px dotted var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping,
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane .grouping {
-    border-top: 2px solid var(--lumo-contrast-20pct);
-    border-left: 2px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane .grouping,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane .grouping {
+    border-top: 2px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-left: 2px solid var(--_vaadin-spreadsheet-header-border-color);
     cursor: var(--lumo-clickable-cursor);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping .expand,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane .grouping .expand,
   .v-spreadsheet .row-group-freeze-pane .grouping .expand {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
     font-size: var(--lumo-font-size-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping.inversed,
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
-    border-bottom: 2px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane .grouping.inversed,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
+    border-bottom: 2px solid var(--_vaadin-spreadsheet-header-border-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane {
     border-bottom: 1px solid var(--lumo-contrast-50pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-border .border {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-border .border {
     border-right: 1px dotted var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .expandbutton {
+  :host([theme~='lumo']) .v-spreadsheet .expandbutton {
     font-size: var(--lumo-font-size-s);
     cursor: var(--lumo-clickable-cursor);
-    color: var(--lumo-body-text-color);
+    color: var(--_vaadin-spreadsheet-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .expandbutton:active {
+  :host([theme~='lumo']) .v-spreadsheet .expandbutton:active {
     border-color: var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-summary .expandbutton {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-summary .expandbutton {
     margin-right: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-summary .expandbutton {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-summary .expandbutton {
     margin-left: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .grouping-corner {
-    border-right: 1px solid var(--lumo-contrast-20pct);
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    background-color: var(--lumo-base-color);
-    background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));        
-  }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-summary {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    border-right: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .grouping-corner {
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-summary {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    border-right: 1px solid var(--lumo-contrast-20pct);
+  :host([theme~='lumo']) .v-spreadsheet .col-group-summary {
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .cell-range-bg-color {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-summary {
+    border-bottom: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    border-right: 1px solid var(--_vaadin-spreadsheet-header-border-color);
+    background-color: var(--lumo-base-color);
+    background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+  }
+  :host([theme~='lumo']) .cell-range-bg-color {
     background-color: var(--lumo-primary-color-10pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell .cell-range {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell .cell-range {
     background-image: var(--lumo-primary-color-10pct) !important;
     background-color: var(--lumo-primary-color-10pct) !important;
   }
@@ -1683,35 +1706,35 @@ export const spreadsheetOverlayStyles = css`
   /*
    * Lumo theme variant 
    */
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip {
-    background-color: var(--lumo-contrast-50pct)
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip {
+    background-color: var(--lumo-contrast-50pct);
     box-shadow: var(--lumo-box-shadow-s);
     color: var(--lumo-base-color);
     padding: var(--lumo-space-xs) var(--lumo-space-s);
     font-size: var(--lumo-font-size-s);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage {
     background-color: var(--lumo-base-color);
     color: var(--lumo-error-color);
     margin: calc(-1 * var(--lumo-space-xs)) calc(-1 * var(--lumo-space-s));
     padding: var(--lumo-space-xs) var(--lumo-space-s);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-info {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-info {
     color: var(--lumo-error-text-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-warning {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-warning {
     color: var(--lumo-warning-text-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-error {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-error {
     color: var(--lumo-error-text-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-critical {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-critical {
     color: var(--vaadin-user-color-0);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-system {
+  #spreadsheet-overlays[theme~='lumo'] .v-tooltip .v-errormessage-system {
     color: var(--vaadin-user-color-1);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu {
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
     border-radius: var(--lumo-border-radius-s);
     background-color: var(--lumo-base-color);
@@ -1719,26 +1742,26 @@ export const spreadsheetOverlayStyles = css`
     box-shadow: var(--lumo-box-shadow-s);
     -webkit-backface-visibility: hidden;
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem {
     cursor: var(--lumo-clickable-cursor);
     line-height: calc(1.5 * var(--lumo-line-height-m));
     padding: 0 var(--lumo-space-l) 0 var(--lumo-space-m);
     border-radius: var(--lumo-border-radius-s);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem:active:before {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem:active:before {
     background: var(--lumo-primary-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem .v-icon {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem .v-icon {
     max-height: calc(1.5 * var(--lumo-line-height-m));
     margin-right: var(--lumo-space-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem-selected {
+  #spreadsheet-overlays[theme~='lumo'] .v-contextmenu .gwt-MenuItem-selected {
     background-color: var(--lumo-primary-color-10pct) !important;
     background-image: var(--lumo-primary-color-10pct);
     color: var(--lumo-body-text-color) !important;
   }
 
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay {
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
     border-radius: var(--lumo-border-radius-m);
     background-color: var(--lumo-base-color);
@@ -1747,23 +1770,23 @@ export const spreadsheetOverlayStyles = css`
     padding: var(--lumo-space-s);
     border: 1px solid var(--lumo-contrast-20pct);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-author {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-author {
     padding-bottom: var(--lumo-space-s);
     font-size: var(--lumo-font-size-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
     color: var(--lumo-error-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-input {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-input {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
     background-color: var(--lumo-base-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-separator {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-comment-overlay .comment-overlay-separator {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     margin-bottom: 7px;
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay {
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
     border-radius: var(--lumo-border-radius-m);
     background-color: var(--lumo-base-color);
@@ -1771,20 +1794,20 @@ export const spreadsheetOverlayStyles = css`
     box-shadow: var(--lumo-box-shadow-s);
     border: 1px solid var(--lumo-contrast-20pct);
   }
-  #spreadsheet-overlays[theme~="lumo"] .spreadsheet-item-filter-layout {
+  #spreadsheet-overlays[theme~='lumo'] .spreadsheet-item-filter-layout {
     gap: var(--lumo-space-xs);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
 
-  #spreadsheet-overlays[theme~="lumo"] .spreadsheet-filter-table-content {
+  #spreadsheet-overlays[theme~='lumo'] .spreadsheet-filter-table-content {
     gap: var(--lumo-space-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header {
     padding-bottom: var(--lumo-space-xs);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     margin-bottom: var(--lumo-space-xs);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox {
     right: 0px;
     left: unset;
     cursor: var(--lumo-clickable-cursor);
@@ -1793,14 +1816,14 @@ export const spreadsheetOverlayStyles = css`
     padding-right: var(--lumo-space-xs);
     border-radius: 0 var(--lumo-border-radius-m) 0 var(--lumo-border-radius-m);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:hover {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:hover {
     color: var(--lumo-primary-color);
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:before {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:before {
     content: var(--lumo-icons-cross);
     font-family: 'lumo-icons';
   }
-  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .header-caption {
+  #spreadsheet-overlays[theme~='lumo'] .v-spreadsheet-popupbutton-overlay-header .header-caption {
     margin-left: var(--lumo-space-xs);
     color: var(--lumo-body-text-color);
     font-weight: bold;

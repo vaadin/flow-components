@@ -59,7 +59,7 @@ public class MarkerFeature extends PointBasedFeature {
         Icon.ImageSize pinImageSize = new Icon.ImageSize(Assets.PIN.getWidth(),
                 Assets.PIN.getHeight());
         Icon.Options pinIconOptions = new Icon.Options();
-        pinIconOptions.setImg(Assets.PIN.getResource());
+        pinIconOptions.setImg(Assets.PIN.getHandler());
         pinIconOptions.setImgSize(pinImageSize);
         pinIconOptions.setScale(0.5f);
         pinIconOptions.setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT);
@@ -71,7 +71,7 @@ public class MarkerFeature extends PointBasedFeature {
         Icon.ImageSize pointImageSize = new Icon.ImageSize(
                 Assets.POINT.getWidth(), Assets.POINT.getHeight());
         Icon.Options pointIconOptions = new Icon.Options();
-        pointIconOptions.setImg(Assets.POINT.getResource());
+        pointIconOptions.setImg(Assets.POINT.getHandler());
         pointIconOptions.setImgSize(pointImageSize);
         pointIconOptions.setScale(0.25f);
         pointIconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);

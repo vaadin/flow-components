@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogEntry;
@@ -42,8 +43,6 @@ import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
-    // Should be COMMAND for macOS
-    private Keys metaKey = Keys.CONTROL;
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
 
@@ -155,16 +154,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     private void selectElement(WebElement element, boolean ctrl,
             boolean shift) {
+        Keys metaKey = isMac() ? Keys.COMMAND : Keys.CONTROL;
         if (ctrl) {
             new Actions(getDriver()).moveToElement(element).keyDown(metaKey)
                     .click().keyUp(metaKey).build().perform();
         } else if (shift) {
             new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
                     .click().keyUp(Keys.SHIFT).build().perform();
-        } else if (ctrl && shift) {
-            new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
-                    .keyDown(metaKey).click().keyUp(Keys.SHIFT).keyUp(metaKey)
-                    .build().perform();
         } else {
             new Actions(getDriver()).moveToElement(element).click().build()
                     .perform();
@@ -359,7 +355,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public void setLocale(Locale locale) {
         ComboBoxElement localeSelect = $(ComboBoxElement.class)
                 .id("localeSelect");
-        localeSelect.selectByText(locale.getDisplayName());
+        localeSelect.selectByText(locale.getDisplayName(Locale.ENGLISH));
     }
 
     public void loadTestFixture(TestFixtures fixture) {
@@ -378,6 +374,18 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 findElements(By.className("v-errorindicator")).isEmpty());
     }
 
+    protected void assertAddressFieldValue(String expected) {
+        try {
+            waitUntil(
+                    driver -> Objects.equals(expected, getAddressFieldValue()),
+                    2);
+        } catch (TimeoutException e) {
+            var actual = getAddressFieldValue();
+            Assert.fail("Expected " + expected + " on addressField, actual:"
+                    + actual);
+        }
+    }
+
     protected void assertAddressFieldValue(String expected, String actual) {
         Assert.assertEquals(
                 "Expected " + expected + " on addressField, actual:" + actual,
@@ -385,7 +393,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     protected void assertSelectedCell(String cell) {
-        assertSelectedCell(cell, isCellSelected(cell));
+        try {
+            waitUntil(driver -> isCellSelected(cell), 2);
+        } catch (TimeoutException e) {
+            Assert.fail("Cell " + cell + " should be the selected cell");
+        }
     }
 
     protected void assertSelectedCell(String cell, boolean selected) {
@@ -394,7 +406,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     protected void assertNotSelectedCell(String cell) {
-        assertNotSelectedCell(cell, isCellSelected(cell));
+        try {
+            waitUntil(driver -> !isCellSelected(cell), 2);
+        } catch (TimeoutException e) {
+            Assert.fail("Cell " + cell + " should not be selected cell");
+        }
     }
 
     protected void assertNotSelectedCell(String cell, boolean selected) {
@@ -562,6 +578,21 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         findElementInShadowRoot(By.cssSelector(".addressfield")).clear();
         findElementInShadowRoot(By.cssSelector(".addressfield")).sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
+    }
+
+    /**
+     * Suppresses the overlay that appears when hovering over a cell with an
+     * invalid formula. The overlay can appear when using setCellValue, and can
+     * cause subsequent button clicks to fail. Can be used in tests that enter
+     * invalid formulas in cells to test the invalid formular indicator (though
+     * obviously not in tests that check the overlay itself).
+     */
+    public void suppressInvalidFormulaCommentOverlay() {
+        executeScript("""
+                arguments[0].addEventListener("mouseover", e => {
+                  e.stopPropagation();
+                }, true);
+                """, getSpreadsheetInShadowRoot());
     }
 
     // Context menu helpers

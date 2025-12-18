@@ -8,25 +8,21 @@
  */
 package com.vaadin.flow.component.map;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class MapVariantTest {
     @Test
-    public void addThemeVariants() {
-        Map map = new Map();
-        map.addThemeVariants(MapVariant.BORDERLESS);
-
-        Assert.assertEquals("borderless",
-                map.getElement().getAttribute("theme"));
+    public void addThemeVariant_themeNamesContainsThemeVariant() {
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new Map(), MapVariant.LUMO_NO_BORDER);
     }
 
     @Test
-    public void removeThemeVariants() {
-        Map map = new Map();
-        map.getElement().setAttribute("theme", "borderless");
-        map.removeThemeVariants(MapVariant.BORDERLESS);
-
-        Assert.assertNull(map.getElement().getAttribute("theme"));
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new Map(), MapVariant.LUMO_NO_BORDER);
     }
 }

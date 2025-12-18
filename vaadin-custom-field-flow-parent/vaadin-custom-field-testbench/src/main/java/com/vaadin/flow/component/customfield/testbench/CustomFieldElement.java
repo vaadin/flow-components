@@ -17,20 +17,14 @@ package com.vaadin.flow.component.customfield.testbench;
 
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-custom-field")
-public class CustomFieldElement extends TestBenchElement implements HasHelper {
-
-    public String getLabel() {
-        return getPropertyString("label");
-    }
-
-    public String getErrorMessage() {
-        return getPropertyString("errorMessage");
-    }
-
+public class CustomFieldElement extends TestBenchElement
+        implements HasHelper, HasLabel, HasValidation {
     /**
      * {@inheritDoc}
      */

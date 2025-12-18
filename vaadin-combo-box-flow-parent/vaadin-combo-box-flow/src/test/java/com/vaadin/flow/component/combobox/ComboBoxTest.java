@@ -38,7 +38,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 public class ComboBoxTest extends ComboBoxBaseTest {
     private enum Category {
@@ -82,7 +82,7 @@ public class ComboBoxTest extends ComboBoxBaseTest {
 
         Assert.assertEquals("foo", comboBox.getValue());
         // should refresh web components selectedItem property
-        JsonObject jsonObject = (JsonObject) comboBox.getElement()
+        ObjectNode jsonObject = (ObjectNode) comboBox.getElement()
                 .getPropertyRaw("selectedItem");
         Assert.assertNotNull(jsonObject);
     }

@@ -9,20 +9,27 @@
  */
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
+import Polygon from 'ol/geom/Polygon';
 import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import View from 'ol/View';
-import { synchronizeImageLayer, synchronizeTileLayer, synchronizeVectorLayer } from './layers.js';
 import {
+  synchronizeFeatureLayer,
+  synchronizeImageLayer,
+  synchronizeTileLayer,
+  synchronizeVectorLayer
+} from './layers.js';
+import {
+  synchronizeCluster,
   synchronizeImageWMSSource,
   synchronizeOSMSource,
   synchronizeTileWMSSource,
   synchronizeVectorSource,
   synchronizeXYZSource
 } from './sources.js';
-import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeText, synchronizeStyle } from './styles.js';
-import { convertToCoordinateArray, synchronizeCollection } from './util.js';
+import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle, synchronizeText } from './styles.js';
+import { convertToCoordinateArray, convertToGeoJSONCoordinateArray, synchronizeCollection } from './util.js';
 
 /**
  * Fallback text style to use for features that don't have a custom one
@@ -69,6 +76,16 @@ function synchronizePoint(target, source, _context) {
   return target;
 }
 
+function synchronizePolygon(target, source, _context) {
+  if (!target) {
+    target = new Polygon(convertToGeoJSONCoordinateArray(source.coordinates));
+  }
+
+  target.setCoordinates(convertToGeoJSONCoordinateArray(source.coordinates));
+
+  return target;
+}
+
 function synchronizeFeature(target, source, context) {
   if (!target) {
     target = new Feature();
@@ -110,10 +127,12 @@ const synchronizerLookup = {
   'ol/Map': synchronizeMap,
   'ol/View': synchronizeView,
   // Layers
+  'ol/layer/Feature': synchronizeFeatureLayer,
   'ol/layer/Image': synchronizeImageLayer,
   'ol/layer/Tile': synchronizeTileLayer,
   'ol/layer/Vector': synchronizeVectorLayer,
   // Sources
+  'ol/source/Cluster': synchronizeCluster,
   'ol/source/ImageWMS': synchronizeImageWMSSource,
   'ol/source/OSM': synchronizeOSMSource,
   'ol/source/TileWMS': synchronizeTileWMSSource,
@@ -121,6 +140,7 @@ const synchronizerLookup = {
   'ol/source/XYZ': synchronizeXYZSource,
   // Geometry
   'ol/geom/Point': synchronizePoint,
+  'ol/geom/Polygon': synchronizePolygon,
   // Styles
   'ol/style/Icon': synchronizeIcon,
   'ol/style/Fill': synchronizeFill,

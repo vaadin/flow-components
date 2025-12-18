@@ -811,6 +811,9 @@ public class Configuration extends AbstractConfigurationObject
      * @see #setTime(Time)
      */
     public Time getTime() {
+        if (time == null) {
+            time = new Time();
+        }
         return time;
     }
 

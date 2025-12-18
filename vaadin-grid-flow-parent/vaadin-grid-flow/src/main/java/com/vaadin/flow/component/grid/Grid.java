@@ -55,7 +55,6 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
@@ -120,7 +119,6 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -128,17 +126,16 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Grid is a component for showing tabular data. A basic Grid uses plain text to
@@ -215,10 +212,8 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.7.0-alpha9")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -256,26 +251,23 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
-        private final UpdateQueueData data;
+        private final Element element;
 
-        protected UpdateQueue(UpdateQueueData data, int size) {
-            this.data = data;
+        protected UpdateQueue(Element element, int size) {
+            this.element = element;
+
             // 'size' property is not synchronized by the web component since
             // there are no events for it, but we
             // need to sync it otherwise server will overwrite client value with
             // the old server one
             enqueue("$connector.updateSize", size);
-            if (data.getUniqueKeyProperty() != null) {
-                enqueue("$connector.updateUniqueItemIdPath",
-                        data.getUniqueKeyProperty());
-            }
             getElement().setProperty("size", size);
         }
 
         @Override
-        public void set(int start, List<JsonValue> items) {
+        public void set(int start, List<JsonNode> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()));
+                    items.stream().collect(JacksonUtils.asArray()));
         }
 
         @Override
@@ -299,16 +291,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         protected Element getElement() {
-            return data.getElement();
-        }
-
-        /**
-         * Gets {@link UpdateQueueData} for this queue.
-         *
-         * @return the {@link UpdateQueueData} object.
-         */
-        public UpdateQueueData getData() {
-            return data;
+            return element;
         }
     }
 
@@ -443,8 +426,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
         private final String columnInternalId; // for internal implementation
@@ -472,7 +453,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         private Renderer<T> renderer;
         private Rendering<T> rendering;
 
-        private SerializableFunction<T, String> classNameGenerator = item -> null;
         private SerializableFunction<T, String> partNameGenerator = item -> null;
         private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
@@ -1045,37 +1025,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Sets the function that is used for generating CSS class names for
-         * cells in this column. Returning {@code null} from the generator
-         * results in no custom class name being set. Multiple class names can
-         * be returned from the generator as space-separated.
-         * <p>
-         * If {@link Grid#setClassNameGenerator(SerializableFunction)} is used
-         * together with this method, resulting class names from both methods
-         * will be effective. Class names generated by grid are applied to the
-         * cells before the class names generated by column. This means that if
-         * the classes contain conflicting style properties, column's classes
-         * will win.
-         *
-         * @param classNameGenerator
-         *            the class name generator to set, not {@code null}
-         * @return this column
-         * @throws NullPointerException
-         *             if {@code classNameGenerator} is {@code null}
-         * @see Grid#setClassNameGenerator(SerializableFunction)
-         * @deprecated {@link #setPartNameGenerator} should be used instead.
-         */
-        @Deprecated
-        public Column<T> setClassNameGenerator(
-                SerializableFunction<T, String> classNameGenerator) {
-            Objects.requireNonNull(classNameGenerator,
-                    "Class name generator can not be null");
-            this.classNameGenerator = classNameGenerator;
-            getGrid().getDataCommunicator().reset();
-            return this;
-        }
-
-        /**
          * Sets the function that is used for generating CSS part names for
          * cells in this column. Returning {@code null} from the generator
          * results in no custom part name being set. Multiple part names can be
@@ -1110,7 +1059,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the tooltip generator to set, not {@code null}
          * @return this column
          * @throws NullPointerException
-         *             if {@code classNameGenerator} is {@code null}
+         *             if {@code tooltipGenerator} is {@code null}
          */
         public Column<T> setTooltipGenerator(
                 SerializableFunction<T, String> tooltipGenerator) {
@@ -1120,16 +1069,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             grid.addTooltipElementToTooltipSlot();
             getGrid().getDataCommunicator().reset();
             return this;
-        }
-
-        /**
-         * Gets the function that is used for generating CSS class names for
-         * cells in this column.
-         *
-         * @return the class name generator
-         */
-        public SerializableFunction<T, String> getClassNameGenerator() {
-            return classNameGenerator;
         }
 
         /**
@@ -1264,7 +1203,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     private class DetailsManager extends AbstractGridExtension<T> {
 
-        private final HashSet<T> detailsVisible = new HashSet<>();
+        private final HashMap<Object, T> detailsVisible = new HashMap<>();
 
         /**
          * Constructs a new details manager for the given grid.
@@ -1286,17 +1225,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            {@code false} if it should be hidden
          */
         public void setDetailsVisible(T item, boolean visible) {
+            Object itemId = getItemId(item);
+
             boolean refresh = false;
             if (!visible) {
-                refresh = detailsVisible.remove(item);
+                refresh = detailsVisible.remove(itemId) != null;
             } else {
-                detailsVisible.add(item);
+                detailsVisible.put(itemId, item);
                 refresh = true;
             }
 
             if (itemDetailsDataGenerator != null && refresh) {
                 refresh(item);
-                if (!detailsVisible.contains(item)) {
+                if (!detailsVisible.containsKey(itemId)) {
                     itemDetailsDataGenerator.destroyData(item);
                 }
             }
@@ -1313,11 +1254,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public boolean isDetailsVisible(T item) {
             return itemDetailsDataGenerator != null
-                    && detailsVisible.contains(item);
+                    && detailsVisible.containsKey(getItemId(item));
         }
 
         @Override
-        public void generateData(T item, JsonObject jsonObject) {
+        public void generateData(T item, ObjectNode jsonObject) {
             if (itemDetailsDataGenerator != null && isDetailsVisible(item)) {
                 jsonObject.put("detailsOpened", true);
                 itemDetailsDataGenerator.generateData(item, jsonObject);
@@ -1332,7 +1273,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         @Override
         public void destroyData(T item) {
-            detailsVisible.remove(item);
+            detailsVisible.remove(getItemId(item));
             if (itemDetailsDataGenerator != null) {
                 itemDetailsDataGenerator.destroyData(item);
             }
@@ -1361,50 +1302,36 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private void setDetailsVisibleFromClient(Set<T> items) {
             Set<T> toRefresh = new HashSet<>();
-            toRefresh.addAll(detailsVisible);
+            toRefresh.addAll(detailsVisible.values());
             toRefresh.addAll(items);
 
             detailsVisible.clear();
-            detailsVisible.addAll(items);
+            for (T item : items) {
+                detailsVisible.put(getItemId(item), item);
+            }
+
             if (itemDetailsDataGenerator != null) {
                 for (T item : toRefresh) {
                     refresh(item);
                 }
             }
         }
+
+        private Object getItemId(T item) {
+            return getDataProvider().getId(item);
+        }
     }
 
     private class GridArrayUpdaterImpl implements GridArrayUpdater {
-        private UpdateQueueData data;
-        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
-
-        public GridArrayUpdaterImpl(
-                SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-            this.updateQueueFactory = updateQueueFactory;
-        }
-
         @Override
         public UpdateQueue startUpdate(int sizeChange) {
-            return updateQueueFactory.apply(data, sizeChange);
+            return new UpdateQueue(getElement(), sizeChange);
         }
 
         @Override
         public void initialize() {
-            initConnector();
-            updateSelectionModeOnClient();
-            setRequestedRange(0, getPageSize());
+            setViewportRange(0, getPageSize());
         }
-
-        @Override
-        public void setUpdateQueueData(UpdateQueueData data) {
-            this.data = data;
-        }
-
-        @Override
-        public UpdateQueueData getUpdateQueueData() {
-            return data;
-        }
-
     }
 
     private final GridArrayUpdater arrayUpdater;
@@ -1450,7 +1377,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableSupplier<Editor<T>> editorFactory = this::createEditor;
 
-    private SerializableFunction<T, String> classNameGenerator = item -> null;
     private SerializableFunction<T, String> partNameGenerator = item -> null;
     private SerializablePredicate<T> defaultDropFilter = item -> true;
     private SerializablePredicate<T> defaultDragFilter = item -> true;
@@ -1550,7 +1476,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the page size. Must be greater than zero.
      */
     public Grid(int pageSize) {
-        this(pageSize, null, new DataCommunicatorBuilder<>());
+        this(pageSize, new DataCommunicatorBuilder<>());
     }
 
     /**
@@ -1616,8 +1542,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1627,10 +1551,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the GridArrayUpdater type
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder) {
-        this(beanType, updateQueueBuilder, dataCommunicatorBuilder, true);
+            Class<T> beanType, B dataCommunicatorBuilder) {
+        this(beanType, dataCommunicatorBuilder, true);
     }
 
     /**
@@ -1650,8 +1572,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1664,10 +1584,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the properties of the beanType
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder, boolean autoCreateColumns) {
-        this(50, updateQueueBuilder, dataCommunicatorBuilder);
+            Class<T> beanType, B dataCommunicatorBuilder,
+            boolean autoCreateColumns) {
+        this(50, dataCommunicatorBuilder);
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
         configureBeanType(beanType, autoCreateColumns);
@@ -1684,8 +1603,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param pageSize
      *            the page size. Must be greater than zero.
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1693,23 +1610,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
-     *
      */
     @SuppressWarnings("unchecked")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            int pageSize,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder) {
+            int pageSize, B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
-        arrayUpdater = createDefaultArrayUpdater(
-                Optional.ofNullable(updateQueueBuilder)
-                        .orElseGet(() -> UpdateQueue::new));
-        arrayUpdater.setUpdateQueueData(
-                new UpdateQueueData(getElement(), getUniqueKeyProperty()));
+        arrayUpdater = createDefaultArrayUpdater();
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
-        gridDataGenerator.addDataGenerator(this::generateStyleData);
         gridDataGenerator.addDataGenerator(this::generatePartData);
         gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
@@ -1735,12 +1644,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         initSelectionPreservationHandler();
     }
 
-    private void generateUniqueKeyData(T item, JsonObject jsonObject) {
-        String uniqueKeyPropertyName = arrayUpdater.getUpdateQueueData()
-                .getUniqueKeyProperty();
-        if (uniqueKeyPropertyName != null
-                && !jsonObject.hasKey(uniqueKeyPropertyName)) {
-            jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
+    private void generateUniqueKeyData(T item, ObjectNode jsonObject) {
+        if (uniqueKeyProperty != null && !jsonObject.has(uniqueKeyProperty)) {
+            jsonObject.put(uniqueKeyProperty, getUniqueKey(item));
         }
     }
 
@@ -1794,10 +1700,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     protected void initConnector() {
+        // Using Page.executeJs to ensure this runs before any other
+        // executeJs calls scheduled on the component that require the
+        // connector.
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
-                .getPage()
-                .executeJs("window.Vaadin.Flow.gridConnector.initLazy($0)",
+                .getPage().executeJs(
+                        "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
                         getElement());
     }
 
@@ -1839,9 +1748,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    protected GridArrayUpdater createDefaultArrayUpdater(
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-        return new GridArrayUpdaterImpl(updateQueueFactory);
+    protected GridArrayUpdater createDefaultArrayUpdater() {
+        return new GridArrayUpdaterImpl();
     }
 
     /**
@@ -1972,8 +1880,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Adds a new text column to this {@link Grid} with a value provider and
      * sorting properties.The value is converted to a JSON value by using
-     * {@link JsonSerializer#toJson(Object)}. The sorting properties are used to
-     * configure backend sorting for this column. In-memory sorting is
+     * {@link JacksonSerializer#toJson(Object)}. The sorting properties are used
+     * to configure backend sorting for this column. In-memory sorting is
      * automatically configured using the return type of the given
      * {@link ValueProvider}.
      *
@@ -3110,7 +3018,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getElement()
                 .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
-        setRequestedRange(0, pageSize);
+        setViewportRange(0, pageSize);
         getDataCommunicator().reset();
     }
 
@@ -3377,20 +3285,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (items.isEmpty()) {
             return;
         }
-        JsonArray jsonArray = Json.createArray();
+        ArrayNode jsonArray = JacksonUtils.createArrayNode();
         for (T item : items) {
-            JsonObject jsonObject = item != null
-                    ? generateJsonForSelection(item)
+            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
                     : null;
-            jsonArray.set(jsonArray.length(), jsonObject);
+            jsonArray.add(jsonObject);
         }
 
         callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
                 false);
     }
 
-    private JsonObject generateJsonForSelection(T item) {
-        JsonObject json = Json.createObject();
+    private JsonNode generateJsonForSelection(T item) {
+        ObjectNode json = JacksonUtils.createObjectNode();
         json.put("key", getDataCommunicator().getKeyMapper().key(item));
         return json;
     }
@@ -3530,13 +3437,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
+     * Intended only for internal use and can be removed in the future.
      *
      * @param internalId
      *            the internal identifier of the column to get
      * @return the column corresponding to the given column identifier, or
      *         {@code null} if no column has such an identifier
      */
-    Column<T> getColumnByInternalId(String internalId) {
+    protected final Column<T> getColumnByInternalId(String internalId) {
         return idToColumnMap.get(internalId);
     }
 
@@ -3887,7 +3795,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
+    private void setViewportRange(int start, int length) {
         if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
             throw new IllegalArgumentException(
                     "Attempted to fetch more items from server than allowed in one go. "
@@ -3898,7 +3806,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + "reason this is not an option, increase the page size of the grid so that rendering "
                             + "every item at once doesn't result in a request for over 10 pages.");
         }
-        getDataCommunicator().setRequestedRange(start, length);
+        getDataCommunicator().setViewportRange(start, length);
     }
 
     @ClientCallable
@@ -3912,18 +3820,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     @ClientCallable
-    private void sortersChanged(JsonArray sorters) {
+    private void sortersChanged(ArrayNode sorters) {
         GridSortOrderBuilder<T> sortOrderBuilder = new GridSortOrderBuilder<>();
-        for (int i = 0; i < sorters.length(); ++i) {
-            JsonObject sorter = sorters.getObject(i);
-            Column<T> column = idToColumnMap.get(sorter.getString("path"));
+        for (int i = 0; i < sorters.size(); ++i) {
+            JsonNode sorter = sorters.get(i);
+            Column<T> column = idToColumnMap.get(sorter.get("path").asString());
             if (column == null) {
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")
-                    && sorter.get("direction").getType() == JsonType.STRING) {
-                switch (sorter.getString("direction")) {
+            if (sorter.has("direction") && sorter.get("direction")
+                    .getNodeType() == JsonNodeType.STRING) {
+                switch (sorter.get("direction").asString()) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
                     break;
@@ -3971,6 +3879,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        initConnector();
         updateClientSideSorterIndicators(sortOrder);
         updateSelectionModeOnClient();
         if (getDataProvider() != null) {
@@ -4054,11 +3963,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             pendingSorterUpdate.cancelExecution();
         }
 
-        JsonArray directions = Json.createArray();
+        ArrayNode directions = JacksonUtils.createArrayNode();
 
-        for (int i = 0; i < order.size(); i++) {
-            GridSortOrder<T> gridSortOrder = order.get(i);
-            JsonObject direction = Json.createObject();
+        for (GridSortOrder<T> gridSortOrder : order) {
+            ObjectNode direction = JacksonUtils.createObjectNode();
 
             String columnId = gridSortOrder.getSorted().getInternalId();
             direction.put("column", columnId);
@@ -4076,7 +3984,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + gridSortOrder.getDirection());
                 }
             }
-            directions.set(i, direction);
+            directions.add(direction);
         }
 
         if (getElement().getNode().isAttached()) {
@@ -4201,7 +4109,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(valueProvider);
 
         return addDataGenerator(
-                (item, data) -> data.put(property, JsonSerializer
+                (item, data) -> data.set(property, JacksonSerializer
                         .toJson(applyValueProvider(valueProvider, item))));
     }
 
@@ -4393,34 +4301,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Sets the function that is used for generating CSS class names for all the
-     * cells in the rows in this grid. Returning {@code null} from the generator
-     * results in no custom class name being set. Multiple class names can be
-     * returned from the generator as space-separated.
-     * <p>
-     * If {@link Column#setClassNameGenerator(SerializableFunction)} is used
-     * together with this method, resulting class names from both methods will
-     * be effective. Class names generated by grid are applied to the cells
-     * before the class names generated by column. This means that if the
-     * classes contain conflicting style properties, column's classes will win.
-     *
-     * @param classNameGenerator
-     *            the class name generator to set, not {@code null}
-     * @throws NullPointerException
-     *             if {@code classNameGenerator} is {@code null}
-     * @see Column#setClassNameGenerator(SerializableFunction)
-     * @deprecated {@link #setPartNameGenerator} should be used instead.
-     */
-    @Deprecated
-    public void setClassNameGenerator(
-            SerializableFunction<T, String> classNameGenerator) {
-        Objects.requireNonNull(classNameGenerator,
-                "Class name generator can not be null");
-        this.classNameGenerator = classNameGenerator;
-        getDataCommunicator().reset();
-    }
-
-    /**
      * Sets the function that is used for generating CSS part names for all the
      * cells in the rows in this grid. Returning {@code null} from the generator
      * results in no custom part name being set. Multiple part names can be
@@ -4462,16 +4342,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Gets the function that is used for generating CSS class names for rows in
-     * this grid.
-     *
-     * @return the class name generator
-     */
-    public SerializableFunction<T, String> getClassNameGenerator() {
-        return classNameGenerator;
-    }
-
-    /**
      * Gets the function that is used for generating CSS part names for rows in
      * this grid.
      *
@@ -4481,8 +4351,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return partNameGenerator;
     }
 
-    private void generateTooltipTextData(T item, JsonObject jsonObject) {
-        JsonObject tooltips = Json.createObject();
+    private void generateTooltipTextData(T item, ObjectNode jsonObject) {
+        ObjectNode tooltips = JacksonUtils.createObjectNode();
 
         String rowTooltip = tooltipGenerator.apply(item);
         if (rowTooltip != null) {
@@ -4496,33 +4366,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         });
 
-        if (tooltips.keys().length > 0) {
-            jsonObject.put("gridtooltips", tooltips);
+        if (!JacksonUtils.getKeys(tooltips).isEmpty()) {
+            jsonObject.set("gridtooltips", tooltips);
         }
     }
 
-    private void generateStyleData(T item, JsonObject jsonObject) {
-        JsonObject style = Json.createObject();
-
-        String rowClassName = classNameGenerator.apply(item);
-        if (rowClassName != null) {
-            style.put("row", rowClassName);
-        }
-
-        idToColumnMap.forEach((id, column) -> {
-            String cellClassName = column.getClassNameGenerator().apply(item);
-            if (cellClassName != null) {
-                style.put(id, cellClassName);
-            }
-        });
-
-        if (style.keys().length > 0) {
-            jsonObject.put("style", style);
-        }
-    }
-
-    private void generatePartData(T item, JsonObject jsonObject) {
-        JsonObject part = Json.createObject();
+    private void generatePartData(T item, ObjectNode jsonObject) {
+        ObjectNode part = JacksonUtils.createObjectNode();
 
         String rowPartName = partNameGenerator.apply(item);
         if (rowPartName != null) {
@@ -4536,12 +4386,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         });
 
-        if (part.keys().length > 0) {
-            jsonObject.put("part", part);
+        if (!JacksonUtils.getKeys(part).isEmpty()) {
+            jsonObject.set("part", part);
         }
     }
 
-    private void generateRowsDragAndDropAccess(T item, JsonObject jsonObject) {
+    private void generateRowsDragAndDropAccess(T item, ObjectNode jsonObject) {
         if (getDropMode() != null && !dropFilter.test(item)) {
             jsonObject.put("dropDisabled", true);
         }
@@ -4551,18 +4401,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    private void generateDragData(T item, JsonObject jsonObject) {
-        JsonObject dragData = Json.createObject();
+    private void generateDragData(T item, ObjectNode jsonObject) {
+        ObjectNode dragData = JacksonUtils.createObjectNode();
 
         this.dragDataGenerators.entrySet().forEach(entry -> dragData
                 .put(entry.getKey(), entry.getValue().apply(item)));
 
-        if (dragData.keys().length > 0) {
-            jsonObject.put("dragData", dragData);
+        if (!JacksonUtils.getKeys(dragData).isEmpty()) {
+            jsonObject.set("dragData", dragData);
         }
     }
 
-    private void generateSelectableData(T item, JsonObject jsonObject) {
+    private void generateSelectableData(T item, ObjectNode jsonObject) {
         if (selectableProvider != null) {
             boolean selectable = selectableProvider.test(item);
             jsonObject.put("selectable", selectable);
@@ -4619,8 +4469,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected void setUniqueKeyProperty(String uniqueKeyProperty) {
         this.uniqueKeyProperty = uniqueKeyProperty;
-        arrayUpdater.getUpdateQueueData()
-                .setUniqueKeyProperty(uniqueKeyProperty);
+        if (uniqueKeyProperty != null) {
+            getElement().callJsFunction("$connector.updateUniqueItemIdPath",
+                    uniqueKeyProperty);
+        }
     }
 
     protected GridArrayUpdater getArrayUpdater() {
@@ -4909,10 +4761,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             SerializableFunction<T, String> dragDataGenerator) {
         this.dragDataGenerators.put(type, dragDataGenerator);
 
-        JsonArray types = Json.createArray();
+        ArrayNode types = JacksonUtils.createArrayNode();
 
-        this.dragDataGenerators.keySet()
-                .forEach(t -> types.set(types.length(), t));
+        this.dragDataGenerators.keySet().forEach(types::add);
         this.getElement().setPropertyJson("__dragDataTypes", types);
         getDataCommunicator().reset();
     }
@@ -4967,6 +4818,33 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .setAttribute("position", position.getPosition()));
     }
 
+    /**
+     * Returns whether the tooltip content is rendered as Markdown.
+     *
+     * @return {@code true} if the content is rendered as Markdown,
+     *         {@code false} if it is treated as plain text
+     */
+    public boolean isTooltipMarkdownEnabled() {
+        return getTooltipElement().map(
+                tooltipElement -> tooltipElement.getProperty("markdown", false))
+                .orElse(false);
+    }
+
+    /**
+     * Sets whether the tooltip content is rendered as Markdown. By default, the
+     * content is treated as plain text.
+     *
+     * @param markdownEnabled
+     *            {@code true} to render the content as Markdown, {@code false}
+     *            to treat it as plain text
+     */
+    public void setTooltipMarkdownEnabled(boolean markdownEnabled) {
+        addTooltipElementToTooltipSlot();
+
+        getTooltipElement().ifPresent(tooltipElement -> tooltipElement
+                .setProperty("markdown", markdownEnabled));
+    }
+
     private void addTooltipElementToTooltipSlot() {
         if (getTooltipElement().isPresent()) {
             // the grid's tooltip slot has already been filled
@@ -5011,7 +4889,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 draggedItemsCount);
 
         if (dragData != null) {
-            JsonObject json = Json.createObject();
+            ObjectNode json = JacksonUtils.createObjectNode();
             dragData.entrySet()
                     .forEach(e -> json.put(e.getKey(), e.getValue()));
             this.getElement().setPropertyJson("__selectionDragData", json);
@@ -5114,6 +4992,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
+        setViewportRangeByIndex(rowIndex);
+
+        // Scroll to the requested index
+        getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    private void setViewportRangeByIndex(int rowIndex) {
         // Grid's page size
         int pageSize = getPageSize();
         // A rough approximation of the viewport size in rows. This affects the
@@ -5136,19 +5021,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         int preloadedItemsCount = lastIndexPageEndIndex - targetPageStartIndex
                 + 1;
         // Preload the items
-        setRequestedRange(targetPageStartIndex, preloadedItemsCount);
-
-        // Scroll to the requested index
-        getElement().callJsFunction("scrollToIndex", rowIndex);
+        setViewportRange(targetPageStartIndex, preloadedItemsCount);
     }
 
     /**
-     * Scrolls to the row presenting the given item.
+     * Scrolls to the given item unless it is already fully visible.
      * <p>
-     * Note that the item index provider should be explicitly set using
-     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)} for lazy
-     * loading data providers. Otherwise, an
-     * {@link UnsupportedOperationException} will be thrown.
+     * For this method to work with a lazy-loading data provider, an item index
+     * provider must be supplied via
+     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)}. If none
+     * is provided, an {@link UnsupportedOperationException} will be thrown.
      *
      * @param item
      *            the item to scroll to, not {@code null}.
@@ -5165,10 +5047,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         AbstractDataView<T> dataView = getDataProvider().isInMemory()
                 ? getListDataView()
                 : getLazyDataView();
+        var itemKey = getDataCommunicator().getKeyMapper().key(item);
         int itemIndex = dataView.getItemIndex(item)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Item to scroll to cannot be found: " + item));
-        scrollToIndex(itemIndex);
+
+        setViewportRangeByIndex(itemIndex);
+
+        getElement().callJsFunction("$connector.scrollToItem", itemKey,
+                itemIndex);
     }
 
     /**

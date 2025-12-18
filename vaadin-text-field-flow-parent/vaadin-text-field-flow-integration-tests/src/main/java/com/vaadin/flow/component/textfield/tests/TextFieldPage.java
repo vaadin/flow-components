@@ -19,7 +19,6 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -52,14 +51,6 @@ public class TextFieldPage extends Div {
                 event -> textField.setReadOnly(!textField.isReadOnly()));
         add(button);
 
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> textField.setRequiredIndicatorVisible(
-                        !textField.isRequiredIndicatorVisible()));
-        add(required);
-
         TextField valueChangeSource = new TextField();
         valueChangeSource.getStyle().set("display", "block");
         valueChangeSource.setId("value-change");
@@ -87,9 +78,9 @@ public class TextFieldPage extends Div {
     }
 
     private void handleTextFieldValue(TextField field) {
-        NativeLabel label = new NativeLabel(field.getValue());
-        label.addClassName("text-field-value");
-        add(label);
+        Span valueMessage = new Span(field.getValue());
+        valueMessage.addClassName("text-field-value");
+        add(valueMessage);
     }
 
     private void addDisabledField() {

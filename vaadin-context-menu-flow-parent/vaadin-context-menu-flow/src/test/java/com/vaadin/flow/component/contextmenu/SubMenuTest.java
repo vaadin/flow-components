@@ -27,7 +27,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 
 /**
  * Unit tests for SubMenu.
@@ -47,21 +47,21 @@ public class SubMenuTest {
 
     @Test
     public void addAndRemoveChildren_getChildrenReturnsChildren() {
-        Label label1 = new Label("Label 1");
-        Label label2 = new Label("Label 2");
-        Label label3 = new Label("Label 3");
+        Span span1 = new Span("Text 1");
+        Span span2 = new Span("Text 2");
+        Span span3 = new Span("Text 3");
 
-        subMenu.add(label1, label2);
-        verifyChildren(subMenu, label1, label2);
+        subMenu.addComponent(span1, span2);
+        verifyChildren(subMenu, span1, span2);
 
-        subMenu.addComponentAtIndex(1, label3);
-        verifyChildren(subMenu, label1, label3, label2);
+        subMenu.addComponentAtIndex(1, span3);
+        verifyChildren(subMenu, span1, span3, span2);
 
-        subMenu.remove(label3);
-        verifyChildren(subMenu, label1, label2);
+        subMenu.remove(span3);
+        verifyChildren(subMenu, span1, span2);
 
-        subMenu.remove(label1);
-        verifyChildren(subMenu, label2);
+        subMenu.remove(span1);
+        verifyChildren(subMenu, span2);
 
         subMenu.removeAll();
         verifyChildren(subMenu);
@@ -100,28 +100,28 @@ public class SubMenuTest {
     public void addItemsAndComponents_getChildrenReturnsAllInOrder() {
         MenuItem item1 = subMenu.addItem("foo");
 
-        Label label1 = new Label("foo");
-        subMenu.add(label1);
+        Span span1 = new Span("foo");
+        subMenu.addComponent(span1);
 
         MenuItem item2 = subMenu.addItem("bar");
 
-        Label label2 = new Label("bar");
-        subMenu.add(label2);
+        Span span2 = new Span("bar");
+        subMenu.addComponent(span2);
 
-        verifyChildren(subMenu, item1, label1, item2, label2);
+        verifyChildren(subMenu, item1, span1, item2, span2);
     }
 
     @Test
     public void addItemsAndComponents_getItemsReturnsItemsOnly() {
         MenuItem item1 = subMenu.addItem("foo");
 
-        Label label1 = new Label("foo");
-        subMenu.add(label1);
+        Span span1 = new Span("foo");
+        subMenu.addComponent(span1);
 
         MenuItem item2 = subMenu.addItem("bar");
 
-        Label label2 = new Label("bar");
-        subMenu.add(label2);
+        Span span2 = new Span("bar");
+        subMenu.addComponent(span2);
 
         verifyItems(subMenu, item1, item2);
     }
@@ -147,7 +147,7 @@ public class SubMenuTest {
         subMenu.removeAll();
         Assert.assertFalse(parentItem.isParentItem());
 
-        subMenu.add(new Label());
+        subMenu.addComponent(new Span());
         Assert.assertTrue(parentItem.isParentItem());
         subMenu.removeAll();
         Assert.assertFalse(parentItem.isParentItem());
@@ -187,7 +187,7 @@ public class SubMenuTest {
 
         Stream<Consumer<SubMenu>> addOperations = Stream.of(
         //@formatter:off
-                menu -> menu.add(new Div()),
+                menu -> menu.addComponent(new Div()),
                 menu -> menu.addItem("foo"),
                 menu -> menu.addItem(new Div()),
                 menu -> menu.addItem("foo", e -> {}),

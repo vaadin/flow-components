@@ -34,7 +34,11 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
     public static final String SERVER_VALIDATION_COUNTER_RESET_BUTTON = "server-validation-counter-reset-button";
 
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
+    public static final String ATTACH_AND_INVALIDATE_FIELD_BUTTON = "attach-and-invalidate-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
+
+    public static final String HIDE_FIELD_BUTTON = "hide-field-button";
+    public static final String SHOW_AND_INVALIDATE_FIELD_BUTTON = "show-and-invalidate-field-button";
 
     private Div serverValidationCounter;
 
@@ -47,6 +51,7 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
         addServerValidityStateControls();
         addServerValidationCounter();
         addAttachDetachControls();
+        addVisibilityControls();
     }
 
     private void addServerValidityStateControls() {
@@ -85,10 +90,32 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
     private void addAttachDetachControls() {
         NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
                 "Attach field", event -> add(testField));
+
+        NativeButton attachAndInvalidateButton = createButton(
+                ATTACH_AND_INVALIDATE_FIELD_BUTTON,
+                "Attach field and invalidate", event -> {
+                    add(testField);
+                    testField.setInvalid(true);
+                });
+
         NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
                 "Detach field", event -> remove(testField));
 
-        add(new Div(attachButton, detachButton));
+        add(new Div(attachButton, attachAndInvalidateButton, detachButton));
+    }
+
+    private void addVisibilityControls() {
+        NativeButton hideButton = createButton(HIDE_FIELD_BUTTON, "Hide field",
+                event -> testField.setVisible(false));
+
+        NativeButton showAndInvalidateButton = createButton(
+                SHOW_AND_INVALIDATE_FIELD_BUTTON, "Show and invalidate field",
+                event -> {
+                    testField.setVisible(true);
+                    testField.setInvalid(true);
+                });
+
+        add(new Div(hideButton, showAndInvalidateButton));
     }
 
     /**

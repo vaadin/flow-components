@@ -28,7 +28,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Server-side component for {@code <vaadin-context-menu>} to be used with
@@ -254,9 +254,9 @@ public class GridContextMenu<T> extends
      * {@inheritDoc}
      */
     @Override
-    protected boolean onBeforeOpenMenu(JsonObject eventDetail) {
+    protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         Grid<T> grid = (Grid<T>) getTarget();
-        String key = eventDetail.getString("key");
+        String key = eventDetail.get("key").asString();
 
         if (getDynamicContentHandler() != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);

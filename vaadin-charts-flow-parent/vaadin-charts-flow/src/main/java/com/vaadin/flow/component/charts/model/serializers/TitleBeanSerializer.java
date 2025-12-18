@@ -8,11 +8,10 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.vaadin.flow.component.charts.model.Title;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
 
 /**
  * Serializer for {@link Title}
@@ -21,15 +20,14 @@ public class TitleBeanSerializer extends BeanSerializationDelegate<Title> {
 
     @Override
     public void serialize(Title bean, BeanSerializerDelegator<Title> serializer,
-            JsonGenerator jgen, SerializerProvider provider)
-            throws IOException {
+            JsonGenerator jgen, SerializationContext context) {
         jgen.writeStartObject();
 
         if (bean != null && bean.getText() == null) {
-            jgen.writeNullField("text");
+            jgen.writeNullProperty("text");
         } else {
             // write fields as per normal serialization rules
-            serializer.serializeFields(bean, jgen, provider);
+            serializer.serializeProperties(bean, jgen, context);
         }
 
         jgen.writeEndObject();

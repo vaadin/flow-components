@@ -25,24 +25,24 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
     private List<String> items;
     private ComboBoxListDataView<String> dataView;
     private ComboBox<String> component;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         component = new ComboBox<>();
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(component);
 
         dataView = component.setItems(items);

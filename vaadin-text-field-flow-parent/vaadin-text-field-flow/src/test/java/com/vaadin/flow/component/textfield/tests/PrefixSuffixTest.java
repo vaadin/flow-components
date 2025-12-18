@@ -18,81 +18,64 @@ package com.vaadin.flow.component.textfield.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
+import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
-/**
- * Tests for setting prefix and suffix components for {@link TextField}.
- */
 public class PrefixSuffixTest {
 
     @Test
-    public void setPrefix_replacesPrefix() {
-        TextField field = new TextField();
-        Assert.assertNull("There should be no prefix component by default",
-                field.getPrefixComponent());
-
-        setAndAssertPrefix(field, new Span());
-        setAndAssertPrefix(field, new H1());
+    public void bigDecimalField() {
+        BigDecimalField c = new BigDecimalField();
+        Assert.assertTrue(c instanceof HasPrefix);
+        Assert.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void setPrefix_setPrefixNull_prefixRemoved() {
-        TextField field = new TextField();
-        field.setPrefixComponent(new Span());
-        field.setPrefixComponent(null);
-
-        Assert.assertNull(field.getPrefixComponent());
-        Assert.assertEquals(
-                "Setting prefix component to null should remove all children in the prefix-slot",
-                0, getNumOfChildrenInSlot(field, "prefix"));
+    public void emailField() {
+        EmailField c = new EmailField();
+        Assert.assertTrue(c instanceof HasPrefix);
+        Assert.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void setSuffix_replacesSuffix() {
-        TextField field = new TextField();
-        Assert.assertNull("There should be no suffix component by default",
-                field.getSuffixComponent());
-
-        setAndAssertSuffix(field, new Span());
-        setAndAssertSuffix(field, new H1());
+    public void integerField() {
+        IntegerField c = new IntegerField();
+        Assert.assertTrue(c instanceof HasPrefix);
+        Assert.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void setSuffix_setSuffixNull_suffixRemoved() {
-        TextField field = new TextField();
-        field.setSuffixComponent(new Span());
-        field.setSuffixComponent(null);
-
-        Assert.assertNull(field.getSuffixComponent());
-        Assert.assertEquals(
-                "Setting suffix component to null should remove all children in the suffix-slot",
-                0, getNumOfChildrenInSlot(field, "suffix"));
+    public void numberField() {
+        NumberField c = new NumberField();
+        Assert.assertTrue(c instanceof HasPrefix);
+        Assert.assertTrue(c instanceof HasSuffix);
     }
 
-    private void setAndAssertPrefix(TextField field, Component prefix) {
-        field.setPrefixComponent(prefix);
-        Assert.assertEquals(
-                "Setting a prefix component should remove existing prefix components",
-                1, getNumOfChildrenInSlot(field, "prefix"));
-        Assert.assertEquals("getPrefixComponent did not return set value",
-                prefix, field.getPrefixComponent());
+    @Test
+    public void passwordField() {
+        PasswordField c = new PasswordField();
+        Assert.assertTrue(c instanceof HasPrefix);
+        Assert.assertTrue(c instanceof HasSuffix);
     }
 
-    private void setAndAssertSuffix(TextField field, Component suffix) {
-        field.setSuffixComponent(suffix);
-        Assert.assertEquals(
-                "Setting a suffix component should remove existing suffix components",
-                1, getNumOfChildrenInSlot(field, "suffix"));
-        Assert.assertEquals("getSuffixComponent did not return set value",
-                suffix, field.getSuffixComponent());
+    @Test
+    public void textArea() {
+        TextArea c = new TextArea();
+        Assert.assertTrue(c instanceof HasPrefix);
+        Assert.assertTrue(c instanceof HasSuffix);
     }
 
-    private int getNumOfChildrenInSlot(Component component, String slot) {
-        return (int) component.getElement().getChildren()
-                .filter(child -> slot.equals(child.getAttribute("slot")))
-                .count();
+    @Test
+    public void textField() {
+        TextField c = new TextField();
+        Assert.assertTrue(c instanceof HasPrefix);
+        Assert.assertTrue(c instanceof HasSuffix);
     }
 }

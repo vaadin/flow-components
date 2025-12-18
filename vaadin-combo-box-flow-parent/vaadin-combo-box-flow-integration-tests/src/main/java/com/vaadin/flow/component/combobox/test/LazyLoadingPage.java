@@ -27,7 +27,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.test.template.ComboBoxInATemplate;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -196,7 +195,7 @@ public class LazyLoadingPage extends Div {
 
         comboBox.setRenderer(new ComponentRenderer<Div, Person>(person -> {
             return new Div(new H4(person.getName()),
-                    new Label("Born: " + person.getBorn()));
+                    new Span("Born: " + person.getBorn()));
         }));
 
         comboBox.setItems((person, filter) -> String.valueOf(person.getBorn())

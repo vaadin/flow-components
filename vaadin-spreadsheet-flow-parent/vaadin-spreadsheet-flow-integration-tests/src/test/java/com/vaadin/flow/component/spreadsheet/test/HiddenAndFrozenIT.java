@@ -32,7 +32,6 @@ public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
 
     @Test
     public void freezePane_sheetWithHiddenAndFrozenRowsAndColumns_freezePanePositionedCorrectly() {
-        getDriver().manage().window().maximize();
         assertFreezePanePositionedCorrectly("hidden_and_frozen.xlsx", 11, 9,
                 "O15");
     }

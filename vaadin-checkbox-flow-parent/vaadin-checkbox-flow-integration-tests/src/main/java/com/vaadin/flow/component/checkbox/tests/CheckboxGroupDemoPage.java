@@ -19,9 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -77,7 +75,6 @@ public class CheckboxGroupDemoPage extends Div {
         addDisabled();
         addDisabledItems();
         addReadOnlyGroup();
-        addComponentWithThemeVariant();
         addHelperCheckboxGroup();
         addItemIconRenderer();
     }
@@ -159,19 +156,6 @@ public class CheckboxGroupDemoPage extends Div {
         button.setId("switch-read-only");
 
         addCard("Read-only checkbox group", group, button, valueInfo);
-    }
-
-    private void addComponentWithThemeVariant() {
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setId("checkbox-group-theme-variants");
-        group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-
-        Button removeVariantButton = new Button("Remove theme variant", e -> {
-            group.removeThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        });
-        removeVariantButton.setId("remove-theme-variant-button");
-        addCard("Button theme variants", group, removeVariantButton);
     }
 
     private void addHelperCheckboxGroup() {

@@ -35,8 +35,6 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-popover")
 public class PopoverIT extends AbstractComponentIT {
 
-    static final String POPOVER_OVERLAY_TAG = "vaadin-popover-overlay";
-
     PopoverElement popover;
 
     @Before
@@ -48,18 +46,15 @@ public class PopoverIT extends AbstractComponentIT {
     @Test
     public void clickTarget_popoverOpensAndCloses() {
         clickTarget();
-        checkPopoverIsOpened();
         Assert.assertTrue(popover.isOpen());
 
         clickTarget();
-        checkPopoverIsClosed();
         Assert.assertFalse(popover.isOpen());
     }
 
     @Test
     public void clickButton_popoverContainsContent() {
         clickTarget();
-        checkPopoverIsOpened();
 
         waitForElementPresent(By.id("popover-content"));
     }
@@ -70,10 +65,10 @@ public class PopoverIT extends AbstractComponentIT {
         clickElementWithJs("attach-target");
 
         clickTarget();
-        checkPopoverIsOpened();
+        Assert.assertTrue(popover.isOpen());
 
         clickTarget();
-        checkPopoverIsClosed();
+        Assert.assertFalse(popover.isOpen());
     }
 
     @Test
@@ -81,7 +76,7 @@ public class PopoverIT extends AbstractComponentIT {
         clickElementWithJs("clear-target");
 
         clickTarget();
-        checkPopoverIsClosed();
+        Assert.assertFalse(popover.isOpen());
     }
 
     @Test
@@ -91,13 +86,13 @@ public class PopoverIT extends AbstractComponentIT {
         clickElementWithJs("attach-target");
 
         clickTarget();
-        checkPopoverIsClosed();
+        Assert.assertFalse(popover.isOpen());
     }
 
     @Test
     public void clickOutside_popoverCloses() {
         clickTarget();
-        checkPopoverIsOpened();
+        Assert.assertTrue(popover.isOpen());
 
         $("body").first().click();
         Assert.assertFalse(popover.isOpen());
@@ -108,7 +103,7 @@ public class PopoverIT extends AbstractComponentIT {
         clickElementWithJs("disable-close-on-outside-click");
 
         clickTarget();
-        checkPopoverIsOpened();
+        Assert.assertTrue(popover.isOpen());
 
         $("body").first().click();
         Assert.assertTrue(popover.isOpen());
@@ -118,7 +113,7 @@ public class PopoverIT extends AbstractComponentIT {
     @Ignore("The test passes locally but fails on CI")
     public void pressEsc_popoverCloses() {
         clickTarget();
-        checkPopoverIsOpened();
+        Assert.assertTrue(popover.isOpen());
 
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
         Assert.assertFalse(popover.isOpen());
@@ -129,7 +124,7 @@ public class PopoverIT extends AbstractComponentIT {
         clickElementWithJs("disable-close-on-esc");
 
         clickTarget();
-        checkPopoverIsOpened();
+        Assert.assertTrue(popover.isOpen());
 
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
         Assert.assertTrue(popover.isOpen());
@@ -137,13 +132,5 @@ public class PopoverIT extends AbstractComponentIT {
 
     private void clickTarget() {
         clickElementWithJs("popover-target");
-    }
-
-    private void checkPopoverIsClosed() {
-        waitForElementNotPresent(By.tagName(POPOVER_OVERLAY_TAG));
-    }
-
-    private void checkPopoverIsOpened() {
-        waitForElementPresent(By.tagName(POPOVER_OVERLAY_TAG));
     }
 }

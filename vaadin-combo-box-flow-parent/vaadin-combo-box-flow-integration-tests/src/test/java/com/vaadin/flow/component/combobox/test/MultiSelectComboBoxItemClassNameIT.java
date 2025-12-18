@@ -94,9 +94,7 @@ public class MultiSelectComboBoxItemClassNameIT extends AbstractComponentIT {
     }
 
     private void assertItemClassNames(String... expectedClassNames) {
-        TestBenchElement overlay = $("vaadin-multi-select-combo-box-overlay")
-                .first();
-        ElementQuery<TestBenchElement> items = overlay
+        ElementQuery<TestBenchElement> items = comboBox
                 .$("vaadin-multi-select-combo-box-item");
 
         for (int i = 0; i < expectedClassNames.length; i++) {

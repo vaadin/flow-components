@@ -8,13 +8,12 @@
  */
 package com.vaadin.flow.component.charts.examples.timeline.util;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class StockPrices {
 
@@ -180,16 +179,11 @@ public class StockPrices {
     }
 
     private static JsonData readJsonDataFrom(String filename) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(
-                    new InputStreamReader(
-                            StockPrices.class.getResourceAsStream(filename)),
-                    JsonData.class);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot read data from " + filename, e);
-        }
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(
+                new InputStreamReader(
+                        StockPrices.class.getResourceAsStream(filename)),
+                JsonData.class);
     }
 
 }

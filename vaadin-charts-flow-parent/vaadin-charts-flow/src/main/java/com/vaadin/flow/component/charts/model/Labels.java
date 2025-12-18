@@ -8,7 +8,10 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+import com.vaadin.flow.component.charts.model.serializers.LabelsRotationSerializer;
 import com.vaadin.flow.component.charts.model.style.Style;
+
+import tools.jackson.databind.annotation.JsonSerialize;
 
 public class Labels extends AbstractConfigurationObject {
 
@@ -223,6 +226,11 @@ public class Labels extends AbstractConfigurationObject {
      * at <a href="http://www.highcharts.com/docs/chart-concepts/axes">Axis
      * docs</a> => What axis should I use?
      * </p>
+     *
+     * <p>
+     * Please note that defining a step will disable the auto rotation of
+     * labels. If you want to rotate the labels, you need to also set the
+     * desired rotation angle using the {@link #setRotation(Number)} method.
      */
     public void setStep(Number step) {
         this.step = step;
@@ -325,6 +333,7 @@ public class Labels extends AbstractConfigurationObject {
         this.zIndex = zIndex;
     }
 
+    @JsonSerialize(using = LabelsRotationSerializer.class)
     public String getRotation() {
         return rotation;
     }

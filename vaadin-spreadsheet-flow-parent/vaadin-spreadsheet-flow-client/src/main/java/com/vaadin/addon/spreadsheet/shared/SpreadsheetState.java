@@ -153,4 +153,7 @@ public class SpreadsheetState extends TabIndexState {
 
     @DelegateToWidget
     public List<String> namedRanges;
+
+    @DelegateToWidget
+    public boolean showCustomEditorOnFocus = false;
 }

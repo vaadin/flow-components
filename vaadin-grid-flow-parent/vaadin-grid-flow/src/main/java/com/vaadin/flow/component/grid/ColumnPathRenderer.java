@@ -23,9 +23,8 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
-
-import elemental.json.Json;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Renderer for columns that doesn't use a renderer function for rendering its
@@ -65,7 +64,7 @@ public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
         container.setProperty("path", property);
 
         // disables the automatic creation of headers when the path is used
-        container.setPropertyJson("header", Json.createNull());
+        container.setPropertyJson("header", JacksonUtils.nullNode());
 
         return new SingleValueProviderRendering();
     }
@@ -74,8 +73,8 @@ public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
 
         @Override
         public Optional<DataGenerator<SOURCE>> getDataGenerator() {
-            return Optional.of((item, jsonObject) -> jsonObject.put(property,
-                    JsonSerializer.toJson(provider.apply(item))));
+            return Optional.of((item, jsonObject) -> jsonObject.set(property,
+                    JacksonSerializer.toJson(provider.apply(item))));
         }
     }
 

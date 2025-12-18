@@ -1,8 +1,8 @@
 import { css, html, LitElement } from 'lit';
-import '@vaadin/text-field/vaadin-text-field.js';
-import '@vaadin/form-layout/vaadin-form-layout.js';
-import '@vaadin/crud/vaadin-crud.js';
-import '@vaadin/vertical-layout/vaadin-vertical-layout.js';
+import '@vaadin/text-field/src/vaadin-text-field.js';
+import '@vaadin/form-layout/src/vaadin-form-layout.js';
+import '@vaadin/crud/src/vaadin-crud.js';
+import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 
 class CrudApp extends LitElement {
   static get styles() {

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -28,6 +29,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -106,17 +108,46 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     SpreadsheetWidget widget = getWidget();
                     SpreadsheetServerRpc rpcProxy = getRpcProxy(
                             SpreadsheetServerRpc.class);
+                    final String APP_ID = host.getPropertyString("appId");
+                    final HashMap<String, Element> iconsToAppend = new HashMap<>();
+
                     for (SpreadsheetActionDetails actionDetail : actionDetails) {
                         SpreadsheetAction spreadsheetAction = new SpreadsheetAction(
                                 this, rpcProxy, actionDetail.key,
                                 actionDetail.type, widget);
                         spreadsheetAction.setCaption(actionDetail.caption);
-                        spreadsheetAction
-                                .setIconUrl(getResourceUrl(actionDetail.key));
+
+                        if (actionDetail.iconNodeId != null) {
+                            var iconContainerId = "spreadsheet-icon-container-"
+                                    + actionDetail.iconNodeId;
+                            iconsToAppend.put(iconContainerId,
+                                    SheetJsniUtil.getVirtualChild(
+                                            actionDetail.iconNodeId, APP_ID));
+                            spreadsheetAction
+                                    .setIconContainerId(iconContainerId);
+                        }
+
                         actions.add(spreadsheetAction);
+                    }
+
+                    if (!iconsToAppend.isEmpty()) {
+                        // Need to wait for the actions to be rendered to the
+                        // context menu to then attach the icons to their
+                        // containers
+                        AnimationScheduler.get()
+                                .requestAnimationFrame((timestamp) -> {
+                                    for (String nodeId : iconsToAppend
+                                            .keySet()) {
+                                        var container = DOM
+                                                .getElementById(nodeId);
+                                        container.appendChild(
+                                                iconsToAppend.get(nodeId));
+                                    }
+                                });
                     }
                     return actions.toArray(new Action[actions.size()]);
                 }
+
             }, left, top);
         }
 
@@ -184,6 +215,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private SpreadsheetServerRpcImpl serverRPC;
 
     private Element host;
+
+    private HashMap<String, Slot> customEditors = null;
 
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
@@ -256,6 +289,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                         event.stopPropagation();
                     }
                 }, ContextMenuEvent.getType());
+
+        getConnection().getContextMenu().addCloseHandler(handler -> {
+            getRpcProxy(SpreadsheetServerRpc.class).contextMenuClosed();
+        });
 
         getRpcProxy(SpreadsheetServerRpc.class).onConnectorInit();
     }
@@ -373,9 +410,22 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 });
             }
             widget.showCellCustomComponents(customWidgetMap);
+            if (!state.showCustomEditorOnFocus) {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
         }
         if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
             setupCustomEditors();
+            if (!state.showCustomEditorOnFocus) {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
+        }
+        if (stateChangeEvent.hasPropertyChanged("showCustomEditorOnFocus")) {
+            if (state.showCustomEditorOnFocus) {
+                widget.removeCellCustomEditors(getCustomEditors());
+            } else {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
         }
         if (stateChangeEvent.hasPropertyChanged("cellComments")
                 || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
@@ -446,10 +496,20 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
+    public HashMap<String, Slot> getCustomEditors() {
+        return customEditors;
+    }
+
     private void setupCustomEditors() {
         if (getState().cellKeysToEditorIdMap == null) {
+            if (!getWidget().isShowCustomEditorOnFocus()) {
+                getWidget().removeCellCustomEditors(getCustomEditors());
+            }
+            customEditors = null;
             getWidget().setCustomEditorFactory(null);
         } else if (getWidget().getCustomEditorFactory() == null) {
+            customEditors = new HashMap<>();
+
             if (customEditorFactory == null) {
                 customEditorFactory = new SpreadsheetCustomEditorFactory() {
 
@@ -463,10 +523,23 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
+                        if (customEditors.containsKey(editorId)) {
+                            var slot = customEditors.get(editorId);
+                            slot.getListener().setCellAddress(key);
+                            return slot;
+                        }
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
-                        return new Slot("custom-editor-" + editorId, editor,
-                                host);
+                        Slot slot = new Slot("custom-editor-" + editorId,
+                                editor, host);
+                        customEditors.put(editorId, slot);
+                        CustomEditorEventListener listener = GWT
+                                .create(CustomEditorEventListener.class);
+                        listener.setSpreadsheetWidget(getWidget());
+                        listener.init(slot, key);
+                        slot.setListener(listener);
+
+                        return slot;
                     }
 
                 };

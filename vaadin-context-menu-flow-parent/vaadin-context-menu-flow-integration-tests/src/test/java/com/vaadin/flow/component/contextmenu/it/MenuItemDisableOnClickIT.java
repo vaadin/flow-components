@@ -85,7 +85,7 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         verifyOpened();
         waitUntil(ExpectedConditions.elementToBeClickable(By.id(itemId)), 2);
         clickElementWithJs(itemId);
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
@@ -173,11 +173,15 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
 
         // Detach and reattach
         clickElementWithJs("remove-re-enable-in-same-round-trip-menu-item");
+        verifyClosedAndRemoved();
+
         rightClickOn(TARGET_ID);
         waitForElementPresent(
                 By.id("add-re-enable-in-same-round-trip-menu-item"));
         waitForElementNotPresent(By.id(itemId));
         clickElementWithJs("add-re-enable-in-same-round-trip-menu-item");
+        verifyClosedAndRemoved();
+
         rightClickOn(TARGET_ID);
         waitForElementPresent(By.id(itemId));
 
@@ -185,8 +189,10 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         Assert.assertTrue(menuItem.isEnabled());
 
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
         clickElementWithJs("toggle-keep-open");
+        verifyClosedAndRemoved();
+
         rightClickOn(TARGET_ID);
         waitForElementPresent(By.id(itemId));
         menuItem = findElement(By.id(itemId));

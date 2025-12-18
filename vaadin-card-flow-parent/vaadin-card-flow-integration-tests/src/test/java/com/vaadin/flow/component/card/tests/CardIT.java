@@ -25,15 +25,17 @@ import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-card")
 public class CardIT extends AbstractComponentIT {
+
+    private CardElement card;
+
     @Before
     public void init() {
         open();
+        card = $(CardElement.class).waitForFirst();
     }
 
     @Test
     public void rendersCardComponent() {
-        CardElement card = $(CardElement.class).waitForFirst();
-
         boolean hasShadowRoot = (Boolean) executeScript(
                 "return arguments[0].shadowRoot !== null", card);
         String componentName = (String) executeScript(
@@ -42,5 +44,37 @@ public class CardIT extends AbstractComponentIT {
 
         Assert.assertTrue(hasShadowRoot);
         Assert.assertEquals("vaadin-card", componentName);
+
+        var title = card.getTitle();
+        Assert.assertNotNull(title);
+        Assert.assertEquals("Title", title.getText());
+
+        var subtitle = card.getSubtitle();
+        Assert.assertNotNull(subtitle);
+        Assert.assertEquals("Subtitle", subtitle.getText());
+
+        var media = card.getMedia();
+        Assert.assertNotNull(media);
+        Assert.assertEquals("https://vaadin.com/images/vaadin-logo.svg",
+                media.getAttribute("src"));
+
+        var headerPrefix = card.getHeaderPrefix();
+        Assert.assertNotNull(headerPrefix);
+        Assert.assertEquals("Header prefix", headerPrefix.getText());
+
+        var headerSuffix = card.getHeaderSuffix();
+        Assert.assertNotNull(headerSuffix);
+        Assert.assertEquals("Header suffix", headerSuffix.getText());
+
+        var footerContents = card.getFooterContents();
+        Assert.assertEquals(2, footerContents.size());
+        Assert.assertEquals("Footer text", footerContents.get(0).getText());
+        Assert.assertEquals("Interactive Footer Content",
+                footerContents.get(1).getText());
+
+        var contents = card.getContents();
+        Assert.assertEquals(2, contents.size());
+        Assert.assertEquals("Content text", contents.get(0).getText());
+        Assert.assertEquals("Interactive Content", contents.get(1).getText());
     }
 }

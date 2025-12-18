@@ -17,7 +17,6 @@ package com.vaadin.flow.component.dialog.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -49,7 +48,6 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
 
     // #7799
     @Test
-    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
     public void dialogOpenedWithListenOnShortcut_sameShortcutListeningOnUi_focusDecidesWhichIsExecuted() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.LISTEN_ON_DIALOG);
@@ -69,27 +67,6 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
-    public void dialogOpenedWithShortcutNoListenOn_sameShortcutListeningOnUi_bothExecuted() {
-        openDialogButton = $(NativeButtonElement.class)
-                .id(DialogWithShortcutPage.SHORTCUT_ON_UI);
-        pressShortcutKey(uiLevelButton);
-        validateLatestShortcutEvent(0, DialogWithShortcutPage.UI_BUTTON);
-
-        openNewDialog();
-
-        pressShortcutKey(getFirstDialogInput());
-        // last event is on dialog
-        validateLatestShortcutEventOnDialog(2, 0);
-        validateShortcutEvent(1, 1, DialogWithShortcutPage.UI_BUTTON);
-
-        closeDialog();
-        pressShortcutKey(uiLevelButton);
-        validateLatestShortcutEvent(3, DialogWithShortcutPage.UI_BUTTON);
-    }
-
-    @Test
-    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
     public void dialogOpenedWithListenOnShortcut_dialogReopened_oldShortcutStillWorks() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.REUSABLE_DIALOG);
@@ -102,23 +79,19 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
         pressShortcutKey(getFirstDialogInput());
         validateLatestShortcutEventOnDialog(1, 0);
 
-        pressShortcutKey(uiLevelButton);
-        validateLatestShortcutEvent(2, DialogWithShortcutPage.UI_BUTTON);
-
         closeDialog();
 
         pressShortcutKey(uiLevelButton);
-        validateLatestShortcutEvent(3, DialogWithShortcutPage.UI_BUTTON);
+        validateLatestShortcutEvent(2, DialogWithShortcutPage.UI_BUTTON);
 
         openNewDialog();
 
         pressShortcutKey(getFirstDialogInput());
-        validateLatestShortcutEventOnDialog(4, 0);
+        validateLatestShortcutEventOnDialog(3, 0);
     }
 
     // vaadin/vaadin-dialog#229
     @Test
-    @Ignore("flaky test see https://github.com/vaadin/flow-components/issues/777")
     public void twoModelessDialogsOpenedWithSameShortcutKeyOnListenOn_dialogWithFocusExecuted() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.MODELESS_SHORTCUT_LISTEN_ON_DIALOG);
@@ -218,6 +191,8 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
 
     private void validateShortcutEvent(int indexFromTop, int eventCounter,
             String eventSourceId) {
+        waitForElementPresent(By.cssSelector("#%s div:nth-child(%d)".formatted(
+                DialogWithShortcutPage.EVENT_LOG, indexFromTop + 1)));
         final WebElement latestEvent = eventLog.findElements(By.tagName("div"))
                 .get(indexFromTop);
         Assert.assertEquals("Invalid latest event",

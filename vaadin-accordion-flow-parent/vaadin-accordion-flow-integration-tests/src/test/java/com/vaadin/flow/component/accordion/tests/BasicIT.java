@@ -35,6 +35,10 @@ public class BasicIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
+        // Close the initially opened panel, otherwise the panel can fire a
+        // close event after opening a different panel, breaking some assertions
+        $(AccordionElement.class).first().$(AccordionPanelElement.class).first()
+                .click();
     }
 
     @Test
@@ -43,20 +47,21 @@ public class BasicIT extends AbstractComponentIT {
     }
 
     @Test
-    public void progammaticOpenByIndex() {
+    public void programmaticOpenByIndex() {
         getTestButton("1").click();
-        Assert.assertEquals(1,
-                $(AccordionElement.class).first().getOpenedIndex().getAsInt());
+        Assert.assertEquals(1, $(AccordionElement.class).first()
+                .getOpenedIndex().orElseThrow());
         Assert.assertEquals("Green opened", getLastEvent(ACCORDION_EVENTS));
         Assert.assertEquals("Panel Green opened", getLastEvent(PANEL_EVENTS));
 
         getTestButton("3").click();
-        Assert.assertEquals(3,
-                $(AccordionElement.class).first().getOpenedIndex().getAsInt());
+        Assert.assertEquals(3, $(AccordionElement.class).first()
+                .getOpenedIndex().orElseThrow());
         Assert.assertEquals("Blue opened", getLastEvent(ACCORDION_EVENTS));
         Assert.assertEquals("Panel Blue opened", getLastEvent(PANEL_EVENTS));
     }
 
+    @Test
     public void programmaticOpenByPanel() {
         getTestButton("green").click();
 
@@ -74,18 +79,21 @@ public class BasicIT extends AbstractComponentIT {
         Assert.assertEquals("Panel Blue opened", getLastEvent(PANEL_EVENTS));
     }
 
+    @Test
     public void programmaticClose() {
         getTestButton("1").click();
         getTestButton("close").click();
         Assert.assertEquals("Accordion closed", getLastEvent(ACCORDION_EVENTS));
     }
 
+    @Test
     public void userOpen() {
         $(AccordionElement.class).first().$(AccordionPanelElement.class).last()
                 .click();
         Assert.assertEquals("Panel Blue opened", getLastEvent(PANEL_EVENTS));
     }
 
+    @Test
     public void userClose() {
         $(AccordionElement.class).first().$(AccordionPanelElement.class).last()
                 .click();
@@ -94,11 +102,13 @@ public class BasicIT extends AbstractComponentIT {
         Assert.assertEquals("Accordion closed", getLastEvent(ACCORDION_EVENTS));
     }
 
+    @Test
     public void panelSummaryText() {
         Assert.assertEquals("Blue", $(AccordionElement.class).first()
                 .$(AccordionPanelElement.class).last().getSummaryText());
     }
 
+    @Test
     public void openPanel() {
         Assert.assertFalse($(AccordionElement.class).first()
                 .$(AccordionPanelElement.class).last().isOpened());
@@ -108,6 +118,7 @@ public class BasicIT extends AbstractComponentIT {
                 .$(AccordionPanelElement.class).last().isOpened());
     }
 
+    @Test
     public void closePanel() {
         Assert.assertFalse($(AccordionElement.class).first()
                 .$(AccordionPanelElement.class).last().isOpened());
@@ -127,6 +138,7 @@ public class BasicIT extends AbstractComponentIT {
                 .$(AccordionPanelElement.class).last().isOpened());
     }
 
+    @Test
     public void removePanel() {
         final int initialCount = $(AccordionElement.class).first()
                 .$(AccordionPanelElement.class).all().size();

@@ -21,7 +21,6 @@ import java.util.Optional;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.data.bean.PeopleGenerator;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -87,7 +86,7 @@ public class GridViewContextMenuPage extends LegacyTestView {
                     new PeopleGenerator().createPerson(items.size() + 1));
             dataProvider.refreshAll();
         });
-        insert.getSubMenu().add(new Hr());
+        insert.getSubMenu().addSeparator();
         insert.getSubMenu().addItem("Insert a row below", event -> {
             Optional<Person> item = event.getItem();
             if (!item.isPresent()) {

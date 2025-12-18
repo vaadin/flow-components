@@ -150,7 +150,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         loadFile("InteractionSample.xlsx");
 
         getChartInShadowRoot(getOverlayElement("B1"))
-                .findElements(By.cssSelector(".highcharts-series-0 > rect"))
+                .findElements(By.cssSelector(
+                        ".highcharts-series-0 > path.highcharts-point"))
                 .get(0).click();
 
         assertSelection("A12", "A13", "A14", "A15", "A16");
@@ -186,7 +187,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         loadFile("chart_with_filtered_out_column.xlsx");
 
         getChartInShadowRoot(getOverlayElement("G11"))
-                .findElements(By.cssSelector(".highcharts-series-0 > rect"))
+                .findElements(By.cssSelector(
+                        ".highcharts-series-0 > path.highcharts-point"))
                 .get(0).click();
 
         assertSelection("G4", "H4", "I4", "J4", "K4", "L4", "M4", "N4", "O4");

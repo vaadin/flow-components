@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -34,12 +34,10 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
     public void stringItemsAreRendered() {
         open();
 
-        $("vaadin-combo-box").id("list").sendKeys(Keys.ARROW_DOWN);
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id("list");
+        comboBox.sendKeys(Keys.ARROW_DOWN);
 
-        WebElement overlay = findElement(
-                By.tagName("vaadin-combo-box-overlay"));
-        List<String> items = overlay
-                .findElements(By.tagName("vaadin-combo-box-item")).stream()
+        List<String> items = comboBox.$("vaadin-combo-box-item").all().stream()
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,
@@ -49,8 +47,7 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected rendered the second item text", "bar",
                 items.get(1));
 
-        $("vaadin-combo-box").id("list").findElement(By.tagName("input"))
-                .sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
+        comboBox.sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
 
         Assert.assertEquals("Unexpected selected item text", "foo",
                 $("div").id("info").getText());

@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -106,7 +106,7 @@ public class Tooltip implements Serializable {
 
             // The host under which the <vaadin-tooltip> element is
             // auto-attached
-            var tooltipHost = UI.getCurrent().getElement();
+            var tooltipHost = UI.getCurrentOrThrow().getElement();
             tooltipHost.appendChild(tooltip.tooltipElement);
             tooltip.tooltipElement.executeJs("this.target = $0;", element);
         };
@@ -169,13 +169,25 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * String used as a tooltip content.
+     * Sets the tooltip content as plain text.
      *
      * @param text
      *            the text to set
      */
     public void setText(String text) {
         tooltipElement.setProperty("text", text);
+        tooltipElement.setProperty("markdown", false);
+    }
+
+    /**
+     * Sets the tooltip content in Markdown format.
+     *
+     * @param markdown
+     *            the text to set in Markdown format
+     */
+    public void setMarkdown(String markdown) {
+        tooltipElement.setProperty("text", markdown);
+        tooltipElement.setProperty("markdown", true);
     }
 
     /**
@@ -195,6 +207,17 @@ public class Tooltip implements Serializable {
      */
     public Tooltip withText(String text) {
         setText(text);
+        return this;
+    }
+
+    /**
+     * String used as a tooltip content in Markdown format.
+     *
+     * @param markdown
+     *            the text to set in Markdown format
+     */
+    public Tooltip withMarkdown(String markdown) {
+        setMarkdown(markdown);
         return this;
     }
 

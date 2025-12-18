@@ -249,4 +249,11 @@ public interface SheetHandler extends GroupingHandler {
 
     boolean isRowProtected(int row);
 
+    SpreadsheetCustomEditorFactory getCustomEditorFactory();
+
+    /**
+     * Called after the sheet has been relayouted (e.g., after scroll).
+     */
+    void onSheetRelayoutComplete();
+
 }

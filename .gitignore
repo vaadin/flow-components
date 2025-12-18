@@ -14,6 +14,9 @@ pom.xml.bak
 .idea/
 *.iml
 
+# MacOS DS_Store files
+.DS_Store
+
 .vscode
 types.d.ts
 tsconfig.json
@@ -33,3 +36,4 @@ error-screenshots
 **/frontend/*.tsx
 dev-bundle
 prod.bundle
+.vaadin-node-tasks.lock

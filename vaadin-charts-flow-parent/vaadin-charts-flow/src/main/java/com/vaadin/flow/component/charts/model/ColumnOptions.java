@@ -8,7 +8,7 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import java.util.Date;
+import java.time.Instant;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
@@ -567,5 +567,5 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     /**
      * @see #setPointStart(Number)
      */
-    public abstract void setPointStart(Date date);
+    public abstract void setPointStart(Instant instant);
 }

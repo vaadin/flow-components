@@ -14,7 +14,13 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class Slot extends Widget {
 
+    private final Element assignedElement;
+    private boolean isElementFocused;
+    private CustomEditorEventListener listener;
+
     public Slot(String name, Element assignedElement, Element host) {
+        this.assignedElement = assignedElement;
+
         // Create the slot element with the given name
         var slotElement = Document.get().createElement("slot");
         slotElement.setAttribute("name", name);
@@ -31,5 +37,25 @@ public class Slot extends Widget {
                 assignedElement.removeFromParent();
             }
         });
+    }
+
+    public Element getAssignedElement() {
+        return assignedElement;
+    }
+
+    public boolean isElementFocused() {
+        return isElementFocused;
+    }
+
+    public void setElementFocused(boolean isElementFocused) {
+        this.isElementFocused = isElementFocused;
+    }
+
+    public CustomEditorEventListener getListener() {
+        return listener;
+    }
+
+    public void setListener(CustomEditorEventListener listener) {
+        this.listener = listener;
     }
 }

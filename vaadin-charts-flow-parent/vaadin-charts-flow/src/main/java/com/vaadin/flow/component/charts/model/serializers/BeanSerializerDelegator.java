@@ -8,16 +8,17 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
-import com.fasterxml.jackson.databind.ser.impl.BeanAsArraySerializer;
-import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
-import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.BeanPropertyWriter;
+import tools.jackson.databind.ser.bean.BeanAsArraySerializer;
+import tools.jackson.databind.ser.bean.BeanSerializerBase;
+import tools.jackson.databind.ser.bean.UnwrappingBeanSerializer;
+import tools.jackson.databind.ser.impl.ObjectIdWriter;
+import tools.jackson.databind.util.NameTransformer;
 
 /**
  * Delegates serialization calls to the given instance of
@@ -39,11 +40,6 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
         super(source, objectIdWriter);
     }
 
-    public BeanSerializerDelegator(BeanSerializerBase source,
-            String[] toIgnore) {
-        super(source, toIgnore);
-    }
-
     public BeanSerializerDelegator(BeanSerializerBase source, Object filterId) {
         super(source, null, filterId);
     }
@@ -59,11 +55,6 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     public BeanSerializerBase withObjectIdWriter(
             ObjectIdWriter objectIdWriter) {
         return new BeanSerializerDelegator(this, objectIdWriter);
-    }
-
-    @Override
-    protected BeanSerializerBase withIgnorals(Set<String> toIgnore) {
-        return new BeanSerializerDelegator(this, toIgnore);
     }
 
     @Override
@@ -87,24 +78,28 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     @Override
     protected BeanSerializerBase asArraySerializer() {
         // copied from BeanSerializer
-        if ((_objectIdWriter == null) && (_anyGetterWriter == null)
-                && (_propertyFilterId == null)) {
-            return new BeanAsArraySerializer(this);
+        if (canCreateArraySerializer()) {
+            return BeanAsArraySerializer.construct(this);
         }
         return this;
     }
 
     @Override
     public void serialize(Object bean, JsonGenerator jgen,
-            SerializerProvider provider) throws IOException {
+            SerializationContext provider) {
         delegate.serialize(delegate.getBeanClass().cast(bean), this, jgen,
                 provider);
     }
 
     @Override
-    public void serializeFields(Object bean, JsonGenerator jgen,
-            SerializerProvider provider)
-            throws IOException, JsonGenerationException {
-        super.serializeFields(bean, jgen, provider);
+    public ValueSerializer<Object> unwrappingSerializer(
+            NameTransformer unwrapper) {
+        // copied from BeanSerializer
+        return new UnwrappingBeanSerializer(this, unwrapper);
+    }
+
+    public void serializeProperties(Object bean, JsonGenerator jgen,
+            SerializationContext provider) {
+        super._serializeProperties(bean, jgen, provider);
     }
 }

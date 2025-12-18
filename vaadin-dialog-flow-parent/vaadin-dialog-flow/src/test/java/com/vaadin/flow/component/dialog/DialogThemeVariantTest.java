@@ -32,15 +32,6 @@ public class DialogThemeVariantTest {
         assertThemeAttribute(null);
     }
 
-    @Test
-    public void addAndRemoveMaterialNoPaddingVariant_themeAttributeUpdated() {
-        assertThemeAttribute(null);
-        dialog.addThemeVariants(DialogVariant.MATERIAL_NO_PADDING);
-        assertThemeAttribute("no-padding");
-        dialog.removeThemeVariants(DialogVariant.MATERIAL_NO_PADDING);
-        assertThemeAttribute(null);
-    }
-
     private void assertThemeAttribute(String expected) {
         String actual = dialog.getThemeName();
         assertEquals("Unexpected theme attribute on dialog", expected, actual);

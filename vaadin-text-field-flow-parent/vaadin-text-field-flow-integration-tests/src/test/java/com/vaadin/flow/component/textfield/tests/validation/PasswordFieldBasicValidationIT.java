@@ -161,12 +161,23 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
+    public void detach_attachAndInvalidate_preservesInvalidState() {
+        detachField();
+        attachAndInvalidateField();
 
-        detachAndReattachField();
+        assertServerInvalid();
+        assertClientInvalid();
+    }
 
-        assertWebComponentCanNotModifyInvalidState();
+    @Test
+    public void detach_hide_attach_showAndInvalidate_preservesInvalidState() {
+        detachField();
+        hideField();
+        attachField();
+        showAndInvalidateField();
+
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test

@@ -15,10 +15,7 @@
  */
 package com.vaadin.flow.component.splitlayout.tests;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import org.junit.Assert;
 
 import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
 import com.vaadin.testbench.TestBenchElement;
@@ -37,9 +34,14 @@ class SplitLayoutAssertions {
         int expectedWidth = (int) Math
                 .round((layoutWidth - splitterWidth) * percentage / 100);
 
-        assertThat(childWidth,
-                allOf(greaterThanOrEqualTo(expectedWidth - MARGIN),
-                        lessThanOrEqualTo(expectedWidth + MARGIN)));
+        Assert.assertTrue(
+                "Child width " + childWidth + " should be >= "
+                        + (expectedWidth - MARGIN),
+                childWidth >= expectedWidth - MARGIN);
+        Assert.assertTrue(
+                "Child width " + childWidth + " should be <= "
+                        + (expectedWidth + MARGIN),
+                childWidth <= expectedWidth + MARGIN);
     }
 
     public static void assertChildHeightInPercentage(
@@ -52,8 +54,13 @@ class SplitLayoutAssertions {
         int expectedHeight = (int) Math
                 .round((layoutHeight - splitterHeight) * percentage / 100);
 
-        assertThat(childHeight,
-                allOf(greaterThanOrEqualTo(expectedHeight - MARGIN),
-                        lessThanOrEqualTo(expectedHeight + MARGIN)));
+        Assert.assertTrue(
+                "Child height " + childHeight + " should be >= "
+                        + (expectedHeight - MARGIN),
+                childHeight >= expectedHeight - MARGIN);
+        Assert.assertTrue(
+                "Child height " + childHeight + " should be <= "
+                        + (expectedHeight + MARGIN),
+                childHeight <= expectedHeight + MARGIN);
     }
 }

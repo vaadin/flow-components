@@ -86,7 +86,7 @@ public class ItemCountEstimateIncreaseComboBoxIT
 
         // Open the combo box drop down and scroll again to last item
         scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (unknownCountBackendItemsCount - 1));
 
         // since the end was reached, only a reset() to data provider will reset
@@ -95,7 +95,7 @@ public class ItemCountEstimateIncreaseComboBoxIT
         verifyItemsCount(unknownCountBackendItemsCount);
         // Open the combo box drop down and scroll again to last item
         scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (unknownCountBackendItemsCount - 1));
     }
 

@@ -68,12 +68,11 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Vaadin Charts is a feature-rich interactive charting library for Vaadin. It
@@ -90,17 +89,13 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/charts", version = "25.0.0")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private Configuration configuration;
 
     private Registration configurationUpdateRegistration;
-
-    private transient JreJsonFactory jsonFactory = new JreJsonFactory();
 
     private final ConfigurationChangeListener changeListener = new ProxyChangeForwarder(
             this);
@@ -164,14 +159,6 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         }
     }
 
-    JreJsonFactory getJsonFactory() {
-        if (jsonFactory == null) {
-            jsonFactory = new JreJsonFactory();
-        }
-
-        return jsonFactory;
-    }
-
     /**
      * Draws a chart using the current configuration.
      *
@@ -206,8 +193,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public void drawChart(boolean resetConfiguration) {
         validateTimelineAndConfiguration();
 
-        final JsonObject configurationNode = getJsonFactory()
-                .parse(ChartSerialization.toJSON(configuration));
+        final ObjectNode configurationNode = JacksonUtils
+                .readTree(ChartSerialization.toJSON(configuration));
 
         getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
@@ -228,7 +215,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * Enabling timeline mode in these unsupported chart types results in an
      * <code>IllegalArgumentException</code>
      * <p>
-     * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
+     * Note: for Timeline chart type see {@link ChartType#TIMELINE} and
      * {@link PlotOptionsTimeline}.
      *
      * @param timeline
@@ -610,7 +597,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Adds a point drag start listener, which will be notified when starting to
      * drag a point.
-     * 
+     *
      * @param listener
      */
     public Registration addPointDragStartListener(
@@ -620,7 +607,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     /**
      * Adds a point drop listener, which will be notified point is dropped.
-     * 
+     *
      * @param listener
      */
     public Registration addPointDropListener(
@@ -631,7 +618,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Adds a point drag listener, which will be notified while point is
      * dragged.
-     * 
+     *
      * @param listener
      */
     public Registration addPointDragListener(
@@ -751,8 +738,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
                     toJsonValue((AbstractConfigurationObject) drilldownSeries));
         }
 
-        private JsonValue toJsonValue(AbstractConfigurationObject series) {
-            return getJsonFactory().parse(ChartSerialization.toJSON(series));
+        private ObjectNode toJsonValue(AbstractConfigurationObject series) {
+            return JacksonUtils.readTree((ChartSerialization.toJSON(series)));
         }
 
         private Series resolveSeriesFor(int seriesIndex) {

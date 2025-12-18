@@ -36,7 +36,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.timepicker.TimePicker;
@@ -271,13 +270,6 @@ public class TimePickerTest {
     public void implementsHasAllowedCharPattern() {
         Assert.assertTrue("TimePicker should support char pattern",
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new TimePicker().getClass()));
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("TimePicker should support overlay class name",
-                HasOverlayClassName.class
                         .isAssignableFrom(new TimePicker().getClass()));
     }
 

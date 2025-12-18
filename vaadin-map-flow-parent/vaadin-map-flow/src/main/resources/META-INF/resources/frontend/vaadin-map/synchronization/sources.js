@@ -8,6 +8,7 @@
  * license.
  */
 import Collection from 'ol/Collection';
+import Cluster from 'ol/source/Cluster';
 import ImageWMS from 'ol/source/ImageWMS';
 import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from 'ol/source/OSM';
 import TileWMS from 'ol/source/TileWMS';
@@ -123,6 +124,22 @@ export function synchronizeVectorSource(target, source, context) {
   }
   synchronizeSource(target, source, context);
   synchronizeCollection(target.getFeaturesCollection(), source.features, context);
+
+  return target;
+}
+
+export function synchronizeCluster(target, source, context) {
+  if (!target) {
+    target = new Cluster(
+      createOptions({
+        ...source,
+        source: new VectorSource({ features: new Collection() })
+      })
+    );
+  }
+  target.setDistance(source.distance);
+  target.setMinDistance(source.minDistance);
+  synchronizeCollection(target.getSource().getFeaturesCollection(), source.features, context);
 
   return target;
 }

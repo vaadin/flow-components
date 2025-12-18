@@ -34,7 +34,7 @@ public class ComboBoxInTemplateIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        message = $("label").id("message");
+        message = $("span").id("message");
         box1 = $("wrapper-template").first().$("combo-box-in-a-template")
                 .first().$(ComboBoxElement.class).first();
         box2 = $("wrapper-template").first().$("combo-box-in-a-template2")

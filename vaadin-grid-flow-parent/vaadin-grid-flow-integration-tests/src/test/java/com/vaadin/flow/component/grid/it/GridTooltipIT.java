@@ -92,6 +92,7 @@ public class GridTooltipIT extends AbstractComponentIT {
         scrollToElement(grid);
         // set grid tooltip
         clickElementWithJs("set-grid-tooltip-button");
+        flushScrolling(grid);
         // check column has grid's tooltip
         showTooltip(grid.getCell(1, 1));
         Assert.assertEquals("Grid's tooltip! Jill", getActiveTooltipText());
@@ -100,6 +101,16 @@ public class GridTooltipIT extends AbstractComponentIT {
         // check column now has column tooltip
         showTooltip(grid.getCell(1, 1));
         Assert.assertEquals("Age of the person is 33", getActiveTooltipText());
+    }
+
+    @Test
+    public void setMarkdownTooltip() {
+        clickElementWithJs("set-markdown-tooltip-button");
+        flushScrolling(grid);
+        showTooltip(grid.getCell(0, 0));
+        Assert.assertEquals(
+                "<p><strong>Markdown</strong> <em>tooltip</em> for Jack</p>",
+                getActiveTooltipHtmlContent());
     }
 
     @Test
@@ -123,7 +134,13 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     private String getActiveTooltipText() {
-        return findElement(By.tagName("vaadin-tooltip-overlay")).getText();
+        return findElement(By.tagName("vaadin-tooltip")).getText();
+    }
+
+    private String getActiveTooltipHtmlContent() {
+        return $("vaadin-tooltip").first().$("div")
+                .withAttribute("slot", "overlay").first()
+                .getAttribute("innerHTML").strip();
     }
 
     /**

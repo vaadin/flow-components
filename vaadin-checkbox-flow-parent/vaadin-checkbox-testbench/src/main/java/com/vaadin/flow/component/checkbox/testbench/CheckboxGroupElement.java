@@ -22,12 +22,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-checkbox-group")
 public class CheckboxGroupElement extends TestBenchElement
-        implements HasHelper {
+        implements HasHelper, HasValidation {
 
     /**
      * Gets the labels of checkboxes that are part of this group.

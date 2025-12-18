@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import java.time.Instant;
-import java.util.Date;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
@@ -719,12 +718,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * values are null to disable, "normal" to stack by value or "percent".
      */
     public abstract void setStacking(Stacking stacking);
-
-    /**
-     * @see #setPointStart(Number)
-     */
-    @Deprecated
-    public abstract void setPointStart(Date date);
 
     /**
      * @see #setPointStart(Number)

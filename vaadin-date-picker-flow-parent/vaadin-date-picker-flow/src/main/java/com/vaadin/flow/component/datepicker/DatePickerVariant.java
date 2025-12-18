@@ -26,12 +26,12 @@ public enum DatePickerVariant implements ThemeVariant {
     LUMO_ALIGN_CENTER("align-center"),
     LUMO_ALIGN_RIGHT("align-right"),
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_ALWAYS_FLOAT_LABEL("always-float-label");
+    AURA_ALIGN_LEFT("align-left"),
+    AURA_ALIGN_CENTER("align-center"),
+    AURA_ALIGN_RIGHT("align-right"),
+    AURA_ALIGN_START("align-start"),
+    AURA_ALIGN_END("align-end"),
+    AURA_HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;
 

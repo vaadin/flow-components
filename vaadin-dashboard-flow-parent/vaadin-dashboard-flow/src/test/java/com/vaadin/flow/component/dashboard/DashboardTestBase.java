@@ -19,12 +19,12 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class DashboardTestBase {
 
@@ -56,24 +56,23 @@ public class DashboardTestBase {
         });
     }
 
-    protected static JsonArray getItemsArray(
+    protected static ArrayNode getItemsArray(
             List<Component> rootLevelComponents) {
-        JsonArray itemsArray = Json.createArray();
+        ArrayNode itemsArray = JacksonUtils.createArrayNode();
         rootLevelComponents.forEach(child -> {
-            JsonObject rootLevelItem = Json.createObject();
+            ObjectNode rootLevelItem = JacksonUtils.createObjectNode();
             rootLevelItem.put("id", child.getElement().getNode().getId());
             if (child instanceof DashboardSection section) {
-                JsonArray sectionItemsArray = Json.createArray();
+                ArrayNode sectionItemsArray = JacksonUtils.createArrayNode();
                 section.getWidgets().forEach(widget -> {
-                    JsonObject sectionItem = Json.createObject();
+                    ObjectNode sectionItem = JacksonUtils.createObjectNode();
                     sectionItem.put("id",
                             widget.getElement().getNode().getId());
-                    sectionItemsArray.set(sectionItemsArray.length(),
-                            sectionItem);
+                    sectionItemsArray.add(sectionItem);
                 });
-                rootLevelItem.put("items", sectionItemsArray);
+                rootLevelItem.set("items", sectionItemsArray);
             }
-            itemsArray.set(itemsArray.length(), rootLevelItem);
+            itemsArray.add(rootLevelItem);
         });
         return itemsArray;
     }
@@ -110,14 +109,10 @@ public class DashboardTestBase {
     }
 
     protected DashboardWidget getNewWidget() {
-        var widget = new DashboardWidget();
-        widget.setFeatureFlagEnabled(true);
-        return widget;
+        return new DashboardWidget();
     }
 
     protected Dashboard getNewDashboard() {
-        var dashboard = new Dashboard();
-        dashboard.setFeatureFlagEnabled(true);
-        return dashboard;
+        return new Dashboard();
     }
 }

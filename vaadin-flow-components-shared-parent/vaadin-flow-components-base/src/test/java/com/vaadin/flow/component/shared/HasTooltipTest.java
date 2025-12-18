@@ -96,6 +96,32 @@ public class HasTooltipTest {
         component.setTooltipText("foo");
         Assert.assertEquals("foo",
                 getTooltipElement(component).get().getProperty("text"));
+        Assert.assertFalse(getTooltipElement(component).get()
+                .getProperty("markdown", false));
+    }
+
+    @Test
+    public void setTooltipMarkdown_tooltipHasMarkdown() {
+        component.setTooltipMarkdown("**Markdown** _foo_");
+        Assert.assertEquals("**Markdown** _foo_",
+                getTooltipElement(component).get().getProperty("text"));
+        Assert.assertTrue(getTooltipElement(component).get()
+                .getProperty("markdown", false));
+    }
+
+    @Test
+    public void switchContentTypes() {
+        component.setTooltipText("foo");
+        Assert.assertFalse(getTooltipElement(component).get()
+                .getProperty("markdown", false));
+
+        component.setTooltipMarkdown("**Markdown** _foo_");
+        Assert.assertTrue(getTooltipElement(component).get()
+                .getProperty("markdown", false));
+
+        component.setTooltipText("foo");
+        Assert.assertFalse(getTooltipElement(component).get()
+                .getProperty("markdown", false));
     }
 
     @Test

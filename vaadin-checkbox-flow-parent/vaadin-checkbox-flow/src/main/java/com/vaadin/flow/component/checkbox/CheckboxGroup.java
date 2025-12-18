@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
@@ -42,8 +41,6 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
@@ -74,10 +71,10 @@ import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * CheckBoxGroup is a multi-selection component where items are displayed as
@@ -114,14 +111,12 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.0.0")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
-        implements HasAriaLabel, HasClientValidation,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasItemComponents<T>,
+        implements HasAriaLabel, HasDataView<T, Void, CheckboxGroupDataView<T>>,
+        HasItemComponents<T>,
         InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
@@ -173,9 +168,11 @@ public class CheckboxGroup<T>
      * Creates an empty checkbox group
      */
     public CheckboxGroup() {
-        super("value", Collections.emptySet(), JsonArray.class,
+        super("value", Collections.emptySet(), ArrayNode.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation);
+
+        getElement().setProperty("manualValidation", true);
 
         addValueChangeListener(e -> validate());
 
@@ -279,13 +276,6 @@ public class CheckboxGroup<T>
             T... items) {
         this(label, listener);
         setItems(items);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     @Override
@@ -749,7 +739,7 @@ public class CheckboxGroup<T>
         // we need to compare old value with new value to see if any disabled
         // items changed their value
         Set<T> value = presentationToModel(this,
-                (JsonArray) getElement().getPropertyRaw(VALUE));
+                (ArrayNode) getElement().getPropertyRaw(VALUE));
         Set<T> oldValue = getValue();
 
         // disabled items cannot change their value
@@ -910,27 +900,25 @@ public class CheckboxGroup<T>
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
-            JsonArray presentation) {
+            ArrayNode presentation) {
         if (group.keyMapper == null) {
             return Collections.emptySet();
         }
-        JsonArray array = presentation;
         Set<T> set = new HashSet<>();
-        for (int i = 0; i < array.length(); i++) {
-            set.add(group.keyMapper.get(array.getString(i)));
+        for (int i = 0; i < presentation.size(); i++) {
+            set.add(group.keyMapper.get(presentation.get(i).asString()));
         }
         return set;
     }
 
-    private static <T> JsonArray modelToPresentation(CheckboxGroup<T> group,
+    private static <T> ArrayNode modelToPresentation(CheckboxGroup<T> group,
             Set<T> model) {
-        JsonArray array = Json.createArray();
+        ArrayNode array = JacksonUtils.createArrayNode();
         if (model.isEmpty()) {
             return array;
         }
 
-        model.stream().map(group.keyMapper::key)
-                .forEach(key -> array.set(array.length(), key));
+        model.stream().map(group.keyMapper::key).forEach(array::add);
         return array;
     }
 

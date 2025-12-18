@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.avatar.tests;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,9 +23,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
-import com.vaadin.flow.component.avatar.AvatarGroupVariant;
-import com.vaadin.flow.component.avatar.AvatarVariant;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 
 public class AvatarGroupTest {
 
@@ -138,25 +134,6 @@ public class AvatarGroupTest {
     }
 
     @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        avatarGroup.addThemeVariants(AvatarGroupVariant.LUMO_LARGE);
-
-        Set<String> themeNames = avatarGroup.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
-    }
-
-    @Test
-    public void addThemeVariant_removeThemeVariant_doesNotContainThemeVariant() {
-        avatarGroup.addThemeVariants(AvatarGroupVariant.LUMO_LARGE);
-        avatarGroup.removeThemeVariants(AvatarGroupVariant.LUMO_LARGE);
-
-        Set<String> themeNames = avatarGroup.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
-    }
-
-    @Test
     public void setI18n() {
         AvatarGroup.AvatarGroupI18n i18n = new AvatarGroup.AvatarGroupI18n()
                 .setAnonymous("anonyymi")
@@ -165,12 +142,5 @@ public class AvatarGroupTest {
 
         avatarGroup.setI18n(i18n);
         Assert.assertEquals(i18n, avatarGroup.getI18n());
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("AvatarGroup should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new AvatarGroup().getClass()));
     }
 }

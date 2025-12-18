@@ -15,20 +15,14 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
@@ -36,10 +30,8 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonNull;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @TestPath("vaadin-virtual-list/virtual-list-test")
 public class VirtualListIT extends AbstractComponentIT {
@@ -116,25 +108,26 @@ public class VirtualListIT extends AbstractComponentIT {
     public void templateFromRendererWithPeople() {
         WebElement list = findElement(By.id("template-renderer-with-people"));
 
-        JsonArray items = getItems(getDriver(), list);
-        Assert.assertEquals(3, items.length());
-        for (int i = 0; i < items.length(); i++) {
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
+        Assert.assertEquals(3, items.size());
+        for (int i = 0; i < items.size(); i++) {
+            ObjectNode item = (ObjectNode) items.get(i);
             Assert.assertEquals(String.valueOf(i + 1),
-                    items.getObject(i).getString("key"));
+                    item.get("key").asString());
             Assert.assertEquals("Person " + (i + 1),
-                    getPropertyString(items.getObject(i), "name"));
+                    getPropertyString(item, "name"));
             Assert.assertEquals(String.valueOf(i + 1),
-                    getPropertyString(items.getObject(i), "age"));
+                    getPropertyString(item, "age"));
             Assert.assertEquals("person_" + (i + 1),
-                    getPropertyString(items.getObject(i), "user"));
+                    getPropertyString(item, "user"));
         }
 
         WebElement update = findElement(
                 By.id("template-renderer-with-people-update-item"));
 
         scrollIntoViewAndClick(update);
-        items = getItems(getDriver(), list);
-        JsonObject person = items.getObject(0);
+        items = VirtualListHelpers.getItems(getDriver(), list);
+        ObjectNode person = (ObjectNode) items.get(0);
         Assert.assertEquals("Person 1 Updated",
                 getPropertyString(person, "name"));
         Assert.assertEquals("person_1_updated",
@@ -146,31 +139,32 @@ public class VirtualListIT extends AbstractComponentIT {
     public void lazyLoaded() {
         WebElement list = findElement(By.id("lazy-loaded"));
 
-        JsonArray items = getItems(getDriver(), list);
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
         // the items are preallocated in the list, but they are empty
-        Assert.assertEquals(100, items.length());
+        Assert.assertEquals(100, items.size());
 
         // Last received index
         int lastReceivedKey = 28;
         assertItemsArePresent(items, 0, lastReceivedKey, "Item ");
 
         // all the remaining items should be empty
-        for (int i = lastReceivedKey; i < items.length(); i++) {
-            MatcherAssert.assertThat(items.get(i),
-                    CoreMatchers.instanceOf(JsonNull.class));
+        for (int i = lastReceivedKey; i < items.size(); i++) {
+            Assert.assertTrue("Item at index " + i + " should be JsonNull",
+                    items.get(i).isNull());
         }
 
         scrollToBottom(list);
-        waitUntil(driver -> getItems(driver, list).get(0) instanceof JsonNull);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list).get(0)
+                .isNull());
 
-        items = getItems(getDriver(), list);
+        items = VirtualListHelpers.getItems(getDriver(), list);
 
         // all the initial items should be empty
-        assertItemsAreNotPresent(items, 0, items.length() - lastReceivedKey);
+        assertItemsAreNotPresent(items, 0, items.size() - lastReceivedKey);
 
         // the last [lastReceivedKey] items should have data
-        assertItemsArePresent(items, items.length() - lastReceivedKey,
-                items.length(), "Item ");
+        assertItemsArePresent(items, items.size() - lastReceivedKey,
+                items.size(), "Item ");
     }
 
     @Test
@@ -216,19 +210,22 @@ public class VirtualListIT extends AbstractComponentIT {
         // clicks on the first item to remove it
         WebElement item = findElement(By.id("template-events-item-0"));
         scrollIntoViewAndClick(item);
-        waitUntil(driver -> getItems(driver, list).length() == 2);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .size() == 2);
         Assert.assertEquals("Clickable item 1 removed", message.getText());
 
         // clicks on the last item to remove it
         item = findElement(By.id("template-events-item-1"));
         scrollIntoViewAndClick(item);
-        waitUntil(driver -> getItems(driver, list).length() == 1);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .size() == 1);
         Assert.assertEquals("Clickable item 3 removed", message.getText());
 
         // clicks on the first item again to remove it
         item = findElement(By.id("template-events-item-0"));
         scrollIntoViewAndClick(item);
-        waitUntil(driver -> getItems(driver, list).length() == 0);
+        waitUntil(
+                driver -> VirtualListHelpers.getItems(driver, list).isEmpty());
         Assert.assertEquals("Clickable item 2 removed", message.getText());
     }
 
@@ -264,8 +261,9 @@ public class VirtualListIT extends AbstractComponentIT {
 
         assertListContainsMaxItems(items.size(), 25);
 
-        MatcherAssert.assertThat(list.getDomProperty("innerText"), CoreMatchers
-                .not(CoreMatchers.containsString("the-placeholder")));
+        String innerText = list.getDomProperty("innerText");
+        Assert.assertFalse("Inner text should not contain 'the-placeholder'",
+                innerText.contains("the-placeholder"));
 
         // Scroll to bottom and set an attribute when a placeholder becomes
         // visible.
@@ -294,10 +292,10 @@ public class VirtualListIT extends AbstractComponentIT {
         waitUntil(driver -> list.getDomProperty("innerText")
                 .contains("Person 100"));
 
-        MatcherAssert.assertThat(
+        String listInnerText = list.getDomProperty("innerText");
+        Assert.assertFalse(
                 "The VirtualList shouldn't display any placeholders after the data is loaded",
-                list.getDomProperty("innerText"), CoreMatchers
-                        .not(CoreMatchers.containsString("the-placeholder")));
+                listInnerText.contains("the-placeholder"));
 
         assertListContainsMaxItems(items.size(), 25);
     }
@@ -307,86 +305,6 @@ public class VirtualListIT extends AbstractComponentIT {
                 "VirtualList shouldn't load this many items at once. "
                         + "Expected at most %s, but got %s.",
                 maxItems, numOfItems), numOfItems <= maxItems);
-    }
-
-    @Test
-    public void detachableList_changeContainers_itemsAreStillShown() {
-        WebElement container1 = findElement(
-                By.id("detachable-list-container-1"));
-        WebElement container2 = findElement(
-                By.id("detachable-list-container-2"));
-        WebElement attach1 = findElement(By.id("detachable-list-attach-1"));
-        WebElement attach2 = findElement(By.id("detachable-list-attach-2"));
-
-        WebElement list = container1.findElement(By.id("detachable-list"));
-        assertItemsArePresent(list, 20);
-
-        // sets a property on the $connector, to validate that the connector
-        // is not reset when changing containers
-        executeScript("arguments[0].$connector._isUsingTheSameInstance = true",
-                list);
-
-        attach2.click();
-        list = container2.findElement(By.id("detachable-list"));
-        assertItemsArePresent(list, 20);
-        Assert.assertTrue("The $connector instance should be preserved",
-                (Boolean) executeScript(
-                        "return arguments[0].$connector._isUsingTheSameInstance",
-                        list));
-
-        attach1.click();
-        list = container1.findElement(By.id("detachable-list"));
-        assertItemsArePresent(list, 20);
-        Assert.assertTrue("The $connector instance should be preserved",
-                (Boolean) executeScript(
-                        "return arguments[0].$connector._isUsingTheSameInstance",
-                        list));
-    }
-
-    @Test
-    public void detachableList_detachAndReattach_itemsAreStillShown() {
-        WebElement container1 = findElement(
-                By.id("detachable-list-container-1"));
-        WebElement attach1 = findElement(By.id("detachable-list-attach-1"));
-        WebElement detach = findElement(By.id("detachable-list-detach"));
-
-        WebElement list = container1.findElement(By.id("detachable-list"));
-        scrollToElement(list);
-
-        assertItemsArePresent(list, 20);
-
-        detach.click();
-        waitForElementNotPresent(By.id("detachable-list"));
-        attach1.click();
-        list = container1.findElement(By.id("detachable-list"));
-        assertItemsArePresent(list, 20);
-    }
-
-    @Test
-    public void detachableList_setInvisibleAndVisible_itemsAreStillShown() {
-        WebElement container1 = findElement(
-                By.id("detachable-list-container-1"));
-        WebElement invisible = findElement(By.id("detachable-list-invisible"));
-        WebElement visible = findElement(By.id("detachable-list-visible"));
-
-        WebElement list = container1.findElement(By.id("detachable-list"));
-        scrollToElement(list);
-
-        assertItemsArePresent(list, 20);
-        // sets a property on the $connector, to validate that the connector
-        // is not reset when changing visibility
-        executeScript("arguments[0].$connector._isUsingTheSameInstance = true",
-                list);
-
-        invisible.click();
-        waitUntil(driver -> "true".equals(list.getDomAttribute("hidden")));
-        visible.click();
-        waitUntil(driver -> list.getDomAttribute("hidden") == null);
-        assertItemsArePresent(list, 20);
-        Assert.assertTrue("The $connector instance should be preserved",
-                (Boolean) executeScript(
-                        "return arguments[0].$connector._isUsingTheSameInstance",
-                        list));
     }
 
     @Test
@@ -430,12 +348,12 @@ public class VirtualListIT extends AbstractComponentIT {
         Assert.assertEquals(3, items.size());
 
         // JDK16 adds extra comma after year in en_US
-        Assert.assertTrue(
-                items.get(0).getText().matches("January 1, 2001,? 1:01 AM"));
-        Assert.assertTrue(
-                items.get(1).getText().matches("February 2, 2002,? 2:02 AM"));
-        Assert.assertTrue(
-                items.get(2).getText().matches("March 3, 2003,? 3:03 AM"));
+        Assert.assertTrue(items.get(0).getText()
+                .matches("January 1, 2001,? 1:01[ \\u00A0\\u202F]AM"));
+        Assert.assertTrue(items.get(1).getText()
+                .matches("February 2, 2002,? 2:02[ \\u00A0\\u202F]AM"));
+        Assert.assertTrue(items.get(2).getText()
+                .matches("March 3, 2003,? 3:03[ \\u00A0\\u202F]AM"));
     }
 
     @Test
@@ -465,36 +383,25 @@ public class VirtualListIT extends AbstractComponentIT {
         executeScript("arguments[0].scrollBy(0,10000);", virtualList);
     }
 
-    private void assertItemsArePresent(WebElement list, int length) {
-        JsonArray items = getItems(driver, list);
-        Assert.assertEquals(length, items.length());
-        for (int i = 0; i < items.length(); i++) {
-            JsonObject obj = items.getObject(i);
-            Assert.assertEquals("Person " + (i + 1),
-                    getPropertyString(obj, "label"));
-        }
-    }
-
-    private void assertItemsArePresent(JsonArray items, int startingIndex,
+    private void assertItemsArePresent(ArrayNode items, int startingIndex,
             int endingIndex, String itemLabelprefix) {
 
         for (int i = startingIndex; i < endingIndex; i++) {
-            MatcherAssert.assertThat(
+            Assert.assertFalse(
                     "Object at index " + i + " is null, when it shouldn't be",
-                    items.get(i),
-                    CoreMatchers.not(CoreMatchers.instanceOf(JsonNull.class)));
+                    items.get(i).isNull());
             Assert.assertEquals(itemLabelprefix + (i + 1),
-                    getPropertyString(items.getObject(i), "label"));
+                    getPropertyString((ObjectNode) items.get(i), "label"));
         }
     }
 
-    private void assertItemsAreNotPresent(JsonArray items, int startingIndex,
+    private void assertItemsAreNotPresent(ArrayNode items, int startingIndex,
             int endingIndex) {
 
         for (int i = startingIndex; i < endingIndex; i++) {
-            MatcherAssert.assertThat(
+            Assert.assertTrue(
                     "Object at index " + i + " is not null, when it should be",
-                    items.get(i), CoreMatchers.instanceOf(JsonNull.class));
+                    items.get(i).isNull());
         }
     }
 
@@ -502,8 +409,8 @@ public class VirtualListIT extends AbstractComponentIT {
             String itemLabelPrefixForFirstSet) {
         WebElement list = findElement(By.id(listId));
 
-        JsonArray items = getItems(getDriver(), list);
-        Assert.assertEquals(3, items.length());
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
+        Assert.assertEquals(3, items.size());
 
         assertItemsArePresent(items, 0, 3, itemLabelPrefixForFirstSet);
     }
@@ -515,21 +422,22 @@ public class VirtualListIT extends AbstractComponentIT {
         WebElement set2Items = findElement(By.id(buttonIdFor2Items));
 
         scrollIntoViewAndClick(set2Items);
-        waitUntil(driver -> getItems(driver, list).length() == 2);
-        JsonArray items = getItems(getDriver(), list);
-        for (int i = 0; i < items.length(); i++) {
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .size() == 2);
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
+        for (int i = 0; i < items.size(); i++) {
             Assert.assertEquals(
                     "The label of the initial object at the index " + i
                             + " of the list '" + listId + "' is wrong",
                     itemLabelPrefixForSecondSet + (i + 1),
-                    getPropertyString(items.getObject(i), "label"));
+                    getPropertyString((ObjectNode) items.get(i), "label"));
         }
     }
 
-    private String getPropertyString(JsonObject json, String propertyName) {
-        var keyForProperty = Arrays.stream(json.keys())
+    private String getPropertyString(ObjectNode json, String propertyName) {
+        var keyForProperty = json.propertyNames().stream()
                 .filter(key -> key.endsWith(propertyName)).findFirst().get();
-        return json.getString(keyForProperty);
+        return json.get(keyForProperty).asString();
     }
 
     private void clickToSet3Items_listIsUpdated(String listId,
@@ -539,14 +447,15 @@ public class VirtualListIT extends AbstractComponentIT {
         WebElement set3Items = findElement(By.id(buttonIdFor3Items));
 
         scrollIntoViewAndClick(set3Items);
-        waitUntil(driver -> getItems(driver, list).length() == 3);
-        JsonArray items = getItems(getDriver(), list);
-        for (int i = 0; i < items.length(); i++) {
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .size() == 3);
+        ArrayNode items = VirtualListHelpers.getItems(getDriver(), list);
+        for (int i = 0; i < items.size(); i++) {
             Assert.assertEquals(
                     "The label of the updated object at the index " + i
                             + " of the list '" + listId + "' is wrong",
                     itemLabelPrefixForFirstSet + (i + 1),
-                    getPropertyString(items.getObject(i), "label"));
+                    getPropertyString((ObjectNode) items.get(i), "label"));
         }
     }
 
@@ -557,30 +466,7 @@ public class VirtualListIT extends AbstractComponentIT {
 
         WebElement set0Items = findElement(By.id(buttonIdFor0Items));
         scrollIntoViewAndClick(set0Items);
-        waitUntil(driver -> getItems(driver, list).length() == 0);
+        waitUntil(
+                driver -> VirtualListHelpers.getItems(driver, list).isEmpty());
     }
-
-    public static JsonArray getItems(WebDriver driver, WebElement element) {
-        Object result = ((JavascriptExecutor) driver)
-                .executeScript("return arguments[0].items;", element);
-        JsonArray array = Json.createArray();
-        if (!(result instanceof List)) {
-            return array;
-        }
-        List<Map<String, ?>> list = (List<Map<String, ?>>) result;
-        for (int i = 0; i < list.size(); i++) {
-            Map<String, ?> map = list.get(i);
-            if (map != null) {
-                JsonObject obj = Json.createObject();
-                map.entrySet().forEach(entry -> {
-                    obj.put(entry.getKey(), String.valueOf(entry.getValue()));
-                });
-                array.set(i, obj);
-            } else {
-                array.set(i, Json.createNull());
-            }
-        }
-        return array;
-    }
-
 }

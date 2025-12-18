@@ -10,6 +10,7 @@ package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.StyleElement;
+import com.google.gwt.user.client.Event;
 
 public class SheetJsniUtil {
 
@@ -156,4 +157,27 @@ public class SheetJsniUtil {
           && $wnd.Vaadin.Flow.clients[appId]
           && $wnd.Vaadin.Flow.clients[appId].getByNodeId(parseInt(nodeId));
     }-*/;
+
+    public static native Element[] getComposedPath(Event event)
+    /*-{
+        return event.composedPath();
+    }-*/;
+
+    public static native Element[] getAssignedElements(Element slot)
+    /*-{
+        return slot.assignedElements();
+    }-*/;
+
+    /**
+     * Gets the part attribute of the given element as a {@link DOMTokenList}.
+     * This is a helper method to access the 'part' property of a web component,
+     * which is not directly available on the standard {@link Element} API.
+     *
+     * @param element
+     *            The element from which to retrieve the part names.
+     * @return A {@link DOMTokenList} containing the part names of the element.
+     */
+    public static DOMTokenList partOf(Element element) {
+        return ((ElementWithPart) element.cast()).getPart();
+    }
 }

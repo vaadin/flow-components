@@ -59,6 +59,8 @@ public class RichTextEditorI18nPage extends Div {
                 .setSuperscript("Superscript custom")
                 .setListOrdered("Ordered list custom")
                 .setListBullet("Bullet list custom")
+                .setOutdent("Outdent custom")
+                .setIndent("Indent custom")
                 .setAlignLeft("Align left custom")
                 .setAlignCenter("Align center custom")
                 .setAlignRight("Align right custom")

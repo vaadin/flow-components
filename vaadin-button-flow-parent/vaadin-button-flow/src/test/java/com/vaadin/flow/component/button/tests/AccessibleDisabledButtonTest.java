@@ -31,12 +31,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.Json;
 
 public class AccessibleDisabledButtonTest {
 
@@ -172,7 +171,8 @@ public class AccessibleDisabledButtonTest {
 
     private void fakeClientDomEvent(Component component, String eventName) {
         Element element = component.getElement();
-        DomEvent event = new DomEvent(element, eventName, Json.createObject());
+        DomEvent event = new DomEvent(element, eventName,
+                JacksonUtils.createObjectNode());
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 }

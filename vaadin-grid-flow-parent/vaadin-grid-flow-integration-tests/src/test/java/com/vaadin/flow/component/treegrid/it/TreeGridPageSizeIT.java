@@ -37,7 +37,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
     public void treegridWithPageSize10_changeTo80_revertBackTo10() {
         TreeGridElement grid = getTreeGrid();
 
-        waitUntil(test -> grid.getNumberOfExpandedRows() == 12, 1);
         // assert here only minimum required fetches
         assertLogContainsFetch(0, 3, "root");
         assertLogContainsFetch(0, 3, "Granddad 0");
@@ -60,7 +59,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         blur();
         button.click();
 
-        waitUntil(test -> grid.getNumberOfExpandedRows() == 12, 1);
         // assert here only minimum required fetches
         assertLogContainsFetch(0, 3, "root");
         assertLogContainsFetch(0, 3, "Granddad 0");
@@ -80,7 +78,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         blur();
         button.click();
 
-        waitUntil(test -> grid.getNumberOfExpandedRows() == 12, 1);
         // assert here only minimum required fetches
         assertLogContainsFetch(0, 3, "root");
         assertLogContainsFetch(0, 3, "Granddad 0");

@@ -26,9 +26,9 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
 
 public class LitRendererTestComponentWrapper extends Div
         implements HasDataProvider<String> {
@@ -45,10 +45,10 @@ public class LitRendererTestComponentWrapper extends Div
                 }
 
                 @Override
-                public void set(int start, List<JsonValue> items) {
+                public void set(int start, List<JsonNode> items) {
                     getChildren().forEach((component) -> {
                         component.getElement().executeJs("this.items = $0",
-                                items.stream().collect(JsonUtils.asArray()));
+                                items.stream().collect(JacksonUtils.asArray()));
                     });
                 }
 
@@ -129,7 +129,7 @@ public class LitRendererTestComponentWrapper extends Div
     @Override
     public void setItems(Collection<String> items) {
         HasDataProvider.super.setItems(items);
-        dataCommunicator.setRequestedRange(0, items.size());
+        dataCommunicator.setViewportRange(0, items.size());
     }
 
     @Override

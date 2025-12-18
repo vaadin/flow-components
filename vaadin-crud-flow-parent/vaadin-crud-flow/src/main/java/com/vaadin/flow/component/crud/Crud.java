@@ -33,10 +33,10 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A component for performing <a href=
@@ -48,9 +48,7 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/crud", version = "25.0.0")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -296,7 +294,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().callJsFunction("set", "editorOpened", opened);
+        getElement().executeJs("this.editorOpened = $0", opened);
     }
 
     /**
@@ -316,7 +314,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #getSaveButton()
      */
     public void setDirty(boolean dirty) {
-        getElement().executeJs("this.set('__isDirty', $0)", dirty);
+        getElement().executeJs("this.__isDirty = $0", dirty);
     }
 
     /**
@@ -528,7 +526,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     private void setI18n(CrudI18n i18n, boolean fireEvent) {
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
         if (fireEvent) {
             ComponentUtil.fireEvent(this.grid,
                     new CrudI18nUpdatedEvent(this, false, i18n));
@@ -907,11 +905,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
          *            an ignored parameter for a side effect
          */
         public EditEvent(Crud<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
             this.item = source.getGrid().getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asString());
         }
 
         private EditEvent(Crud<E> source, boolean fromClient, E item) {

@@ -369,6 +369,12 @@ public class SpreadsheetJsApiTest {
         assertTrue(new ArrayList().equals(sharedState.namedRanges));
     }
 
+    @Test
+    public void should_updateState_when_setShowCustomEditorOnFocus_isCalled() {
+        api.setShowCustomEditorOnFocus(true);
+        assertEquals(true, sharedState.showCustomEditorOnFocus);
+    }
+
     // CLIENT RPC METHODS
 
     @Test

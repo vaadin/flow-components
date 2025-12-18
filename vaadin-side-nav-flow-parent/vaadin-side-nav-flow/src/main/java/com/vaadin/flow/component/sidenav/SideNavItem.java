@@ -33,8 +33,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.QueryParameters;
@@ -44,7 +45,7 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import com.vaadin.flow.router.internal.HasUrlParameterFormat;
 
-import elemental.json.JsonArray;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * A menu item for the {@link SideNav} component.
@@ -57,10 +58,10 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
-public class SideNavItem extends SideNavItemContainer
-        implements HasEnabled, HasPrefix, HasSuffix {
+public class SideNavItem extends Component implements HasSideNavItems,
+        HasEnabled, HasPrefix, HasSuffix, HasTooltip {
 
     private Element labelElement;
 
@@ -195,11 +196,6 @@ public class SideNavItem extends SideNavItemContainer
         setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
-    }
-
-    @Override
-    protected void setupSideNavItem(SideNavItem item) {
-        item.getElement().setAttribute("slot", "children");
     }
 
     /**
@@ -376,13 +372,13 @@ public class SideNavItem extends SideNavItemContainer
      * @return the path aliases for this item, empty if none
      */
     public Set<String> getPathAliases() {
-        JsonArray pathAliases = (JsonArray) getElement()
+        ArrayNode pathAliases = (ArrayNode) getElement()
                 .getPropertyRaw("pathAliases");
         if (pathAliases == null) {
             return Collections.emptySet();
         }
         return new HashSet<>(
-                JsonSerializer.toObjects(String.class, pathAliases));
+                JacksonSerializer.toObjects(String.class, pathAliases));
     }
 
     /**
@@ -399,7 +395,8 @@ public class SideNavItem extends SideNavItemContainer
         if (pathAliases == null || pathAliases.isEmpty()) {
             getElement().removeProperty("pathAliases");
         } else {
-            JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()
+            ArrayNode aliasesAsJson = JacksonSerializer.toJson(pathAliases
+                    .stream()
                     .map(alias -> Objects.requireNonNull(alias,
                             "Alias to set cannot be null"))
                     .map(this::updateQueryParameters).map(this::sanitizePath)

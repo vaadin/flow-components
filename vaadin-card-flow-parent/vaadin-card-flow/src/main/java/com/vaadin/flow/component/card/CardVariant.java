@@ -23,18 +23,14 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum CardVariant implements ThemeVariant {
     LUMO_ELEVATED("elevated"),
     LUMO_OUTLINED("outlined"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_ELEVATED("elevated"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_OUTLINED("outlined");
+    LUMO_HORIZONTAL("horizontal"),
+    LUMO_STRETCH_MEDIA("stretch-media"),
+    LUMO_COVER_MEDIA("cover-media"),
+    AURA_ELEVATED("elevated"),
+    AURA_OUTLINED("outlined"),
+    AURA_HORIZONTAL("horizontal"),
+    AURA_STRETCH_MEDIA("stretch-media"),
+    AURA_COVER_MEDIA("cover-media");
 
     private final String variant;
 

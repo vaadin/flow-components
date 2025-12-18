@@ -45,9 +45,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -112,17 +109,15 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/select", version = "25.0.0")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
-        implements Focusable<Select<T>>, HasAriaLabel, HasClientValidation,
+        implements Focusable<Select<T>>, HasAriaLabel,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
         InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>,
-        HasListDataView<T, SelectListDataView<T>>, HasOverlayClassName,
-        HasPrefix, HasThemeVariant<SelectVariant>, HasValidationProperties,
+        HasListDataView<T, SelectListDataView<T>>, HasPrefix,
+        HasThemeVariant<SelectVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<Select<T>, T>, HasPlaceholder {
 
     public static final String LABEL_ATTRIBUTE = "label";
@@ -182,6 +177,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         super("value", null, String.class, Select::presentationToModel,
                 Select::modelToPresentation);
 
+        getElement().setProperty("manualValidation", true);
+
         setInvalid(false);
         setOpened(false);
         // Trigger model-to-presentation conversion in constructor, so that
@@ -198,6 +195,53 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
                 new InvalidChangeEvent(this, event.isUserOriginated())));
+    }
+
+    /**
+     * Creates a select with the defined label.
+     *
+     * @param label
+     *            the label describing the select
+     * @see #setLabel(String)
+     */
+    public Select(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a select with the defined label and populated with the items in
+     * the collection.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Collection)
+     */
+    public Select(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a select with the defined label and populated with the items in
+     * the array.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public Select(String label, T... items) {
+        this();
+        setLabel(label);
+        setItems(items);
     }
 
     /**
@@ -294,8 +338,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
 
@@ -897,8 +939,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**

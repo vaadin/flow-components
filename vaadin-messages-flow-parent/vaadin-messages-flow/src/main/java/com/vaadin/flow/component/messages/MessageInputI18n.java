@@ -17,6 +17,8 @@ package com.vaadin.flow.component.messages;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * The internationalization properties for {@link MessageInput}. This can be
  * used to customize and translate the language used in the message input
@@ -26,6 +28,7 @@ import java.io.Serializable;
  *
  * @author Vaadin Ltd.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MessageInputI18n implements Serializable {
     private String message;
     private String send;

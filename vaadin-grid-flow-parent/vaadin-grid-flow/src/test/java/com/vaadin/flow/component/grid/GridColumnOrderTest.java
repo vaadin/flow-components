@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
 public class GridColumnOrderTest {
@@ -46,7 +46,7 @@ public class GridColumnOrderTest {
         secondColumn = grid.addColumn(str -> str).setKey("secondColumn");
         thirdColumn = grid.addColumn(str -> str).setKey("thirdColumn");
         IconRenderer<String> renderer = new IconRenderer<>(
-                generator -> new Label(":D"));
+                generator -> new Span(":D"));
         fourthColumn = grid.addColumn(renderer).setKey("fourthColumn");
     }
 

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -96,20 +95,6 @@ public class EmailFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        EmailFieldElement emailField = $(EmailFieldElement.class).first();
-
-        assertFalse(emailField.hasAttribute("required"));
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(attributeToBe(emailField, "required", "true"));
-
-        button.click();
-        waitUntil(attributeToBe(emailField, "required", ""));
-    }
-
-    @Test
     public void assertClearValue() {
         EmailFieldElement field = $(EmailFieldElement.class)
                 .id("clear-email-field");
@@ -118,9 +103,7 @@ public class EmailFieldPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = field.$("*")
-                .withAttributeContainingWord("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);

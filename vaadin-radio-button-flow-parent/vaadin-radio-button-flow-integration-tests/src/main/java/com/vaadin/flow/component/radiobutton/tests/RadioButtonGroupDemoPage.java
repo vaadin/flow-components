@@ -24,7 +24,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.router.Route;
@@ -70,7 +69,6 @@ public class RadioButtonGroupDemoPage extends Div {
         addDisabled();
         addDisabledItems();
         addReadOnlyGroup();
-        addComponentWithThemeVariant();
     }
 
     private void addHelperText() {
@@ -97,20 +95,6 @@ public class RadioButtonGroupDemoPage extends Div {
 
         addCard("Helper text", groupWitHelperText, groupWitHelperComponent,
                 clearHelperText, clearHelperComponent);
-    }
-
-    private void addComponentWithThemeVariant() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setId("button-group-theme-variant");
-        group.setItems("foo", "bar", "baz");
-        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-
-        NativeButton button = new NativeButton("Remove theme variant",
-                e -> group
-                        .removeThemeVariants(RadioGroupVariant.LUMO_VERTICAL));
-        button.setId("remove-theme-variant-button");
-
-        addCard("Radio Button Theme Variant", group, button);
     }
 
     private void addBasicFeatures() {

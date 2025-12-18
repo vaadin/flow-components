@@ -33,16 +33,16 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
@@ -74,7 +74,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private final String propertyNamespace;
 
     private final Map<String, ValueProvider<SOURCE, ?>> valueProviders = new HashMap<>();
-    private final Map<String, SerializableBiConsumer<SOURCE, JsonArray>> clientCallables = new HashMap<>();
+    private final Map<String, SerializableBiConsumer<SOURCE, ArrayNode>> clientCallables = new HashMap<>();
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
@@ -159,7 +159,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private void setElementRenderer(Element container, String rendererName,
             String templateExpression, ReturnChannelRegistration returnChannel,
-            JsonArray clientCallablesArray, String propertyNamespace) {
+            ArrayNode clientCallablesArray, String propertyNamespace) {
         assert container.getNode().isAttached() : "Container must be attached";
 
         String appId = getElementUI(container).getInternals().getAppId();
@@ -195,11 +195,11 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
                     // Invoked when the client calls one of the client callables
-                    String handlerName = arguments.getString(0);
-                    String itemKey = arguments.getString(1);
-                    JsonArray args = arguments.getArray(2);
+                    String handlerName = arguments.get(0).asString();
+                    String itemKey = arguments.get(1).asString();
+                    ArrayNode args = (ArrayNode) arguments.get(2);
 
-                    SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
+                    SerializableBiConsumer<SOURCE, ArrayNode> handler = clientCallables
                             .get(handlerName);
                     SOURCE item = keyMapper.get(itemKey);
                     if (item != null) {
@@ -207,7 +207,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     }
                 });
 
-        JsonArray clientCallablesArray = JsonUtils
+        ArrayNode clientCallablesArray = JacksonUtils
                 .listToJson(new ArrayList<>(clientCallables.keySet()));
 
         List<Registration> registrations = new ArrayList<>();
@@ -245,16 +245,16 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // see https://github.com/vaadin/flow-components/issues/6256
         return new DataGenerator<SOURCE>() {
             @Override
-            public void generateData(SOURCE item, JsonObject jsonObject) {
+            public void generateData(SOURCE item, ObjectNode jsonObject) {
                 valueProviders.forEach((key, provider) -> {
-                    jsonObject.put(
+                    jsonObject.set(
                             // Prefix the property name with a LitRenderer
                             // instance specific namespace to avoid property
                             // name clashes.
                             // Fixes https://github.com/vaadin/flow/issues/8629
                             // in LitRenderer
                             propertyNamespace + key,
-                            JsonSerializer.toJson(provider.apply(item)));
+                            JacksonSerializer.toJson(provider.apply(item)));
                 });
             }
         };
@@ -288,8 +288,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * }
      * </pre>
      *
-     * Any types supported by the {@link JsonSerializer} are valid types for the
-     * LitRenderer.
+     * Any Jackson types supported are valid for LitRenderer.
      *
      * @param property
      *            the name of the property used inside the template expression,
@@ -381,7 +380,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
      */
     public LitRenderer<SOURCE> withFunction(String functionName,
-            SerializableBiConsumer<SOURCE, JsonArray> handler) {
+            SerializableBiConsumer<SOURCE, ArrayNode> handler) {
         Objects.requireNonNull(functionName);
         Objects.requireNonNull(handler);
 

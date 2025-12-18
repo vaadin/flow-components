@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -130,6 +131,10 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void cellValueEdited(int row, int col, String value) {
+        if (spreadsheet.isCellLocked(new CellAddress(row - 1, col - 1))) {
+            protectedCellWriteAttempted();
+            return;
+        }
         spreadsheet.getCellValueManager().onCellValueChange(col, row, value);
     }
 
@@ -190,6 +195,11 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void actionOnColumnHeader(String actionKey) {
         spreadsheet.getContextMenuManager().onActionOnColumnHeader(actionKey);
+    }
+
+    @Override
+    public void contextMenuClosed() {
+        spreadsheet.getContextMenuManager().onContextMenuClosed();
     }
 
     @Override
@@ -270,14 +280,12 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
         // Check for protected cells at target
         for (int i = 0; i < pasteHeight; i++) {
-            Row row = activesheet.getRow(rowIndex + i);
-            if (row != null) {
-                for (int j = 0; j < pasteWidth; j++) {
-                    Cell cell = row.getCell(colIndex + j);
-                    if (spreadsheet.isCellLocked(cell)) {
-                        protectedCellWriteAttempted();
-                        return;
-                    }
+            for (int j = 0; j < pasteWidth; j++) {
+                CellAddress cellAddress = new CellAddress(rowIndex + i,
+                        colIndex + j);
+                if (spreadsheet.isCellLocked(cellAddress)) {
+                    protectedCellWriteAttempted();
+                    return;
                 }
             }
         }
@@ -334,7 +342,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         for (int x = region.getFirstColumn(); x <= region
                 .getLastColumn(); x++) {
             for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
-                cells.add(new CellReference(y, x));
+                cells.add(new CellReference(
+                        spreadsheet.getActiveSheet().getSheetName(), y, x,
+                        false, false));
             }
         }
         fireCellValueChangeEvent(cells);
@@ -414,7 +424,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                         .getLastColumn(); col++) {
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell != null) {
-                        if (spreadsheet.isCellLocked(cell)) {
+                        if (spreadsheet.isCellLocked(cell.getAddress())) {
                             protectedCellWriteAttempted();
                             return;
                         }
@@ -429,7 +439,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 .getSelectedCellReference();
         Cell cell = spreadsheet.getCell(reference.getRow(), reference.getCol());
         if (cell != null) {
-            if (spreadsheet.isCellLocked(cell)) {
+            if (spreadsheet.isCellLocked(cell.getAddress())) {
                 protectedCellWriteAttempted();
                 return;
             }

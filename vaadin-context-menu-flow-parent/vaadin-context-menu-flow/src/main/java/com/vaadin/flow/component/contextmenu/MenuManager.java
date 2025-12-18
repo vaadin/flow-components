@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -87,7 +88,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     public I addItem(String text) {
         I menuItem = itemGenerator.apply(menu, contentReset);
         menuItem.setText(text);
-        add(menuItem);
+        addComponent(menuItem);
         return menuItem;
     }
 
@@ -100,7 +101,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      */
     public I addItem(Component component) {
         I menuItem = itemGenerator.apply(menu, contentReset);
-        add(menuItem);
+        addComponent(menuItem);
         menuItem.add(component);
         return menuItem;
     }
@@ -156,7 +157,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @see #remove(Component...)
      * @see #addComponentAtIndex(int, Component)
      */
-    public void add(Component... components) {
+    public void addComponent(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
                     "A checkable item cannot have a sub menu");
@@ -177,7 +178,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *
      * @param components
      *            components to remove
-     * @see #add(Component...)
+     * @see #addComponent(Component...)
      */
     public void remove(Component... components) {
         Objects.requireNonNull(components,
@@ -219,7 +220,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @param component
      *            component to insert
      *
-     * @see #add(Component...)
+     * @see #addComponent(Component...)
      * @see #remove(Component...)
      */
     public void addComponentAtIndex(int index, Component component) {
@@ -241,7 +242,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * <p>
      * Children consist of components and items.
      *
-     * @see #add(Component...)
+     * @see #addComponent(Component...)
      * @see #addItem(Component)
      *
      * @see #getItems()
@@ -264,6 +265,13 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     public List<I> getItems() {
         return getChildren().filter(itemType::isInstance).map(itemType::cast)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        addComponent(new Hr());
     }
 
     private void updateChildren() {

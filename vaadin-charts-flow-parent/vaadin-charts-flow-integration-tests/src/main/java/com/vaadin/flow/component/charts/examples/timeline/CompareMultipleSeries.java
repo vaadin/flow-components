@@ -30,6 +30,7 @@ public class CompareMultipleSeries extends AbstractChartExample {
     public void initDemo() {
         final Chart chart = new Chart();
         chart.setTimeline(true);
+        chart.setClassName("CompareMultipleSeries");
 
         Configuration configuration = chart.getConfiguration();
         configuration.getTitle().setText("AAPL Stock Price");

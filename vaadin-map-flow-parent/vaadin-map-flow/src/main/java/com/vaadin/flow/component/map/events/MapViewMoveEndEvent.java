@@ -16,7 +16,7 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.View;
 
-import elemental.json.JsonArray;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Fired when viewport movement has ended.
@@ -32,8 +32,8 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
     public MapViewMoveEndEvent(MapBase source, boolean fromClient,
             @EventData("event.detail.rotation") double rotation,
             @EventData("event.detail.zoom") double zoom,
-            @EventData("event.detail.center") JsonArray center,
-            @EventData("event.detail.extent") JsonArray extent) {
+            @EventData("event.detail.center") ArrayNode center,
+            @EventData("event.detail.extent") ArrayNode extent) {
         super(source, fromClient);
         this.rotation = (double) rotation;
         this.zoom = (double) zoom;

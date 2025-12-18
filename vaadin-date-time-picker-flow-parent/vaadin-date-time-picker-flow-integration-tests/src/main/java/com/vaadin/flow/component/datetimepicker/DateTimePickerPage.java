@@ -89,13 +89,6 @@ public class DateTimePickerPage extends Div {
         picker5.setId("date-time-picker-high-precision-initial-value");
 
         add(new Hr(), new H1("Set initial value with high precision"), picker5);
-
-        // Set variant
-        DateTimePicker picker6 = new DateTimePicker();
-        picker6.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
-        picker6.setId("date-time-picker-variant");
-
-        add(new Hr(), new H1("Small variant"), picker6);
     }
 
     private void updateMessage(Div message, DateTimePicker dateTimePicker) {

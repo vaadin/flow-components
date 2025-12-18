@@ -23,6 +23,7 @@ import java.io.Serializable;
 /**
  * FileOutputStream with a reference to the output file.
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public class UploadOutputStream extends FileOutputStream
         implements Serializable {
     private final File file;

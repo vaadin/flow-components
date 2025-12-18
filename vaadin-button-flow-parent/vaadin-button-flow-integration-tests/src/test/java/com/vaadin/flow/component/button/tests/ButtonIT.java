@@ -87,7 +87,7 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class)
                 .withText("button", ButtonIT::containsIgnoreCase).all();
-        Assert.assertEquals(4, buttonElements.size());
+        Assert.assertEquals(3, buttonElements.size());
     }
 
     @Test
@@ -408,15 +408,6 @@ public class ButtonIT extends AbstractComponentIT {
                     + (msg != null ? msg : "") + "'!");
             return expected.equals(msg);
         });
-    }
-
-    @Test
-    public void assertVariants() {
-        WebElement button = findElement(By.id("button-theme-variants"));
-        Assert.assertEquals("small primary", button.getDomAttribute("theme"));
-
-        findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertEquals("primary", button.getDomAttribute("theme"));
     }
 
     private int getCenterX(WebElement element) {

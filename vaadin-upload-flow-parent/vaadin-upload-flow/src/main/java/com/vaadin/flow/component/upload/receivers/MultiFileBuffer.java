@@ -37,7 +37,10 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
  * <p>
  * For a custom file the constructor {@link AbstractFileBuffer(FileFactory)}
  * should be used.
+ * 
+ * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public class MultiFileBuffer extends AbstractFileBuffer
         implements MultiFileReceiver {
 

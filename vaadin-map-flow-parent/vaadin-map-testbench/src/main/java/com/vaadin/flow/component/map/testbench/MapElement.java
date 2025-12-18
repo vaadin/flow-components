@@ -318,6 +318,10 @@ public class MapElement extends TestBenchElement {
         public void setRotation(float rotation) {
             executor.executeScript(path("setRotation(%s)", rotation));
         }
+
+        public List<Double> calculateExtent() {
+            return (List<Double>) get("calculateExtent()");
+        }
     }
 
     public static class LayerCollectionReference
@@ -365,6 +369,13 @@ public class MapElement extends TestBenchElement {
         public long getRevision() {
             return getLong("getRevision()");
         }
+
+        public boolean isTileLoaded(int z, int x, int y) {
+            String tileKey = String.format("%s/%s/%s", z, x, y);
+            return getBoolean(
+                    "getRenderer().getTileCache().getKeys().some(key => key.endsWith('%s'))",
+                    tileKey);
+        }
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
@@ -388,6 +399,10 @@ public class MapElement extends TestBenchElement {
         public VectorSourceReference asVectorSource() {
             return new VectorSourceReference(executor, expression);
         }
+
+        public ClusterSourceReference asClusterSource() {
+            return new ClusterSourceReference(executor, expression);
+        }
     }
 
     public static abstract class UrlTileSourceReference
@@ -406,11 +421,6 @@ public class MapElement extends TestBenchElement {
         private XyzSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
-        }
-
-        public boolean isTileLoaded(int z, int x, int y) {
-            String tileKey = String.format("%s/%s/%s", z, x, y);
-            return getBoolean("tileCache.containsKey('%s')", tileKey);
         }
     }
 
@@ -468,6 +478,22 @@ public class MapElement extends TestBenchElement {
         }
     }
 
+    public static class ClusterSourceReference extends SourceReference {
+        private ClusterSourceReference(ExpressionExecutor executor,
+                String expression) {
+            super(executor, expression);
+        }
+
+        public int getClusterCount() {
+            return getInt("getFeatures().length");
+        }
+
+        public ClusterFeatureReference getCluster(int index) {
+            return new ClusterFeatureReference(executor,
+                    path("getFeatures()[%s]", index));
+        }
+    }
+
     public static class FeatureCollectionReference
             extends ConfigurationObjectReference {
         private FeatureCollectionReference(ExpressionExecutor executor,
@@ -505,6 +531,29 @@ public class MapElement extends TestBenchElement {
         }
     }
 
+    public static class ClusterFeatureReference
+            extends ConfigurationObjectReference {
+        private ClusterFeatureReference(ExpressionExecutor executor,
+                String expression) {
+            super(executor, expression);
+        }
+
+        public int getFeatureCount() {
+            return getInt("values_.features.length");
+        }
+
+        public FeatureReference getFeature(String featureId) {
+            return new FeatureReference(executor, path(
+                    "values_.features.find(feature => feature.id === '%s')",
+                    featureId));
+        }
+
+        public StyleReference getStyle(LayerReference layer) {
+            return new StyleReference(executor,
+                    layer.path("getStyle()(%s)", expression));
+        }
+    }
+
     public static class StyleReference extends ConfigurationObjectReference {
         private StyleReference(ExpressionExecutor executor, String expression) {
             super(executor, expression);
@@ -528,6 +577,39 @@ public class MapElement extends TestBenchElement {
         public Coordinate getCoordinates() {
             return new Coordinate(getDouble("getCoordinates()[0]"),
                     getDouble("getCoordinates()[1]"));
+        }
+
+        public Coordinate[][] getPolygonCoordinates() {
+            // Get the coordinates array from OpenLayers
+            Object coordinatesObj = get("getCoordinates()");
+            if (coordinatesObj == null) {
+                return null;
+            }
+
+            // Cast to List of lists (OpenLayers returns polygon as array of
+            // arrays)
+            @SuppressWarnings("unchecked")
+            List<List<List<Number>>> rings = (List<List<List<Number>>>) coordinatesObj;
+
+            // Create result array with the size matching the number of rings
+            Coordinate[][] result = new Coordinate[rings.size()][];
+
+            // Process each ring
+            for (int ringIndex = 0; ringIndex < rings.size(); ringIndex++) {
+                List<List<Number>> ring = rings.get(ringIndex);
+                result[ringIndex] = new Coordinate[ring.size()];
+
+                // Process each coordinate in the ring
+                for (int coordIndex = 0; coordIndex < ring
+                        .size(); coordIndex++) {
+                    List<Number> coord = ring.get(coordIndex);
+                    double x = coord.get(0).doubleValue();
+                    double y = coord.get(1).doubleValue();
+                    result[ringIndex][coordIndex] = new Coordinate(x, y);
+                }
+            }
+
+            return result;
         }
     }
 

@@ -36,7 +36,7 @@ public class TreeGridExpandDataRequestIT extends AbstractTreeGridIT {
     }
 
     private void clickClearLog() {
-        findElement(By.id(makeId("Clear log"))).click();
+        findElement(By.id("clear-log")).click();
     }
 
     @Test

@@ -19,7 +19,6 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Route;
 
@@ -45,14 +44,6 @@ public class NumberFieldPage extends Div {
         button.addClickListener(
                 event -> numberField.setReadOnly(!numberField.isReadOnly()));
         add(button);
-
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> numberField.setRequiredIndicatorVisible(
-                        !numberField.isRequiredIndicatorVisible()));
-        add(required);
 
         NativeButton enabled = new NativeButton(
                 "Set/unset field enabled property");
@@ -83,7 +74,6 @@ public class NumberFieldPage extends Div {
                 logValueChangeListener(stepValueMessage));
 
         add(numberFieldStep, stepValueMessage);
-        addNumberFields();
     }
 
     private ValueChangeListener<? super ComponentValueChangeEvent<NumberField, Double>> logValueChangeListener(
@@ -91,27 +81,5 @@ public class NumberFieldPage extends Div {
         return event -> stepValueMessage
                 .setText(String.format("Old value: '%s'. New value: '%s'.",
                         event.getOldValue(), event.getValue()));
-    }
-
-    private void addNumberFields() {
-        NumberField dollarField = new NumberField("Dollars");
-        dollarField.setPrefixComponent(new Span("$"));
-
-        NumberField euroField = new NumberField("Euros");
-        euroField.setSuffixComponent(new Span("€"));
-
-        NumberField stepperField = new NumberField("Stepper");
-        stepperField.setValue(1d);
-        stepperField.setMin(0);
-        stepperField.setMax(10);
-        stepperField.setStepButtonsVisible(true);
-
-        euroField.setSuffixComponent(new Span("€"));
-
-        dollarField.setId("dollar-field");
-        euroField.setId("euro-field");
-        stepperField.setId("step-number-field-2");
-
-        add(dollarField, euroField, stepperField);
     }
 }

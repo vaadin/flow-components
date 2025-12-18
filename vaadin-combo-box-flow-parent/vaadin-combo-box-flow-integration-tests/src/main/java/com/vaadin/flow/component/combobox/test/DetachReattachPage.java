@@ -18,8 +18,8 @@ package com.vaadin.flow.component.combobox.test;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
@@ -54,7 +54,7 @@ public class DetachReattachPage extends Div {
 
         NativeButton setComponentRenderer = new NativeButton(
                 "set component renderer", e -> comboBox.setRenderer(
-                        new ComponentRenderer<>(s -> new NativeLabel(s))));
+                        new ComponentRenderer<>(s -> new Span(s))));
         setComponentRenderer.setId("set-component-renderer");
 
         Div valueChanges = new Div();

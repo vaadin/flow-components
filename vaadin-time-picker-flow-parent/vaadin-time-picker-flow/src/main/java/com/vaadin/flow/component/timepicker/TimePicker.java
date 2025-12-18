@@ -40,12 +40,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -112,18 +109,16 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.0.0")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation,
+        HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>,
-        HasPrefix, HasOverlayClassName, HasThemeVariant<TimePickerVariant>,
-        HasValidationProperties, HasValidator<LocalTime>, HasPlaceholder {
+        HasPrefix, HasThemeVariant<TimePickerVariant>, HasValidationProperties,
+        HasValidator<LocalTime>, HasPlaceholder {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -142,14 +137,14 @@ public class TimePicker
     private LocalTime min;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
+    private String unparsableValue;
+
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private Validator<LocalTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        boolean hasBadInput = Objects.equals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasBadInput) {
+        if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     TimePickerI18n::getBadInputErrorMessage));
         }
@@ -227,14 +222,22 @@ public class TimePicker
             setPresentationValue(time);
         }
 
+        getElement().setProperty("manualValidation", true);
+
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
-            validate();
-            fireValidationStatusChangeEvent();
+            // The unparsable-change event is fired in the following situations:
+            // 1. User modifies input but it remains unparsable
+            // 2. User enters unparsable input in empty field
+            // 3. User clears unparsable input
+            //
+            // In all these cases, ValueChangeEvent isn't fired, so
+            // we call setModelValue manually to trigger validation.
+            setModelValue(getEmptyValue(), true);
         });
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
@@ -356,33 +359,60 @@ public class TimePicker
      */
     @Override
     public void setValue(LocalTime value) {
+        LocalTime oldValue = getValue();
+        if (oldValue == null && value == null && isInputUnparsable()) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
+            setModelValue(getEmptyValue(), false);
+            return;
+        }
+
         // Truncate the value to millisecond precision, as the is the maximum
         // that the time picker web component supports.
         if (value != null) {
             value = value.truncatedTo(ChronoUnit.MILLIS);
         }
 
-        LocalTime oldValue = getValue();
-        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
-        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
-        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        String oldInputElementValue = getInputElementValue();
+        super.setValue(value);
+    }
 
-        // When the value is cleared programmatically, there is no change event
-        // that would synchronize _inputElementValue, so we reset it ourselves
-        // to prevent the following validation from treating this as bad input.
-        if (isNewValueEmpty) {
-            setInputElementValue("");
+    @Override
+    protected void setModelValue(LocalTime newModelValue, boolean fromClient) {
+        LocalTime oldModelValue = getValue();
+        String oldUnparsableValue = unparsableValue;
+
+        if (fromClient && newModelValue == null
+                && !getInputElementValue().isEmpty()) {
+            unparsableValue = getInputElementValue();
+        } else {
+            unparsableValue = null;
         }
 
-        super.setValue(value);
+        boolean isModelValueRemainedEmpty = newModelValue == null
+                && oldModelValue == null;
 
-        // Revalidate if setValue(null) didn't result in a value change but
-        // cleared bad input
-        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        if (fromClient && isModelValueRemainedEmpty) {
             validate();
             fireValidationStatusChangeEvent();
+            return;
         }
+
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty
+                && oldUnparsableValue != null) {
+            setInputElementValue("");
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**
@@ -441,13 +471,29 @@ public class TimePicker
     }
 
     /**
+     * For internal use only.
+     * <p>
      * Returns whether the input element has a value or not.
      *
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
+     * @deprecated Since v24.8
      */
+    @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
         return !getInputElementValue().isEmpty();
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Returns whether the input value is unparsable.
+     *
+     * @return <code>true</code> if the input element's value is populated and
+     *         unparsable, <code>false</code> otherwise
+     */
+    protected final boolean isInputUnparsable() {
+        return unparsableValue != null;
     }
 
     /**
@@ -626,7 +672,6 @@ public class TimePicker
         super.onAttach(attachEvent);
         initConnector();
         requestLocaleUpdate();
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {

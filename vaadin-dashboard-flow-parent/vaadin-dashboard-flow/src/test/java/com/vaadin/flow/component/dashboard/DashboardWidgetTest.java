@@ -34,7 +34,6 @@ public class DashboardWidgetTest extends DashboardTestBase {
     public void setTitleInConstructor_returnsCorrectTitle() {
         var valueToSet = "New title";
         var widget = new DashboardWidget(valueToSet);
-        widget.setFeatureFlagEnabled(true);
         widget.setTitle(valueToSet);
         Assert.assertEquals(valueToSet, widget.getTitle());
     }
@@ -156,7 +155,6 @@ public class DashboardWidgetTest extends DashboardTestBase {
     public void setContentInConstructor_correctContentIsSet() {
         var content = new Div();
         var widget = new DashboardWidget(content);
-        widget.setFeatureFlagEnabled(true);
         Assert.assertEquals(content, widget.getContent());
     }
 
@@ -165,7 +163,6 @@ public class DashboardWidgetTest extends DashboardTestBase {
         var title = "New title";
         var content = new Div();
         var widget = new DashboardWidget(title, content);
-        widget.setFeatureFlagEnabled(true);
         Assert.assertEquals(title, widget.getTitle());
         Assert.assertEquals(content, widget.getContent());
     }

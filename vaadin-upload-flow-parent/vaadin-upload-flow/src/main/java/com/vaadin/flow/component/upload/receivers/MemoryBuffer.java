@@ -24,7 +24,10 @@ import com.vaadin.flow.component.upload.Receiver;
 
 /**
  * Basic in memory file receiver implementation.
+ * 
+ * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public class MemoryBuffer implements Receiver {
 
     private FileData file;

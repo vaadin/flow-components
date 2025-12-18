@@ -41,7 +41,7 @@ public class FeatureTextIT extends AbstractComponentIT {
         removeTextStyleButton = $(TestBenchElement.class)
                 .id("remove-text-style");
 
-        trackRenderCount();
+        trackUpdateCount();
     }
 
     @Test
@@ -105,14 +105,14 @@ public class FeatureTextIT extends AbstractComponentIT {
         Assert.assertEquals("#fff", text.getBackgroundStroke().getColor());
         Assert.assertEquals(2, text.getBackgroundStroke().getWidth());
 
-        waitUntil(driver -> getRenderCount() == 1);
+        waitUntil(driver -> getUpdateCount() == 1);
     }
 
     @Test
     public void updateCustomTextStyle() {
         setTextStyleButton.click();
 
-        waitUntil(driver -> getRenderCount() == 1);
+        waitUntil(driver -> getUpdateCount() == 1);
 
         updateTextStyleButton.click();
 
@@ -120,14 +120,14 @@ public class FeatureTextIT extends AbstractComponentIT {
         Assert.assertEquals("Marker text 1", text.getText());
         Assert.assertEquals("15px sans-serif", text.getFont());
 
-        waitUntil(driver -> getRenderCount() == 2);
+        waitUntil(driver -> getUpdateCount() == 2);
     }
 
     @Test
     public void setDefaultTextStyle_noErrors() {
         setDefaultTextStyle.click();
 
-        waitUntil(driver -> getRenderCount() == 1);
+        waitUntil(driver -> getUpdateCount() == 1);
 
         checkLogsForErrors();
     }
@@ -136,7 +136,7 @@ public class FeatureTextIT extends AbstractComponentIT {
     public void removeCustomTextStyle() {
         setTextStyleButton.click();
 
-        waitUntil(driver -> getRenderCount() == 1);
+        waitUntil(driver -> getUpdateCount() == 1);
 
         removeTextStyleButton.click();
 
@@ -144,7 +144,7 @@ public class FeatureTextIT extends AbstractComponentIT {
         Assert.assertEquals("Marker text 1", text.getText());
         Assert.assertEquals("13px sans-serif", text.getFont());
 
-        waitUntil(driver -> getRenderCount() == 2);
+        waitUntil(driver -> getUpdateCount() == 2);
     }
 
     private MapElement.TextReference getMarkerTextStyle(String markerId) {
@@ -156,15 +156,18 @@ public class FeatureTextIT extends AbstractComponentIT {
         return feature.getStyle().getText();
     }
 
-    private long getRenderCount() {
+    private long getUpdateCount() {
         return (long) getCommandExecutor().executeScript(
-                "const map = arguments[0];" + "return map.__renderCount;", map);
+                "const map = arguments[0];" + "return map.__updateCount;", map);
     }
 
-    private void trackRenderCount() {
-        getCommandExecutor().executeScript("const map = arguments[0];"
-                + "map.__renderCount = 0;"
-                + "map.configuration.on('rendercomplete', () => { map.__renderCount = map.__renderCount + 1 });",
-                map);
+    private void trackUpdateCount() {
+        getCommandExecutor().executeScript("""
+                const map = arguments[0];
+                map.__updateCount = 0;
+                map.configuration.getLayers().getArray()[0].on('change', () => {
+                    map.__updateCount = map.__updateCount + 1;
+                });
+                """, map);
     }
 }

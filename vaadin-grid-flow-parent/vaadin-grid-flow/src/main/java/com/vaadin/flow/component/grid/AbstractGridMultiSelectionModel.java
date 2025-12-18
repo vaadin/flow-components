@@ -45,7 +45,7 @@ import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Abstract implementation of a GridMultiSelectionModel.
@@ -102,7 +102,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     protected void remove() {
         super.remove();
         deselectAll();
-        if (selectionColumn.getElement().getNode().isAttached()) {
+        if (selectionColumn.getParent().map(getGrid()::equals).orElse(false)) {
             getGrid().getElement().removeChild(selectionColumn.getElement());
         }
     }
@@ -365,7 +365,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (isSelected(item)) {
             jsonObject.put("selected", true);
         }

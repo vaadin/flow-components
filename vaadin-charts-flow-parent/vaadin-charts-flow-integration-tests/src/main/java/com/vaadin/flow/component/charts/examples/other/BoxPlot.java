@@ -31,6 +31,7 @@ public class BoxPlot extends AbstractChartExample {
     @Override
     public void initDemo() {
         final Chart chart = new Chart();
+        chart.setClassName("BoxPlot");
 
         chart.getConfiguration().setTitle("Box Plot Example");
 

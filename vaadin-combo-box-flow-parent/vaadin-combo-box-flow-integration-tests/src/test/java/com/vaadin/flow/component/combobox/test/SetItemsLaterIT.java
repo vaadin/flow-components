@@ -72,8 +72,8 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
 
         assertLoadedItemsCount("ComboBox should have loaded 2 items", 2,
                 comboBox);
-        assertRendered("foo");
-        assertRendered("bar");
+        assertRendered(comboBox, "foo");
+        assertRendered(comboBox, "bar");
     }
 
 }

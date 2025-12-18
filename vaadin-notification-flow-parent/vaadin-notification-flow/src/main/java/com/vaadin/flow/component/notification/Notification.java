@@ -37,14 +37,13 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -54,9 +53,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/notification", version = "25.0.0")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -65,11 +62,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
     private static final String OPENED_PROPERTY = "opened";
-    private static final String OPENED_CHANGED_EVENT = "opened-changed";
 
-    private boolean autoAddedToTheUi = false;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
+    private OverlayAutoAddController<Notification> autoAddController;
 
     /**
      * Enumeration of all available positions for notification component
@@ -158,8 +152,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with the given String rendered as its HTML text,
-     * that does not close automatically.
+     * Creates a Notification with the given String rendered as its text, that
+     * does not close automatically.
      *
      * @param text
      *            the text of the Notification
@@ -169,8 +163,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with given String rendered as its HTML text and
-     * given Integer rendered as its duration.
+     * Creates a Notification with given String rendered as its text and given
+     * Integer rendered as its duration.
      * <p>
      * Set to {@code 0} or a negative number to disable the notification
      * auto-closing.
@@ -251,23 +245,21 @@ public class Notification extends Component implements HasComponents, HasStyle,
                 event -> fireEvent(
                         new OpenedChangeEvent(this, event.isUserOriginated())));
 
-        getElement().addEventListener(OPENED_CHANGED_EVENT,
-                event -> removeAutoAdded());
-    }
-
-    /**
-     * Removes the notification from its parent if it was added automatically.
-     */
-    private void removeAutoAdded() {
-        if (autoAddedToTheUi && !isOpened()) {
-            autoAddedToTheUi = false;
-            getElement().removeFromParent();
-        }
+        // Initialize auto add behavior
+        autoAddController = new OverlayAutoAddController<>(this);
     }
 
     /**
      * Shows a notification in the current page with given text, duration,
      * position and assertive state.
+     * <p>
+     * This automatically adds the notification to the {@link UI}, and
+     * automatically removes it from the UI when it closes. Note that the
+     * notification is then scoped to the UI, and not the current view. As such,
+     * when navigating away from a view, the notification will still be opened
+     * or stay open. In order to close the notification when navigating away
+     * from a view, it should either be explicitly added as a child to the view,
+     * or it should be explicitly closed when leaving the view.
      *
      * @param text
      *            the text of the Notification
@@ -293,6 +285,14 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * Shows a notification in the current page with given text, duration and
      * position.
+     * <p>
+     * This automatically adds the notification to the {@link UI}, and
+     * automatically removes it from the UI when it closes. Note that the
+     * notification is then scoped to the UI, and not the current view. As such,
+     * when navigating away from a view, the notification will still be opened
+     * or stay open. In order to close the notification when navigating away
+     * from a view, it should either be explicitly added as a child to the view,
+     * or it should be explicitly closed when leaving the view.
      *
      * @param text
      *            the text of the Notification
@@ -315,7 +315,14 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * This is the convenience method for {@link #show(String, int, Position)}
      * which uses default web-component values for duration (which is 5000 ms)
      * and position ({@literal Position.BOTTOM_START}).
-     *
+     * <p>
+     * This automatically adds the notification to the {@link UI}, and
+     * automatically removes it from the UI when it closes. Note that the
+     * notification is then scoped to the UI, and not the current view. As such,
+     * when navigating away from a view, the notification will still be opened
+     * or stay open. In order to close the notification when navigating away
+     * from a view, it should either be explicitly added as a child to the view,
+     * or it should be explicitly closed when leaving the view.
      *
      * @param text
      *            the text of the Notification
@@ -388,8 +395,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * Closes the notification.
      * <p>
-     * Note: This method also removes the notification component from the DOM
-     * after closing it, unless you have added the component manually.
+     * This automatically removes the notification from the {@link UI}, unless
+     * it was manually added to a parent component.
      */
     public void close() {
         setOpened(false);
@@ -444,47 +451,20 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * Opens or closes the notification.
      * <p>
-     * Note: You don't need to add the component anywhere before opening it.
-     * Since {@code <vaadin-notification>}'s location in the DOM doesn't really
-     * matter, opening a notification will automatically add it to the
-     * {@code <body>} if it's not yet attached anywhere.
+     * If a notification was not added manually to a parent component, it will
+     * be automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the notification is then
+     * scoped to the UI, and not the current view. As such, when navigating away
+     * from a view, the notification will still be opened or stay open. In order
+     * to close the notification when navigating away from a view, it should
+     * either be explicitly added as a child to the view, or it should be
+     * explicitly closed when leaving the view.
      *
      * @param opened
      *            {@code true} to open the notification, {@code false} to close
      *            it
      */
     public void setOpened(boolean opened) {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        StateTree.ExecutionRegistration addToUiRegistration = ui
-                .beforeClientResponse(ui, context -> {
-                    if (isOpened()
-                            && getElement().getNode().getParent() == null) {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                    }
-                    if (afterProgrammaticNavigationListenerRegistration != null) {
-                        afterProgrammaticNavigationListenerRegistration
-                                .remove();
-                    }
-                });
-        if (ui.getSession() != null) {
-            afterProgrammaticNavigationListenerRegistration = ui
-                    .addAfterNavigationListener(event -> {
-                        if (event.getLocationChangeEvent()
-                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                            addToUiRegistration.remove();
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-        }
         getElement().setProperty(OPENED_PROPERTY, opened);
     }
 
@@ -496,7 +476,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *
      * @return the {@code opened} property from the webcomponent
      */
-    @Synchronize(property = "opened", value = "opened-changed")
+    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty(OPENED_PROPERTY, false);
     }
@@ -682,7 +662,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
             // itself when its parent, for example a dialog, gets attached
             // again.
             setOpened(false);
-            removeAutoAdded();
+            autoAddController.remove();
         });
     }
 

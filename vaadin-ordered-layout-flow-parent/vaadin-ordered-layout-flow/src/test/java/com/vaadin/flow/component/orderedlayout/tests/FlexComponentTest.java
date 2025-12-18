@@ -54,6 +54,21 @@ public class FlexComponentTest {
         component.setFlexShrink(-1, div);
     }
 
+    @Test
+    public void setFlexGrow() {
+        TestComponent component = new TestComponent();
+        Div div = new Div();
+        component.add(div);
+
+        component.setFlexGrow(2, div);
+        Assert.assertEquals(2, component.getFlexGrow(div), 0);
+        Assert.assertEquals("2.0", div.getStyle().get("flex-grow"));
+
+        component.setFlexGrow(0, div);
+        Assert.assertEquals(0, component.getFlexGrow(div), 0);
+        Assert.assertEquals("0.0", div.getStyle().get("flex-grow"));
+    }
+
     @Tag("test")
     private static class TestComponent extends Component
             implements FlexComponent {

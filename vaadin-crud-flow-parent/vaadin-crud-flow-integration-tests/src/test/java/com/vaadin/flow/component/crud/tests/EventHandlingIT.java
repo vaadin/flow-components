@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.crud.tests;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,8 +42,8 @@ public class EventHandlingIT extends AbstractComponentIT {
     private void dismissConfirmDialog(CrudElement crud,
             ConfirmDialogType type) {
         final TestBenchElement confirmButton = crud
-                .$(ConfirmDialogElement.class).id(type.getId())
-                .getConfirmButton();
+                .$(ConfirmDialogElement.class)
+                .withAttribute("slot", type.getId()).first().getConfirmButton();
         confirmButton.click();
     }
 
@@ -88,10 +87,10 @@ public class EventHandlingIT extends AbstractComponentIT {
                 "Edit: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
 
-        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
+        Assert.assertEquals("Guille", crud.getForm().$(TextFieldElement.class)
                 .withAttribute("editor-role", "first-name").first().getValue());
 
-        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
+        Assert.assertEquals("Guille", crud.getForm().$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first().getValue());
     }
 
@@ -111,7 +110,7 @@ public class EventHandlingIT extends AbstractComponentIT {
 
         // Ensure editor is marked dirty on edit
         getTestButton("editServerItem").click();
-        crud.getEditor().$(TextFieldElement.class)
+        crud.getForm().$(TextFieldElement.class)
                 .withAttribute("editor-role", "first-name").first()
                 .setValue("Vaadin");
 
@@ -150,22 +149,22 @@ public class EventHandlingIT extends AbstractComponentIT {
     public void saveTest() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(0);
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
 
         // Invalid input
         lastNameField.setValue("Manolo");
         crud.getEditorSaveButton().click();
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
         Assert.assertTrue(crud.isEditorOpen());
         Assert.assertEquals("Sayo",
                 $(GridElement.class).first().getCell(0, 2).getText());
 
         // Valid input
         lastNameField.setValue("Oladeji");
-        Assert.assertFalse(lastNameField.hasAttribute("invalid"));
+        Assert.assertFalse(lastNameField.isInvalid());
 
         crud.getEditorSaveButton().click();
 
@@ -179,21 +178,21 @@ public class EventHandlingIT extends AbstractComponentIT {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.getNewItemButton().get().click();
 
-        TextFieldElement firstNameField = crud.getEditor()
+        TextFieldElement firstNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "first-name").first();
 
-        Assert.assertFalse(firstNameField.hasAttribute("invalid"));
+        Assert.assertFalse(firstNameField.isInvalid());
 
         // To avoid editor being dirty
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Oladeji");
 
         crud.getEditorSaveButton().click();
 
-        Assert.assertTrue(firstNameField.hasAttribute("invalid"));
+        Assert.assertTrue(firstNameField.isInvalid());
     }
 
     @Test
@@ -201,16 +200,16 @@ public class EventHandlingIT extends AbstractComponentIT {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(1);
 
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
 
-        Assert.assertFalse(lastNameField.hasAttribute("invalid"));
+        Assert.assertFalse(lastNameField.isInvalid());
 
         lastNameField.setValue("Raiden");
         crud.getEditorSaveButton().click();
 
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
     }
 
     @Test
@@ -220,7 +219,7 @@ public class EventHandlingIT extends AbstractComponentIT {
 
         crud.getNewItemButton().get().click();
 
-        TestBenchElement editor = crud.getEditor();
+        TestBenchElement editor = crud.getForm();
         TextFieldElement firstNameField = editor.$(TextFieldElement.class)
                 .withAttribute("editor-role", "first-name").first();
         TextFieldElement lastNameField = editor.$(TextFieldElement.class)
@@ -246,17 +245,15 @@ public class EventHandlingIT extends AbstractComponentIT {
     private boolean isConfirmDialogOpen(CrudElement crud,
             ConfirmDialogType type) {
         ConfirmDialogElement confirmDialog = crud.$(ConfirmDialogElement.class)
-                .id(type.getId());
-        TestBenchElement overlay = ((TestBenchElement) confirmDialog
-                .getContext());
-        return overlay.getPropertyBoolean("opened");
+                .withAttribute("slot", type.getId()).first();
+        return confirmDialog.getPropertyBoolean("opened");
     }
 
     private enum ConfirmDialogType {
         CANCEL, DELETE;
 
         private String getId() {
-            return "confirm" + StringUtils.capitalize(name().toLowerCase());
+            return "confirm-" + name().toLowerCase();
         }
     }
 }

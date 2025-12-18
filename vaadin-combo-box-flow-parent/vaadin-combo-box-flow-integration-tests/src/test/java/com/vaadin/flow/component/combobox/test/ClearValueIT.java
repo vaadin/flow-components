@@ -70,12 +70,11 @@ public class ClearValueIT extends AbstractComponentIT {
         comboBox.openPopup();
         comboBox.closePopup();
 
-        comboBox.$("[part~='clear-button']").get(0).click();
+        comboBox.clickClearButton();
 
         comboBox.openPopup();
 
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
+        ElementQuery<TestBenchElement> items = comboBox
                 .$("vaadin-combo-box-item");
 
         items.all()
@@ -180,8 +179,8 @@ public class ClearValueIT extends AbstractComponentIT {
                 comboBox.getSelectedText());
         Assert.assertEquals(String.format(
                 "Unexpected 'allowCustomValue' property name for combo box with id '%s'",
-                comboBoxId), Boolean.toString(allowCustomValue),
-                comboBox.getPropertyString("allowCustomValue"));
+                comboBoxId), allowCustomValue,
+                comboBox.getPropertyBoolean("allowCustomValue"));
 
         findElement(By.id(buttonId)).click();
 

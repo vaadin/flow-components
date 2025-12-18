@@ -38,38 +38,38 @@ public class GridScrollTest {
     @Test
     public void scrollToStart_preloadOnePage() {
         grid.scrollToIndex(0);
-        Assert.assertEquals("0-50", getRequestedRange(grid));
+        Assert.assertEquals("0-50", getViewportRange(grid));
     }
 
     @Test
     public void scrollToEnd_preloadOnePage() {
         grid.scrollToIndex(950);
-        Assert.assertEquals("950-1000", getRequestedRange(grid));
+        Assert.assertEquals("950-1000", getViewportRange(grid));
     }
 
     @Test
     public void scrollToStartOfPage_preloadOnePage() {
         grid.scrollToIndex(500);
-        Assert.assertEquals("500-550", getRequestedRange(grid));
+        Assert.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
     public void scrollToSecondIndexOfPage_preloadOnePage() {
         grid.scrollToIndex(501);
-        Assert.assertEquals("500-550", getRequestedRange(grid));
+        Assert.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
     public void scrollToSecondLastIndexOfPage_preloadTwoPages() {
         grid.scrollToIndex(499);
-        Assert.assertEquals("450-550", getRequestedRange(grid));
+        Assert.assertEquals("450-550", getViewportRange(grid));
     }
 
     @Test
     public void smallPageSize_scrollToIndex_preloadMultiplePages() {
         grid.setPageSize(5);
         grid.scrollToIndex(499);
-        Assert.assertEquals("495-540", getRequestedRange(grid));
+        Assert.assertEquals("495-540", getViewportRange(grid));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class GridScrollTest {
         grid.setItems(items);
 
         grid.scrollToItem(items.get(500));
-        Assert.assertEquals("500-550", getRequestedRange(grid));
+        Assert.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class GridScrollTest {
                 .setItemIndexProvider((item, query) -> items.indexOf(item));
 
         grid.scrollToItem(items.get(500));
-        Assert.assertEquals("500-550", getRequestedRange(grid));
+        Assert.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
@@ -118,15 +118,14 @@ public class GridScrollTest {
                 () -> grid.scrollToItem("Not present"));
     }
 
-    private String getRequestedRange(Grid<String> grid) {
+    private String getViewportRange(Grid<String> grid) {
         try {
             var communicator = grid.getDataCommunicator();
-            var requestedRangeField = communicator.getClass()
-                    .getDeclaredField("requestedRange");
-            requestedRangeField.setAccessible(true);
-            Range requestedRange = (Range) requestedRangeField
-                    .get(communicator);
-            return requestedRange.getStart() + "-" + requestedRange.getEnd();
+            var viewportRangeField = communicator.getClass()
+                    .getDeclaredField("viewportRange");
+            viewportRangeField.setAccessible(true);
+            Range viewportRange = (Range) viewportRangeField.get(communicator);
+            return viewportRange.getStart() + "-" + viewportRange.getEnd();
 
         } catch (Exception e) {
             return "";

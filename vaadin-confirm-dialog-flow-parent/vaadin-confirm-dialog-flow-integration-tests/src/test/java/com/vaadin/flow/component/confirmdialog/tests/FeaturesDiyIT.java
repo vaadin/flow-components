@@ -96,8 +96,8 @@ public class FeaturesDiyIT extends AbstractComponentIT {
     @Test
     public void testConfirmDialogButtonsCount() throws Exception {
         openDialog("SampleConfirmDialog");
-        int confirmButtonCount = findElements(By.cssSelector(
-                "vaadin-confirm-dialog-overlay [slot='confirm-button']"))
+        int confirmButtonCount = findElements(
+                By.cssSelector("vaadin-confirm-dialog [slot='confirm-button']"))
                 .size();
         Assert.assertEquals(1, confirmButtonCount);
     }
@@ -113,7 +113,7 @@ public class FeaturesDiyIT extends AbstractComponentIT {
     }
 
     public void assertDialogClosed() {
-        Assert.assertFalse(getConfirmDialog().isPresent());
+        waitForElementNotPresent(By.tagName("vaadin-confirm-dialog"));
     }
 
     private void clickConfirm() {

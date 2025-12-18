@@ -24,7 +24,10 @@ import java.util.logging.Logger;
 
 /**
  * Abstract class for common file receiver buffers.
+ * 
+ * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public abstract class AbstractFileBuffer implements Serializable {
 
     private FileFactory factory;

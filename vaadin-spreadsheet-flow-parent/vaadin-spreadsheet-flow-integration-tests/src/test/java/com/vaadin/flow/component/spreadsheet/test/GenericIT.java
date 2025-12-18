@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
@@ -36,11 +35,17 @@ public class GenericIT extends AbstractSpreadsheetIT {
         final var a1 = getSpreadsheet().getCellAt("A1");
         a1.setValue("X");
 
-        new Actions(getDriver()).sendKeys(Keys.ARROW_RIGHT)
-                .sendKeys(Keys.ARROW_RIGHT).sendKeys(Keys.ARROW_DOWN)
-                .sendKeys(Keys.ARROW_DOWN).sendKeys(Keys.ARROW_LEFT)
-                .sendKeys(Keys.ARROW_UP).sendKeys("Y").sendKeys(Keys.RETURN)
-                .sendKeys(Keys.ENTER).build().perform();
+        // Using individual commands seems less flaky than batching them
+        // together
+        getSpreadsheet().sendKeys(Keys.ARROW_RIGHT);
+        getSpreadsheet().sendKeys(Keys.ARROW_RIGHT);
+        getSpreadsheet().sendKeys(Keys.ARROW_DOWN);
+        getSpreadsheet().sendKeys(Keys.ARROW_DOWN);
+        getSpreadsheet().sendKeys(Keys.ARROW_LEFT);
+        getSpreadsheet().sendKeys(Keys.ARROW_UP);
+        getSpreadsheet().sendKeys("Y");
+        getSpreadsheet().sendKeys(Keys.RETURN);
+        getSpreadsheet().sendKeys(Keys.ENTER);
 
         final var c2 = getSpreadsheet().getCellAt("C2");
         Assert.assertEquals("X", a1.getValue());

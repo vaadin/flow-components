@@ -8,23 +8,21 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Serializer for {@link SolidColor}
  *
  */
-public class SolidColorSerializer extends JsonSerializer<SolidColor> {
+public class SolidColorSerializer extends ValueSerializer<SolidColor> {
 
-    public static Module getModule() {
+    public static JacksonModule getModule() {
         SimpleModule module = new SimpleModule();
         module.addSerializer(SolidColor.class, new SolidColorSerializer());
         return module;
@@ -32,8 +30,7 @@ public class SolidColorSerializer extends JsonSerializer<SolidColor> {
 
     @Override
     public void serialize(SolidColor value, JsonGenerator gen,
-            SerializerProvider serializers)
-            throws IOException, JsonProcessingException {
+            SerializationContext context) {
         gen.writeString(value.toString());
     }
 }

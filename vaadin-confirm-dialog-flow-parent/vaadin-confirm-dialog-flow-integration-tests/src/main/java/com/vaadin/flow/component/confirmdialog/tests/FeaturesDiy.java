@@ -92,6 +92,7 @@ public class FeaturesDiy extends Features {
         });
         cancelButton.getElement().setAttribute("theme", "tertiary");
         dialog.setCancelButton(cancelButton);
+        dialog.setCancelable(true);
 
         return dialog;
     }
@@ -121,6 +122,7 @@ public class FeaturesDiy extends Features {
         });
         discardButton.getElement().setAttribute("theme", "error tertiary");
         dialog.setRejectButton(discardButton);
+        dialog.setRejectable(true);
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setId("cancelDiy");
@@ -130,6 +132,7 @@ public class FeaturesDiy extends Features {
         });
         cancelButton.getElement().setAttribute("theme", "tertiary");
         dialog.setCancelButton(cancelButton);
+        dialog.setCancelable(true);
 
         return dialog;
     }

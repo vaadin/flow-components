@@ -18,14 +18,17 @@ package com.vaadin.flow.component.sidenav;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * A side navigation menu with support for hierarchical and flat menus.
@@ -37,9 +40,10 @@ import com.vaadin.flow.internal.JsonSerializer;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
-public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
+public class SideNav extends Component implements HasSideNavItems, HasSize,
+        HasStyle, HasThemeVariant<SideNavVariant> {
 
     private Element labelElement;
 
@@ -134,7 +138,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      *
      * @return true if the side navigation menu is expanded, false if collapsed
      */
-    @Synchronize(property = "collapsed", value = "collapsed-changed")
+    @Synchronize(property = "collapsed", value = "collapsed-changed", allowInert = true)
     public boolean isExpanded() {
         return !getElement().getProperty("collapsed", false);
     }
@@ -146,6 +150,30 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      */
     public void setExpanded(boolean expanded) {
         getElement().setProperty("collapsed", !expanded);
+    }
+
+    /**
+     * Gets whether to expand parent items of the nested matching item after
+     * initial rendering or navigation. By default, all the parent items are
+     * expanded.
+     *
+     * @return true if parent items for the item should be expanded
+     */
+    public boolean isAutoExpand() {
+        return !getElement().getProperty("noAutoExpand", false);
+    }
+
+    /**
+     * Sets whether to expand parent items of the nested matching item after
+     * initial rendering or navigation. By default, all the parent items are
+     * expanded.
+     *
+     * @param autoExpand
+     *            true if parent items for the item should be expanded, false
+     *            otherwise
+     */
+    public void setAutoExpand(boolean autoExpand) {
+        getElement().setProperty("noAutoExpand", !autoExpand);
     }
 
     /**
@@ -172,12 +200,13 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         Objects.requireNonNull(i18n,
                 "The i18N properties object should not be null");
         this.i18n = i18n;
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**
      * The internationalization properties for {@link SideNav}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SideNavI18n implements Serializable {
         private String toggle;
 

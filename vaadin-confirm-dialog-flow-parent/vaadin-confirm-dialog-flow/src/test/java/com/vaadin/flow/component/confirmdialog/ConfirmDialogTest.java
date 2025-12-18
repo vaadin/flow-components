@@ -17,6 +17,13 @@ package com.vaadin.flow.component.confirmdialog;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 public class ConfirmDialogTest {
 
@@ -40,12 +47,11 @@ public class ConfirmDialogTest {
 
         Assert.assertEquals("100px", confirmDialog.getWidth());
         Assert.assertEquals("100px",
-                confirmDialog.getElement().getProperty("_contentWidth"));
+                confirmDialog.getElement().getProperty("width"));
 
         confirmDialog.setWidth(null);
         Assert.assertNull(confirmDialog.getWidth());
-        Assert.assertNull(
-                confirmDialog.getElement().getProperty("_contentWidth"));
+        Assert.assertNull(confirmDialog.getElement().getProperty("width"));
     }
 
     @Test
@@ -55,11 +61,27 @@ public class ConfirmDialogTest {
 
         Assert.assertEquals("100px", confirmDialog.getHeight());
         Assert.assertEquals("100px",
-                confirmDialog.getElement().getProperty("_contentHeight"));
+                confirmDialog.getElement().getProperty("height"));
 
         confirmDialog.setHeight(null);
         Assert.assertNull(confirmDialog.getHeight());
-        Assert.assertNull(
-                confirmDialog.getElement().getProperty("_contentHeight"));
+        Assert.assertNull(confirmDialog.getElement().getProperty("height"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void addClosedListener_listenerInvokedOnClose() {
+        ConfirmDialog dialog = new ConfirmDialog();
+        ComponentEventListener<ConfirmDialog.ClosedEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+        dialog.addClosedListener(listener);
+
+        Element element = dialog.getElement();
+        dialog.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(element, "closed",
+                        JacksonUtils.createObjectNode()));
+
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any(ConfirmDialog.ClosedEvent.class));
     }
 }

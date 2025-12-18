@@ -15,16 +15,12 @@
  */
 package com.vaadin.flow.component.progressbar.tests;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.progressbar.ProgressBarVariant;
+import com.vaadin.flow.component.progressbar.testbench.ProgressBarElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -36,36 +32,20 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-progress-bar")
 public class ProgressBarIT extends AbstractComponentIT {
 
+    private ProgressBarElement progressBar;
+
     @Before
     public void init() {
         open();
+        progressBar = $(ProgressBarElement.class).waitForFirst();
     }
 
     @Test
     public void clickOnProgressButtonIncrementsProgressBarValue() {
-        WebElement progressBar = findElement(By.id("custom-progress-bar"));
-        WebElement button = findElement(By.id("progress-button"));
-        assertThat(valueOf(progressBar), is("20"));
+        Assert.assertEquals(20, progressBar.getValue(), 0);
 
-        scrollIntoViewAndClick(button);
+        findElement(By.id("progress-button")).click();
 
-        waitUntil(driver -> valueOf(progressBar).equals("30"));
-    }
-
-    @Test
-    public void assertVariants() {
-        WebElement progressBar = findElement(
-                By.id("progress-bar-theme-variant"));
-        scrollToElement(progressBar);
-
-        Assert.assertEquals(ProgressBarVariant.LUMO_ERROR.getVariantName(),
-                progressBar.getDomAttribute("theme"));
-
-        findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(progressBar.getDomAttribute("theme"));
-    }
-
-    private String valueOf(WebElement progressBar) {
-        return progressBar.getDomProperty("value");
+        Assert.assertEquals(30, progressBar.getValue(), 0);
     }
 }

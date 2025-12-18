@@ -31,11 +31,11 @@ import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.dnd.EffectAllowed;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.RouterLink;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class GridDnDTest {
 
@@ -57,12 +57,12 @@ public class GridDnDTest {
     @Test
     public void gridDnD_genericDnD_activeDragComponentAndDataSet() {
         List<String> dragData = Collections.singletonList("2");
-        JsonObject object = Json.createObject();
-        JsonArray array = Json.createArray();
-        JsonObject item = Json.createObject();
+        ObjectNode object = JacksonUtils.createObjectNode();
+        ArrayNode array = JacksonUtils.createArrayNode();
+        ObjectNode item = JacksonUtils.createObjectNode();
         item.put("key", grid.getDataCommunicator().getKeyMapper().key("2"));
-        array.set(0, item);
-        object.put("draggedItems", array);
+        array.add(item);
+        object.set("draggedItems", array);
 
         GridDragStartEvent<String> startEvent = new GridDragStartEvent<String>(
                 grid, true, object);

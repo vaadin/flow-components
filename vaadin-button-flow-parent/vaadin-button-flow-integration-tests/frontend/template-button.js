@@ -1,6 +1,6 @@
 import { html, LitElement } from 'lit';
-import '@vaadin/button/vaadin-button.js';
-import '@vaadin/icon/vaadin-icon.js';
+import '@vaadin/button/src/vaadin-button.js';
+import '@vaadin/icon/src/vaadin-icon.js';
 
 class TemplateButton extends LitElement {
   render() {

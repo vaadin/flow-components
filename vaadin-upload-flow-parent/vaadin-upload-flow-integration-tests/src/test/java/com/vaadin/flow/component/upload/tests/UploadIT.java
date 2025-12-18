@@ -15,13 +15,10 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -54,13 +51,16 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadAnyFile() throws Exception {
-        File tempFile = createTempFile("txt");
+        File tempFile = createTempFile("some file", "txt");
         getUpload().upload(tempFile);
 
         String content = uploadOutput.getText();
 
+        String expectedContents = tempFile.getName() + "text/plain"
+                + getTempFileContents();
+
         Assert.assertTrue("Upload content does not contain file details",
-                content.contains(tempFile.getName() + getTempFileContents()));
+                content.contains(expectedContents));
         Assert.assertTrue("Progress update event was not fired properly",
                 content.contains("PROGRESS:" + tempFile.getName()));
     }
@@ -153,14 +153,16 @@ public class UploadIT extends AbstractUploadIT {
         getUpload().upload(tempFile);
 
         List<LogEntry> logList1 = getLogEntries(Level.SEVERE);
-        assertThat("There should have no severe message in the console",
-                logList1.size(), CoreMatchers.is(0));
+        Assert.assertEquals(
+                "There should have no severe message in the console", 0,
+                logList1.size());
 
         WebElement upload = getUpload();
         executeScript("arguments[0]._removeFile()", upload);
         List<LogEntry> logList2 = getLogEntries(Level.SEVERE);
-        assertThat("There should have no severe message in the console",
-                logList2.size(), CoreMatchers.is(0));
+        Assert.assertEquals(
+                "There should have no severe message in the console", 0,
+                logList2.size());
     }
 
     @Test

@@ -28,14 +28,14 @@ describe('grid connector - data range', () => {
   }
 
   function expectRequestedRange(range: [number, number]) {
-    expect(grid.$server.setRequestedRange).to.be.calledOnce;
-    expect(grid.$server.setRequestedRange.args[0]).to.eql(range);
+    expect(grid.$server.setViewportRange).to.be.calledOnce;
+    expect(grid.$server.setViewportRange.args[0]).to.eql(range);
   }
 
   function processRequestedRange() {
-    const range = grid.$server.setRequestedRange.args[0];
+    const range = grid.$server.setViewportRange.args[0];
     setRootItemsRange(range[0], range[1]);
-    grid.$server.setRequestedRange.resetHistory();
+    grid.$server.setViewportRange.resetHistory();
   }
 
   beforeEach(async () => {
@@ -47,6 +47,11 @@ describe('grid connector - data range', () => {
       <vaadin-grid>
         <vaadin-grid-column path="name"></vaadin-grid-column>
       </vaadin-grid>
+      <style>
+        vaadin-grid::part(cell) {
+          min-height: 36px;
+        }
+      </style>
     `);
 
     init(grid);

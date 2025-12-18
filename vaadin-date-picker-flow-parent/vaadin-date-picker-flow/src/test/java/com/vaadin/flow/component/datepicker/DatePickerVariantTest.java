@@ -68,14 +68,6 @@ public class DatePickerVariantTest {
     }
 
     @Test
-    public void addMaterialAlwaysFloatLabel_themeAttributeUpdated() {
-        assertThemeAttribute(null);
-        datePicker.addThemeVariants(
-                DatePickerVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
-        assertThemeAttribute("always-float-label");
-    }
-
-    @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);

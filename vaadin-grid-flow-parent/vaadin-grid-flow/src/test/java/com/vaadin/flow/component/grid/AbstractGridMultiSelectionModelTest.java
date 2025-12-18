@@ -32,13 +32,14 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class AbstractGridMultiSelectionModelTest {
 
     private Set<String> selected;
     private Set<String> deselected;
     private Grid<String> grid;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void setup() {
@@ -62,7 +63,7 @@ public class AbstractGridMultiSelectionModelTest {
             }
         };
 
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(grid);
     }
 
@@ -703,6 +704,17 @@ public class AbstractGridMultiSelectionModelTest {
         grid.setItemSelectableProvider(null);
         Assert.assertFalse(selectionColumn.getElement()
                 .getProperty("_selectAllHidden", false));
+    }
+
+    @Test
+    public void setMultiSelect_removeGrid_setSingleSelect_addGrid_selectionColumnRemoved() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        ui.remove(grid);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        ui.add(grid);
+        Assert.assertThrows(IllegalStateException.class,
+                () -> getGridSelectionColumn(grid));
     }
 
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(

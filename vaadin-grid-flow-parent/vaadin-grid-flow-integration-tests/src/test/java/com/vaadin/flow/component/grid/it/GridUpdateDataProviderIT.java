@@ -75,6 +75,15 @@ public class GridUpdateDataProviderIT extends AbstractComponentIT {
     }
 
     @Test
+    public void emptyGrid_setItemsAndPageSize() {
+        WebElement grid = findElement(By.id("empty-grid"));
+        findElement(By.id("set-items-and-page-size")).click();
+
+        waitUntil(driver -> hasCell(grid, "foo"));
+        waitUntil(driver -> hasCell(grid, "bar"));
+    }
+
+    @Test
     public void beanGrid_changeDataProvider() {
         WebElement grid = findElement(By.id("bean-grid"));
         waitUntil(driver -> hasCell(grid, "foo"));

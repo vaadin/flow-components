@@ -280,9 +280,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
                 DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
 
         $(DatePickerElement.class).id(id).click();
-        waitForElementPresent(By.tagName("vaadin-date-picker-overlay"));
+        waitForElementVisible(By.tagName("vaadin-date-picker-overlay-content"));
         $(DatePickerElement.class).id(id).sendKeys(Keys.ESCAPE);
-        waitForElementNotPresent(By.tagName("vaadin-date-picker-overlay"));
 
         String todayString = LocalDate.now()
                 .format(DateTimeFormatter.ISO_LOCAL_DATE);

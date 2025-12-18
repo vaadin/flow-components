@@ -27,11 +27,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 @TestPath("vaadin-grid/grid-client-item-toggle-event")
 public class GridClientItemToggleEventIT extends AbstractComponentIT {
@@ -75,15 +75,15 @@ public class GridClientItemToggleEventIT extends AbstractComponentIT {
                 "GridClientItemToggleEvent should be fired only once", 1,
                 records.size());
 
-        JsonObject record = Json.parse(records.get(0).getText());
+        ObjectNode record = JacksonUtils.readTree(records.get(0).getText());
         Assert.assertTrue("isFromClient should be true",
-                record.getBoolean("isFromClient"));
+                record.get("isFromClient").asBoolean());
         Assert.assertEquals("Item should match the toggled item", item,
-                record.getString("item"));
+                record.get("item").asString());
         Assert.assertEquals("isSelected should match the selected state",
-                isSelected, record.getBoolean("isSelected"));
+                isSelected, record.get("isSelected").asBoolean());
         Assert.assertEquals("isShiftKey should match the shift key state",
-                isShiftKey, record.getBoolean("isShiftKey"));
+                isShiftKey, record.get("isShiftKey").asBoolean());
 
         findElement(By.id("clear-event-log")).click();
     }

@@ -4,13 +4,18 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-card-flow-parent</artifactId>
-        <version>24.7-SNAPSHOT</version>
+        <version>25.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-card-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Card</name>
     <description>Vaadin Card</description>
     <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
@@ -25,6 +30,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-flow-components-base</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-test-util</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>jakarta.platform</groupId>

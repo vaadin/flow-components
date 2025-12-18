@@ -22,7 +22,6 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -44,10 +43,10 @@ public class ComponentRendererPage extends Div {
             item -> {
                 VerticalLayout container = new VerticalLayout();
 
-                Label song = new Label(item.getName());
+                Span song = new Span(item.getName());
                 container.add(song);
 
-                Label artist = new Label(item.getArtist());
+                Span artist = new Span(item.getArtist());
                 artist.getStyle().set("fontSize", "smaller");
                 container.add(artist);
 

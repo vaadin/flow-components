@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,24 +39,24 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         grid.expandWithClick(2);
         grid.expandWithClick(3);
-        grid.scrollToRow(300);
+        grid.scrollToRowByPath(300);
 
         expandSecondRowButton.click();
 
-        grid.scrollToRow(0);
+        grid.scrollToRowByPath(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Dad 1/0", "Dad 1/1", "Dad 1/2", "Granddad 2", "Dad 2/0" });
 
-        grid.scrollToRow(300);
+        grid.scrollToRowByPath(300);
         collapseSecondRowButton.click();
-        grid.scrollToRow(0);
+        grid.scrollToRowByPath(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
 
-        grid.scrollToRow(300);
+        grid.scrollToRowByPath(300);
         expandSecondRowButton.click();
         collapseSecondRowButton.click();
-        grid.scrollToRow(0);
+        grid.scrollToRowByPath(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
     }
@@ -97,7 +96,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         // Scroll first root item way out of viewport and check that the key was
         // dropped
-        grid.scrollToRow(200);
+        grid.scrollToRowByPath(200);
         checkFirstRootItemKey.click();
         Assert.assertEquals(
                 "First root key was in KeyMapper when it should not be",
@@ -120,25 +119,17 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         TreeGridElement grid = getTreeGrid();
 
-        waitUntil(tets -> grid.getNumberOfExpandedRows() == 99);
-
         // assuming cache size to be visible row count + buffer before/after
         // assuming buffer to match visible row count
         int assumedCachedSize = (grid.getLastVisibleRowIndex()
                 - grid.getFirstVisibleRowIndex()) * 3;
-        waitUntil(test -> !grid.isLoadingExpandedRows(), 20);
         String[] cellTexts = new String[assumedCachedSize];
         for (int i = 0; i < assumedCachedSize; i++) {
             cellTexts[i] = grid.getCellWaitForRow(i, 0).getText();
         }
-        grid.scrollToRowAndWait(0);
-
+        grid.scrollToRowByPath(0);
         grid.collapseWithClick(1);
-        waitUntil(tets -> grid.getNumberOfExpandedRows() == 98);
-
         grid.expandWithClick(1);
-        waitUntil(tets -> grid.getNumberOfExpandedRows() == 99);
-        waitUntil(test -> !grid.isLoadingExpandedRows(), 25);
 
         assertCellTexts(0, 0, cellTexts);
     }
@@ -154,11 +145,11 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         $("button").id("expand-recursively").click();
 
         // Scroll as far as possible
-        grid.scrollToRowAndWait(1000000);
+        grid.scrollToRowByPath(1000000);
         assertExpandedNodesPopulated(grid);
 
         // Repeat
-        grid.scrollToRowAndWait(1000000);
+        grid.scrollToRowByPath(1000000);
         assertExpandedNodesPopulated(grid);
     }
 
@@ -169,8 +160,8 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
             String cellText = grid.getCell(i, 0).getText();
             if (cellText.contains("Dad")) {
                 String sonText = grid.getCell(i + 1, 0).getText();
-                Assert.assertThat(sonText + " is not a Son item", sonText,
-                        StringContains.containsString("Son"));
+                Assert.assertTrue(sonText + " is not a Son item",
+                        sonText.contains("Son"));
 
             }
         }

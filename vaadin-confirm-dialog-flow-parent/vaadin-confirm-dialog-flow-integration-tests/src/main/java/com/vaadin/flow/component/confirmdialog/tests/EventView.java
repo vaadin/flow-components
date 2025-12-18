@@ -32,7 +32,8 @@ public class EventView extends Div {
         Button toggleCloseOnEscButton = new Button("Toggle close on Esc",
                 e -> dialog.setCloseOnEsc(!dialog.isCloseOnEsc()));
         toggleCloseOnEscButton.setId("toggle-close-on-esc");
+        dialog.add(toggleCloseOnEscButton);
 
-        add(dialog, showDialogButton, toggleCloseOnEscButton);
+        add(dialog, showDialogButton);
     }
 }

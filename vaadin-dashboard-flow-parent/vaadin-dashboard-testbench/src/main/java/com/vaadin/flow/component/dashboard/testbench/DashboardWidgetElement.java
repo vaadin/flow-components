@@ -33,7 +33,8 @@ public class DashboardWidgetElement extends TestBenchElement {
      *         the web component
      */
     public Integer getColspan() {
-        var colspanStr = getComputedCssValue("--vaadin-dashboard-item-colspan");
+        var colspanStr = getComputedCssValue(
+                "--vaadin-dashboard-widget-colspan");
         return colspanStr.isEmpty() ? null : Integer.valueOf(colspanStr);
     }
 
@@ -44,7 +45,8 @@ public class DashboardWidgetElement extends TestBenchElement {
      *         the web component
      */
     public Integer getRowspan() {
-        var rowspanStr = getComputedCssValue("--vaadin-dashboard-item-rowspan");
+        var rowspanStr = getComputedCssValue(
+                "--vaadin-dashboard-widget-rowspan");
         return rowspanStr.isEmpty() ? null : Integer.valueOf(rowspanStr);
     }
 

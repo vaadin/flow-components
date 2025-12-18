@@ -30,6 +30,7 @@ public class GaugeWithDualAxes extends AbstractChartExample {
     public void initDemo() {
         final Random random = new Random(0); // NOSONAR
         final Chart chart = new Chart();
+        chart.setClassName("GaugeWithDualAxes");
 
         final Configuration configuration = chart.getConfiguration();
         configuration.getChart().setType(ChartType.GAUGE);

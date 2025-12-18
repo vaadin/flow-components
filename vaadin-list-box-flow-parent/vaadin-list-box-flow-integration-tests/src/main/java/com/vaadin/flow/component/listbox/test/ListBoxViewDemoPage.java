@@ -23,8 +23,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -48,7 +48,8 @@ public class ListBoxViewDemoPage extends Div {
     }
 
     private void addListboxWithSelection() {
-        Label message = new Label("-");
+        Span message = new Span("-");
+        message.setId("selection-message");
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems("Bread", "Butter", "Milk");
 
@@ -93,18 +94,18 @@ public class ListBoxViewDemoPage extends Div {
         ListBoxListDataView<Item> listDataView = listBox.setItems(getItems());
 
         listBox.setRenderer(new ComponentRenderer<>(item -> {
-            Label name = new Label("Item: " + item.getName());
-            Label stock = new Label("In stock: " + item.getStock());
+            Span name = new Span("Item: " + item.getName());
+            Span stock = new Span("In stock: " + item.getStock());
 
             NativeButton button = new NativeButton("Buy", event -> {
                 item.setStock(item.getStock() - 1);
                 listDataView.refreshItem(item);
             });
 
-            Div labels = new Div(name, stock);
-            Div layout = new Div(labels, button);
+            Div spans = new Div(name, stock);
+            Div layout = new Div(spans, button);
 
-            labels.getStyle().set("display", "flex")
+            spans.getStyle().set("display", "flex")
                     .set("flexDirection", "column").set("marginRight", "10px");
             layout.getStyle().set("display", "flex").set("alignItems",
                     "center");
@@ -119,8 +120,8 @@ public class ListBoxViewDemoPage extends Div {
     }
 
     private void addDisabledListBox() {
-        Label message = new Label("-");
-        message.setId("message-label");
+        Span message = new Span("-");
+        message.setId("disabled-selection-message");
 
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems("Bread", "Butter", "Milk");
@@ -132,7 +133,7 @@ public class ListBoxViewDemoPage extends Div {
         NativeButton button = new NativeButton("Select Milk",
                 event -> listBox.setValue("Milk"));
 
-        Label note = new Label(
+        Span note = new Span(
                 "Note! Even though updating from the client doesn't work, "
                         + "the server may push a new status for the component.");
 

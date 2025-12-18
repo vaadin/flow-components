@@ -25,12 +25,12 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     private TreeGrid<String> treeGrid;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void setup() {
@@ -41,7 +41,7 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
                 root -> Collections.emptyList());
         treeGrid.setSelectionMode(Grid.SelectionMode.MULTI);
 
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(treeGrid);
     }
 

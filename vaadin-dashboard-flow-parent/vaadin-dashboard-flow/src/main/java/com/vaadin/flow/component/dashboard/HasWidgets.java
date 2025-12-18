@@ -66,6 +66,30 @@ public interface HasWidgets extends Serializable {
     void addWidgetAtIndex(int index, DashboardWidget widget);
 
     /**
+     * Adds the given widget immediately after the reference widget.
+     * <p>
+     * If the reference widget is located within a section, the new widget will
+     * be added to the same section, positioned after the reference widget. If
+     * the reference widget is at the root level of the dashboard, the new
+     * widget will be added at the root level, positioned after the reference
+     * widget.
+     * <p>
+     * In case the new widget has already been added to another parent, it will
+     * be removed from there and added to the appropriate location.
+     *
+     * @param referenceWidget
+     *            the widget after which the new widget will be added, not
+     *            {@code null}
+     * @param newWidget
+     *            the widget to add, not {@code null}
+     * @throws IllegalArgumentException
+     *             if the reference widget is not found in this component or any
+     *             of its sections
+     */
+    void addWidgetAfter(DashboardWidget referenceWidget,
+            DashboardWidget newWidget);
+
+    /**
      * Removes the given widgets from this component.
      *
      * @param widgets

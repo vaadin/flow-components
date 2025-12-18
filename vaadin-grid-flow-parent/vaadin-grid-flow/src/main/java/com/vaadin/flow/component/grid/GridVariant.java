@@ -25,12 +25,11 @@ public enum GridVariant {
     LUMO_ROW_STRIPES("row-stripes"),
     LUMO_COMPACT("compact"),
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_COLUMN_DIVIDERS("column-dividers");
+    AURA_NO_BORDER("no-border"),
+    AURA_NO_ROW_BORDERS("no-row-borders"),
+    AURA_COLUMN_BORDERS("column-borders"),
+    AURA_ROW_STRIPES("row-stripes"),
+    AURA_WRAP_CELL_CONTENT("wrap-cell-content");
 
     private final String variant;
 

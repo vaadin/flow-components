@@ -134,16 +134,6 @@ public class CheckboxIT extends AbstractComponentIT {
     }
 
     @Test
-    public void accessibleCheckbox() {
-        WebElement checkbox = layout.findElement(By.id("accessible-checkbox"));
-        WebElement inputElement = checkbox
-                .findElement(By.cssSelector("[slot=input]"));
-        Assert.assertEquals(
-                "Accessible checkbox should have the aria-label attribute",
-                "Click me", inputElement.getDomAttribute("aria-label"));
-    }
-
-    @Test
     public void imgCheckbox_clickOnLabel_checkboxIsChecked() {
         CheckboxElement checkbox = $(CheckboxElement.class)
                 .id("img-component-label-checkbox");

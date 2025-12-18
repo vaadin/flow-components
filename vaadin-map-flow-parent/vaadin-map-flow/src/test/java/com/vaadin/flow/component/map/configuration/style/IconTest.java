@@ -31,6 +31,7 @@ public class IconTest {
         Assert.assertNull(icon.getCrossOrigin());
         Assert.assertEquals("test", icon.getSrc());
         Assert.assertNull(icon.getImg());
+        Assert.assertNull(icon.getImgHandler());
         Assert.assertNull(icon.getImgSize());
     }
 
@@ -74,7 +75,7 @@ public class IconTest {
         Assert.assertThrows(IllegalStateException.class, () -> {
             Icon.Options options = new Icon.Options();
             options.setSrc("test");
-            options.setImg(Assets.PIN.getResource());
+            options.setImg(Assets.PIN.getHandler());
             new Icon(options);
         });
     }

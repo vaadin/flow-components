@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.popover.testbench;
 
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -27,13 +26,6 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-popover")
 public class PopoverElement extends TestBenchElement {
-
-    @Override
-    public SearchContext getContext() {
-        // Find child elements inside the overlay,
-        return getPropertyElement("_overlayElement");
-    }
-
     /**
      * Checks whether the popover is shown.
      *

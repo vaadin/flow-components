@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
 
@@ -90,7 +90,8 @@ public class SheetChartWrapper extends SheetOverlayWrapper
             if (chartCreator != null) {
                 content = chartCreator.createChart(chartXml, spreadsheet);
             } else {
-                Label label = new Label(INTEGRATION_MISSING_TEXT); // , HTML);
+                NativeLabel label = new NativeLabel(INTEGRATION_MISSING_TEXT); // ,
+                                                                               // HTML);
                 label.addClassName("overlay-content");
                 content = new Div(label);
             }

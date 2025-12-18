@@ -25,7 +25,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -118,6 +118,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         Div message = createMessageDiv("string-selection-message");
 
         ComboBox<String> comboBox = new ComboBox<>("Browsers");
+        comboBox.setPlaceholder("Input browser name");
         comboBox.setItems("Google Chrome", "Mozilla Firefox", "Opera",
                 "Apple Safari", "Microsoft Edge");
 
@@ -290,10 +291,10 @@ public class ComboBoxDemoPage extends VerticalLayout {
         comboBox.setRenderer(new ComponentRenderer<>(item -> {
             VerticalLayout container = new VerticalLayout();
 
-            Label song = new Label(item.getName());
+            Span song = new Span(item.getName());
             container.add(song);
 
-            Label artist = new Label(item.getArtist());
+            Span artist = new Span(item.getArtist());
             artist.getStyle().set("fontSize", "smaller");
             container.add(artist);
 

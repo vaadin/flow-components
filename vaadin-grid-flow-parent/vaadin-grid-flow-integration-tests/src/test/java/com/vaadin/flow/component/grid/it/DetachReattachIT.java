@@ -72,6 +72,8 @@ public class DetachReattachIT extends AbstractComponentIT {
                 grid.findElement(By.className("item-details")).isDisplayed());
 
         grid.getCell(1, 0).click();
+        waitUntil(e -> $(GridElement.class).first()
+                .findElements(By.className("item-details")).isEmpty());
 
         Assert.assertEquals("Item details are hidden on subsequent cell click.",
                 0, grid.findElements(By.className("item-details")).size());
@@ -217,5 +219,18 @@ public class DetachReattachIT extends AbstractComponentIT {
         grid = $(GridElement.class).first();
         sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
         Assert.assertEquals(direction, sorter.getProperty("direction"));
+    }
+
+    @Test
+    public void detach_attachAndDetach_noClientErrors() {
+        open();
+
+        // Detach
+        $("button").id("detach-button").click();
+
+        // Attach and detach in the same round trip
+        $("button").id("attach-and-detach-button").click();
+
+        checkLogsForErrors();
     }
 }

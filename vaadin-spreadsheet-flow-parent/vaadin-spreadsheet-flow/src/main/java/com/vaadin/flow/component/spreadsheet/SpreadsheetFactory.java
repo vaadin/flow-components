@@ -21,6 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
@@ -1042,6 +1045,7 @@ public class SpreadsheetFactory implements Serializable {
      *            Target Spreadsheet
      */
     static void loadFreezePane(Spreadsheet spreadsheet) {
+
         final Sheet sheet = spreadsheet.getActiveSheet();
         PaneInformation paneInformation = sheet.getPaneInformation();
 
@@ -1051,34 +1055,52 @@ public class SpreadsheetFactory implements Serializable {
             // With a large sheet, getTopRow could become negative.
             var topRow = Math.max(0, sheet.getTopRow());
             var leftCol = Math.max(0, sheet.getLeftCol());
+            var vSplit = paneInformation.getVerticalSplitPosition();
+            var hSplit = paneInformation.getHorizontalSplitPosition();
 
             /*
              * In POI, HorizontalSplit means rows and VerticalSplit means
              * columns.
              *
              * In Spreadsheet the meaning is the opposite.
-             */
-            spreadsheet.setHorizontalSplitPosition(
-                    paneInformation.getVerticalSplitPosition() + leftCol);
-
-            spreadsheet.setVerticalSplitPosition(
-                    paneInformation.getHorizontalSplitPosition() + topRow);
-
-            /*
+             * 
+             * POI uses a split position of 0 to mean "no split", so we should
+             * not be setting split positions or hiding anything in the case
+             * this position is 0.
+             *
              * If the view was scrolled down / right when panes were frozen, the
              * invisible frozen rows/columns are effectively hidden in Excel. We
-             * mimic this behavior here.
+             * attempt to mimic this behavior here by actually hiding the
+             * rows/columns, but only if there actually was a split.
              */
-            for (int col = 0; col < leftCol; col++) {
-                spreadsheet.setColumnHidden(col, true);
+            if (vSplit > 0) {
+                spreadsheet.setHorizontalSplitPosition(vSplit + leftCol);
+                if (leftCol > 0) {
+                    spreadsheet.setColumnsHidden(IntStream.range(0, leftCol)
+                            .boxed().collect(Collectors.toMap(
+                                    Function.identity(), index -> true)));
+                }
+            } else if (leftCol > 0) {
+                // TODO: should scroll vertically to restore viewport state
+                // This needs API on the Spreadsheet side
             }
-            for (int row = 0; row < topRow; row++) {
-                spreadsheet.setRowHidden(row, true);
+
+            if (hSplit > 0) {
+                spreadsheet.setVerticalSplitPosition(hSplit + topRow);
+                if (topRow > 0) {
+                    spreadsheet.setRowsHidden(IntStream.range(0, topRow).boxed()
+                            .collect(Collectors.toMap(Function.identity(),
+                                    index -> true)));
+                }
+            } else if (topRow > 0) {
+                // TODO: should scroll vertically to restore viewport state
+                // This needs API on the Spreadsheet side
             }
         } else {
             spreadsheet.setVerticalSplitPosition(0);
             spreadsheet.setHorizontalSplitPosition(0);
         }
+
     }
 
     private static Sheet createNewSheet(Workbook workbook) {

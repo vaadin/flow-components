@@ -17,7 +17,7 @@ package com.vaadin.flow.component.dialog.tests;
 
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -31,9 +31,9 @@ public class InitiallyOpenedDialogPage extends Div {
 
     public InitiallyOpenedDialogPage() {
         Dialog dialog = new Dialog();
-        Label label = new Label("Label inside dialog");
-        label.setId("nested-component");
-        dialog.add(label);
+        Span span = new Span("Text inside dialog");
+        span.setId("nested-component");
+        dialog.add(span);
         dialog.open();
     }
 }

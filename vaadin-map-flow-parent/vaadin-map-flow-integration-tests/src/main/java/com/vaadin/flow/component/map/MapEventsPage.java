@@ -46,7 +46,7 @@ public class MapEventsPage extends Div {
 
         NativeButton addMoveEndListener = new NativeButton(
                 "Add move end listener", e -> {
-                    map.addViewMoveEndEventListener(event -> {
+                    map.addViewMoveEndListener(event -> {
                         View mapView = map.getView();
                         String stateText = mapView.getCenter().getX() + ";"
                                 + mapView.getCenter().getY() + ";";
@@ -66,7 +66,7 @@ public class MapEventsPage extends Div {
 
         NativeButton addClickListener = new NativeButton("Add click listener",
                 e -> {
-                    map.addClickEventListener(event -> {
+                    map.addClickListener(event -> {
                         String coordinatesInfo = event.getCoordinate().getX()
                                 + ";" + event.getCoordinate().getY();
                         String pixelPositionInfo = event.getMouseDetails()

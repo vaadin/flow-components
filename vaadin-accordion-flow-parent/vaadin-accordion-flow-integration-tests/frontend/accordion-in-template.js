@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit';
-import '@vaadin/accordion/vaadin-accordion.js';
-import '@vaadin/text-field/vaadin-text-field.js';
-import '@vaadin/vertical-layout/vaadin-vertical-layout.js';
+import '@vaadin/accordion/src/vaadin-accordion.js';
+import '@vaadin/text-field/src/vaadin-text-field.js';
+import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
 
 class AccordionApp extends LitElement {
   static get styles() {

@@ -34,15 +34,12 @@ public class DefineCustomProjectionIT extends AbstractComponentIT {
     public void initWithEpsg3067UserProjection_setViewportUsingEpsg3067Coordinates_correctViewport() {
         // Verify correct viewport by checking that the Turku map tile is
         // visible
-        // Due to reprojecting the view, the map tile for zoom level 9 is
-        // loaded, rather than for zoom level then as configured in the test
-        // setup
-        // This is the map tile containing Turku for zoom level 9:
-        // https://b.tile.openstreetmap.org/9/287/147.png
+        // Due to reprojecting the view, the map tile keys do not match with the
+        // tiles actually loaded from OSM. The key below was picked manually
+        // by checking the tiles in the tile cache loaded in the browser.
         MapElement.LayerReference layer = map.getMapReference().getLayers()
                 .getLayer("background-layer");
-        MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
-        waitUntilMapTileLoaded(source, 9, 287, 147);
+        waitUntilMapTileLoaded(layer, 10, 519, 339);
     }
 
     @Test
@@ -53,11 +50,13 @@ public class DefineCustomProjectionIT extends AbstractComponentIT {
         view.setCenter(new MapElement.Coordinate(385725.63, 6671616.89));
 
         // Double-check Helsinki map tile is visible
-        // (https://b.tile.openstreetmap.org/9/291/148.png)
+        // Due to reprojecting the view, the map tile keys do not match with the
+        // tiles actually loaded from OSM. The key below was picked manually
+        // by checking the tiles in the tile cache loaded in the browser.
+        // Also verified that the same tile is not loaded in the test above.
         MapElement.LayerReference layer = map.getMapReference().getLayers()
                 .getLayer("background-layer");
-        MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
-        waitUntilMapTileLoaded(source, 9, 291, 148);
+        waitUntilMapTileLoaded(layer, 10, 523, 342);
 
         // Check coordinates received server-side
         String[] parts = eventDataDiv.getText().split(";");
@@ -68,8 +67,8 @@ public class DefineCustomProjectionIT extends AbstractComponentIT {
         Assert.assertEquals(6671616.89, centerY, 0.001);
     }
 
-    private void waitUntilMapTileLoaded(MapElement.XyzSourceReference source,
-            int z, int x, int y) {
-        waitUntil(driver -> source.isTileLoaded(z, x, y));
+    private void waitUntilMapTileLoaded(MapElement.LayerReference layer, int z,
+            int x, int y) {
+        waitUntil(driver -> layer.isTileLoaded(z, x, y));
     }
 }

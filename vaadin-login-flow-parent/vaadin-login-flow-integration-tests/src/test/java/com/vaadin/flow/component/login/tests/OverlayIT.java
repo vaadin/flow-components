@@ -20,11 +20,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-login/overlay")
-public class OverlayIT extends AbstractLoginIT {
+public class OverlayIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -32,7 +35,11 @@ public class OverlayIT extends AbstractLoginIT {
     }
 
     private void openOverlay() {
-        $("button").waitForFirst().click();
+        $("button").withId("open-button").waitForFirst().click();
+    }
+
+    private void closeOverlay() {
+        $("button").withId("close-button").waitForFirst().click();
     }
 
     @Test
@@ -53,11 +60,21 @@ public class OverlayIT extends AbstractLoginIT {
         Assert.assertEquals("Application description",
                 loginOverlay.getDescription());
 
-        checkLoginFormDefaults(loginOverlay.getLoginForm());
+        Assert.assertEquals("Log in", loginOverlay.getFormTitle());
+        Assert.assertEquals("", loginOverlay.getErrorMessageTitle());
+        Assert.assertEquals("", loginOverlay.getErrorMessage());
+        Assert.assertEquals("Forgot password",
+                loginOverlay.getForgotPasswordButton().getText().trim());
+        Assert.assertFalse(
+                loginOverlay.getForgotPasswordButton().hasAttribute("hidden"));
+        Assert.assertEquals("", loginOverlay.getAdditionalInformation());
 
-        checkLoginForm(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(),
-                loginOverlay.getSubmitButton());
+        Assert.assertEquals("Username",
+                loginOverlay.getUsernameField().getLabel());
+        Assert.assertEquals("Password",
+                loginOverlay.getPasswordField().getLabel());
+        Assert.assertEquals("Log in",
+                loginOverlay.getSubmitButton().getText().trim());
     }
 
     @Test
@@ -76,7 +93,7 @@ public class OverlayIT extends AbstractLoginIT {
         loginOverlay.getPasswordField().setValue("value");
         loginOverlay.submit();
 
-        Assert.assertFalse($(LoginOverlayElement.class).exists());
+        waitUntil(driver -> !$(LoginOverlayElement.class).exists());
     }
 
     @Test
@@ -119,17 +136,17 @@ public class OverlayIT extends AbstractLoginIT {
     }
 
     private void checkTitleComponentWasReset() {
-        // Setting title as String should detach the title component
+        // Setting title as String should restore the default title component
         $("button").id("removeCustomTitle").click();
         openOverlay();
 
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
                 .waitForFirst();
 
-        Assert.assertFalse(loginOverlay.hasTitleComponent());
         Assert.assertEquals("Make title string again", loginOverlay.getTitle());
     }
 
+    @Test
     public void testTitleAndDescriptionStrings() {
         String url = getRootURL() + getTestPath()
                 + "/property-title-description";
@@ -143,4 +160,19 @@ public class OverlayIT extends AbstractLoginIT {
                 loginOverlay.getDescription());
     }
 
+    @Test
+    public void testOverlayModalityModeIsStrictByDefault() {
+        openOverlay();
+        $(LoginOverlayElement.class).withAttribute("opened").waitForFirst();
+        closeOverlay(); // strict mode blocks clicking button
+        $(LoginOverlayElement.class).withAttribute("opened").waitForFirst();
+    }
+
+    protected void checkSuccessfulLogin(TextFieldElement usernameField,
+            PasswordFieldElement passwordField, Runnable submit) {
+        usernameField.setValue("username");
+        passwordField.setValue("password");
+        submit.run();
+        Assert.assertEquals("Successful login", $("div").id("info").getText());
+    }
 }

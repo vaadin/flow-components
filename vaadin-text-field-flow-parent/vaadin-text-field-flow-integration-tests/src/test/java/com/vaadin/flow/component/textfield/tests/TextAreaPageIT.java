@@ -52,9 +52,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = field.$("*")
-                .withAttributeContainingWord("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
@@ -118,14 +116,6 @@ public class TextAreaPageIT extends AbstractComponentIT {
 
     private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
         waitUntil(driver -> expected.equals(valueDiv.getText()));
-    }
-
-    @Test
-    public void textAreaHasPlaceholder() {
-        WebElement textField = findElement(
-                By.id("text-area-with-value-change-listener"));
-        Assert.assertEquals(textField.getDomAttribute("placeholder"),
-                "placeholder text");
     }
 
     @Test

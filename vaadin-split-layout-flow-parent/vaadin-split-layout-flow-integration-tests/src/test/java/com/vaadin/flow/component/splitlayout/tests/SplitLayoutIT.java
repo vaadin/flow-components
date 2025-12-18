@@ -23,7 +23,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -120,18 +119,6 @@ public class SplitLayoutIT extends AbstractComponentIT {
 
         Assert.assertEquals("Primary component width should be 150", 150,
                 primaryComponent.getSize().width);
-    }
-
-    @Test
-    public void assertVariants() {
-        WebElement splitLayout = findElement(
-                By.id("split-layout-theme-variant"));
-        scrollToElement(splitLayout);
-        Assert.assertEquals(SplitLayoutVariant.LUMO_SMALL.getVariantName(),
-                splitLayout.getDomAttribute("theme"));
-
-        findElement(By.id("remove-variant-button")).click();
-        Assert.assertNull(splitLayout.getDomAttribute("theme"));
     }
 
     @Element("*")

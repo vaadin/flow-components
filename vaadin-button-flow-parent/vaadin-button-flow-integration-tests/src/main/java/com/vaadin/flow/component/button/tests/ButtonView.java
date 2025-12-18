@@ -22,7 +22,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -52,7 +51,6 @@ public class ButtonView extends Div {
         createButtonWithDisableOnClickThatEnablesInSameRoundTrip();
         createButtonWithDisableOnClickThatIsHidden();
         createButtonWithDisableOnClickAndPointerEventsAuto();
-        addVariantsFeature();
         createButtonsWithShortcuts();
 
         message = new Div();
@@ -137,19 +135,6 @@ public class ButtonView extends Div {
                 + evt.getSource().getText()
                 + " was clicked, but the button is disabled and this shouldn't happen!"));
         button.setId("disabled-button");
-    }
-
-    private void addVariantsFeature() {
-        Button button = new Button("Button");
-        button.setId("button-theme-variants");
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_PRIMARY);
-
-        Button removeVariantButton = new Button("Remove theme variant", e -> {
-            button.removeThemeVariants(ButtonVariant.LUMO_SMALL);
-        });
-        removeVariantButton.setId("remove-theme-variant-button");
-        addCard("Button theme variants", button, removeVariantButton);
     }
 
     private void createButtonsWithShortcuts() {

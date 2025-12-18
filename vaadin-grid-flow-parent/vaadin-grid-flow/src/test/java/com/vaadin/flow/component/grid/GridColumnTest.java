@@ -30,7 +30,7 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -57,7 +57,7 @@ public class GridColumnTest {
         firstColumn = grid.addColumn(str -> str);
         secondColumn = grid.addColumn(str -> str);
         thirdColumn = grid.addColumn(str -> str);
-        renderer = new IconRenderer<String>(generator -> new Label(":D"));
+        renderer = new IconRenderer<String>(generator -> new Span(":D"));
         fourthColumn = grid.addColumn(renderer);
 
         UI.setCurrent(new UI());

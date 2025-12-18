@@ -18,7 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Gender;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
@@ -29,13 +29,13 @@ public class ColumnResizeEventPage extends Div {
     public static final String GRID_ID = "column-resize-event-grid";
     public static final String RESIZED_COLUMN_ID = "Resized Column ID";
 
-    public static final String RESIZED_COLUMN_ID_LABEL = "resized-col-id";
-    public static final String WIDTHS_COLUMN_VALUES_LABEL = "widths-col-values";
-    public static final String FLEX_GROWS_COLUMN_VALUES_LABEL = "flex-grows-col-values";
+    public static final String RESIZED_COLUMN_ID_MESSAGE = "resized-col-id";
+    public static final String WIDTHS_COLUMN_VALUES_MESSAGE = "widths-col-values";
+    public static final String FLEX_GROWS_COLUMN_VALUES_MESSAGE = "flex-grows-col-values";
 
-    private Label resizedColumnIdLabel = new Label();
-    private Label widthsColValuesLabel = new Label();
-    private Label flexGrowsColValuesLabel = new Label();
+    private Span resizedColumnIdMessage = new Span();
+    private Span widthsColValuesMessage = new Span();
+    private Span flexGrowsColValuesMessage = new Span();
 
     public ColumnResizeEventPage() {
         Grid<Person> grid = new Grid<>();
@@ -58,20 +58,20 @@ public class ColumnResizeEventPage extends Div {
         idColumn.setId("C");
 
         grid.addColumnResizeListener(e -> {
-            resizedColumnIdLabel.setText(e.getResizedColumn().getId().get());
-            flexGrowsColValuesLabel.setText(firstNameColumn.getFlexGrow() + "|"
-                    + lastNameColumn.getFlexGrow() + "|"
+            resizedColumnIdMessage.setText(e.getResizedColumn().getId().get());
+            flexGrowsColValuesMessage.setText(firstNameColumn.getFlexGrow()
+                    + "|" + lastNameColumn.getFlexGrow() + "|"
                     + idColumn.getFlexGrow());
-            widthsColValuesLabel.setText(firstNameColumn.getWidth() + "|"
+            widthsColValuesMessage.setText(firstNameColumn.getWidth() + "|"
                     + lastNameColumn.getWidth() + "|" + idColumn.getWidth());
         });
 
-        resizedColumnIdLabel.setId(RESIZED_COLUMN_ID_LABEL);
-        flexGrowsColValuesLabel.setId(FLEX_GROWS_COLUMN_VALUES_LABEL);
-        widthsColValuesLabel.setId(WIDTHS_COLUMN_VALUES_LABEL);
+        resizedColumnIdMessage.setId(RESIZED_COLUMN_ID_MESSAGE);
+        flexGrowsColValuesMessage.setId(FLEX_GROWS_COLUMN_VALUES_MESSAGE);
+        widthsColValuesMessage.setId(WIDTHS_COLUMN_VALUES_MESSAGE);
 
-        add(grid, resizedColumnIdLabel, widthsColValuesLabel,
-                flexGrowsColValuesLabel);
+        add(grid, resizedColumnIdMessage, widthsColValuesMessage,
+                flexGrowsColValuesMessage);
     }
 
 }

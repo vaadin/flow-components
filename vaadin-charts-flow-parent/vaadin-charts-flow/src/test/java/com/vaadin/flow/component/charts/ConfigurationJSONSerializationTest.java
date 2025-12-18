@@ -98,7 +98,7 @@ public class ConfigurationJSONSerializationTest {
             }
         });
         assertEquals(
-                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{},\"series\":[],\"exporting\":{\"enabled\":false}}",
+                "{\"chart\":{\"styledMode\":false},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"series\":[]}",
                 toJSON(conf));
     }
 
@@ -108,7 +108,7 @@ public class ConfigurationJSONSerializationTest {
         YAxis axis = new YAxis();
         conf.addyAxis(axis);
         assertEquals(
-                "{\"chart\":{\"styledMode\":false},\"yAxis\":{\"axisIndex\":0},\"plotOptions\":{},\"series\":[],\"exporting\":{\"enabled\":false}}",
+                "{\"chart\":{\"styledMode\":false},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"series\":[],\"yAxis\":{\"axisIndex\":0}}",
                 toJSON(conf));
     }
 
@@ -117,7 +117,7 @@ public class ConfigurationJSONSerializationTest {
         Configuration conf = new Configuration();
         conf.getChart().setStyledMode(true);
         assertEquals(
-                "{\"chart\":{\"styledMode\":true},\"plotOptions\":{},\"series\":[],\"exporting\":{\"enabled\":false}}",
+                "{\"chart\":{\"styledMode\":true},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"series\":[]}",
                 toJSON(conf));
     }
 
@@ -127,7 +127,7 @@ public class ConfigurationJSONSerializationTest {
         conf.setSeries(new ListSeries(), new ListSeries());
         conf.addSeries(new ListSeries());
         assertEquals(
-                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{},\"series\":[{\"data\":[]},{\"data\":[]},{\"data\":[]}],\"exporting\":{\"enabled\":false}}",
+                "{\"chart\":{\"styledMode\":false},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"series\":[{\"data\":[]},{\"data\":[]},{\"data\":[]}]}",
                 toJSON(conf));
     }
 
@@ -138,13 +138,14 @@ public class ConfigurationJSONSerializationTest {
         States states = options.getStates();
         Inactive inactive = states.getInactive();
         inactive.setOpacity(1.0);
+        inactive.setLineWidth(2.0);
         inactive.setBorderColor(new SolidColor("#000000"));
         inactive.setColor(new SolidColor("#808080"));
         inactive.setAnimation(false);
         conf.setPlotOptions(options);
 
         assertEquals(
-                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{\"pie\":{\"states\":{\"inactive\":{\"animation\":false,\"borderColor\":\"#000000\",\"color\":\"#808080\",\"opacity\":1.0}}}},\"series\":[],\"exporting\":{\"enabled\":false}}",
+                "{\"chart\":{\"styledMode\":false},\"exporting\":{\"enabled\":false},\"plotOptions\":{\"pie\":{\"states\":{\"inactive\":{\"animation\":false,\"borderColor\":\"#000000\",\"color\":\"#808080\",\"lineWidth\":2.0,\"opacity\":1.0}}}},\"series\":[]}",
                 toJSON(conf));
     }
 
@@ -157,7 +158,7 @@ public class ConfigurationJSONSerializationTest {
         conf.addLabel(label);
 
         assertEquals(
-                "{\"chart\":{\"styledMode\":false},\"plotOptions\":{},\"series\":[],\"exporting\":{\"enabled\":false},\"annotations\":[{\"labels\":[{\"point\":{\"x\":100,\"y\":100},\"text\":\"Sample\",\"useHTML\":true}]}]}",
+                "{\"annotations\":[{\"labels\":[{\"point\":{\"x\":100,\"y\":100},\"text\":\"Sample\",\"useHTML\":true}]}],\"chart\":{\"styledMode\":false},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"series\":[]}",
                 toJSON(conf));
     }
 }

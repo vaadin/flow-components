@@ -77,10 +77,9 @@ public class MenuBarTooltipIT extends AbstractComponentIT {
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
                 button);
-        waitForElementPresent(By.tagName("vaadin-tooltip-overlay"));
     }
 
     private String getActiveTooltipText() {
-        return findElement(By.tagName("vaadin-tooltip-overlay")).getText();
+        return findElement(By.tagName("vaadin-tooltip")).getText();
     }
 }

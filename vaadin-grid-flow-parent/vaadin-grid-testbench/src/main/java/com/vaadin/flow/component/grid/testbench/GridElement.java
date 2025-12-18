@@ -54,14 +54,9 @@ public class GridElement extends TestBenchElement {
         waitUntilLoadingFinished();
     }
 
-    /**
-     * Scrolls to the row with the given flat row index.
-     *
-     * @param row
-     *            the row to scroll to
-     */
-    protected void scrollToFlatRow(int row) {
-        callFunction("_scrollToFlatIndex", row);
+    void scrollToRowByFlatIndex(int rowFlatIndex) {
+        waitUntilLoadingFinished();
+        callFunction("_scrollToFlatIndex", rowFlatIndex);
         waitUntilLoadingFinished();
     }
 
@@ -130,7 +125,7 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
         if (!isRowInView(rowIndex)) {
-            scrollToFlatRow(rowIndex);
+            scrollToRowByFlatIndex(rowIndex);
         }
 
         GridTRElement row = getRow(rowIndex);
@@ -234,15 +229,40 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Gets the <code>tr</code> element for the given row index.
+     * Gets the {@code tr} element for the given row index.
      *
      * @param rowIndex
      *            the row index
-     * @return the tr element for the row
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport
      * @throws IndexOutOfBoundsException
      *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
+        return getRow(rowIndex, false);
+    }
+
+    /**
+     * Gets the {@code tr} element for the given row index.
+     * <p>
+     * Returns {@code null} if the row is not in viewport and the provided
+     * {@code scroll} parameter is {@code false}.
+     *
+     * @param rowIndex
+     *            the row index
+     * @param scroll
+     *            whether to scroll to the row index
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport and the provided {@code scroll} parameter is
+     *         {@code false}
+     * @throws IndexOutOfBoundsException
+     *             if no row with given index exists
+     */
+    public GridTRElement getRow(int rowIndex, boolean scroll)
+            throws IndexOutOfBoundsException {
+        if (scroll && !isRowInView(rowIndex)) {
+            scrollToRowByFlatIndex(rowIndex);
+        }
         var rows = getRows(rowIndex, rowIndex);
         return rows.size() == 1 ? rows.get(0) : null;
     }
@@ -355,6 +375,25 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
+     * Finds the cell element for the given row and column in header.
+     *
+     * @param rowIndex
+     *            the index of the row in the header
+     * @param columnIndex
+     *            the index of the column in the header
+     * @return the GridTHTDElement for the given row and column in header.
+     */
+    public GridTHTDElement getHeaderCell(int rowIndex, int columnIndex) {
+        WebElement theader = $("*").id("header");
+        List<WebElement> headerRows = theader.findElements(By.tagName("tr"));
+        List<WebElement> headerCells = headerRows.get(rowIndex)
+                .findElements(By.tagName("th"));
+        var cell = headerCells.get(columnIndex);
+        return wrapElement(cell, getCommandExecutor())
+                .wrap(GridTHTDElement.class);
+    }
+
+    /**
      * Gets the footer cell for the given visible column index.
      *
      * @param columnIndex
@@ -363,6 +402,49 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getFooterCell(int columnIndex) {
         return getVisibleColumns().get(columnIndex).getFooterCell();
+    }
+
+    /**
+     * Finds the vaadin-grid-cell-content element for the given row and column
+     * in footer.
+     *
+     * @param rowIndex
+     *            the index of the row in the footer
+     * @param columnIndex
+     *            the index of the column in the footer
+     * @return the vaadin-grid-cell-content element for the given row and column
+     *         in footer.
+     */
+    public TestBenchElement getFooterCellContent(int rowIndex,
+            int columnIndex) {
+        WebElement tfoot = $("*").id("footer");
+        List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
+        List<WebElement> footerCells = footerRows.get(rowIndex)
+                .findElements(By.tagName("td"));
+        String slotName = footerCells.get(columnIndex)
+                .findElement(By.tagName("slot")).getDomAttribute("name");
+
+        return findElement(By.cssSelector(
+                "vaadin-grid-cell-content[slot='" + slotName + "']"));
+    }
+
+    /**
+     * Finds the cell element for the given row and column in footer.
+     *
+     * @param rowIndex
+     *            the index of the row in the footer
+     * @param columnIndex
+     *            the index of the column in the footer
+     * @return the GridTHTDElement for the given row and column in footer.
+     */
+    public GridTHTDElement getFooterCell(int rowIndex, int columnIndex) {
+        WebElement tfoot = $("*").id("footer");
+        List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
+        List<WebElement> footerCells = footerRows.get(rowIndex)
+                .findElements(By.tagName("td"));
+        var cell = footerCells.get(columnIndex);
+        return wrapElement(cell, getCommandExecutor())
+                .wrap(GridTHTDElement.class);
     }
 
     /**

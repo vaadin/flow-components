@@ -99,7 +99,8 @@ public class SpreadsheetJsApi {
 
                 "height", "width", "description", "descriptionContentMode",
                 "caption", "styles", "id", "primaryStyleName", "errorMessage",
-                "captionAsHtml", "tabIndex", "enabled" }) {
+                "captionAsHtml", "tabIndex", "enabled",
+                "showCustomEditorOnFocus" }) {
             if (sce.isInitialStateChange()
                     || sce.hasPropertyChanged(propertyName)) {
                 SpreadsheetWidget w = connector.getWidget();
@@ -185,6 +186,8 @@ public class SpreadsheetJsApi {
                     w.setWidth(s.width);
                 if ("id".equals(propertyName))
                     w.setId(s.id);
+                if ("showCustomEditorOnFocus".equals(propertyName))
+                    w.setShowCustomEditorOnFocus(s.showCustomEditorOnFocus);
             }
         }
     }
@@ -444,6 +447,10 @@ public class SpreadsheetJsApi {
         getState().namedRanges = Parser.parseArraylistString(namedRanges);
     }
 
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        getState().showCustomEditorOnFocus = showCustomEditorOnFocus;
+    }
+
     public void setHeight(String height) {
         getState().height = height;
     }
@@ -679,6 +686,10 @@ public class SpreadsheetJsApi {
     public void setCellsAddedToRangeSelectionCallback(
             JsConsumer<String> callback) {
         getServerRpcInstance().setCellsAddedToRangeSelectionCallback(callback);
+    }
+
+    public void setContextMenuClosedCallback(JsConsumer<Void> callback) {
+        getServerRpcInstance().setContextMenuClosedCallback(callback);
     }
 
     public void setRowSelectedCallback(JsConsumer<String> callback) {

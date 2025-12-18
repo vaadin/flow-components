@@ -33,7 +33,7 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        list = $(VirtualListElement.class).first();
+        list = $(VirtualListElement.class).waitForFirst();
         waitForElementPresent(By.id("item-0"));
     }
 
