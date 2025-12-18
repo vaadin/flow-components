@@ -21,6 +21,8 @@ import org.junit.Test;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.UploadDropZone;
+import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 
@@ -82,7 +84,7 @@ public class UploadTest {
         Upload upload = new Upload();
         Assert.assertNull(upload.getDropZone());
 
-        Div dropZone = new Div();
+        UploadDropZone dropZone = new UploadDropZone();
         upload.setDropZone(dropZone);
         Assert.assertEquals(dropZone, upload.getDropZone());
 
@@ -95,7 +97,7 @@ public class UploadTest {
         Upload upload = new Upload();
         Assert.assertNull(upload.getFileList());
 
-        Div fileList = new Div();
+        UploadFileList fileList = new UploadFileList();
         upload.setFileList(fileList);
         Assert.assertEquals(fileList, upload.getFileList());
 

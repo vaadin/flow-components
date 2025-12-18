@@ -96,8 +96,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     private Component defaultDropLabelIcon;
 
     private Component customAddButton;
-    private Component customDropZone;
-    private Component customFileList;
+    private UploadDropZone customDropZone;
+    private HasUploadFileList customFileList;
 
     /**
      * The output of the upload is redirected to this receiver.
@@ -365,7 +365,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *            the component to be used as the drop zone, or {@code null} to
      *            remove the custom drop zone
      */
-    public void setDropZone(Component dropZone) {
+    public void setDropZone(UploadDropZone dropZone) {
         if (customDropZone != null) {
             getElement().executeJs("this.dropArea = null;");
         }
@@ -381,7 +381,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *
      * @return the custom drop zone component, or {@code null} if not set
      */
-    public Component getDropZone() {
+    public UploadDropZone getDropZone() {
         return customDropZone;
     }
 
@@ -397,11 +397,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * {@code i18n}, and {@code disabled} properties, and should fire
      * {@code file-retry}, {@code file-abort}, and {@code file-start} events.
      *
+     * @param <T>
+     *            the type of the file list component
      * @param fileList
      *            the component to be used as the file list, or {@code null} to
      *            remove the custom file list
      */
-    public void setFileList(Component fileList) {
+    public <T extends Component & HasUploadFileList> void setFileList(
+            T fileList) {
         if (customFileList != null) {
             getElement().executeJs("this.fileList = null;");
         }
@@ -417,7 +420,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *
      * @return the custom file list component, or {@code null} if not set
      */
-    public Component getFileList() {
+    public HasUploadFileList getFileList() {
         return customFileList;
     }
 
