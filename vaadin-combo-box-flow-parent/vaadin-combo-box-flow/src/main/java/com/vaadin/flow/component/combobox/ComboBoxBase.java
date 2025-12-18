@@ -384,7 +384,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *         until filtering is triggered.
      */
     public int getFilterTimeout() {
-        return getElement().getProperty("_filterTimeout", DEFAULT_FILTER_TIMEOUT);
+        return getElement().getProperty("_filterTimeout",
+                DEFAULT_FILTER_TIMEOUT);
     }
 
     /**
