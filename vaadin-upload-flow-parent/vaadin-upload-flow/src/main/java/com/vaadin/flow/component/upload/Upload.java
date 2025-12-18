@@ -95,6 +95,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     private Component dropLabelIcon;
     private Component defaultDropLabelIcon;
 
+    private Component customAddButton;
+    private Component customDropZone;
+    private Component customFileList;
+
     /**
      * The output of the upload is redirected to this receiver.
      */
@@ -289,6 +293,132 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public void setAutoUpload(boolean autoUpload) {
         getElement().setProperty("noAuto", !autoUpload);
+    }
+
+    /**
+     * Sets the headless mode. When true, the upload component hides its default
+     * UI (buttons, drop label, and file list). Use this when providing custom
+     * UI elements via {@link #setAddButton(Component)},
+     * {@link #setDropZone(Component)}, and {@link #setFileList(Component)}.
+     *
+     * @param headless
+     *            true to hide the default UI
+     */
+    public void setHeadless(boolean headless) {
+        getElement().setProperty("headless", headless);
+    }
+
+    /**
+     * Gets the headless mode.
+     *
+     * @return true if the default UI is hidden
+     */
+    public boolean isHeadless() {
+        return getElement().getProperty("headless", false);
+    }
+
+    /**
+     * Sets a custom component to be used as the add button. When clicked, this
+     * component will open the file selection dialog.
+     * <p>
+     * This is typically used together with {@link #setHeadless(boolean)} to
+     * create a custom upload UI.
+     * <p>
+     * Note: The custom component must be attached to the DOM before this method
+     * is called.
+     *
+     * @param addButton
+     *            the component to be used as the add button, or {@code null} to
+     *            remove the custom add button
+     */
+    public void setAddButton(Component addButton) {
+        if (customAddButton != null) {
+            getElement().executeJs("this.addButton = null;");
+        }
+        customAddButton = addButton;
+        if (addButton != null) {
+            getElement().executeJs("this.addButton = $0;",
+                    addButton.getElement());
+        }
+    }
+
+    /**
+     * Gets the custom component used as the add button.
+     *
+     * @return the custom add button component, or {@code null} if not set
+     */
+    public Component getAddButton() {
+        return customAddButton;
+    }
+
+    /**
+     * Sets a custom component to be used as the drop zone. Files can be dragged
+     * and dropped onto this component to upload them.
+     * <p>
+     * This is typically used together with {@link #setHeadless(boolean)} to
+     * create a custom upload UI.
+     * <p>
+     * Note: The custom component must be attached to the DOM before this method
+     * is called.
+     *
+     * @param dropZone
+     *            the component to be used as the drop zone, or {@code null} to
+     *            remove the custom drop zone
+     */
+    public void setDropZone(Component dropZone) {
+        if (customDropZone != null) {
+            getElement().executeJs("this.dropArea = null;");
+        }
+        customDropZone = dropZone;
+        if (dropZone != null) {
+            getElement().executeJs("this.dropArea = $0;",
+                    dropZone.getElement());
+        }
+    }
+
+    /**
+     * Gets the custom component used as the drop zone.
+     *
+     * @return the custom drop zone component, or {@code null} if not set
+     */
+    public Component getDropZone() {
+        return customDropZone;
+    }
+
+    /**
+     * Sets a custom component to be used as the file list. This component will
+     * display the list of files being uploaded.
+     * <p>
+     * This is typically used together with {@link #setHeadless(boolean)} to
+     * create a custom upload UI.
+     * <p>
+     * Note: The custom component must be attached to the DOM before this method
+     * is called. The component should be able to handle the {@code items},
+     * {@code i18n}, and {@code disabled} properties, and should fire
+     * {@code file-retry}, {@code file-abort}, and {@code file-start} events.
+     *
+     * @param fileList
+     *            the component to be used as the file list, or {@code null} to
+     *            remove the custom file list
+     */
+    public void setFileList(Component fileList) {
+        if (customFileList != null) {
+            getElement().executeJs("this.fileList = null;");
+        }
+        customFileList = fileList;
+        if (fileList != null) {
+            getElement().executeJs("this.fileList = $0;",
+                    fileList.getElement());
+        }
+    }
+
+    /**
+     * Gets the custom component used as the file list.
+     *
+     * @return the custom file list component, or {@code null} if not set
+     */
+    public Component getFileList() {
+        return customFileList;
     }
 
     /**

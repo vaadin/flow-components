@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
@@ -48,5 +49,57 @@ public class UploadTest {
 
         upload.setReceiver(new MemoryBuffer());
         Assert.assertEquals(1, upload.getElement().getProperty("maxFiles", 0));
+    }
+
+    @Test
+    public void setHeadless() {
+        Upload upload = new Upload();
+        Assert.assertFalse(upload.isHeadless());
+
+        upload.setHeadless(true);
+        Assert.assertTrue(upload.isHeadless());
+        Assert.assertTrue(upload.getElement().getProperty("headless", false));
+
+        upload.setHeadless(false);
+        Assert.assertFalse(upload.isHeadless());
+    }
+
+    @Test
+    public void setAddButton() {
+        Upload upload = new Upload();
+        Assert.assertNull(upload.getAddButton());
+
+        Div button = new Div();
+        upload.setAddButton(button);
+        Assert.assertEquals(button, upload.getAddButton());
+
+        upload.setAddButton(null);
+        Assert.assertNull(upload.getAddButton());
+    }
+
+    @Test
+    public void setDropZone() {
+        Upload upload = new Upload();
+        Assert.assertNull(upload.getDropZone());
+
+        Div dropZone = new Div();
+        upload.setDropZone(dropZone);
+        Assert.assertEquals(dropZone, upload.getDropZone());
+
+        upload.setDropZone(null);
+        Assert.assertNull(upload.getDropZone());
+    }
+
+    @Test
+    public void setFileList() {
+        Upload upload = new Upload();
+        Assert.assertNull(upload.getFileList());
+
+        Div fileList = new Div();
+        upload.setFileList(fileList);
+        Assert.assertEquals(fileList, upload.getFileList());
+
+        upload.setFileList(null);
+        Assert.assertNull(upload.getFileList());
     }
 }
