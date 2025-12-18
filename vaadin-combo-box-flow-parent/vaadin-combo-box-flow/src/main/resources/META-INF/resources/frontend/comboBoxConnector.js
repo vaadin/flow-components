@@ -89,11 +89,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     if (filterChanged) {
       cache = {};
       lastFilter = params.filter;
-      let timerValue = 500;
-      if (comboBox.filterDebouncerTimer) {
-        timerValue = comboBox.filterDebouncerTimer;
-      }
-      this._filterDebouncer = Debouncer.debounce(this._filterDebouncer, timeOut.after(timerValue), () => {
+      this._filterDebouncer = Debouncer.debounce(this._filterDebouncer, timeOut.after(comboBox._filterTimeout ?? 500), () => {
         if (serverFacade.getLastFilterSentToServer() === params.filter) {
           // Fixes the case when the filter changes
           // to something else and back to the original value

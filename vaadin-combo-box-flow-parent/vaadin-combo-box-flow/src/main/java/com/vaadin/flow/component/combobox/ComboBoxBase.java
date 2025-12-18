@@ -97,6 +97,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
         HasValidationProperties, HasValidator<TValue>, HasPlaceholder {
+    private static final int DEFAULT_FILTER_TIMEOUT = 500;
 
     /**
      * Registration for custom value listeners that disallows entering custom
@@ -206,6 +207,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 e -> getDataCommunicator().notifySelectionChanged());
 
         addValueChangeListener(e -> validate());
+
+        setFilterTimeout(DEFAULT_FILTER_TIMEOUT);
     }
 
     /**
@@ -358,6 +361,30 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     protected void setFilter(String filter) {
         getElement().setProperty("filter", filter == null ? "" : filter);
+    }
+
+    /**
+     * Sets the debounce timeout that the component waits for a short pause in
+     * typing, before triggering a server-side visit to filter items. The
+     * default is 500ms.
+     *
+     * @param filterTimeout
+     *            the time in milliseconds that needs to happen between
+     *            keystrokes until filtering is triggered.
+     */
+    public void setFilterTimeout(int filterTimeout) {
+        getElement().setProperty("_filterTimeout", filterTimeout);
+    }
+
+    /**
+     * Gets the debounce timeout that the component waits for a short pause in
+     * typing, before triggering a server-side visit to filter items.
+     *
+     * @return the time in milliseconds that needs to happen between keystrokes
+     *         until filtering is triggered.
+     */
+    public int getFilterTimeout() {
+        return getElement().getProperty("_filterTimeout", DEFAULT_FILTER_TIMEOUT);
     }
 
     /**
