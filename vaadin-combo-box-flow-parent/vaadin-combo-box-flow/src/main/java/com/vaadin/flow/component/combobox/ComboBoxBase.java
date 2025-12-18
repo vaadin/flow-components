@@ -364,24 +364,23 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Sets the debounce timeout that the component waits for a short pause in
-     * typing, before triggering a server-side visit to filter items. The
-     * default is 500ms.
+     * Sets the debounce timeout for filtering. The component waits for the
+     * specified duration of inactivity before sending a server request to
+     * filter items. The default is 500ms.
      *
      * @param filterTimeout
-     *            the time in milliseconds that needs to happen between
-     *            keystrokes until filtering is triggered.
+     *            the time in milliseconds to wait after typing stops before
+     *            filtering is triggered
      */
     public void setFilterTimeout(int filterTimeout) {
         getElement().setProperty("_filterTimeout", filterTimeout);
     }
 
     /**
-     * Gets the debounce timeout that the component waits for a short pause in
-     * typing, before triggering a server-side visit to filter items.
+     * Gets the debounce timeout for filtering.
      *
-     * @return the time in milliseconds that needs to happen between keystrokes
-     *         until filtering is triggered.
+     * @return the time in milliseconds to wait after typing stops before
+     *         filtering is triggered
      */
     public int getFilterTimeout() {
         return getElement().getProperty("_filterTimeout",
