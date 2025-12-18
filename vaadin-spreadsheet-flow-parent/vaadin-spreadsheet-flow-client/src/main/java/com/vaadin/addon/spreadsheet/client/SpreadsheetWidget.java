@@ -578,6 +578,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             public void execute() {
                 // remove old, add new
                 clearMergedRegions();
+
+                // copy list for later
+                if (mergedRegions == null) {
+                    SpreadsheetWidget.this.mergedRegions = null;
+                } else {
+                    SpreadsheetWidget.this.mergedRegions = new ArrayList<>(
+                            mergedRegions);
+                }
+
                 if (mergedRegions != null) {
                     int i = 0;
                     while (i < mergedRegions.size()) {
@@ -594,14 +603,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         i++;
                     }
                     sheetWidget.checkMergedRegionPositions();
-                }
-
-                // copy list for later
-                if (mergedRegions == null) {
-                    SpreadsheetWidget.this.mergedRegions = null;
-                } else {
-                    SpreadsheetWidget.this.mergedRegions = new ArrayList<MergedRegion>(
-                            mergedRegions);
                 }
             }
         });
