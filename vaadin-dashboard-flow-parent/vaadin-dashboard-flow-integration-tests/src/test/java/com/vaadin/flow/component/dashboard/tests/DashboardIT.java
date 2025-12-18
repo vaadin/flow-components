@@ -54,6 +54,14 @@ public class DashboardIT extends AbstractComponentIT {
     }
 
     @Test
+    public void addWidgetAfterExistingWidget_widgetIsCorrectlyAdded() {
+        clickElementWithJs("add-widget-after-existing");
+        assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "New widget 1",
+                "Widget 3", "Widget 1 in Section 1", "Widget 2 in Section 1",
+                "Widget 1 in Section 2");
+    }
+
+    @Test
     public void removeFirstAndLastWidgetsFromDashboard_widgetsAreCorrectlyRemoved() {
         clickElementWithJs("remove-first-and-last-widgets");
         assertDashboardWidgetsByTitle("Widget 2", "Widget 3",
