@@ -197,12 +197,11 @@ public class Dashboard extends Component
 
         // Search in sections
         for (Component component : childrenComponents) {
-            if (component instanceof DashboardSection section) {
-                if (section.getWidgets().contains(referenceWidget)) {
-                    // Found the section containing the reference widget
-                    section.addWidgetAfter(referenceWidget, newWidget);
-                    return; // updateClient() is called by section
-                }
+            if (component instanceof DashboardSection section
+                    && section.getWidgets().contains(referenceWidget)) {
+                // Found the section containing the reference widget
+                section.addWidgetAfter(referenceWidget, newWidget);
+                return; // updateClient() is called by section
             }
         }
 
