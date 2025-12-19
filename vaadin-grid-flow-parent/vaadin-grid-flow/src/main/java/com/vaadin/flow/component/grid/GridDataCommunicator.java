@@ -31,4 +31,9 @@ class GridDataCommunicator<T> extends DataCommunicator<T> {
                 .callJsFunction("$connector.updateFlatData", data),
                 element.getNode());
     }
+
+    @Override
+    public void refreshViewport() {
+        super.refreshViewport();
+    }
 }
