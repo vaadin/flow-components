@@ -5,11 +5,19 @@ window.Vaadin = window.Vaadin || {};
 window.Vaadin.Upload = window.Vaadin.Upload || {};
 window.Vaadin.Upload.UploadManager = UploadManager;
 
-// Registry to track UploadManager instances by unique ID
+// Registry to track UploadManager instances by unique ID using WeakRef
+// This allows managers to be garbage collected when no longer referenced
 const uploadManagers = new Map();
+
+// FinalizationRegistry to clean up the map entry when manager is GC'd
+const registry = new FinalizationRegistry((id) => {
+  uploadManagers.delete(id);
+});
 
 /**
  * Creates a new UploadManager instance and registers it with the given ID.
+ * The manager is stored using WeakRef so it can be garbage collected when
+ * no longer referenced by components.
  * @param {string} id - Unique identifier for the manager
  * @param {Object} options - Configuration options for the UploadManager
  * @param {HTMLElement} [eventTarget] - Element to dispatch events to for server communication
@@ -17,7 +25,8 @@ const uploadManagers = new Map();
  */
 window.Vaadin.Upload.UploadManager.createUploadManager = function (id, options, eventTarget) {
   const manager = new UploadManager(options);
-  uploadManagers.set(id, manager);
+  uploadManagers.set(id, new WeakRef(manager));
+  registry.register(manager, id);
 
   // Forward events to the event target element for server-side handling
   if (eventTarget) {
@@ -48,10 +57,11 @@ window.Vaadin.Upload.UploadManager.createUploadManager = function (id, options, 
 /**
  * Gets an UploadManager instance by its ID.
  * @param {string} id - The manager ID
- * @returns {UploadManager|undefined} The manager instance, or undefined if not found
+ * @returns {UploadManager|undefined} The manager instance, or undefined if not found or GC'd
  */
 window.Vaadin.Upload.UploadManager.getUploadManager = function (id) {
-  return uploadManagers.get(id);
+  const ref = uploadManagers.get(id);
+  return ref?.deref();
 };
 
 /**
@@ -59,9 +69,10 @@ window.Vaadin.Upload.UploadManager.getUploadManager = function (id) {
  * @param {string} id - The manager ID
  */
 window.Vaadin.Upload.UploadManager.removeUploadManager = function (id) {
-  const manager = uploadManagers.get(id);
+  const ref = uploadManagers.get(id);
+  const manager = ref?.deref();
   if (manager) {
     manager.destroy();
-    uploadManagers.delete(id);
   }
+  uploadManagers.delete(id);
 };

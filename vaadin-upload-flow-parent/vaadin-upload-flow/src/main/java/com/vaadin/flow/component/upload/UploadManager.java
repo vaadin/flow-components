@@ -16,12 +16,16 @@
 package com.vaadin.flow.component.upload;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -290,37 +294,42 @@ public class UploadManager implements Serializable {
             return;
         }
 
-        // Register the stream resource with the UI element
-        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                uploadHandler, ui.getElement()) {
-            @Override
-            public String getName() {
-                return targetName;
-            }
-        };
+        // Register the stream resource with the UI element (use static class to
+        // avoid implicit 'this' reference that would prevent GC)
+        StreamResourceRegistry.ElementStreamResource elementStreamResource = new NamedElementStreamResource(
+                uploadHandler, ui.getElement(), targetName);
 
         // Set up event listeners on UI element for events from JS manager
         setupEventListeners();
 
-        ui.beforeClientResponse(ui, context -> {
-            ui.getElement().setAttribute("data-upload-target-" + id,
-                    elementStreamResource);
+        // Store the target URL as an attribute on the UI element (setAttribute
+        // auto-registers the resource and converts to URL)
+        final String attrName = "upload-target-" + id;
+        ui.getElement().setAttribute(attrName, elementStreamResource);
 
-            // Build configuration options
+        // Capture current config values for the lambda
+        final int currentMaxFiles = maxFiles;
+        final int currentMaxFileSize = maxFileSize;
+        final String currentAccept = accept;
+        final boolean currentAutoUpload = autoUpload;
+
+        ui.beforeClientResponse(ui, context -> {
+            // Build configuration options - read target from attribute and
+            // remove it
             StringBuilder options = new StringBuilder();
-            options.append("{ target: document.body.getAttribute('data-upload-target-"
-                    + id + "')");
-            if (maxFiles > 0) {
-                options.append(", maxFiles: ").append(maxFiles);
+            options.append("{ target: (()=>{ const a='").append(attrName)
+                    .append("'; const t=$1.getAttribute(a); $1.removeAttribute(a); return t; })()");
+            if (currentMaxFiles > 0) {
+                options.append(", maxFiles: ").append(currentMaxFiles);
             }
-            if (maxFileSize > 0) {
-                options.append(", maxFileSize: ").append(maxFileSize);
+            if (currentMaxFileSize > 0) {
+                options.append(", maxFileSize: ").append(currentMaxFileSize);
             }
-            if (accept != null && !accept.isEmpty()) {
-                options.append(", accept: '").append(escapeJs(accept))
+            if (currentAccept != null && !currentAccept.isEmpty()) {
+                options.append(", accept: '").append(escapeJs(currentAccept))
                         .append("'");
             }
-            if (!autoUpload) {
+            if (!currentAutoUpload) {
                 options.append(", noAuto: true");
             }
             options.append(" }");
@@ -336,38 +345,59 @@ public class UploadManager implements Serializable {
     }
 
     private void setupEventListeners() {
+        // Get or create the managers registry for this UI
+        ManagerRegistry registry = getOrCreateRegistry(ui);
+
+        // Register this manager in the registry
+        registry.put(id, new WeakReference<>(this));
+    }
+
+    private static ManagerRegistry getOrCreateRegistry(UI ui) {
+        ManagerRegistry registry = ComponentUtil.getData(ui,
+                ManagerRegistry.class);
+        if (registry == null) {
+            registry = new ManagerRegistry();
+            ComponentUtil.setData(ui, ManagerRegistry.class, registry);
+            installSharedListeners(ui, registry);
+        }
+        return registry;
+    }
+
+    private static void installSharedListeners(UI ui, ManagerRegistry registry) {
         final String detailManagerId = "event.detail.managerId";
         final String detailFileName = "event.detail.fileName";
         final String detailErrorMessage = "event.detail.errorMessage";
 
-        // Listen for file-remove events forwarded from the JS manager
+        // Single shared listener for file-remove events
         ui.getElement().addEventListener("upload-manager-file-remove",
                 event -> {
                     String managerId = event.getEventData().get(detailManagerId)
                             .asString();
-                    if (id.equals(managerId)) {
+                    UploadManager manager = registry.get(managerId);
+                    if (manager != null) {
                         String fileName = event.getEventData()
                                 .get(detailFileName).asString();
                         FileRemovedEventData eventData = new FileRemovedEventData(
                                 fileName);
-                        fileRemovedListeners
+                        manager.fileRemovedListeners
                                 .forEach(listener -> listener.accept(eventData));
                     }
                 }).addEventData(detailManagerId).addEventData(detailFileName);
 
-        // Listen for file-reject events forwarded from the JS manager
+        // Single shared listener for file-reject events
         ui.getElement().addEventListener("upload-manager-file-reject",
                 event -> {
                     String managerId = event.getEventData().get(detailManagerId)
                             .asString();
-                    if (id.equals(managerId)) {
+                    UploadManager manager = registry.get(managerId);
+                    if (manager != null) {
                         String fileName = event.getEventData()
                                 .get(detailFileName).asString();
                         String errorMessage = event.getEventData()
                                 .get(detailErrorMessage).asString();
                         FileRejectedEventData eventData = new FileRejectedEventData(
                                 fileName, errorMessage);
-                        fileRejectedListeners
+                        manager.fileRejectedListeners
                                 .forEach(listener -> listener.accept(eventData));
                     }
                 }).addEventData(detailManagerId).addEventData(detailFileName)
@@ -375,15 +405,46 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Destroys this manager and releases all resources. Call this when the
-     * manager is no longer needed.
+     * Static nested class to avoid implicit 'this' reference in anonymous
+     * class, which would prevent GC of UploadManager.
      */
-    public void destroy() {
-        if (initialized) {
-            ui.getPage().executeJs(
-                    "window.Vaadin.Upload.UploadManager.removeUploadManager($0);",
-                    id);
-            initialized = false;
+    private static class NamedElementStreamResource
+            extends StreamResourceRegistry.ElementStreamResource {
+        private final String name;
+
+        NamedElementStreamResource(UploadHandler handler,
+                com.vaadin.flow.dom.Element element, String name) {
+            super(handler, element);
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
+    /**
+     * Registry for UploadManager instances within a UI.
+     */
+    private static class ManagerRegistry implements Serializable {
+        private final Map<String, WeakReference<UploadManager>> managers = new HashMap<>();
+
+        void put(String id, WeakReference<UploadManager> ref) {
+            managers.put(id, ref);
+        }
+
+        UploadManager get(String id) {
+            WeakReference<UploadManager> ref = managers.get(id);
+            if (ref != null) {
+                UploadManager manager = ref.get();
+                if (manager == null) {
+                    // Manager was GC'd, clean up the entry
+                    managers.remove(id);
+                }
+                return manager;
+            }
+            return null;
         }
     }
 
