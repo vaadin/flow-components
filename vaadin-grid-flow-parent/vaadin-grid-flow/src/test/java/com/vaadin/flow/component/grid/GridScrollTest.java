@@ -121,7 +121,7 @@ public class GridScrollTest {
     private String getViewportRange(Grid<String> grid) {
         try {
             var communicator = grid.getDataCommunicator();
-            var viewportRangeField = communicator.getClass()
+            var viewportRangeField = communicator.getClass().getSuperclass()
                     .getDeclaredField("viewportRange");
             viewportRangeField.setAccessible(true);
             Range viewportRange = (Range) viewportRangeField.get(communicator);
