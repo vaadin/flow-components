@@ -1741,10 +1741,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         protected DataCommunicator<T> build(Element element,
                 CompositeDataGenerator<T> dataGenerator, U arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            return new DataCommunicator<>(
-                    dataGenerator, arrayUpdater, data -> element
-                            .callJsFunction("$connector.updateFlatData", data),
-                    element.getNode());
+            return new GridDataCommunicator<>(element, dataGenerator,
+                    arrayUpdater);
         }
     }
 
