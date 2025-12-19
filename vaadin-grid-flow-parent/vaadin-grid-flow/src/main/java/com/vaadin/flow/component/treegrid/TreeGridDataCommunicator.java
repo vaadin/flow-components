@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
 /**
- * This class is for internal use only.
+ * WARNING: This class is for internal use only.
  */
 class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     private final Element element;
