@@ -28,7 +28,7 @@ import java.io.Serializable;
  *
  * @author Vaadin Ltd.
  * @see Upload#setFileList(HasUploadFileList)
- * @see UploadFileList
+ * @see UploadFileListBox
  */
 public interface HasUploadFileList extends Serializable {
 }

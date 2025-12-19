@@ -15,60 +15,56 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadDropZone;
-import com.vaadin.flow.component.upload.UploadFileList;
-import com.vaadin.flow.component.upload.UploadOrchestrator;
+import com.vaadin.flow.component.upload.UploadFileListBox;
+import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
- * Demo page for UploadOrchestrator with custom external components.
+ * Demo page for UploadManager with custom external components.
  *
  * @author Vaadin Ltd
  */
-@Route("vaadin-upload/orchestrator")
-public class UploadOrchestratorPage extends Div {
+@Route("vaadin-upload/manager")
+public class UploadManagerPage extends Div {
 
-    public UploadOrchestratorPage() {
-        add(new H2("Upload Orchestrator Demo"));
+    public UploadManagerPage() {
+        add(new H2("Upload Manager Demo"));
         add(new Paragraph(
-                "This demo shows the UploadOrchestrator with custom external components."));
+                "This demo shows the UploadManager with custom external components."));
 
-        // Create external UI components
-        var dropZone = new UploadDropZone();
-        dropZone.add(new Span("Drag and drop files here or "));
-
-        var addButton = new NativeButton("Select Files");
-
-        var fileList = new UploadFileList();
-
-        // Create orchestrator and connect components
-        var orchestrator = new UploadOrchestrator();
-        orchestrator.setDropZone(dropZone);
-        orchestrator.setAddButton(addButton);
-        orchestrator.setFileList(fileList);
-
-        // Set up upload handling
-        orchestrator.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
+        // Create the manager with an upload handler
+        var manager = new UploadManager(UI.getCurrent(), UploadHandler.inMemory((metadata, data) -> {
             System.out.println("Uploaded file: " + metadata.fileName()
                     + ", size: " + data.length + " bytes");
         }));
 
         // Add file removed listener
-        orchestrator.addFileRemovedListener(event -> {
+        manager.addFileRemovedListener(event -> {
             System.out.println("Removed file: " + event.getFileName());
         });
 
         // Add file rejected listener
-        orchestrator.addFileRejectedListener(event -> {
+        manager.addFileRejectedListener(event -> {
             System.out.println("Rejected file: " + event.getFileName()
                     + ", reason: " + event.getErrorMessage());
         });
+
+        // Create UI components linked to the manager
+        var dropZone = new UploadDropZone(manager);
+        dropZone.add(new Span("Drag and drop files here or "));
+
+        var addButton = new UploadButton(manager);
+        addButton.add(new Span("Select Files"));
+
+        var fileList = new UploadFileListBox(manager);
 
         // Add UI components to the layout
         add(dropZone, addButton, fileList);

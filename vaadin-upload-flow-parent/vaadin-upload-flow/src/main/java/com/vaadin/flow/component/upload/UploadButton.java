@@ -22,51 +22,47 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * A drop zone component for file uploads. When files are dropped on this
- * component, they are added to the linked {@link UploadManager}.
+ * A button component for triggering file uploads. When clicked, it opens a file
+ * picker dialog. This component is designed to work with {@link UploadManager}.
  * <p>
- * The component has minimal styling by default. When files are dragged over it,
- * the {@code dragover} attribute is set on the element, which can be used for
- * styling.
- * <p>
- * Example usage with UploadManager:
+ * Example usage:
  *
  * <pre>
  * var manager = new UploadManager(uploadHandler);
- * var dropZone = new UploadDropZone(manager);
- * dropZone.add(new Span("Drop files here"));
- * add(dropZone);
+ * var button = new UploadButton(manager);
+ * button.add(new Span("Select Files"));
+ * add(button);
  * </pre>
  *
  * @author Vaadin Ltd.
  * @see UploadManager
  */
-@Tag("vaadin-upload-drop-zone")
+@Tag("vaadin-upload-button")
 @NpmPackage(value = "@vaadin/upload", version = "25.0.0")
-@JsModule("@vaadin/upload/src/vaadin-upload-drop-zone.js")
+@JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 @JsModule("./vaadin-upload-manager-connector.js")
-public class UploadDropZone extends Component implements HasComponents {
+public class UploadButton extends Component implements HasComponents {
 
     /**
-     * Creates a new empty drop zone without a manager. The manager must be set
+     * Creates a new upload button without a manager. The manager must be set
      * later using {@link #setManager(UploadManager)}.
      */
-    public UploadDropZone() {
+    public UploadButton() {
     }
 
     /**
-     * Creates a new drop zone linked to the given manager.
+     * Creates a new upload button linked to the given manager.
      *
      * @param manager
      *            the upload manager to link to
      */
-    public UploadDropZone(UploadManager manager) {
+    public UploadButton(UploadManager manager) {
         setManager(manager);
     }
 
     /**
-     * Sets the upload manager that this drop zone is linked to. When files are
-     * dropped, they will be added to the manager.
+     * Sets the upload manager that this button is linked to. When files are
+     * selected, they will be added to the manager.
      *
      * @param manager
      *            the upload manager, or {@code null} to unlink
