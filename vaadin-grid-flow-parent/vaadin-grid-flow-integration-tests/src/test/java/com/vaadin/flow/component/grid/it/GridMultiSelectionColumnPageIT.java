@@ -36,29 +36,27 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         open();
         WebElement definedItemCountLazyGrid = findElement(By.id(
                 GridMultiSelectionColumnPage.DEFINED_ITEM_COUNT_LAZY_GRID_ID));
-        Assert.assertEquals(
+        Assert.assertFalse(
                 "Defined Item Count Lazy grid selectAllCheckbox should be hidden by default",
-                "true",
                 definedItemCountLazyGrid
                         .findElement(By.id(SELECT_ALL_CHECKBOX_ID))
-                        .getDomAttribute("hidden"));
+                        .isDisplayed());
 
         WebElement unknownItemCountLazyGrid = findElement(By.id(
                 GridMultiSelectionColumnPage.UNKNOWN_ITEM_COUNT_LAZY_GRID_ID));
-        Assert.assertEquals(
+        Assert.assertFalse(
                 "Unknown Item Count Lazy grid selectAllCheckbox should be hidden by default",
-                "true",
                 unknownItemCountLazyGrid
                         .findElement(By.id(SELECT_ALL_CHECKBOX_ID))
-                        .getDomAttribute("hidden"));
+                        .isDisplayed());
 
         WebElement grid = findElement(
                 By.id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID));
         WebElement selectAllCheckbox = grid
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
-        Assert.assertNull(
+        Assert.assertTrue(
                 "in-memory grid selectAllCheckbox should be visible by default",
-                selectAllCheckbox.getDomAttribute("hidden"));
+                selectAllCheckbox.isDisplayed());
     }
 
     @Test
@@ -215,22 +213,22 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         WebElement selectAllCheckbox = grid
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
 
-        Assert.assertEquals("The selectAllCheckbox should be hidden by default",
-                "true", selectAllCheckbox.getDomAttribute("hidden"));
+        Assert.assertFalse("The selectAllCheckbox should be hidden by default",
+                selectAllCheckbox.isDisplayed());
 
         WebElement inMemory = findElement(By.id("set-in-memory-button"));
         inMemory.click();
 
-        Assert.assertNull(
+        Assert.assertTrue(
                 "The selectAllCheckbox should be visible with in-memory DataProvider",
-                selectAllCheckbox.getDomAttribute("hidden"));
+                selectAllCheckbox.isDisplayed());
 
         WebElement backend = findElement(By.id("set-backend-button"));
         backend.click();
 
-        Assert.assertEquals(
+        Assert.assertFalse(
                 "The selectAllCheckbox should be hidden with backend DataProvider",
-                "true", selectAllCheckbox.getDomAttribute("hidden"));
+                selectAllCheckbox.isDisplayed());
     }
 
     @Test
