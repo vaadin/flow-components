@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
-        <version>25.0-SNAPSHOT</version>
+        <version>25.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-spreadsheet-flow</artifactId>
     <packaging>jar</packaging>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>3.0.0-beta2</version>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

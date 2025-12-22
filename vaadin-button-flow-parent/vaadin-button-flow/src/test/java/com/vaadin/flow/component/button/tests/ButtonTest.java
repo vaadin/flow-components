@@ -134,6 +134,45 @@ public class ButtonTest {
     }
 
     @Test
+    public void setIconWithoutText_noSlot() {
+        icon = new Icon();
+        button = new Button();
+
+        button.setIcon(icon);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+
+        // Changing icon position should have no effect
+        button.setIconAfterText(true);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+
+        button.setIconAfterText(false);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+    }
+
+    @Test
+    public void setIcon_setText_slotUpdated() {
+        icon = new Icon();
+        button = new Button();
+
+        button.setIcon(icon);
+        button.setText(TEST_STRING);
+
+        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void setIcon_setAndRemoveText_slotRemoved() {
+        icon = new Icon();
+        button = new Button();
+
+        button.setIcon(icon);
+        button.setText(TEST_STRING);
+        button.setText(null);
+
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+    }
+
+    @Test
     public void setEnabled() {
         button = new Button();
         button.setEnabled(true);

@@ -46,7 +46,7 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-beta7")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -134,9 +134,6 @@ public class GridPro<E> extends Grid<E> {
                 getDataProvider().refreshItem(e.getItem());
             }
 
-            getElement().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
-                    getElement());
         });
 
         addCellEditStartedListener(e -> {
@@ -714,6 +711,10 @@ public class GridPro<E> extends Grid<E> {
             // Retrieve the pre-edit value
             var gridProPreEditValue = ComponentUtil.getData(column,
                     "gridProPreEditValue");
+
+            getElement().executeJs(
+                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
+                    getElement());
 
             if (column.getEditorField() != null) {
                 // Custom editor column

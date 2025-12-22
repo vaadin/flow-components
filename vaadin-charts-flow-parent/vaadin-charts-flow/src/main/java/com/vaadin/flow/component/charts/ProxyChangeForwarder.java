@@ -36,7 +36,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
         if (event.getItem() != null) {
             chart.getElement().callJsFunction("__callSeriesFunction",
                     "addPoint", getSeriesIndex(event),
-                    JacksonUtils.readTree(
+                    JacksonUtils.getMapper().readTree(
                             ChartSerialization.toJSON(event.getItem())),
                     true, event.isShift());
         }
@@ -57,7 +57,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
         } else {
             chart.getElement().callJsFunction("__callPointFunction", "update",
                     getSeriesIndex(event), event.getPointIndex(),
-                    JacksonUtils.readTree(
+                    JacksonUtils.getMapper().readTree(
                             ChartSerialization.toJSON(event.getItem())));
         }
     }

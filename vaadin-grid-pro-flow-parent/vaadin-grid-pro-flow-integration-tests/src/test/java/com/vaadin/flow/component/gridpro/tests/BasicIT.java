@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.gridpro.testbench.GridProElement;
@@ -432,6 +433,12 @@ public class BasicIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "Cell value should remain unchanged after opening and closing editor without changes",
                 initialValue, cell.getText());
+        // Assert there's no element with 'updating-cell' part
+        Assert.assertTrue(
+                "Cell should not have 'updating-cell' part after closing editor without changes",
+                cell.getParent()
+                        .findElements(By.cssSelector("[part~='updating-cell']"))
+                        .isEmpty());
 
         // Assert that no ItemPropertyChanged events were fired
         String finalEventsPanelText = getPanelText("events-panel");

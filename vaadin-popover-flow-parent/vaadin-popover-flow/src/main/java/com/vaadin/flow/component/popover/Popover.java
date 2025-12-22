@@ -47,7 +47,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.0.0-beta7")
+@NpmPackage(value = "@vaadin/popover", version = "25.0.0")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
@@ -835,7 +835,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *            the width to set, may be {@code null}
      */
     public void setWidth(String width) {
-        getElement().setProperty("contentWidth", width);
+        getElement().setProperty("width", width);
     }
 
     /**
@@ -852,7 +852,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *            the height to set, may be {@code null}
      */
     public void setHeight(String height) {
-        getElement().setProperty("contentHeight", height);
+        getElement().setProperty("height", height);
     }
 
     /**
