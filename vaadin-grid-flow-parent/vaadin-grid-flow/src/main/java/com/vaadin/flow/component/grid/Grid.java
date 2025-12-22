@@ -1378,10 +1378,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SerializableSupplier<Editor<T>> editorFactory = this::createEditor;
 
     private SerializableFunction<T, String> partNameGenerator = item -> null;
-    private SerializablePredicate<T> defaultDropFilter = item -> true;
-    private SerializablePredicate<T> defaultDragFilter = item -> true;
-    private SerializablePredicate<T> dropFilter = defaultDropFilter;
-    private SerializablePredicate<T> dragFilter = defaultDragFilter;
+    private SerializablePredicate<T> dropFilter = item -> true;
+    private SerializablePredicate<T> dragFilter = item -> true;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
