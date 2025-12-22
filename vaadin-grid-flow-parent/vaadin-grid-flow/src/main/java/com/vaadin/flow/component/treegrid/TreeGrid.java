@@ -1143,4 +1143,9 @@ public class TreeGrid<T> extends Grid<T>
                         "this.$connector.scrollToItem($0, ...$1)", itemKey,
                         itemIndexPath)));
     }
+
+    @Override
+    protected void refreshViewport() {
+        ((TreeGridDataCommunicator<T>) getDataCommunicator()).refreshViewport();
+    }
 }
