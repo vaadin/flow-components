@@ -41,42 +41,54 @@ public class TreeGridScrollPositionPage extends Div {
         });
         add(treeGrid);
 
-        addButton("set-rows-draggable",
-                event -> treeGrid.setRowsDraggable(true));
+        addButton("set-rows-draggable", event -> {
+            treeGrid.setRowsDraggable(true);
+        });
 
-        addButton("set-drag-filter",
-                event -> treeGrid.setDragFilter(item -> true));
+        addButton("set-drag-filter", event -> {
+            treeGrid.setDragFilter(item -> true);
+        });
 
-        addButton("set-drop-filter",
-                event -> treeGrid.setDropFilter((item) -> true));
+        addButton("set-drop-filter", event -> {
+            treeGrid.setDropFilter((item) -> true);
+        });
 
-        addButton("set-drop-mode",
-                event -> treeGrid.setDropMode(GridDropMode.ON_TOP));
+        addButton("set-drop-mode", event -> {
+            treeGrid.setDropMode(GridDropMode.ON_TOP);
+        });
 
-        addButton("set-drag-data-generator", event -> treeGrid
-                .setDragDataGenerator("customProp", (item) -> "customValue"));
+        addButton("set-drag-data-generator", event -> {
+            treeGrid.setDragDataGenerator("customProp",
+                    (item) -> "customValue");
+        });
 
-        addButton("set-part-name-generator", event -> treeGrid
-                .setPartNameGenerator((item) -> "custom-part"));
+        addButton("set-part-name-generator", event -> {
+            treeGrid.setPartNameGenerator((item) -> "custom-part");
+        });
 
-        addButton("set-tooltip-generator", event -> treeGrid
-                .setTooltipGenerator(item -> "Tooltip for " + item.getName()));
+        addButton("set-tooltip-generator", event -> {
+            treeGrid.setTooltipGenerator(
+                    item -> "Tooltip for " + item.getName());
+        });
 
-        addButton("add-column",
-                event -> treeGrid.addColumn(TestTreeData.Item::getName));
+        addButton("add-column", event -> {
+            treeGrid.addColumn(TestTreeData.Item::getName);
+        });
 
-        addButton("set-column-custom-renderer",
-                event -> treeGrid.getColumns().get(0)
-                        .setRenderer(new TextRenderer<>(
-                                item -> "Rendered " + item.getName())));
+        addButton("set-column-custom-renderer", event -> {
+            treeGrid.getColumns().get(0).setRenderer(
+                    new TextRenderer<>(item -> "Rendered " + item.getName()));
+        });
 
-        addButton("set-column-tooltip-generator",
-                event -> treeGrid.getColumns().get(0).setTooltipGenerator(
-                        item -> "Column tooltip for " + item.getName()));
+        addButton("set-column-tooltip-generator", event -> {
+            treeGrid.getColumns().get(0).setTooltipGenerator(
+                    item -> "Column tooltip for " + item.getName());
+        });
 
-        addButton("set-column-part-name-generator",
-                event -> treeGrid.getColumns().get(0)
-                        .setPartNameGenerator(item -> "column-custom-part"));
+        addButton("set-column-part-name-generator", event -> {
+            treeGrid.getColumns().get(0)
+                    .setPartNameGenerator(item -> "column-custom-part");
+        });
     }
 
     private void addButton(String id,
