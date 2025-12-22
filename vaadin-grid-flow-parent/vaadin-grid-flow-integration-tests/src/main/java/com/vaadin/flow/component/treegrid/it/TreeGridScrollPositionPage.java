@@ -71,9 +71,8 @@ public class TreeGridScrollPositionPage extends Div {
                                 item -> "Rendered " + item.getName())));
 
         addButton("set-column-tooltip-generator",
-                event -> treeGrid.getColumns().get(0)
-                        .setTooltipGenerator(
-                                item -> "Column tooltip for " + item.getName()));
+                event -> treeGrid.getColumns().get(0).setTooltipGenerator(
+                        item -> "Column tooltip for " + item.getName()));
 
         addButton("set-column-part-name-generator",
                 event -> treeGrid.getColumns().get(0)
@@ -82,7 +81,8 @@ public class TreeGridScrollPositionPage extends Div {
 
     private void addButton(String id,
             ComponentEventListener<ClickEvent<NativeButton>> listener) {
-        NativeButton button = new NativeButton(id.replaceAll("-", " "), listener);
+        NativeButton button = new NativeButton(id.replaceAll("-", " "),
+                listener);
         button.setId(id);
         add(button);
     }
