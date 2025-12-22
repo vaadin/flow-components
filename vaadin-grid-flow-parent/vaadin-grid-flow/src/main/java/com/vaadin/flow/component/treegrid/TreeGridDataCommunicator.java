@@ -53,6 +53,11 @@ class TreeGridDataCommunicator<T> extends HierarchicalDataCommunicator<T> {
     }
 
     @Override
+    public void refreshViewport() {
+        super.refreshViewport();
+    }
+
+    @Override
     public List<T> preloadFlatRangeForward(int start, int length) {
         return super.preloadFlatRangeForward(start, length);
     }
