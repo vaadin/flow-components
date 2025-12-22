@@ -25,9 +25,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
@@ -52,7 +50,13 @@ public class GridProTest {
 
         UI.setCurrent(ui);
 
-        grid = createFakeGridPro();
+        grid = Mockito.spy(GridPro.class);
+
+        Mockito.when(grid.getDataProvider())
+                .thenReturn(Mockito.mock(DataProvider.class));
+
+        var testItemKey = grid.getDataCommunicator().getKeyMapper()
+                .key(testItem);
 
         // We should ensure the correct value were passed
         grid.addEditColumn(Person::getName)
@@ -60,25 +64,8 @@ public class GridProTest {
 
         // A client-side Grid item.
         selectedItem = JacksonUtils.createObjectNode();
-        selectedItem.put("key", "1");
+        selectedItem.put("key", testItemKey);
         selectedItem.put("col0", "foo");
-    }
-
-    private GridPro<Person> createFakeGridPro() {
-        GridPro<Person> grid = Mockito.spy(GridPro.class);
-
-        Mockito.when(grid.getDataProvider())
-                .thenReturn(Mockito.mock(DataProvider.class));
-
-        DataCommunicator<Person> communicator = Mockito
-                .mock(DataCommunicator.class);
-        Mockito.when(grid.getDataCommunicator()).thenReturn(communicator);
-
-        KeyMapper<Person> keyMapper = Mockito.mock(KeyMapper.class);
-        Mockito.when(communicator.getKeyMapper()).thenReturn(keyMapper);
-
-        Mockito.when(keyMapper.get("1")).thenReturn(testItem);
-        return grid;
     }
 
     @Test
