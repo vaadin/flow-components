@@ -25,9 +25,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
@@ -57,7 +55,8 @@ public class GridProTest {
         Mockito.when(grid.getDataProvider())
                 .thenReturn(Mockito.mock(DataProvider.class));
 
-        var testItemKey = grid.getDataCommunicator().getKeyMapper().key(testItem);
+        var testItemKey = grid.getDataCommunicator().getKeyMapper()
+                .key(testItem);
 
         // We should ensure the correct value were passed
         grid.addEditColumn(Person::getName)
