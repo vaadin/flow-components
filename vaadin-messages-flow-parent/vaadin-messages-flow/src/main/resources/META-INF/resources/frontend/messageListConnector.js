@@ -15,16 +15,40 @@
  */
 
 /**
- * Maps the given items to a new array of items with formatted time.
+ * Creates a DateTimeFormat with the given locale, or throws if invalid.
  */
-function formatItems(items, locale) {
-  const formatter = new Intl.DateTimeFormat(locale, {
+function createDateTimeFormatter(locale) {
+  return new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: 'numeric'
   });
+}
+
+/**
+ * Maps the given items to a new array of items with formatted time.
+ */
+function formatItems(items, locale) {
+  let formatter;
+
+  // Try creating formatter with progressive fallbacks
+  const fallbackLocales = [
+    locale, // Full locale (e.g., "de-DE-hw")
+    locale?.split('-').slice(0, 2).join('-'), // Base locale without variant (e.g., "de-DE")
+    locale?.split('-')[0], // Language only (e.g., "de")
+    undefined // Browser default
+  ];
+
+  for (const fallbackLocale of fallbackLocales) {
+    try {
+      formatter = createDateTimeFormatter(fallbackLocale);
+      break;
+    } catch (e) {
+      // Continue to next fallback
+    }
+  }
 
   return items.map((item) =>
     item.time
