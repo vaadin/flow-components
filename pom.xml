@@ -98,7 +98,7 @@
         <spring-data-commons.version>4.0.1</spring-data-commons.version>
 
         <!-- spreadsheet -->
-        <poi.version>5.4.1</poi.version>
+        <poi.version>5.5.1</poi.version>
         <javaparser.version>3.27.1</javaparser.version>
     </properties>
     <dependencyManagement>
