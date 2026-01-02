@@ -83,7 +83,7 @@ public class AxisGrid extends AbstractConfigurationObject {
 
     /**
      * Add a new column to the grid. See {@link #setColumns(List)}
-     * 
+     *
      * @param column
      *            A column to be added
      */

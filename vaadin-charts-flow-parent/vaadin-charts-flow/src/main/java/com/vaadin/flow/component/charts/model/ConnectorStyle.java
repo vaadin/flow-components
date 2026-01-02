@@ -124,7 +124,7 @@ public class ConnectorStyle extends AbstractConfigurationObject {
 
     /**
      * Set the default pathfinder algorithm to use for this chart.
-     * 
+     *
      * @see PathfinderType
      */
     public void setType(PathfinderType type) {

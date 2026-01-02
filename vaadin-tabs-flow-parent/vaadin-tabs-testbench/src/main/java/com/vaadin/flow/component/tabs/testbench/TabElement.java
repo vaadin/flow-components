@@ -31,7 +31,7 @@ public class TabElement extends TestBenchElement {
 
     /**
      * Gets the label of the tab.
-     * 
+     *
      * @return the label of the tab
      */
     public String getLabel() {

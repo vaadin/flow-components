@@ -151,7 +151,7 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * The minimum and maximum value of the axis as Instant.
-     * 
+     *
      * @param min
      *            Minimum value as Instant.
      * @param max

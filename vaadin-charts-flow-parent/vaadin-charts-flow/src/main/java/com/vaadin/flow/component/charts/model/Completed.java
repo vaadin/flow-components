@@ -41,7 +41,7 @@ public class Completed extends AbstractConfigurationObject {
     /**
      * The amount of the progress indicator, ranging from 0 (not started) to 1
      * (finished). Defaults to 0.
-     * 
+     *
      * @param amount
      */
     public void setAmount(Number amount) {
@@ -58,7 +58,7 @@ public class Completed extends AbstractConfigurationObject {
     /**
      * The fill of the progress indicator. Defaults to a darkened variety of the
      * main color. The value will be ignored if the chart is in Styled mode.
-     * 
+     *
      * @param fill
      */
     public void setFill(Color fill) {

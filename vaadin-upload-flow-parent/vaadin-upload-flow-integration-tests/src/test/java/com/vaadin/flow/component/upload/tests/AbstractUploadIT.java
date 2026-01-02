@@ -39,7 +39,7 @@ public abstract class AbstractUploadIT extends AbstractComponentIT {
     /**
      * Creates a temp file with the provided name and extension for testing
      * purposes.
-     * 
+     *
      * @param fileName
      *            the temp file name prefix
      * @param extension
