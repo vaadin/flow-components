@@ -25,7 +25,7 @@ public class SeriesConnectorAnimation extends AbstractConfigurationObject {
 
     /**
      * Defaults to true.
-     * 
+     *
      * @param reversed
      */
     public void setReversed(Boolean reversed) {

@@ -61,7 +61,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
 
     /**
      * Guide box cursor. Defaults to "move".
-     * 
+     *
      * @param cursor
      */
     public void setCursor(String cursor) {
@@ -93,7 +93,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
 
     /**
      * Width of the line around the guide box. Defaults to 1.
-     * 
+     *
      * @param lineWidth
      */
     public void setLineWidth(Number lineWidth) {
@@ -109,7 +109,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
 
     /**
      * Guide box zIndex. Defaults to 900.
-     * 
+     *
      * @param zIndex
      */
     public void setzIndex(Number zIndex) {
