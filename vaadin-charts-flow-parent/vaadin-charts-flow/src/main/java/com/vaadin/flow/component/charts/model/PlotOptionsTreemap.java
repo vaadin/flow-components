@@ -243,7 +243,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
     /**
      * Options for the breadcrumbs, the navigation at the top leading the way up
      * through the traversed levels.
-     * 
+     *
      * @param breadcrumbs
      */
     public void setBreadcrumbs(Breadcrumbs breadcrumbs) {

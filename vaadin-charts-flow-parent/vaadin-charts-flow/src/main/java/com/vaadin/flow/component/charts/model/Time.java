@@ -95,7 +95,7 @@ public class Time extends AbstractConfigurationObject {
      * when correct Daylight Saving Time transitions are required.
      * <p>
      * Defaults to: true
-     * 
+     *
      * @deprecated This property is deprecated and should not be used in new
      *             code. Use {@link #setTimezone(String)} instead.
      */

@@ -37,7 +37,7 @@ public class ZoomingResetButton extends AbstractConfigurationObject {
     /**
      * Defines whether the reset button is visible. When undefined, it is shown
      * automatically if zooming is enabled and hidden if zooming is disabled.
-     * 
+     *
      * @param enabled
      */
     public void setEnabled(Boolean enabled) {
@@ -56,12 +56,12 @@ public class ZoomingResetButton extends AbstractConfigurationObject {
 
     /**
      * The position of the button.
-     * 
+     *
      * <p>
      * Adjusting position values might cause overlap with chart elements. Ensure
      * coordinates do not obstruct other components or data visibility.
      * </p>
-     * 
+     *
      * @param position
      */
     public void setPosition(Position position) {
@@ -96,7 +96,7 @@ public class ZoomingResetButton extends AbstractConfigurationObject {
 
     /**
      * A collection of attributes for the button theme.
-     * 
+     *
      * @param theme
      */
     public void setTheme(ButtonTheme theme) {

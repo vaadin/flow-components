@@ -1197,11 +1197,11 @@ public class Configuration extends AbstractConfigurationObject
      * and/or end points. Multiple algorithms are available for calculating how
      * the connecting lines are drawn. In Gantt charts, the connectors are used
      * to draw dependencies between tasks.
-     * 
+     *
      * Values set here serve as the default values for all connectors in the
      * chart. Individual style for a connector can be set on each point
      * dependency (see {@link GanttSeriesItemDependency}).
-     * 
+     *
      * @param connectors
      */
     public void setConnectors(ChartConnectors connectors) {

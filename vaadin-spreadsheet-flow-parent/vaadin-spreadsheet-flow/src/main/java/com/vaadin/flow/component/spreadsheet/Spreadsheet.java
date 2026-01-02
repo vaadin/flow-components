@@ -1219,7 +1219,7 @@ public class Spreadsheet extends Component
 
     /**
      * Create the default Spreadsheet handler.
-     * 
+     *
      * @return SpreadsheetHandlerImpl
      */
     protected SpreadsheetHandlerImpl createDefaultHandler() {

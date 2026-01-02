@@ -1758,7 +1758,7 @@ public class YAxis extends Axis {
     /**
      * Maximum range which can be set using the navigator's handles. Opposite of
      * {@link #setMinRange(Number)}
-     * 
+     *
      * @param maxRange
      */
     public void setMaxRange(Number maxRange) {
@@ -1799,7 +1799,7 @@ public class YAxis extends Axis {
      * height. For example, setting the static scale to 24 results in each Y
      * axis category taking up 24 pixels, and the height of the chart adjusts.
      * Adding or removing items will make the chart resize. Defaults to 50.
-     * 
+     *
      * @param staticScale
      */
     public void setStaticScale(Number staticScale) {
