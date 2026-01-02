@@ -150,8 +150,8 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
     @Override
     public T getItem(int index) {
         // TODO: change the implementation to make the returned item not depend
-        //  on client-side filter applied
-        //  https://github.com/vaadin/vaadin-flow-components/issues/282
+        // on client-side filter applied
+        // https://github.com/vaadin/vaadin-flow-components/issues/282
         return super.getItem(index);
     }
 
@@ -167,8 +167,8 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
     @Override
     public Stream<T> getItems() {
         // TODO: change the implementation to make the returned item not depend
-        //  on client-side filter applied
-        //  https://github.com/vaadin/vaadin-flow-components/issues/282
+        // on client-side filter applied
+        // https://github.com/vaadin/vaadin-flow-components/issues/282
         return super.getItems();
     }
 }

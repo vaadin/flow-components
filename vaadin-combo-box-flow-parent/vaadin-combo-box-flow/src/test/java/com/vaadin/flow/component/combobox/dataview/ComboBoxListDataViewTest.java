@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBoxBase;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
@@ -158,10 +159,11 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         try {
             // Reset the client filter on server side as though it's sent from
             // client
-            Method setRequestedRangeMethod = ComboBox.class.getDeclaredMethod(
-                    "setRequestedRange", int.class, int.class, String.class);
-            setRequestedRangeMethod.setAccessible(true);
-            setRequestedRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
+            Method setViewportRangeMethod = ComboBoxBase.class
+                    .getDeclaredMethod("setViewportRange", int.class, int.class,
+                            String.class);
+            setViewportRangeMethod.setAccessible(true);
+            setViewportRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
                     clientFilter);
         } catch (Exception e) {
             throw new RuntimeException(e);
