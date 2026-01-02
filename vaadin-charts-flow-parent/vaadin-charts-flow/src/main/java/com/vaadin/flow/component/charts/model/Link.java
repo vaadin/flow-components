@@ -29,7 +29,7 @@ public class Link extends AbstractConfigurationObject {
 
     /**
      * Sets the color of the link between nodes.
-     * 
+     *
      * @param color
      *            the color to use for the link
      */
@@ -47,7 +47,7 @@ public class Link extends AbstractConfigurationObject {
 
     /**
      * Sets the line width of the link connecting nodes, in pixels.
-     * 
+     *
      * @param lineWidth
      *            the width of the link line
      */
@@ -66,7 +66,7 @@ public class Link extends AbstractConfigurationObject {
     /**
      * Radius for the rounded corners of the links between nodes. Works for
      * {@link LinkType#DEFAULT} link type.
-     * 
+     *
      * @param radius
      *            the radius for link corners
      */
@@ -84,7 +84,7 @@ public class Link extends AbstractConfigurationObject {
 
     /**
      * Sets the type of link shape.
-     * 
+     *
      * @param type
      *            the link shape type
      */
