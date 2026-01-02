@@ -26,6 +26,7 @@ import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -74,8 +75,7 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     @SuppressWarnings("unchecked")
     @Override
     public Stream<T> getItems() {
-        return getDataProvider()
-                .fetch(ItemFetchHelper.getQuery(dataCommunicator));
+        return getDataProvider().fetch(getQuery());
     }
 
     /**
@@ -93,8 +93,7 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     @SuppressWarnings("unchecked")
     @Override
     public int getItemCount() {
-        return getDataProvider()
-                .size(ItemFetchHelper.getQuery(dataCommunicator));
+        return getDataProvider().size(getQuery());
     }
 
     @Override
@@ -191,5 +190,10 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     @Override
     public ComboBoxListDataView<T> setFilter(SerializablePredicate<T> filter) {
         return (ComboBoxListDataView<T>) super.setFilter(filter);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Query getQuery() {
+        return dataCommunicator.buildQuery(0, Integer.MAX_VALUE);
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.dataview;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,10 +61,10 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
-        ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        setClientFilter(component, "ba");
         // Close combo box drop down to trigger the filter erase
         component.setOpened(false);
-        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        fakeClientCommunication();
 
         Stream<String> filteredItems = dataView.getItems();
 
@@ -98,10 +99,10 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
-        ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        setClientFilter(component, "ba");
         // Close combo box drop down to trigger the filter erase
         component.setOpened(false);
-        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        fakeClientCommunication();
 
         int itemCount = dataView.getItemCount();
 
@@ -152,4 +153,24 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         return new ComboBox<>();
     }
 
+    private void setClientFilter(ComboBox<String> comboBox,
+            String clientFilter) {
+        try {
+            // Reset the client filter on server side as though it's sent from
+            // client
+            Method setRequestedRangeMethod = ComboBox.class.getDeclaredMethod(
+                    "setRequestedRange", int.class, int.class, String.class);
+            setRequestedRangeMethod.setAccessible(true);
+            setRequestedRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
+                    clientFilter);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
+    }
 }
