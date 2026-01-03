@@ -141,6 +141,24 @@ public class FilteringIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void setFilter_close_filterReset() {
+        comboBoxWithFilteredItems.openPopup();
+
+        comboBoxWithFilteredItems.setFilter("444");
+        waitForItems(comboBoxWithFilteredItems, items -> items.size() == 1
+                && "Item 444".equals(getItemLabel(items, 0)));
+
+        comboBoxWithFilteredItems.closePopup();
+        waitForItems(comboBoxWithFilteredItems, items -> items.size() == 500);
+
+        comboBoxWithFilteredItems.openPopup();
+        waitForItems(comboBoxWithFilteredItems,
+                items -> items.size() == 500
+                        && "Item 0".equals(getItemLabel(items, 0))
+                        && "Item 49".equals(getItemLabel(items, 49)));
+    }
+
+    @Test
     public void configureFilterInDataProvider_setDataProvider_serverSideFiltering() {
         box = $(ComboBoxElement.class).id("filterable-data-provider");
         box.openPopup();
