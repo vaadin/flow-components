@@ -157,8 +157,7 @@ public class ComboBoxListDataViewPage extends Div {
 
         add(comboBox, itemSelect, filterByAge, reverseSorting,
                 selectItemOnIndex, showItemData, showNextData, showPreviousData,
-                removePerson, count, itemData,
-                secondComboBox);
+                removePerson, count, itemData, secondComboBox);
     }
 
     private List<Person> generatePersonItems() {

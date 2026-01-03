@@ -145,9 +145,8 @@ public class FilteringIT extends AbstractComboBoxIT {
         comboBoxWithFilteredItems.openPopup();
 
         comboBoxWithFilteredItems.setFilter("444");
-        waitForItems(comboBoxWithFilteredItems,
-            items -> items.size() == 1
-                    && "Item 444".equals(getItemLabel(items, 0)));
+        waitForItems(comboBoxWithFilteredItems, items -> items.size() == 1
+                && "Item 444".equals(getItemLabel(items, 0)));
 
         comboBoxWithFilteredItems.closePopup();
         waitForItems(comboBoxWithFilteredItems, items -> items.size() == 500);
