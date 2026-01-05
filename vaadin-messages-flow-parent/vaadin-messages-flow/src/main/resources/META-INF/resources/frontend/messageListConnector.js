@@ -29,10 +29,11 @@ function createDateTimeFormatter(locale) {
 
 function getFormatter(locale) {
   // Try creating formatter with progressive fallbacks
+  const localeParts = locale?.split('-');
   const fallbackLocales = [
     locale, // Full locale (e.g., "de-DE-hw")
-    locale?.split('-').slice(0, 2).join('-'), // Base locale without variant (e.g., "de-DE")
-    locale?.split('-')[0] // Language only (e.g., "de")
+    localeParts?.slice(0, 2).join('-'), // Base locale without variant (e.g., "de-DE")
+    localeParts?.[0] // Language only (e.g., "de")
   ];
 
   for (const fallbackLocale of fallbackLocales) {
