@@ -862,7 +862,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", JacksonUtils.createArrayNode());
+        getElement().executeJs("this.files = [];");
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
