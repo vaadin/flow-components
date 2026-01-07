@@ -863,7 +863,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", Json.createArray());
+        getElement().executeJs("this.files = [];");
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
