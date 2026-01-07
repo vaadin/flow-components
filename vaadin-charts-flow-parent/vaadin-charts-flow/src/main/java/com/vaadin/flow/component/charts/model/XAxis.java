@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -1604,7 +1604,7 @@ public class XAxis extends Axis {
      * If there are multiple axes on the same side of the chart, the pixel
      * margin between the axes. Defaults to 0 on vertical axes, 15 on horizontal
      * axes.
-     * 
+     *
      * @param margin
      */
     public void setMargin(Number margin) {
@@ -1621,7 +1621,7 @@ public class XAxis extends Axis {
     /**
      * Maximum range which can be set using the navigator's handles. Opposite of
      * {@link #setMinRange(Number)}
-     * 
+     *
      * @param maxRange
      */
     public void setMaxRange(Number maxRange) {
@@ -1638,7 +1638,7 @@ public class XAxis extends Axis {
     /**
      * Whether to pan axis. If chart.panning is enabled, the option allows to
      * disable panning on an individual axis. Defaults to true.
-     * 
+     *
      * @param panningEnabled
      */
     public void setPanningEnabled(Boolean panningEnabled) {
@@ -1659,7 +1659,7 @@ public class XAxis extends Axis {
      * approximately 5 minor ticks between each major tick. Prior to v6.0.0,
      * ticks were unabled in auto layout by setting minorTickInterval to "auto".
      * Defaults to false.
-     * 
+     *
      * @param minorTicks
      */
     public void setMinorTicks(Boolean minorTicks) {

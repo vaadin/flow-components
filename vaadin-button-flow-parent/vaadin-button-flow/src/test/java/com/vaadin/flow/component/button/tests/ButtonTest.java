@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -131,6 +131,45 @@ public class ButtonTest {
         assertIconAfterText();
         button.setIconAfterText(false);
         assertIconBeforeText();
+    }
+
+    @Test
+    public void setIconWithoutText_noSlot() {
+        icon = new Icon();
+        button = new Button();
+
+        button.setIcon(icon);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+
+        // Changing icon position should have no effect
+        button.setIconAfterText(true);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+
+        button.setIconAfterText(false);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+    }
+
+    @Test
+    public void setIcon_setText_slotUpdated() {
+        icon = new Icon();
+        button = new Button();
+
+        button.setIcon(icon);
+        button.setText(TEST_STRING);
+
+        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void setIcon_setAndRemoveText_slotRemoved() {
+        icon = new Icon();
+        button = new Button();
+
+        button.setIcon(icon);
+        button.setText(TEST_STRING);
+        button.setText(null);
+
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
     }
 
     @Test

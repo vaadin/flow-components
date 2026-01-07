@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -35,7 +35,7 @@ public class Zooming extends AbstractConfigurationObject {
      * Set a key to hold when dragging to zoom the chart. This is useful to
      * avoid zooming while moving points. Should be set different than
      * {@link ChartModel#getPanKey()}.
-     * 
+     *
      * @param key
      */
     public void setKey(PanKey key) {
@@ -54,7 +54,7 @@ public class Zooming extends AbstractConfigurationObject {
 
     /**
      * Configuration for mouse wheel zoom.
-     * 
+     *
      * @param mouseWheel
      */
     public void setMouseWheel(ZoomingMouseWheel mouseWheel) {
@@ -71,7 +71,7 @@ public class Zooming extends AbstractConfigurationObject {
     /**
      * Equivalent to type, but for pinch gestures. By default, the pinchType is
      * the same as the {@link #getType()} setting.
-     * 
+     *
      * @param pinchType
      */
     public void setPinchType(Dimension pinchType) {
@@ -91,7 +91,7 @@ public class Zooming extends AbstractConfigurationObject {
     /**
      * The button that appears after a selection zoom, allowing the user to
      * reset zoom.
-     * 
+     *
      * @param resetButton
      */
     public void setResetButton(ZoomingResetButton resetButton) {
@@ -112,7 +112,7 @@ public class Zooming extends AbstractConfigurationObject {
      * touch-dragging the chart to read the tooltip. And especially when
      * vertical zooming is enabled, it will make it hard to scroll vertically on
      * the page.
-     * 
+     *
      * @param singleTouch
      */
     public void setSingleTouch(Boolean singleTouch) {
@@ -132,7 +132,7 @@ public class Zooming extends AbstractConfigurationObject {
      * Note: For non-cartesian series, the only supported zooming type is
      * {@link Dimension#XY}, as zooming in a single direction is not applicable
      * due to the radial nature of the coordinate system.
-     * 
+     *
      * @param type
      */
     public void setType(Dimension type) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -147,7 +147,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
 
     /**
      * Dependencies on another tasks (points) in the Gantt chart.
-     * 
+     *
      * @see #addDependency(GanttSeriesItemDependency)
      * @see #addDependency(String)
      */
@@ -157,7 +157,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
 
     /**
      * Adds a dependency on another task.
-     * 
+     *
      * @param dependency
      *            The dependency configuration object, allowing to specify
      *            further connecting options between the points.
@@ -171,7 +171,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
 
     /**
      * Adds a dependency on another task.
-     * 
+     *
      * @param to
      *            The ID of the point (task) that this point depends on in Gantt
      *            charts
@@ -189,7 +189,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
 
     /**
      * The end time of a task.
-     * 
+     *
      * @param end
      */
     public void setEnd(Instant end) {
@@ -206,7 +206,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
     /**
      * Whether this point is a milestone. If so, only the start option is
      * handled, while end is ignored. Defaults to false.
-     * 
+     *
      * @param milestone
      */
     public void setMilestone(Boolean milestone) {
@@ -223,7 +223,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
     /**
      * The ID of the parent point (task) of this point in Gantt charts. Defaults
      * to null
-     * 
+     *
      * @param parent
      */
     public void setParent(String parent) {
@@ -239,7 +239,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
 
     /**
      * The start time of a task.
-     * 
+     *
      * @param start
      */
     public void setStart(Instant start) {
@@ -255,7 +255,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
 
     /**
      * The Y value of a task.
-     * 
+     *
      * @param y
      */
     public void setY(Number y) {
@@ -338,7 +338,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * A reserved subspace to store options and values for customized
      * functionality. Here you can add additional data for your own event
      * callbacks and formatter callbacks.
-     * 
+     *
      * @param custom
      */
     public void setCustom(AbstractConfigurationObject custom) {

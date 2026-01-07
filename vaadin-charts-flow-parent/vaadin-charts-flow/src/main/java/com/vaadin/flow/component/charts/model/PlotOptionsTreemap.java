@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -243,7 +243,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
     /**
      * Options for the breadcrumbs, the navigation at the top leading the way up
      * through the traversed levels.
-     * 
+     *
      * @param breadcrumbs
      */
     public void setBreadcrumbs(Breadcrumbs breadcrumbs) {

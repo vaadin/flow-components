@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,11 +14,6 @@
  * the License.
  */
 package com.vaadin.flow.component.button;
-
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
@@ -56,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.0.0-beta7")
+@NpmPackage(value = "@vaadin/button", version = "25.0.1")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -182,10 +177,11 @@ public class Button extends Component
      */
     @Override
     public void setText(String text) {
-        removeAll(getNonTextNodes());
+        removeAllTextContent();
         if (text != null && !text.isEmpty()) {
             getElement().appendChild(Element.createText(text));
         }
+        updateIconSlot();
         updateThemeAttribute();
     }
 
@@ -238,6 +234,9 @@ public class Button extends Component
      * <p>
      * At the element-level, this method determines whether to set
      * {@code slot="prefix"} or {@code slot="suffix"} attribute to the icon.
+     * <p>
+     * When there is no text content in the button, the icon will not have any
+     * slot attribute regardless of this setting.
      *
      * @param iconAfterText
      *            whether the icon should be positioned after the text content
@@ -245,9 +244,7 @@ public class Button extends Component
      */
     public void setIconAfterText(boolean iconAfterText) {
         this.iconAfterText = iconAfterText;
-        if (iconComponent != null) {
-            updateIconSlot();
-        }
+        updateIconSlot();
     }
 
     /**
@@ -453,8 +450,17 @@ public class Button extends Component
     }
 
     private void updateIconSlot() {
-        iconComponent.getElement().setAttribute("slot",
-                iconAfterText ? "suffix" : "prefix");
+        if (iconComponent == null) {
+            return;
+        }
+        boolean hasText = getElement().getChildren()
+                .anyMatch(Element::isTextNode);
+        if (hasText) {
+            iconComponent.getElement().setAttribute("slot",
+                    iconAfterText ? "suffix" : "prefix");
+        } else {
+            iconComponent.getElement().removeAttribute("slot");
+        }
     }
 
     /**
@@ -477,26 +483,18 @@ public class Button extends Component
         }
     }
 
-    /**
-     * Removes all contents from this component except elements in
-     * {@code exclusion} array. This includes child components, text content as
-     * well as child elements that have been added directly to this component
-     * using the {@link Element} API.
-     */
-    private void removeAll(Element... exclusion) {
-        Set<Element> toExclude = Stream.of(exclusion)
-                .collect(Collectors.toSet());
-        Predicate<Element> filter = toExclude::contains;
-        getElement().getChildren().filter(filter.negate())
-                .forEach(child -> child.removeAttribute("slot"));
-        getElement().removeAllChildren();
-        getElement().appendChild(exclusion);
-    }
+    private void removeAllTextContent() {
+        // Determine all components to keep
+        Element[] elementsToKeep = getElement().getChildren()
+                .filter(child -> !child.isTextNode()).toArray(Element[]::new);
 
-    private Element[] getNonTextNodes() {
-        return getElement().getChildren()
-                .filter(element -> !element.isTextNode())
-                .toArray(Element[]::new);
+        // Remove all children. This results in the client-side content being
+        // cleared, which is needed to also remove content added through a
+        // template.
+        getElement().removeAllChildren();
+
+        // Re-add the components to keep
+        getElement().appendChild(elementsToKeep);
     }
 
     private void updateThemeAttribute() {

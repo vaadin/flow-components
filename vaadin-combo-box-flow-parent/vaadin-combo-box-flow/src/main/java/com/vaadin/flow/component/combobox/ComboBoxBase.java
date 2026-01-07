@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -97,6 +97,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
         HasValidationProperties, HasValidator<TValue>, HasPlaceholder {
+    private static final int DEFAULT_FILTER_TIMEOUT = 500;
 
     /**
      * Registration for custom value listeners that disallows entering custom
@@ -206,6 +207,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 e -> getDataCommunicator().notifySelectionChanged());
 
         addValueChangeListener(e -> validate());
+
+        setFilterTimeout(DEFAULT_FILTER_TIMEOUT);
     }
 
     /**
@@ -358,6 +361,30 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     protected void setFilter(String filter) {
         getElement().setProperty("filter", filter == null ? "" : filter);
+    }
+
+    /**
+     * Sets the debounce timeout for filtering. The component waits for the
+     * specified duration of inactivity before sending a server request to
+     * filter items. The default is 500ms.
+     *
+     * @param filterTimeout
+     *            the time in milliseconds to wait after typing stops before
+     *            filtering is triggered
+     */
+    public void setFilterTimeout(int filterTimeout) {
+        getElement().setProperty("_filterTimeout", filterTimeout);
+    }
+
+    /**
+     * Gets the debounce timeout for filtering.
+     *
+     * @return the time in milliseconds to wait after typing stops before
+     *         filtering is triggered
+     */
+    public int getFilterTimeout() {
+        return getElement().getProperty("_filterTimeout",
+                DEFAULT_FILTER_TIMEOUT);
     }
 
     /**

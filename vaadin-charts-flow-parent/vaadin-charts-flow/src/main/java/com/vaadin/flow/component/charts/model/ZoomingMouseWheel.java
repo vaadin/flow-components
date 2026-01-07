@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -36,7 +36,7 @@ public class ZoomingMouseWheel extends AbstractConfigurationObject {
 
     /**
      * Enable zooming with mouse wheel.
-     * 
+     *
      * @param enabled
      */
     public void setEnabled(Boolean enabled) {
@@ -57,7 +57,7 @@ public class ZoomingMouseWheel extends AbstractConfigurationObject {
      * <p>
      * Sensitivity of mouse wheel or trackpad scrolling. 1 is no sensitivity,
      * while with 2, one mouse wheel delta will zoom in 50%.
-     * 
+     *
      * @param sensitivity
      */
     public void setSensitivity(Number sensitivity) {
@@ -77,14 +77,14 @@ public class ZoomingMouseWheel extends AbstractConfigurationObject {
      * here, it will inherit the type from {@link Zooming#getType()}. In
      * {@link Chart#setTimeline(Boolean)} charts, it defaults to
      * {@link Dimension#X}.
-     * 
+     *
      * Note that particularly with mouse wheel in the y direction, the zoom is
      * affected by the default {@link YAxis#getStartOnTick()} and
      * {@link YAxis#getEndOnTick()} settings. In order to respect these
      * settings, the zoom level will adjust after the user has stopped zooming.
      * To prevent this, consider setting {@link YAxis#setStartOnTick(Boolean)}
      * and {@link YAxis#setEndOnTick(Boolean)} to false.
-     * 
+     *
      * @param type
      */
     public void setType(Dimension type) {
