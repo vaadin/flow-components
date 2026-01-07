@@ -83,6 +83,20 @@ public class UploadIT extends AbstractUploadIT {
 
         Assert.assertEquals("File list should not contain files", 0,
                 getFileCount());
+
+        // Verify clear file list works multiple times
+        getUpload().upload(tempFile);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should contain 1 file", 1,
+                getFileCount());
+
+        $("button").id("clear-file-list").click();
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
     }
 
     @Test
