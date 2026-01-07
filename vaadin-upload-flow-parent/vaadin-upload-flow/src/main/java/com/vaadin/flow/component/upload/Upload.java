@@ -51,7 +51,6 @@ import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
@@ -863,7 +862,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", Json.createArray());
+        getElement().executeJs("this.files = [];");
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
