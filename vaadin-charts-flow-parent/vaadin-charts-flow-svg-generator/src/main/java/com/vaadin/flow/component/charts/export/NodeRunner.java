@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.frontend.FrontendToolsLocator;
-import com.vaadin.flow.server.frontend.FrontendUtils;
 
 class NodeRunner {
 
