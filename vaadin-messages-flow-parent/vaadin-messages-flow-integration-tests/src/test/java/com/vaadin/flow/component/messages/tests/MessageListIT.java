@@ -229,6 +229,35 @@ public class MessageListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void changeLocaleVariant_messagesRendered() {
+        clickElementWithJs("setLocaleVariant");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 2, messages.size());
+
+        MessageElement msg = messages.get(0);
+        Assert.assertEquals("Unexpected text content", "foo", msg.getText());
+        // Should fallback to German locale formatting
+        Assert.assertTrue("Unexpected time prop", msg.getTime()
+                .matches("[0-9]+\\. [A-Za-z\\.]+ 2021, [0-9]+:[0-9]+"));
+        Assert.assertEquals("Unexpected userName prop", "sender",
+                msg.getUserName());
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void changeLocaleVariant_addItem_doesNotThrow() {
+        clickElementWithJs("setLocaleVariant");
+        clickElementWithJs("addItem");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 3, messages.size());
+
+        checkLogsForErrors(message -> message.contains("test.jpg"));
+    }
+
+    @Test
     public void setImageAsDownloadResource_imageLoaded() {
         getLogEntries(Level.WARNING); // message logs before setting resource
         clickElementWithJs("setImageAsDownloadHandler");
