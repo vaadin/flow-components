@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -56,8 +56,8 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.1")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 

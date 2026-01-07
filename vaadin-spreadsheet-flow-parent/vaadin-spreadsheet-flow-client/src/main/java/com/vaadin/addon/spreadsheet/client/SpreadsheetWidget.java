@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -2185,7 +2185,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     /**
      * Returns whether the custom editor is shown when the cell gets focus.
-     * 
+     *
      * @return true if the custom editor is shown on focus, false otherwise
      */
     public boolean isShowCustomEditorOnFocus() {
@@ -2194,7 +2194,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     /**
      * Sets whether the custom editor should be shown when the cell gets focus.
-     * 
+     *
      * @param showCustomEditorOnFocus
      *            true to show the custom editor on focus, false to not show it
      */

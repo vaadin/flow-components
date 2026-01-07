@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -47,7 +47,7 @@ public class DragHandle extends AbstractConfigurationObject {
 
     /**
      * The fill color of the drag handles. Defaults to #fff.
-     * 
+     *
      * @param color
      */
     public void setColor(Color color) {
@@ -65,7 +65,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * The mouse cursor to use for the drag handles. By default this is
      * intelligently switching between ew-resize and ns-resize depending on the
      * direction the point is being dragged.
-     * 
+     *
      * @param cursor
      */
     public void setCursor(String cursor) {
@@ -131,7 +131,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * Function to define the SVG path to use for the drag handles. Takes the
      * point as argument. Should return an SVG path in array format. The SVG
      * path is automatically positioned on the point.
-     * 
+     *
      * @param _fn_pathFormatter
      */
     public void setPathFormatter(String _fn_pathFormatter) {

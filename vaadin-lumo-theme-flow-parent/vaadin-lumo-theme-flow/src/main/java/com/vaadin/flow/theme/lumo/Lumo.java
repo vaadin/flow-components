@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,8 +30,8 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.0.0")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.0")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.0.1")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.1")
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class Lumo implements AbstractTheme {
 

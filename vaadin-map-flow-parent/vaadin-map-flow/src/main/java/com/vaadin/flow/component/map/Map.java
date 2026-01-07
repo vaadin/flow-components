@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -71,7 +71,7 @@ import tools.jackson.databind.node.ObjectNode;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "25.0.0")
+@NpmPackage(value = "@vaadin/map", version = "25.0.1")
 @NpmPackage(value = "ol", version = "10.6.1")
 @NpmPackage(value = "proj4", version = "2.17.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
