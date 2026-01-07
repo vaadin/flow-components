@@ -770,5 +770,5 @@ AiOrchestrator.builder(provider, systemPrompt)
 
 ---
 
-**Last Updated**: 2025-11-21
-**Vaadin Version**: 25.0-SNAPSHOT
+**Last Updated**: 2026-01-07
+**Vaadin Version**: 25.1-SNAPSHOT
