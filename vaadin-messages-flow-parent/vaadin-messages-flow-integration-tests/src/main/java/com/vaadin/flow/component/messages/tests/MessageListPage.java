@@ -70,6 +70,9 @@ public class MessageListPage extends Div {
 
         addButton("setLocale", () -> UI.getCurrent().setLocale(Locale.ITALIAN));
 
+        addButton("setLocaleVariant",
+                () -> UI.getCurrent().setLocale(Locale.of("de", "DE", "hw")));
+
         addButton("detachList", () -> remove(messageList));
         addButton("attachList", () -> addComponentAsFirst(messageList));
 
