@@ -51,7 +51,6 @@ import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
