@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -76,6 +76,20 @@ public class UploadIT extends AbstractUploadIT {
         $("button").id("print-file-count").click();
 
         Assert.assertEquals("File list should contain 3 files", 3,
+                getFileCount());
+
+        $("button").id("clear-file-list").click();
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
+
+        // Verify clear file list works multiple times
+        getUpload().upload(tempFile);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should contain 1 file", 1,
                 getFileCount());
 
         $("button").id("clear-file-list").click();

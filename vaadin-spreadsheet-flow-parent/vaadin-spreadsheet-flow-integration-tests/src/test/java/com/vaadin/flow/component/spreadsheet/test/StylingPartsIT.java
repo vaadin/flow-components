@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -67,10 +67,10 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
 
         //@formatter:off
         var scrollTabButtons = Map.of(
-                "scroll-tabs-beginning", SCROLL_TABS_TO_START_BUTTON, 
-                "scroll-tabs-left", SCROLL_TABS_BACKWARD_BUTTON, 
-                "scroll-tabs-right", SCROLL_TABS_FORWARD_BUTTON, 
-                "scroll-tabs-end", SCROLL_TABS_TO_END_BUTTON, 
+                "scroll-tabs-beginning", SCROLL_TABS_TO_START_BUTTON,
+                "scroll-tabs-left", SCROLL_TABS_BACKWARD_BUTTON,
+                "scroll-tabs-right", SCROLL_TABS_FORWARD_BUTTON,
+                "scroll-tabs-end", SCROLL_TABS_TO_END_BUTTON,
                 "add-new-tab", NEW_TAB_BUTTON
         );
         //@formatter:on

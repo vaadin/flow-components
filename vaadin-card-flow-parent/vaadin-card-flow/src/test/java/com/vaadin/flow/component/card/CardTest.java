@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.card;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -276,68 +273,25 @@ public class CardTest {
     }
 
     @Test
-    public void cardHasNoChildrenByDefault() {
+    public void getChildren_emptyByDefault() {
         Assert.assertTrue(card.getChildren().findAny().isEmpty());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void addNullCollection_throwsNullPointerException() {
-        card.add((Collection<Component>) null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void addNullArray_throwsNullPointerException() {
-        card.add((Component[]) null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void addNullComponentInArray_throwsNullPointerException() {
-        card.add(new Div(), null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void addNullComponentInCollection_throwsNullPointerException() {
-        card.add(Arrays.asList(new Div(), null));
-    }
-
     @Test
-    public void addNullComponentInCollection_childrenNotUpdated() {
-        try {
-            card.add(new Div(), null);
-        } catch (NullPointerException e) {
-            // Do nothing
-        }
+    public void getChildren_onlyReturnsComponentsFromDefaultSlot() {
+        card.setTitle(new Div());
+        card.setSubtitle(new Div());
+        card.setHeader(new Div());
+        card.setHeaderPrefix(new Div());
+        card.setHeaderSuffix(new Div());
+        card.setMedia(new Div());
+
         Assert.assertTrue(card.getChildren().findAny().isEmpty());
-    }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void removeContentWithAnotherParent_throwsIllegalArgumentException() {
-        var contentWithAnotherParent = new Span();
-        var otherParent = new Div();
-        otherParent.add(contentWithAnotherParent);
-        var content = new Div();
+        var content = new Span();
         card.add(content);
-        card.remove(List.of(contentWithAnotherParent));
-    }
 
-    @Test
-    public void removeContentWithNoParent_childrenNotUpdated() {
-        var contentWithNoParent = new Span();
-        var content = new Div();
-        card.add(content);
-        card.remove(List.of(contentWithNoParent));
         Assert.assertEquals(List.of(content), card.getChildren().toList());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void cardWithContent_removeNull_throwsNullPointerException() {
-        card.add(new Span());
-        card.remove(Collections.singletonList(null));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void cardWithoutContent_removeNull_throwsNullPointerException() {
-        card.remove(Collections.singletonList(null));
     }
 
     @Test
@@ -370,43 +324,109 @@ public class CardTest {
 
     @Test
     public void emptyCard_addComponentAtIndex_componentAddedAtCorrectIndex() {
-        var component = new Div();
+        var component = new Span();
         card.addComponentAtIndex(0, component);
-        var firstComponent = card.getChildren().findFirst();
-        Assert.assertTrue(firstComponent.isPresent());
-        Assert.assertEquals(component, firstComponent.get());
+        Assert.assertEquals(List.of(component), card.getChildren().toList());
         Assert.assertTrue(component.isAttached());
     }
 
     @Test
     public void addComponentAtNextIndex_componentAddedAtCorrectIndex() {
-        card.add(new Span());
-        var component = new Div();
-        var initialCount = (int) card.getChildren().count();
-        card.addComponentAtIndex(initialCount, component);
-        var firstComponent = card.getChildren().skip(initialCount).findFirst();
-        Assert.assertTrue(firstComponent.isPresent());
-        Assert.assertEquals(component, firstComponent.get());
-        Assert.assertTrue(component.isAttached());
+        var first = new Span();
+        card.add(first);
+        var second = new Span();
+        card.addComponentAtIndex(1, second);
+        Assert.assertEquals(List.of(first, second),
+                card.getChildren().toList());
+        Assert.assertTrue(second.isAttached());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addComponentAtNegativeIndex_throwsIllegalArgumentException() {
+        card.addComponentAtIndex(-1, new Span());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void addComponentAtOutOfBoundsIndex_throwsIllegalArgumentException() {
+        // Add components to other slots to check that index only operates on
+        // default slot
+        card.setTitle(new Div());
+        card.setSubtitle(new Div());
+        card.setHeader(new Div());
+        card.setHeaderPrefix(new Div());
+        card.setHeaderSuffix(new Div());
+        card.setMedia(new Div());
+
         card.add(new Span());
-        var component = new Div();
-        card.addComponentAtIndex((int) card.getChildren().count() + 1,
-                component);
+        card.addComponentAtIndex(2, new Span());
     }
 
     @Test
     public void addComponentAtIndex_componentsAddedAtCorrectIndexes() {
-        card.add(new Span());
-        var component = new Div();
-        card.addComponentAtIndex(0, component);
-        var firstComponent = card.getChildren().findFirst();
-        Assert.assertTrue(firstComponent.isPresent());
-        Assert.assertEquals(component, firstComponent.get());
-        Assert.assertTrue(component.isAttached());
+        var first = new Span();
+        card.add(first);
+
+        var second = new Span();
+        card.addComponentAtIndex(0, second);
+        Assert.assertEquals(List.of(second, first),
+                card.getChildren().toList());
+
+        var third = new Span();
+        card.addComponentAtIndex(2, third);
+        Assert.assertEquals(List.of(second, first, third),
+                card.getChildren().toList());
+
+        var fourth = new Span();
+        card.addComponentAtIndex(1, fourth);
+        Assert.assertEquals(List.of(second, fourth, first, third),
+                card.getChildren().toList());
+    }
+
+    @Test
+    public void addComponentAtIndex_ignoresComponentsFromOtherSlots() {
+        card.setTitle(new Div());
+        card.setSubtitle(new Div());
+        card.setHeader(new Div());
+        card.setHeaderPrefix(new Div());
+        card.setHeaderSuffix(new Div());
+        card.setMedia(new Div());
+
+        var first = new Span();
+        var second = new Span();
+
+        card.add(first);
+        card.add(second);
+
+        var third = new Span();
+        card.addComponentAtIndex(1, third);
+        Assert.assertEquals(List.of(first, third, second),
+                card.getChildren().toList());
+    }
+
+    @Test
+    public void addComponentAtIndex_withAlreadyAddedComponent() {
+        card.setTitle(new Div());
+        card.setSubtitle(new Div());
+        card.setHeader(new Div());
+        card.setHeaderPrefix(new Div());
+        card.setHeaderSuffix(new Div());
+        card.setMedia(new Div());
+
+        var first = new Span();
+        var second = new Span();
+        var third = new Span();
+
+        card.add(first);
+        card.add(second);
+        card.add(third);
+
+        card.addComponentAtIndex(2, third);
+        Assert.assertEquals(List.of(first, second, third),
+                card.getChildren().toList());
+
+        card.addComponentAtIndex(0, third);
+        Assert.assertEquals(List.of(third, first, second),
+                card.getChildren().toList());
     }
 
     @Test

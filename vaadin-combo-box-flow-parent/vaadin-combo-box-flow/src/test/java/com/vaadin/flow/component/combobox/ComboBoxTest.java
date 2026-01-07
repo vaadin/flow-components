@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -234,6 +234,19 @@ public class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setOverlayWidth(100, Unit.PIXELS);
         Assert.assertEquals("100.0px",
                 comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
+    }
+
+    @Test
+    public void setFilterTimeout_getFilterTimeout() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertEquals(500, comboBox.getFilterTimeout());
+        Assert.assertEquals(500,
+                comboBox.getElement().getProperty("_filterTimeout", 0));
+
+        comboBox.setFilterTimeout(750);
+        Assert.assertEquals(750, comboBox.getFilterTimeout());
+        Assert.assertEquals(750,
+                comboBox.getElement().getProperty("_filterTimeout", 0));
     }
 
     @Tag("div")

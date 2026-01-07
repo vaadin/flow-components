@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -128,6 +128,115 @@ public class DashboardTest extends DashboardTestBase {
     public void addNullWidgetAtIndex_exceptionIsThrown() {
         Assert.assertThrows(NullPointerException.class,
                 () -> dashboard.addWidgetAtIndex(0, null));
+    }
+
+    @Test
+    public void addWidgetAfter_rootLevelWidget_widgetIsAddedAfter() {
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        DashboardWidget widget3 = getNewWidget();
+        dashboard.add(widget1, widget2);
+        fakeClientCommunication();
+        dashboard.addWidgetAfter(widget1, widget3);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget1, widget3, widget2);
+    }
+
+    @Test
+    public void addWidgetAfter_lastRootLevelWidget_widgetIsAddedAtEnd() {
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        DashboardWidget widget3 = getNewWidget();
+        dashboard.add(widget1, widget2);
+        fakeClientCommunication();
+        dashboard.addWidgetAfter(widget2, widget3);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget1, widget2, widget3);
+    }
+
+    @Test
+    public void addWidgetAfter_sectionWidget_widgetIsAddedInSameSection() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        DashboardWidget widget3 = getNewWidget();
+        section.add(widget1, widget2);
+        fakeClientCommunication();
+        dashboard.addWidgetAfter(widget1, widget3);
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget1, widget3, widget2);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetAfter_lastSectionWidget_widgetIsAddedAtEndOfSection() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        DashboardWidget widget3 = getNewWidget();
+        section.add(widget1, widget2);
+        fakeClientCommunication();
+        dashboard.addWidgetAfter(widget2, widget3);
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget1, widget2, widget3);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetAfter_nullReferenceWidget_exceptionIsThrown() {
+        DashboardWidget widget = getNewWidget();
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.addWidgetAfter(null, widget));
+    }
+
+    @Test
+    public void addWidgetAfter_nullNewWidget_exceptionIsThrown() {
+        DashboardWidget widget = getNewWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.addWidgetAfter(widget, null));
+    }
+
+    @Test
+    public void addWidgetAfter_referenceWidgetNotFound_exceptionIsThrown() {
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        dashboard.add(widget1);
+        fakeClientCommunication();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> dashboard.addWidgetAfter(widget2, getNewWidget()));
+    }
+
+    @Test
+    public void addWidgetAfter_widgetWithExistingParent_widgetIsMovedAfterReference() {
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        DashboardWidget widget3 = getNewWidget();
+        dashboard.add(widget1, widget2, widget3);
+        fakeClientCommunication();
+        dashboard.addWidgetAfter(widget1, widget3);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget1, widget3, widget2);
+    }
+
+    @Test
+    public void addWidgetAfterInSection_nullReferenceWidget_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = getNewWidget();
+        Assert.assertThrows(NullPointerException.class,
+                () -> section.addWidgetAfter(null, widget));
+    }
+
+    @Test
+    public void addWidgetAfterInSection_referenceWidgetNotFound_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        section.add(widget1);
+        fakeClientCommunication();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> section.addWidgetAfter(widget2, getNewWidget()));
     }
 
     @Test

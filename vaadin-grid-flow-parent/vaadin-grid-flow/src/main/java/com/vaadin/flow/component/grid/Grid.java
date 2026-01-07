@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -212,8 +212,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-rc1")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-rc1")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -555,7 +555,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         .orElse(null);
             }
 
-            getGrid().getDataCommunicator().reset();
+            getGrid().refreshViewport();
             return this;
         }
 
@@ -1046,7 +1046,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Objects.requireNonNull(partNameGenerator,
                     "Part name generator can not be null");
             this.partNameGenerator = partNameGenerator;
-            getGrid().getDataCommunicator().reset();
+            getGrid().refreshViewport();
             return this;
         }
 
@@ -1067,7 +1067,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     "Tooltip generator can not be null");
 
             grid.addTooltipElementToTooltipSlot();
-            getGrid().getDataCommunicator().reset();
+            getGrid().refreshViewport();
             return this;
         }
 
@@ -1378,10 +1378,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SerializableSupplier<Editor<T>> editorFactory = this::createEditor;
 
     private SerializableFunction<T, String> partNameGenerator = item -> null;
-    private SerializablePredicate<T> defaultDropFilter = item -> true;
-    private SerializablePredicate<T> defaultDragFilter = item -> true;
-    private SerializablePredicate<T> dropFilter = defaultDropFilter;
-    private SerializablePredicate<T> dragFilter = defaultDragFilter;
+    private SerializablePredicate<T> dropFilter = item -> true;
+    private SerializablePredicate<T> dragFilter = item -> true;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
@@ -1741,10 +1739,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         protected DataCommunicator<T> build(Element element,
                 CompositeDataGenerator<T> dataGenerator, U arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            return new DataCommunicator<>(
-                    dataGenerator, arrayUpdater, data -> element
-                            .callJsFunction("$connector.updateFlatData", data),
-                    element.getNode());
+            return new GridDataCommunicator<>(element, dataGenerator,
+                    arrayUpdater);
         }
     }
 
@@ -2016,7 +2012,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         getElement().appendChild(current.getElement());
 
-        getDataCommunicator().reset();
+        refreshViewport();
 
         return column;
     }
@@ -4321,7 +4317,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(partNameGenerator,
                 "Part name generator can not be null");
         this.partNameGenerator = partNameGenerator;
-        getDataCommunicator().reset();
+        refreshViewport();
     }
 
     /**
@@ -4622,15 +4618,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setDropMode(GridDropMode dropMode) {
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
-
-        // Do not reset the data communicator if no filters are applied in order
-        // to avoid unnecessary scroll position reset. This can be removed when
-        // Flow will provide a way to request refresh for only items that
-        // are in the viewport.
-        if (dragFilter != defaultDragFilter
-                || dropFilter != defaultDropFilter) {
-            getDataCommunicator().reset();
-        }
+        refreshViewport();
     }
 
     /**
@@ -4655,15 +4643,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setRowsDraggable(boolean rowsDraggable) {
         getElement().setProperty("rowsDraggable", rowsDraggable);
-
-        // Do not reset the data communicator if no filters are applied in order
-        // to avoid unnecessary scroll position reset. This can be removed when
-        // Flow will provide a way to request refresh for only items that
-        // are in the viewport.
-        if (dragFilter != defaultDragFilter
-                || dropFilter != defaultDropFilter) {
-            getDataCommunicator().reset();
-        }
+        refreshViewport();
     }
 
     /**
@@ -4719,7 +4699,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setDropFilter(SerializablePredicate<T> dropFilter) {
         Objects.requireNonNull(dropFilter, "Drop filter can not be null");
         this.dropFilter = dropFilter;
-        getDataCommunicator().reset();
+        refreshViewport();
     }
 
     /**
@@ -4739,7 +4719,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setDragFilter(SerializablePredicate<T> dragFilter) {
         Objects.requireNonNull(dragFilter, "Drag filter can not be null");
         this.dragFilter = dragFilter;
-        getDataCommunicator().reset();
+        refreshViewport();
     }
 
     /**
@@ -4765,7 +4745,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         this.dragDataGenerators.keySet().forEach(types::add);
         this.getElement().setPropertyJson("__dragDataTypes", types);
-        getDataCommunicator().reset();
+        refreshViewport();
     }
 
     /**
@@ -4786,7 +4766,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         this.tooltipGenerator = Objects.requireNonNull(tooltipGenerator,
                 "Tooltip generator cannot be null");
         addTooltipElementToTooltipSlot();
-        this.dataCommunicator.reset();
+        refreshViewport();
     }
 
     /**
@@ -5297,5 +5277,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         } else {
             SlotUtils.clearSlot(this, EMPTY_STATE_SLOT);
         }
+    }
+
+    protected void refreshViewport() {
+        ((GridDataCommunicator<T>) getDataCommunicator()).refreshViewport();
     }
 }

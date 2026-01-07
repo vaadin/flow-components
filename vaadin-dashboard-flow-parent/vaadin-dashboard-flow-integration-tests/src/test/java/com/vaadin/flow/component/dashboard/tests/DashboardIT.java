@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -51,6 +51,14 @@ public class DashboardIT extends AbstractComponentIT {
         assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "Widget 3",
                 "Widget 1 in Section 1", "Widget 2 in Section 1",
                 "Widget 1 in Section 2", "New widget 1", "New widget 2");
+    }
+
+    @Test
+    public void addWidgetAfterExistingWidget_widgetIsCorrectlyAdded() {
+        clickElementWithJs("add-widget-after-existing");
+        assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "New widget 1",
+                "Widget 3", "Widget 1 in Section 1", "Widget 2 in Section 1",
+                "Widget 1 in Section 2");
     }
 
     @Test
