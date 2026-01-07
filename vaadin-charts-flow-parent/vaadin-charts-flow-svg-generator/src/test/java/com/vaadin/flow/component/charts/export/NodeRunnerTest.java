@@ -20,8 +20,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.frontend.FrontendToolsLocator;
-import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class NodeRunnerTest {
 
