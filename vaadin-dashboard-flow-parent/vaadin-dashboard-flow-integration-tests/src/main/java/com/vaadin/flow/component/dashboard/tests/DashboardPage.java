@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -132,10 +132,19 @@ public class DashboardPage extends Div {
                 e -> dashboard.setEditable(!dashboard.isEditable()));
         toggleEditable.setId("toggle-editable");
 
+        NativeButton addWidgetAfterExisting = new NativeButton(
+                "Add widget after Widget 2");
+        addWidgetAfterExisting.addClickListener(click -> {
+            DashboardWidget newWidget1 = new DashboardWidget();
+            newWidget1.setTitle("New widget 1");
+            dashboard.addWidgetAfter(widget2, newWidget1);
+        });
+        addWidgetAfterExisting.setId("add-widget-after-existing");
+
         add(addMultipleWidgets, removeFirstAndLastWidgets, removeAll,
                 addSectionWithMultipleWidgets, removeFirstSection,
                 setMaximumColumnCount1, setMaximumColumnCountNull,
-                toggleEditable, dashboard);
+                toggleEditable, addWidgetAfterExisting, dashboard);
     }
 
     private static Optional<DashboardSection> getFirstSection(

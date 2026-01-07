@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -1063,7 +1063,7 @@ public class SpreadsheetFactory implements Serializable {
              * columns.
              *
              * In Spreadsheet the meaning is the opposite.
-             * 
+             *
              * POI uses a split position of 0 to mean "no split", so we should
              * not be setting split positions or hiding anything in the case
              * this position is 0.

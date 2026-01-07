@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -610,7 +610,7 @@ public class DataLabels extends AbstractDataLabels {
     /**
      * Aligns data labels relative to points. If center alignment is not
      * possible, it defaults to right. Defaults to "center".
-     * 
+     *
      * @param position
      */
     public void setPosition(HorizontalAlign position) {

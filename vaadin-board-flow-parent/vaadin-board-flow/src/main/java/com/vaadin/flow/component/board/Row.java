@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -30,7 +30,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *             Consider using Dashboard as an alternative.
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/board", version = "25.0.0-beta7")
+@NpmPackage(value = "@vaadin/board", version = "25.0.1")
 @JsModule("@vaadin/board/src/vaadin-board-row.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Row extends Component

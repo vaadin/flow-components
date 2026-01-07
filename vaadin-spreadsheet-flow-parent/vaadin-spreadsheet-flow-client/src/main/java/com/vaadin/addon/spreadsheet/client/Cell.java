@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -93,8 +93,7 @@ public class Cell {
             element.setInnerText("");
             element.getStyle().clearZIndex();
         } else {
-            if (sheetWidget.isMergedCell(SheetWidget.toKey(col, row))
-                    && !(this instanceof MergedCell)) {
+            if (isSubCell()) {
                 element.getStyle().clearZIndex();
             } else {
                 element.getStyle().setZIndex(ZINDEXVALUE);
@@ -169,8 +168,8 @@ public class Cell {
         } else {
             overflowing = false;
         }
-        if (sheetWidget.isMergedCell(SheetWidget.toKey(col, row))
-                && !(this instanceof MergedCell)) {
+
+        if (isSubCell()) {
             element.getStyle().setOverflow(Overflow.HIDDEN);
         } else {
             if (overflowPx > 0) {
@@ -183,6 +182,13 @@ public class Cell {
             }
         }
         overflowDirty = false;
+    }
+
+    private boolean isSubCell() {
+        if (this instanceof MergedCell) {
+            return false;
+        }
+        return sheetWidget.actionHandler.getMergedRegion(col, row) != null;
     }
 
     int measureOverflow() {

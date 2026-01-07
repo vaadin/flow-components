@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -57,7 +57,7 @@ public interface DOMTokenList {
     /**
      * Removes the given token from the list if it is present, and adds it if it
      * is not.
-     * 
+     *
      * @param token
      *            The token to toggle.
      * @return {@code true} if the token is now present in the list, and

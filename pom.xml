@@ -7,7 +7,7 @@
         <version>3.0.0</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>25.0-SNAPSHOT</version>
+    <version>25.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
@@ -70,18 +70,18 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>25.0-SNAPSHOT</flow.version>
-        <testbench.version>10.0.0-beta6</testbench.version>
+        <flow.version>25.1-SNAPSHOT</flow.version>
+        <testbench.version>10.0.0</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <jetty.version>12.1.2</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
-        <karaf-maven-plugin.version>4.4.8</karaf-maven-plugin.version>
+        <karaf-maven-plugin.version>4.4.9</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
-        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+        <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
@@ -96,7 +96,7 @@
         <cvdlName/>
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>4.0.0</spring-data-commons.version>
+        <spring-data-commons.version>4.0.1</spring-data-commons.version>
 
         <!-- spreadsheet -->
         <poi.version>5.4.1</poi.version>
@@ -274,7 +274,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.4.0</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>

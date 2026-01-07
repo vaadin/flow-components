@@ -89,24 +89,28 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     if (filterChanged) {
       cache = {};
       lastFilter = params.filter;
-      this._filterDebouncer = Debouncer.debounce(this._filterDebouncer, timeOut.after(500), () => {
-        if (serverFacade.getLastFilterSentToServer() === params.filter) {
-          // Fixes the case when the filter changes
-          // to something else and back to the original value
-          // within debounce timeout, and the
-          // DataCommunicator thinks it doesn't need to send data
-          serverFacade.needsDataCommunicatorReset();
+      this._filterDebouncer = Debouncer.debounce(
+        this._filterDebouncer,
+        timeOut.after(comboBox._filterTimeout ?? 500),
+        () => {
+          if (serverFacade.getLastFilterSentToServer() === params.filter) {
+            // Fixes the case when the filter changes
+            // to something else and back to the original value
+            // within debounce timeout, and the
+            // DataCommunicator thinks it doesn't need to send data
+            serverFacade.needsDataCommunicatorReset();
+          }
+          if (params.filter !== lastFilter) {
+            throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
+          }
+          // Remove the debouncer before clearing page callbacks.
+          // This makes sure that they are executed.
+          this._filterDebouncer = undefined;
+          // Call the method again after debounce.
+          clearPageCallbacks();
+          comboBox.dataProvider(params, callback);
         }
-        if (params.filter !== lastFilter) {
-          throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
-        }
-        // Remove the debouncer before clearing page callbacks.
-        // This makes sure that they are executed.
-        this._filterDebouncer = undefined;
-        // Call the method again after debounce.
-        clearPageCallbacks();
-        comboBox.dataProvider(params, callback);
-      });
+      );
       return;
     }
 

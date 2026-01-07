@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -124,7 +124,7 @@ public class ConnectorStyle extends AbstractConfigurationObject {
 
     /**
      * Set the default pathfinder algorithm to use for this chart.
-     * 
+     *
      * @see PathfinderType
      */
     public void setType(PathfinderType type) {
