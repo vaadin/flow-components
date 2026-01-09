@@ -1,0 +1,132 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.ai.provider;
+
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+/**
+ * Unit tests for {@link LLMProvider} interface and its nested interfaces.
+ */
+public class LLMProviderTest {
+
+    @Test
+    public void llmRequestOf_withValidMessage_createsRequest() {
+        var request = LLMProvider.LLMRequest.of("Hello world");
+
+        Assert.assertEquals("Hello world", request.userMessage());
+        Assert.assertNotNull(request.attachments());
+        Assert.assertTrue(request.attachments().isEmpty());
+        Assert.assertNull(request.systemPrompt());
+        Assert.assertNotNull(request.tools());
+        Assert.assertEquals(0, request.tools().length);
+    }
+
+    @Test
+    public void llmRequestOf_withEmptyMessage_throwsException() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> LLMProvider.LLMRequest.of(null));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> LLMProvider.LLMRequest.of(""));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> LLMProvider.LLMRequest.of("   "));
+    }
+
+    @Test
+    public void llmRequestBuilder_withAllFields_createsRequest() {
+        var attachment = LLMProvider.Attachment.of("test.txt", "text/plain",
+                "content".getBytes());
+        var toolObject = new Object();
+
+        var request = new LLMProvider.LLMRequestBuilder()
+                .userMessage("Test message").attachments(List.of(attachment))
+                .systemPrompt("You are helpful").tools(toolObject).build();
+
+        Assert.assertEquals("Test message", request.userMessage());
+        Assert.assertEquals(1, request.attachments().size());
+        Assert.assertEquals(attachment, request.attachments().getFirst());
+        Assert.assertEquals("You are helpful", request.systemPrompt());
+        Assert.assertEquals(1, request.tools().length);
+        Assert.assertEquals(toolObject, request.tools()[0]);
+    }
+
+    @Test
+    public void llmRequestBuilder_withInvalidUserMessage_throwsException() {
+        Assert.assertThrows(IllegalStateException.class,
+                () -> new LLMProvider.LLMRequestBuilder().userMessage("")
+                        .build());
+        Assert.assertThrows(IllegalStateException.class,
+                () -> new LLMProvider.LLMRequestBuilder().userMessage("   ")
+                        .build());
+    }
+
+    @Test
+    public void attachment_withValidParameters_createsAttachment() {
+        var data = "test data".getBytes();
+        var attachment = LLMProvider.Attachment.of("file.txt", "text/plain",
+                data);
+
+        Assert.assertEquals("file.txt", attachment.fileName());
+        Assert.assertEquals("text/plain", attachment.contentType());
+        Assert.assertArrayEquals(data, attachment.data());
+    }
+
+    @Test
+    public void attachment_withNullParameters_throwsException() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> LLMProvider.Attachment.of(null, "text/plain",
+                        "data".getBytes()));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> LLMProvider.Attachment.of("file.txt", null,
+                        "data".getBytes()));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> LLMProvider.Attachment.of("file.txt", "text/plain",
+                        null));
+    }
+
+    @Test
+    public void llmRequestBuilder_nullToolInArray_throwsException() {
+        var builder = new LLMProvider.LLMRequestBuilder().userMessage("Test");
+
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> builder.tools(new Object(), null, new Object()));
+    }
+
+    @Test
+    public void llmRequestBuilder_trimsSystemPrompt() {
+        var request = new LLMProvider.LLMRequestBuilder().userMessage("Test")
+                .systemPrompt("  You are helpful  ").build();
+
+        Assert.assertEquals("You are helpful", request.systemPrompt());
+    }
+
+    @Test
+    public void llmRequestBuilder_emptySystemPromptBecomesNull() {
+        var request = new LLMProvider.LLMRequestBuilder().userMessage("Test")
+                .systemPrompt("   ").build();
+
+        Assert.assertNull(request.systemPrompt());
+    }
+
+    @Test
+    public void llmRequestOf_trimsUserMessage() {
+        var request = LLMProvider.LLMRequest.of("  Hello world  ");
+
+        Assert.assertEquals("Hello world", request.userMessage());
+    }
+}
