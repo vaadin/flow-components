@@ -8,7 +8,6 @@
  */
 package com.vaadin.component.spreadsheet.client.js;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -566,10 +565,11 @@ public class SpreadsheetJsApi {
         }
     }
 
-    public void setResources(Element element, String resources) {
-        ArrayList<String> l = Parser.parseArraylistString(resources);
-        l.forEach(k -> spreadsheetConnector.getConnection().setResource(k,
-                element.getAttribute("resource-" + k)));
+    public void setResources(Element element, String[] resources) {
+        for (String k : resources) {
+            spreadsheetConnector.getConnection().setResource(k,
+                    element.getAttribute("resource-" + k));
+        }
     }
 
     public void notifyStateChanges(String[] propNames, boolean initial) {
