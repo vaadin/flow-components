@@ -305,6 +305,43 @@ public class HorizontalLayoutSlotsTest {
     }
 
     @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_start1() {
+        Div addedAtIndex = new Div();
+
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertNull(addedAtIndex.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_start2() {
+        layout.addToStart(new Div());
+
+        Div addedAtIndex = new Div();
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertNull(addedAtIndex.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_middle() {
+        layout.addToMiddle(new Div());
+
+        Div addedAtIndex = new Div();
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertEquals("middle",
+                addedAtIndex.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_end() {
+        layout.addToEnd(new Div());
+
+        Div addedAtIndex = new Div();
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertEquals("end",
+                addedAtIndex.getElement().getAttribute("slot"));
+    }
+
+    @Test
     public void add_sameComponentAddedTwice_doesNotThrow() {
         Div div1 = new Div();
         Div div2 = new Div();
