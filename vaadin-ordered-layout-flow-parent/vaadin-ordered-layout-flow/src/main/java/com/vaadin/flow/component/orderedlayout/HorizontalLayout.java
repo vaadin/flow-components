@@ -325,9 +325,15 @@ public class HorizontalLayout extends Component implements ThemableLayout,
 
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Component oldComponent = getComponentCount() > index
-                ? getComponentAt(index)
-                : null;
+        int size = getComponentCount();
+
+        Component oldComponent = null;
+        if (index < size) {
+            oldComponent = getComponentAt(index);
+        } else if (size > 0) {
+            oldComponent = getComponentAt(size - 1);
+        }
+
         String slotName = oldComponent != null
                 ? oldComponent.getElement().getAttribute("slot")
                 : null;
