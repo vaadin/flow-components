@@ -32,7 +32,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  *            type of the item represented by this component
  */
 @Tag("vaadin-item")
-@NpmPackage(value = "@vaadin/item", version = "25.0.1")
+@NpmPackage(value = "@vaadin/item", version = "25.1.0-alpha1")
 @JsModule("@vaadin/item/src/vaadin-item.js")
 class VaadinItem<T> extends Component
         implements HasItemComponents.ItemComponent<T>, HasComponents {
