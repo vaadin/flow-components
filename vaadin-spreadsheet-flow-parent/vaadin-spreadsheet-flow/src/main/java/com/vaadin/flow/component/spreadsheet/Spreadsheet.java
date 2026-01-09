@@ -3653,8 +3653,7 @@ public class Spreadsheet extends Component
                 handler.inline();
             }
             resources.put(key, resource.toString());
-            getElement().setProperty("resources",
-                    Serializer.serialize(new ArrayList<>(resources.keySet())));
+            getElement().executeJs("this.resources=$0", resources.keySet());
             getElement().setAttribute("resource-" + key,
                     new StreamResourceRegistry.ElementStreamResource(resource,
                             this.getElement()));
