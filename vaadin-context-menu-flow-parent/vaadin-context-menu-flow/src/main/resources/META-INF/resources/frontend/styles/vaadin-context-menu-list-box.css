@@ -1,0 +1,4 @@
+[part="items"] ::slotted(hr:first-child),
+[part="items"] ::slotted(hr:last-child) {
+    display: none !important;
+}
