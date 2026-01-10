@@ -27,6 +27,7 @@ import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
@@ -59,6 +60,7 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
+@CssImport(value = "./styles/vaadin-context-menu-list-box.css", themeFor = "vaadin-context-menu-list-box")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasStyle {
 

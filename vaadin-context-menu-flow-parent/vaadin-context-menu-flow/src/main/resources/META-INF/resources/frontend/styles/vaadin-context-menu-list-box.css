@@ -1,0 +1,6 @@
+/* Use ::slotted to reach the actual Light DOM elements */
+
+[part="items"] ::slotted(hr:first-child),
+[part="items"] ::slotted(hr:last-child) {
+    display: none !important;
+}
