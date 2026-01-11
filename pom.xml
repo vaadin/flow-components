@@ -398,6 +398,7 @@
                         <excludes>
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
+                        <skip>${skipUnitTests}</skip>
                     </configuration>
                 </plugin>
                 <plugin>
