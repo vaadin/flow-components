@@ -22,7 +22,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadDropZone;
-import com.vaadin.flow.component.upload.UploadFileListBox;
+import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.UploadHandler;
@@ -64,7 +64,7 @@ public class UploadManagerPage extends Div {
         var addButton = new UploadButton(manager);
         addButton.add(new Span("Select Files"));
 
-        var fileList = new UploadFileListBox(manager);
+        var fileList = new UploadFileList(manager);
 
         // Add UI components to the layout
         add(dropZone, addButton, fileList);

@@ -32,39 +32,39 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * <pre>
  * var manager = new UploadManager(uploadHandler);
- * var fileListBox = new UploadFileListBox(manager);
- * add(fileListBox);
+ * var fileList = new UploadFileList(manager);
+ * add(fileList);
  * </pre>
  *
  * @author Vaadin Ltd.
  * @see UploadManager
  */
-@Tag("vaadin-upload-file-list-box")
+@Tag("vaadin-upload-file-list")
 @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha1")
-@JsModule("@vaadin/upload/src/vaadin-upload-file-list-box.js")
+@JsModule("@vaadin/upload/src/vaadin-upload-file-list.js")
 @JsModule("./vaadin-upload-manager-connector.js")
-public class UploadFileListBox extends Component {
+public class UploadFileList extends Component {
 
     /**
-     * Creates a new empty file list box without a manager. The manager must be
+     * Creates a new empty file list without a manager. The manager must be
      * set later using {@link #setManager(UploadManager)}.
      */
-    public UploadFileListBox() {
+    public UploadFileList() {
     }
 
     /**
-     * Creates a new file list box linked to the given manager.
+     * Creates a new file list linked to the given manager.
      *
      * @param manager
      *            the upload manager to link to
      */
-    public UploadFileListBox(UploadManager manager) {
+    public UploadFileList(UploadManager manager) {
         setManager(manager);
     }
 
     /**
-     * Sets the upload manager that this file list box is linked to. The file
-     * list box will display files managed by this manager.
+     * Sets the upload manager that this file list is linked to. The file
+     * list will display files managed by this manager.
      *
      * @param manager
      *            the upload manager, or {@code null} to unlink

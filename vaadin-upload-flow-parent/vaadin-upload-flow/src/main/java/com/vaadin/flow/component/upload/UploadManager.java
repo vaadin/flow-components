@@ -58,17 +58,17 @@ import com.vaadin.flow.shared.Registration;
  * // Create UI components linked to the manager
  * var dropZone = new UploadDropZone(manager);
  * var addButton = new UploadButton(manager);
- * var fileListBox = new UploadFileListBox(manager);
+ * var fileList = new UploadFileList(manager);
  *
  * // Add UI components to the layout
- * add(dropZone, addButton, fileListBox);
+ * add(dropZone, addButton, fileList);
  * </pre>
  *
  * @author Vaadin Ltd.
  * @see Upload
  * @see UploadDropZone
  * @see UploadButton
- * @see UploadFileListBox
+ * @see UploadFileList
  */
 public class UploadManager implements Serializable {
 
