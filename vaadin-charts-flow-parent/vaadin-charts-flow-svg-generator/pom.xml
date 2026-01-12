@@ -17,6 +17,10 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-build-tools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
             <scope>test</scope>
         </dependency>
