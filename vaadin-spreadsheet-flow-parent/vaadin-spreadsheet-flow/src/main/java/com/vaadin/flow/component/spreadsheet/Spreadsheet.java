@@ -108,6 +108,8 @@ import com.vaadin.pro.licensechecker.Capabilities;
 import com.vaadin.pro.licensechecker.Capability;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
+import elemental.json.Json;
+import elemental.json.JsonArray;
 import elemental.json.JsonValue;
 
 /**
@@ -3627,8 +3629,8 @@ public class Spreadsheet extends Component
             getElement().removeAttribute("resource-" + key);
         } else {
             resources.put(key, resource.toString());
-            getElement().setProperty("resources",
-                    Serializer.serialize(new ArrayList<>(resources.keySet())));
+            var array = getResourcesArray();
+            getElement().executeJs("this.resources=$0", array);
             getElement().setAttribute("resource-" + key, resource);
         }
     }
@@ -3653,11 +3655,25 @@ public class Spreadsheet extends Component
                 handler.inline();
             }
             resources.put(key, resource.toString());
-            getElement().executeJs("this.resources=$0", resources.keySet());
+            var array = getResourcesArray();
+            getElement().executeJs("this.resources=$0", array);
             getElement().setAttribute("resource-" + key,
                     new StreamResourceRegistry.ElementStreamResource(resource,
                             this.getElement()));
         }
+    }
+
+    /**
+     * Helper method to get the resources keys as a JsonArray.
+     * 
+     * @return a JsonArray of resource keys
+     */
+    private JsonArray getResourcesArray() {
+        var array = Json.createArray();
+        for (String resKey : resources.keySet()) {
+            array.set(array.length(), resKey);
+        }
+        return array;
     }
 
     void clearSheetServerSide() {
