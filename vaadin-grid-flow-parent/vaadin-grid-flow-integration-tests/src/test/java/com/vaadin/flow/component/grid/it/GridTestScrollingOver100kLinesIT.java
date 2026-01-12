@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,9 +53,10 @@ public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {
         allCellContents.forEach(vgcc -> {
             TestBenchElement slot = vgcc.getPropertyElement("assignedSlot");
             if (headerSlots.contains(slot) || bodySlots.contains(slot)) {
+                String text = vgcc.getText();
                 Assert.assertTrue(
                         "A grid cell was expected to have text content but had none.",
-                        StringUtils.isNotBlank(vgcc.getText()));
+                        text != null && !text.isBlank());
             }
         });
     }
