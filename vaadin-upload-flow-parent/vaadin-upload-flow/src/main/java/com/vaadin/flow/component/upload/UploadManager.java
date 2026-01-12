@@ -16,17 +16,14 @@
 package com.vaadin.flow.component.upload;
 
 import java.io.Serializable;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.UploadHandler;
@@ -50,7 +47,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * <pre>
  * // Create the manager with an upload handler
- * var manager = new UploadManager(UI.getCurrent(),
+ * var manager = new UploadManager(this,
  *         UploadHandler.inMemory((metadata, data) -&gt; {
  *             // Process uploaded file
  *         }));
@@ -73,7 +70,7 @@ import com.vaadin.flow.shared.Registration;
 public class UploadManager implements Serializable {
 
     private final String id = UUID.randomUUID().toString();
-    private final UI ui;
+    private final Component owner;
 
     private UploadHandler uploadHandler;
     private String targetName = "upload";
@@ -96,24 +93,24 @@ public class UploadManager implements Serializable {
      * be set using {@link #setUploadHandler(UploadHandler)} before uploads can
      * work.
      *
-     * @param ui
-     *            the UI instance this manager belongs to
+     * @param owner
+     *            the owner component this manager is attached to
      */
-    public UploadManager(UI ui) {
+    public UploadManager(Component owner) {
         // TODO: How to make sure vaadin-upload-manager-connector.js is loaded?
-        this(ui, null);
+        this(owner, null);
     }
 
     /**
      * Creates a new upload manager with the given upload handler.
      *
-     * @param ui
-     *            the UI instance this manager belongs to
+     * @param owner
+     *            the owner component this manager is attached to
      * @param handler
      *            the upload handler to use
      */
-    public UploadManager(UI ui, UploadHandler handler) {
-        this.ui = Objects.requireNonNull(ui, "UI cannot be null");
+    public UploadManager(Component owner, UploadHandler handler) {
+        this.owner = Objects.requireNonNull(owner, "Owner component cannot be null");
         if (handler != null) {
             setUploadHandler(handler);
         }
@@ -294,18 +291,19 @@ public class UploadManager implements Serializable {
             return;
         }
 
-        // Register the stream resource with the UI element (use static class to
-        // avoid implicit 'this' reference that would prevent GC)
+        Element ownerElement = owner.getElement();
+
+        // Register the stream resource with the owner element
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new NamedElementStreamResource(
-                uploadHandler, ui.getElement(), targetName);
+                uploadHandler, ownerElement, targetName);
 
-        // Set up event listeners on UI element for events from JS manager
-        setupEventListeners();
+        // Set up event listeners on owner element for events from JS manager
+        setupEventListeners(ownerElement);
 
-        // Store the target URL as an attribute on the UI element (setAttribute
+        // Store the target URL as an attribute on the owner element (setAttribute
         // auto-registers the resource and converts to URL)
-        final String attrName = "upload-target-" + id;
-        ui.getElement().setAttribute(attrName, elementStreamResource);
+        final String attrName = "data-upload-manager-target-" + id;
+        ownerElement.setAttribute(attrName, elementStreamResource);
 
         // Capture current config values for the lambda
         final int currentMaxFiles = maxFiles;
@@ -313,94 +311,66 @@ public class UploadManager implements Serializable {
         final String currentAccept = accept;
         final boolean currentAutoUpload = autoUpload;
 
-        ui.beforeClientResponse(ui, context -> {
-            // Build configuration options - read target from attribute and
-            // remove it
-            StringBuilder options = new StringBuilder();
-            options.append("{ target: (()=>{ const a='").append(attrName)
-                    .append("'; const t=$1.getAttribute(a); $1.removeAttribute(a); return t; })()");
-            if (currentMaxFiles > 0) {
-                options.append(", maxFiles: ").append(currentMaxFiles);
-            }
-            if (currentMaxFileSize > 0) {
-                options.append(", maxFileSize: ").append(currentMaxFileSize);
-            }
-            if (currentAccept != null && !currentAccept.isEmpty()) {
-                options.append(", accept: '").append(escapeJs(currentAccept))
-                        .append("'");
-            }
-            if (!currentAutoUpload) {
-                options.append(", noAuto: true");
-            }
-            options.append(" }");
+        ownerElement.getNode().runWhenAttached(ui -> {
+            ui.beforeClientResponse(owner, context -> {
+                // Build configuration options - read target from attribute and
+                // remove it
+                StringBuilder options = new StringBuilder();
+                options.append("{ target: (()=>{ const a='").append(attrName)
+                        .append("'; const t=$1.getAttribute(a); return t; })()");
+                if (currentMaxFiles > 0) {
+                    options.append(", maxFiles: ").append(currentMaxFiles);
+                }
+                if (currentMaxFileSize > 0) {
+                    options.append(", maxFileSize: ").append(currentMaxFileSize);
+                }
+                if (currentAccept != null && !currentAccept.isEmpty()) {
+                    options.append(", accept: '").append(escapeJs(currentAccept))
+                            .append("'");
+                }
+                if (!currentAutoUpload) {
+                    options.append(", noAuto: true");
+                }
+                options.append(" }");
 
-            // Create the JS manager using the connector, passing the UI element
-            // for event forwarding
-            ui.getPage()
-                    .executeJs("window.Vaadin.Upload.UploadManager.createUploadManager($0, "
-                            + options + ", $1);", id, ui.getElement());
+                // Create the JS manager using the connector, passing the owner element
+                // for event forwarding
+                ui.getPage()
+                        .executeJs("window.Vaadin.Upload.UploadManager.createUploadManager($0, "
+                                + options + ", $1);", id, ownerElement);
 
-            initialized = true;
+                initialized = true;
+            });
         });
     }
 
-    private void setupEventListeners() {
-        // Get or create the managers registry for this UI
-        ManagerRegistry registry = getOrCreateRegistry(ui);
-
-        // Register this manager in the registry
-        registry.put(id, new WeakReference<>(this));
-    }
-
-    private static ManagerRegistry getOrCreateRegistry(UI ui) {
-        ManagerRegistry registry = ComponentUtil.getData(ui,
-                ManagerRegistry.class);
-        if (registry == null) {
-            registry = new ManagerRegistry();
-            ComponentUtil.setData(ui, ManagerRegistry.class, registry);
-            installSharedListeners(ui, registry);
-        }
-        return registry;
-    }
-
-    private static void installSharedListeners(UI ui, ManagerRegistry registry) {
-        final String detailManagerId = "event.detail.managerId";
+    private void setupEventListeners(Element ownerElement) {
         final String detailFileName = "event.detail.fileName";
         final String detailErrorMessage = "event.detail.errorMessage";
 
-        // Single shared listener for file-remove events
-        ui.getElement().addEventListener("upload-manager-file-remove",
+        // Listener for file-remove events
+        ownerElement.addEventListener("upload-manager-file-remove",
                 event -> {
-                    String managerId = event.getEventData().get(detailManagerId)
-                            .asString();
-                    UploadManager manager = registry.get(managerId);
-                    if (manager != null) {
-                        String fileName = event.getEventData()
-                                .get(detailFileName).asString();
-                        FileRemovedEventData eventData = new FileRemovedEventData(
-                                fileName);
-                        manager.fileRemovedListeners
-                                .forEach(listener -> listener.accept(eventData));
-                    }
-                }).addEventData(detailManagerId).addEventData(detailFileName);
+                    String fileName = event.getEventData()
+                            .get(detailFileName).asString();
+                    FileRemovedEventData eventData = new FileRemovedEventData(
+                            fileName);
+                    fileRemovedListeners
+                            .forEach(listener -> listener.accept(eventData));
+                }).addEventData(detailFileName);
 
-        // Single shared listener for file-reject events
-        ui.getElement().addEventListener("upload-manager-file-reject",
+        // Listener for file-reject events
+        ownerElement.addEventListener("upload-manager-file-reject",
                 event -> {
-                    String managerId = event.getEventData().get(detailManagerId)
-                            .asString();
-                    UploadManager manager = registry.get(managerId);
-                    if (manager != null) {
-                        String fileName = event.getEventData()
-                                .get(detailFileName).asString();
-                        String errorMessage = event.getEventData()
-                                .get(detailErrorMessage).asString();
-                        FileRejectedEventData eventData = new FileRejectedEventData(
-                                fileName, errorMessage);
-                        manager.fileRejectedListeners
-                                .forEach(listener -> listener.accept(eventData));
-                    }
-                }).addEventData(detailManagerId).addEventData(detailFileName)
+                    String fileName = event.getEventData()
+                            .get(detailFileName).asString();
+                    String errorMessage = event.getEventData()
+                            .get(detailErrorMessage).asString();
+                    FileRejectedEventData eventData = new FileRejectedEventData(
+                            fileName, errorMessage);
+                    fileRejectedListeners
+                            .forEach(listener -> listener.accept(eventData));
+                }).addEventData(detailFileName)
                 .addEventData(detailErrorMessage);
     }
 
@@ -413,7 +383,7 @@ public class UploadManager implements Serializable {
         private final String name;
 
         NamedElementStreamResource(UploadHandler handler,
-                com.vaadin.flow.dom.Element element, String name) {
+                Element element, String name) {
             super(handler, element);
             this.name = name;
         }
@@ -421,30 +391,6 @@ public class UploadManager implements Serializable {
         @Override
         public String getName() {
             return name;
-        }
-    }
-
-    /**
-     * Registry for UploadManager instances within a UI.
-     */
-    private static class ManagerRegistry implements Serializable {
-        private final Map<String, WeakReference<UploadManager>> managers = new HashMap<>();
-
-        void put(String id, WeakReference<UploadManager> ref) {
-            managers.put(id, ref);
-        }
-
-        UploadManager get(String id) {
-            WeakReference<UploadManager> ref = managers.get(id);
-            if (ref != null) {
-                UploadManager manager = ref.get();
-                if (manager == null) {
-                    // Manager was GC'd, clean up the entry
-                    managers.remove(id);
-                }
-                return manager;
-            }
-            return null;
         }
     }
 
@@ -458,11 +404,13 @@ public class UploadManager implements Serializable {
             } else {
                 jsValue = String.valueOf(value);
             }
-            ui.getPage().executeJs(
-                    "const manager = window.Vaadin.Upload.UploadManager.getUploadManager($0);"
-                            + "if (manager) { manager." + property + " = "
-                            + jsValue + "; }",
-                    id);
+            owner.getElement().getNode().runWhenAttached(ui -> {
+                ui.getPage().executeJs(
+                        "const manager = window.Vaadin.Upload.UploadManager.getUploadManager($0);"
+                                + "if (manager) { manager." + property + " = "
+                                + jsValue + "; }",
+                        id);
+            });
         }
     }
 

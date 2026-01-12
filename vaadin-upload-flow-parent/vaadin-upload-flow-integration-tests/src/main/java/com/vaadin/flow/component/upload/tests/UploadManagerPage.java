@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -41,7 +40,7 @@ public class UploadManagerPage extends Div {
                 "This demo shows the UploadManager with custom external components."));
 
         // Create the manager with an upload handler
-        var manager = new UploadManager(UI.getCurrent(), UploadHandler.inMemory((metadata, data) -> {
+        var manager = new UploadManager(this, UploadHandler.inMemory((metadata, data) -> {
             System.out.println("Uploaded file: " + metadata.fileName()
                     + ", size: " + data.length + " bytes");
         }));
