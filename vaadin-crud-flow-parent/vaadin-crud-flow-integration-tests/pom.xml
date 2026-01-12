@@ -139,6 +139,8 @@
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                        </fileset>
+                        <fileset>
                             <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>
