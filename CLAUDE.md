@@ -8,9 +8,9 @@ This is the Vaadin Flow Components repository containing Vaadin Flow wrappers fo
 
 ### Technologies
 
-- Java 21+
+- Java 17+
 - Maven
-- Vaadin Flow 25+
+- Vaadin Flow 24
 - JUnit 4 for unit testing
 - Mockito for mocking in unit tests
 - Vaadin TestBench for integration tests
