@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.ai.provider;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
@@ -51,10 +50,8 @@ public interface LLMProvider extends Serializable {
 
     /**
      * Represents a request to the LLM containing all necessary context,
-     * configuration, and tools. Requests are immutable and should be created
-     * using either {@link #of(String)} for simple cases or
-     * {@link LLMRequestBuilder} for complex requests with attachments, tools,
-     * and custom system prompts.
+     * configuration, and tools. Requests are immutable and can be created using
+     * {@link #of(String)} for simple cases.
      */
     interface LLMRequest extends Serializable {
         /**
@@ -93,9 +90,7 @@ public interface LLMProvider extends Serializable {
         Object[] tools();
 
         /**
-         * Creates a simple LLM request with just a user message. For requests
-         * with attachments, tools, or custom system prompts, use
-         * {@link LLMRequestBuilder} instead.
+         * Creates a simple LLM request with just a user message.
          *
          * @param userMessage
          *            the user message, not {@code null} or empty
@@ -136,123 +131,6 @@ public interface LLMProvider extends Serializable {
     }
 
     /**
-     * Builder for creating {@link LLMRequest} instances with a fluent API. This
-     * builder provides a convenient way to construct complex requests with
-     * multiple attachments, tools, and configuration options.
-     */
-    class LLMRequestBuilder implements Serializable {
-        private String userMessage;
-        private List<Attachment> attachments = List.of();
-        private String systemPrompt;
-        private Object[] tools = new Object[0];
-
-        /**
-         * Sets the user message.
-         *
-         * @param userMessage
-         *            the user message, not {@code null}
-         * @return this builder for method chaining
-         */
-        public LLMRequestBuilder userMessage(String userMessage) {
-            this.userMessage = userMessage;
-            return this;
-        }
-
-        /**
-         * Sets the file attachments.
-         *
-         * @param attachments
-         *            the list of attachments, or {@code null} for no
-         *            attachments
-         * @return this builder for method chaining
-         */
-        public LLMRequestBuilder attachments(List<Attachment> attachments) {
-            this.attachments = attachments != null ? attachments : List.of();
-            return this;
-        }
-
-        /**
-         * Sets the system prompt.
-         *
-         * @param systemPrompt
-         *            the system prompt, or {@code null} if not needed
-         * @return this builder for method chaining
-         */
-        public LLMRequestBuilder systemPrompt(String systemPrompt) {
-            this.systemPrompt = systemPrompt;
-            return this;
-        }
-
-        /**
-         * Sets the tool objects.
-         *
-         * @param tools
-         *            the objects with vendor-specific tool annotations
-         * @return this builder for method chaining
-         * @throws IllegalArgumentException
-         *             if any element in the tools array is {@code null}
-         */
-        public LLMRequestBuilder tools(Object... tools) {
-            if (tools == null) {
-                this.tools = new Object[0];
-            } else {
-                // Validate no null elements
-                for (var i = 0; i < tools.length; i++) {
-                    if (tools[i] == null) {
-                        throw new IllegalArgumentException(
-                                "Tool at index " + i + " must not be null");
-                    }
-                }
-                this.tools = tools;
-            }
-            return this;
-        }
-
-        /**
-         * Builds the immutable LLMRequest.
-         *
-         * @return the LLMRequest instance
-         * @throws IllegalStateException
-         *             if userMessage was not set or is empty
-         */
-        public LLMRequest build() {
-            if (userMessage == null || userMessage.trim().isEmpty()) {
-                throw new IllegalStateException(
-                        "User message must be set before building");
-            }
-
-            var finalUserMessage = userMessage.trim();
-            var finalAttachments = List.copyOf(attachments);
-            var finalSystemPrompt = systemPrompt != null
-                    && !systemPrompt.trim().isEmpty() ? systemPrompt.trim()
-                            : null;
-            var finalTools = Arrays.copyOf(tools, tools.length);
-
-            return new LLMRequest() {
-                @Override
-                public String userMessage() {
-                    return finalUserMessage;
-                }
-
-                @Override
-                public List<Attachment> attachments() {
-                    return finalAttachments;
-                }
-
-                @Override
-                public String systemPrompt() {
-                    return finalSystemPrompt;
-                }
-
-                @Override
-                public Object[] tools() {
-                    return finalTools;
-                }
-            };
-        }
-    }
-
-    /**
      * Represents a file attachment that can be sent to the LLM for analysis.
      * Attachments support various file types including images, documents, and
      * text files. The LLM can analyze, reference, and answer questions about
@@ -279,42 +157,5 @@ public interface LLMProvider extends Serializable {
          * @return the file data
          */
         byte[] data();
-
-        /**
-         * Creates a new Attachment instance.
-         *
-         * @param fileName
-         *            the file name, not {@code null}
-         * @param contentType
-         *            the MIME type, not {@code null}
-         * @param data
-         *            the file data, not {@code null}
-         * @return a new Attachment instance
-         * @throws IllegalArgumentException
-         *             if any parameter is {@code null}
-         */
-        static Attachment of(String fileName, String contentType, byte[] data) {
-            if (fileName == null || contentType == null || data == null) {
-                throw new IllegalArgumentException(
-                        "fileName, contentType, and data must not be null");
-            }
-
-            return new Attachment() {
-                @Override
-                public String fileName() {
-                    return fileName;
-                }
-
-                @Override
-                public String contentType() {
-                    return contentType;
-                }
-
-                @Override
-                public byte[] data() {
-                    return data;
-                }
-            };
-        }
     }
 }

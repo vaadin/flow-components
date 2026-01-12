@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,82 +43,6 @@ public class LLMProviderTest {
                 () -> LLMProvider.LLMRequest.of(""));
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> LLMProvider.LLMRequest.of("   "));
-    }
-
-    @Test
-    public void llmRequestBuilder_withAllFields_createsRequest() {
-        var attachment = LLMProvider.Attachment.of("test.txt", "text/plain",
-                "content".getBytes());
-        var toolObject = new Object();
-
-        var request = new LLMProvider.LLMRequestBuilder()
-                .userMessage("Test message").attachments(List.of(attachment))
-                .systemPrompt("You are helpful").tools(toolObject).build();
-
-        Assert.assertEquals("Test message", request.userMessage());
-        Assert.assertEquals(1, request.attachments().size());
-        Assert.assertEquals(attachment, request.attachments().getFirst());
-        Assert.assertEquals("You are helpful", request.systemPrompt());
-        Assert.assertEquals(1, request.tools().length);
-        Assert.assertEquals(toolObject, request.tools()[0]);
-    }
-
-    @Test
-    public void llmRequestBuilder_withInvalidUserMessage_throwsException() {
-        Assert.assertThrows(IllegalStateException.class,
-                () -> new LLMProvider.LLMRequestBuilder().userMessage("")
-                        .build());
-        Assert.assertThrows(IllegalStateException.class,
-                () -> new LLMProvider.LLMRequestBuilder().userMessage("   ")
-                        .build());
-    }
-
-    @Test
-    public void attachment_withValidParameters_createsAttachment() {
-        var data = "test data".getBytes();
-        var attachment = LLMProvider.Attachment.of("file.txt", "text/plain",
-                data);
-
-        Assert.assertEquals("file.txt", attachment.fileName());
-        Assert.assertEquals("text/plain", attachment.contentType());
-        Assert.assertArrayEquals(data, attachment.data());
-    }
-
-    @Test
-    public void attachment_withNullParameters_throwsException() {
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> LLMProvider.Attachment.of(null, "text/plain",
-                        "data".getBytes()));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> LLMProvider.Attachment.of("file.txt", null,
-                        "data".getBytes()));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> LLMProvider.Attachment.of("file.txt", "text/plain",
-                        null));
-    }
-
-    @Test
-    public void llmRequestBuilder_nullToolInArray_throwsException() {
-        var builder = new LLMProvider.LLMRequestBuilder().userMessage("Test");
-
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> builder.tools(new Object(), null, new Object()));
-    }
-
-    @Test
-    public void llmRequestBuilder_trimsSystemPrompt() {
-        var request = new LLMProvider.LLMRequestBuilder().userMessage("Test")
-                .systemPrompt("  You are helpful  ").build();
-
-        Assert.assertEquals("You are helpful", request.systemPrompt());
-    }
-
-    @Test
-    public void llmRequestBuilder_emptySystemPromptBecomesNull() {
-        var request = new LLMProvider.LLMRequestBuilder().userMessage("Test")
-                .systemPrompt("   ").build();
-
-        Assert.assertNull(request.systemPrompt());
     }
 
     @Test
