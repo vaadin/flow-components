@@ -42,7 +42,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @see UploadManager
  */
 @Tag("vaadin-upload-drop-zone")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha1")
 @JsModule("@vaadin/upload/src/vaadin-upload-drop-zone.js")
 @JsModule("./vaadin-upload-manager-connector.js")
 public class UploadDropZone extends Component implements HasComponents {

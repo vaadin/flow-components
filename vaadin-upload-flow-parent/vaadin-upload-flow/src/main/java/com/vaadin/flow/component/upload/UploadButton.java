@@ -38,7 +38,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @see UploadManager
  */
 @Tag("vaadin-upload-button")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha1")
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 @JsModule("./vaadin-upload-manager-connector.js")
 public class UploadButton extends Component implements HasComponents {

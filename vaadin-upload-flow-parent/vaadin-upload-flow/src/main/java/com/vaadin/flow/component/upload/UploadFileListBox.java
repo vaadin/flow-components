@@ -40,7 +40,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @see UploadManager
  */
 @Tag("vaadin-upload-file-list-box")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha1")
 @JsModule("@vaadin/upload/src/vaadin-upload-file-list-box.js")
 @JsModule("./vaadin-upload-manager-connector.js")
 public class UploadFileListBox extends Component {
