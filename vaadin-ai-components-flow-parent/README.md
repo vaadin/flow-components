@@ -1,7 +1,7 @@
-# Dashboard component for Vaadin Flow
+# AI components for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-dashboard>`](https://github.com/vaadin/web-components/tree/main/packages/dashboard)
-element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
+This project provides interfaces for building AI-powered applications with LLM integration
+and [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application
 
