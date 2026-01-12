@@ -50,8 +50,7 @@ public interface LLMProvider extends Serializable {
 
     /**
      * Represents a request to the LLM containing all necessary context,
-     * configuration, and tools. Requests are immutable and can be created using
-     * {@link #of(String)} for simple cases.
+     * configuration, and tools. Requests are immutable.
      */
     interface LLMRequest extends Serializable {
         /**
@@ -88,46 +87,6 @@ public interface LLMProvider extends Serializable {
          * @return array of tool objects, never {@code null} but may be empty
          */
         Object[] tools();
-
-        /**
-         * Creates a simple LLM request with just a user message.
-         *
-         * @param userMessage
-         *            the user message, not {@code null} or empty
-         * @return a new LLMRequest instance
-         * @throws IllegalArgumentException
-         *             if userMessage is {@code null} or empty
-         */
-        static LLMRequest of(String userMessage) {
-            if (userMessage == null || userMessage.trim().isEmpty()) {
-                throw new IllegalArgumentException(
-                        "User message must not be null or empty");
-            }
-
-            var finalUserMessage = userMessage.trim();
-
-            return new LLMRequest() {
-                @Override
-                public String userMessage() {
-                    return finalUserMessage;
-                }
-
-                @Override
-                public List<Attachment> attachments() {
-                    return List.of();
-                }
-
-                @Override
-                public String systemPrompt() {
-                    return null;
-                }
-
-                @Override
-                public Object[] tools() {
-                    return new Object[0];
-                }
-            };
-        }
     }
 
     /**
