@@ -22,6 +22,9 @@
                     <name>!release</name>
                 </property>
             </activation>
+            <modules>
+                <module>vaadin-ai-components-flow-integration-tests</module>
+            </modules>
         </profile>
     </profiles>
 </project>
