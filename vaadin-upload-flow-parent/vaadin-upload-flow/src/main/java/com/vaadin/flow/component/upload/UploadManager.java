@@ -25,7 +25,6 @@ import java.util.UUID;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -73,7 +72,6 @@ public class UploadManager implements Serializable {
     private final Component owner;
 
     private UploadHandler uploadHandler;
-    private String targetName = "upload";
 
     // Configuration properties
     private int maxFiles = 0;
@@ -152,7 +150,6 @@ public class UploadManager implements Serializable {
                     "The target name cannot be blank");
         }
         this.uploadHandler = handler;
-        this.targetName = targetName;
         initializeManager();
     }
 
@@ -282,6 +279,7 @@ public class UploadManager implements Serializable {
      */
     public Registration addFileRejectedListener(
             SerializableConsumer<FileRejectedEventData> listener) {
+        // TODO: Let's just use regular component events now that we have the owner component
         fileRejectedListeners.add(listener);
         return () -> fileRejectedListeners.remove(listener);
     }
@@ -293,17 +291,13 @@ public class UploadManager implements Serializable {
 
         Element ownerElement = owner.getElement();
 
-        // Register the stream resource with the owner element
-        StreamResourceRegistry.ElementStreamResource elementStreamResource = new NamedElementStreamResource(
-                uploadHandler, ownerElement, targetName);
-
         // Set up event listeners on owner element for events from JS manager
         setupEventListeners(ownerElement);
 
         // Store the target URL as an attribute on the owner element (setAttribute
         // auto-registers the resource and converts to URL)
         final String attrName = "data-upload-manager-target-" + id;
-        ownerElement.setAttribute(attrName, elementStreamResource);
+        ownerElement.setAttribute(attrName, uploadHandler);
 
         // Capture current config values for the lambda
         final int currentMaxFiles = maxFiles;
@@ -372,26 +366,6 @@ public class UploadManager implements Serializable {
                             .forEach(listener -> listener.accept(eventData));
                 }).addEventData(detailFileName)
                 .addEventData(detailErrorMessage);
-    }
-
-    /**
-     * Static nested class to avoid implicit 'this' reference in anonymous
-     * class, which would prevent GC of UploadManager.
-     */
-    private static class NamedElementStreamResource
-            extends StreamResourceRegistry.ElementStreamResource {
-        private final String name;
-
-        NamedElementStreamResource(UploadHandler handler,
-                Element element, String name) {
-            super(handler, element);
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
     }
 
     private void updateProperty(String property, Object value) {
