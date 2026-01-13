@@ -13,6 +13,10 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-build-tools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
         </dependency>
         <dependency>
