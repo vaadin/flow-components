@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.upload;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -42,7 +43,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-upload-file-list")
 @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha1")
 @JsModule("@vaadin/upload/src/vaadin-upload-file-list.js")
-@JsModule("./vaadin-upload-manager-connector.js")
 public class UploadFileList extends Component {
 
     /**
@@ -70,17 +70,12 @@ public class UploadFileList extends Component {
      *            the upload manager, or {@code null} to unlink
      */
     public void setManager(UploadManager manager) {
-        if (manager != null) {
-            String managerId = manager.getId();
-            getElement().getNode().runWhenAttached(
-                    ui -> ui.beforeClientResponse(this, context -> setTarget(managerId)));
-            addAttachListener(event -> setTarget(managerId));
-        }
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> setTarget(manager)));
+        addAttachListener(event -> setTarget(manager));
     }
 
-    private void setTarget(String managerId) {
-        getElement().executeJs(
-                "this.target = window.Vaadin.Upload.UploadManager.getUploadManager($0);",
-                managerId);
+    private void setTarget(UploadManager manager) {
+        getElement().executeJs("this.target = $0.manager", ComponentUtil.getData(manager.getOwner(), "upload-manager-connector-"+ manager.getId()));
     }
 }

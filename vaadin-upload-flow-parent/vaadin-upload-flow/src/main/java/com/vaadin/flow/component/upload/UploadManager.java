@@ -27,6 +27,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -73,6 +75,7 @@ public class UploadManager implements Serializable {
 
     private final String id = UUID.randomUUID().toString();
     private final Component owner;
+    private final Connector connector;
 
     private UploadHandler uploadHandler;
 
@@ -91,7 +94,6 @@ public class UploadManager implements Serializable {
      *            the owner component this manager is attached to
      */
     public UploadManager(Component owner) {
-        // TODO: How to make sure vaadin-upload-manager-connector.js is loaded?
         this(owner, null);
     }
 
@@ -105,9 +107,20 @@ public class UploadManager implements Serializable {
      */
     public UploadManager(Component owner, UploadHandler handler) {
         this.owner = Objects.requireNonNull(owner, "Owner component cannot be null");
+        this.connector = new Connector();
+        ComponentUtil.setData(owner, "upload-manager-connector-" + id, connector);
+
+        // Add connector as virtual child of owner (doesn't appear in DOM)
+        owner.getElement().appendVirtualChild(connector.getElement());
+
         if (handler != null) {
             setUploadHandler(handler);
         }
+    }
+
+
+    public Component getOwner() {
+        return owner;
     }
 
     /**
@@ -127,7 +140,11 @@ public class UploadManager implements Serializable {
      */
     public void setUploadHandler(UploadHandler handler) {
         this.uploadHandler = Objects.requireNonNull(handler, "UploadHandler cannot be null");
-        initializeManager();
+        connector.getElement().setAttribute("target", uploadHandler);
+    }
+
+    public UploadHandler getUploadHandler() {
+        return uploadHandler;
     }
 
     /**
@@ -140,7 +157,7 @@ public class UploadManager implements Serializable {
      */
     public void setMaxFiles(int maxFiles) {
         this.maxFiles = maxFiles;
-        updateProperty("maxFiles", maxFiles == 0 ? "Infinity" : maxFiles);
+        connector.getElement().setProperty("maxFiles", maxFiles == 0 ? Double.POSITIVE_INFINITY : (double) maxFiles);
     }
 
     /**
@@ -162,8 +179,7 @@ public class UploadManager implements Serializable {
      */
     public void setMaxFileSize(int maxFileSize) {
         this.maxFileSize = maxFileSize;
-        updateProperty("maxFileSize",
-                maxFileSize == 0 ? "Infinity" : maxFileSize);
+        connector.getElement().setProperty("maxFileSize", maxFileSize == 0 ? Double.POSITIVE_INFINITY : (double) maxFileSize);
     }
 
     /**
@@ -194,7 +210,7 @@ public class UploadManager implements Serializable {
         } else {
             this.accept = null;
         }
-        updateProperty("accept", accept != null ? accept : "");
+        connector.getElement().setProperty("accept", accept != null ? accept : "");
     }
 
     /**
@@ -219,7 +235,7 @@ public class UploadManager implements Serializable {
      */
     public void setAutoUpload(boolean autoUpload) {
         this.autoUpload = autoUpload;
-        updateProperty("noAuto", !autoUpload);
+        connector.getElement().setProperty("autoUpload", autoUpload);
     }
 
     /**
@@ -242,7 +258,7 @@ public class UploadManager implements Serializable {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addFileRemovedListener(
             ComponentEventListener<FileRemovedEvent> listener) {
-        return ComponentUtil.addListener(owner, FileRemovedEvent.class,
+        return ComponentUtil.addListener(connector, FileRemovedEvent.class,
                 (ComponentEventListener) listener);
     }
 
@@ -258,30 +274,19 @@ public class UploadManager implements Serializable {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addFileRejectedListener(
             ComponentEventListener<FileRejectedEvent> listener) {
-        return ComponentUtil.addListener(owner, FileRejectedEvent.class,
+        return ComponentUtil.addListener(connector, FileRejectedEvent.class,
                 (ComponentEventListener) listener);
     }
 
-    private void initializeManager() {
-        if (uploadHandler == null) {
-            return;
-        }
 
-        Element ownerElement = owner.getElement();
-
-        // Store the target URL as an attribute on the owner element (setAttribute
-        // auto-registers the resource and converts to URL)
-        final String attrName = "data-upload-manager-target-" + id;
-        ownerElement.setAttribute(attrName, uploadHandler);
-    }
-
-    private void updateProperty(String property, Object value) {
-        owner.getElement().getNode().runWhenAttached(ui ->
-                ui.getPage().executeJs(
-                        "const manager = window.Vaadin.Upload.UploadManager.getUploadManager($0);"
-                                + "if (manager) { manager." + property + " = $1; }",
-                        id, value)
-            );
+    /**
+     * Internal connector component that loads the JS module and handles
+     * client-server communication. Added as a virtual child of the owner
+     * component so it doesn't appear in the DOM.
+     */
+    @Tag("vaadin-upload-manager-connector")
+    @JsModule("./vaadin-upload-manager-connector.ts")
+    private static class Connector extends Component {
     }
 
     /**
