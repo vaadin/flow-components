@@ -23,7 +23,7 @@ const registry = new FinalizationRegistry((id) => {
  * @param {HTMLElement} [eventTarget] - Element to dispatch events to for server communication
  * @returns {UploadManager} The created manager instance
  */
-window.Vaadin.Upload.UploadManager.createUploadManager = function (id, options, eventTarget) {
+function createUploadManager(id, options, eventTarget) {
   const manager = new UploadManager(options);
   uploadManagers.set(id, new WeakRef(manager));
   registry.register(manager, id);
@@ -33,8 +33,8 @@ window.Vaadin.Upload.UploadManager.createUploadManager = function (id, options, 
     manager.addEventListener('file-remove', (e) => {
       eventTarget.dispatchEvent(
         new CustomEvent('upload-manager-file-remove', {
-          detail: { managerId: id, fileName: e.detail.file?.name },
-        }),
+          detail: { managerId: id, fileName: e.detail.file?.name }
+        })
       );
     });
 
@@ -44,15 +44,15 @@ window.Vaadin.Upload.UploadManager.createUploadManager = function (id, options, 
           detail: {
             managerId: id,
             fileName: e.detail.file?.name,
-            errorMessage: e.detail.error,
-          },
-        }),
+            errorMessage: e.detail.error
+          }
+        })
       );
     });
   }
 
   return manager;
-};
+}
 
 /**
  * Gets an UploadManager instance by its ID.
@@ -62,17 +62,4 @@ window.Vaadin.Upload.UploadManager.createUploadManager = function (id, options, 
 window.Vaadin.Upload.UploadManager.getUploadManager = function (id) {
   const ref = uploadManagers.get(id);
   return ref?.deref();
-};
-
-/**
- * Removes and destroys an UploadManager instance by its ID.
- * @param {string} id - The manager ID
- */
-window.Vaadin.Upload.UploadManager.removeUploadManager = function (id) {
-  const ref = uploadManagers.get(id);
-  const manager = ref?.deref();
-  if (manager) {
-    manager.destroy();
-  }
-  uploadManagers.delete(id);
 };

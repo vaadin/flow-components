@@ -16,15 +16,18 @@
 package com.vaadin.flow.component.upload;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -79,13 +82,6 @@ public class UploadManager implements Serializable {
     private String accept;
     private boolean autoUpload = true;
 
-    // Listeners
-    private final List<SerializableConsumer<FileRemovedEventData>> fileRemovedListeners = new ArrayList<>();
-    private final List<SerializableConsumer<FileRejectedEventData>> fileRejectedListeners = new ArrayList<>();
-
-    // Track if initialized
-    private boolean initialized;
-
     /**
      * Creates a new upload manager without an upload handler. The handler must
      * be set using {@link #setUploadHandler(UploadHandler)} before uploads can
@@ -130,26 +126,7 @@ public class UploadManager implements Serializable {
      *            the upload handler, not {@code null}
      */
     public void setUploadHandler(UploadHandler handler) {
-        setUploadHandler(handler, "upload");
-    }
-
-    /**
-     * Sets the upload handler that processes uploaded files.
-     *
-     * @param handler
-     *            the upload handler, not {@code null}
-     * @param targetName
-     *            the endpoint name (single path segment), used as the last path
-     *            segment of the upload URL, not {@code null} or blank
-     */
-    public void setUploadHandler(UploadHandler handler, String targetName) {
-        Objects.requireNonNull(handler, "UploadHandler cannot be null");
-        Objects.requireNonNull(targetName, "The target name cannot be null");
-        if (targetName.isBlank()) {
-            throw new IllegalArgumentException(
-                    "The target name cannot be blank");
-        }
-        this.uploadHandler = handler;
+        this.uploadHandler = Objects.requireNonNull(handler, "UploadHandler cannot be null");
         initializeManager();
     }
 
@@ -262,10 +239,11 @@ public class UploadManager implements Serializable {
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addFileRemovedListener(
-            SerializableConsumer<FileRemovedEventData> listener) {
-        fileRemovedListeners.add(listener);
-        return () -> fileRemovedListeners.remove(listener);
+            ComponentEventListener<FileRemovedEvent> listener) {
+        return ComponentUtil.addListener(owner, FileRemovedEvent.class,
+                (ComponentEventListener) listener);
     }
 
     /**
@@ -277,11 +255,11 @@ public class UploadManager implements Serializable {
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addFileRejectedListener(
-            SerializableConsumer<FileRejectedEventData> listener) {
-        // TODO: Let's just use regular component events now that we have the owner component
-        fileRejectedListeners.add(listener);
-        return () -> fileRejectedListeners.remove(listener);
+            ComponentEventListener<FileRejectedEvent> listener) {
+        return ComponentUtil.addListener(owner, FileRejectedEvent.class,
+                (ComponentEventListener) listener);
     }
 
     private void initializeManager() {
@@ -291,123 +269,41 @@ public class UploadManager implements Serializable {
 
         Element ownerElement = owner.getElement();
 
-        // Set up event listeners on owner element for events from JS manager
-        setupEventListeners(ownerElement);
-
         // Store the target URL as an attribute on the owner element (setAttribute
         // auto-registers the resource and converts to URL)
         final String attrName = "data-upload-manager-target-" + id;
         ownerElement.setAttribute(attrName, uploadHandler);
-
-        // Capture current config values for the lambda
-        final int currentMaxFiles = maxFiles;
-        final int currentMaxFileSize = maxFileSize;
-        final String currentAccept = accept;
-        final boolean currentAutoUpload = autoUpload;
-
-        ownerElement.getNode().runWhenAttached(ui -> {
-            ui.beforeClientResponse(owner, context -> {
-                // Build configuration options - read target from attribute and
-                // remove it
-                StringBuilder options = new StringBuilder();
-                options.append("{ target: (()=>{ const a='").append(attrName)
-                        .append("'; const t=$1.getAttribute(a); return t; })()");
-                if (currentMaxFiles > 0) {
-                    options.append(", maxFiles: ").append(currentMaxFiles);
-                }
-                if (currentMaxFileSize > 0) {
-                    options.append(", maxFileSize: ").append(currentMaxFileSize);
-                }
-                if (currentAccept != null && !currentAccept.isEmpty()) {
-                    options.append(", accept: '").append(escapeJs(currentAccept))
-                            .append("'");
-                }
-                if (!currentAutoUpload) {
-                    options.append(", noAuto: true");
-                }
-                options.append(" }");
-
-                // Create the JS manager using the connector, passing the owner element
-                // for event forwarding
-                ui.getPage()
-                        .executeJs("window.Vaadin.Upload.UploadManager.createUploadManager($0, "
-                                + options + ", $1);", id, ownerElement);
-
-                initialized = true;
-            });
-        });
-    }
-
-    private void setupEventListeners(Element ownerElement) {
-        final String detailFileName = "event.detail.fileName";
-        final String detailErrorMessage = "event.detail.errorMessage";
-
-        // Listener for file-remove events
-        ownerElement.addEventListener("upload-manager-file-remove",
-                event -> {
-                    String fileName = event.getEventData()
-                            .get(detailFileName).asString();
-                    FileRemovedEventData eventData = new FileRemovedEventData(
-                            fileName);
-                    fileRemovedListeners
-                            .forEach(listener -> listener.accept(eventData));
-                }).addEventData(detailFileName);
-
-        // Listener for file-reject events
-        ownerElement.addEventListener("upload-manager-file-reject",
-                event -> {
-                    String fileName = event.getEventData()
-                            .get(detailFileName).asString();
-                    String errorMessage = event.getEventData()
-                            .get(detailErrorMessage).asString();
-                    FileRejectedEventData eventData = new FileRejectedEventData(
-                            fileName, errorMessage);
-                    fileRejectedListeners
-                            .forEach(listener -> listener.accept(eventData));
-                }).addEventData(detailFileName)
-                .addEventData(detailErrorMessage);
     }
 
     private void updateProperty(String property, Object value) {
-        if (initialized) {
-            String jsValue;
-            if (value instanceof String) {
-                jsValue = "'" + escapeJs((String) value) + "'";
-            } else if (value instanceof Boolean) {
-                jsValue = value.toString();
-            } else {
-                jsValue = String.valueOf(value);
-            }
-            owner.getElement().getNode().runWhenAttached(ui -> {
+        owner.getElement().getNode().runWhenAttached(ui ->
                 ui.getPage().executeJs(
                         "const manager = window.Vaadin.Upload.UploadManager.getUploadManager($0);"
-                                + "if (manager) { manager." + property + " = "
-                                + jsValue + "; }",
-                        id);
-            });
-        }
-    }
-
-    private String escapeJs(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("\\", "\\\\").replace("'", "\\'");
+                                + "if (manager) { manager." + property + " = $1; }",
+                        id, value)
+            );
     }
 
     /**
-     * Event data for file removed events.
+     * Event fired when a file is removed from the upload manager.
      */
-    public static class FileRemovedEventData implements Serializable {
+    @DomEvent("upload-manager-file-remove")
+    public static class FileRemovedEvent extends ComponentEvent<Component> {
         private final String fileName;
 
         /**
-         * Creates file removed event data.
+         * Creates a new event.
          *
+         * @param source
+         *            the owner component
+         * @param fromClient
+         *            whether the event originated from the client
          * @param fileName
          *            the name of the removed file
          */
-        public FileRemovedEventData(String fileName) {
+        public FileRemovedEvent(Component source, boolean fromClient,
+                @EventData("event.detail.fileName") String fileName) {
+            super(source, fromClient);
             this.fileName = fileName;
         }
 
@@ -422,23 +318,32 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Event data for file rejected events.
+     * Event fired when a file is rejected by the upload manager due to
+     * constraints like max file size, max files, or accepted file types.
      */
-    public static class FileRejectedEventData implements Serializable {
+    @DomEvent("upload-manager-file-reject")
+    public static class FileRejectedEvent extends ComponentEvent<Component> {
         private final String fileName;
         private final String errorMessage;
 
         /**
-         * Creates file rejected event data.
+         * Creates a new event.
          *
-         * @param fileName
-         *            the name of the rejected file
+         * @param source
+         *            the owner component
+         * @param fromClient
+         *            whether the event originated from the client
          * @param errorMessage
          *            the error message
+         * @param fileName
+         *            the name of the rejected file
          */
-        public FileRejectedEventData(String fileName, String errorMessage) {
-            this.fileName = fileName;
+        public FileRejectedEvent(Component source, boolean fromClient,
+                @EventData("event.detail.errorMessage") String errorMessage,
+                @EventData("event.detail.fileName") String fileName) {
+            super(source, fromClient);
             this.errorMessage = errorMessage;
+            this.fileName = fileName;
         }
 
         /**
@@ -451,7 +356,7 @@ public class UploadManager implements Serializable {
         }
 
         /**
-         * Gets the error message.
+         * Gets the error message describing why the file was rejected.
          *
          * @return the error message
          */
