@@ -117,11 +117,6 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>flow-osgi</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
                 <artifactId>flow-test-generic</artifactId>
                 <version>${flow.version}</version>
             </dependency>
