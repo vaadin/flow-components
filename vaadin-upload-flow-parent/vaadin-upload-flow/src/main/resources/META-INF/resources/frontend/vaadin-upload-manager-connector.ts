@@ -7,7 +7,6 @@ import { UploadManager } from '@vaadin/upload/vaadin-upload-manager.js';
  * UploadManager instance based on properties set from the server.
  *
  * Properties read from the element:
- * - managerId: Unique ID for the manager
  * - target: Upload URL (from attribute, auto-converted by Flow)
  * - maxFiles: Maximum number of files (optional)
  * - maxFileSize: Maximum file size in bytes (optional)
@@ -31,12 +30,26 @@ class UploadManagerConnector extends HTMLElement {
     return ['target'];
   }
 
+  set maxFiles(value: number) {
+    this.manager.maxFiles = value;
+  }
+
+  set maxFileSize(value: number) {
+    this.manager.maxFileSize = value;
+  }
+
+  set accept(value: string) {
+    this.manager.accept = value;
+  }
+
+  set noAuto(value: boolean) {
+    this.manager.noAuto = value;
+  }
+
   constructor() {
     super();
-    // Get the owner element (parent in the DOM or the element that has this as virtual child)
-    // For virtual children, we need to dispatch events to the owner component's element
 
-    // Forward events to the owner element for server-side handling
+    // Forward events to the connector element for server-side handling
     this.manager.addEventListener('file-remove', (e: CustomEvent) => {
       this.dispatchEvent(
         new CustomEvent('upload-manager-file-remove', {

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -72,5 +73,10 @@ public class UploadManagerPage extends Div {
         dropZone.getStyle().set("border", "2px dashed #ccc");
         dropZone.getStyle().set("padding", "40px");
         dropZone.getStyle().set("text-align", "center");
+
+
+        add(new Button("Set max files to 2", event -> {
+            manager.setMaxFiles(2);
+        }));
     }
 }
