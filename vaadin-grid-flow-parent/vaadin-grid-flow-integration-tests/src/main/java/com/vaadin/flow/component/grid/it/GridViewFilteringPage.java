@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.textfield.TextField;
@@ -67,9 +65,9 @@ public class GridViewFilteringPage extends LegacyTestView {
             TextField field = new TextField();
             ValueProvider<Person, String> valueProvider = iterator2.next();
 
-            field.addValueChangeListener(event -> dataProvider
-                    .addFilter(person -> StringUtils.containsIgnoreCase(
-                            valueProvider.apply(person), field.getValue())));
+            field.addValueChangeListener(event -> dataProvider.addFilter(
+                    person -> valueProvider.apply(person).toLowerCase()
+                            .contains(field.getValue().toLowerCase())));
 
             field.setValueChangeMode(ValueChangeMode.EAGER);
 
