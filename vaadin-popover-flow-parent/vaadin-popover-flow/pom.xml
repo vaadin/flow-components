@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Vaadin Popover</name>
     <description>Vaadin Popover</description>
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

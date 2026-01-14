@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Vaadin Details</name>
     <description>Vaadin Details</description>
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
