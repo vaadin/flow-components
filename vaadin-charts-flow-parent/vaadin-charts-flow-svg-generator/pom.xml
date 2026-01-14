@@ -9,7 +9,9 @@
     <artifactId>vaadin-charts-flow-svg-generator</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Charts SVG Generator API</name>
-
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
