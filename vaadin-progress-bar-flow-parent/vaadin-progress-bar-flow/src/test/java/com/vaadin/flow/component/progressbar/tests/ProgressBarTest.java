@@ -172,30 +172,4 @@ public class ProgressBarTest {
         Assert.assertEquals("updated value is wrong", max,
                 progressBar.getValue(), 0.0);
     }
-
-    @Test
-    public void setValueShouldThrowIfValueLessThanMin() {
-        double min = 10.0;
-        double max = 100.0;
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
-
-        ProgressBar progressBar = new ProgressBar(min, max);
-        progressBar.setValue(9);
-    }
-
-    @Test
-    public void setValueShouldThrowIfValueGreaterThanMax() {
-        double min = 10.0;
-        double max = 100.0;
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
-
-        ProgressBar progressBar = new ProgressBar(min, max);
-        progressBar.setValue(101);
-    }
 }

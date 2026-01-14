@@ -85,6 +85,11 @@ public class ProgressBar extends Component
             throw new IllegalArgumentException(String.format(
                     "min ('%s') must be less than max ('%s')", min, max));
         }
+        if (min > value || value > max) {
+            throw new IllegalArgumentException(String.format(
+                    "value must be between min ('%s') and max ('%s')", min,
+                    max));
+        }
         setMin(min);
         setMax(max);
         setValue(value);
@@ -97,13 +102,6 @@ public class ProgressBar extends Component
      *            the double value to set
      */
     public void setValue(double value) {
-        double min = getMin();
-        double max = getMax();
-        if (min > value || value > max) {
-            throw new IllegalArgumentException(String.format(
-                    "value must be between min ('%s') and max ('%s')", min,
-                    max));
-        }
         getElement().setProperty("value", value);
     }
 
