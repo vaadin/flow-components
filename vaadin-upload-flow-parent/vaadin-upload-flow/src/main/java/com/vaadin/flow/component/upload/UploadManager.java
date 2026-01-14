@@ -289,7 +289,7 @@ public class UploadManager implements Serializable {
      */
     public void setAutoUpload(boolean autoUpload) {
         this.autoUpload = autoUpload;
-        connector.getElement().setProperty("autoUpload", autoUpload);
+        connector.getElement().setProperty("noAuto", !autoUpload);
     }
 
     /**
@@ -400,7 +400,9 @@ public class UploadManager implements Serializable {
     }
 
     private void fireAllFinished() {
-        ComponentUtil.fireEvent(connector, new AllFinishedEvent(connector));
+        // Use UI.access() since this may be called from upload handler thread
+        connector.getUI().ifPresent(ui -> ui.access(() -> ComponentUtil
+                .fireEvent(connector, new AllFinishedEvent(connector))));
     }
 
     /**
@@ -474,7 +476,7 @@ public class UploadManager implements Serializable {
     /**
      * Event fired when a file is removed from the upload manager.
      */
-    @DomEvent("upload-manager-file-remove")
+    @DomEvent("file-remove")
     public static class FileRemovedEvent extends ComponentEvent<Component> {
         private final String fileName;
 
@@ -508,7 +510,7 @@ public class UploadManager implements Serializable {
      * Event fired when a file is rejected by the upload manager due to
      * constraints like max file size, max files, or accepted file types.
      */
-    @DomEvent("upload-manager-file-reject")
+    @DomEvent("file-reject")
     public static class FileRejectedEvent extends ComponentEvent<Component> {
         private final String fileName;
         private final String errorMessage;
