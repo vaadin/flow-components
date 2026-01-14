@@ -16,9 +16,9 @@
 package com.vaadin.flow.component.upload;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -41,7 +41,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-upload-button")
 @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha1")
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
-public class UploadButton extends Component implements HasComponents {
+public class UploadButton extends Button {
 
     /**
      * Creates a new upload button without a manager. The manager must be set
@@ -74,6 +74,6 @@ public class UploadButton extends Component implements HasComponents {
     }
 
     private void setTarget(UploadManager manager) {
-        getElement().executeJs("this.target = $0.manager", ComponentUtil.getData(manager.getOwner(), "upload-manager-connector-"+ manager.getId()));
+        getElement().executeJs("this.manager = $0.manager", manager.getConnector());
     }
 }

@@ -19,7 +19,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -72,7 +71,6 @@ import com.vaadin.flow.shared.Registration;
  */
 public class UploadManager implements Serializable {
 
-    private final String id = UUID.randomUUID().toString();
     private final Component owner;
     private final Connector connector;
 
@@ -107,7 +105,6 @@ public class UploadManager implements Serializable {
     public UploadManager(Component owner, UploadHandler handler) {
         this.owner = Objects.requireNonNull(owner, "Owner component cannot be null");
         this.connector = new Connector();
-        ComponentUtil.setData(owner, "upload-manager-connector-" + id, connector);
 
         // Add connector as virtual child of owner (doesn't appear in DOM)
         owner.getElement().appendVirtualChild(connector.getElement());
@@ -122,13 +119,8 @@ public class UploadManager implements Serializable {
         return owner;
     }
 
-    /**
-     * Gets the unique identifier for this manager.
-     *
-     * @return the manager ID
-     */
-    public String getId() {
-        return id;
+    Connector getConnector() {
+        return connector;
     }
 
     /**

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.upload;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -78,6 +77,6 @@ public class UploadDropZone extends Component implements HasComponents {
     }
 
     private void setTarget(UploadManager manager) {
-        getElement().executeJs("this.target = $0.manager", ComponentUtil.getData(manager.getOwner(), "upload-manager-connector-"+ manager.getId()));
+        getElement().executeJs("this.manager = $0.manager", manager.getConnector());
     }
 }

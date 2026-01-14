@@ -40,8 +40,12 @@ public class UploadManagerPage extends Div {
         add(new Paragraph(
                 "This demo shows the UploadManager with custom external components."));
 
+        var owner = new Div();
+        owner.setId("owner");
+        add(owner);
+
         // Create the manager with an upload handler
-        var manager = new UploadManager(this, UploadHandler.inMemory((metadata, data) -> {
+        var manager = new UploadManager(owner, UploadHandler.inMemory((metadata, data) -> {
             System.out.println("Uploaded file: " + metadata.fileName()
                     + ", size: " + data.length + " bytes");
         }));
@@ -62,7 +66,7 @@ public class UploadManagerPage extends Div {
         dropZone.add(new Span("Drag and drop files here or "));
 
         var addButton = new UploadButton(manager);
-        addButton.add(new Span("Select Files"));
+        addButton.setText("Select Files");
 
         var fileList = new UploadFileList(manager);
 
@@ -77,6 +81,20 @@ public class UploadManagerPage extends Div {
 
         add(new Button("Set max files to 2", event -> {
             manager.setMaxFiles(2);
+        }));
+
+        add(new Button("Print child count", event -> {
+            System.out.println("Child count: " + owner.getChildren().count());
+            System.out.println("Child count: " + owner.getComponentCount());
+        }));
+
+
+        add(new Button("Clear owner children", event -> {
+            owner.removeAll();
+        }));
+
+        add(new Button("Detach owner", event -> {
+            owner.removeFromParent();
         }));
     }
 }
