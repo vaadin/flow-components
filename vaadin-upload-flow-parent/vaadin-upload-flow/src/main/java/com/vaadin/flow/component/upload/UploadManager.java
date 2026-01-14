@@ -303,6 +303,32 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Sets whether the upload manager is enabled. When disabled, uploads cannot
+     * be started from any linked UI components (buttons, drop zones).
+     * <p>
+     * This is the authoritative server-side control for preventing uploads.
+     * Disabling individual UI components like {@link UploadButton} or
+     * {@link UploadDropZone} only affects the UI but does not prevent a
+     * malicious client from initiating uploads. Use this method to securely
+     * prevent uploads.
+     *
+     * @param enabled
+     *            {@code true} to enable uploads, {@code false} to disable
+     */
+    public void setEnabled(boolean enabled) {
+        connector.getElement().setEnabled(enabled);
+    }
+
+    /**
+     * Gets whether the upload manager is enabled.
+     *
+     * @return {@code true} if uploads are enabled, {@code false} otherwise
+     */
+    public boolean isEnabled() {
+        return connector.getElement().isEnabled();
+    }
+
+    /**
      * Checks if an upload is currently in progress.
      *
      * @return {@code true} if receiving upload, {@code false} otherwise

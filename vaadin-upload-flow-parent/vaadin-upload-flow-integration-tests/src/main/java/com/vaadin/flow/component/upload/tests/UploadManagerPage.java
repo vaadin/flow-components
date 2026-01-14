@@ -96,5 +96,11 @@ public class UploadManagerPage extends Div {
         add(new Button("Detach owner", event -> {
             owner.removeFromParent();
         }));
+
+
+        add(new Button("Toggle enabled", event -> {
+            manager.setEnabled(!manager.isEnabled());
+            System.out.println("Manager enabled: " + manager.isEnabled());
+        }));
     }
 }

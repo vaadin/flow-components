@@ -213,6 +213,18 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void setEnabled_setsProperty() {
+        manager.setEnabled(false);
+
+        Assert.assertFalse(manager.isEnabled());
+    }
+
+    @Test
+    public void isEnabled_defaultIsTrue() {
+        Assert.assertTrue(manager.isEnabled());
+    }
+
+    @Test
     public void isUploading_initiallyFalse() {
         Assert.assertFalse(manager.isUploading());
     }
