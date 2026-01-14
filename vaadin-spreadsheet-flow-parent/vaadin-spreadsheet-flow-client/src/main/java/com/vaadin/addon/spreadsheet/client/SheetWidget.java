@@ -772,6 +772,19 @@ public class SheetWidget extends Panel {
             handleHorizontalScroll(scrollLeft, hScrollDiff);
             updateCells(0, -1);
 
+            // When columns are hidden (rightEdgeChange < 0) without scrolling,
+            // we need to expand the column range to fill the viewport
+            if (rightEdgeChange < 0 && hScrollDiff == 0
+                    && lastColumnIndex < actionHandler.getMaxColumns()
+                    && lastColumnPosition < rightBound) {
+                int leftBound = scrollLeft
+                        - actionHandler.getColumnBufferSize();
+                if (leftBound < 0) {
+                    leftBound = 0;
+                }
+                handleHorizontalScrollRight(leftBound, rightBound);
+            }
+
             if (rightEdgeChange < 0 || hScrollDiff > 0
                     || (lastColumnIndex < actionHandler.getMaxColumns()
                             && lastColumnPosition < rightBound)) {
@@ -779,6 +792,18 @@ public class SheetWidget extends Panel {
             }
 
             handleVerticalScroll(scrollTop, vScrollDiff);
+
+            // When rows are hidden (bottomEdgeChange < 0) without scrolling,
+            // we need to expand the row range to fill the viewport
+            if (bottomEdgeChange < 0 && vScrollDiff == 0
+                    && lastRowIndex < actionHandler.getMaxRows()
+                    && lastRowPosition < bottomBound) {
+                int topBound = scrollTop - actionHandler.getRowBufferSize();
+                if (topBound < 0) {
+                    topBound = 0;
+                }
+                handleVerticalScrollDown(topBound, bottomBound);
+            }
 
             if (topEdgeChange > 0 || vScrollDiff < 0) {
                 updateCells(-1, 0);
@@ -788,6 +813,17 @@ public class SheetWidget extends Panel {
                             && lastRowPosition < bottomBound)) {
                 updateCells(1, 0);
             }
+
+            // Update row headers after potential row index changes from hiding
+            if (bottomEdgeChange < 0 && vScrollDiff == 0) {
+                resetRowHeaders();
+            }
+            // Update column headers after potential column index changes from
+            // hiding
+            if (rightEdgeChange < 0 && hScrollDiff == 0) {
+                resetColHeaders();
+            }
+
             resetRowAndColumnStyles();
 
             previousScrollLeft = scrollLeft;
