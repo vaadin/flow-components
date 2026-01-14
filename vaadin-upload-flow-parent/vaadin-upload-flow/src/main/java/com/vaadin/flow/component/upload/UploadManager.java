@@ -28,6 +28,9 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.internal.streams.UploadCompleteEvent;
+import com.vaadin.flow.internal.streams.UploadStartEvent;
+import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -82,6 +85,12 @@ public class UploadManager implements Serializable {
     private String accept;
     private boolean autoUpload = true;
 
+    // Upload state tracking
+    private int activeUploads = 0;
+    private volatile boolean interrupted = false;
+    private boolean uploading = false;
+    private boolean uploadListenersRegistered = false;
+
     /**
      * Creates a new upload manager without an upload handler. The handler must
      * be set using {@link #setUploadHandler(UploadHandler)} before uploads can
@@ -109,18 +118,47 @@ public class UploadManager implements Serializable {
         // Add connector as virtual child of owner (doesn't appear in DOM)
         owner.getElement().appendVirtualChild(connector.getElement());
 
+        // Set up default fail-fast handler
+        setUploadHandler(new FailFastUploadHandler());
+
+        // Listen for upload-abort from client
+        connector.getElement().addEventListener("upload-manager-abort",
+                event -> interruptUpload());
+
         if (handler != null) {
             setUploadHandler(handler);
         }
     }
 
-
+    /**
+     * Gets the owner component this manager is attached to.
+     *
+     * @return the owner component
+     */
     public Component getOwner() {
         return owner;
     }
 
+    /**
+     * Gets the internal connector component.
+     *
+     * @return the connector component
+     */
     Connector getConnector() {
         return connector;
+    }
+
+    /**
+     * Sets the upload handler that processes uploaded files.
+     * <p>
+     * This overload uses the default upload target name {@code "upload"}, which
+     * becomes the last segment of the dynamically generated upload URL.
+     *
+     * @param handler
+     *            the upload handler, not {@code null}
+     */
+    public void setUploadHandler(UploadHandler handler) {
+        setUploadHandler(handler, "upload");
     }
 
     /**
@@ -128,13 +166,41 @@ public class UploadManager implements Serializable {
      *
      * @param handler
      *            the upload handler, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment), used as the last path
+     *            segment of the dynamically generated upload URL; must not be
+     *            blank
      */
-    public void setUploadHandler(UploadHandler handler) {
-        this.uploadHandler = Objects.requireNonNull(handler, "UploadHandler cannot be null");
+    public void setUploadHandler(UploadHandler handler, String targetName) {
+        Objects.requireNonNull(handler, "UploadHandler cannot be null");
+        Objects.requireNonNull(targetName, "The target name cannot be null");
+        if (targetName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "The target name cannot be blank");
+        }
+        this.uploadHandler = handler;
         connector.getElement().setAttribute("target", uploadHandler);
+
+        // Register internal listeners for upload state tracking
+        if (!(handler instanceof FailFastUploadHandler)
+                && !uploadListenersRegistered) {
+            uploadListenersRegistered = true;
+            ComponentUtil.addListener(connector, UploadStartEvent.class,
+                    event -> startUpload());
+            ComponentUtil.addListener(connector, UploadCompleteEvent.class,
+                    event -> endUpload());
+        }
     }
 
+    /**
+     * Gets the upload handler that processes uploaded files.
+     *
+     * @return the upload handler, or {@code null} if not set
+     */
     public UploadHandler getUploadHandler() {
+        if (uploadHandler instanceof FailFastUploadHandler) {
+            return null;
+        }
         return uploadHandler;
     }
 
@@ -148,7 +214,8 @@ public class UploadManager implements Serializable {
      */
     public void setMaxFiles(int maxFiles) {
         this.maxFiles = maxFiles;
-        connector.getElement().setProperty("maxFiles", maxFiles == 0 ? Double.POSITIVE_INFINITY : (double) maxFiles);
+        connector.getElement().setProperty("maxFiles",
+                maxFiles == 0 ? Double.POSITIVE_INFINITY : (double) maxFiles);
     }
 
     /**
@@ -170,7 +237,8 @@ public class UploadManager implements Serializable {
      */
     public void setMaxFileSize(int maxFileSize) {
         this.maxFileSize = maxFileSize;
-        connector.getElement().setProperty("maxFileSize", maxFileSize == 0 ? Double.POSITIVE_INFINITY : (double) maxFileSize);
+        connector.getElement().setProperty("maxFileSize",
+                maxFileSize == 0 ? Double.POSITIVE_INFINITY : (double) maxFileSize);
     }
 
     /**
@@ -240,6 +308,81 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Checks if an upload is currently in progress.
+     *
+     * @return {@code true} if receiving upload, {@code false} otherwise
+     */
+    public boolean isUploading() {
+        return activeUploads > 0;
+    }
+
+    /**
+     * Checks if the upload has been interrupted.
+     *
+     * @return {@code true} if the upload was interrupted, {@code false}
+     *         otherwise
+     */
+    public boolean isInterrupted() {
+        return interrupted;
+    }
+
+    /**
+     * Interrupt the upload currently being received.
+     * <p>
+     * The interruption will be done by the receiving thread so this method will
+     * return immediately and the actual interrupt will happen a bit later.
+     * <p>
+     * Note! This will interrupt all ongoing uploads.
+     */
+    public void interruptUpload() {
+        if (isUploading()) {
+            interrupted = true;
+        }
+    }
+
+    /**
+     * Clear the list of files being processed, or already uploaded.
+     */
+    public void clearFileList() {
+        connector.getElement().executeJs(
+                "if (this.manager) { this.manager.files = []; }");
+    }
+
+    /**
+     * Go into upload state. This is to prevent uploading more files than
+     * accepted on same component.
+     *
+     * @throws IllegalStateException
+     *             if maximum supported amount of uploads already started
+     */
+    private void startUpload() {
+        if (maxFiles != 0 && maxFiles <= activeUploads) {
+            throw new IllegalStateException(
+                    "Maximum supported amount of uploads already started");
+        }
+        activeUploads++;
+        uploading = true;
+    }
+
+    /**
+     * End upload state and check if all uploads are finished.
+     */
+    private void endUpload() {
+        activeUploads--;
+        if (activeUploads == 0) {
+            interrupted = false;
+            if (uploading) {
+                uploading = false;
+                fireAllFinished();
+            }
+        }
+    }
+
+    private void fireAllFinished() {
+        ComponentUtil.fireEvent(connector, new AllFinishedEvent(connector));
+    }
+
+    /**
      * Adds a listener for events fired when a file is removed.
      *
      * @param listener
@@ -269,6 +412,19 @@ public class UploadManager implements Serializable {
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * Add a listener that is informed when all uploads have finished.
+     *
+     * @param listener
+     *            all finished listener to add
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public Registration addAllFinishedListener(
+            ComponentEventListener<AllFinishedEvent> listener) {
+        return ComponentUtil.addListener(connector, AllFinishedEvent.class,
+                (ComponentEventListener) listener);
+    }
 
     /**
      * Internal connector component that loads the JS module and handles
@@ -277,7 +433,21 @@ public class UploadManager implements Serializable {
      */
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload-manager-connector.ts")
-    private static class Connector extends Component {
+    static class Connector extends Component {
+    }
+
+    /**
+     * An internal implementation of the UploadHandler interface that reminds
+     * the developer that UploadHandler must be set. Upload event listeners are
+     * not registered for this handler.
+     */
+    private static final class FailFastUploadHandler implements UploadHandler {
+        @Override
+        public void handleUploadRequest(UploadEvent event) {
+            throw new IllegalStateException(
+                    "Upload cannot be performed without an upload handler set. "
+                            + "Please first set the upload handler with setUploadHandler()");
+        }
     }
 
     /**
@@ -291,7 +461,7 @@ public class UploadManager implements Serializable {
          * Creates a new event.
          *
          * @param source
-         *            the owner component
+         *            the source component
          * @param fromClient
          *            whether the event originated from the client
          * @param fileName
@@ -326,7 +496,7 @@ public class UploadManager implements Serializable {
          * Creates a new event.
          *
          * @param source
-         *            the owner component
+         *            the source component
          * @param fromClient
          *            whether the event originated from the client
          * @param errorMessage
@@ -358,6 +528,23 @@ public class UploadManager implements Serializable {
          */
         public String getErrorMessage() {
             return errorMessage;
+        }
+    }
+
+    /**
+     * Event fired when all uploads have finished (either successfully, failed,
+     * or aborted).
+     */
+    public static class AllFinishedEvent extends ComponentEvent<Component> {
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         */
+        public AllFinishedEvent(Component source) {
+            super(source, false);
         }
     }
 }
