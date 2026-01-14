@@ -39,6 +39,7 @@
          used in this module just for the compilation Java to JS -->
         <gwt.version>2.9.0</gwt.version>
         <framework.version>8.30.0</framework.version>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
 
     <dependencyManagement>
