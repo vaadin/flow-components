@@ -75,7 +75,7 @@ import com.vaadin.flow.shared.Registration;
 public class UploadManager implements Serializable {
 
     private final Component owner;
-    private final Connector connector;
+    private final Connector connector = new Connector();
 
     private UploadHandler uploadHandler;
 
@@ -113,21 +113,16 @@ public class UploadManager implements Serializable {
      */
     public UploadManager(Component owner, UploadHandler handler) {
         this.owner = Objects.requireNonNull(owner, "Owner component cannot be null");
-        this.connector = new Connector();
 
         // Add connector as virtual child of owner (doesn't appear in DOM)
         owner.getElement().appendVirtualChild(connector.getElement());
 
         // Set up default fail-fast handler
-        setUploadHandler(new FailFastUploadHandler());
+        setUploadHandler(handler != null ? handler : new FailFastUploadHandler());
 
         // Listen for upload-abort from client
         connector.getElement().addEventListener("upload-manager-abort",
                 event -> interruptUpload());
-
-        if (handler != null) {
-            setUploadHandler(handler);
-        }
     }
 
     /**
