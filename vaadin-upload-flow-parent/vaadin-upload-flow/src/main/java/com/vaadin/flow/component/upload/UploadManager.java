@@ -43,13 +43,16 @@ import com.vaadin.flow.shared.Registration;
  * manager is invisible and UI components connect to it by setting this manager
  * as their target. This allows more freedom in designing the upload experience.
  * <p>
- * 
+ * For upload progress monitoring (start, progress, success, failure events),
+ * use an {@link com.vaadin.flow.server.streams.UploadHandler} that implements
+ * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}.
+ * <p>
  * Example usage:
  *
  * <pre>
  * // Create the manager with an upload handler
  * var manager = new UploadManager(this,
- *         UploadHandler.inMemory((metadata, data) -> {
+ *         UploadHandler.inMemory((metadata, data) -&gt; {
  *             // Process uploaded file
  *         }));
  *
@@ -80,7 +83,10 @@ public class UploadManager implements Serializable {
      * work.
      *
      * @param owner
-     *            the owner component this manager is attached to
+     *            the component that owns this manager. The manager's lifecycle
+     *            is tied to the owner's lifecycle - when the owner is detached
+     *            from the UI, uploads will stop working. The owner is typically
+     *            the view or layout containing the upload UI components.
      */
     public UploadManager(Component owner) {
         this(owner, null);
@@ -90,7 +96,10 @@ public class UploadManager implements Serializable {
      * Creates a new upload manager with the given upload handler.
      *
      * @param owner
-     *            the owner component this manager is attached to
+     *            the component that owns this manager. The manager's lifecycle
+     *            is tied to the owner's lifecycle - when the owner is detached
+     *            from the UI, uploads will stop working. The owner is typically
+     *            the view or layout containing the upload UI components.
      * @param handler
      *            the upload handler to use
      */
