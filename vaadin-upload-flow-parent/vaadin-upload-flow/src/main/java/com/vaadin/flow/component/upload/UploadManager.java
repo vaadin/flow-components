@@ -18,6 +18,7 @@ package com.vaadin.flow.component.upload;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -72,7 +73,7 @@ public class UploadManager implements Serializable {
     private final Connector connector = new Connector();
 
     // Upload state tracking
-    private int activeUploads = 0;
+    private final AtomicInteger activeUploads = new AtomicInteger(0);
     private volatile boolean interrupted = false;
     private boolean uploading = false;
     private boolean uploadListenersRegistered = false;
@@ -304,7 +305,7 @@ public class UploadManager implements Serializable {
      * @return {@code true} if receiving upload, {@code false} otherwise
      */
     public boolean isUploading() {
-        return activeUploads > 0;
+        return activeUploads.get() > 0;
     }
 
     /**
@@ -348,11 +349,12 @@ public class UploadManager implements Serializable {
      */
     private void startUpload() {
         int maxFiles = getMaxFiles();
-        if (maxFiles != 0 && maxFiles <= activeUploads) {
+        int current = activeUploads.get();
+        if (maxFiles != 0 && maxFiles <= current) {
             throw new IllegalStateException(
                     "Maximum supported amount of uploads already started");
         }
-        activeUploads++;
+        activeUploads.incrementAndGet();
         uploading = true;
     }
 
@@ -360,8 +362,8 @@ public class UploadManager implements Serializable {
      * End upload state and check if all uploads are finished.
      */
     private void endUpload() {
-        activeUploads--;
-        if (activeUploads == 0) {
+        int remaining = activeUploads.decrementAndGet();
+        if (remaining == 0) {
             interrupted = false;
             if (uploading) {
                 uploading = false;

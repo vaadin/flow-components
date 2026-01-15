@@ -74,9 +74,25 @@ public class UploadManagerTest {
         Assert.assertNotNull(manager);
     }
 
+    @Test
+    public void constructor_withOwnerAndHandler_createsManager() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        UploadManager managerWithHandler = new UploadManager(owner, handler);
+
+        Assert.assertNotNull(managerWithHandler);
+    }
+
     @Test(expected = NullPointerException.class)
     public void constructor_withNullOwner_throws() {
         new UploadManager(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void constructor_withNullOwnerAndHandler_throws() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        new UploadManager(null, handler);
     }
 
     @Test(expected = NullPointerException.class)
@@ -96,6 +112,24 @@ public class UploadManagerTest {
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
         manager.setUploadHandler(handler, "   ");
+    }
+
+    @Test
+    public void setUploadHandler_setsHandler() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+
+        // Should not throw
+        manager.setUploadHandler(handler);
+    }
+
+    @Test
+    public void setUploadHandler_withCustomTargetName_setsHandler() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+
+        // Should not throw
+        manager.setUploadHandler(handler, "custom-upload");
     }
 
     @Test
@@ -155,6 +189,23 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void setAcceptedFileTypes_withEmptyArray_clearsRestrictions() {
+        manager.setAcceptedFileTypes("image/*");
+        manager.setAcceptedFileTypes(new String[0]);
+
+        Assert.assertTrue(manager.getAcceptedFileTypes().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedFileTypes_withSingleType_setsProperty() {
+        manager.setAcceptedFileTypes("image/*");
+
+        List<String> accepted = manager.getAcceptedFileTypes();
+        Assert.assertEquals(1, accepted.size());
+        Assert.assertEquals("image/*", accepted.get(0));
+    }
+
+    @Test
     public void getAcceptedFileTypes_defaultIsEmpty() {
         Assert.assertTrue(manager.getAcceptedFileTypes().isEmpty());
     }
@@ -167,6 +218,14 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void setAutoUpload_canBeReEnabled() {
+        manager.setAutoUpload(false);
+        manager.setAutoUpload(true);
+
+        Assert.assertTrue(manager.isAutoUpload());
+    }
+
+    @Test
     public void isAutoUpload_defaultIsTrue() {
         Assert.assertTrue(manager.isAutoUpload());
     }
@@ -176,6 +235,14 @@ public class UploadManagerTest {
         manager.setEnabled(false);
 
         Assert.assertFalse(manager.isEnabled());
+    }
+
+    @Test
+    public void setEnabled_canBeReEnabled() {
+        manager.setEnabled(false);
+        manager.setEnabled(true);
+
+        Assert.assertTrue(manager.isEnabled());
     }
 
     @Test
