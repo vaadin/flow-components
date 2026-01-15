@@ -19,6 +19,7 @@ exclude = [
 // 'PreSelectedValueIT',
 //// We can disable tests of a specific component
 // '%regex[com.vaadin.flow.component.charts.*]',
+  '%regex[com.vaadin.flow.component.ai.*]',
 ]
 
 let modules = [];

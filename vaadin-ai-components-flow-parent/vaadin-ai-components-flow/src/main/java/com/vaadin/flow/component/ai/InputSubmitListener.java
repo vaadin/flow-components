@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2026 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,12 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.app;
+package com.vaadin.flow.component.ai;
 
-import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.theme.lumo.Lumo;
+import java.io.Serializable;
 
-@StyleSheet(Lumo.STYLESHEET)
-public class TestAppShell implements AppShellConfigurator {
+/**
+ * Listener for input submit events.
+ *
+ * @author Vaadin Ltd
+ * @see AiInput
+ * @see InputSubmitEvent
+ */
+@FunctionalInterface
+public interface InputSubmitListener extends Serializable {
+
+    /**
+     * Called when the user submits input.
+     *
+     * @param event
+     *            the submit event, not {@code null}
+     */
+    void onSubmit(InputSubmitEvent event);
 }
