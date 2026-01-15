@@ -70,6 +70,16 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
         setValue(value);
     }
 
+    @Override
+    public void setValue(Double value) {
+        if (value < getMin() || value > getMax()) {
+            throw new IllegalArgumentException(
+                    "The value must be between min and max");
+        }
+
+        super.setValue(value);
+    }
+
     /**
      * Sets the minimum value of the slider.
      *
@@ -77,6 +87,11 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
      *            the minimum value
      */
     public void setMin(double min) {
+        if (min > getMax()) {
+            throw new IllegalArgumentException(
+                    "The min value cannot be greater than the max value");
+        }
+
         getElement().setProperty("min", min);
     }
 
@@ -96,6 +111,11 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
      *            the maximum value
      */
     public void setMax(double max) {
+        if (max < getMin()) {
+            throw new IllegalArgumentException(
+                    "The max value cannot be less than the min value");
+        }
+
         getElement().setProperty("max", max);
     }
 
