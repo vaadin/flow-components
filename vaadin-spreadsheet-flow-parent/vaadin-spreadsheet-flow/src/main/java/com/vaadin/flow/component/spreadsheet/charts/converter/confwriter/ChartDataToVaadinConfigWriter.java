@@ -137,7 +137,7 @@ public class ChartDataToVaadinConfigWriter {
                     + "   } else {\n"
                     + "      //numberFormat can handle numbers 20 digits long.\n"
                     + "      var tooltipDecimals = (Math.ceil(Math.log(signlessNumer)/Math.LN10) + $tooltipDecimals<= 20 ? $tooltipDecimals : 20);\n"
-                    + "      formattedNumber = Highcharts.numberFormat(this.$v, tooltipDecimals);\n"
+                    + "      formattedNumber = this.series.chart.numberFormatter(this.$v, tooltipDecimals);\n"
                     + "   }\n" + "   text = $seriesTitle + ' ' + \n"
                     + "      (typeof $seriesName == 'number' ? $seriesName : JSON.stringify($seriesName)) + ' ' + $pointTitle + ' ' + \n"
                     + "      (('name' in this.point) ? JSON.stringify(this.point.name) : this.x + 1) + \n"
