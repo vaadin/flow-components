@@ -24,8 +24,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
@@ -71,6 +69,7 @@ import com.vaadin.flow.shared.Registration;
 public class UploadManager implements Serializable {
 
     private final Connector connector = new Connector();
+    private final Component owner;
 
     // Upload state tracking
     private final AtomicInteger activeUploads = new AtomicInteger(0);
@@ -106,6 +105,7 @@ public class UploadManager implements Serializable {
      */
     public UploadManager(Component owner, UploadHandler handler) {
         Objects.requireNonNull(owner, "Owner component cannot be null");
+        this.owner = owner;
 
         // Add connector as virtual child of owner (doesn't appear in DOM)
         owner.getElement().appendVirtualChild(connector.getElement());
@@ -117,6 +117,30 @@ public class UploadManager implements Serializable {
         // Listen for upload-abort from client
         connector.getElement().addEventListener("upload-manager-abort",
                 event -> interruptUpload());
+
+        // Listen for file-remove and file-reject events from client.
+        // We manually listen to DOM events and fire ComponentEvents with the
+        // owner as source, so that getSource() returns the meaningful owner
+        // component instead of the internal connector.
+        final String eventDetailFileName = "event.detail.fileName";
+        final String eventDetailErrorMessage = "event.detail.errorMessage";
+
+        connector.getElement().addEventListener("file-remove", event -> {
+            String fileName = event.getEventData().get(eventDetailFileName)
+                    .asString();
+            ComponentUtil.fireEvent(owner,
+                    new FileRemovedEvent(owner, true, fileName));
+        }).addEventData(eventDetailFileName);
+
+        connector.getElement().addEventListener("file-reject", event -> {
+            String fileName = event.getEventData().get(eventDetailFileName)
+                    .asString();
+            String errorMessage = event.getEventData()
+                    .get(eventDetailErrorMessage).asString();
+            ComponentUtil.fireEvent(owner,
+                    new FileRejectedEvent(owner, true, errorMessage, fileName));
+        }).addEventData(eventDetailFileName)
+                .addEventData(eventDetailErrorMessage);
     }
 
     /**
@@ -374,8 +398,8 @@ public class UploadManager implements Serializable {
 
     private void fireAllFinished() {
         // Use UI.access() since this may be called from upload handler thread
-        connector.getUI().ifPresent(ui -> ui.access(() -> ComponentUtil
-                .fireEvent(connector, new AllFinishedEvent(connector))));
+        owner.getUI().ifPresent(ui -> ui.access(() -> ComponentUtil
+                .fireEvent(owner, new AllFinishedEvent(owner))));
     }
 
     /**
@@ -385,11 +409,10 @@ public class UploadManager implements Serializable {
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addFileRemovedListener(
             ComponentEventListener<FileRemovedEvent> listener) {
-        return ComponentUtil.addListener(connector, FileRemovedEvent.class,
-                (ComponentEventListener) listener);
+        return ComponentUtil.addListener(owner, FileRemovedEvent.class,
+                listener);
     }
 
     /**
@@ -401,11 +424,10 @@ public class UploadManager implements Serializable {
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addFileRejectedListener(
             ComponentEventListener<FileRejectedEvent> listener) {
-        return ComponentUtil.addListener(connector, FileRejectedEvent.class,
-                (ComponentEventListener) listener);
+        return ComponentUtil.addListener(owner, FileRejectedEvent.class,
+                listener);
     }
 
     /**
@@ -415,11 +437,10 @@ public class UploadManager implements Serializable {
      *            all finished listener to add
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addAllFinishedListener(
             ComponentEventListener<AllFinishedEvent> listener) {
-        return ComponentUtil.addListener(connector, AllFinishedEvent.class,
-                (ComponentEventListener) listener);
+        return ComponentUtil.addListener(owner, AllFinishedEvent.class,
+                listener);
     }
 
     /**
@@ -447,9 +468,10 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Event fired when a file is removed from the upload manager.
+     * Event fired when a file is removed from the upload manager. The event
+     * source is the owner component passed to the {@link UploadManager}
+     * constructor.
      */
-    @DomEvent("file-remove")
     public static class FileRemovedEvent extends ComponentEvent<Component> {
         private final String fileName;
 
@@ -464,7 +486,7 @@ public class UploadManager implements Serializable {
          *            the name of the removed file
          */
         public FileRemovedEvent(Component source, boolean fromClient,
-                @EventData("event.detail.fileName") String fileName) {
+                String fileName) {
             super(source, fromClient);
             this.fileName = fileName;
         }
@@ -481,9 +503,10 @@ public class UploadManager implements Serializable {
 
     /**
      * Event fired when a file is rejected by the upload manager due to
-     * constraints like max file size, max files, or accepted file types.
+     * constraints like max file size, max files, or accepted file types. The
+     * event source is the owner component passed to the {@link UploadManager}
+     * constructor.
      */
-    @DomEvent("file-reject")
     public static class FileRejectedEvent extends ComponentEvent<Component> {
         private final String fileName;
         private final String errorMessage;
@@ -501,8 +524,7 @@ public class UploadManager implements Serializable {
          *            the name of the rejected file
          */
         public FileRejectedEvent(Component source, boolean fromClient,
-                @EventData("event.detail.errorMessage") String errorMessage,
-                @EventData("event.detail.fileName") String fileName) {
+                String errorMessage, String fileName) {
             super(source, fromClient);
             this.errorMessage = errorMessage;
             this.fileName = fileName;
@@ -529,7 +551,8 @@ public class UploadManager implements Serializable {
 
     /**
      * Event fired when all uploads have finished (either successfully, failed,
-     * or aborted).
+     * or aborted). The event source is the owner component passed to the
+     * {@link UploadManager} constructor.
      */
     public static class AllFinishedEvent extends ComponentEvent<Component> {
 
@@ -537,7 +560,7 @@ public class UploadManager implements Serializable {
          * Creates a new event.
          *
          * @param source
-         *            the source component
+         *            the owner component of the upload manager
          */
         public AllFinishedEvent(Component source) {
             super(source, false);
