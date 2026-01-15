@@ -45,9 +45,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         uploadFile(tempFile);
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
-
+        logStatus();
         assertLogContains("Uploaded: " + tempFile.getName());
     }
 
@@ -56,9 +54,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         uploadFile(tempFile);
-        triggerServerRoundtrip();
-        waitForLog("All uploads finished");
-
+        logStatus();
         assertLogContains("All uploads finished");
     }
 
@@ -68,12 +64,10 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile2 = createTempFile("file2", "txt");
 
         uploadFiles(tempFile1, tempFile2);
-        triggerServerRoundtrip();
-        waitForLog("All uploads finished");
-
+        logStatus();
+        assertLogContains("All uploads finished");
         assertLogContains("Uploaded: " + tempFile1.getName());
         assertLogContains("Uploaded: " + tempFile2.getName());
-        assertLogContains("All uploads finished");
     }
 
     @Test
@@ -84,9 +78,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile2 = createTempFile("file2", "txt");
 
         uploadFiles(tempFile1, tempFile2);
-        triggerServerRoundtrip();
-        waitForLog("Rejected:");
-
+        logStatus();
         assertLogContains("Rejected:");
     }
 
@@ -98,9 +90,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File largeFile = createLargeFile(150);
 
         uploadFile(largeFile);
-        triggerServerRoundtrip();
-        waitForLog("Rejected:");
-
+        logStatus();
         assertLogContains("Rejected: " + largeFile.getName());
     }
 
@@ -112,9 +102,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File textFile = createTempFile("txt");
 
         uploadFile(textFile);
-        triggerServerRoundtrip();
-        waitForLog("Rejected:");
-
+        logStatus();
         assertLogContains("Rejected: " + textFile.getName());
     }
 
@@ -126,9 +114,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File textFile = createTempFile("txt");
 
         uploadFile(textFile);
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
-
+        logStatus();
         assertLogContains("Uploaded: " + textFile.getName());
     }
 
@@ -142,9 +128,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File textFile = createTempFile("txt");
 
         uploadFile(textFile);
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
-
+        logStatus();
         assertLogContains("Uploaded: " + textFile.getName());
     }
 
@@ -156,7 +140,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         // Add file without triggering upload
-        setFileInputValue(tempFile);
+        uploadFile(tempFile);
 
         // Wait a bit to make sure no upload happens
         Thread.sleep(500);
@@ -174,13 +158,11 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         // Add file without triggering upload
-        setFileInputValue(tempFile);
+        uploadFile(tempFile);
 
         // Manually trigger upload
         clickButton("trigger-upload");
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
-
+        logStatus();
         assertLogContains("Uploaded: " + tempFile.getName());
     }
 
@@ -189,11 +171,11 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         uploadFile(tempFile);
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
+        logStatus();
+        assertLogContains("Uploaded:");
 
         clickButton("remove-first-file");
-        waitForLog("Removed:");
+        assertLogContains("Removed:");
 
         assertLogContains("Removed: " + tempFile.getName());
     }
@@ -203,25 +185,25 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         uploadFile(tempFile);
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
+        logStatus();
+        assertLogContains("Uploaded:");
 
         clickButton("get-file-count");
-        waitForLog("File count:");
+        assertLogContains("File count:");
         assertLogContains("File count: 1");
 
         clickButton("clear-log");
         clickButton("clear-file-list");
 
         clickButton("get-file-count");
-        waitForLog("File count:");
+        assertLogContains("File count:");
         assertLogContains("File count: 0");
     }
 
     @Test
     public void statusButton_logsCorrectDefaultStatus() {
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         String log = getLogText();
         Assert.assertTrue("Status should show enabled=true",
@@ -244,7 +226,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     public void setMaxFiles_statusReflectsChange() {
         clickButton("set-max-files-3");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("maxFiles=3");
     }
@@ -253,7 +235,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     public void setMaxFileSize_statusReflectsChange() {
         clickButton("set-max-file-size-100");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("maxFileSize=100");
     }
@@ -262,7 +244,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     public void setAcceptedFileTypes_statusReflectsChange() {
         clickButton("set-accept-multiple");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("acceptedTypes=[text/*, application/pdf]");
     }
@@ -271,7 +253,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     public void disableAutoUpload_statusReflectsChange() {
         clickButton("disable-auto-upload");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("autoUpload=false");
     }
@@ -281,7 +263,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         clickButton("disable-auto-upload");
         clickButton("enable-auto-upload");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("autoUpload=true");
     }
@@ -290,7 +272,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     public void disableManager_statusReflectsChange() {
         clickButton("disable-manager");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("enabled=false");
     }
@@ -300,7 +282,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         clickButton("disable-manager");
         clickButton("enable-manager");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("enabled=true");
     }
@@ -310,7 +292,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         clickButton("set-max-files-3");
         clickButton("set-max-files-unlimited");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("maxFiles=0");
     }
@@ -320,7 +302,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         clickButton("set-max-file-size-100");
         clickButton("set-max-file-size-unlimited");
         clickButton("status-button");
-        waitForLog("Status:");
+        assertLogContains("Status:");
 
         assertLogContains("maxFileSize=0");
     }
@@ -333,8 +315,8 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         uploadFile(tempFile);
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
+        logStatus();
+        assertLogContains("Uploaded:");
 
         // Verify file size is logged
         assertLogContains("bytes)");
@@ -347,8 +329,8 @@ public class UploadManagerIT extends AbstractUploadIT {
         File largeFile = createLargeFile(150);
 
         uploadFile(largeFile);
-        triggerServerRoundtrip();
-        waitForLog("Rejected:");
+        logStatus();
+        assertLogContains("Rejected:");
 
         // Verify error message is included (file size exceeded)
         String log = getLogText();
@@ -360,7 +342,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     public void detachOwner_uploadFails() throws Exception {
         // Detach the owner component
         clickButton("detach-owner");
-        waitForLog("Owner detached");
+        assertLogContains("Owner detached");
 
         File tempFile = createTempFile("txt");
 
@@ -369,7 +351,7 @@ public class UploadManagerIT extends AbstractUploadIT {
 
         // Wait a bit for any potential upload to complete
         Thread.sleep(1000);
-        triggerServerRoundtrip();
+        logStatus();
 
         // Verify no upload happened
         Assert.assertFalse("Upload should fail when owner is detached",
@@ -380,18 +362,18 @@ public class UploadManagerIT extends AbstractUploadIT {
     public void detachOwner_reattach_uploadWorks() throws Exception {
         // Detach the owner component
         clickButton("detach-owner");
-        waitForLog("Owner detached");
+        assertLogContains("Owner detached");
 
         // Reattach the owner component
         clickButton("reattach-owner");
-        waitForLog("Owner reattached");
+        assertLogContains("Owner reattached");
 
         File tempFile = createTempFile("txt");
 
         // Upload should work again after reattachment
         uploadFile(tempFile);
-        triggerServerRoundtrip();
-        waitForLog("Uploaded:");
+        logStatus();
+        assertLogContains("Uploaded:");
 
         assertLogContains("Uploaded: " + tempFile.getName());
     }
@@ -404,22 +386,45 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         // Add file without triggering upload
-        setFileInputValue(tempFile);
+        uploadFile(tempFile);
 
         // Detach the owner
         clickButton("detach-owner");
-        waitForLog("Owner detached");
+        assertLogContains("Owner detached");
 
         // Try to trigger upload - should fail
         clickButton("trigger-upload");
 
         // Wait a bit for any potential upload
         Thread.sleep(1000);
-        triggerServerRoundtrip();
+        logStatus();
 
         // Verify no upload happened
         Assert.assertFalse("Upload should fail when owner is detached",
                 getLogText().contains("Uploaded:"));
+    }
+
+    @Test
+    public void uploadEmptyFile_fileIsUploaded() throws Exception {
+        // Create an empty file (0 bytes)
+        File emptyFile = createEmptyFile();
+
+        uploadFile(emptyFile);
+        logStatus();
+        assertLogContains("Uploaded: " + emptyFile.getName());
+        assertLogContains("(0 bytes)");
+    }
+
+    @Test
+    public void uploadFileWithSpecialCharacters_fileIsUploaded()
+            throws Exception {
+        // Create a file with special characters in name
+        File specialFile = createFileWithSpecialName();
+
+        uploadFile(specialFile);
+        logStatus();
+        assertLogContains("Uploaded:");
+        assertLogContains("bytes)");
     }
 
     private void uploadFile(File file) {
@@ -439,17 +444,8 @@ public class UploadManagerIT extends AbstractUploadIT {
         input.sendKeys(paths.toString());
     }
 
-    private void setFileInputValue(File file) {
-        WebElement input = findElement(By.id("native-file-input"));
-        input.sendKeys(file.getAbsolutePath());
-    }
-
     private void clickButton(String id) {
         findElement(By.id(id)).click();
-    }
-
-    private void waitForLog(String text) {
-        waitUntil(driver -> getLogText().contains(text), 10);
     }
 
     private String getLogText() {
@@ -457,15 +453,14 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     private void assertLogContains(String text) {
-        Assert.assertTrue("Log should contain: " + text,
-                getLogText().contains(text));
+        waitUntil(driver -> getLogText().contains(text), 10);
     }
 
     /**
      * Triggers a server roundtrip to fetch pending UI updates from UI.access()
      * calls. This is needed because the test app doesn't use Push.
      */
-    private void triggerServerRoundtrip() {
+    private void logStatus() {
         clickButton("status-button");
     }
 
@@ -485,5 +480,30 @@ public class UploadManagerIT extends AbstractUploadIT {
         }
         tempFile.deleteOnExit();
         return tempFile;
+    }
+
+    /**
+     * Creates an empty file (0 bytes) for testing empty file uploads.
+     */
+    private File createEmptyFile() throws IOException {
+        File emptyFile = File.createTempFile("EmptyFile", ".txt");
+        // File is already empty after creation, just delete on exit
+        emptyFile.deleteOnExit();
+        return emptyFile;
+    }
+
+    /**
+     * Creates a file with special characters in its name.
+     */
+    private File createFileWithSpecialName() throws IOException {
+        // Use characters that are valid on most file systems
+        File specialFile = File.createTempFile("file with spaces & (parens)",
+                ".txt");
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter(specialFile))) {
+            writer.write("test content");
+        }
+        specialFile.deleteOnExit();
+        return specialFile;
     }
 }

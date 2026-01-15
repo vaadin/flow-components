@@ -43,9 +43,10 @@ public class UploadManagerPage extends Div {
         logArea = new Div();
         logArea.setId("log-area");
 
-        // We're using a separate Div as the owner component for testing purposes.
-        // In real usage, the owner component would typically be the UploadButton,
-        // the current view, or some other component in the UI depending on the case.
+        // We're using a separate Div as the owner component for testing
+        // purposes. In real usage, the owner component would typically be the
+        // UploadButton, the current view, or some other component in the UI
+        // depending on the case.
         owner = new Div();
         owner.setId("owner");
         add(owner);
@@ -67,7 +68,6 @@ public class UploadManagerPage extends Div {
                 + event.getFileName() + " - " + event.getErrorMessage()));
         manager.addAllFinishedListener(event -> log("All uploads finished"));
 
-        
         // Get connector via reflection since getConnector() is package-private
         connector = getConnector(manager);
 
