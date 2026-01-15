@@ -70,6 +70,10 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
         setValue(value);
     }
 
+    /**
+     * @throws IllegalArgumentException
+     *             if the value is not between min and max
+     */
     @Override
     public void setValue(Double value) {
         if (value < getMin() || value > getMax()) {
@@ -85,6 +89,8 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
      *
      * @param min
      *            the minimum value
+     * @throws IllegalArgumentException
+     *             if the min is greater than the max value
      */
     public void setMin(double min) {
         if (min > getMax()) {
@@ -109,6 +115,8 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
      *
      * @param max
      *            the maximum value
+     * @throws IllegalArgumentException
+     *             if the max is less than the min value
      */
     public void setMax(double max) {
         if (max < getMin()) {
@@ -134,8 +142,15 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
      *
      * @param step
      *            the step value
+     * @throws IllegalArgumentException
+     *             if the step is less than or equal to zero
      */
     public void setStep(double step) {
+        if (step <= 0) {
+            throw new IllegalArgumentException(
+                    "The step value must be a positive number");
+        }
+
         getElement().setProperty("step", step);
     }
 
