@@ -159,6 +159,14 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void setMaxFileSize_withLargeValue_supportsFilesOver2GB() {
+        long fiveGB = 5L * 1024 * 1024 * 1024; // 5GB
+        manager.setMaxFileSize(fiveGB);
+
+        Assert.assertEquals(fiveGB, manager.getMaxFileSize());
+    }
+
+    @Test
     public void setMaxFileSize_withZero_meansUnlimited() {
         manager.setMaxFileSize(0);
 

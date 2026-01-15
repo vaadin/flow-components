@@ -201,7 +201,7 @@ public class UploadManager implements Serializable {
      * @param maxFileSize
      *            the maximum file size in bytes, or 0 for unlimited
      */
-    public void setMaxFileSize(int maxFileSize) {
+    public void setMaxFileSize(long maxFileSize) {
         connector.getElement().setProperty("maxFileSize",
                 maxFileSize == 0 ? Double.POSITIVE_INFINITY
                         : (double) maxFileSize);
@@ -212,9 +212,9 @@ public class UploadManager implements Serializable {
      *
      * @return the maximum file size in bytes, or 0 if unlimited
      */
-    public int getMaxFileSize() {
+    public long getMaxFileSize() {
         double value = connector.getElement().getProperty("maxFileSize", 0.0);
-        return Double.isInfinite(value) ? 0 : (int) value;
+        return Double.isInfinite(value) ? 0 : (long) value;
     }
 
     /**
