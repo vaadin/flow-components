@@ -199,10 +199,11 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         Assert.assertNotNull(firstPoint);
         actions.moveToElement(firstPoint).perform();
 
-        var tooltip = waitUntil((d) -> chart
+        var tooltip = waitUntil(driver -> chart
                 .findElement(By.cssSelector(".highcharts-tooltip text")), 2);
-        Assert.assertEquals(tooltip.getText(),
-                "Series \"Packaging Cost per Unit\" Point \"Controllo di gestione\" 0");
+        Assert.assertEquals(
+                "Series \"Packaging Cost per Unit\" Point \"Controllo di gestione\" 0",
+                tooltip.getText());
     }
 
     @Test
