@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,8 +24,6 @@ import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.N
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REMOVE_ITEM;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.REVERSE_SORTING;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SECOND_COMBO_BOX_ID;
-import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_ITEMS;
-import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_ITEM_COUNT;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_ITEM_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_NEXT_DATA;
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_PREVIOUS_DATA;
@@ -201,92 +199,6 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
         assertItem(getItems(secondComboBox), 0, "Person 0 lastName");
     }
 
-    @Test
-    public void getItemCount_withClientSideFilter_returnsItemFromNotFilteredSet() {
-        firstComboBox.setFilter("222");
-
-        waitForItems(firstComboBox, items -> items.size() == 1
-                && "Person 222".equals(getItemLabel(items, 0)));
-
-        clickButton(SHOW_ITEM_COUNT);
-        Assert.assertEquals("The client filter shouldn't impact the item count",
-                "250", getItemCount());
-
-        firstComboBox.openPopup();
-
-        waitForItems(firstComboBox,
-                items -> items.size() == 250
-                        && "Person 0".equals(getItemLabel(items, 0))
-                        && "Person 49".equals(getItemLabel(items, 49)));
-
-        clickButton(SHOW_ITEM_COUNT);
-        Assert.assertEquals("The client filter shouldn't impact the item count",
-                "250", getItemCount());
-    }
-
-    @Test
-    public void getItem_withClientSideFilter_returnsItemFromNotFilteredSet() {
-        firstComboBox.setFilter("222");
-
-        waitForItems(firstComboBox, items -> items.size() == 1
-                && "Person 222".equals(getItemLabel(items, 0)));
-
-        selectItem(0);
-        showSelectedPerson();
-        verifySelectedPerson(0);
-
-        selectItem(249);
-        showSelectedPerson();
-        verifySelectedPerson(249);
-
-        firstComboBox.openPopup();
-
-        waitForItems(firstComboBox,
-                items -> items.size() == 250
-                        && "Person 0".equals(getItemLabel(items, 0))
-                        && "Person 49".equals(getItemLabel(items, 49)));
-
-        selectItem(0);
-        showSelectedPerson();
-        verifySelectedPerson(0);
-
-        selectItem(249);
-        showSelectedPerson();
-        verifySelectedPerson(249);
-    }
-
-    @Test
-    public void getItems_withClientSideFilter_returnsNotFilteredItems() {
-        firstComboBox.setFilter("222");
-
-        waitForItems(firstComboBox, items -> items.size() == 1
-                && "Person 222".equals(getItemLabel(items, 0)));
-
-        clickButton(SHOW_ITEMS);
-
-        // Checks the filter has been cleared after closing the drop down
-        // ComboBox clears the cache after closing, so the item's values are
-        // not checked here
-        waitForItems(firstComboBox, items -> items.size() == 250);
-
-        Assert.assertTrue("The client filter shouldn't impact the items",
-                getItemData().startsWith("Person 0 lastName,Person 1 lastName")
-                        && getItemData().endsWith("Person 249 lastName"));
-
-        firstComboBox.openPopup();
-
-        waitForItems(firstComboBox,
-                items -> items.size() == 250
-                        && "Person 0".equals(getItemLabel(items, 0))
-                        && "Person 49".equals(getItemLabel(items, 49)));
-
-        clickButton(SHOW_ITEMS);
-
-        Assert.assertTrue("The client filter shouldn't impact the items",
-                getItemData().startsWith("Person 0 lastName,Person 1 lastName")
-                        && getItemData().endsWith("Person 249 lastName"));
-    }
-
     private void showSelectedPerson() {
         clickButton(SHOW_ITEM_DATA);
     }
@@ -313,10 +225,6 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
     private String getItemData() {
         return $("span").id(ITEM_DATA).getText();
-    }
-
-    private String getItemCount() {
-        return $("span").id(ITEM_COUNT).getText();
     }
 
     private void setTextFilter(ComboBoxElement comboBox, String filter) {

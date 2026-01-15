@@ -62,6 +62,7 @@
         <module>vaadin-field-highlighter-flow-parent</module>
         <module>vaadin-side-nav-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
+        <module>vaadin-ai-components-flow-parent</module>
     </modules>
     <scm>
         <connection>scm:https:https://github.com/vaadin/flow-components.git</connection>
@@ -80,7 +81,7 @@
         <karaf-maven-plugin.version>4.4.9</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
-        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+        <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
@@ -96,10 +97,14 @@
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.0.1</spring-data-commons.version>
+        <reactor-core.version>3.8.2</reactor-core.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
         <javaparser.version>3.27.1</javaparser.version>
+
+        <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
+        <surefire.argLine/>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -110,50 +115,10 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>flow</artifactId>
+                <artifactId>flow-bom</artifactId>
                 <version>${flow.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-client</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-data</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-html-components</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-lit-template</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-osgi</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-polymer-template</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-server</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-server-production-mode</artifactId>
-                <version>${flow.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -163,11 +128,6 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-test-util</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-dev-server</artifactId>
                 <version>${flow.version}</version>
             </dependency>
             <dependency>
@@ -305,7 +265,7 @@
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
-                    <version>7.1.0</version>
+                    <version>7.2.1</version>
                     <configuration>
                         <bnd><![CDATA[
                           // macro reference: https://bnd.bndtools.org/chapters/855-macros-ref.html
@@ -395,9 +355,11 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
+                        <argLine>${surefire.argLine}</argLine>
                         <excludes>
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
+                        <skip>${skipUnitTests}</skip>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -577,6 +539,17 @@
                         </sortPom>
                     </pom>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

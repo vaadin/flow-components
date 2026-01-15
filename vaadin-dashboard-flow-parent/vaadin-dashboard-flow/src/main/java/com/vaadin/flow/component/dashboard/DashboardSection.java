@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -33,7 +33,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @Tag("vaadin-dashboard-section")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-section.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.0.1")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-alpha1")
 public class DashboardSection extends Component implements HasWidgets {
 
     private final List<DashboardWidget> widgets = new ArrayList<>();

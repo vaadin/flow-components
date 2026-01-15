@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/progress-bar", version = "25.0.1")
+@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-alpha1")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {
@@ -85,6 +85,11 @@ public class ProgressBar extends Component
             throw new IllegalArgumentException(String.format(
                     "min ('%s') must be less than max ('%s')", min, max));
         }
+        if (min > value || value > max) {
+            throw new IllegalArgumentException(String.format(
+                    "value must be between min ('%s') and max ('%s')", min,
+                    max));
+        }
         setMin(min);
         setMax(max);
         setValue(value);
@@ -97,13 +102,6 @@ public class ProgressBar extends Component
      *            the double value to set
      */
     public void setValue(double value) {
-        double min = getMin();
-        double max = getMax();
-        if (min > value || value > max) {
-            throw new IllegalArgumentException(String.format(
-                    "value must be between min ('%s') and max ('%s')", min,
-                    max));
-        }
         getElement().setProperty("value", value);
     }
 

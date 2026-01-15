@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -3319,10 +3319,10 @@ public class SheetWidget extends Panel {
     /**
      * Handles horizontal scrolling in the spreadsheet. It calculates the
      * visible columns and updates the column headers accordingly.
-     * 
+     *
      * The method takes the current scroll position and the difference since the
      * last update to determine how many columns to display.
-     * 
+     *
      * @param scrollLeft
      *            the current scroll position from the left
      * @param scrollDiff
@@ -3424,10 +3424,10 @@ public class SheetWidget extends Panel {
     /**
      * Handles vertical scrolling in the spreadsheet. It calculates the visible
      * rows and updates the row headers accordingly.
-     * 
+     *
      * The method takes the current scroll position and the difference since the
      * last update to determine how many rows to display.
-     * 
+     *
      * @param scrollTop
      *            the current scroll position from the top
      * @param scrollDiff

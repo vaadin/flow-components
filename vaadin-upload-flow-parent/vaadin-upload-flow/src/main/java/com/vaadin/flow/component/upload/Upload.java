@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -63,7 +63,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.1")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha1")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
@@ -862,7 +862,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", JacksonUtils.createArrayNode());
+        getElement().executeJs("this.files = [];");
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

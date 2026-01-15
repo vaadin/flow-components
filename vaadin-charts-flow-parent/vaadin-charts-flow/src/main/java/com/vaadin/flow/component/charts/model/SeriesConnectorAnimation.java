@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -25,7 +25,7 @@ public class SeriesConnectorAnimation extends AbstractConfigurationObject {
 
     /**
      * Defaults to true.
-     * 
+     *
      * @param reversed
      */
     public void setReversed(Boolean reversed) {

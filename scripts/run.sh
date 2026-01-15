@@ -46,12 +46,12 @@ askITests() {
   [ -n "$itests" ] && itests="-Dit.test=$itests"
 }
 ## Ask whether run unit tests before ITs
-askUTests() {
-  utests="-Dtest=none"
+askSkipUnitTests() {
+  skip_unit_tests="-DskipUnitTests"
   [ -n "$itests" ] && return
   printf "Do you want to run also Unit Tests y/n [y]: "
   read run
-  [ "$run" != n ] && utests=""
+  [ "$run" != n ] && skip_unit_tests=""
 }
 ## Run the mergeITs script if it was not run or there are modifications in modules
 mergeITs() {
@@ -91,11 +91,11 @@ read option
 ## compose the mvn cli command based on the selected option
 case $option in
    1) askModule; cmd="mvn clean test-compile -amd -B $quiet -DskipFrontend -pl $module-flow-parent";;
-   2) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
+   2) askModule; askITests; askSkipUnitTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -pl $module-flow-parent/$module-flow-integration-tests $skip_unit_tests $itests $frontend $jetty $args";;
    3) askModule; cmd="mvn package $jettyrun -am -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
    4) cmd="mvn clean test-compile -DskipFrontend -B $quiet -T 1C";;
    5) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
-   6) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $args";;
+   6) mergeITs; askITests; askSkipUnitTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -Drun-it -pl integration-tests $skip_unit_tests $itests $frontend $jetty $args";;
    7) mergeITs; cmd="mvn package $jettyrun -am -B $quiet -DskipTests -Drun-it -pl integration-tests"; browser=true;;
 esac
 

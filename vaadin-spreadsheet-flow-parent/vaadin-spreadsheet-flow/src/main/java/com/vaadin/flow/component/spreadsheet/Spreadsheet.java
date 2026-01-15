@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -1219,7 +1219,7 @@ public class Spreadsheet extends Component
 
     /**
      * Create the default Spreadsheet handler.
-     * 
+     *
      * @return SpreadsheetHandlerImpl
      */
     protected SpreadsheetHandlerImpl createDefaultHandler() {
@@ -3603,8 +3603,7 @@ public class Spreadsheet extends Component
                 handler.inline();
             }
             resources.put(key, resource.toString());
-            getElement().setProperty("resources",
-                    Serializer.serialize(new ArrayList<>(resources.keySet())));
+            getElement().executeJs("this.resources=$0", resources.keySet());
             getElement().setAttribute("resource-" + key,
                     new StreamResourceRegistry.ElementStreamResource(resource,
                             this.getElement()));
