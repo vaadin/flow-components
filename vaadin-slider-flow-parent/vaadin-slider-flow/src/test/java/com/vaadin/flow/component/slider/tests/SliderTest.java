@@ -107,4 +107,10 @@ public class SliderTest {
         Slider slider = new Slider(0, 100);
         slider.setValue(150.0);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setStep_notPositive_throws() {
+        Slider slider = new Slider();
+        slider.setStep(0);
+    }
 }
