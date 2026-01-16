@@ -144,6 +144,15 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Gets the internal connector component.
+     *
+     * @return the connector component
+     */
+    Connector getConnector() {
+        return connector;
+    }
+
+    /**
      * Sets the upload handler that processes uploaded files.
      * <p>
      * This overload uses the default upload target name {@code "upload"}, which

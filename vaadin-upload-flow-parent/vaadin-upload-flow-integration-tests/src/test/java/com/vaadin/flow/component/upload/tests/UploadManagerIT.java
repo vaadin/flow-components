@@ -24,16 +24,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WrapsDriver;
-import org.openqa.selenium.WrapsElement;
-import org.openqa.selenium.chromium.ChromiumDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.LocalFileDetector;
-import org.openqa.selenium.remote.RemoteWebElement;
-import org.openqa.selenium.safari.SafariDriver;
 
+import com.vaadin.flow.component.upload.testbench.UploadButtonElement;
+import com.vaadin.flow.component.upload.testbench.UploadFileListElement;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
@@ -140,8 +133,11 @@ public class UploadManagerIT extends AbstractUploadIT {
         // Add file without triggering upload
         uploadFile(tempFile);
 
-        // Manually trigger upload
-        clickButton("trigger-upload");
+        // Click the start button on the first file in the list
+        UploadFileListElement fileList = $(UploadFileListElement.class)
+                .id("file-list");
+        waitUntil(driver -> fileList.getFileCount() > 0, 10);
+        fileList.getFiles().get(0).$("[part~='start-button']").first().click();
 
         assertLogContains("Uploaded: " + tempFile.getName());
     }
@@ -154,7 +150,11 @@ public class UploadManagerIT extends AbstractUploadIT {
 
         assertLogContains("Uploaded:");
 
-        clickButton("remove-first-file");
+        // Click the remove button on the first file in the list
+        UploadFileListElement fileList = $(UploadFileListElement.class)
+                .id("file-list");
+        waitUntil(driver -> fileList.getFileCount() > 0, 10);
+        fileList.getFiles().get(0).$("[part~='remove-button']").first().click();
 
         assertLogContains("Removed: " + tempFile.getName());
     }
@@ -167,14 +167,15 @@ public class UploadManagerIT extends AbstractUploadIT {
         logStatus();
         assertLogContains("Uploaded:");
 
-        clickButton("get-file-count");
-        assertLogContains("File count: 1");
+        UploadFileListElement fileList = $(UploadFileListElement.class)
+                .id("file-list");
+        Assert.assertEquals("File count should be 1", 1,
+                fileList.getFileCount());
 
-        clickButton("clear-log");
         clickButton("clear-file-list");
 
-        clickButton("get-file-count");
-        assertLogContains("File count: 0");
+        Assert.assertEquals("File count should be 0 after clearing", 0,
+                fileList.getFileCount());
     }
 
     @Test
@@ -214,45 +215,17 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     private void uploadFile(File file) {
-        WebElement input = getFileInput();
-        input.sendKeys(file.getAbsolutePath());
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        uploadButton.upload(file);
     }
 
     private void uploadFiles(File... files) {
-        WebElement input = getFileInput();
-        StringBuilder paths = new StringBuilder();
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
         for (File file : files) {
-            if (!paths.isEmpty()) {
-                paths.append("\n");
-            }
-            paths.append(file.getAbsolutePath());
+            uploadButton.upload(file, 0);
         }
-        input.sendKeys(paths.toString());
-    }
-
-    private WebElement getFileInput() {
-        WebElement input = findElement(By.id("native-file-input"));
-        // Set LocalFileDetector for remote browser support (e.g., CI Selenium
-        // grid)
-        WebElement realInput = input;
-        while (realInput instanceof WrapsElement) {
-            realInput = ((WrapsElement) realInput).getWrappedElement();
-        }
-        if (realInput instanceof RemoteWebElement && !isLocalDriver()) {
-            ((RemoteWebElement) realInput)
-                    .setFileDetector(new LocalFileDetector());
-        }
-        return input;
-    }
-
-    private boolean isLocalDriver() {
-        WebDriver driver = getDriver();
-        while (driver instanceof WrapsDriver) {
-            driver = ((WrapsDriver) driver).getWrappedDriver();
-        }
-        return driver instanceof ChromiumDriver
-                || driver instanceof FirefoxDriver
-                || driver instanceof SafariDriver;
     }
 
     private void clickButton(String id) {
