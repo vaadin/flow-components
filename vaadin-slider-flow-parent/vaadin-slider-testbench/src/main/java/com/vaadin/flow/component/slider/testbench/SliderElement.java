@@ -33,4 +33,31 @@ public class SliderElement extends TestBenchElement {
     public double getValue() {
         return getPropertyDouble("value");
     }
+
+    /**
+     * Gets the minimum value of the slider.
+     *
+     * @return the minimum value
+     */
+    public double getMin() {
+        return getPropertyDouble("min");
+    }
+
+    /**
+     * Gets the maximum value of the slider.
+     *
+     * @return the maximum value
+     */
+    public double getMax() {
+        return getPropertyDouble("max");
+    }
+
+    /**
+     * Gets the step value of the slider.
+     *
+     * @return the step value
+     */
+    public double getStep() {
+        return getPropertyDouble("step");
+    }
 }

@@ -15,9 +15,12 @@
  */
 package com.vaadin.flow.component.slider;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -28,8 +31,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-slider")
-@NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
-@JsModule("@vaadin/slider/src/vaadin-slider.js")
+// @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
+// @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends AbstractSinglePropertyField<Slider, Double>
         implements HasSize {
 
@@ -68,6 +71,23 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
         setMin(min);
         setMax(max);
         setValue(value);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        checkFeatureFlag(attachEvent.getUI());
+    }
+
+    private void checkFeatureFlag(UI ui) {
+        FeatureFlags featureFlags = FeatureFlags
+                .get(ui.getSession().getService().getContext());
+        boolean enabled = featureFlags
+                .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT);
+
+        if (!enabled) {
+            throw new ExperimentalFeatureException();
+        }
     }
 
     /**
