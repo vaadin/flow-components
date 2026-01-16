@@ -32,7 +32,7 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.dataprovider.MockUI;
+import com.vaadin.tests.MockUI;
 
 public class AbstractGridMultiSelectionModelTest {
 
