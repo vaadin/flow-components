@@ -39,15 +39,15 @@ public class Slider extends SliderBase<Slider, Double>
     private final static double DEFAULT_MAX = 100.0;
 
     /**
-     * Constructs a slider with a default range of 0 to 100 and an initial value
+     * Constructs a {@code Slider} with a default range of 0 to 100 and an initial value
      * of 0.
      */
     public Slider() {
-        this((String) null);
+        this(DEFAULT_MIN, DEFAULT_MAX, DEFAULT_MIN);
     }
 
     /**
-     * Constructs a slider with a value change listener, a default range of 0 to
+     * Constructs a {@code Slider} with a value change listener, a default range of 0 to
      * 100, and an initial value of 0.
      *
      * @param listener
@@ -55,22 +55,56 @@ public class Slider extends SliderBase<Slider, Double>
      */
     public Slider(
             ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this((String) null, listener);
+        this(DEFAULT_MIN, DEFAULT_MAX, DEFAULT_MIN, listener);
     }
 
     /**
-     * Constructs a slider with the given label, a default range of 0 to 100,
+     * Constructs a {@code Slider} with the given min, max, and initial value.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
+     */
+    public Slider(double min, double max, double value) {
+        super(min, max, value);
+    }
+
+    /**
+     * Constructs a {@code Slider} with the given min, max, initial value, and a value
+     * change listener.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
+     * @param listener
+     *            the value change listener
+     */
+    public Slider(double min, double max, double value,
+            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
+        this(min, max, value);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a {@code Slider} with the given label, a default range of 0 to 100,
      * and an initial value of 0.
      *
      * @param label
      *            the text to set as the label
      */
     public Slider(String label) {
-        this(label, DEFAULT_MIN, DEFAULT_MAX);
+        this();
+        setLabel(label);
     }
 
     /**
-     * Constructs a slider with the given label, value change listener, a
+     * Constructs a {@code Slider} with the given label and a value change listener, a
      * default range of 0 to 100, and an initial value of 0.
      *
      * @param label
@@ -80,41 +114,12 @@ public class Slider extends SliderBase<Slider, Double>
      */
     public Slider(String label,
             ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this(label, DEFAULT_MIN, DEFAULT_MAX, listener);
+        this(listener);
+        setLabel(label);
     }
 
     /**
-     * Constructs a slider with the given min and max values. The initial value
-     * is set to the minimum.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     */
-    public Slider(double min, double max) {
-        this((String) null, min, max);
-    }
-
-    /**
-     * Constructs a slider with the given min and max values, and a value change
-     * listener. The initial value is set to the minimum.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param listener
-     *            the value change listener
-     */
-    public Slider(double min, double max,
-            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this((String) null, min, max, listener);
-    }
-
-    /**
-     * Constructs a slider with the given label, min, and max values. The
-     * initial value is set to the minimum.
+     * Constructs a {@code Slider} with the given label, min, max, and initial value.
      *
      * @param label
      *            the text to set as the label
@@ -122,14 +127,17 @@ public class Slider extends SliderBase<Slider, Double>
      *            the minimum value
      * @param max
      *            the maximum value
+     * @param value
+     *            the initial value
      */
-    public Slider(String label, double min, double max) {
-        super(label, min, max, min);
+    public Slider(String label, double min, double max, double value) {
+        this(min, max, value);
+        setLabel(label);
     }
 
     /**
-     * Constructs a slider with the given label, min, and max values, and a
-     * value change listener. The initial value is set to the minimum.
+     * Constructs a {@code Slider} with the given label, min, max, initial value, and a
+     * value change listener.
      *
      * @param label
      *            the text to set as the label
@@ -137,12 +145,15 @@ public class Slider extends SliderBase<Slider, Double>
      *            the minimum value
      * @param max
      *            the maximum value
+     * @param value
+     *            the initial value
      * @param listener
      *            the value change listener
      */
-    public Slider(String label, double min, double max,
+    public Slider(String label, double min, double max, double value,
             ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        super(label, min, max, min, listener);
+        this(min, max, value, listener);
+        setLabel(label);
     }
 
     @Override
