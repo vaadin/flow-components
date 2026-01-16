@@ -35,16 +35,57 @@ import com.vaadin.flow.component.UI;
 public class Slider extends SliderBase<Slider, Double>
         implements HasSize, Focusable<Slider>, KeyNotifier {
 
+    private final static double DEFAULT_MIN = 0.0;
+    private final static double DEFAULT_MAX = 100.0;
+
     /**
-     * Constructs a new Slider with default values (min=0, max=100, value=0).
+     * Constructs a slider with a default range of 0 to 100 and an initial value
+     * of 0.
      */
     public Slider() {
-        this(0, 100);
+        this((String) null);
     }
 
     /**
-     * Constructs a new Slider with the given min and max values. The initial
-     * value is set to min.
+     * Constructs a slider with a value change listener, a default range of 0 to
+     * 100, and an initial value of 0.
+     *
+     * @param listener
+     *            the value change listener
+     */
+    public Slider(
+            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
+        this((String) null, listener);
+    }
+
+    /**
+     * Constructs a slider with the given label, a default range of 0 to 100,
+     * and an initial value of 0.
+     *
+     * @param label
+     *            the text to set as the label
+     */
+    public Slider(String label) {
+        this(label, DEFAULT_MIN, DEFAULT_MAX);
+    }
+
+    /**
+     * Constructs a slider with the given label, value change listener, a
+     * default range of 0 to 100, and an initial value of 0.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param listener
+     *            the value change listener
+     */
+    public Slider(String label,
+            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
+        this(label, DEFAULT_MIN, DEFAULT_MAX, listener);
+    }
+
+    /**
+     * Constructs a slider with the given min and max values. The initial value
+     * is set to the minimum.
      *
      * @param min
      *            the minimum value
@@ -52,24 +93,56 @@ public class Slider extends SliderBase<Slider, Double>
      *            the maximum value
      */
     public Slider(double min, double max) {
-        this(min, max, min);
+        this((String) null, min, max);
     }
 
     /**
-     * Constructs a new Slider with the given min, max, and initial value.
+     * Constructs a slider with the given min and max values, and a value change
+     * listener. The initial value is set to the minimum.
      *
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param value
-     *            the initial value
+     * @param listener
+     *            the value change listener
      */
-    public Slider(double min, double max, double value) {
-        super("value", 0.0, false);
-        setMin(min);
-        setMax(max);
-        setValue(value);
+    public Slider(double min, double max,
+            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
+        this((String) null, min, max, listener);
+    }
+
+    /**
+     * Constructs a slider with the given label, min, and max values. The
+     * initial value is set to the minimum.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     */
+    public Slider(String label, double min, double max) {
+        super(label, min, max, min);
+    }
+
+    /**
+     * Constructs a slider with the given label, min, and max values, and a
+     * value change listener. The initial value is set to the minimum.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param listener
+     *            the value change listener
+     */
+    public Slider(String label, double min, double max,
+            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
+        super(label, min, max, min, listener);
     }
 
     @Override
