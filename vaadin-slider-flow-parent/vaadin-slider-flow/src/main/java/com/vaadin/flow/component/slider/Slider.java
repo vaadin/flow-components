@@ -17,38 +17,35 @@ package com.vaadin.flow.component.slider;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 
 /**
- * Slider is an input component that allows the user to select a numeric value
- * within a range by dragging a handle along a track.
+ * Slider is an input field that allows the user to select a numeric value
+ * within a range by dragging a handle along a track or using arrow keys for
+ * precise input.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-slider")
 // @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
 // @JsModule("@vaadin/slider/src/vaadin-slider.js")
-public class Slider extends SliderBase<Slider, Double>
-        implements HasSize, Focusable<Slider>, KeyNotifier {
+public class Slider extends SliderBase<Slider, Double> {
 
     private final static double DEFAULT_MIN = 0.0;
     private final static double DEFAULT_MAX = 100.0;
 
     /**
-     * Constructs a {@code Slider} with a default range of 0 to 100 and an initial value
-     * of 0.
+     * Constructs a {@code Slider} with a default range of 0 to 100 and an
+     * initial value of 0.
      */
     public Slider() {
         this(DEFAULT_MIN, DEFAULT_MAX, DEFAULT_MIN);
     }
 
     /**
-     * Constructs a {@code Slider} with a value change listener, a default range of 0 to
-     * 100, and an initial value of 0.
+     * Constructs a {@code Slider} with a value change listener, a default range
+     * of 0 to 100, and an initial value of 0.
      *
      * @param listener
      *            the value change listener
@@ -73,8 +70,8 @@ public class Slider extends SliderBase<Slider, Double>
     }
 
     /**
-     * Constructs a {@code Slider} with the given min, max, initial value, and a value
-     * change listener.
+     * Constructs a {@code Slider} with the given min, max, initial value, and a
+     * value change listener.
      *
      * @param min
      *            the minimum value
@@ -92,8 +89,8 @@ public class Slider extends SliderBase<Slider, Double>
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, a default range of 0 to 100,
-     * and an initial value of 0.
+     * Constructs a {@code Slider} with the given label, a default range of 0 to
+     * 100, and an initial value of 0.
      *
      * @param label
      *            the text to set as the label
@@ -104,8 +101,8 @@ public class Slider extends SliderBase<Slider, Double>
     }
 
     /**
-     * Constructs a {@code Slider} with the given label and a value change listener, a
-     * default range of 0 to 100, and an initial value of 0.
+     * Constructs a {@code Slider} with the given label and a value change
+     * listener, a default range of 0 to 100, and an initial value of 0.
      *
      * @param label
      *            the text to set as the label
@@ -119,7 +116,8 @@ public class Slider extends SliderBase<Slider, Double>
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min, max, and initial value.
+     * Constructs a {@code Slider} with the given label, min, max, and initial
+     * value.
      *
      * @param label
      *            the text to set as the label
@@ -136,8 +134,8 @@ public class Slider extends SliderBase<Slider, Double>
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min, max, initial value, and a
-     * value change listener.
+     * Constructs a {@code Slider} with the given label, min, max, initial
+     * value, and a value change listener.
      *
      * @param label
      *            the text to set as the label

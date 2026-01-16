@@ -16,8 +16,11 @@
 package com.vaadin.flow.component.slider;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 
 /**
@@ -32,7 +35,8 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
  */
 public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
-        implements HasLabel, HasHelper, HasValidationProperties {
+        implements HasLabel, HasHelper, HasValidationProperties, HasSize,
+        Focusable<Slider>, KeyNotifier {
 
     /**
      * Constructs a slider with the given min, max, and initial value.
