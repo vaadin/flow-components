@@ -16,9 +16,8 @@
 package com.vaadin.flow.component.slider;
 
 /**
- * An exception which is thrown when somebody attempts to use the
- * {@link Slider} component without activating the associated
- * feature flag first.
+ * An exception which is thrown when somebody attempts to use the {@link Slider}
+ * component without activating the associated feature flag first.
  *
  * @author Vaadin Ltd
  */
