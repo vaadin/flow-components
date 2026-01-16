@@ -24,8 +24,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.upload.testbench.UploadButtonElement;
+import com.vaadin.flow.component.upload.testbench.UploadFileListElement;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
@@ -165,14 +166,15 @@ public class UploadManagerIT extends AbstractUploadIT {
         logStatus();
         assertLogContains("Uploaded:");
 
-        clickButton("get-file-count");
-        assertLogContains("File count: 1");
+        UploadFileListElement fileList = $(UploadFileListElement.class)
+                .id("file-list");
+        Assert.assertEquals("File count should be 1", 1,
+                fileList.getFileCount());
 
-        clickButton("clear-log");
         clickButton("clear-file-list");
 
-        clickButton("get-file-count");
-        assertLogContains("File count: 0");
+        Assert.assertEquals("File count should be 0 after clearing", 0,
+                fileList.getFileCount());
     }
 
     @Test
@@ -212,20 +214,17 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     private void uploadFile(File file) {
-        WebElement input = findElement(By.id("native-file-input"));
-        input.sendKeys(file.getAbsolutePath());
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        uploadButton.upload(file);
     }
 
     private void uploadFiles(File... files) {
-        WebElement input = findElement(By.id("native-file-input"));
-        StringBuilder paths = new StringBuilder();
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
         for (File file : files) {
-            if (!paths.isEmpty()) {
-                paths.append("\n");
-            }
-            paths.append(file.getAbsolutePath());
+            uploadButton.upload(file, 0);
         }
-        input.sendKeys(paths.toString());
     }
 
     private void clickButton(String id) {

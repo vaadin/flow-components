@@ -148,6 +148,16 @@ public class UploadManager implements Serializable {
                 event -> endUpload());
     }
 
+
+    /**
+     * Gets the internal connector component.
+     *
+     * @return the connector component
+     */
+    Connector getConnector() {
+        return connector;
+    }
+
     /**
      * Sets the upload handler that processes uploaded files.
      * <p>
