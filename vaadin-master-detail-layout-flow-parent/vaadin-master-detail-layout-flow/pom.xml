@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Vaadin Master Detail Layout</name>
     <description>Vaadin Master Detail Layout</description>
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

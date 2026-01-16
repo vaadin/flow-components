@@ -101,8 +101,11 @@
         <reactor-core.version>3.8.2</reactor-core.version>
 
         <!-- spreadsheet -->
-        <poi.version>5.4.1</poi.version>
+        <poi.version>5.5.1</poi.version>
         <javaparser.version>3.27.1</javaparser.version>
+
+        <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
+        <surefire.argLine/>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -263,7 +266,7 @@
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
-                    <version>7.2.0</version>
+                    <version>7.2.1</version>
                     <configuration>
                         <bnd><![CDATA[
                           // macro reference: https://bnd.bndtools.org/chapters/855-macros-ref.html
@@ -353,6 +356,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
+                        <argLine>${surefire.argLine}</argLine>
                         <excludes>
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
@@ -536,6 +540,17 @@
                         </sortPom>
                     </pom>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
