@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -172,6 +173,36 @@ public class ChartsIT extends AbstractSpreadsheetIT {
     public void openFile_fileHas3dChart_noExceptionsRaised() {
         loadFile("3DChart.xlsx");
         assertNoErrorIndicatorDetected();
+    }
+
+    @Test
+    public void numberFormatting_hoverOverPointWorks() {
+        loadFile("FeatureSample - Blanks as zeros.xlsm");
+
+        var chart = getChartInShadowRoot(getOverlayElement("B14"));
+
+        var actions = new Actions(getDriver());
+
+        // Move to the tracker line to make simulating hovering over points
+        // work
+        TestBenchElement trackerLine = chart
+                .findElement(By.cssSelector(".highcharts-tracker-line"));
+        Assert.assertNotNull(trackerLine);
+        actions.moveToElement(trackerLine).perform();
+
+        // Hover over the first point of the first series to show the
+        // tooltip
+        var firstPoint = chart.findElements(
+                By.cssSelector(".highcharts-series-0 > path.highcharts-point"))
+                .get(0);
+        Assert.assertNotNull(firstPoint);
+        actions.moveToElement(firstPoint).perform();
+
+        var tooltip = waitUntil(driver -> chart
+                .findElement(By.cssSelector(".highcharts-tooltip text")), 2);
+        Assert.assertEquals(
+                "Series \"Packaging Cost per Unit\" Point \"Controllo di gestione\" 0",
+                tooltip.getText());
     }
 
     @Test
