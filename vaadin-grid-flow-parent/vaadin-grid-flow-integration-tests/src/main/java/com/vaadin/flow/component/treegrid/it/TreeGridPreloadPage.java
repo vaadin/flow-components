@@ -76,7 +76,11 @@ public class TreeGridPreloadPage extends VerticalLayout
         int dpNodesPerLevel = nodesPerLevel == null ? 3
                 : Integer.parseInt(nodesPerLevel.get(0));
         int dpDepth = depth == null ? 4 : Integer.parseInt(depth.get(0));
-        setDataProvider(dpNodesPerLevel, dpDepth);
+        long responseDelayMillis = queryParameters
+                .getSingleParameter("responseDelay").map(Long::parseLong)
+                .orElse(0L);
+
+        setDataProvider(dpNodesPerLevel, dpDepth, responseDelayMillis);
 
         // query parameter: expandedRootIndexes
         List<String> expandedRootIndexes = queryParameters.getParameters()
@@ -107,12 +111,34 @@ public class TreeGridPreloadPage extends VerticalLayout
         }
     }
 
-    private void setDataProvider(int nodesPerLevel, int depth) {
+    private void setDataProvider(int nodesPerLevel, int depth,
+            long responseDelayMillis) {
+
         grid.setDataProvider(
                 new LazyHierarchicalDataProvider(nodesPerLevel, depth) {
+
+                    private void delay() {
+                        if (responseDelayMillis > 0) {
+                            try {
+                                Thread.sleep(responseDelayMillis);
+                            } catch (InterruptedException e) {
+                                // ignore
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public int getChildCount(
+                            HierarchicalQuery<HierarchicalTestBean, Void> query) {
+                        delay();
+                        return super.getChildCount(query);
+                    }
+
                     @Override
                     protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
                             HierarchicalQuery<HierarchicalTestBean, Void> query) {
+                        delay();
                         VaadinRequest currentRequest = VaadinService
                                 .getCurrentRequest();
                         if (!currentRequest.equals(lastRequest)) {
