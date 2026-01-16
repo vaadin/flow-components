@@ -18,7 +18,9 @@ package com.vaadin.flow.component.slider;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 
@@ -32,7 +34,7 @@ import com.vaadin.flow.component.UI;
 // @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
 // @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends AbstractSinglePropertyField<Slider, Double>
-        implements HasSize {
+        implements HasSize, Focusable<Slider>, KeyNotifier {
 
     /**
      * Constructs a new Slider with default values (min=0, max=100, value=0).

@@ -18,6 +18,9 @@ package com.vaadin.flow.component.slider.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.slider.Slider;
 
 public class SliderTest {
@@ -112,5 +115,20 @@ public class SliderTest {
     public void setStep_notPositive_throws() {
         Slider slider = new Slider();
         slider.setStep(0);
+    }
+
+    public void implementsHasSizeInterface() {
+        Slider slider = new Slider();
+        Assert.assertTrue(slider instanceof HasSize);
+    }
+
+    public void implementsFocusableInterface() {
+        Slider slider = new Slider();
+        Assert.assertTrue(slider instanceof Focusable);
+    }
+
+    public void implementsKeyNotifierInterface() {
+        Slider slider = new Slider();
+        Assert.assertTrue(slider instanceof KeyNotifier);
     }
 }
