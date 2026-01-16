@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.slider;
 
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
@@ -33,7 +32,7 @@ import com.vaadin.flow.component.UI;
 @Tag("vaadin-slider")
 // @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
 // @JsModule("@vaadin/slider/src/vaadin-slider.js")
-public class Slider extends AbstractSinglePropertyField<Slider, Double>
+public class Slider extends SliderBase<Slider, Double>
         implements HasSize, Focusable<Slider>, KeyNotifier {
 
     /**
@@ -102,84 +101,5 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double>
         }
 
         super.setValue(value);
-    }
-
-    /**
-     * Sets the minimum value of the slider.
-     *
-     * @param min
-     *            the minimum value
-     * @throws IllegalArgumentException
-     *             if the min is greater than the max value
-     */
-    public void setMin(double min) {
-        if (min > getMax()) {
-            throw new IllegalArgumentException(
-                    "The min value cannot be greater than the max value");
-        }
-
-        getElement().setProperty("min", min);
-    }
-
-    /**
-     * Gets the minimum value of the slider.
-     *
-     * @return the minimum value
-     */
-    public double getMin() {
-        return getElement().getProperty("min", 0.0);
-    }
-
-    /**
-     * Sets the maximum value of the slider.
-     *
-     * @param max
-     *            the maximum value
-     * @throws IllegalArgumentException
-     *             if the max is less than the min value
-     */
-    public void setMax(double max) {
-        if (max < getMin()) {
-            throw new IllegalArgumentException(
-                    "The max value cannot be less than the min value");
-        }
-
-        getElement().setProperty("max", max);
-    }
-
-    /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
-    public double getMax() {
-        return getElement().getProperty("max", 100.0);
-    }
-
-    /**
-     * Sets the step value of the slider. The step is the amount the value
-     * changes when the user moves the handle.
-     *
-     * @param step
-     *            the step value
-     * @throws IllegalArgumentException
-     *             if the step is less than or equal to zero
-     */
-    public void setStep(double step) {
-        if (step <= 0) {
-            throw new IllegalArgumentException(
-                    "The step value must be a positive number");
-        }
-
-        getElement().setProperty("step", step);
-    }
-
-    /**
-     * Gets the step value of the slider.
-     *
-     * @return the step value
-     */
-    public double getStep() {
-        return getElement().getProperty("step", 1.0);
     }
 }
