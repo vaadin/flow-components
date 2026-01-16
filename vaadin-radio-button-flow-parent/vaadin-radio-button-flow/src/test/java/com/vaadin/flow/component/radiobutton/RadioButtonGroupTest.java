@@ -46,8 +46,8 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
-import com.vaadin.tests.dataprovider.MockUI;
 
 public class RadioButtonGroupTest {
 

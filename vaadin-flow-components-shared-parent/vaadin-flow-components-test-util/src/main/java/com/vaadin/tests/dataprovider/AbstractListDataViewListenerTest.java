@@ -28,6 +28,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.tests.MockUI;
 
 // Originally from com.vaadin.flow.data.provider.AbstractListDataViewListenerTest
 // If this breaks, check there for updates

@@ -35,7 +35,7 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.tests.dataprovider.MockUI;
+import com.vaadin.tests.MockUI;
 
 import tools.jackson.databind.JsonNode;
 
