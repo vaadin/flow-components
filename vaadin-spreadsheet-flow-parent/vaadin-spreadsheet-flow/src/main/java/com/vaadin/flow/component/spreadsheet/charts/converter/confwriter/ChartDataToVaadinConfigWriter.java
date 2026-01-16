@@ -127,21 +127,24 @@ public class ChartDataToVaadinConfigWriter {
             String seriesName = series.name == null ? Integer.toString(i + 1)
                     : "this.series.name";
 
-            String seriesFormatter = "if(this.series.options.id == '$id'){\n"
-                    + "   var formattedNumber;\n"
-                    + "   var signlessNumer = Math.abs(this.$v);"
-                    + "   if ($tooltipDecimals < 0 ) {\n"
-                    + "      //Round numbers to contain only 9 digits if they contain decimals.\n"
-                    + "      var tooltipDecimals = (signlessNumer>1.0 ? 9-Math.floor(Math.log(signlessNumer)/Math.LN10) : 9);\n"
-                    + "      formattedNumber = (Math.round(this.$v) == this.$v ? this.$v : Math.round(this.$v * Math.pow(10,tooltipDecimals))/Math.pow(10,tooltipDecimals));\n"
-                    + "   } else {\n"
-                    + "      //numberFormat can handle numbers 20 digits long.\n"
-                    + "      var tooltipDecimals = (Math.ceil(Math.log(signlessNumer)/Math.LN10) + $tooltipDecimals<= 20 ? $tooltipDecimals : 20);\n"
-                    + "      formattedNumber = Highcharts.numberFormat(this.$v, tooltipDecimals);\n"
-                    + "   }\n" + "   text = $seriesTitle + ' ' + \n"
-                    + "      (typeof $seriesName == 'number' ? $seriesName : JSON.stringify($seriesName)) + ' ' + $pointTitle + ' ' + \n"
-                    + "      (('name' in this.point) ? JSON.stringify(this.point.name) : this.x + 1) + \n"
-                    + "      ' <br>' + formattedNumber;" + "}";
+            String seriesFormatter = """
+                    if(this.series.options.id == '$id'){
+                       var formattedNumber;
+                       var signlessNumer = Math.abs(this.$v);
+                       if ($tooltipDecimals < 0 ) {
+                          //Round numbers to contain only 9 digits if they contain decimals.
+                          var tooltipDecimals = (signlessNumer>1.0 ? 9-Math.floor(Math.log(signlessNumer)/Math.LN10) : 9);
+                          formattedNumber = (Math.round(this.$v) == this.$v ? this.$v : Math.round(this.$v * Math.pow(10,tooltipDecimals))/Math.pow(10,tooltipDecimals));
+                       } else {
+                          //numberFormat can handle numbers 20 digits long.
+                          var tooltipDecimals = (Math.ceil(Math.log(signlessNumer)/Math.LN10) + $tooltipDecimals<= 20 ? $tooltipDecimals : 20);
+                          formattedNumber = this.point.series.chart.numberFormatter(this.$v, tooltipDecimals);
+                       }
+                       text = $seriesTitle + ' ' +
+                          (typeof $seriesName == 'number' ? $seriesName : JSON.stringify($seriesName)) + ' ' + $pointTitle + ' ' +
+                          (('name' in this.point) ? JSON.stringify(this.point.name) : this.x + 1) +
+                          ' <br>' + formattedNumber;
+                    }""";
 
             formatter.append(seriesFormatter.replace("$v", pointData)
                     .replace("$id", Integer.toString(i++))
