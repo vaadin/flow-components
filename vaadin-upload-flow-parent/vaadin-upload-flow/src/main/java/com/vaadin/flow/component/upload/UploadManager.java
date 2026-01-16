@@ -75,7 +75,6 @@ public class UploadManager implements Serializable {
     private final AtomicInteger activeUploads = new AtomicInteger(0);
     private volatile boolean interrupted = false;
     private boolean uploading = false;
-    private boolean uploadListenersRegistered = false;
 
     /**
      * Creates a new upload manager without an upload handler. The handler must
@@ -141,6 +140,12 @@ public class UploadManager implements Serializable {
                     new FileRejectedEvent(owner, true, errorMessage, fileName));
         }).addEventData(eventDetailFileName)
                 .addEventData(eventDetailErrorMessage);
+
+        // Register internal listeners for upload state tracking
+        ComponentUtil.addListener(connector, UploadStartEvent.class,
+                event -> startUpload());
+        ComponentUtil.addListener(connector, UploadCompleteEvent.class,
+                event -> endUpload());
     }
 
     /**
@@ -182,16 +187,6 @@ public class UploadManager implements Serializable {
             }
         };
         connector.getElement().setAttribute("target", elementStreamResource);
-
-        // Register internal listeners for upload state tracking
-        if (!(handler instanceof FailFastUploadHandler)
-                && !uploadListenersRegistered) {
-            uploadListenersRegistered = true;
-            ComponentUtil.addListener(connector, UploadStartEvent.class,
-                    event -> startUpload());
-            ComponentUtil.addListener(connector, UploadCompleteEvent.class,
-                    event -> endUpload());
-        }
     }
 
     /**

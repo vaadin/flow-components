@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -25,9 +27,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.internal.streams.UploadCompleteEvent;
+import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
@@ -70,11 +76,6 @@ public class UploadManagerTest {
     }
 
     @Test
-    public void constructor_withOwner_createsManager() {
-        Assert.assertNotNull(manager);
-    }
-
-    @Test
     public void constructor_withOwnerAndHandler_createsManager() {
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
@@ -101,7 +102,7 @@ public class UploadManagerTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void setUploadHandler_withNullTargetName_throws() {
+    public void setUploadHandler_withNullTargetName_throws() { // NOSONAR
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
         manager.setUploadHandler(handler, null);
@@ -121,6 +122,7 @@ public class UploadManagerTest {
 
         // Should not throw
         manager.setUploadHandler(handler);
+        Assert.assertNotNull(manager);
     }
 
     @Test
@@ -130,6 +132,7 @@ public class UploadManagerTest {
 
         // Should not throw
         manager.setUploadHandler(handler, "custom-upload");
+        Assert.assertNotNull(manager);
     }
 
     @Test
@@ -342,4 +345,186 @@ public class UploadManagerTest {
         Assert.assertSame(owner, event.getSource());
         Assert.assertFalse(event.isFromClient());
     }
+
+    /**
+     * Helper to get the internal connector component via reflection.
+     */
+    private Component getConnector(UploadManager manager) {
+        try {
+            Field connectorField = UploadManager.class
+                    .getDeclaredField("connector");
+            connectorField.setAccessible(true);
+            return (Component) connectorField.get(manager);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(
+                    "Failed to access connector field via reflection", e);
+        }
+    }
+
+    /**
+     * Simulates an upload start event on the connector.
+     */
+    private void simulateUploadStart(UploadManager manager) {
+        Component connector = getConnector(manager);
+        ComponentUtil.fireEvent(connector, new UploadStartEvent(connector));
+    }
+
+    /**
+     * Simulates an upload complete event on the connector.
+     */
+    private void simulateUploadComplete(UploadManager manager) {
+        Component connector = getConnector(manager);
+        ComponentUtil.fireEvent(connector, new UploadCompleteEvent(connector));
+    }
+
+    @Test
+    public void concurrentUploads_tracksMultipleActiveUploads() {
+        // Set up manager with handler to enable upload tracking
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        manager.setUploadHandler(handler);
+
+        // Start 5 concurrent uploads
+        for (int i = 0; i < 5; i++) {
+            simulateUploadStart(manager);
+        }
+
+        Assert.assertTrue("Should be uploading with 5 active uploads",
+                manager.isUploading());
+
+        // Complete 3 uploads
+        for (int i = 0; i < 3; i++) {
+            simulateUploadComplete(manager);
+        }
+
+        Assert.assertTrue("Should still be uploading with 2 active uploads",
+                manager.isUploading());
+
+        // Complete remaining uploads
+        simulateUploadComplete(manager);
+        simulateUploadComplete(manager);
+
+        Assert.assertFalse("Should not be uploading after all complete",
+                manager.isUploading());
+    }
+
+    @Test
+    public void interruptUpload_duringActiveUpload_setsInterruptedFlag() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        manager.setUploadHandler(handler);
+
+        // Start an upload
+        simulateUploadStart(manager);
+        Assert.assertTrue(manager.isUploading());
+        Assert.assertFalse(manager.isInterrupted());
+
+        // Interrupt the upload
+        manager.interruptUpload();
+
+        Assert.assertTrue("Should be interrupted during active upload",
+                manager.isInterrupted());
+        Assert.assertTrue("Should still be marked as uploading",
+                manager.isUploading());
+    }
+
+    @Test
+    public void interruptUpload_flagClearedAfterUploadComplete() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        manager.setUploadHandler(handler);
+
+        // Start an upload and interrupt it
+        simulateUploadStart(manager);
+        manager.interruptUpload();
+        Assert.assertTrue(manager.isInterrupted());
+
+        // Complete the upload
+        simulateUploadComplete(manager);
+
+        Assert.assertFalse(
+                "Interrupted flag should be cleared after upload completes",
+                manager.isInterrupted());
+        Assert.assertFalse(manager.isUploading());
+    }
+
+    @Test
+    public void setMaxFiles_enforcedDuringActiveUpload() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        manager.setUploadHandler(handler);
+        manager.setMaxFiles(3);
+
+        // Start 3 uploads (at max)
+        simulateUploadStart(manager);
+        simulateUploadStart(manager);
+        simulateUploadStart(manager);
+
+        Assert.assertTrue(manager.isUploading());
+
+        // Try to start a 4th upload - should throw
+        try {
+            simulateUploadStart(manager);
+            Assert.fail(
+                    "Should throw IllegalStateException when exceeding maxFiles");
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage()
+                    .contains("Maximum supported amount of uploads"));
+        }
+    }
+
+    @Test
+    public void setMaxFiles_changesDuringActiveUpload_affectsNewUploads() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        manager.setUploadHandler(handler);
+        manager.setMaxFiles(5);
+
+        // Start 2 uploads
+        simulateUploadStart(manager);
+        simulateUploadStart(manager);
+
+        // Reduce maxFiles to 2 during upload
+        manager.setMaxFiles(2);
+
+        // Try to start another upload - should throw because we're at max
+        try {
+            simulateUploadStart(manager);
+            Assert.fail("Should throw when at new maxFiles limit");
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage()
+                    .contains("Maximum supported amount of uploads"));
+        }
+    }
+
+    @Test
+    public void allFinishedEvent_firedOnlyWhenAllUploadsComplete() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        manager.setUploadHandler(handler);
+
+        AtomicInteger finishedCount = new AtomicInteger(0);
+        manager.addAllFinishedListener(
+                event -> finishedCount.incrementAndGet());
+
+        // Start 3 uploads
+        simulateUploadStart(manager);
+        simulateUploadStart(manager);
+        simulateUploadStart(manager);
+
+        // Complete first two - should not fire event yet
+        simulateUploadComplete(manager);
+        Assert.assertEquals("AllFinished should not fire yet", 0,
+                finishedCount.get());
+
+        simulateUploadComplete(manager);
+        Assert.assertEquals("AllFinished should not fire yet", 0,
+                finishedCount.get());
+
+        // Complete last upload - should fire event
+        simulateUploadComplete(manager);
+        Assert.assertEquals("AllFinished should fire once", 1,
+                finishedCount.get());
+    }
+
 }
