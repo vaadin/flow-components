@@ -155,10 +155,6 @@
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.openjdk.jol</groupId>
             <artifactId>jol-core</artifactId>
             <version>0.17</version>
@@ -188,6 +184,8 @@
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                        </fileset>
+                        <fileset>
                             <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>

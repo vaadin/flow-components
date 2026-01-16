@@ -13,6 +13,7 @@
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <cvdlName>vaadin-spreadsheet-flow</cvdlName>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
     <dependencies>
         <dependency>
@@ -70,10 +71,24 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- https://github.com/advisories/GHSA-vc5p-v9hr-52mj
+        remove the exclusion and this following dependency
+        after upgrading poi version-->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.25.3</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>${poi.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>

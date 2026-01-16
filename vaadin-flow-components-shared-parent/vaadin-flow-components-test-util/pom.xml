@@ -9,6 +9,9 @@
     <artifactId>vaadin-flow-components-test-util</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Flow Components Test Utilities</name>
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -40,11 +40,25 @@ if (!match) {
 
 const npmThemePackageVersion = match[1];
 
-console.log(`Extracting theme distribution for ${npmThemePackage}@${npmThemePackageVersion}`);
-
 // Create temporary directory for npm install
 const tempDir = path.join('target', 'npm-workspace');
 fs.mkdirSync(tempDir, { recursive: true });
+
+// Check if cached and up to date
+const cacheFile = path.join(tempDir, `.theme-cache.json`);
+if (fs.existsSync(cacheFile)) {
+  try {
+    const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+    if (cache.package === npmThemePackage && cache.version === npmThemePackageVersion) {
+      console.log(`Theme distribution for ${npmThemePackage}@${npmThemePackageVersion} is up to date, skipping`);
+      process.exit(0);
+    }
+  } catch (e) {
+    // Cache file invalid, proceed with installation
+  }
+}
+
+console.log(`Extracting theme distribution for ${npmThemePackage}@${npmThemePackageVersion}`);
 
 // Install the theme package using npm
 const packageJson = {
@@ -77,5 +91,11 @@ if (!fs.existsSync(sourceDir)) {
 }
 
 fs.cpSync(sourceDir, targetDir, { recursive: true });
+
+// Write cache file to mark as up to date
+fs.writeFileSync(cacheFile, JSON.stringify({
+  package: npmThemePackage,
+  version: npmThemePackageVersion
+}, null, 2));
 
 console.log(`Copied theme distribution to ${targetDir}`);
