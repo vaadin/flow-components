@@ -58,44 +58,6 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
     }
 
     /**
-     * Constructs a slider with the given label, min, max, and initial value.
-     *
-     * @param label
-     *            the text to set as the label
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param value
-     *            the initial value
-     */
-    public SliderBase(String label, double min, double max, TValue value) {
-        this(min, max, value);
-        setLabel(label);
-    }
-
-    /**
-     * Constructs a slider with the given label, min, max, initial value, and a
-     * value change listener.
-     *
-     * @param label
-     *            the text to set as the label
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param value
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     */
-    public SliderBase(String label, double min, double max, TValue value,
-            ValueChangeListener<? super ComponentValueChangeEvent<TComponent, TValue>> listener) {
-        this(label, min, max, value);
-        addValueChangeListener(listener);
-    }
-
-    /**
      * Sets the minimum value of the slider.
      *
      * @param min

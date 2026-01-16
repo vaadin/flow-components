@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.slider.tests;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,49 +25,9 @@ public class SliderBaseTest {
 
     @Tag("test-slider")
     private static class TestSlider extends SliderBase<TestSlider, Double> {
-        public TestSlider(double min, double max, Double value) {
+        public TestSlider(double min, double max, double value) {
             super(min, max, value);
         }
-
-        public TestSlider(String label, double min, double max, Double value) {
-            super(label, min, max, value);
-        }
-
-        public TestSlider(String label, double min, double max, Double value,
-                ValueChangeListener<? super ComponentValueChangeEvent<TestSlider, Double>> listener) {
-            super(label, min, max, value, listener);
-        }
-    }
-
-    @Test
-    public void minMaxValueConstructor() {
-        TestSlider slider = new TestSlider(10.0, 50.0, 25.0);
-        Assert.assertEquals(10.0, slider.getMin(), 0.0);
-        Assert.assertEquals(50.0, slider.getMax(), 0.0);
-        Assert.assertEquals(25.0, slider.getValue(), 0.0);
-    }
-
-    @Test
-    public void labelMinMaxValueConstructor() {
-        TestSlider slider = new TestSlider("Label", 10.0, 50.0, 25.0);
-        Assert.assertEquals("Label", slider.getLabel());
-        Assert.assertEquals(10.0, slider.getMin(), 0.0);
-        Assert.assertEquals(50.0, slider.getMax(), 0.0);
-        Assert.assertEquals(25.0, slider.getValue(), 0.0);
-    }
-
-    @Test
-    public void labelMinMaxValueListenerConstructor() {
-        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
-        TestSlider slider = new TestSlider("Label", 10.0, 50.0, 25.0,
-                e -> listenerInvoked.set(true));
-        Assert.assertEquals("Label", slider.getLabel());
-        Assert.assertEquals(10.0, slider.getMin(), 0.0);
-        Assert.assertEquals(50.0, slider.getMax(), 0.0);
-        Assert.assertEquals(25.0, slider.getValue(), 0.0);
-
-        slider.setValue(30.0);
-        Assert.assertTrue(listenerInvoked.get());
     }
 
     @Test
