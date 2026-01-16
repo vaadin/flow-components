@@ -49,6 +49,33 @@ public class SliderTest {
     }
 
     @Test
+    public void labelConstructor() {
+        Slider slider = new Slider("Label");
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(0.0, slider.getMin(), 0.0);
+        Assert.assertEquals(100.0, slider.getMax(), 0.0);
+        Assert.assertEquals(0.0, slider.getValue(), 0.0);
+    }
+
+    @Test
+    public void labelMinMaxConstructor() {
+        Slider slider = new Slider("Label", 10.0, 50.0);
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(10.0, slider.getValue(), 0.0);
+    }
+
+    @Test
+    public void labelMinMaxValueConstructor() {
+        Slider slider = new Slider("Label", 10.0, 50.0, 25.0);
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(25.0, slider.getValue(), 0.0);
+    }
+
+    @Test
     public void setMin_getMin() {
         Slider slider = new Slider();
         Assert.assertEquals(0.0, slider.getMin(), 0.0);
