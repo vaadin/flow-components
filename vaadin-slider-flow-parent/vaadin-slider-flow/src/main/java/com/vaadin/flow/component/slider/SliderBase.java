@@ -16,8 +16,9 @@
 package com.vaadin.flow.component.slider;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 
 /**
  * Abstract base class for slider components.
@@ -30,65 +31,68 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd
  */
 public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
-        extends AbstractSinglePropertyField<TComponent, TValue> {
+        extends AbstractSinglePropertyField<TComponent, TValue>
+        implements HasLabel, HasHelper, HasValidationProperties {
 
     /**
-     * Creates a new SliderBase instance.
+     * Constructs a slider with the given min, max, and initial value.
      *
-     * @param propertyName
-     *            the name of the element property to bind the value to
-     * @param defaultValue
-     *            the default value
-     * @param elementPropertyType
-     *            the type of the element property
-     * @param presentationToModel
-     *            a function to convert element property value to model value
-     * @param modelToPresentation
-     *            a function to convert model value to element property value
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
      */
-    public <P> SliderBase(String propertyName, TValue defaultValue,
-            Class<P> elementPropertyType,
-            SerializableFunction<P, TValue> presentationToModel,
-            SerializableFunction<TValue, P> modelToPresentation) {
-        super(propertyName, defaultValue, elementPropertyType,
-                presentationToModel, modelToPresentation);
+    public SliderBase(double min, double max, TValue value) {
+        super("value", null, false);
+
+        getElement().setProperty("manualValidation", true);
+
+        setMin(min);
+        setMax(max);
+        setValue(value);
+
+        // workaround for // https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
     }
 
     /**
-     * Creates a new SliderBase instance.
+     * Constructs a slider with the given label, min, max, and initial value.
      *
-     * @param propertyName
-     *            the name of the element property to bind the value to
-     * @param defaultValue
-     *            the default value
-     * @param acceptNullValues
-     *            whether null values are accepted
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
      */
-    public SliderBase(String propertyName, TValue defaultValue,
-            boolean acceptNullValues) {
-        super(propertyName, defaultValue, acceptNullValues);
+    public SliderBase(String label, double min, double max, TValue value) {
+        this(min, max, value);
+        setLabel(label);
     }
 
     /**
-     * Creates a new SliderBase instance.
+     * Constructs a slider with the given label, min, max, initial value, and a
+     * value change listener.
      *
-     * @param propertyName
-     *            the name of the element property to bind the value to
-     * @param defaultValue
-     *            the default value
-     * @param elementPropertyType
-     *            the type of the element property
-     * @param presentationToModel
-     *            a function to convert element property value to model value
-     * @param modelToPresentation
-     *            a function to convert model value to element property value
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
+     * @param listener
+     *            the value change listener
      */
-    public <P> SliderBase(String propertyName, TValue defaultValue,
-            Class<P> elementPropertyType,
-            SerializableBiFunction<TComponent, P, TValue> presentationToModel,
-            SerializableBiFunction<TComponent, TValue, P> modelToPresentation) {
-        super(propertyName, defaultValue, elementPropertyType,
-                presentationToModel, modelToPresentation);
+    public SliderBase(String label, double min, double max, TValue value,
+            ValueChangeListener<? super ComponentValueChangeEvent<TComponent, TValue>> listener) {
+        this(label, min, max, value);
+        addValueChangeListener(listener);
     }
 
     /**
