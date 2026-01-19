@@ -212,8 +212,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.1.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha1")
+@NpmPackage(value = "@vaadin/grid", version = "25.1.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha2")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
