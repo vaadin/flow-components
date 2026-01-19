@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -25,6 +28,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.function.SerializableRunnable;
 
 /**
  * Abstract base class for slider components.
@@ -36,10 +40,11 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
  *
  * @author Vaadin Ltd
  */
-public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
+public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue extends Number>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasLabel, HasHelper, HasValidationProperties, HasSize,
         Focusable<Slider>, KeyNotifier {
+    private Set<String> pendingBeforeClientResponseActions = new HashSet<>();
 
     /**
      * Constructs a slider with the given min, max, and initial value.
@@ -51,13 +56,14 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @param value
      *            the initial value
      */
-    public SliderBase(double min, double max, TValue value) {
+    protected SliderBase(double min, double max, double step, TValue value) {
         super("value", null, false);
 
         getElement().setProperty("manualValidation", true);
 
-        setMin(min);
-        setMax(max);
+        setMinDouble(min);
+        setMaxDouble(max);
+        setStepDouble(step);
         setValue(value);
 
         // workaround for // https://github.com/vaadin/flow/issues/3496
@@ -89,7 +95,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if the min is greater than the max value
      */
-    void setMin(double min) {
+    void setMinDouble(double min) {
         if (min > getMaxDouble()) {
             throw new IllegalArgumentException(
                     "The min value cannot be greater than the max value");
@@ -115,7 +121,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if the max is less than the min value
      */
-    void setMax(double max) {
+    void setMaxDouble(double max) {
         if (max < getMinDouble()) {
             throw new IllegalArgumentException(
                     "The max value cannot be less than the min value");
@@ -142,7 +148,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if the step is less than or equal to zero
      */
-    void setStep(double step) {
+    void setStepDouble(double step) {
         if (step <= 0) {
             throw new IllegalArgumentException(
                     "The step value must be a positive number");
@@ -158,5 +164,30 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      */
     double getStepDouble() {
         return getElement().getProperty("step", 1);
+    }
+
+    /**
+     * Schedules the given action to be executed before the client response,
+     * identified by the given key. If an action with the same key is already
+     * scheduled, it will not be added again.
+     *
+     * @param key
+     *            the unique key identifying the action
+     * @param action
+     *            the action to be executed
+     */
+    void scheduleBeforeClientResponse(String key, SerializableRunnable action) {
+        if (pendingBeforeClientResponseActions.contains(key)) {
+            return;
+        }
+
+        getElement().getNode().runWhenAttached(ui -> {
+            ui.beforeClientResponse(this, context -> {
+                pendingBeforeClientResponseActions.remove(key);
+                action.run();
+            });
+        });
+
+        pendingBeforeClientResponseActions.add(key);
     }
 }
