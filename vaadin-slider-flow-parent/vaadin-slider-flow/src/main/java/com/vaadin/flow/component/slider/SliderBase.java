@@ -56,7 +56,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @param value
      *            the initial value
      */
-    protected SliderBase(double min, double max, double step, TValue value) {
+    SliderBase(double min, double max, double step, TValue value) {
         super("value", null, false);
 
         getElement().setProperty("manualValidation", true);
