@@ -30,7 +30,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *             Consider using Dashboard as an alternative.
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/board", version = "25.1.0-alpha1")
+@NpmPackage(value = "@vaadin/board", version = "25.1.0-alpha2")
 @JsModule("@vaadin/board/src/vaadin-board-row.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Row extends Component
