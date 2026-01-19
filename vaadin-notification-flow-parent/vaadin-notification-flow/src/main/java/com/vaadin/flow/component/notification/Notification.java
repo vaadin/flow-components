@@ -23,17 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -45,6 +35,7 @@ import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.signals.Signal;
 
 /**
  * Notifications are used to provide feedback to the user. They communicate
@@ -62,6 +53,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
     private static final String OPENED_PROPERTY = "opened";
+
+    private final SignalPropertySupport<String> textSupport = SignalPropertySupport.create(this, this::updateText);
 
     private OverlayAutoAddController<Notification> autoAddController;
 
@@ -166,8 +159,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * Creates a Notification with given String rendered as its text and given
      * Integer rendered as its duration.
      * <p>
-     * Set to {@code 0} or a negative number to disable the notification
-     * auto-closing.
+     * Set duration to {@code 0} or a negative number to disable
+     * the notification auto-closing.
      *
      * @param text
      *            the text of the Notification
@@ -181,8 +174,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * Creates a Notification with given text String, duration and position
      * <P>
-     * Set to {@code 0} or a negative number to disable the notification
-     * auto-closing.
+     * Set duration to {@code 0} or a negative number to disable
+     * the notification auto-closing.
      *
      * @param text
      *            the text of the notification
@@ -204,8 +197,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * Creates a Notification with given text String, duration, position and
      * assertive state.
      * <P>
-     * Set to {@code 0} or a negative number to disable the notification
-     * auto-closing.
+     * Set duration to {@code 0} or a negative number to disable
+     * the notification auto-closing.
      *
      * @param text
      *            the text of the notification
@@ -222,6 +215,81 @@ public class Notification extends Component implements HasComponents, HasStyle,
     public Notification(String text, int duration, Position position,
             boolean assertive) {
         this(text, duration, position);
+        setAssertive(assertive);
+    }
+
+    /**
+     * Creates a Notification with the text bound to the given Signal, that
+     * does not close automatically.
+     *
+     * @param textSignal
+     *            the signal with the text of the Notification
+     */
+    public Notification(Signal<String> textSignal) {
+        this(textSignal, 0, DEFAULT_POSITION);
+    }
+
+    /**
+     * Creates a Notification with the text bound to the given Signal and given
+     * Integer rendered as its duration.
+     * <p>
+     * Set to {@code 0} or a negative number to disable the notification
+     * auto-closing.
+     *
+     * @param textSignal
+     *            the signal with the text of the Notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     */
+    public Notification(Signal<String> textSignal, int duration) {
+        this(textSignal, duration, DEFAULT_POSITION);
+    }
+
+    /**
+     * Creates a Notification with the text bound to the given Signal, given
+     * duration and position.
+     * <P>
+     * Set to {@code 0} or a negative number to disable the notification
+     * auto-closing.
+     *
+     * @param textSignal
+     *            the signal with the text of the notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     */
+    public Notification(Signal<String> textSignal, int duration, Position position) {
+        initBaseElementsAndListeners();
+        bindText(textSignal);
+        setDuration(duration);
+        setPosition(position);
+    }
+
+    /**
+     * Creates a Notification with the text bound to the given Signal, duration,
+     * position and assertive state.
+     * <P>
+     * Set to {@code 0} or a negative number to disable the notification
+     * auto-closing.
+     *
+     * @param textSignal
+     *            the signal with the text of the notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     * @param assertive
+     *            whether the notification should have {@code aria-live}
+     *            attribute set to {@code assertive} or {@code polite}
+     */
+    public Notification(Signal<String> textSignal, int duration, Position position,
+            boolean assertive) {
+        this(textSignal, duration, position);
         setAssertive(assertive);
     }
 
@@ -343,9 +411,17 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            the text of the Notification
      */
     public void setText(String text) {
-        removeAll();
-        this.getElement().setProperty("text", text);
-        this.getElement().callJsFunction("requestContentUpdate");
+        textSupport.set(text);
+    }
+
+    /**
+     * Binds the notification text to the given signal.
+     *
+     * @param textSignal the signal containing the text value to be bound, or
+     *                   {@code null} to remove the binding.
+     */
+    public void bindText(Signal<String> textSignal) {
+        textSupport.bind(textSignal);
     }
 
     /**
@@ -585,6 +661,12 @@ public class Notification extends Component implements HasComponents, HasStyle,
         return super.addDetachListener(listener);
     }
 
+    private void updateText(String text) {
+        removeAll();
+        this.getElement().setProperty("text", text);
+        this.getElement().callJsFunction("requestContentUpdate");
+    }
+
     private void configureComponentRenderer() {
         this.getElement().removeProperty("text");
         updateVirtualChildNodeIds();
@@ -695,5 +777,9 @@ public class Notification extends Component implements HasComponents, HasStyle,
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "Notification does not support adding styles to card element");
+    }
+
+    SignalPropertySupport<String> getTextSupport() {
+        return textSupport;
     }
 }
