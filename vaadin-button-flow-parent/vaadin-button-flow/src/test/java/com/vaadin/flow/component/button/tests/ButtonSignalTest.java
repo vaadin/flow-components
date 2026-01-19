@@ -30,7 +30,7 @@ import com.vaadin.signals.Signal;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
-public class ButtonSignalText extends AbstractSignalsUnitTest {
+public class ButtonSignalTest extends AbstractSignalsUnitTest {
 
     private Button button;
     private Icon icon;
