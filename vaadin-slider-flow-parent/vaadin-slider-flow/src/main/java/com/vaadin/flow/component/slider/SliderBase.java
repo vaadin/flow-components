@@ -47,12 +47,14 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
     private Set<String> pendingBeforeClientResponseActions = new HashSet<>();
 
     /**
-     * Constructs a slider with the given min, max, and initial value.
+     * Constructs a slider with the given min, max, step, and initial value.
      *
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
+     * @param step
+     *            the step value
      * @param value
      *            the initial value
      */
