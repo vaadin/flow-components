@@ -267,18 +267,6 @@ public class UploadManagerTest {
     }
 
     @Test
-    public void isInterrupted_initiallyFalse() {
-        Assert.assertFalse(manager.isInterrupted());
-    }
-
-    @Test
-    public void interruptUpload_whenNotUploading_doesNothing() {
-        manager.interruptUpload();
-
-        Assert.assertFalse(manager.isInterrupted());
-    }
-
-    @Test
     public void addFileRemovedListener_registersListener() {
         AtomicBoolean listenerCalled = new AtomicBoolean(false);
 
@@ -406,46 +394,6 @@ public class UploadManagerTest {
 
         Assert.assertFalse("Should not be uploading after all complete",
                 manager.isUploading());
-    }
-
-    @Test
-    public void interruptUpload_duringActiveUpload_setsInterruptedFlag() {
-        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
-        });
-        manager.setUploadHandler(handler);
-
-        // Start an upload
-        simulateUploadStart(manager);
-        Assert.assertTrue(manager.isUploading());
-        Assert.assertFalse(manager.isInterrupted());
-
-        // Interrupt the upload
-        manager.interruptUpload();
-
-        Assert.assertTrue("Should be interrupted during active upload",
-                manager.isInterrupted());
-        Assert.assertTrue("Should still be marked as uploading",
-                manager.isUploading());
-    }
-
-    @Test
-    public void interruptUpload_flagClearedAfterUploadComplete() {
-        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
-        });
-        manager.setUploadHandler(handler);
-
-        // Start an upload and interrupt it
-        simulateUploadStart(manager);
-        manager.interruptUpload();
-        Assert.assertTrue(manager.isInterrupted());
-
-        // Complete the upload
-        simulateUploadComplete(manager);
-
-        Assert.assertFalse(
-                "Interrupted flag should be cleared after upload completes",
-                manager.isInterrupted());
-        Assert.assertFalse(manager.isUploading());
     }
 
     @Test

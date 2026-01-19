@@ -73,7 +73,6 @@ public class UploadManager implements Serializable {
 
     // Upload state tracking
     private final AtomicInteger activeUploads = new AtomicInteger(0);
-    private volatile boolean interrupted = false;
     private boolean uploading = false;
 
     /**
@@ -112,10 +111,6 @@ public class UploadManager implements Serializable {
         // Set up default fail-fast handler
         setUploadHandler(
                 handler != null ? handler : new FailFastUploadHandler());
-
-        // Listen for upload-abort from client
-        connector.getElement().addEventListener("upload-manager-abort",
-                event -> interruptUpload());
 
         // Listen for file-remove and file-reject events from client.
         // We manually listen to DOM events and fire ComponentEvents with the
@@ -328,30 +323,6 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Checks if the upload has been interrupted.
-     *
-     * @return {@code true} if the upload was interrupted, {@code false}
-     *         otherwise
-     */
-    public boolean isInterrupted() {
-        return interrupted;
-    }
-
-    /**
-     * Interrupt the upload currently being received.
-     * <p>
-     * The interruption will be done by the receiving thread so this method will
-     * return immediately and the actual interrupt will happen a bit later.
-     * <p>
-     * Note! This will interrupt all ongoing uploads.
-     */
-    public void interruptUpload() {
-        if (isUploading()) {
-            interrupted = true;
-        }
-    }
-
-    /**
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
@@ -382,12 +353,9 @@ public class UploadManager implements Serializable {
      */
     private void endUpload() {
         int remaining = activeUploads.decrementAndGet();
-        if (remaining == 0) {
-            interrupted = false;
-            if (uploading) {
-                uploading = false;
-                fireAllFinished();
-            }
+        if (remaining == 0 && uploading) {
+            uploading = false;
+            fireAllFinished();
         }
     }
 
