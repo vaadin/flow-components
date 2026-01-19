@@ -114,13 +114,13 @@ public class SliderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setValue_lessThanMin_throws() {
-        Slider slider = new Slider(0, 100, 0);
+        Slider slider = new Slider(0.0, 100.0, 0.0);
         slider.setValue(-150.0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setValue_greaterThanMax_throws() {
-        Slider slider = new Slider(0, 100, 0);
+        Slider slider = new Slider(0.0, 100.0, 0.0);
         slider.setValue(150.0);
     }
 
@@ -137,5 +137,62 @@ public class SliderTest {
     public void implementsKeyNotifierInterface() {
         Slider slider = new Slider();
         Assert.assertTrue(slider instanceof KeyNotifier);
+    }
+
+    @Test
+    public void setMin_getMin() {
+        Slider slider = new Slider(0.0, 100.0, 0.0);
+        Assert.assertEquals(0.0, slider.getMin(), 0.0);
+        Assert.assertEquals(0.0, slider.getElement().getProperty("min", 0.0),
+                0.0);
+
+        slider.setMin(10.0);
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(10.0, slider.getElement().getProperty("min", 0.0),
+                0.0);
+    }
+
+    @Test
+    public void setMax_getMax() {
+        Slider slider = new Slider(0.0, 100.0, 0.0);
+        Assert.assertEquals(100.0, slider.getMax(), 0.0);
+        Assert.assertEquals(100.0, slider.getElement().getProperty("max", 0.0),
+                0.0);
+
+        slider.setMax(200.0);
+        Assert.assertEquals(200.0, slider.getMax(), 0.0);
+        Assert.assertEquals(200.0, slider.getElement().getProperty("max", 0.0),
+                0.0);
+    }
+
+    @Test
+    public void setStep_getStep() {
+        Slider slider = new Slider(0.0, 100.0, 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(1.0, slider.getElement().getProperty("step", 1.0),
+                0.0);
+
+        slider.setStep(5.0);
+        Assert.assertEquals(5.0, slider.getStep(), 0.0);
+        Assert.assertEquals(5.0, slider.getElement().getProperty("step", 1.0),
+                0.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setMin_greaterThanMax_throws() {
+        Slider slider = new Slider(0.0, 100.0, 0.0);
+        slider.setMin(150.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setMax_lessThanMin_throws() {
+        Slider slider = new Slider(50.0, 100.0, 50.0);
+        slider.setMax(25.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setStep_notPositive_throws() {
+        Slider slider = new Slider(0.0, 100.0, 0.0);
+        slider.setStep(0.0);
     }
 }
