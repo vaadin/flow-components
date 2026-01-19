@@ -15,12 +15,15 @@
  */
 package com.vaadin.flow.component.slider;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 
 /**
@@ -61,6 +64,23 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
         setInvalid(false);
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        checkFeatureFlag(attachEvent.getUI());
+    }
+
+    private void checkFeatureFlag(UI ui) {
+        FeatureFlags featureFlags = FeatureFlags
+                .get(ui.getSession().getService().getContext());
+        boolean enabled = featureFlags
+                .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT);
+
+        if (!enabled) {
+            throw new ExperimentalFeatureException();
+        }
+    }
+
     /**
      * Sets the minimum value of the slider.
      *
@@ -69,8 +89,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if the min is greater than the max value
      */
-    public void setMin(double min) {
-        if (min > getMax()) {
+    void setMin(double min) {
+        if (min > getMaxDouble()) {
             throw new IllegalArgumentException(
                     "The min value cannot be greater than the max value");
         }
@@ -83,8 +103,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the minimum value
      */
-    public double getMin() {
-        return getElement().getProperty("min", 0.0);
+    double getMinDouble() {
+        return getElement().getProperty("min", 0);
     }
 
     /**
@@ -95,8 +115,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if the max is less than the min value
      */
-    public void setMax(double max) {
-        if (max < getMin()) {
+    void setMax(double max) {
+        if (max < getMinDouble()) {
             throw new IllegalArgumentException(
                     "The max value cannot be less than the min value");
         }
@@ -109,8 +129,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the maximum value
      */
-    public double getMax() {
-        return getElement().getProperty("max", 100.0);
+    double getMaxDouble() {
+        return getElement().getProperty("max", 100);
     }
 
     /**
@@ -122,7 +142,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if the step is less than or equal to zero
      */
-    public void setStep(double step) {
+    void setStep(double step) {
         if (step <= 0) {
             throw new IllegalArgumentException(
                     "The step value must be a positive number");
@@ -136,7 +156,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the step value
      */
-    public double getStep() {
-        return getElement().getProperty("step", 1.0);
+    double getStepDouble() {
+        return getElement().getProperty("step", 1);
     }
 }

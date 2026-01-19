@@ -15,10 +15,7 @@
  */
 package com.vaadin.flow.component.slider;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 
 /**
  * Slider is an input field that allows the user to select a numeric value
@@ -32,8 +29,8 @@ import com.vaadin.flow.component.UI;
 // @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> {
 
-    private final static double DEFAULT_MIN = 0.0;
-    private final static double DEFAULT_MAX = 100.0;
+    private final static double DEFAULT_MIN = 0;
+    private final static double DEFAULT_MAX = 100;
 
     /**
      * Constructs a {@code Slider} with a default range of 0 to 100 and an
@@ -154,23 +151,6 @@ public class Slider extends SliderBase<Slider, Double> {
         setLabel(label);
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag(attachEvent.getUI());
-    }
-
-    private void checkFeatureFlag(UI ui) {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
-        boolean enabled = featureFlags
-                .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
     /**
      * @throws IllegalArgumentException
      *             if the value is not between min and max
@@ -183,5 +163,69 @@ public class Slider extends SliderBase<Slider, Double> {
         }
 
         super.setValue(value);
+    }
+
+    /**
+     * Sets the minimum value of the slider.
+     *
+     * @param min
+     *            the minimum value
+     * @throws IllegalArgumentException
+     *             if the min is greater than the max value
+     */
+    public void setMin(double min) {
+        super.setMin(min);
+    }
+
+    /**
+     * Gets the minimum value of the slider.
+     *
+     * @return the minimum value
+     */
+    public double getMin() {
+        return getMinDouble();
+    }
+
+    /**
+     * Sets the maximum value of the slider.
+     *
+     * @param max
+     *            the maximum value
+     * @throws IllegalArgumentException
+     *             if the max is less than the min value
+     */
+    public void setMax(double max) {
+        super.setMax(max);
+    }
+
+    /**
+     * Gets the maximum value of the slider.
+     *
+     * @return the maximum value
+     */
+    public double getMax() {
+        return getMaxDouble();
+    }
+
+    /**
+     * Sets the step value of the slider. The step is the amount the value
+     * changes when the user moves the handle.
+     *
+     * @param step
+     *            the step value
+     * @throws IllegalArgumentException
+     *             if the step is less than or equal to zero
+     */
+    public void setStep(double step) {
+        super.setStep(step);
+    }
+
+    /**
+     * Gets the step value of the slider.
+     *
+     * @return the step value
+     */
+    public double getStep() {
+        return getStepDouble();
     }
 }
