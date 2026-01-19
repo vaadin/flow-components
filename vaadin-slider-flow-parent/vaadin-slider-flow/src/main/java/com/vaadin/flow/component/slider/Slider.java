@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.util.Objects;
+
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Tag;
 
 /**
@@ -31,6 +35,9 @@ public class Slider extends SliderBase<Slider, Double> {
 
     private final static double DEFAULT_MIN = 0;
     private final static double DEFAULT_MAX = 100;
+    private final static double DEFAULT_STEP = 1;
+
+    private boolean pendingStateValidityCheck = false;
 
     /**
      * Constructs a {@code Slider} with a default range of 0 to 100 and an
@@ -63,7 +70,7 @@ public class Slider extends SliderBase<Slider, Double> {
      *            the initial value
      */
     public Slider(double min, double max, double value) {
-        super(min, max, value);
+        super(min, max, DEFAULT_STEP, value);
     }
 
     /**
@@ -153,13 +160,21 @@ public class Slider extends SliderBase<Slider, Double> {
 
     /**
      * @throws IllegalArgumentException
-     *             if the value is not between min and max
+     *             if the value is not between min and max or not aligned with
+     *             the step value
      */
     @Override
     public void setValue(Double value) {
+        Objects.requireNonNull(value, "Value cannot be null");
+
         if (value < getMin() || value > getMax()) {
             throw new IllegalArgumentException(
                     "The value must be between min and max");
+        }
+
+        if (value % getStep() != 0) {
+            throw new IllegalArgumentException(
+                    "The value is not aligned with the step value");
         }
 
         super.setValue(value);
@@ -174,7 +189,19 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if the min is greater than the max value
      */
     public void setMin(double min) {
-        super.setMin(min);
+        super.setMinDouble(min);
+
+        scheduleBeforeClientResponse("min", () -> {
+            if (getValue() < getMin()) {
+                LoggerFactory.getLogger(Slider.class).warn(
+                        """
+                                Value {} is below the minimum of {}. \
+                                This may happen when the minimum was changed but the value was not updated. \
+                                Consider increasing the value or decreasing the minimum to avoid inconsistent behavior.
+                                """,
+                        getValue(), getMin());
+            }
+        });
     }
 
     /**
@@ -195,7 +222,19 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if the max is less than the min value
      */
     public void setMax(double max) {
-        super.setMax(max);
+        super.setMaxDouble(max);
+
+        scheduleBeforeClientResponse("max", () -> {
+            if (getValue() > getMax()) {
+                LoggerFactory.getLogger(Slider.class).warn(
+                        """
+                                Current value {} exceeds the maximum of {}. \
+                                This may happen when the maximum was changed but the value was not updated. \
+                                Consider reducing the value or increasing the maximum to avoid inconsistent behavior.
+                                """,
+                        getValue(), getMax());
+            }
+        });
     }
 
     /**
@@ -213,11 +252,23 @@ public class Slider extends SliderBase<Slider, Double> {
      *
      * @param step
      *            the step value
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentExceptionm
      *             if the step is less than or equal to zero
      */
     public void setStep(double step) {
-        super.setStep(step);
+        super.setStepDouble(step);
+
+        scheduleBeforeClientResponse("step", () -> {
+            if (getValue() % getStep() != 0) {
+                LoggerFactory.getLogger(Slider.class).warn(
+                        """
+                                Value {} is not aligned with the step {}. \
+                                This may happen when the step was changed but the value was not updated. \
+                                Consider adjusting the value to align with the step to avoid inconsistent behavior.
+                                """,
+                        getValue(), getStep());
+            }
+        });
     }
 
     /**
