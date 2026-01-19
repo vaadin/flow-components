@@ -93,12 +93,11 @@ public class UploadManagerPage extends Div {
         // Add status button
         var statusButton = new NativeButton("Log Status",
                 event -> log("Status: enabled=" + manager.isEnabled()
-                        + ", uploading=" + manager.isUploading()
-                        + ", interrupted=" + manager.isInterrupted()
-                        + ", maxFiles=" + manager.getMaxFiles()
-                        + ", maxFileSize=" + manager.getMaxFileSize()
-                        + ", autoUpload=" + manager.isAutoUpload()
-                        + ", acceptedTypes=" + manager.getAcceptedFileTypes()));
+                        + ", uploading=" + manager.isUploading() + ", maxFiles="
+                        + manager.getMaxFiles() + ", maxFileSize="
+                        + manager.getMaxFileSize() + ", autoUpload="
+                        + manager.isAutoUpload() + ", acceptedTypes="
+                        + manager.getAcceptedFileTypes()));
         statusButton.setId("status-button");
         add(statusButton);
 
@@ -218,10 +217,7 @@ public class UploadManagerPage extends Div {
                 event -> connector.getElement().executeJs(
                         "if (this.manager) { this.manager.uploadFiles(); }"));
         triggerUpload.setId("trigger-upload");
-        var interruptUpload = new NativeButton("Interrupt",
-                event -> manager.interruptUpload());
-        interruptUpload.setId("interrupt-upload");
-        uploadControlGroup.add(triggerUpload, interruptUpload);
+        uploadControlGroup.add(triggerUpload);
         add(uploadControlGroup);
 
         // --- Log ---
