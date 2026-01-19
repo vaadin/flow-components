@@ -47,6 +47,29 @@ public class SliderTest {
     }
 
     @Test
+    public void minMaxValueConstructor() {
+        Slider slider = new Slider(10.0, 50.0, 25.0);
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(25.0, slider.getValue(), 0.0);
+    }
+
+    @Test
+    public void minMaxValueListenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        Slider slider = new Slider(10.0, 50.0, 25.0,
+                e -> listenerInvoked.set(true));
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(25.0, slider.getValue(), 0.0);
+
+        slider.setValue(30.0);
+        Assert.assertTrue(listenerInvoked.get());
+    }
+
+    @Test
     public void minMaxStepValueConstructor() {
         Slider slider = new Slider(10.0, 50.0, 5.0, 25.0);
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
@@ -88,6 +111,31 @@ public class SliderTest {
         Assert.assertEquals(0.0, slider.getValue(), 0.0);
 
         slider.setValue(50.0);
+        Assert.assertTrue(listenerInvoked.get());
+    }
+
+    @Test
+    public void labelMinMaxValueConstructor() {
+        Slider slider = new Slider("Label", 10.0, 50.0, 25.0);
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(25.0, slider.getValue(), 0.0);
+    }
+
+    @Test
+    public void labelMinMaxValueListenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        Slider slider = new Slider("Label", 10.0, 50.0, 25.0,
+                e -> listenerInvoked.set(true));
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(25.0, slider.getValue(), 0.0);
+
+        slider.setValue(30.0);
         Assert.assertTrue(listenerInvoked.get());
     }
 
