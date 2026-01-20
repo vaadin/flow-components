@@ -70,14 +70,12 @@ public class Button extends Component
     // bindings of the button separatly from its icon. All `HasText` methods
     // delegate to this node.
     private final Text textNode = new Text("");
-    {
-        add(textNode);
-    }
 
     /**
      * Default constructor. Creates an empty button.
      */
     public Button() {
+        add(textNode);
     }
 
     /**
@@ -88,6 +86,7 @@ public class Button extends Component
      * @see #setText(String)
      */
     public Button(String text) {
+        this();
         setText(text);
     }
 
@@ -98,6 +97,7 @@ public class Button extends Component
      *            the signal of text value
      */
     public Button(Signal<String> textSignal) {
+        this();
         bindText(textSignal);
     }
 
@@ -109,6 +109,7 @@ public class Button extends Component
      * @see #setIcon(Component)
      */
     public Button(Component icon) {
+        this();
         setIcon(icon);
     }
 
@@ -126,6 +127,7 @@ public class Button extends Component
      * @see #setIcon(Component)
      */
     public Button(String text, Component icon) {
+        this();
         setIcon(icon);
         setText(text);
     }
@@ -139,6 +141,7 @@ public class Button extends Component
      *            the icon inside the button
      */
     public Button(Signal<String> textSignal, Component icon) {
+        this();
         setIcon(icon);
         bindText(textSignal);
     }
@@ -155,6 +158,7 @@ public class Button extends Component
      */
     public Button(String text,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         setText(text);
         addClickListener(clickListener);
     }
@@ -170,6 +174,7 @@ public class Button extends Component
      */
     public Button(Signal<String> textSignal,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         bindText(textSignal);
         addClickListener(clickListener);
     }
@@ -186,6 +191,7 @@ public class Button extends Component
      */
     public Button(Component icon,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         setIcon(icon);
         addClickListener(clickListener);
     }
@@ -205,6 +211,7 @@ public class Button extends Component
      */
     public Button(String text, Component icon,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         setIcon(icon);
         setText(text);
         addClickListener(clickListener);
@@ -223,6 +230,7 @@ public class Button extends Component
      */
     public Button(Signal<String> textSignal, Component icon,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         setIcon(icon);
         bindText(textSignal);
         addClickListener(clickListener);
