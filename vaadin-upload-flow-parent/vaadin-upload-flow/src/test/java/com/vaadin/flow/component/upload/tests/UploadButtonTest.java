@@ -81,7 +81,7 @@ public class UploadButtonTest {
     public void constructor_withManager_linksToManager() {
         UploadButton button = new UploadButton(manager);
 
-        Assert.assertNotNull(button);
+        Assert.assertSame(manager, button.getManager());
     }
 
     @Test
@@ -90,8 +90,14 @@ public class UploadButtonTest {
 
         button.setManager(manager);
 
-        // No exception means success (actual linking happens on attach)
-        Assert.assertNotNull(button);
+        Assert.assertSame(manager, button.getManager());
+    }
+
+    @Test
+    public void getManager_default_returnsNull() {
+        UploadButton button = new UploadButton();
+
+        Assert.assertNull(button.getManager());
     }
 
     @Test

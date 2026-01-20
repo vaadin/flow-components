@@ -52,6 +52,7 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("@vaadin/upload/src/vaadin-upload-file-list.js")
 public class UploadFileList extends Component {
 
+    private UploadManager manager;
     private UploadFileListI18N i18n;
 
     /**
@@ -79,9 +80,19 @@ public class UploadFileList extends Component {
      *            the upload manager, or {@code null} to unlink
      */
     public final void setManager(UploadManager manager) {
+        this.manager = manager;
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> setTarget(manager)));
         addAttachListener(event -> setTarget(manager));
+    }
+
+    /**
+     * Gets the upload manager that this file list is linked to.
+     *
+     * @return the upload manager, or {@code null} if not linked
+     */
+    public UploadManager getManager() {
+        return manager;
     }
 
     private void setTarget(UploadManager manager) {

@@ -82,7 +82,7 @@ public class UploadDropZoneTest {
     public void constructor_withManager_linksToManager() {
         UploadDropZone dropZone = new UploadDropZone(manager);
 
-        Assert.assertNotNull(dropZone);
+        Assert.assertSame(manager, dropZone.getManager());
     }
 
     @Test
@@ -91,8 +91,14 @@ public class UploadDropZoneTest {
 
         dropZone.setManager(manager);
 
-        // No exception means success (actual linking happens on attach)
-        Assert.assertNotNull(dropZone);
+        Assert.assertSame(manager, dropZone.getManager());
+    }
+
+    @Test
+    public void getManager_default_returnsNull() {
+        UploadDropZone dropZone = new UploadDropZone();
+
+        Assert.assertNull(dropZone.getManager());
     }
 
     @Test
