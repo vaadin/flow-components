@@ -58,7 +58,8 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(notification);
         assertTextSignalBindingActive();
         Assert.assertEquals(0, notification.getDuration(), 0);
-        Assert.assertEquals("bottom-start", notification.getPosition().getClientName());
+        Assert.assertEquals("bottom-start",
+                notification.getPosition().getClientName());
     }
 
     @Test
@@ -67,7 +68,8 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(notification);
         assertTextSignalBindingActive();
         Assert.assertEquals(4000, notification.getDuration(), 0);
-        Assert.assertEquals("bottom-start", notification.getPosition().getClientName());
+        Assert.assertEquals("bottom-start",
+                notification.getPosition().getClientName());
     }
 
     @Test
@@ -76,16 +78,19 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(notification);
         assertTextSignalBindingActive();
         Assert.assertEquals(10000, notification.getDuration(), 0);
-        Assert.assertEquals("top-end", notification.getPosition().getClientName());
+        Assert.assertEquals("top-end",
+                notification.getPosition().getClientName());
     }
 
     @Test
     public void textSignalAndDurationAndPositionAndAssertiveCtor() {
-        notification = new Notification(textSignal, 10000, Position.TOP_END, true);
+        notification = new Notification(textSignal, 10000, Position.TOP_END,
+                true);
         UI.getCurrent().add(notification);
         assertTextSignalBindingActive();
         Assert.assertEquals(10000, notification.getDuration(), 0);
-        Assert.assertEquals("top-end", notification.getPosition().getClientName());
+        Assert.assertEquals("top-end",
+                notification.getPosition().getClientName());
         Assert.assertTrue(notification.isAssertive());
     }
 
@@ -169,12 +174,12 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
             }
 
             public SpyNotification(Signal<String> textSignal, int duration,
-                                   Position position) {
+                    Position position) {
                 super(textSignal, duration, position);
             }
 
             public SpyNotification(Signal<String> textSignal, int duration,
-                                   Position position, boolean assertive) {
+                    Position position, boolean assertive) {
                 super(textSignal, duration, position, assertive);
             }
 
@@ -197,7 +202,8 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         Mockito.verify(mockNotification, Mockito.times(1)).bindText(textSignal);
         Mockito.clearInvocations(mockNotification);
 
-        notification = new SpyNotification(textSignal, 4000, Position.TOP_END, true);
+        notification = new SpyNotification(textSignal, 4000, Position.TOP_END,
+                true);
         Mockito.verify(mockNotification, Mockito.times(1)).bindText(textSignal);
     }
 
@@ -208,7 +214,8 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         notification.setText("initial");
 
         // Verify textSupport is used by checking it's the same instance
-        Assert.assertSame(notification.getTextSupport().get(), notification.getElement().getProperty("text", ""));
+        Assert.assertSame(notification.getTextSupport().get(),
+                notification.getElement().getProperty("text", ""));
     }
 
     @Test

@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.signals.ValueSignal;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +36,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.signals.ValueSignal;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -134,7 +134,8 @@ public class NotificationTest {
 
         Collection<Notification> notificationsToCheck = Arrays.asList(
                 new Notification(), new Notification("test"),
-                new Notification(new Span("one"), new Span("two")), new Notification(new ValueSignal<>("signal")));
+                new Notification(new Span("one"), new Span("two")),
+                new Notification(new ValueSignal<>("signal")));
 
         Assert.assertEquals(
                 "Not all of the Notification constructors without duration parameter are tested",
