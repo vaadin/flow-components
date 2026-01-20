@@ -24,7 +24,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.WrapsElement;
+import org.openqa.selenium.chromium.ChromiumDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.LocalFileDetector;
+import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.safari.SafariDriver;
 
 import com.vaadin.flow.testutil.TestPath;
 
@@ -45,7 +53,6 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         uploadFile(tempFile);
-        logStatus();
         assertLogContains("Uploaded: " + tempFile.getName());
     }
 
@@ -55,7 +62,6 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile2 = createTempFile("file2", "txt");
 
         uploadFiles(tempFile1, tempFile2);
-        logStatus();
         assertLogContains("All uploads finished");
         assertLogContains("Uploaded: " + tempFile1.getName());
         assertLogContains("Uploaded: " + tempFile2.getName());
@@ -69,7 +75,6 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile2 = createTempFile("file2", "txt");
 
         uploadFiles(tempFile1, tempFile2);
-        logStatus();
         assertLogContains("Rejected:");
     }
 
@@ -81,7 +86,6 @@ public class UploadManagerIT extends AbstractUploadIT {
         File largeFile = createLargeFile(150);
 
         uploadFile(largeFile);
-        logStatus();
         assertLogContains("Rejected: " + largeFile.getName());
     }
 
@@ -93,7 +97,6 @@ public class UploadManagerIT extends AbstractUploadIT {
         File textFile = createTempFile("txt");
 
         uploadFile(textFile);
-        logStatus();
         assertLogContains("Rejected: " + textFile.getName());
     }
 
@@ -105,7 +108,6 @@ public class UploadManagerIT extends AbstractUploadIT {
         File textFile = createTempFile("txt");
 
         uploadFile(textFile);
-        logStatus();
         assertLogContains("Uploaded: " + textFile.getName());
     }
 
@@ -140,7 +142,7 @@ public class UploadManagerIT extends AbstractUploadIT {
 
         // Manually trigger upload
         clickButton("trigger-upload");
-        logStatus();
+
         assertLogContains("Uploaded: " + tempFile.getName());
     }
 
@@ -149,7 +151,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         uploadFile(tempFile);
-        logStatus();
+
         assertLogContains("Uploaded:");
 
         clickButton("remove-first-file");
@@ -212,12 +214,12 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     private void uploadFile(File file) {
-        WebElement input = findElement(By.id("native-file-input"));
+        WebElement input = getFileInput();
         input.sendKeys(file.getAbsolutePath());
     }
 
     private void uploadFiles(File... files) {
-        WebElement input = findElement(By.id("native-file-input"));
+        WebElement input = getFileInput();
         StringBuilder paths = new StringBuilder();
         for (File file : files) {
             if (!paths.isEmpty()) {
@@ -226,6 +228,31 @@ public class UploadManagerIT extends AbstractUploadIT {
             paths.append(file.getAbsolutePath());
         }
         input.sendKeys(paths.toString());
+    }
+
+    private WebElement getFileInput() {
+        WebElement input = findElement(By.id("native-file-input"));
+        // Set LocalFileDetector for remote browser support (e.g., CI Selenium
+        // grid)
+        WebElement realInput = input;
+        while (realInput instanceof WrapsElement) {
+            realInput = ((WrapsElement) realInput).getWrappedElement();
+        }
+        if (realInput instanceof RemoteWebElement && !isLocalDriver()) {
+            ((RemoteWebElement) realInput)
+                    .setFileDetector(new LocalFileDetector());
+        }
+        return input;
+    }
+
+    private boolean isLocalDriver() {
+        WebDriver driver = getDriver();
+        while (driver instanceof WrapsDriver) {
+            driver = ((WrapsDriver) driver).getWrappedDriver();
+        }
+        return driver instanceof ChromiumDriver
+                || driver instanceof FirefoxDriver
+                || driver instanceof SafariDriver;
     }
 
     private void clickButton(String id) {
@@ -237,7 +264,10 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     private void assertLogContains(String text) {
-        waitUntil(driver -> getLogText().contains(text), 10);
+        waitUntil(driver -> {
+            logStatus();
+            return getLogText().contains(text);
+        }, 100);
     }
 
     private void logStatus() {
