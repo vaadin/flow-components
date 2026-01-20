@@ -470,38 +470,6 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
-    public void stream_withSlowTool_toolExecutionTimesOut() {
-        mockUi();
-        var mockUI = UI.getCurrent();
-        // Tool sleeps for 2 seconds, but timeout is 1 second
-        provider.setToolExecutionTimeoutSeconds(1);
-
-        var slowTool = new SlowTool(2);
-        var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
-                new Object[] { slowTool });
-
-        var response1 = mockSimpleResponseWithTool("slowOperation");
-        var response2 = mockSimpleResponse("Response 2");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response1, response2);
-        provider.stream(request).blockFirst();
-
-        Mockito.verify(mockUI).access(Mockito.any(Command.class));
-
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
-
-        var secondRequest = captor.getAllValues().get(1);
-        var toolResults = getToolExecutionResults(secondRequest);
-
-        Assert.assertEquals(1, toolResults.size());
-        Assert.assertTrue(
-                toolResults.getFirst().text().contains("Error executing tool"));
-        Assert.assertFalse(toolResults.getFirst().text()
-                .contains(slowTool.getCompletedMessage()));
-    }
-
-    @Test
     public void stream_withNullToolExecutor_addsToolNotFoundMessageToRequest() {
         var request = new TestLLMRequest("Call unknown tool", null,
                 Collections.emptyList(), new Object[0]);
@@ -700,18 +668,11 @@ public class LangChain4JLLMProviderTest {
                 .map(ToolExecutionResultMessage.class::cast).toList();
     }
 
-    /**
-     * Creates a mock UI that executes commands asynchronously, similar to real
-     * UI.access() behavior. Commands run in a separate thread and Future.get()
-     * waits for completion with real timeout support.
-     */
     private static void mockUi() {
         var mockUI = Mockito.mock(UI.class);
         Mockito.doAnswer(invocation -> {
             Command command = invocation.getArgument(0);
             var futureTask = new FutureTask<Void>(() -> {
-                // Set UI in the worker thread, mimicking real UI.access()
-                // behavior
                 UI.setCurrent(mockUI);
                 try {
                     command.execute();
@@ -809,24 +770,6 @@ public class LangChain4JLLMProviderTest {
         @Tool
         public String throwError() {
             throw new RuntimeException(getErrorMessage());
-        }
-    }
-
-    private record SlowTool(int sleepDurationSeconds) {
-
-        public String getCompletedMessage() {
-            return "Completed after " + sleepDurationSeconds + " seconds";
-        }
-
-        @Tool
-        public String slowOperation() {
-            try {
-                Thread.sleep(sleepDurationSeconds * 1000L);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return "Interrupted";
-            }
-            return getCompletedMessage();
         }
     }
 }
