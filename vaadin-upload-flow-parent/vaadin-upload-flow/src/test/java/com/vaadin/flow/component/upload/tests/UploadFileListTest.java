@@ -82,7 +82,7 @@ public class UploadFileListTest {
     public void constructor_withManager_linksToManager() {
         UploadFileList fileList = new UploadFileList(manager);
 
-        Assert.assertNotNull(fileList);
+        Assert.assertSame(manager, fileList.getManager());
     }
 
     @Test
@@ -91,8 +91,14 @@ public class UploadFileListTest {
 
         fileList.setManager(manager);
 
-        // No exception means success (actual linking happens on attach)
-        Assert.assertNotNull(fileList);
+        Assert.assertSame(manager, fileList.getManager());
+    }
+
+    @Test
+    public void getManager_default_returnsNull() {
+        UploadFileList fileList = new UploadFileList();
+
+        Assert.assertNull(fileList.getManager());
     }
 
     @Test

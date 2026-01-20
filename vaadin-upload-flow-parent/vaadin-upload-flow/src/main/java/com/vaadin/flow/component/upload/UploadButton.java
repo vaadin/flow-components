@@ -41,6 +41,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 public class UploadButton extends Button {
 
+    private UploadManager manager;
+
     /**
      * Creates a new upload button without a manager. The manager must be set
      * later using {@link #setManager(UploadManager)}.
@@ -66,9 +68,19 @@ public class UploadButton extends Button {
      *            the upload manager, or {@code null} to unlink
      */
     public final void setManager(UploadManager manager) {
+        this.manager = manager;
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> setTarget(manager)));
         addAttachListener(event -> setTarget(manager));
+    }
+
+    /**
+     * Gets the upload manager that this button is linked to.
+     *
+     * @return the upload manager, or {@code null} if not linked
+     */
+    public UploadManager getManager() {
+        return manager;
     }
 
     private void setTarget(UploadManager manager) {
