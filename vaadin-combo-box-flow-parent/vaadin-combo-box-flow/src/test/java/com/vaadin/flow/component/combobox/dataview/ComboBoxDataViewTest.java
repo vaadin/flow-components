@@ -40,9 +40,9 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
 import com.vaadin.tests.dataprovider.CustomInMemoryDataProvider;
-import com.vaadin.tests.dataprovider.MockUI;
 
 public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
 
