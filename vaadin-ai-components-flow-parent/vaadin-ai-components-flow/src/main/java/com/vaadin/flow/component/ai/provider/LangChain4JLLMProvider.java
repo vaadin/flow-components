@@ -160,18 +160,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             Arrays.stream(toolObject.getClass().getDeclaredMethods())
                     .filter(method -> method.isAnnotationPresent(Tool.class))
                     .forEach(method -> {
-                        // This can fail in environments where the module
-                        // doesn't allow
-                        // reflective access, in which case we skip the method.
-                        try {
-                            method.setAccessible(true);
-                        } catch (Exception e) {
-                            LOGGER.warn(
-                                    "Failed to make tool method accessible: {}. "
-                                            + "Ensure the method is public or the module allows reflective access.",
-                                    method.getName(), e);
-                            return;
-                        }
                         var toolExecutor = getToolExecutor(toolObject, method);
                         var toolExecutorKey = ToolSpecifications
                                 .toolSpecificationFrom(method).name();
