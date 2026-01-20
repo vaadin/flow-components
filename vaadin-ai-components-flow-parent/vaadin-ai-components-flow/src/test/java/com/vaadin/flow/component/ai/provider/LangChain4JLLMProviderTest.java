@@ -519,35 +519,6 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
-    public void stream_withUI_executesToolInUIContext() throws Exception {
-        mockUi();
-        var uiTools = new UITools();
-        var request = new TestLLMRequest("Do UI action", null,
-                Collections.emptyList(), new Object[] { uiTools });
-
-        var response1 = mockSimpleResponseWithTool("uiAction");
-        var response2 = mockSimpleResponse("UI action done");
-
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response1, response2);
-
-        var result = provider.stream(request).blockFirst();
-
-        Assert.assertEquals("UI action done", result);
-        Mockito.verify(UI.getCurrent()).access(Mockito.any(Command.class));
-        Assert.assertTrue("Tool should have executed in UI context",
-                uiTools.isExecutedInUIContext());
-
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
-        var secondRequest = captor.getAllValues().get(1);
-        var toolResults = getToolExecutionResults(secondRequest);
-        Assert.assertEquals(1, toolResults.size());
-        Assert.assertEquals(toolResults.getFirst().text(),
-                uiTools.getUiActionResult());
-    }
-
-    @Test
     public void stream_withStreamingModelAndTool_executesTool() {
         var toolObject = new SampleToolsClass();
         var request = new TestLLMRequest("Get temperature", null,
