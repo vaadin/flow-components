@@ -71,6 +71,9 @@ public class Button extends Component
     // delegate to this node.
     private final Text textNode = new Text("");
 
+    private final SignalPropertySupport<String> textSupport = SignalPropertySupport
+            .<String> create(this, this::textChangeHandler);
+
     /**
      * Default constructor. Creates an empty button.
      */
@@ -253,9 +256,7 @@ public class Button extends Component
     @Override
     public void setText(String text) {
         textNode.setText(text);
-        updateChildren();
-        updateIconSlot();
-        updateThemeAttribute();
+        textChangeHandler(text);
     }
 
     @Override
@@ -276,11 +277,7 @@ public class Button extends Component
     @Override
     public void bindText(Signal<String> textSignal) {
         textNode.bindText(textSignal);
-        SignalPropertySupport.<String> create(this, (text) -> {
-            updateChildren();
-            updateIconSlot();
-            updateThemeAttribute();
-        }).bind(textSignal);
+        textSupport.bind(textSignal);
     }
 
     /**
@@ -636,5 +633,18 @@ public class Button extends Component
         getElement().removeAllChildren();
 
         getElement().appendChild(elements);
+    }
+
+    /**
+     * Makes DOM updates related and coinciding with changing text, including
+     * icon slot, theme attribute, and handling template content.
+     *
+     * @param text
+     *            the text inside the button
+     */
+    private void textChangeHandler(String text) {
+        updateChildren();
+        updateIconSlot();
+        updateThemeAttribute();
     }
 }
