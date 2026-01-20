@@ -23,7 +23,7 @@ public class AiComponentsSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
-                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.langchain4j\\.LangChain4JLLMProvider\\$.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LangChain4JLLMProvider\\$.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LLMProviderHelpers"));
     }
 }
