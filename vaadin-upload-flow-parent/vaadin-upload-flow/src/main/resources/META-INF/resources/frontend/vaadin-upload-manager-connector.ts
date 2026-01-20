@@ -46,6 +46,10 @@ class UploadManagerConnector extends HTMLElement {
     this.manager.noAuto = value;
   }
 
+  clearFileList() {
+    this.manager.files = [];
+  }
+
   constructor() {
     super();
 

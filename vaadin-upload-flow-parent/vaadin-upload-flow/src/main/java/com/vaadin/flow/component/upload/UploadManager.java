@@ -327,8 +327,7 @@ public class UploadManager implements Serializable {
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        connector.getElement()
-                .executeJs("if (this.manager) { this.manager.files = []; }");
+        connector.getElement().callJsFunction("clearFileList");
     }
 
     /**
