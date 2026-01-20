@@ -153,58 +153,6 @@ public class LLMProviderHelpersTest {
                 exception.getMessage());
     }
 
-    @Test
-    public void supportedContentType_fromMimeType_withImageTypes_returnsImage() {
-        Assert.assertEquals(LLMProviderHelpers.AttachmentContentType.IMAGE,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("image/png"));
-        Assert.assertEquals(LLMProviderHelpers.AttachmentContentType.IMAGE,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("image/jpeg"));
-        Assert.assertEquals(LLMProviderHelpers.AttachmentContentType.IMAGE,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("image/gif"));
-    }
-
-    @Test
-    public void supportedContentType_fromMimeType_withTextTypes_returnsText() {
-        Assert.assertEquals(LLMProviderHelpers.AttachmentContentType.TEXT,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("text/plain"));
-        Assert.assertEquals(LLMProviderHelpers.AttachmentContentType.TEXT,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("text/html"));
-    }
-
-    @Test
-    public void supportedContentType_fromMimeType_withPdfTypes_returnsPdf() {
-        Assert.assertEquals(LLMProviderHelpers.AttachmentContentType.PDF,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("application/pdf"));
-        Assert.assertEquals(LLMProviderHelpers.AttachmentContentType.PDF,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("application/x-pdf"));
-    }
-
-    @Test
-    public void supportedContentType_fromMimeType_withUnsupportedTypes_returnsUnsupported() {
-        Assert.assertEquals(
-                LLMProviderHelpers.AttachmentContentType.UNSUPPORTED,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("application/octet-stream"));
-        Assert.assertEquals(
-                LLMProviderHelpers.AttachmentContentType.UNSUPPORTED,
-                LLMProviderHelpers.AttachmentContentType
-                        .fromMimeType("video/mp4"));
-    }
-
-    @Test
-    public void supportedContentType_fromMimeType_withNull_returnsUnsupported() {
-        Assert.assertEquals(
-                LLMProviderHelpers.AttachmentContentType.UNSUPPORTED,
-                LLMProviderHelpers.AttachmentContentType.fromMimeType(null));
-    }
-
     private static byte[] getInvalidUtf8Data() {
         return new byte[] { 'H', 'i', (byte) 0xFF, (byte) 0xFE };
     }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.provider.langchain4j;
+package com.vaadin.flow.component.ai.provider;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,6 +40,7 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.PdfFileContent;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
@@ -372,10 +373,9 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withPdfAttachment_handlesPdf() {
-        var pdfTextContent = "PDF text content";
-        var attachment = new TestAttachment(
-                pdfTextContent.getBytes(StandardCharsets.UTF_8),
-                "application/pdf", "document.pdf");
+        var pdfData = "PDF binary content".getBytes(StandardCharsets.UTF_8);
+        var attachment = new TestAttachment(pdfData, "application/pdf",
+                "document.pdf");
         var request = new TestLLMRequest("Summarize this document", null,
                 List.of(attachment), new Object[0]);
 
@@ -385,44 +385,35 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel).chat(captor.capture());
 
         var userMessage = (UserMessage) captor.getValue().messages().getFirst();
-        var textContent = userMessage.contents().stream()
-                .filter(TextContent.class::isInstance)
-                .map(TextContent.class::cast)
-                .filter(c -> c.text().contains(pdfTextContent)).findFirst()
+        var pdfContent = userMessage.contents().stream()
+                .filter(PdfFileContent.class::isInstance).findFirst()
                 .orElse(null);
 
-        Assert.assertNotNull("Should include PDF content as text", textContent);
-        Assert.assertTrue("Should wrap in attachment tags", textContent.text()
-                .contains("<attachment filename=\"document.pdf\">"));
+        Assert.assertNotNull("Should include PDF content as PdfFileContent",
+                pdfContent);
     }
 
     @Test
-    public void stream_withBinaryPdfData_throwsIllegalArgumentException() {
-        var invalidBinaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46,
-                (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x80 };
-        var attachment = new TestAttachment(invalidBinaryPdfData,
-                "application/pdf", "binary.pdf");
-        var request = new TestLLMRequest("Summarize", null, List.of(attachment),
-                new Object[0]);
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> provider.stream(request).blockFirst());
-    }
-
-    @Test
-    public void stream_withValidTextPdf_succeeds() {
-        var validPdfTextData = "This is extracted PDF content with UTF-8: café"
-                .getBytes(StandardCharsets.UTF_8);
-        var attachment = new TestAttachment(validPdfTextData, "application/pdf",
-                "text.pdf");
+    public void stream_withBinaryPdfData_handlesBinaryPdf() {
+        // Binary PDF data should be handled correctly with base64 encoding
+        var binaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46, (byte) 0xFF,
+                (byte) 0xFE, (byte) 0x00, (byte) 0x80 };
+        var attachment = new TestAttachment(binaryPdfData, "application/pdf",
+                "binary.pdf");
         var request = new TestLLMRequest("Summarize", null, List.of(attachment),
                 new Object[0]);
 
-        var response = mockSimpleResponse("Summary");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
+        mockSimpleChat(request, "Summary");
 
-        var result = provider.stream(request).blockFirst();
-        Assert.assertEquals("Summary", result);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        var pdfContent = userMessage.contents().stream()
+                .filter(PdfFileContent.class::isInstance).findFirst()
+                .orElse(null);
+
+        Assert.assertNotNull("Should handle binary PDF data", pdfContent);
     }
 
     @Test

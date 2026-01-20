@@ -27,44 +27,7 @@ import java.util.Objects;
  * <p>
  * Intended only for internal use and can be removed in the future.
  */
-public final class LLMProviderHelpers {
-
-    /**
-     * Supported content type categories for attachments.
-     */
-    public enum AttachmentContentType {
-        /** Image content types (image/*). */
-        IMAGE,
-        /** Text content types (text/*). */
-        TEXT,
-        /** PDF content types (application/pdf, application/x-pdf). */
-        PDF,
-        /** Unsupported or unknown content types. */
-        UNSUPPORTED;
-
-        /**
-         * Detects the content type category from a MIME type string.
-         *
-         * @param contentType
-         *            the MIME content type
-         * @return the corresponding category, or {@code UNSUPPORTED} if not
-         *         recognized
-         */
-        public static AttachmentContentType fromMimeType(String contentType) {
-            if (contentType != null) {
-                if (contentType.startsWith("image/")) {
-                    return IMAGE;
-                }
-                if (contentType.contains("text")) {
-                    return TEXT;
-                }
-                if (contentType.contains("pdf")) {
-                    return PDF;
-                }
-            }
-            return UNSUPPORTED;
-        }
-    }
+final class LLMProviderHelpers {
 
     /**
      * Decodes byte array as UTF-8 text.
@@ -107,8 +70,11 @@ public final class LLMProviderHelpers {
      * @return a data URL in the format "data:{contentType};base64,{data}"
      */
     public static String toBase64DataUrl(byte[] data, String contentType) {
-        var base64 = Base64.getEncoder().encodeToString(data);
-        return "data:" + contentType + ";base64," + base64;
+        return "data:" + contentType + ";base64," + getBase64Data(data);
+    }
+
+    public static String getBase64Data(byte[] data) {
+        return Base64.getEncoder().encodeToString(data);
     }
 
     /**

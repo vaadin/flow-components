@@ -13,9 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.provider.langchain4j;
+package com.vaadin.flow.component.ai.provider;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,21 +31,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.provider.LLMProviderHelpers;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.AudioContent;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.PdfFileContent;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.data.message.VideoContent;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -124,7 +124,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 "User message must not be null");
         return Flux.create(sink -> {
             try {
-                chatMemory.add(buildUserMessage(request));
+                var userMessage = buildUserMessage(request);
+                chatMemory.add(userMessage);
                 var toolContext = new ToolContext(prepareToolExecutors(request),
                         prepareToolSpecifications(request));
                 var context = new ChatExecutionContext(request, sink,
@@ -137,7 +138,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
-     * Only for testing purposes
+     * Sets the timeout for tool execution in seconds. Only for testing
+     * purposes.
+     *
+     * @param toolExecutionTimeoutSeconds
+     *            the timeout in seconds
      */
     void setToolExecutionTimeoutSeconds(int toolExecutionTimeoutSeconds) {
         this.toolExecutionTimeoutSeconds = toolExecutionTimeoutSeconds;
@@ -155,11 +160,15 @@ public class LangChain4JLLMProvider implements LLMProvider {
             Arrays.stream(toolObject.getClass().getDeclaredMethods())
                     .filter(method -> method.isAnnotationPresent(Tool.class))
                     .forEach(method -> {
+                        // This can fail in environments where the module
+                        // doesn't allow
+                        // reflective access, in which case we skip the method.
                         try {
                             method.setAccessible(true);
                         } catch (Exception e) {
                             LOGGER.warn(
-                                    "Failed to make tool method accessible: {}",
+                                    "Failed to make tool method accessible: {}. "
+                                            + "Ensure the method is public or the module allows reflective access.",
                                     method.getName(), e);
                             return;
                         }
@@ -172,7 +181,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return toolExecutors;
     }
 
-    private ToolExecutor getToolExecutor(Object toolObject, Method method) {
+    private ToolExecutor getToolExecutor(Object toolObject,
+            java.lang.reflect.Method method) {
         var baseExecutor = new DefaultToolExecutor(toolObject, method);
         return (toolRequest, memoryId) -> {
             var currentUI = UI.getCurrent();
@@ -358,12 +368,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private static Optional<Content> getAttachmentContent(
             Attachment attachment) {
         LLMProviderHelpers.validateAttachment(attachment);
-        var contentType = LLMProviderHelpers.AttachmentContentType
+        var contentType = AttachmentContentType
                 .fromMimeType(attachment.contentType());
         return switch (contentType) {
         case IMAGE -> Optional.of(getImageAttachmentContent(attachment));
         case TEXT -> Optional.of(getTextAttachmentContent(attachment));
         case PDF -> Optional.of(getPdfAttachmentContent(attachment));
+        case AUDIO -> Optional.of(getAudioAttachmentContent(attachment));
+        case VIDEO -> Optional.of(getVideoAttachmentContent(attachment));
         case UNSUPPORTED -> Optional.empty();
         };
     }
@@ -375,18 +387,28 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 .formatTextAttachment(attachment.fileName(), textContent));
     }
 
-    private static TextContent getPdfAttachmentContent(Attachment attachment) {
-        var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
-                attachment.fileName(), true);
-        return TextContent.from(LLMProviderHelpers
-                .formatTextAttachment(attachment.fileName(), textContent));
+    private static PdfFileContent getPdfAttachmentContent(
+            Attachment attachment) {
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return PdfFileContent.from(base64, attachment.contentType());
     }
 
     private static ImageContent getImageAttachmentContent(
             Attachment attachment) {
-        var dataUrl = LLMProviderHelpers.toBase64DataUrl(attachment.data(),
-                attachment.contentType());
-        return ImageContent.from(dataUrl, ImageContent.DetailLevel.AUTO);
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return ImageContent.from(base64, attachment.contentType());
+    }
+
+    private static AudioContent getAudioAttachmentContent(
+            Attachment attachment) {
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return AudioContent.from(base64, attachment.contentType());
+    }
+
+    private static VideoContent getVideoAttachmentContent(
+            Attachment attachment) {
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return VideoContent.from(base64, attachment.contentType());
     }
 
     /**
