@@ -17,6 +17,7 @@ package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.signals.Signal;
 
 /**
  * Mixin interface for components that provide properties for setting invalid
@@ -51,6 +52,27 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     @Override
     default String getErrorMessage() {
         return getElement().getProperty("errorMessage");
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Binds a given signal to the single error message to display for all
+     * constraint violations. The error message will only appear when the
+     * component is flagged as invalid, either as a result of constraint
+     * validation or by the developer through {@link #setInvalid(boolean)} if
+     * manual validation mode is enabled.
+     * <p>
+     * Signal's value {@code null} clears the error message.
+     *
+     * @param signal
+     *            the signal to bind the error message to, or {@code null} to
+     *            clear the existing binding
+     */
+    @Override
+    default void bindErrorMessage(Signal<String> signal) {
+        getElement().bindProperty("errorMessage", signal
+                .map(errorMessage -> errorMessage == null ? "" : errorMessage));
     }
 
     /**
