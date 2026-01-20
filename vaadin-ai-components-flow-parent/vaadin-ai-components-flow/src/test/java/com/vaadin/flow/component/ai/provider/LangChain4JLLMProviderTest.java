@@ -20,16 +20,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.FutureTask;
 import java.util.stream.IntStream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.provider.LLMProvider.Attachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
+import com.vaadin.flow.server.Command;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -61,6 +65,11 @@ public class LangChain4JLLMProviderTest {
         mockStreamingChatModel = Mockito.mock(StreamingChatModel.class);
         provider = new LangChain4JLLMProvider(mockChatModel);
         streamingProvider = new LangChain4JLLMProvider(mockStreamingChatModel);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -461,6 +470,38 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
+    public void stream_withSlowTool_toolExecutionTimesOut() {
+        mockUi();
+        var mockUI = UI.getCurrent();
+        // Tool sleeps for 2 seconds, but timeout is 1 second
+        provider.setToolExecutionTimeoutSeconds(1);
+
+        var slowTool = new SlowTool(2);
+        var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
+                new Object[] { slowTool });
+
+        var response1 = mockSimpleResponseWithTool("slowOperation");
+        var response2 = mockSimpleResponse("Response 2");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+        provider.stream(request).blockFirst();
+
+        Mockito.verify(mockUI).access(Mockito.any(Command.class));
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResults = getToolExecutionResults(secondRequest);
+
+        Assert.assertEquals(1, toolResults.size());
+        Assert.assertTrue(
+                toolResults.getFirst().text().contains("Error executing tool"));
+        Assert.assertFalse(toolResults.getFirst().text()
+                .contains(slowTool.getCompletedMessage()));
+    }
+
+    @Test
     public void stream_withNullToolExecutor_addsToolNotFoundMessageToRequest() {
         var request = new TestLLMRequest("Call unknown tool", null,
                 Collections.emptyList(), new Object[0]);
@@ -480,6 +521,62 @@ public class LangChain4JLLMProviderTest {
         Assert.assertEquals(1, toolResults.size());
         Assert.assertTrue(
                 toolResults.getFirst().text().contains("Tool not found"));
+    }
+
+    @Test
+    public void stream_withoutUI_executesTool() {
+        var uiTools = new UITools();
+        var request = new TestLLMRequest("Do UI action", null,
+                Collections.emptyList(), new Object[] { uiTools });
+
+        var response1 = mockSimpleResponseWithTool("uiAction");
+        var response2 = mockSimpleResponse("UI action done");
+
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        var result = provider.stream(request).blockFirst();
+
+        Assert.assertEquals("UI action done", result);
+        Assert.assertFalse("Tool should not have executed in UI context",
+                uiTools.isExecutedInUIContext());
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResults = getToolExecutionResults(secondRequest);
+        Assert.assertEquals(1, toolResults.size());
+        Assert.assertEquals(toolResults.getFirst().text(),
+                uiTools.getUiActionResult());
+    }
+
+    @Test
+    public void stream_withUI_executesToolInUIContext() throws Exception {
+        mockUi();
+        var uiTools = new UITools();
+        var request = new TestLLMRequest("Do UI action", null,
+                Collections.emptyList(), new Object[] { uiTools });
+
+        var response1 = mockSimpleResponseWithTool("uiAction");
+        var response2 = mockSimpleResponse("UI action done");
+
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        var result = provider.stream(request).blockFirst();
+
+        Assert.assertEquals("UI action done", result);
+        Mockito.verify(UI.getCurrent()).access(Mockito.any(Command.class));
+        Assert.assertTrue("Tool should have executed in UI context",
+                uiTools.isExecutedInUIContext());
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResults = getToolExecutionResults(secondRequest);
+        Assert.assertEquals(1, toolResults.size());
+        Assert.assertEquals(toolResults.getFirst().text(),
+                uiTools.getUiActionResult());
     }
 
     @Test
@@ -589,6 +686,30 @@ public class LangChain4JLLMProviderTest {
                 toolResultMessages.getFirst().text());
     }
 
+    @Test
+    public void stream_withPrivateTool_executesPrivateTool() {
+        var toolObject = new PrivateToolClass();
+        var request = new TestLLMRequest("Call private tool", null,
+                Collections.emptyList(), new Object[] { toolObject });
+
+        var response1 = mockSimpleResponseWithTool("privateMethod");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResultMessages = getToolExecutionResults(secondRequest);
+
+        Assert.assertEquals(1, toolResultMessages.size());
+        Assert.assertEquals(toolObject.getPrivateMethodResult(),
+                toolResultMessages.getFirst().text());
+    }
+
     private void mockSimpleChat(LLMRequest request, String responseText) {
         var response = mockSimpleResponse(responseText);
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
@@ -601,6 +722,32 @@ public class LangChain4JLLMProviderTest {
         return request.messages().stream()
                 .filter(ToolExecutionResultMessage.class::isInstance)
                 .map(ToolExecutionResultMessage.class::cast).toList();
+    }
+
+    /**
+     * Creates a mock UI that executes commands asynchronously, similar to real
+     * UI.access() behavior. Commands run in a separate thread and Future.get()
+     * waits for completion with real timeout support.
+     */
+    private static void mockUi() {
+        var mockUI = Mockito.mock(UI.class);
+        Mockito.doAnswer(invocation -> {
+            Command command = invocation.getArgument(0);
+            var futureTask = new FutureTask<Void>(() -> {
+                // Set UI in the worker thread, mimicking real UI.access()
+                // behavior
+                UI.setCurrent(mockUI);
+                try {
+                    command.execute();
+                } finally {
+                    UI.setCurrent(null);
+                }
+                return null;
+            });
+            new Thread(futureTask).start();
+            return futureTask;
+        }).when(mockUI).access(Mockito.any(Command.class));
+        UI.setCurrent(mockUI);
     }
 
     private static <T extends Content> List<T> getUserMessageContents(
@@ -648,6 +795,24 @@ public class LangChain4JLLMProviderTest {
             String fileName) implements Attachment {
     }
 
+    private static class UITools {
+        private boolean executedInUIContext = false;
+
+        public boolean isExecutedInUIContext() {
+            return executedInUIContext;
+        }
+
+        public String getUiActionResult() {
+            return "UI action executed";
+        }
+
+        @Tool
+        public String uiAction() {
+            executedInUIContext = UI.getCurrent() != null;
+            return getUiActionResult();
+        }
+    }
+
     private static class SampleToolsClass {
         @Tool
         public String getTemperature() {
@@ -660,6 +825,17 @@ public class LangChain4JLLMProviderTest {
         }
     }
 
+    private static class PrivateToolClass {
+        public String getPrivateMethodResult() {
+            return "Private method result";
+        }
+
+        @Tool
+        private String privateMethod() {
+            return getPrivateMethodResult();
+        }
+    }
+
     private static class ErrorThrowingToolClass {
         public String getErrorMessage() {
             return "Tool execution failed";
@@ -668,6 +844,29 @@ public class LangChain4JLLMProviderTest {
         @Tool
         public String throwError() {
             throw new RuntimeException(getErrorMessage());
+        }
+    }
+
+    private static class SlowTool {
+        private final int sleepDurationSeconds;
+
+        SlowTool(int sleepDurationSeconds) {
+            this.sleepDurationSeconds = sleepDurationSeconds;
+        }
+
+        public String getCompletedMessage() {
+            return "Completed after " + sleepDurationSeconds + " seconds";
+        }
+
+        @Tool
+        public String slowOperation() {
+            try {
+                Thread.sleep(sleepDurationSeconds * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return "Interrupted";
+            }
+            return getCompletedMessage();
         }
     }
 }

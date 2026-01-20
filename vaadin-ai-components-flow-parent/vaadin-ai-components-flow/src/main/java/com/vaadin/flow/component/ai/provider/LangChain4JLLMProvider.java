@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.UI;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -66,12 +72,17 @@ import reactor.core.publisher.FluxSink;
  */
 public class LangChain4JLLMProvider implements LLMProvider {
 
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(LangChain4JLLMProvider.class);
+
     private static final int MAX_MESSAGES = 30;
     private static final int MAX_TOOL_EXECUTION_DEPTH = 20;
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
     private final transient ChatMemory chatMemory;
+
+    private int toolExecutionTimeoutSeconds = 120;
 
     /**
      * Constructor with a streaming chat model.
@@ -126,6 +137,17 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }, FluxSink.OverflowStrategy.BUFFER);
     }
 
+    /**
+     * Sets the timeout for tool execution in seconds. Only for testing
+     * purposes.
+     *
+     * @param toolExecutionTimeoutSeconds
+     *            the timeout in seconds
+     */
+    void setToolExecutionTimeoutSeconds(int toolExecutionTimeoutSeconds) {
+        this.toolExecutionTimeoutSeconds = toolExecutionTimeoutSeconds;
+    }
+
     private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
         var tools = request.tools();
         if (tools == null) {
@@ -138,18 +160,61 @@ public class LangChain4JLLMProvider implements LLMProvider {
             Arrays.stream(toolObject.getClass().getDeclaredMethods())
                     .filter(method -> method.isAnnotationPresent(Tool.class))
                     .forEach(method -> {
+                        // This can fail in environments where the module
+                        // doesn't allow
+                        // reflective access, in which case we skip the method.
+                        try {
+                            method.setAccessible(true);
+                        } catch (Exception e) {
+                            LOGGER.warn(
+                                    "Failed to make tool method accessible: {}. "
+                                            + "Ensure the method is public or the module allows reflective access.",
+                                    method.getName(), e);
+                            return;
+                        }
+                        var toolExecutor = getToolExecutor(toolObject, method);
                         var toolExecutorKey = ToolSpecifications
                                 .toolSpecificationFrom(method).name();
-                        var toolExecutor = getToolExecutor(toolObject, method);
                         toolExecutors.put(toolExecutorKey, toolExecutor);
                     });
         }
         return toolExecutors;
     }
 
-    private ToolExecutor getToolExecutor(Object toolObject, Method method) {
+    private ToolExecutor getToolExecutor(Object toolObject,
+            java.lang.reflect.Method method) {
         var baseExecutor = new DefaultToolExecutor(toolObject, method);
-        return baseExecutor::execute;
+        return (toolRequest, memoryId) -> {
+            var currentUI = UI.getCurrent();
+            if (currentUI == null) {
+                return baseExecutor.execute(toolRequest, memoryId);
+            }
+            return executeToolInUIContext(baseExecutor, toolRequest, memoryId,
+                    currentUI);
+        };
+    }
+
+    private String executeToolInUIContext(ToolExecutor baseExecutor,
+            ToolExecutionRequest toolRequest, Object memoryId, UI ui) {
+        var result = new AtomicReference<String>();
+        var error = new AtomicReference<Exception>();
+        try {
+            ui.access(() -> {
+                try {
+                    result.set(baseExecutor.execute(toolRequest, memoryId));
+                } catch (Exception e) {
+                    error.set(e);
+                }
+            }).get(toolExecutionTimeoutSeconds, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            error.set(e);
+        }
+        if (error.get() != null) {
+            LOGGER.error("Tool execution failed: {}", toolRequest.name(),
+                    error.get());
+            return "Error executing tool: " + error.get().getMessage();
+        }
+        return result.get();
     }
 
     private List<ToolSpecification> prepareToolSpecifications(
