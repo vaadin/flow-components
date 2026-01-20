@@ -65,7 +65,7 @@ public class UploadButton extends Button {
      * @param manager
      *            the upload manager, or {@code null} to unlink
      */
-    public void setManager(UploadManager manager) {
+    public final void setManager(UploadManager manager) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> setTarget(manager)));
         addAttachListener(event -> setTarget(manager));
