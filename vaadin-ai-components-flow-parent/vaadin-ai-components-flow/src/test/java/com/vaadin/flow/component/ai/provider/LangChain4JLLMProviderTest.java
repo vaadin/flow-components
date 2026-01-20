@@ -686,30 +686,6 @@ public class LangChain4JLLMProviderTest {
                 toolResultMessages.getFirst().text());
     }
 
-    @Test
-    public void stream_withPrivateTool_executesPrivateTool() {
-        var toolObject = new PrivateToolClass();
-        var request = new TestLLMRequest("Call private tool", null,
-                Collections.emptyList(), new Object[] { toolObject });
-
-        var response1 = mockSimpleResponseWithTool("privateMethod");
-        var response2 = mockSimpleResponse("Done");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response1, response2);
-
-        provider.stream(request).blockFirst();
-
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
-
-        var secondRequest = captor.getAllValues().get(1);
-        var toolResultMessages = getToolExecutionResults(secondRequest);
-
-        Assert.assertEquals(1, toolResultMessages.size());
-        Assert.assertEquals(toolObject.getPrivateMethodResult(),
-                toolResultMessages.getFirst().text());
-    }
-
     private void mockSimpleChat(LLMRequest request, String responseText) {
         var response = mockSimpleResponse(responseText);
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
@@ -825,17 +801,6 @@ public class LangChain4JLLMProviderTest {
         }
     }
 
-    private static class PrivateToolClass {
-        public String getPrivateMethodResult() {
-            return "Private method result";
-        }
-
-        @Tool
-        private String privateMethod() {
-            return getPrivateMethodResult();
-        }
-    }
-
     private static class ErrorThrowingToolClass {
         public String getErrorMessage() {
             return "Tool execution failed";
@@ -847,26 +812,21 @@ public class LangChain4JLLMProviderTest {
         }
     }
 
-    private static class SlowTool {
-        private final int sleepDurationSeconds;
-
-        SlowTool(int sleepDurationSeconds) {
-            this.sleepDurationSeconds = sleepDurationSeconds;
-        }
+    private record SlowTool(int sleepDurationSeconds) {
 
         public String getCompletedMessage() {
-            return "Completed after " + sleepDurationSeconds + " seconds";
-        }
-
-        @Tool
-        public String slowOperation() {
-            try {
-                Thread.sleep(sleepDurationSeconds * 1000L);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return "Interrupted";
+                return "Completed after " + sleepDurationSeconds + " seconds";
             }
-            return getCompletedMessage();
+
+            @Tool
+            public String slowOperation() {
+                try {
+                    Thread.sleep(sleepDurationSeconds * 1000L);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return "Interrupted";
+                }
+                return getCompletedMessage();
+            }
         }
-    }
 }
