@@ -80,4 +80,23 @@ public class UploadDropZone extends Component implements HasComponents {
         getElement().executeJs("this.manager = $0.manager",
                 manager.getConnector());
     }
+
+    /**
+     * Sets whether this drop zone is enabled. When disabled, the drop zone will
+     * not accept dropped files.
+     * <p>
+     * <strong>Note:</strong> Disabling this drop zone only affects the UI and
+     * does not prevent a malicious client from initiating uploads. To securely
+     * prevent uploads, use {@link UploadManager#setEnabled(boolean)}.
+     *
+     * @param enabled
+     *            {@code true} to enable the drop zone, {@code false} to disable
+     * @see UploadManager#setEnabled(boolean)
+     */
+    @SuppressWarnings("java:S1185") // Override is intentional to provide
+                                    // specific Javadoc
+    @Override
+    public void setEnabled(boolean enabled) {
+        HasComponents.super.setEnabled(enabled);
+    }
 }
