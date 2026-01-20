@@ -77,6 +77,25 @@ public class UploadButton extends Button {
     }
 
     /**
+     * Sets whether this button is enabled. When disabled, the button cannot be
+     * used to select files.
+     * <p>
+     * <strong>Note:</strong> Disabling this button only affects the UI and does
+     * not prevent a malicious client from initiating uploads. To securely
+     * prevent uploads, use {@link UploadManager#setEnabled(boolean)}.
+     *
+     * @param enabled
+     *            {@code true} to enable the button, {@code false} to disable
+     * @see UploadManager#setEnabled(boolean)
+     */
+    @SuppressWarnings("java:S1185") // Override is intentional to provide
+                                    // specific Javadoc
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+    }
+
+    /**
      * Sets the capture attribute for mobile file input. This controls whether
      * to use the device's camera or microphone to capture files directly.
      * <p>
