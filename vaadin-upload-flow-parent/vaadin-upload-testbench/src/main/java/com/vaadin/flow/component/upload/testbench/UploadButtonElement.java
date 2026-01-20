@@ -37,6 +37,8 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-upload-button")
 public class UploadButtonElement extends TestBenchElement {
 
+    private static final String HIDDEN_PROPERTY = "hidden";
+
     /**
      * Uploads the given local file using this button. Waits for 60 seconds for
      * the upload to finish.
@@ -71,8 +73,8 @@ public class UploadButtonElement extends TestBenchElement {
         }
 
         // Element must be focusable for Edge and Firefox
-        Boolean hidden = uploadElement.getPropertyBoolean("hidden");
-        uploadElement.setProperty("hidden", false);
+        Boolean hidden = uploadElement.getPropertyBoolean(HIDDEN_PROPERTY);
+        uploadElement.setProperty(HIDDEN_PROPERTY, false);
 
         try {
             // Firefox uploads the previous file again without this
@@ -83,7 +85,7 @@ public class UploadButtonElement extends TestBenchElement {
         }
 
         uploadElement.sendKeys(file.getPath());
-        uploadElement.setProperty("hidden", hidden);
+        uploadElement.setProperty(HIDDEN_PROPERTY, hidden);
 
         if (maxSeconds > 0) {
             waitForUploads(maxSeconds);
