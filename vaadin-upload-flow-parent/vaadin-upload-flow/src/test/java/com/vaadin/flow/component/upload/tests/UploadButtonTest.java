@@ -98,4 +98,39 @@ public class UploadButtonTest {
     public void extendsButton() {
         Assert.assertTrue(Button.class.isAssignableFrom(UploadButton.class));
     }
+
+    @Test
+    public void setCapture_user_propertyIsSet() {
+        UploadButton button = new UploadButton();
+
+        button.setCapture("user");
+
+        Assert.assertEquals("user", button.getCapture());
+    }
+
+    @Test
+    public void setCapture_environment_propertyIsSet() {
+        UploadButton button = new UploadButton();
+
+        button.setCapture("environment");
+
+        Assert.assertEquals("environment", button.getCapture());
+    }
+
+    @Test
+    public void getCapture_default_returnsNull() {
+        UploadButton button = new UploadButton();
+
+        Assert.assertNull(button.getCapture());
+    }
+
+    @Test
+    public void setCapture_null_removesProperty() {
+        UploadButton button = new UploadButton();
+        button.setCapture("user");
+
+        button.setCapture(null);
+
+        Assert.assertNull(button.getCapture());
+    }
 }
