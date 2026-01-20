@@ -815,18 +815,18 @@ public class LangChain4JLLMProviderTest {
     private record SlowTool(int sleepDurationSeconds) {
 
         public String getCompletedMessage() {
-                return "Completed after " + sleepDurationSeconds + " seconds";
-            }
-
-            @Tool
-            public String slowOperation() {
-                try {
-                    Thread.sleep(sleepDurationSeconds * 1000L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return "Interrupted";
-                }
-                return getCompletedMessage();
-            }
+            return "Completed after " + sleepDurationSeconds + " seconds";
         }
+
+        @Tool
+        public String slowOperation() {
+            try {
+                Thread.sleep(sleepDurationSeconds * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return "Interrupted";
+            }
+            return getCompletedMessage();
+        }
+    }
 }
