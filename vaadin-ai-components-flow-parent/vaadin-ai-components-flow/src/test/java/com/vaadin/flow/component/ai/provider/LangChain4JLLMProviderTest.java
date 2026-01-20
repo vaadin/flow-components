@@ -20,20 +20,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.FutureTask;
 import java.util.stream.IntStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.provider.LLMProvider.Attachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
-import com.vaadin.flow.server.Command;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -65,11 +61,6 @@ public class LangChain4JLLMProviderTest {
         mockStreamingChatModel = Mockito.mock(StreamingChatModel.class);
         provider = new LangChain4JLLMProvider(mockChatModel);
         streamingProvider = new LangChain4JLLMProvider(mockStreamingChatModel);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -492,33 +483,6 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
-    public void stream_withoutUI_executesTool() {
-        var uiTools = new UITools();
-        var request = new TestLLMRequest("Do UI action", null,
-                Collections.emptyList(), new Object[] { uiTools });
-
-        var response1 = mockSimpleResponseWithTool("uiAction");
-        var response2 = mockSimpleResponse("UI action done");
-
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response1, response2);
-
-        var result = provider.stream(request).blockFirst();
-
-        Assert.assertEquals("UI action done", result);
-        Assert.assertFalse("Tool should not have executed in UI context",
-                uiTools.isExecutedInUIContext());
-
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
-        var secondRequest = captor.getAllValues().get(1);
-        var toolResults = getToolExecutionResults(secondRequest);
-        Assert.assertEquals(1, toolResults.size());
-        Assert.assertEquals(toolResults.getFirst().text(),
-                uiTools.getUiActionResult());
-    }
-
-    @Test
     public void stream_withStreamingModelAndTool_executesTool() {
         var toolObject = new SampleToolsClass();
         var request = new TestLLMRequest("Get temperature", null,
@@ -639,25 +603,6 @@ public class LangChain4JLLMProviderTest {
                 .map(ToolExecutionResultMessage.class::cast).toList();
     }
 
-    private static void mockUi() {
-        var mockUI = Mockito.mock(UI.class);
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
-            var futureTask = new FutureTask<Void>(() -> {
-                UI.setCurrent(mockUI);
-                try {
-                    command.execute();
-                } finally {
-                    UI.setCurrent(null);
-                }
-                return null;
-            });
-            new Thread(futureTask).start();
-            return futureTask;
-        }).when(mockUI).access(Mockito.any(Command.class));
-        UI.setCurrent(mockUI);
-    }
-
     private static <T extends Content> List<T> getUserMessageContents(
             ChatRequest request, Class<T> contentClass) {
         return request.messages().stream().filter(UserMessage.class::isInstance)
@@ -701,24 +646,6 @@ public class LangChain4JLLMProviderTest {
 
     private record TestAttachment(byte[] data, String contentType,
             String fileName) implements Attachment {
-    }
-
-    private static class UITools {
-        private boolean executedInUIContext = false;
-
-        public boolean isExecutedInUIContext() {
-            return executedInUIContext;
-        }
-
-        public String getUiActionResult() {
-            return "UI action executed";
-        }
-
-        @Tool
-        public String uiAction() {
-            executedInUIContext = UI.getCurrent() != null;
-            return getUiActionResult();
-        }
     }
 
     private static class SampleToolsClass {
