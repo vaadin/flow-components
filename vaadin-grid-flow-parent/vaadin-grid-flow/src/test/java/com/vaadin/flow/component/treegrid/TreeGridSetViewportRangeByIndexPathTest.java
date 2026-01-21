@@ -32,7 +32,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.tests.dataprovider.MockUI;
+import com.vaadin.tests.MockUI;
 
 import tools.jackson.databind.JsonNode;
 

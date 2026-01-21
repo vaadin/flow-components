@@ -26,7 +26,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.dataprovider.MockUI;
+import com.vaadin.tests.MockUI;
 
 public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     private TreeGrid<String> treeGrid;
