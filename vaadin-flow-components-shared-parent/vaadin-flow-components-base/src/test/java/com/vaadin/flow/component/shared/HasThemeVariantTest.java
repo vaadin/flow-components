@@ -16,27 +16,17 @@
 package com.vaadin.flow.component.shared;
 
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.signals.BindingActiveException;
 import com.vaadin.signals.ValueSignal;
 
-public class HasThemeVariantTest {
+public class HasThemeVariantTest extends AbstractSignalsUnitTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
@@ -219,112 +209,4 @@ public class HasThemeVariantTest {
             implements HasThemeVariant<TestComponentVariant> {
     }
 
-    private static class MockUI extends UI {
-
-        public MockUI() {
-            this(findOrcreateSession());
-        }
-
-        public MockUI(VaadinSession session) {
-            getInternals().setSession(session);
-            setCurrent(this);
-        }
-
-        @Override
-        protected void init(VaadinRequest request) {
-            // Do nothing
-        }
-
-        private static VaadinSession findOrcreateSession() {
-            VaadinSession session = VaadinSession.getCurrent();
-            if (session == null) {
-                MockService service = Mockito.mock(MockService.class);
-                Mockito.when(service.getRouteRegistry())
-                        .thenReturn(Mockito.mock(RouteRegistry.class));
-                session = new AlwaysLockedVaadinSession(service);
-                VaadinSession.setCurrent(session);
-            }
-            return session;
-        }
-
-        private static class MockService extends VaadinServletService {
-
-            @Override
-            public RouteRegistry getRouteRegistry() {
-                return super.getRouteRegistry();
-            }
-        }
-
-        private static class AlwaysLockedVaadinSession
-                extends MockVaadinSession {
-
-            private AlwaysLockedVaadinSession(VaadinService service) {
-                super(service);
-                lock();
-            }
-
-        }
-
-        private static class MockVaadinSession extends VaadinSession {
-            /*
-             * Used to make sure there's at least one reference to the mock
-             * session while it's locked. This is used to prevent the session
-             * from being eaten by GC in tests where @Before creates a session
-             * and sets it as the current instance without keeping any direct
-             * reference to it. This pattern has a chance of leaking memory if
-             * the session is not unlocked in the right way, but it should be
-             * acceptable for testing use.
-             */
-            private static final ThreadLocal<MockVaadinSession> referenceKeeper = new ThreadLocal<>();
-
-            private MockVaadinSession(VaadinService service) {
-                super(service);
-            }
-
-            @Override
-            public void close() {
-                super.close();
-                closeCount++;
-            }
-
-            public int getCloseCount() {
-                return closeCount;
-            }
-
-            @Override
-            public Lock getLockInstance() {
-                return lock;
-            }
-
-            @Override
-            public void lock() {
-                super.lock();
-                referenceKeeper.set(this);
-            }
-
-            @Override
-            public void unlock() {
-                super.unlock();
-                referenceKeeper.remove();
-            }
-
-            private int closeCount;
-
-            private ReentrantLock lock = new ReentrantLock();
-        }
-    }
-
-    @BeforeClass
-    public static void setupUI() {
-        var mockUI = new MockUI();
-        UI.setCurrent(mockUI);
-    }
-
-    @AfterClass
-    public static void teardownUI() {
-        if (UI.getCurrent() != null) {
-            UI.getCurrent().removeAll();
-            UI.setCurrent(null);
-        }
-    }
 }
