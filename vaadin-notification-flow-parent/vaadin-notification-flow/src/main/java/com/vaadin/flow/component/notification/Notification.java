@@ -152,8 +152,23 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public Notification() {
         initBaseElementsAndListeners();
-        setPosition(DEFAULT_POSITION);
-        setDuration(0);
+        setPositionInternal(DEFAULT_POSITION);
+        setDurationInternal(0);
+    }
+
+    /**
+     * Creates a notification with given components inside.
+     * <p>
+     * Note: To mix text and child components in a component that also supports
+     * child components, use the {@link Text} component for the textual parts.
+     *
+     * @param components
+     *            the components inside the notification
+     * @see #add(Component...)
+     */
+    public Notification(Component... components) {
+        this();
+        add(components);
     }
 
     /**
@@ -165,6 +180,17 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public Notification(String text) {
         this(text, 0, DEFAULT_POSITION);
+    }
+
+    /**
+     * Creates a Notification with the text bound to the given Signal, that does
+     * not close automatically.
+     *
+     * @param textSignal
+     *            the signal with the text of the Notification
+     */
+    public Notification(Signal<String> textSignal) {
+        this(textSignal, 0, DEFAULT_POSITION);
     }
 
     /**
@@ -184,6 +210,22 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
+     * Creates a Notification with the text bound to the given Signal and given
+     * Integer rendered as its duration.
+     * <p>
+     * Set to {@code 0} or a negative number to disable the notification
+     * auto-closing.
+     *
+     * @param textSignal
+     *            the signal with the text of the Notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     */
+    public Notification(Signal<String> textSignal, int duration) {
+        this(textSignal, duration, DEFAULT_POSITION);
+    }
+
+    /**
      * Creates a Notification with given text String, duration and position
      * <P>
      * Set duration to {@code 0} or a negative number to disable the
@@ -200,9 +242,33 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public Notification(String text, int duration, Position position) {
         initBaseElementsAndListeners();
-        setText(text);
-        setDuration(duration);
-        setPosition(position);
+        textSupport.set(text);
+        setDurationInternal(duration);
+        setPositionInternal(position);
+    }
+
+    /**
+     * Creates a Notification with the text bound to the given Signal, given
+     * duration and position.
+     * <P>
+     * Set to {@code 0} or a negative number to disable the notification
+     * auto-closing.
+     *
+     * @param textSignal
+     *            the signal with the text of the notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     */
+    public Notification(Signal<String> textSignal, int duration,
+            Position position) {
+        initBaseElementsAndListeners();
+        textSupport.bind(textSignal);
+        setDurationInternal(duration);
+        setPositionInternal(position);
     }
 
     /**
@@ -231,57 +297,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with the text bound to the given Signal, that does
-     * not close automatically.
-     *
-     * @param textSignal
-     *            the signal with the text of the Notification
-     */
-    public Notification(Signal<String> textSignal) {
-        this(textSignal, 0, DEFAULT_POSITION);
-    }
-
-    /**
-     * Creates a Notification with the text bound to the given Signal and given
-     * Integer rendered as its duration.
-     * <p>
-     * Set to {@code 0} or a negative number to disable the notification
-     * auto-closing.
-     *
-     * @param textSignal
-     *            the signal with the text of the Notification
-     * @param duration
-     *            the duration in milliseconds to show the notification
-     */
-    public Notification(Signal<String> textSignal, int duration) {
-        this(textSignal, duration, DEFAULT_POSITION);
-    }
-
-    /**
-     * Creates a Notification with the text bound to the given Signal, given
-     * duration and position.
-     * <P>
-     * Set to {@code 0} or a negative number to disable the notification
-     * auto-closing.
-     *
-     * @param textSignal
-     *            the signal with the text of the notification
-     * @param duration
-     *            the duration in milliseconds to show the notification
-     * @param position
-     *            the position of the notification. Valid enumerate values are
-     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
-     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
-     */
-    public Notification(Signal<String> textSignal, int duration,
-            Position position) {
-        initBaseElementsAndListeners();
-        bindText(textSignal);
-        setDuration(duration);
-        setPosition(position);
-    }
-
-    /**
      * Creates a Notification with the text bound to the given Signal, duration,
      * position and assertive state.
      * <P>
@@ -304,21 +319,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
             Position position, boolean assertive) {
         this(textSignal, duration, position);
         setAssertive(assertive);
-    }
-
-    /**
-     * Creates a notification with given components inside.
-     * <p>
-     * Note: To mix text and child components in a component that also supports
-     * child components, use the {@link Text} component for the textual parts.
-     *
-     * @param components
-     *            the components inside the notification
-     * @see #add(Component...)
-     */
-    public Notification(Component... components) {
-        this();
-        add(components);
     }
 
     private void initBaseElementsAndListeners() {
@@ -448,9 +448,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            not {@code null}
      */
     public void setPosition(Position position) {
-        String positionName = position.getClientName();
-        getElement().setProperty("position",
-                positionName == null ? "" : positionName);
+        setPositionInternal(position);
     }
 
     /**
@@ -673,6 +671,16 @@ public class Notification extends Component implements HasComponents, HasStyle,
     public Registration addDetachListener(
             ComponentEventListener<DetachEvent> listener) {
         return super.addDetachListener(listener);
+    }
+
+    private void setPositionInternal(Position position) {
+        String positionName = position.getClientName();
+        getElement().setProperty("position",
+                positionName == null ? "" : positionName);
+    }
+
+    private void setDurationInternal(int duration) {
+        getElement().setProperty("duration", duration);
     }
 
     private void updateText(String text) {
