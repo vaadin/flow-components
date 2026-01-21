@@ -68,6 +68,7 @@ public interface HasValidationProperties extends HasElement, HasValidation {
      * @param signal
      *            the signal to bind the error message to, or {@code null} to
      *            clear the existing binding
+     * @since 25.1
      */
     @Override
     default void bindErrorMessage(Signal<String> signal) {
@@ -100,5 +101,27 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     @Override
     default boolean isInvalid() {
         return getElement().getProperty("invalid", false);
+    }
+
+    /**
+     * Binds a given boolean signal to the invalid state of the component.
+     * <p>
+     * The invalid state controls whether the component is considered invalid
+     * and whether a possible error message is shown. If manual validation mode
+     * is enabled with {@link #setManualValidation(boolean)}, then the value
+     * provided by the bound signal determines the visual invalid state of the
+     * component.
+     * <p>
+     * Signal's value {@code null} is treated as {@code false}.
+     *
+     * @param signal
+     *            the signal to bind the invalid state to, or {@code null} to
+     *            clear the existing binding
+     * @since 25.1
+     */
+    @Override
+    default void bindInvalid(Signal<Boolean> signal) {
+        getElement().bindProperty("invalid", signal
+                .map(invalid -> invalid == null ? Boolean.FALSE : invalid));
     }
 }

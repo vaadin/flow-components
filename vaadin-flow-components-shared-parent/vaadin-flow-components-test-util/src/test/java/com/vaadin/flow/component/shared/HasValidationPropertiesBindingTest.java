@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.shared;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -108,6 +110,81 @@ public class HasValidationPropertiesBindingTest
 
         try {
             component.bindErrorMessage(new ValueSignal<>("bar"));
+            fail("Expected BindingActiveException when binding a new signal while a binding is active");
+        } catch (BindingActiveException expected) {
+            // expected
+        }
+    }
+
+    @Test
+    public void bindInvalid_elementAttached_updatesWithSignal_andNullMapsToFalse() {
+        TestComponent component = new TestComponent();
+        // Attach component so that Element.bindProperty becomes active
+        UI.getCurrent().add(component);
+
+        // Bind a signal and verify initial propagation
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindInvalid(signal);
+        assertTrue(component.isInvalid());
+        assertTrue(component.getElement().getProperty("invalid", false));
+
+        // Update to a different non-null value
+        signal.value(false);
+        assertFalse(component.isInvalid());
+        assertFalse(component.getElement().getProperty("invalid", false));
+
+        // Update to null -> should map to false
+        signal.value(null);
+        assertFalse(component.getElement().getProperty("invalid", false));
+        assertFalse(component.isInvalid());
+    }
+
+    @Test
+    public void bindInvalid_elementNotAttached_bindingInactive_untilAttach() {
+        TestComponent component = new TestComponent();
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindInvalid(signal);
+
+        // While detached, binding should be inactive
+        assertFalse(component.isInvalid());
+        signal.value(false);
+        assertFalse(component.isInvalid());
+
+        // Attach -> latest value is applied
+        UI.getCurrent().add(component);
+        assertFalse(component.isInvalid());
+
+        // Update after attach -> applied
+        signal.value(true);
+        assertTrue(component.isInvalid());
+    }
+
+    @Test
+    public void setInvalid_whileBindingActive_throwsBindingActiveException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindInvalid(signal);
+        assertTrue(component.isInvalid());
+
+        try {
+            component.setInvalid(false);
+            fail("Expected BindingActiveException when setting invalid while binding is active");
+        } catch (BindingActiveException expected) {
+            // expected
+        }
+    }
+
+    @Test
+    public void bindInvalid_againWhileActive_throwsBindingActiveException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindInvalid(signal);
+        assertTrue(component.isInvalid());
+
+        try {
+            component.bindInvalid(new ValueSignal<>(false));
             fail("Expected BindingActiveException when binding a new signal while a binding is active");
         } catch (BindingActiveException expected) {
             // expected
