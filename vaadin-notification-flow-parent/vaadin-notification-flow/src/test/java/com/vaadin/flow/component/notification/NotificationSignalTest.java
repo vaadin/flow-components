@@ -19,7 +19,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -162,49 +161,50 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textSignalConstructors_usesBindText() {
-        var mockNotification = Mockito.mock(Notification.class);
-        class SpyNotification extends Notification {
-            public SpyNotification(Signal<String> textSignal) {
-                super(textSignal);
-            }
+    public void textSignalConstructors_usesTextSupport() {
+        // Test single parameter constructor
+        notification = new Notification(textSignal);
+        textSignal.value("text signal");
+        UI.getCurrent().add(notification);
+        Assert.assertEquals("text signal", notification.getTextSupport().get());
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.setText("error"));
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.bindText(computedSignal));
 
-            public SpyNotification(Signal<String> textSignal, int duration) {
-                super(textSignal, duration);
-            }
+        // Test with duration
+        notification = new Notification(textSignal, 4000);
+        textSignal.value("text signal, duration");
+        UI.getCurrent().add(notification);
+        Assert.assertEquals("text signal, duration",
+                notification.getTextSupport().get());
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.setText("error"));
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.bindText(computedSignal));
 
-            public SpyNotification(Signal<String> textSignal, int duration,
-                    Position position) {
-                super(textSignal, duration, position);
-            }
+        // Test with duration and position
+        notification = new Notification(textSignal, 4000, Position.TOP_END);
+        textSignal.value("text signal, duration, position");
+        UI.getCurrent().add(notification);
+        Assert.assertEquals("text signal, duration, position",
+                notification.getTextSupport().get());
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.setText("error"));
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.bindText(computedSignal));
 
-            public SpyNotification(Signal<String> textSignal, int duration,
-                    Position position, boolean assertive) {
-                super(textSignal, duration, position, assertive);
-            }
-
-            @Override
-            public void bindText(Signal<String> value) {
-                mockNotification.bindText(value);
-                super.bindText(value);
-            }
-        }
-
-        notification = new SpyNotification(textSignal);
-        Mockito.verify(mockNotification, Mockito.times(1)).bindText(textSignal);
-        Mockito.clearInvocations(mockNotification);
-
-        notification = new SpyNotification(textSignal, 4000);
-        Mockito.verify(mockNotification, Mockito.times(1)).bindText(textSignal);
-        Mockito.clearInvocations(mockNotification);
-
-        notification = new SpyNotification(textSignal, 4000, Position.TOP_END);
-        Mockito.verify(mockNotification, Mockito.times(1)).bindText(textSignal);
-        Mockito.clearInvocations(mockNotification);
-
-        notification = new SpyNotification(textSignal, 4000, Position.TOP_END,
+        // Test with all parameters
+        notification = new Notification(textSignal, 4000, Position.TOP_END,
                 true);
-        Mockito.verify(mockNotification, Mockito.times(1)).bindText(textSignal);
+        textSignal.value("text signal, duration, position, assertive");
+        UI.getCurrent().add(notification);
+        Assert.assertEquals("text signal, duration, position, assertive",
+                notification.getTextSupport().get());
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.setText("error"));
+        Assert.assertThrows(BindingActiveException.class,
+                () -> notification.bindText(computedSignal));
     }
 
     @Test
