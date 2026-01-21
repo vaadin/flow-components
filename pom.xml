@@ -101,18 +101,12 @@
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
-        <javaparser.version>3.27.1</javaparser.version>
 
         <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
         <surefire.argLine/>
     </properties>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.github.javaparser</groupId>
-                <artifactId>javaparser-core</artifactId>
-                <version>${javaparser.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-bom</artifactId>
