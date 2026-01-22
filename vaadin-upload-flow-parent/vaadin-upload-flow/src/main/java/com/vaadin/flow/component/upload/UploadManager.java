@@ -74,7 +74,6 @@ public class UploadManager implements Serializable {
 
     // Upload state tracking
     private final AtomicInteger activeUploads = new AtomicInteger(0);
-    private boolean uploading = false;
 
     /**
      * Creates a new upload manager without an upload handler. The handler must
@@ -248,6 +247,12 @@ public class UploadManager implements Serializable {
     public void setAcceptedFileTypes(String... acceptedFileTypes) {
         String accept = "";
         if (acceptedFileTypes != null) {
+            for (String fileType : acceptedFileTypes) {
+                if (fileType == null || fileType.isBlank()) {
+                    throw new IllegalArgumentException(
+                            "Accepted file types cannot contain null or blank values");
+                }
+            }
             accept = String.join(",", acceptedFileTypes);
         }
         connector.getElement().setProperty("accept", accept);
@@ -293,10 +298,9 @@ public class UploadManager implements Serializable {
      * be started from any linked UI components (buttons, drop zones).
      * <p>
      * This is the authoritative server-side control for preventing uploads.
-     * Disabling individual UI components like {@link UploadButton} or
-     * {@link UploadDropZone} only affects the UI but does not prevent a
-     * malicious client from initiating uploads. Use this method to securely
-     * prevent uploads.
+     * Disabling individual UI components only affects the UI but does not
+     * prevent a malicious client from initiating uploads. Use this method to
+     * securely prevent uploads.
      *
      * @param enabled
      *            {@code true} to enable uploads, {@code false} to disable
@@ -345,7 +349,6 @@ public class UploadManager implements Serializable {
                     "Maximum supported amount of uploads already started");
         }
         activeUploads.incrementAndGet();
-        uploading = true;
     }
 
     /**
@@ -353,8 +356,7 @@ public class UploadManager implements Serializable {
      */
     private void endUpload() {
         int remaining = activeUploads.decrementAndGet();
-        if (remaining == 0 && uploading) {
-            uploading = false;
+        if (remaining == 0) {
             fireAllFinished();
         }
     }

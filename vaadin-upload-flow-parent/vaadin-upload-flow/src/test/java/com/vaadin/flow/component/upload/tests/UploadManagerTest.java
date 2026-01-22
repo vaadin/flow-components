@@ -18,7 +18,6 @@ package com.vaadin.flow.component.upload.tests;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
@@ -84,35 +83,40 @@ public class UploadManagerTest {
         Assert.assertNotNull(managerWithHandler);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void constructor_withNullOwner_throws() {
-        new UploadManager(null);
+        Assert.assertThrows(NullPointerException.class,
+                () -> new UploadManager(null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void constructor_withNullOwnerAndHandler_throws() {
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
-        new UploadManager(null, handler);
+        Assert.assertThrows(NullPointerException.class,
+                () -> new UploadManager(null, handler));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void setUploadHandler_withNull_throws() {
-        manager.setUploadHandler(null);
+        Assert.assertThrows(NullPointerException.class,
+                () -> manager.setUploadHandler(null));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setUploadHandler_withNullTargetName_throws() { // NOSONAR
+    @Test
+    public void setUploadHandler_withNullTargetName_throws() {
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
-        manager.setUploadHandler(handler, null);
+        Assert.assertThrows(NullPointerException.class,
+                () -> manager.setUploadHandler(handler, null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void setUploadHandler_withBlankTargetName_throws() {
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
-        manager.setUploadHandler(handler, "   ");
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> manager.setUploadHandler(handler, "   "));
     }
 
     @Test
@@ -217,6 +221,18 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void setAcceptedFileTypes_withNullValue_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> manager.setAcceptedFileTypes("image/*", null, ".pdf"));
+    }
+
+    @Test
+    public void setAcceptedFileTypes_withBlankValue_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> manager.setAcceptedFileTypes("image/*", "   ", ".pdf"));
+    }
+
+    @Test
     public void getAcceptedFileTypes_defaultIsEmpty() {
         Assert.assertTrue(manager.getAcceptedFileTypes().isEmpty());
     }
@@ -268,40 +284,32 @@ public class UploadManagerTest {
 
     @Test
     public void addFileRemovedListener_registersListener() {
-        AtomicBoolean listenerCalled = new AtomicBoolean(false);
-
-        var registration = manager
-                .addFileRemovedListener(event -> listenerCalled.set(true));
+        var registration = manager.addFileRemovedListener(event -> {
+        });
 
         Assert.assertNotNull(registration);
     }
 
     @Test
     public void addFileRejectedListener_registersListener() {
-        AtomicBoolean listenerCalled = new AtomicBoolean(false);
-
-        var registration = manager
-                .addFileRejectedListener(event -> listenerCalled.set(true));
+        var registration = manager.addFileRejectedListener(event -> {
+        });
 
         Assert.assertNotNull(registration);
     }
 
     @Test
     public void addAllFinishedListener_registersListener() {
-        AtomicBoolean listenerCalled = new AtomicBoolean(false);
-
-        var registration = manager
-                .addAllFinishedListener(event -> listenerCalled.set(true));
+        var registration = manager.addAllFinishedListener(event -> {
+        });
 
         Assert.assertNotNull(registration);
     }
 
     @Test
     public void removeListener_unregistersListener() {
-        AtomicBoolean listenerCalled = new AtomicBoolean(false);
-
-        var registration = manager
-                .addFileRemovedListener(event -> listenerCalled.set(true));
+        var registration = manager.addFileRemovedListener(event -> {
+        });
         registration.remove();
 
         Assert.assertNotNull(registration);
