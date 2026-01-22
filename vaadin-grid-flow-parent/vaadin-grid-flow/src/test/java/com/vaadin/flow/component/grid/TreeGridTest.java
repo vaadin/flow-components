@@ -23,7 +23,7 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.tests.dataprovider.MockUI;
+import com.vaadin.tests.MockUI;
 
 public class TreeGridTest {
 
