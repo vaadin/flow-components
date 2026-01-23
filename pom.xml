@@ -99,7 +99,7 @@
 
         <!-- spreadsheet -->
         <poi.version>5.4.1</poi.version>
-        <javaparser.version>3.27.1</javaparser.version>
+        <javaparser.version>3.28.0</javaparser.version>
 
         <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
         <surefire.argLine/>
