@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai;
+package com.vaadin.flow.component.ai.component;
 
 import java.io.Serializable;
 import java.time.Instant;
