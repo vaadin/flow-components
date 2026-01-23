@@ -62,6 +62,9 @@ public class UploadManagerPage extends UploadDropZone {
                                     + " (" + data.length + " bytes)"));
                 }));
 
+        // Link the drop zone to the manager
+        setManager(manager);
+
         // Add event listeners
         manager.addFileRemovedListener(
                 event -> log("Removed: " + event.getFileName()));
