@@ -59,6 +59,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(0, notification.getDuration(), 0);
         Assert.assertEquals("bottom-start",
                 notification.getPosition().getClientName());
+        Assert.assertFalse(notification.isAssertive());
     }
 
     @Test
@@ -69,6 +70,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(4000, notification.getDuration(), 0);
         Assert.assertEquals("bottom-start",
                 notification.getPosition().getClientName());
+        Assert.assertFalse(notification.isAssertive());
     }
 
     @Test
@@ -79,6 +81,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(10000, notification.getDuration(), 0);
         Assert.assertEquals("top-end",
                 notification.getPosition().getClientName());
+        Assert.assertFalse(notification.isAssertive());
     }
 
     @Test
