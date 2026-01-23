@@ -23,6 +23,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -33,6 +34,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.signals.Signal;
 
 /**
  * Details is an expandable panel for showing and hiding content from the user
@@ -61,6 +63,10 @@ public class Details extends Component implements HasComponents, HasSize,
     private final Component summaryContainer;
     private final Div contentContainer;
 
+    /** Signal support for the summary text property. */
+    private final SignalPropertySupport<String> summaryTextSupport = SignalPropertySupport
+            .create(this, this::updateSummaryText);
+
     /**
      * Server-side component for the {@code <vaadin-details-summary>} element.
      */
@@ -81,7 +87,7 @@ public class Details extends Component implements HasComponents, HasSize,
         SlotUtils.addToSlot(this, "summary", summaryContainer);
 
         if (getElement().getPropertyRaw("opened") == null) {
-            setOpened(false);
+            getElement().setProperty("opened", false);
         }
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
@@ -97,7 +103,10 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary) {
         this();
-        setSummaryText(summary);
+        if (summary == null) {
+            summary = "";
+        }
+        updateSummaryText(summary);
     }
 
     /**
@@ -109,7 +118,19 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(Component summary) {
         this();
-        setSummary(summary);
+        updateSummary(summary);
+    }
+
+    /**
+     * Initializes a new Details component with a summary text provided by a
+     * signal.
+     *
+     * @param summaryTextSignal
+     *            the signal that provides the summary text
+     */
+    public Details(Signal<String> summaryTextSignal) {
+        this();
+        summaryTextSupport.bind(summaryTextSignal);
     }
 
     /**
@@ -125,8 +146,11 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary, Component content) {
         this();
-        setSummaryText(summary);
-        add(content);
+        if (summary == null) {
+            summary = "";
+        }
+        updateSummaryText(summary);
+        contentContainer.add(content);
     }
 
     /**
@@ -142,8 +166,23 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(Component summary, Component content) {
         this();
-        setSummary(summary);
-        add(content);
+        updateSummary(summary);
+        contentContainer.add(content);
+    }
+
+    /**
+     * Initializes a new Details component with a summary text provided by a
+     * signal and content.
+     *
+     * @param summaryTextSignal
+     *            the signal that provides the summary text.
+     * @param content
+     *            the content component to add.
+     */
+    public Details(Signal<String> summaryTextSignal, Component content) {
+        this();
+        summaryTextSupport.bind(summaryTextSignal);
+        contentContainer.add(content);
     }
 
     /**
@@ -160,7 +199,7 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary, Component... components) {
         this(summary);
-        add(components);
+        contentContainer.add(components);
     }
 
     /**
@@ -177,7 +216,22 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(Component summary, Component... components) {
         this(summary);
-        add(components);
+        contentContainer.add(components);
+    }
+
+    /**
+     * Initializes a new Details component with a summary text provided by a
+     * signal and optional content components.
+     *
+     * @param summaryTextSignal
+     *            the signal that provides the summary text.
+     * @param components
+     *            the content components to add.
+     */
+    public Details(Signal<String> summaryTextSignal, Component... components) {
+        this();
+        summaryTextSupport.bind(summaryTextSignal);
+        contentContainer.add(components);
     }
 
     /**
@@ -198,13 +252,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *            any previously set summary
      */
     public void setSummary(Component summary) {
-        summaryContainer.getElement().removeAllChildren();
-        if (summary == null) {
-            return;
-        }
-
-        this.summary = summary;
-        summaryContainer.getElement().appendChild(summary.getElement());
+        updateSummary(summary);
     }
 
     /**
@@ -218,14 +266,19 @@ public class Details extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Creates a text wrapper and sets a summary via
-     * {@link #setSummary(Component)}
+     * Sets the summary text of the details component.
+     *
+     * @param summary
+     *            the summary text to set, or {@code null} for empty text
+     * @throws com.vaadin.signals.BindingActiveException
+     *             if the summary text is currently bound to a signal
+     * @see #bindSummaryText(Signal)
      */
     public void setSummaryText(String summary) {
         if (summary == null) {
             summary = "";
         }
-        setSummary(new Span(summary));
+        summaryTextSupport.set(summary);
     }
 
     /**
@@ -234,6 +287,54 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public String getSummaryText() {
         return summary == null ? "" : summary.getElement().getText();
+    }
+
+    /**
+     * Updates the summary component. For internal use during initialization and
+     * signal updates.
+     */
+    private void updateSummary(Component summary) {
+        summaryContainer.getElement().removeAllChildren();
+        if (summary == null) {
+            return;
+        }
+
+        this.summary = summary;
+        summaryContainer.getElement().appendChild(summary.getElement());
+    }
+
+    /**
+     * Updates the summary text when bound to a signal.
+     */
+    private void updateSummaryText(String newText) {
+        if (summary == null || !(summary instanceof Span)) {
+            updateSummary(new Span(newText));
+        } else {
+            summary.getElement().setText(newText);
+        }
+    }
+
+    /**
+     * Binds a signal to update the summary text of the details component.
+     * <p>
+     * When bound, the signal manages the summary text. Any previously set
+     * custom summary component will be replaced when the signal updates.
+     *
+     * @param signal
+     *            the signal that provides the new summary text, or {@code null}
+     *            to remove the binding.
+     */
+    public void bindSummaryText(Signal<String> signal) {
+        summaryTextSupport.bind(signal);
+    }
+
+    /**
+     * Gets the summary text signal support instance for testing purposes.
+     *
+     * @return the summary text signal support
+     */
+    SignalPropertySupport<String> getSummaryTextSupport() {
+        return summaryTextSupport;
     }
 
     /**
