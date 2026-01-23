@@ -18,8 +18,8 @@ package com.vaadin.flow.component.shared;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -92,12 +92,8 @@ public class HasValidationPropertiesBindingTest
         component.bindErrorMessage(signal);
         assertEquals("foo", component.getErrorMessage());
 
-        try {
-            component.setErrorMessage("bar");
-            fail("Expected BindingActiveException when setting errorMessage while binding is active");
-        } catch (BindingActiveException expected) {
-            // expected
-        }
+        assertThrows(BindingActiveException.class,
+                () -> component.setErrorMessage("bar"));
     }
 
     @Test
@@ -108,12 +104,8 @@ public class HasValidationPropertiesBindingTest
         component.bindErrorMessage(signal);
         assertEquals("foo", component.getErrorMessage());
 
-        try {
-            component.bindErrorMessage(new ValueSignal<>("bar"));
-            fail("Expected BindingActiveException when binding a new signal while a binding is active");
-        } catch (BindingActiveException expected) {
-            // expected
-        }
+        assertThrows(BindingActiveException.class,
+                () -> component.bindErrorMessage(new ValueSignal<>("bar")));
     }
 
     @Test
@@ -167,12 +159,8 @@ public class HasValidationPropertiesBindingTest
         component.bindInvalid(signal);
         assertTrue(component.isInvalid());
 
-        try {
-            component.setInvalid(false);
-            fail("Expected BindingActiveException when setting invalid while binding is active");
-        } catch (BindingActiveException expected) {
-            // expected
-        }
+        assertThrows(BindingActiveException.class,
+                () -> component.setInvalid(false));
     }
 
     @Test
@@ -183,11 +171,7 @@ public class HasValidationPropertiesBindingTest
         component.bindInvalid(signal);
         assertTrue(component.isInvalid());
 
-        try {
-            component.bindInvalid(new ValueSignal<>(false));
-            fail("Expected BindingActiveException when binding a new signal while a binding is active");
-        } catch (BindingActiveException expected) {
-            // expected
-        }
+        assertThrows(BindingActiveException.class,
+                () -> component.bindInvalid(new ValueSignal<>(false)));
     }
 }
