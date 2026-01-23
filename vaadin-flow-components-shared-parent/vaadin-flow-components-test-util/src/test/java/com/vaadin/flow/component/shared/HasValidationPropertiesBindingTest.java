@@ -125,10 +125,10 @@ public class HasValidationPropertiesBindingTest
         assertFalse(component.isInvalid());
         assertFalse(component.getElement().getProperty("invalid", false));
 
-        // Update to null -> should map to false
-        signal.value(null);
-        assertFalse(component.getElement().getProperty("invalid", false));
-        assertFalse(component.isInvalid());
+        // Update to a different non-null value again
+        signal.value(true);
+        assertTrue(component.isInvalid());
+        assertTrue(component.getElement().getProperty("invalid", false));
     }
 
     @Test
