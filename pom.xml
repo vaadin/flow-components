@@ -99,6 +99,7 @@
         <spring-data-commons.version>4.0.2</spring-data-commons.version>
         <reactor-core.version>3.8.2</reactor-core.version>
         <langchain4j.version>1.10.0</langchain4j.version>
+        <spring-ai.version>2.0.0-M1</spring-ai.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
