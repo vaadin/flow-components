@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -72,7 +73,44 @@ public class SpringAiLLMProviderTest {
     @Test
     public void constructor_withNullChatModel_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
-                () -> new SpringAiLLMProvider(null, false));
+                () -> new SpringAiLLMProvider((ChatModel) null, false));
+    }
+
+    @Test
+    public void constructor_withNullChatClient_throwsNullPointerException() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> new SpringAiLLMProvider((ChatClient) null, false));
+    }
+
+    @Test
+    public void constructor_withChatClient_nonStreaming_returnsResponse() {
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAiLLMProvider(chatClient, false);
+        var request = createSimpleRequest("Hello");
+        mockSimpleChat("Full response");
+
+        var results = chatClientProvider.stream(request).collectList().block();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("Full response", results.getFirst());
+    }
+
+    @Test
+    public void constructor_withChatClient_streaming_returnsStreamedTokens() {
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientStreamingProvider = new SpringAiLLMProvider(chatClient,
+                true);
+        var request = createSimpleRequest("Hello");
+        var tokens = List.of("Hello", " ", "World");
+
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.fromIterable(tokens.stream()
+                        .map(this::mockSimpleChatResponse).toList()));
+
+        var results = chatClientStreamingProvider.stream(request).collectList()
+                .block();
+        Assert.assertEquals(tokens, results);
     }
 
     @Test
