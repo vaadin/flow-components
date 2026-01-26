@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +29,7 @@ import org.openqa.selenium.JavascriptException;
 
 import com.vaadin.flow.component.upload.testbench.UploadButtonElement;
 import com.vaadin.flow.component.upload.testbench.UploadFileListElement;
+import com.vaadin.flow.component.upload.testbench.UploadManagerTester;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
@@ -240,6 +242,167 @@ public class UploadManagerIT extends AbstractUploadIT {
             Assert.assertTrue("Exception should indicate manager is null",
                     e.getMessage().contains("null"));
         }
+    }
+
+    @Test
+    public void getMaxFiles_defaultIsInfinity() {
+        // Log status first to ensure the manager is initialized
+        logStatus();
+        assertLogContains("maxFiles=0");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        Assert.assertTrue("Default maxFiles should be Infinity",
+                Double.isInfinite(tester.getMaxFiles()));
+    }
+
+    @Test
+    public void getMaxFiles_returnsConfiguredValue() {
+        clickButton("set-max-files-3");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        Assert.assertEquals("maxFiles should be 3", 3.0, tester.getMaxFiles(),
+                0.0);
+    }
+
+    @Test
+    public void isMaxFilesReached_falseWhenNoFiles() {
+        clickButton("set-max-files-1");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        Assert.assertFalse("maxFilesReached should be false with no files",
+                tester.isMaxFilesReached());
+    }
+
+    @Test
+    public void isMaxFilesReached_trueWhenLimitReached() throws Exception {
+        clickButton("set-max-files-1");
+
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+        assertLogContains("Uploaded:");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        Assert.assertTrue("maxFilesReached should be true after uploading",
+                tester.isMaxFilesReached());
+    }
+
+    @Test
+    public void removeFile_removesFileAtIndex() throws Exception {
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+        assertLogContains("Uploaded:");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        waitUntil(driver -> tester.getFileCount() > 0, 10);
+        Assert.assertEquals("File count should be 1", 1, tester.getFileCount());
+
+        tester.removeFile(0);
+        assertLogContains("Removed: " + tempFile.getName());
+        Assert.assertEquals("File count should be 0 after removal", 0,
+                tester.getFileCount());
+    }
+
+    @Test
+    public void uploadFiles_triggersManualUpload() throws Exception {
+        clickButton("disable-auto-upload");
+
+        File tempFile = createTempFile("txt");
+
+        // Add file without triggering upload
+        UploadManagerTester tester = getUploadManagerTester();
+        tester.upload(tempFile, 0);
+
+        // Verify file was added but not uploaded
+        waitUntil(driver -> tester.getFileCount() > 0, 10);
+        Thread.sleep(500); // NOSONAR
+        logStatus();
+        Assert.assertFalse("File should not be uploaded automatically",
+                getLogText().contains("Uploaded:"));
+
+        // Trigger manual upload
+        tester.uploadFiles();
+        tester.waitForUploads(60);
+
+        assertLogContains("Uploaded: " + tempFile.getName());
+    }
+
+    @Test
+    public void uploadMultiple_uploadsAllFiles() throws Exception {
+        File tempFile1 = createTempFile("file1", "txt");
+        File tempFile2 = createTempFile("file2", "txt");
+        File tempFile3 = createTempFile("file3", "txt");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        tester.uploadMultiple(Arrays.asList(tempFile1, tempFile2, tempFile3),
+                60);
+
+        assertLogContains("All uploads finished");
+        assertLogContains("Uploaded: " + tempFile1.getName());
+        assertLogContains("Uploaded: " + tempFile2.getName());
+        assertLogContains("Uploaded: " + tempFile3.getName());
+    }
+
+    @Test
+    public void abort_canBeCalledWithoutError() throws Exception {
+        // Disable auto-upload so we can control the timing
+        clickButton("disable-auto-upload");
+
+        File tempFile = createTempFile("txt");
+
+        UploadManagerTester tester = getUploadManagerTester();
+
+        // Add file without triggering upload
+        tester.upload(tempFile, 0);
+
+        waitUntil(driver -> tester.getFileCount() == 1, 10);
+
+        // Call abort - should not throw error even with no active uploads
+        tester.abort();
+
+        // Verify the file is still in the list (not uploaded, not removed)
+        Assert.assertEquals("File should still be in the list", 1,
+                tester.getFileCount());
+
+        // Now trigger the upload and verify it works
+        tester.uploadFiles();
+        tester.waitForUploads(60);
+
+        assertLogContains("Uploaded: " + tempFile.getName());
+    }
+
+    @Test
+    public void getFileCount_returnsCorrectCount() throws Exception {
+        UploadManagerTester tester = getUploadManagerTester();
+        Assert.assertEquals("Initial file count should be 0", 0,
+                tester.getFileCount());
+
+        File tempFile1 = createTempFile("file1", "txt");
+        File tempFile2 = createTempFile("file2", "txt");
+
+        uploadFile(tempFile1);
+        assertLogContains("Uploaded: " + tempFile1.getName());
+        Assert.assertEquals("File count should be 1", 1, tester.getFileCount());
+
+        uploadFile(tempFile2);
+        assertLogContains("Uploaded: " + tempFile2.getName());
+        Assert.assertEquals("File count should be 2", 2, tester.getFileCount());
+    }
+
+    @Test
+    public void waitForUploads_waitsUntilComplete() throws Exception {
+        File tempFile = createTempFile("txt");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        tester.upload(tempFile, 0);
+        tester.waitForUploads(60);
+
+        // If we got here without timeout, the wait worked correctly
+        assertLogContains("Uploaded: " + tempFile.getName());
+    }
+
+    private UploadManagerTester getUploadManagerTester() {
+        return $(UploadButtonElement.class).id("upload-button")
+                .getUploadManager();
     }
 
     private void uploadFile(File file) {
