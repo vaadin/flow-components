@@ -81,9 +81,7 @@ public class UploadFileList extends Component {
      */
     public final void setManager(UploadManager manager) {
         this.manager = manager;
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> setTarget(manager)));
-        addAttachListener(event -> setTarget(manager));
+        UploadManagerLink.link(this, manager);
     }
 
     /**
@@ -93,11 +91,6 @@ public class UploadFileList extends Component {
      */
     public UploadManager getManager() {
         return manager;
-    }
-
-    private void setTarget(UploadManager manager) {
-        getElement().executeJs("this.manager = $0.manager",
-                manager.getConnector());
     }
 
     /**
