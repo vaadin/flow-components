@@ -82,17 +82,12 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
 
     /**
      * @throws IllegalArgumentException
-     *             if the value is not between min and max, not aligned with the
-     *             step value, or if start is greater than end
+     *             if the value is not between min and max or not aligned with
+     *             the step value
      */
     @Override
     public void setValue(RangeSliderValue value) {
         Objects.requireNonNull(value, "Value cannot be null");
-
-        if (value.start() > value.end()) {
-            throw new IllegalArgumentException(
-                    "Start value cannot be greater than end value");
-        }
 
         if (value.start() < getMin() || value.end() > getMax()) {
             throw new IllegalArgumentException(
