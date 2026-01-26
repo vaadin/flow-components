@@ -176,6 +176,18 @@ public class SliderTest {
         slider.setValue(150.0);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void setValue_notAlignedWithStep_throws() {
+        Slider slider = new Slider(0.0, 100.0, 10.0, 0.0);
+        slider.setValue(15.0);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setValue_null_throws() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
+        slider.setValue(null);
+    }
+
     public void implementsHasSizeInterface() {
         Slider slider = new Slider();
         Assert.assertTrue(slider instanceof HasSize);
@@ -237,14 +249,38 @@ public class SliderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void setMin_greaterThanCurrentValue_throws() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 50.0);
+        slider.setMin(60.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void setMax_lessThanMin_throws() {
         Slider slider = new Slider(50.0, 100.0, 10.0, 50.0);
         slider.setMax(25.0);
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void setMax_lessThanCurrentValue_throws() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 50.0);
+        slider.setMax(40.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void setStep_notPositive_throws() {
         Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
         slider.setStep(0.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setStep_negative_throws() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
+        slider.setStep(-5.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setStep_valueNotAligned_throws() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 15.0);
+        slider.setStep(10.0);
     }
 }
