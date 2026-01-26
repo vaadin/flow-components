@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
@@ -37,14 +38,14 @@ import tools.jackson.databind.node.ArrayNode;
 // @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
 
-    private static final SerializableFunction<ArrayNode, RangeSliderValue> PARSER = arrayNode -> new RangeSliderValue(
-            arrayNode.get(0).asDouble(), arrayNode.get(1).asDouble());
+    private static final SerializableFunction<ArrayNode, RangeSliderValue> PARSER = arrayNode -> {
+        return new RangeSliderValue(arrayNode.get(0).asDouble(),
+                arrayNode.get(1).asDouble());
+    };
 
     private static final SerializableFunction<RangeSliderValue, ArrayNode> FORMATTER = value -> {
-        ArrayNode arrayNode = JacksonUtils.createArrayNode();
-        arrayNode.add(value.start());
-        arrayNode.add(value.end());
-        return arrayNode;
+        return JacksonUtils
+                .listToJson(Arrays.asList(value.start(), value.end()));
     };
 
     private final static double DEFAULT_MIN = 0;
@@ -119,7 +120,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
                         """
                                 Start value {} is below the minimum of {}. \
                                 This may happen when the minimum was changed but the value was not updated. \
-                                Consider increasing the value or decreasing the minimum to avoid inconsistent behavior.
+                                Increase the start value or decrease the minimum to avoid inconsistent UI behavior.
                                 """,
                         getValue().start(), getMin());
             }
@@ -150,9 +151,9 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
             if (getValue().end() > getMax()) {
                 LoggerFactory.getLogger(RangeSlider.class).warn(
                         """
-                                End value {} exceeds the maximum of {}. \
+                                End value {} exceeds the maximum of {}.
                                 This may happen when the maximum was changed but the value was not updated. \
-                                Consider reducing the value or increasing the maximum to avoid inconsistent behavior.
+                                Decrease the end value or increase the maximum to avoid inconsistent UI behavior.
                                 """,
                         getValue().end(), getMax());
             }
@@ -188,7 +189,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
                         """
                                 Value [{}, {}] is not aligned with the step {}. \
                                 This may happen when the step was changed but the value was not updated. \
-                                Consider adjusting the value to align with the step to avoid inconsistent behavior.
+                                Update the value so that it aligns with the step to avoid inconsistent UI behavior.
                                 """,
                         value.start(), value.end(), getStep());
             }
