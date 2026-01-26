@@ -198,9 +198,9 @@ public class SliderTest {
         Assert.assertEquals(0.0, slider.getElement().getProperty("min", 0.0),
                 0.0);
 
-        slider.setMin(10.0);
-        Assert.assertEquals(10.0, slider.getMin(), 0.0);
-        Assert.assertEquals(10.0, slider.getElement().getProperty("min", 0.0),
+        slider.setMin(-10.0);
+        Assert.assertEquals(-10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(-10.0, slider.getElement().getProperty("min", 0.0),
                 0.0);
     }
 
