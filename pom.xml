@@ -82,7 +82,7 @@
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
-        <spotless.plugin.version>3.1.0</spotless.plugin.version>
+        <spotless.plugin.version>3.2.0</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
@@ -98,10 +98,11 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.0.2</spring-data-commons.version>
         <reactor-core.version>3.8.2</reactor-core.version>
+        <langchain4j.version>1.10.0</langchain4j.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
-        <javaparser.version>3.27.1</javaparser.version>
+        <javaparser.version>3.28.0</javaparser.version>
 
         <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
         <surefire.argLine/>

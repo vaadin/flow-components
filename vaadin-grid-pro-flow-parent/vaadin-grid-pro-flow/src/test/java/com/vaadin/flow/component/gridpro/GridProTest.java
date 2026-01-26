@@ -232,6 +232,7 @@ public class GridProTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void itemPropertyChangedListener_notCalledWhenValueUnchanged_customEditor() {
+        UI.getCurrent().add(grid);
         ComponentEventListener listener = Mockito
                 .mock(ComponentEventListener.class);
         grid.addItemPropertyChangedListener(listener);

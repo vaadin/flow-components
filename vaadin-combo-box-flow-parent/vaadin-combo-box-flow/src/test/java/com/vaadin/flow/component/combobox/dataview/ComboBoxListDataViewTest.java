@@ -30,8 +30,8 @@ import com.vaadin.flow.component.combobox.ComboBoxBase;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
-import com.vaadin.tests.dataprovider.MockUI;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
