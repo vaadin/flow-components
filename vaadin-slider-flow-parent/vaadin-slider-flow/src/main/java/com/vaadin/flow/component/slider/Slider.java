@@ -35,13 +35,11 @@ public class Slider extends SliderBase<Slider, Double> {
     private static final double DEFAULT_MAX = 100;
     private static final double DEFAULT_STEP = 1;
 
-    private static final SerializableBiFunction<Slider, Double, Double> PARSER = (component, value) -> {
-        return component.requireValidValue(value);
-    };
+    private static final SerializableBiFunction<Slider, Double, Double> PARSER = (
+            component, value) -> component.requireValidValue(value);
 
-    private static final SerializableBiFunction<Slider, Double, Double> FORMATTER = (component, value) -> {
-        return component.requireValidValue(value);
-    };
+    private static final SerializableBiFunction<Slider, Double, Double> FORMATTER = (
+            component, value) -> component.requireValidValue(value);
 
     /**
      * Constructs a {@code Slider} with range 0-100 and initial value 0.
@@ -258,102 +256,62 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Sets the minimum value of the slider.
-     *
-     * @param min
-     *            the minimum value
-     * @throws IllegalArgumentException
-     *             if the min is greater than the max value
-     * @throws IllegalArgumentException
-     *             if the current value is less than the new minimum value
+     * {@inheritDoc}
+     * <p>
+     * To update the minimum value, use the
+     * {@link #setValue(double, double, Double) setValue(min, max, value)
+     * method}.
      */
-    public void setMin(double min) {
-        if (getValue() < min) {
-            throw new IllegalArgumentException(
-                    "The current value {} is less than the new minimum value {}".formatted(
-                            getValue(), min));
-        }
-
-        super.setMinDouble(min);
-    }
-
-    /**
-     * Gets the minimum value of the slider.
-     *
-     * @return the minimum value
-     */
+    @Override
     public double getMin() {
-        return getMinDouble();
+        return super.getMin();
     }
 
     /**
-     * Sets the maximum value of the slider.
-     *
-     * @param max
-     *            the maximum value
-     * @throws IllegalArgumentException
-     *             if the max is less than the min value
-     * @throws IllegalArgumentException
-     *             if the current value is greater than the new maximum value
+     * {@inheritDoc}
+     * <p>
+     * To update the maximum value, use the
+     * {@link #setValue(double, double, Double) setValue(min, max, value)
+     * method}.
      */
-    public void setMax(double max) {
-        if (getValue() > max) {
-            throw new IllegalArgumentException(
-                    "The current value {} is greater than the new maximum value {}".formatted(
-                            getValue(), max));
-        }
-
-        super.setMaxDouble(max);
-    }
-
-    /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
+    @Override
     public double getMax() {
-        return getMaxDouble();
+        return super.getMax();
     }
 
     /**
-     * Sets the step value of the slider. The step is the amount the value
-     * changes when the user moves the handle.
-     *
-     * @param step
-     *            the step value
-     * @throws IllegalArgumentExceptionm
-     *             if the step is less than or equal to zero
-     * @throws IllegalArgumentException
-     *             if the current value is not aligned with the new step value
+     * {@inheritDoc}
+     * <p>
+     * To update the step value, use the
+     * {@link #setValue(double, double, double, Double) setValue(min, max, step,
+     * value) method}.
      */
-    public void setStep(double step) {
-        if (getValue() % step != 0) {
-            throw new IllegalArgumentException(
-                    "The current value {} is not aligned with the new step value {}".formatted(
-                            getValue(), step));
-        }
-
-        super.setStepDouble(step);
-    }
-
-    /**
-     * Gets the step value of the slider.
-     *
-     * @return the step value
-     */
+    @Override
     public double getStep() {
-        return getStepDouble();
+        return super.getStep();
     }
 
-    private double requireValidValue(Double value) {
+    @Override
+    public void setValue(double min, double max, Double value) {
+        super.setValue(min, max, value);
+    }
+
+    @Override
+    public void setValue(double min, double max, double step, Double value) {
+        super.setValue(min, max, step, value);
+    }
+
+    @Override
+    Double requireValidValue(double min, double max, double step,
+            Double value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
-        if (value < getMin() || value > getMax()) {
+        if (value < min || value > max) {
             throw new IllegalArgumentException(
                     "The value must be between min and max");
         }
 
-        if (value % getStep() != 0) {
+        if (value % step != 0) {
             throw new IllegalArgumentException(
                     "The value is not aligned with the step value");
         }
