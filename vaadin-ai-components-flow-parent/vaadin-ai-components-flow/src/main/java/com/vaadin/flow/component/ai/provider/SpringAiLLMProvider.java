@@ -60,7 +60,7 @@ public class SpringAiLLMProvider implements LLMProvider {
     private static final String CONVERSATION_ID = "default";
 
     private final transient ChatClient chatClient;
-    private final transient boolean isStreaming;
+    private final boolean isStreaming;
 
     /**
      * Constructor with a chat model and streaming mode configuration.
@@ -82,6 +82,25 @@ public class SpringAiLLMProvider implements LLMProvider {
                         .conversationId(CONVERSATION_ID).build())
                 .build();
         isStreaming = streaming;
+    }
+
+    /**
+     * Constructor with a chat client and streaming mode configuration. Note:
+     * When using this constructor, conversation memory must be configured
+     * externally in the {@link ChatClient}.
+     *
+     * @param chatClient
+     *            the chat client, not {@code null}
+     * @param streaming
+     *            {@code true} to use streaming mode, {@code false} for
+     *            non-streaming
+     * @throws NullPointerException
+     *             if chatModel is {@code null}
+     */
+    public SpringAiLLMProvider(ChatClient chatClient, boolean streaming) {
+        Objects.requireNonNull(chatClient, "ChatClient must not be null");
+        this.chatClient = chatClient;
+        this.isStreaming = streaming;
     }
 
     @Override
