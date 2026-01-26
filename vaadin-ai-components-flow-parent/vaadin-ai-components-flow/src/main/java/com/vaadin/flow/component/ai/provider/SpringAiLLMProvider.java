@@ -81,6 +81,25 @@ public class SpringAiLLMProvider implements LLMProvider {
         this.chatClient = chatClient;
     }
 
+    /**
+     * Constructor with a chat client and streaming mode configuration. Note:
+     * When using this constructor, conversation memory must be configured
+     * externally in the {@link ChatClient}.
+     *
+     * @param chatClient
+     *            the chat client, not {@code null}
+     * @param streaming
+     *            {@code true} to use streaming mode, {@code false} for
+     *            non-streaming
+     * @throws NullPointerException
+     *             if chatModel is {@code null}
+     */
+    public SpringAiLLMProvider(ChatClient chatClient, boolean streaming) {
+        Objects.requireNonNull(chatClient, "ChatClient must not be null");
+        this.chatClient = chatClient;
+        this.isStreaming = streaming;
+    }
+
     @Override
     public Flux<String> stream(LLMRequest request) {
         Objects.requireNonNull(request, "Request must not be null");
