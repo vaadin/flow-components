@@ -34,7 +34,8 @@ public class RangeSliderTest {
         Assert.assertEquals(0.0, slider.getMin(), 0.0);
         Assert.assertEquals(100.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(0.0, 100.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(0.0, 100.0),
+                slider.getValue());
     }
 
     @Test
@@ -44,7 +45,8 @@ public class RangeSliderTest {
         Assert.assertEquals(0.0, slider.getMin(), 0.0);
         Assert.assertEquals(100.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(0.0, 100.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(0.0, 100.0),
+                slider.getValue());
 
         slider.setValue(new RangeSliderValue(25.0, 75.0));
         Assert.assertTrue(listenerInvoked.get());
@@ -57,7 +59,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
     }
 
     @Test
@@ -69,7 +72,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
 
         slider.setValue(new RangeSliderValue(20.0, 40.0));
         Assert.assertTrue(listenerInvoked.get());
@@ -82,7 +86,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(5.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
     }
 
     @Test
@@ -94,7 +99,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(5.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
 
         slider.setValue(new RangeSliderValue(20.0, 40.0));
         Assert.assertTrue(listenerInvoked.get());
@@ -107,7 +113,8 @@ public class RangeSliderTest {
         Assert.assertEquals(0.0, slider.getMin(), 0.0);
         Assert.assertEquals(100.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(0.0, 100.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(0.0, 100.0),
+                slider.getValue());
     }
 
     @Test
@@ -119,7 +126,8 @@ public class RangeSliderTest {
         Assert.assertEquals(0.0, slider.getMin(), 0.0);
         Assert.assertEquals(100.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(0.0, 100.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(0.0, 100.0),
+                slider.getValue());
 
         slider.setValue(new RangeSliderValue(25.0, 75.0));
         Assert.assertTrue(listenerInvoked.get());
@@ -133,7 +141,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
     }
 
     @Test
@@ -146,7 +155,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(1.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
 
         slider.setValue(new RangeSliderValue(20.0, 40.0));
         Assert.assertTrue(listenerInvoked.get());
@@ -160,7 +170,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(5.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
     }
 
     @Test
@@ -173,7 +184,8 @@ public class RangeSliderTest {
         Assert.assertEquals(10.0, slider.getMin(), 0.0);
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(5.0, slider.getStep(), 0.0);
-        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0),
+                slider.getValue());
 
         slider.setValue(new RangeSliderValue(20.0, 40.0));
         Assert.assertTrue(listenerInvoked.get());
