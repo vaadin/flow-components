@@ -89,8 +89,9 @@ public class IconActionFixture implements SpreadsheetFixture {
             @Override
             public Action[] getActions(CellRangeAddress target,
                     Spreadsheet sender) {
-                return new Action[] {
-                        new Action("Column action", LumoIcon.COG.create()) };
+                var action = new Action("Column action");
+                action.setIcon(LumoIcon.COG.create());
+                return new Action[] { action };
             }
         });
 
