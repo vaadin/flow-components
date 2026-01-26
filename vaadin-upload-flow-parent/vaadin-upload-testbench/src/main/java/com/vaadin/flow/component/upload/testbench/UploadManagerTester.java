@@ -61,8 +61,11 @@ public class UploadManagerTester {
      * @return the maximum number of files, or {@code Infinity} if unlimited
      */
     public double getMaxFiles() {
-        return ((Number) executeScript("return arguments[0].manager.maxFiles"))
-                .doubleValue();
+        Object result = executeScript("return arguments[0].manager.maxFiles");
+        if (result == null) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return ((Number) result).doubleValue();
     }
 
     /**
@@ -202,18 +205,17 @@ public class UploadManagerTester {
 
     private void setLocalFileDetector(TestBenchElement fileInput) {
         WebElement realElement = fileInput;
-        while (realElement instanceof WrapsElement) {
-            realElement = ((WrapsElement) realElement).getWrappedElement();
+        while (realElement instanceof WrapsElement wrapsElement) {
+            realElement = wrapsElement.getWrappedElement();
         }
-        if (realElement instanceof RemoteWebElement) {
-            ((RemoteWebElement) realElement)
-                    .setFileDetector(new LocalFileDetector());
+        if (realElement instanceof RemoteWebElement remoteWebElement) {
+            remoteWebElement.setFileDetector(new LocalFileDetector());
         }
     }
 
     private static boolean isLocalDriver(WebDriver driver) {
-        while (driver instanceof WrapsDriver) {
-            driver = ((WrapsDriver) driver).getWrappedDriver();
+        while (driver instanceof WrapsDriver wrapsDriver) {
+            driver = wrapsDriver.getWrappedDriver();
         }
         return driver instanceof ChromiumDriver
                 || driver instanceof FirefoxDriver
