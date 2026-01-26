@@ -31,9 +31,10 @@ import com.vaadin.tests.MockUI;
 
 public class RangeSliderWarningsTest {
 
-    private MockUI ui = new MockUI();
     private RangeSlider slider;
-    private Logger logger;
+
+    private MockUI ui = new MockUI();
+    private Logger logger = Mockito.mock(Logger.class);
     private FeatureFlags featureFlags = Mockito.mock(FeatureFlags.class);
     private MockedStatic<FeatureFlags> featureFlagsStatic = Mockito
             .mockStatic(FeatureFlags.class);
@@ -49,8 +50,6 @@ public class RangeSliderWarningsTest {
         Mockito.when(featureFlags
                 .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
                 .thenReturn(true);
-
-        logger = Mockito.mock(Logger.class);
         loggerFactoryStatic
                 .when(() -> LoggerFactory.getLogger(RangeSlider.class))
                 .thenReturn(logger);
