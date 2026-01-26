@@ -290,7 +290,7 @@ public class Slider extends SliderBase<Slider, Double> {
                         """
                                 Value {} is below the minimum of {}. \
                                 This may happen when the minimum was changed but the value was not updated. \
-                                Consider increasing the value or decreasing the minimum to avoid inconsistent behavior.
+                                Increase the value or decrease the minimum to avoid inconsistent UI behavior.
                                 """,
                         getValue(), getMin());
             }
@@ -323,7 +323,7 @@ public class Slider extends SliderBase<Slider, Double> {
                         """
                                 Current value {} exceeds the maximum of {}. \
                                 This may happen when the maximum was changed but the value was not updated. \
-                                Consider reducing the value or increasing the maximum to avoid inconsistent behavior.
+                                Decrease the value or increase the maximum to avoid inconsistent UI behavior.
                                 """,
                         getValue(), getMax());
             }
@@ -357,7 +357,7 @@ public class Slider extends SliderBase<Slider, Double> {
                         """
                                 Value {} is not aligned with the step {}. \
                                 This may happen when the step was changed but the value was not updated. \
-                                Consider adjusting the value to align with the step to avoid inconsistent behavior.
+                                Update the value so that it aligns with the step to avoid inconsistent UI behavior.
                                 """,
                         getValue(), getStep());
             }
