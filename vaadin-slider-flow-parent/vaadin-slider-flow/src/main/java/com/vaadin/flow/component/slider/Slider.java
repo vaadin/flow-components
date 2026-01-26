@@ -17,9 +17,8 @@ package com.vaadin.flow.component.slider;
 
 import java.util.Objects;
 
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
  * Slider is an input field that allows the user to select a numeric value
@@ -32,10 +31,17 @@ import com.vaadin.flow.component.Tag;
 // @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
 // @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> {
+    private static final double DEFAULT_MIN = 0;
+    private static final double DEFAULT_MAX = 100;
+    private static final double DEFAULT_STEP = 1;
 
-    private final static double DEFAULT_MIN = 0;
-    private final static double DEFAULT_MAX = 100;
-    private final static double DEFAULT_STEP = 1;
+    private static final SerializableBiFunction<Slider, Double, Double> PARSER = (component, value) -> {
+        return component.requireValidValue(value);
+    };
+
+    private static final SerializableBiFunction<Slider, Double, Double> FORMATTER = (component, value) -> {
+        return component.requireValidValue(value);
+    };
 
     /**
      * Constructs a {@code Slider} with range 0-100 and initial value 0.
@@ -110,7 +116,7 @@ public class Slider extends SliderBase<Slider, Double> {
      *            the initial value
      */
     public Slider(double min, double max, double step, double value) {
-        super(min, max, step, value);
+        super(min, max, step, value, Double.class, PARSER, FORMATTER);
     }
 
     /**
@@ -252,49 +258,23 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * @throws IllegalArgumentException
-     *             if the value is not between min and max or not aligned with
-     *             the step value
-     */
-    @Override
-    public void setValue(Double value) {
-        Objects.requireNonNull(value, "Value cannot be null");
-
-        if (value < getMin() || value > getMax()) {
-            throw new IllegalArgumentException(
-                    "The value must be between min and max");
-        }
-
-        if (value % getStep() != 0) {
-            throw new IllegalArgumentException(
-                    "The value is not aligned with the step value");
-        }
-
-        super.setValue(value);
-    }
-
-    /**
      * Sets the minimum value of the slider.
      *
      * @param min
      *            the minimum value
      * @throws IllegalArgumentException
      *             if the min is greater than the max value
+     * @throws IllegalArgumentException
+     *             if the current value is less than the new minimum value
      */
     public void setMin(double min) {
-        super.setMinDouble(min);
+        if (getValue() < min) {
+            throw new IllegalArgumentException(
+                    "The current value {} is less than the new minimum value {}".formatted(
+                            getValue(), min));
+        }
 
-        scheduleBeforeClientResponse("min", () -> {
-            if (getValue() < getMin()) {
-                LoggerFactory.getLogger(Slider.class).warn(
-                        """
-                                Value {} is below the minimum of {}. \
-                                This may happen when the minimum was changed but the value was not updated. \
-                                Increase the value or decrease the minimum to avoid inconsistent UI behavior.
-                                """,
-                        getValue(), getMin());
-            }
-        });
+        super.setMinDouble(min);
     }
 
     /**
@@ -313,21 +293,17 @@ public class Slider extends SliderBase<Slider, Double> {
      *            the maximum value
      * @throws IllegalArgumentException
      *             if the max is less than the min value
+     * @throws IllegalArgumentException
+     *             if the current value is greater than the new maximum value
      */
     public void setMax(double max) {
-        super.setMaxDouble(max);
+        if (getValue() > max) {
+            throw new IllegalArgumentException(
+                    "The current value {} is greater than the new maximum value {}".formatted(
+                            getValue(), max));
+        }
 
-        scheduleBeforeClientResponse("max", () -> {
-            if (getValue() > getMax()) {
-                LoggerFactory.getLogger(Slider.class).warn(
-                        """
-                                Current value {} exceeds the maximum of {}. \
-                                This may happen when the maximum was changed but the value was not updated. \
-                                Decrease the value or increase the maximum to avoid inconsistent UI behavior.
-                                """,
-                        getValue(), getMax());
-            }
-        });
+        super.setMaxDouble(max);
     }
 
     /**
@@ -347,21 +323,17 @@ public class Slider extends SliderBase<Slider, Double> {
      *            the step value
      * @throws IllegalArgumentExceptionm
      *             if the step is less than or equal to zero
+     * @throws IllegalArgumentException
+     *             if the current value is not aligned with the new step value
      */
     public void setStep(double step) {
-        super.setStepDouble(step);
+        if (getValue() % step != 0) {
+            throw new IllegalArgumentException(
+                    "The current value {} is not aligned with the new step value {}".formatted(
+                            getValue(), step));
+        }
 
-        scheduleBeforeClientResponse("step", () -> {
-            if (getValue() % getStep() != 0) {
-                LoggerFactory.getLogger(Slider.class).warn(
-                        """
-                                Value {} is not aligned with the step {}. \
-                                This may happen when the step was changed but the value was not updated. \
-                                Update the value so that it aligns with the step to avoid inconsistent UI behavior.
-                                """,
-                        getValue(), getStep());
-            }
-        });
+        super.setStepDouble(step);
     }
 
     /**
@@ -371,5 +343,21 @@ public class Slider extends SliderBase<Slider, Double> {
      */
     public double getStep() {
         return getStepDouble();
+    }
+
+    private double requireValidValue(Double value) {
+        Objects.requireNonNull(value, "Value cannot be null");
+
+        if (value < getMin() || value > getMax()) {
+            throw new IllegalArgumentException(
+                    "The value must be between min and max");
+        }
+
+        if (value % getStep() != 0) {
+            throw new IllegalArgumentException(
+                    "The value is not aligned with the step value");
+        }
+
+        return value;
     }
 }

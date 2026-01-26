@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -40,15 +41,18 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue extends Number>
+public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasLabel, HasHelper, HasValidationProperties, HasSize,
-        Focusable<Slider>, KeyNotifier {
+        Focusable<TComponent>, KeyNotifier {
     private Set<String> pendingBeforeClientResponseActions = new HashSet<>();
 
     /**
-     * Constructs a slider with the given min, max, step, and initial value.
+     * Constructs a slider with the given min, max, step, initial value, and
+     * custom converters for the value property.
      *
+     * @param <TPresentation>
+     *            the presentation type used by the element property
      * @param min
      *            the minimum value
      * @param max
@@ -57,9 +61,19 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *            the step value
      * @param value
      *            the initial value
+     * @param presentationType
+     *            the class of the presentation type
+     * @param presentationToModel
+     *            a function to convert from presentation to model
+     * @param modelToPresentation
+     *            a function to convert from model to presentation
      */
-    SliderBase(double min, double max, double step, TValue value) {
-        super("value", null, false);
+    <TPresentation> SliderBase(double min, double max, double step,
+            TValue value, Class<TPresentation> presentationType,
+            SerializableBiFunction<TComponent, TPresentation, TValue> presentationToModel,
+            SerializableBiFunction<TComponent, TValue, TPresentation> modelToPresentation) {
+        super("value", null, presentationType, presentationToModel,
+                modelToPresentation);
 
         getElement().setProperty("manualValidation", true);
 
