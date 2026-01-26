@@ -2,11 +2,13 @@
 
 const readline = require('readline');
 const fs = require('fs');
+const path = require('path');
+const os = require('os');
 const { spawn } = require('child_process');
 
 // === Configuration ===
 
-const HISTORY_FILE = '.run.history.json';
+const HISTORY_FILE = path.join(os.homedir(), '.vaadin-flow-components-run.history.json');
 const MAX_HISTORY = 10;
 
 const LOG_FILTERS = [
