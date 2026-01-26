@@ -194,6 +194,26 @@ public class UploadManagerPage extends UploadDropZone {
         fileOpsGroup.add(clearFileListBtn);
         add(fileOpsGroup);
 
+        // --- Unlink Components ---
+        var unlinkGroup = createButtonGroup("Unlink:");
+        var unlinkButton = new NativeButton("Unlink Button", event -> {
+            uploadButton.setManager(null);
+            log("Upload button unlinked");
+        });
+        unlinkButton.setId("unlink-button");
+        var unlinkFileList = new NativeButton("Unlink File List", event -> {
+            fileList.setManager(null);
+            log("File list unlinked");
+        });
+        unlinkFileList.setId("unlink-file-list");
+        var unlinkDropZone = new NativeButton("Unlink Drop Zone", event -> {
+            setManager(null);
+            log("Drop zone unlinked");
+        });
+        unlinkDropZone.setId("unlink-drop-zone");
+        unlinkGroup.add(unlinkButton, unlinkFileList, unlinkDropZone);
+        add(unlinkGroup);
+
         // --- Log ---
         var logGroup = createButtonGroup("Log:");
         var clearLog = new NativeButton("Clear", event -> logArea.removeAll());

@@ -55,7 +55,8 @@ class UploadManagerLink implements Serializable {
         component.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(component,
                         context -> component.getElement().executeJs(
-                                "this.manager = $0.manager",
-                                manager.getConnector())));
+                                "this.manager = $0 ? $0.manager : null",
+                                manager != null ? manager.getConnector()
+                                        : null)));
     }
 }
