@@ -18,10 +18,8 @@ package com.vaadin.flow.component.slider;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -37,20 +35,25 @@ import tools.jackson.databind.node.ArrayNode;
 // @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
 // @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
+    private static final double DEFAULT_MIN = 0;
+    private static final double DEFAULT_MAX = 100;
+    private static final double DEFAULT_STEP = 1;
 
-    private static final SerializableFunction<ArrayNode, RangeSliderValue> PARSER = arrayNode -> {
-        return new RangeSliderValue(arrayNode.get(0).asDouble(),
-                arrayNode.get(1).asDouble());
+    private static final SerializableBiFunction<RangeSlider, ArrayNode, RangeSliderValue> PARSER = (
+            component, arrayValue) -> {
+        RangeSliderValue value = new RangeSliderValue(
+                arrayValue.get(0).asDouble(), arrayValue.get(1).asDouble());
+
+        return component.requireValidValue(value);
     };
 
-    private static final SerializableFunction<RangeSliderValue, ArrayNode> FORMATTER = value -> {
+    private static final SerializableBiFunction<RangeSlider, RangeSliderValue, ArrayNode> FORMATTER = (
+            component, value) -> {
+        component.requireValidValue(value);
+
         return JacksonUtils
                 .listToJson(Arrays.asList(value.start(), value.end()));
     };
-
-    private final static double DEFAULT_MIN = 0;
-    private final static double DEFAULT_MAX = 100;
-    private final static double DEFAULT_STEP = 1;
 
     /**
      * Constructs a {@code RangeSlider} with range 0-100 and initial value
@@ -276,49 +279,23 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * @throws IllegalArgumentException
-     *             if the value is not between min and max or not aligned with
-     *             the step value
-     */
-    @Override
-    public void setValue(RangeSliderValue value) {
-        Objects.requireNonNull(value, "Value cannot be null");
-
-        if (value.start() < getMin() || value.end() > getMax()) {
-            throw new IllegalArgumentException(
-                    "The value must be between min and max");
-        }
-
-        if (value.start() % getStep() != 0 || value.end() % getStep() != 0) {
-            throw new IllegalArgumentException(
-                    "The value is not aligned with the step value");
-        }
-
-        super.setValue(value);
-    }
-
-    /**
      * Sets the minimum value of the slider.
      *
      * @param min
      *            the minimum value
      * @throws IllegalArgumentException
      *             if the min is greater than the max value
+     * @throws IllegalArgumentException
+     *             if the current start value is below the new minimum value
      */
     public void setMin(double min) {
-        super.setMinDouble(min);
+        if (getValue().start() < min) {
+            throw new IllegalArgumentException(
+                    "The current start value {} is below the new minimum value {}"
+                            .formatted(getValue().start(), min));
+        }
 
-        scheduleBeforeClientResponse("min", () -> {
-            if (getValue().start() < getMin()) {
-                LoggerFactory.getLogger(RangeSlider.class).warn(
-                        """
-                                Start value {} is below the minimum of {}. \
-                                This may happen when the minimum was changed but the value was not updated. \
-                                Increase the start value or decrease the minimum to avoid inconsistent UI behavior.
-                                """,
-                        getValue().start(), getMin());
-            }
-        });
+        super.setMinDouble(min);
     }
 
     /**
@@ -337,21 +314,17 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      *            the maximum value
      * @throws IllegalArgumentException
      *             if the max is less than the min value
+     * @throws IllegalArgumentException
+     *             if the current end value exceeds the new maximum value
      */
     public void setMax(double max) {
-        super.setMaxDouble(max);
+        if (getValue().end() > max) {
+            throw new IllegalArgumentException(
+                    "The current end value {} exceeds the new maximum value {}"
+                            .formatted(getValue().end(), max));
+        }
 
-        scheduleBeforeClientResponse("max", () -> {
-            if (getValue().end() > getMax()) {
-                LoggerFactory.getLogger(RangeSlider.class).warn(
-                        """
-                                End value {} exceeds the maximum of {}.
-                                This may happen when the maximum was changed but the value was not updated. \
-                                Decrease the end value or increase the maximum to avoid inconsistent UI behavior.
-                                """,
-                        getValue().end(), getMax());
-            }
-        });
+        super.setMaxDouble(max);
     }
 
     /**
@@ -371,23 +344,18 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      *            the step value
      * @throws IllegalArgumentException
      *             if the step is less than or equal to zero
+     * @throws IllegalArgumentException
+     *             if the current value is not aligned with the new step value
      */
     public void setStep(double step) {
-        super.setStepDouble(step);
+        if (getValue().start() % step != 0 || getValue().end() % step != 0) {
+            throw new IllegalArgumentException(
+                    "The current value [{}, {}] is not aligned with the new step value {}"
+                            .formatted(getValue().start(), getValue().end(),
+                                    step));
+        }
 
-        scheduleBeforeClientResponse("step", () -> {
-            RangeSliderValue value = getValue();
-            if (value.start() % getStep() != 0
-                    || value.end() % getStep() != 0) {
-                LoggerFactory.getLogger(RangeSlider.class).warn(
-                        """
-                                Value [{}, {}] is not aligned with the step {}. \
-                                This may happen when the step was changed but the value was not updated. \
-                                Update the value so that it aligns with the step to avoid inconsistent UI behavior.
-                                """,
-                        value.start(), value.end(), getStep());
-            }
-        });
+        super.setStepDouble(step);
     }
 
     /**
@@ -397,5 +365,21 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      */
     public double getStep() {
         return getStepDouble();
+    }
+
+    private RangeSliderValue requireValidValue(RangeSliderValue value) {
+        Objects.requireNonNull(value, "Value cannot be null");
+
+        if (value.start() < getMin() || value.end() > getMax()) {
+            throw new IllegalArgumentException(
+                    "The value must be between min and max");
+        }
+
+        if (value.start() % getStep() != 0 || value.end() % getStep() != 0) {
+            throw new IllegalArgumentException(
+                    "The value is not aligned with the step value");
+        }
+
+        return value;
     }
 }
