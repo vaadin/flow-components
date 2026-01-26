@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Vaadin Slider</name>
     <description>Vaadin Slider</description>
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
