@@ -28,7 +28,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
-import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -46,23 +46,6 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
         implements HasLabel, HasHelper, HasValidationProperties, HasSize,
         Focusable<TComponent>, KeyNotifier {
     private Set<String> pendingBeforeClientResponseActions = new HashSet<>();
-
-    /**
-     * Constructs a slider with the given min, max, step, and initial value.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param step
-     *            the step value
-     * @param value
-     *            the initial value
-     */
-    SliderBase(double min, double max, double step, TValue value) {
-        super("value", null, false);
-        init(min, max, step, value);
-    }
 
     /**
      * Constructs a slider with the given min, max, step, initial value, and
@@ -87,14 +70,11 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      */
     <TPresentation> SliderBase(double min, double max, double step,
             TValue value, Class<TPresentation> presentationType,
-            SerializableFunction<TPresentation, TValue> presentationToModel,
-            SerializableFunction<TValue, TPresentation> modelToPresentation) {
+            SerializableBiFunction<TComponent, TPresentation, TValue> presentationToModel,
+            SerializableBiFunction<TComponent, TValue, TPresentation> modelToPresentation) {
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
-        init(min, max, step, value);
-    }
 
-    private void init(double min, double max, double step, TValue value) {
         getElement().setProperty("manualValidation", true);
 
         setMinDouble(min);
