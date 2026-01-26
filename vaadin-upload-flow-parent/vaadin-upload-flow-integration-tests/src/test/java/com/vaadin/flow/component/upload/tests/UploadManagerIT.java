@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptException;
 
 import com.vaadin.flow.component.upload.testbench.UploadButtonElement;
 import com.vaadin.flow.component.upload.testbench.UploadFileListElement;
@@ -214,6 +215,31 @@ public class UploadManagerIT extends AbstractUploadIT {
         // Verify no upload happened
         Assert.assertFalse("Upload should fail when owner is detached",
                 getLogText().contains("Uploaded:"));
+    }
+
+    @Test
+    public void unlinkButton_uploadFails() throws Exception {
+        // Unlink the upload button from the manager
+        clickButton("unlink-button");
+        assertLogContains("Upload button unlinked");
+
+        File tempFile = createTempFile("txt");
+
+        // Try to upload - should fail since button is unlinked
+        // The manager property is null after unlinking, so calling addFiles
+        // will throw a JavascriptException
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        var tester = uploadButton.getUploadManager();
+        try {
+            tester.upload(tempFile);
+            Assert.fail("Expected JavascriptException when uploading "
+                    + "with unlinked button");
+        } catch (JavascriptException e) {
+            // Expected - manager is null after unlinking
+            Assert.assertTrue("Exception should indicate manager is null",
+                    e.getMessage().contains("null"));
+        }
     }
 
     private void uploadFile(File file) {
