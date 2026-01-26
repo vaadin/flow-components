@@ -26,13 +26,11 @@ import com.vaadin.testbench.elementsbase.Element;
 public class UploadDropZoneElement extends TestBenchElement {
 
     /**
-     * Checks if files are currently being dragged over the drop zone. When
-     * files are dragged over, the element has a {@code dragover} attribute.
+     * Gets a tester for the upload manager linked to this drop zone.
      *
-     * @return {@code true} if files are being dragged over, {@code false}
-     *         otherwise
+     * @return the upload manager tester
      */
-    public boolean isDragOver() {
-        return hasAttribute("dragover");
+    public UploadManagerTester getUploadManager() {
+        return new UploadManagerTester(this);
     }
 }

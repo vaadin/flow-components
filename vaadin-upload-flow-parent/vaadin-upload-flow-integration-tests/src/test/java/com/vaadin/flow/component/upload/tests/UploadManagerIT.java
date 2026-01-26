@@ -136,8 +136,9 @@ public class UploadManagerIT extends AbstractUploadIT {
         // Click the start button on the first file in the list
         UploadFileListElement fileList = $(UploadFileListElement.class)
                 .id("file-list");
-        waitUntil(driver -> fileList.getFileCount() > 0, 10);
-        fileList.getFiles().get(0).$("[part~='start-button']").first().click();
+        waitUntil(driver -> fileList.getUploadManager().getFileCount() > 0, 10);
+        fileList.$("vaadin-upload-file").first().$("[part~='start-button']")
+                .first().click();
 
         assertLogContains("Uploaded: " + tempFile.getName());
     }
@@ -153,8 +154,9 @@ public class UploadManagerIT extends AbstractUploadIT {
         // Click the remove button on the first file in the list
         UploadFileListElement fileList = $(UploadFileListElement.class)
                 .id("file-list");
-        waitUntil(driver -> fileList.getFileCount() > 0, 10);
-        fileList.getFiles().get(0).$("[part~='remove-button']").first().click();
+        waitUntil(driver -> fileList.getUploadManager().getFileCount() > 0, 10);
+        fileList.$("vaadin-upload-file").first().$("[part~='remove-button']")
+                .first().click();
 
         assertLogContains("Removed: " + tempFile.getName());
     }
@@ -170,12 +172,12 @@ public class UploadManagerIT extends AbstractUploadIT {
         UploadFileListElement fileList = $(UploadFileListElement.class)
                 .id("file-list");
         Assert.assertEquals("File count should be 1", 1,
-                fileList.getFileCount());
+                fileList.getUploadManager().getFileCount());
 
         clickButton("clear-file-list");
 
         Assert.assertEquals("File count should be 0 after clearing", 0,
-                fileList.getFileCount());
+                fileList.getUploadManager().getFileCount());
     }
 
     @Test
@@ -217,14 +219,14 @@ public class UploadManagerIT extends AbstractUploadIT {
     private void uploadFile(File file) {
         UploadButtonElement uploadButton = $(UploadButtonElement.class)
                 .id("upload-button");
-        uploadButton.upload(file);
+        uploadButton.getUploadManager().upload(file);
     }
 
     private void uploadFiles(File... files) {
         UploadButtonElement uploadButton = $(UploadButtonElement.class)
                 .id("upload-button");
         for (File file : files) {
-            uploadButton.upload(file, 0);
+            uploadButton.getUploadManager().upload(file, 0);
         }
     }
 

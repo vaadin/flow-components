@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.upload.testbench;
 
-import java.util.List;
-
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -28,21 +26,11 @@ import com.vaadin.testbench.elementsbase.Element;
 public class UploadFileListElement extends TestBenchElement {
 
     /**
-     * Gets the number of files in the list.
+     * Gets a tester for the upload manager linked to this file list.
      *
-     * @return the number of files
+     * @return the upload manager tester
      */
-    public int getFileCount() {
-        List<TestBenchElement> files = getFiles();
-        return files != null ? files.size() : 0;
-    }
-
-    /**
-     * Gets all file elements in the list.
-     *
-     * @return a list of file elements
-     */
-    public List<TestBenchElement> getFiles() {
-        return $("vaadin-upload-file").all();
+    public UploadManagerTester getUploadManager() {
+        return new UploadManagerTester(this);
     }
 }
