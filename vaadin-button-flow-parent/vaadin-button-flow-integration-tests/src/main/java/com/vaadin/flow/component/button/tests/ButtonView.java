@@ -183,7 +183,8 @@ public class ButtonView extends Div {
 
     private boolean containsChild(Component parent, String tagName) {
         return parent.getElement().getChildren()
-                .anyMatch(element -> element.getTag().equals(tagName));
+                .anyMatch(element -> !element.isTextNode()
+                        && element.getTag().equals(tagName));
     }
 
     private void createButtonWithDisableOnClick() {

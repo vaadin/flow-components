@@ -27,8 +27,8 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
-import com.vaadin.tests.dataprovider.MockUI;
 
 public class GridTest {
 

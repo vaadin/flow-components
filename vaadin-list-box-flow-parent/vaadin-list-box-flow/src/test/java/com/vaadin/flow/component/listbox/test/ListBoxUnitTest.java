@@ -29,8 +29,8 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
-import com.vaadin.tests.dataprovider.MockUI;
 
 public class ListBoxUnitTest {
 
