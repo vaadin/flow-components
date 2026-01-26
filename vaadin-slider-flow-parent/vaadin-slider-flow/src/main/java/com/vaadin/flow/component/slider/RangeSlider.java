@@ -64,6 +64,57 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
+     * Constructs a {@code RangeSlider} with range 0-100, initial value 0-100,
+     * and a value change listener.
+     * <p>
+     * The step defaults to 1.
+     *
+     * @param listener
+     *            the value change listener
+     */
+    public RangeSlider(
+            ValueChangeListener<? super ComponentValueChangeEvent<RangeSlider, RangeSliderValue>> listener) {
+        this(DEFAULT_MIN, DEFAULT_MAX, DEFAULT_STEP,
+                new RangeSliderValue(DEFAULT_MIN, DEFAULT_MAX), listener);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given range and initial value.
+     * <p>
+     * The step defaults to 1.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
+     */
+    public RangeSlider(double min, double max, RangeSliderValue value) {
+        this(min, max, DEFAULT_STEP, value);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given range, initial value, and
+     * a value change listener.
+     * <p>
+     * The step defaults to 1.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
+     * @param listener
+     *            the value change listener
+     */
+    public RangeSlider(double min, double max, RangeSliderValue value,
+            ValueChangeListener<? super ComponentValueChangeEvent<RangeSlider, RangeSliderValue>> listener) {
+        this(min, max, DEFAULT_STEP, value, listener);
+    }
+
+    /**
      * Constructs a {@code RangeSlider} with the given range, step, and initial
      * value.
      *
@@ -79,6 +130,149 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     public RangeSlider(double min, double max, double step,
             RangeSliderValue value) {
         super(min, max, step, value, ArrayNode.class, PARSER, FORMATTER);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given range, step, initial
+     * value, and a value change listener.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @param value
+     *            the initial value
+     * @param listener
+     *            the value change listener
+     */
+    public RangeSlider(double min, double max, double step,
+            RangeSliderValue value,
+            ValueChangeListener<? super ComponentValueChangeEvent<RangeSlider, RangeSliderValue>> listener) {
+        this(min, max, step, value);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given label, range 0-100, and
+     * initial value 0-100.
+     * <p>
+     * The step defaults to 1.
+     *
+     * @param label
+     *            the text to set as the label
+     */
+    public RangeSlider(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given label, range 0-100,
+     * initial value 0-100, and a value change listener.
+     * <p>
+     * The step defaults to 1.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param listener
+     *            the value change listener
+     */
+    public RangeSlider(String label,
+            ValueChangeListener<? super ComponentValueChangeEvent<RangeSlider, RangeSliderValue>> listener) {
+        this(listener);
+        setLabel(label);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given label, range, and initial
+     * value.
+     * <p>
+     * The step defaults to 1.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
+     */
+    public RangeSlider(String label, double min, double max,
+            RangeSliderValue value) {
+        this(min, max, value);
+        setLabel(label);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given label, range, initial
+     * value, and a value change listener.
+     * <p>
+     * The step defaults to 1.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the initial value
+     * @param listener
+     *            the value change listener
+     */
+    public RangeSlider(String label, double min, double max,
+            RangeSliderValue value,
+            ValueChangeListener<? super ComponentValueChangeEvent<RangeSlider, RangeSliderValue>> listener) {
+        this(min, max, value, listener);
+        setLabel(label);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given label, range, step, and
+     * initial value.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @param value
+     *            the initial value
+     */
+    public RangeSlider(String label, double min, double max, double step,
+            RangeSliderValue value) {
+        this(min, max, step, value);
+        setLabel(label);
+    }
+
+    /**
+     * Constructs a {@code RangeSlider} with the given label, range, step,
+     * initial value, and a value change listener.
+     *
+     * @param label
+     *            the text to set as the label
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @param value
+     *            the initial value
+     * @param listener
+     *            the value change listener
+     */
+    public RangeSlider(String label, double min, double max, double step,
+            RangeSliderValue value,
+            ValueChangeListener<? super ComponentValueChangeEvent<RangeSlider, RangeSliderValue>> listener) {
+        this(min, max, step, value, listener);
+        setLabel(label);
     }
 
     /**

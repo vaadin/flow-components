@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.slider.tests;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,6 +38,44 @@ public class RangeSliderTest {
     }
 
     @Test
+    public void listenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        RangeSlider slider = new RangeSlider(e -> listenerInvoked.set(true));
+        Assert.assertEquals(0.0, slider.getMin(), 0.0);
+        Assert.assertEquals(100.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(0.0, 100.0), slider.getValue());
+
+        slider.setValue(new RangeSliderValue(25.0, 75.0));
+        Assert.assertTrue(listenerInvoked.get());
+    }
+
+    @Test
+    public void minMaxValueConstructor() {
+        RangeSlider slider = new RangeSlider(10.0, 50.0,
+                new RangeSliderValue(15.0, 45.0));
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+    }
+
+    @Test
+    public void minMaxValueListenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        RangeSlider slider = new RangeSlider(10.0, 50.0,
+                new RangeSliderValue(15.0, 45.0),
+                e -> listenerInvoked.set(true));
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+
+        slider.setValue(new RangeSliderValue(20.0, 40.0));
+        Assert.assertTrue(listenerInvoked.get());
+    }
+
+    @Test
     public void minMaxStepValueConstructor() {
         RangeSlider slider = new RangeSlider(10.0, 50.0, 5.0,
                 new RangeSliderValue(15.0, 45.0));
@@ -43,6 +83,100 @@ public class RangeSliderTest {
         Assert.assertEquals(50.0, slider.getMax(), 0.0);
         Assert.assertEquals(5.0, slider.getStep(), 0.0);
         Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+    }
+
+    @Test
+    public void minMaxStepValueListenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        RangeSlider slider = new RangeSlider(10.0, 50.0, 5.0,
+                new RangeSliderValue(15.0, 45.0),
+                e -> listenerInvoked.set(true));
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(5.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+
+        slider.setValue(new RangeSliderValue(20.0, 40.0));
+        Assert.assertTrue(listenerInvoked.get());
+    }
+
+    @Test
+    public void labelConstructor() {
+        RangeSlider slider = new RangeSlider("Label");
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(0.0, slider.getMin(), 0.0);
+        Assert.assertEquals(100.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(0.0, 100.0), slider.getValue());
+    }
+
+    @Test
+    public void labelListenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        RangeSlider slider = new RangeSlider("Label",
+                e -> listenerInvoked.set(true));
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(0.0, slider.getMin(), 0.0);
+        Assert.assertEquals(100.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(0.0, 100.0), slider.getValue());
+
+        slider.setValue(new RangeSliderValue(25.0, 75.0));
+        Assert.assertTrue(listenerInvoked.get());
+    }
+
+    @Test
+    public void labelMinMaxValueConstructor() {
+        RangeSlider slider = new RangeSlider("Label", 10.0, 50.0,
+                new RangeSliderValue(15.0, 45.0));
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+    }
+
+    @Test
+    public void labelMinMaxValueListenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        RangeSlider slider = new RangeSlider("Label", 10.0, 50.0,
+                new RangeSliderValue(15.0, 45.0),
+                e -> listenerInvoked.set(true));
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(1.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+
+        slider.setValue(new RangeSliderValue(20.0, 40.0));
+        Assert.assertTrue(listenerInvoked.get());
+    }
+
+    @Test
+    public void labelMinMaxStepValueConstructor() {
+        RangeSlider slider = new RangeSlider("Label", 10.0, 50.0, 5.0,
+                new RangeSliderValue(15.0, 45.0));
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(5.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+    }
+
+    @Test
+    public void labelMinMaxStepValueListenerConstructor() {
+        AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+        RangeSlider slider = new RangeSlider("Label", 10.0, 50.0, 5.0,
+                new RangeSliderValue(15.0, 45.0),
+                e -> listenerInvoked.set(true));
+        Assert.assertEquals("Label", slider.getLabel());
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(5.0, slider.getStep(), 0.0);
+        Assert.assertEquals(new RangeSliderValue(15.0, 45.0), slider.getValue());
+
+        slider.setValue(new RangeSliderValue(20.0, 40.0));
+        Assert.assertTrue(listenerInvoked.get());
     }
 
     @Test(expected = IllegalArgumentException.class)
