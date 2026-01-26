@@ -24,18 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUI;
 
 public class SliderWarningsTest {
 
-    private UI ui;
     private Slider slider;
-    private Logger logger;
+
+    private MockUI ui = new MockUI();
+    private Logger logger = Mockito.mock(Logger.class);
     private FeatureFlags featureFlags = Mockito.mock(FeatureFlags.class);
     private MockedStatic<FeatureFlags> featureFlagsStatic = Mockito
             .mockStatic(FeatureFlags.class);
@@ -44,28 +42,15 @@ public class SliderWarningsTest {
 
     @Before
     public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        VaadinContext context = Mockito.mock(VaadinContext.class);
-
-        Mockito.when(session.hasLock()).thenReturn(true);
-        Mockito.when(session.getService()).thenReturn(service);
-        Mockito.when(service.getContext()).thenReturn(context);
-
-        featureFlagsStatic.when(() -> FeatureFlags.get(context))
+        featureFlagsStatic
+                .when(() -> FeatureFlags
+                        .get(ui.getSession().getService().getContext()))
                 .thenReturn(featureFlags);
         Mockito.when(featureFlags
                 .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
                 .thenReturn(true);
-
-        logger = Mockito.mock(Logger.class);
         loggerFactoryStatic.when(() -> LoggerFactory.getLogger(Slider.class))
                 .thenReturn(logger);
-
-        ui.getInternals().setSession(session);
 
         slider = new Slider(0, 100, 50);
         ui.add(slider);
@@ -74,7 +59,6 @@ public class SliderWarningsTest {
 
     @After
     public void tearDown() {
-        UI.setCurrent(null);
         featureFlagsStatic.close();
         loggerFactoryStatic.close();
     }
