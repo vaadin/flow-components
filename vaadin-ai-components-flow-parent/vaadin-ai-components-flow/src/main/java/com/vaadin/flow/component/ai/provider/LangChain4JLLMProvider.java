@@ -67,7 +67,6 @@ import reactor.core.publisher.FluxSink;
 public class LangChain4JLLMProvider implements LLMProvider {
 
     private static final int MAX_MESSAGES = 30;
-    private static final int MAX_TOOL_EXECUTION_DEPTH = 20;
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
@@ -163,13 +162,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private void executeChat(ChatExecutionContext context) {
-        if (context.getDepth() == MAX_TOOL_EXECUTION_DEPTH) {
-            context.getSink()
-                    .error(new IllegalStateException(
-                            "Maximum tool execution depth exceeded: "
-                                    + context.getDepth()));
-            return;
-        }
         var messages = buildMessages(context.getRequest(),
                 context.getChatMemory());
         if (streamingChatModel != null) {
