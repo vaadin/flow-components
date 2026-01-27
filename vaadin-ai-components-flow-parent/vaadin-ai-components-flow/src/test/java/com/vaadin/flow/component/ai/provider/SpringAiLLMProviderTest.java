@@ -45,15 +45,12 @@ import reactor.core.publisher.Flux;
 public class SpringAiLLMProviderTest {
 
     private ChatModel mockChatModel;
-
     private SpringAiLLMProvider provider;
-    private SpringAiLLMProvider streamingProvider;
 
     @Before
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
-        provider = new SpringAiLLMProvider(mockChatModel, false);
-        streamingProvider = new SpringAiLLMProvider(mockChatModel, true);
+        provider = new SpringAiLLMProvider(mockChatModel);
     }
 
     @Test
@@ -73,19 +70,20 @@ public class SpringAiLLMProviderTest {
     @Test
     public void constructor_withNullChatModel_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
-                () -> new SpringAiLLMProvider((ChatModel) null, false));
+                () -> new SpringAiLLMProvider((ChatModel) null));
     }
 
     @Test
     public void constructor_withNullChatClient_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
-                () -> new SpringAiLLMProvider((ChatClient) null, false));
+                () -> new SpringAiLLMProvider((ChatClient) null));
     }
 
     @Test
     public void constructor_withChatClient_nonStreaming_returnsResponse() {
         var chatClient = ChatClient.builder(mockChatModel).build();
-        var chatClientProvider = new SpringAiLLMProvider(chatClient, false);
+        var chatClientProvider = new SpringAiLLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat("Full response");
 
@@ -97,10 +95,27 @@ public class SpringAiLLMProviderTest {
     }
 
     @Test
-    public void constructor_withChatClient_streaming_returnsStreamedTokens() {
+    public void constructor_withChatClient_defaultConfig_returnsStreamedTokens() {
         var chatClient = ChatClient.builder(mockChatModel).build();
-        var chatClientStreamingProvider = new SpringAiLLMProvider(chatClient,
-                true);
+        var chatClientStreamingProvider = new SpringAiLLMProvider(chatClient);
+        var request = createSimpleRequest("Hello");
+        var tokens = List.of("Hello", " ", "World");
+
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.fromIterable(tokens.stream()
+                        .map(this::mockSimpleChatResponse).toList()));
+
+        var results = chatClientStreamingProvider.stream(request).collectList()
+                .block();
+        Assert.assertEquals(tokens, results);
+    }
+
+    @Test
+    public void constructor_withChatClient_setNonStreaming_setStreaming_returnsStreamedTokens() {
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientStreamingProvider = new SpringAiLLMProvider(chatClient);
+        chatClientStreamingProvider.setStreaming(false);
+        chatClientStreamingProvider.setStreaming(true);
         var request = createSimpleRequest("Hello");
         var tokens = List.of("Hello", " ", "World");
 
@@ -115,6 +130,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withNonStreamingModel_returnsResponse() {
+        provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat("Full response");
 
@@ -136,6 +152,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_emptyTextResponse_returnsEmpty() {
+        provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat("");
         var results = provider.stream(request).collectList().block();
@@ -145,6 +162,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_nullTextResponse_returnsEmpty() {
+        provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat(null);
         var results = provider.stream(request).collectList().block();
@@ -154,6 +172,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withSystemPromptInRequest_includesSystemMessage() {
+        provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", "You are a helpful assistant",
                 Collections.emptyList(), new Object[0]);
         mockSimpleChat("Response");
@@ -167,6 +186,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withNullSystemPrompt_noSystemMessage() {
+        provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat("Response");
 
@@ -179,6 +199,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withEmptySystemPrompt_noSystemMessage() {
+        provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", "   ",
                 Collections.emptyList(), new Object[0]);
         mockSimpleChat("Response");
@@ -192,6 +213,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withNullAttachments_returnsResponse() {
+        provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", null, null, new Object[0]);
         mockSimpleChat("Hi");
         var result = provider.stream(request).blockFirst();
@@ -217,6 +239,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withUnsupportedAttachmentType_ignoresAttachment() {
+        provider.setStreaming(false);
         var attachment = new TestAttachment("data".getBytes(),
                 "application/octet-stream", "file.bin");
         var request = new TestLLMRequest("Process this", null,
@@ -231,6 +254,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withPdfAttachment_handlesPdf() {
+        provider.setStreaming(false);
         var pdfData = "PDF binary content".getBytes(StandardCharsets.UTF_8);
         var attachment = new TestAttachment(pdfData, "application/pdf",
                 "document.pdf");
@@ -247,6 +271,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withBinaryPdfData_handlesBinaryPdf() {
+        provider.setStreaming(false);
         // Binary PDF data should be handled correctly
         var binaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46, (byte) 0xFF,
                 (byte) 0xFE, (byte) 0x00, (byte) 0x80 };
@@ -265,6 +290,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withImageAttachment_processesImage() {
+        provider.setStreaming(false);
         var imageData = "fake-image-data".getBytes();
         var attachment = new TestAttachment(imageData, "image/png", "test.png");
         var request = new TestLLMRequest("Describe this image", null,
@@ -280,6 +306,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withTextAttachment_processesText() {
+        provider.setStreaming(false);
         var textContent = "Test UTF-8: é à ü";
         var attachment = new TestAttachment(
                 textContent.getBytes(StandardCharsets.UTF_8), "text/plain",
@@ -304,7 +331,7 @@ public class SpringAiLLMProviderTest {
                 .thenReturn(Flux.fromIterable(tokens.stream()
                         .map(this::mockSimpleChatResponse).toList()));
 
-        var results = streamingProvider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList().block();
         Assert.assertEquals(tokens, results);
     }
 
@@ -319,7 +346,7 @@ public class SpringAiLLMProviderTest {
                 .thenReturn(Flux.fromIterable(tokens.stream()
                         .map(this::mockSimpleChatResponse).toList()));
 
-        var results = streamingProvider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList().block();
 
         Assert.assertNotNull(results);
         Assert.assertEquals(tokens, results);
@@ -328,6 +355,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withNullTools_handlesNullToolsArray() {
+        provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
                 null);
         mockSimpleChat("Hi");
@@ -340,6 +368,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withEmptyToolsArray_handlesEmptyTools() {
+        provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
                 new Object[0]);
         mockSimpleChat("Hi");
@@ -352,6 +381,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void chatMemory_retainsHistory() {
+        provider.setStreaming(false);
         var response1 = mockSimpleChatResponse("Response 1");
         var response2 = mockSimpleChatResponse("Response 2");
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
@@ -367,6 +397,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_preservesChatHistoryAcrossRequests() {
+        provider.setStreaming(false);
         var response1 = mockSimpleChatResponse("Hi there");
         var response2 = mockSimpleChatResponse("I'm good");
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
@@ -385,6 +416,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withMaxMessagesLimit_dropsOldestMessages() {
+        provider.setStreaming(false);
         var requestCount = 20;
 
         // Each request adds 2 messages: UserMessage and AiMessage
@@ -418,6 +450,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
+        provider.setStreaming(false);
         var imageAttachment = new TestAttachment("fake-image".getBytes(),
                 "image/jpeg", "photo.jpg");
         var textAttachment = new TestAttachment(
@@ -445,6 +478,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withAudioAttachment_processesAudio() {
+        provider.setStreaming(false);
         var audioData = "fake-audio-data".getBytes();
         var attachment = new TestAttachment(audioData, "audio/mpeg",
                 "audio.mp3");
@@ -465,6 +499,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withVideoAttachment_processesVideo() {
+        provider.setStreaming(false);
         var videoData = "fake-video-data".getBytes();
         var attachment = new TestAttachment(videoData, "video/mp4",
                 "video.mp4");
