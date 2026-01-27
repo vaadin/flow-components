@@ -35,6 +35,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.annotation.Tool;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider.Attachment;
@@ -336,47 +337,72 @@ public class SpringAiLLMProviderTest {
     }
 
     @Test
-    public void stream_withStreamingModelAndTool_executesTool() {
+    public void stream_withSingleTool_toolsAreConfigured() {
+        provider.setStreaming(false);
         var toolObject = new SampleToolsClass();
         var request = new TestLLMRequest("Get temperature", null,
                 Collections.emptyList(), new Object[] { toolObject });
+        mockSimpleChat("The temperature is 22°C");
 
-        var tokens = List.of("The", " temperature", " is", " 22°C");
-        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
-                .thenReturn(Flux.fromIterable(tokens.stream()
-                        .map(this::mockSimpleChatResponse).toList()));
+        provider.stream(request).blockFirst();
 
-        var results = provider.stream(request).collectList().block();
-
-        Assert.assertNotNull(results);
-        Assert.assertEquals(tokens, results);
-        Mockito.verify(mockChatModel).stream(Mockito.any(Prompt.class));
+        var chatOptions = capturePrompt().getOptions();
+        Assert.assertNotNull(chatOptions);
+        var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
+                .getToolCallbacks();
+        Assert.assertNotNull(toolCallbacks);
+        Assert.assertEquals(2, toolCallbacks.size());
     }
 
     @Test
-    public void stream_withNullTools_handlesNullToolsArray() {
+    public void stream_withMultipleToolObjects_allToolsAreConfigured() {
         provider.setStreaming(false);
-        var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
-                null);
-        mockSimpleChat("Hi");
+        var tool1 = new SampleToolsClass();
+        var tool2 = new AnotherSampleToolsClass();
+        var request = new TestLLMRequest("Get weather info", null,
+                Collections.emptyList(), new Object[] { tool1, tool2 });
+        mockSimpleChat("Weather info");
 
-        var result = provider.stream(request).blockFirst();
+        provider.stream(request).blockFirst();
 
-        Assert.assertEquals("Hi", result);
-        Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
+        var chatOptions = capturePrompt().getOptions();
+        Assert.assertNotNull(chatOptions);
+        var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
+                .getToolCallbacks();
+        Assert.assertNotNull(toolCallbacks);
+        Assert.assertEquals(3, toolCallbacks.size());
     }
 
     @Test
-    public void stream_withEmptyToolsArray_handlesEmptyTools() {
+    public void stream_withEmptyToolsArray_noToolCallbacksConfigured() {
         provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
                 new Object[0]);
         mockSimpleChat("Hi");
 
-        var result = provider.stream(request).blockFirst();
+        provider.stream(request).blockFirst();
 
-        Assert.assertEquals("Hi", result);
-        Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
+        var chatOptions = capturePrompt().getOptions();
+        var noToolCallbacks = chatOptions == null
+                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
+                        .isEmpty();
+        Assert.assertTrue(noToolCallbacks);
+    }
+
+    @Test
+    public void stream_withNullToolsArray_noToolCallbacksConfigured() {
+        provider.setStreaming(false);
+        var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
+                null);
+        mockSimpleChat("Hi");
+
+        provider.stream(request).blockFirst();
+
+        var chatOptions = capturePrompt().getOptions();
+        var noToolCallbacks = chatOptions == null
+                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
+                        .isEmpty();
+        Assert.assertTrue(noToolCallbacks);
     }
 
     @Test
