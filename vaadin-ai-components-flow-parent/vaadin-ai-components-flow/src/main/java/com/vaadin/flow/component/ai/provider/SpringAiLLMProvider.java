@@ -15,25 +15,15 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.UnaryOperator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.content.Media;
 import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
@@ -52,28 +42,21 @@ import reactor.core.publisher.Flux;
  */
 public class SpringAiLLMProvider implements LLMProvider {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(SpringAiLLMProvider.class);
-
     private static final int MAX_MESSAGES = 30;
-    private static final int MAX_TOOL_EXECUTION_DEPTH = 20;
     private static final String CONVERSATION_ID = "default";
 
     private final transient ChatClient chatClient;
-    private final boolean isStreaming;
+    private boolean isStreaming = true;
 
     /**
-     * Constructor with a chat model and streaming mode configuration.
+     * Constructor with a chat model.
      *
      * @param chatModel
      *            the chat model, not {@code null}
-     * @param streaming
-     *            {@code true} to use streaming mode, {@code false} for
-     *            non-streaming
      * @throws NullPointerException
      *             if chatModel is {@code null}
      */
-    public SpringAiLLMProvider(ChatModel chatModel, boolean streaming) {
+    public SpringAiLLMProvider(ChatModel chatModel) {
         Objects.requireNonNull(chatModel, "ChatModel must not be null");
         var chatMemory = MessageWindowChatMemory.builder()
                 .maxMessages(MAX_MESSAGES).build();
@@ -81,26 +64,21 @@ public class SpringAiLLMProvider implements LLMProvider {
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
                         .conversationId(CONVERSATION_ID).build())
                 .build();
-        isStreaming = streaming;
     }
 
     /**
-     * Constructor with a chat client and streaming mode configuration. Note:
-     * When using this constructor, conversation memory must be configured
-     * externally in the {@link ChatClient}.
+     * Constructor with a chat client. Note: When using this constructor,
+     * conversation memory must be configured externally in the
+     * {@link ChatClient}.
      *
      * @param chatClient
      *            the chat client, not {@code null}
-     * @param streaming
-     *            {@code true} to use streaming mode, {@code false} for
-     *            non-streaming
      * @throws NullPointerException
      *             if chatModel is {@code null}
      */
-    public SpringAiLLMProvider(ChatClient chatClient, boolean streaming) {
+    public SpringAiLLMProvider(ChatClient chatClient) {
         Objects.requireNonNull(chatClient, "ChatClient must not be null");
         this.chatClient = chatClient;
-        this.isStreaming = streaming;
     }
 
     @Override
@@ -108,81 +86,32 @@ public class SpringAiLLMProvider implements LLMProvider {
         Objects.requireNonNull(request, "Request must not be null");
         Objects.requireNonNull(request.userMessage(),
                 "User message must not be null");
-        var toolCallbacks = prepareToolCallbacks(request);
         if (isStreaming) {
-            return executeStreamingChat(request, toolCallbacks);
+            return executeStreamingChat(request);
         }
-        return executeNonStreamingChat(request, toolCallbacks);
+        return executeNonStreamingChat(request);
     }
 
-    private List<FunctionToolCallback<Object, Object>> prepareToolCallbacks(
-            LLMRequest request) {
-        var tools = request.tools();
-        if (tools == null) {
-            return Collections.emptyList();
-        }
-        var executionCounter = new AtomicInteger(0);
-        var callbacks = new ArrayList<FunctionToolCallback<Object, Object>>();
-        for (var toolObject : tools) {
-            Arrays.stream(toolObject.getClass().getDeclaredMethods())
-                    .filter(method -> method.isAnnotationPresent(Tool.class))
-                    .map(method -> createToolCallback(toolObject, method,
-                            executionCounter))
-                    .forEach(callbacks::add);
-        }
-        return callbacks;
+    /**
+     * Sets whether to use streaming mode. The default is {@code true}.
+     *
+     * @param streaming
+     *            {@code true} to use streaming mode, {@code false} for
+     *            non-streaming.
+     */
+    public void setStreaming(boolean streaming) {
+        this.isStreaming = streaming;
     }
 
-    private FunctionToolCallback<Object, Object> createToolCallback(
-            Object toolObject, Method method, AtomicInteger executionCounter) {
-        var toolAnnotation = method.getAnnotation(Tool.class);
-        var toolName = toolAnnotation.name().isEmpty() ? method.getName()
-                : toolAnnotation.name();
-        var description = toolAnnotation.description().isEmpty()
-                ? "Executes " + toolName
-                : toolAnnotation.description();
-
-        UnaryOperator<Object> function = input -> {
-            int currentDepth = executionCounter.incrementAndGet();
-            if (currentDepth > MAX_TOOL_EXECUTION_DEPTH) {
-                throw new IllegalStateException(
-                        "Maximum tool execution depth exceeded: "
-                                + currentDepth);
-            }
-            return invokeMethod(toolObject, method, input);
-        };
-        return FunctionToolCallback.builder(toolName, function)
-                .description(description).inputType(Object.class).build();
-    }
-
-    private Object invokeMethod(Object toolObject, Method method,
-            Object input) {
+    private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
-            if (method.getParameterCount() == 0) {
-                return method.invoke(toolObject);
-            }
-            return method.invoke(toolObject, input);
-        } catch (Exception e) {
-            LOGGER.error("Failed to invoke tool method: {}", method.getName(),
-                    e);
-            if (e.getCause() instanceof RuntimeException re) {
-                throw re;
-            }
-            throw new RuntimeException("Tool execution failed", e);
-        }
-    }
-
-    private Flux<String> executeStreamingChat(LLMRequest request,
-            List<FunctionToolCallback<Object, Object>> toolCallbacks) {
-        try {
-            return getPromptSpec(request, toolCallbacks).stream().content();
+            return getPromptSpec(request).stream().content();
         } catch (Exception e) {
             return Flux.error(e);
         }
     }
 
-    private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request,
-            List<FunctionToolCallback<Object, Object>> toolCallbacks) {
+    private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
         promptSpec = promptSpec.user(userSpec -> {
             userSpec.text(request.userMessage());
@@ -195,18 +124,17 @@ public class SpringAiLLMProvider implements LLMProvider {
                 && !request.systemPrompt().trim().isEmpty()) {
             promptSpec = promptSpec.system(request.systemPrompt().trim());
         }
-        if (!toolCallbacks.isEmpty()) {
-            promptSpec = promptSpec.toolCallbacks(
-                    toolCallbacks.toArray(new FunctionToolCallback[0]));
+        var tools = request.tools();
+        if (tools != null && tools.length > 0) {
+            promptSpec = promptSpec.tools(tools);
         }
         return promptSpec;
     }
 
-    private Flux<String> executeNonStreamingChat(LLMRequest request,
-            List<FunctionToolCallback<Object, Object>> toolCallbacks) {
+    private Flux<String> executeNonStreamingChat(LLMRequest request) {
         return Flux.create(sink -> {
             try {
-                var promptSpec = getPromptSpec(request, toolCallbacks);
+                var promptSpec = getPromptSpec(request);
                 var response = promptSpec.call().content();
                 if (response != null && !response.isEmpty()) {
                     sink.next(response);
