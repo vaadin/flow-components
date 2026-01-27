@@ -36,3 +36,7 @@ error-screenshots
 **/frontend/*.tsx
 dev-bundle
 prod.bundle
+
+# Claude Code
+.claude/*.local.*
+CLAUDE.local.md
