@@ -16,6 +16,8 @@ This command is only run when automated cherry-picking failed, so expect merge c
    - The merge commit SHA
    - The PR branch name
    - The PR title
+   - The PR description
+   - The PR labels
 
 2. **Prepare branches**:
    - Fetch latest commits for the source branch: `git fetch origin <source-branch>`
@@ -42,5 +44,10 @@ This command is only run when automated cherry-picking failed, so expect merge c
    - Start the description with "This PR cherry-picks changes from the original PR #<pr-number> to branch $1."
    - Then add a separator (`---`) surrounded by new lines
    - Then add the original PR description, wrapped in a Markdown blockquote (prefix each line with `> `)
+
+7. **Update original PR**:
+   - If the original PR has the label `need to pick manually $1`, remove it
+   - Add the label `cherry-picked-$1` to the original PR
+   - Ignore any errors if the labels do not exist
 
 You can use the `gh` CLI tool for GitHub operations throughout these steps.
