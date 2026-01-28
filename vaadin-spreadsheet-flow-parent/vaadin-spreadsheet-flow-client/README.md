@@ -23,16 +23,26 @@ The patch must be applied from the repository root.
 As the patch is not continuously maintained, merge conflicts must be resolved.
 **Changes from the patch must not be added to commits / PRs.**
 
-After applying the patch, for debugging the GWT code you have two ways:
+After applying the patch, for debugging the GWT code you have two options:
 
-- Quick (only for the IT module):
-    - run `./scripts/run.sh` in this repo parent folder, and select option `10`
-    - If not already, you need to install the bookmark as it is indicated in the next block
+**Running the IT module:**
 
-- Manually:
-    - run `mvn -Psdm` from this folder
-    - open this module in your favourite java IDE
-    - open the url http://localhost:9876 and install the 'Dev Mode On' bookmark in your browser (this only need to be performed once)
-    - run your application containing the `vaadin-spreadsheet` in localhost
-    - visit your application in localhost e.g. http://localhost:8080
-    - perform changes in Java code, and push the bookmark when ready.
+- Run the following commands from the repository root:
+  ```sh
+  # Install the spreadsheet-flow module
+  mvn -B -q -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow -DskipTests install
+  # Start the GWT SuperDevMode code server (in a separate terminal)
+  mvn -B -q -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client -Psdm
+  # Start the Jetty server for integration tests
+  mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -B -q -DskipTests -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-integration-tests
+  ```
+- If not already, you need to install the bookmark as it is indicated in the next block
+
+**Running any Vaadin app with a spreadsheet:**
+
+- run `mvn -Psdm` from this folder
+- open this module in your favourite java IDE
+- open the url http://localhost:9876 and install the 'Dev Mode On' bookmark in your browser (this only need to be performed once)
+- run your application containing the `vaadin-spreadsheet` in localhost
+- visit your application in localhost e.g. http://localhost:8080
+- perform changes in Java code, and push the bookmark when ready.
