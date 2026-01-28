@@ -767,12 +767,27 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.$connector.removeFromQueue = function (item) {
-    // The page callbacks for the given item are about to be discarded ->
-    // Resolve the callbacks with an empty array to not leave grid in loading state
-    const itemSubCache = dataProviderController.getItemSubCache(item);
-    Object.values(itemSubCache?.pendingRequests || {}).forEach((callback) => callback([]));
-
     const itemId = grid.getItemId(item);
+    const itemContext = dataProviderController.getItemContext(item);
+    const itemSubCache = itemContext?.subCache;
+    const hasPendingRequests = Object.keys(itemSubCache?.pendingRequests || {}).length > 0;
+
+    if (hasPendingRequests) {
+      // Clear the last requested range for this parent to allow fresh requests on re-expand
+      delete lastRequestedRanges[itemId];
+
+      // Clear the connector cache for this parent to avoid stale data
+      delete cache[itemId];
+
+      // Resolve pending callbacks to not leave grid in loading state
+      Object.values(itemSubCache.pendingRequests).forEach((callback) => callback([]));
+
+      // Remove the sub-cache completely so it gets recreated on re-expand.
+      // This forces the grid to request fresh data instead of using cached size=0
+      // (which was set by callback([]) above).
+      itemContext.cache.removeSubCache(itemContext.index);
+    }
+
     ensureSubCacheQueue = ensureSubCacheQueue.filter((item) => item.itemkey !== itemId);
     parentRequestQueue = parentRequestQueue.filter((item) => item.parentKey !== itemId);
   };
