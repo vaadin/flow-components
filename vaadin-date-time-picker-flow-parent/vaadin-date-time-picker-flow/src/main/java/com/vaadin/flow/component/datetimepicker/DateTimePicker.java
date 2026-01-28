@@ -403,8 +403,8 @@ public class DateTimePicker
         var shouldFireValidationStatusChangeEvent = oldValue == null
                 && value == null
                 && (isInputUnparsable() || isInputIncomplete());
-        super.setValue(value);
         synchronizeChildComponentValues(value);
+        super.setValue(value);
         if (shouldFireValidationStatusChangeEvent) {
             validate(true);
         }
