@@ -42,4 +42,13 @@ public class DialogElement extends TestBenchElement {
             return false;
         }
     }
+
+    /**
+     * Gets the title set for the dialog header.
+     *
+     * @return the header title or an empty string if not defined
+     */
+    public String getHeaderTitle() {
+        return getPropertyString("headerTitle");
+    }
 }
