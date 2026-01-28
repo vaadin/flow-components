@@ -768,9 +768,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.removeFromQueue = function (item) {
     const itemId = grid.getItemId(item);
-
-    // Check if there are pending requests (data was still loading when collapsed)
-    const itemSubCache = dataProviderController.getItemSubCache(item);
+    const itemContext = dataProviderController.getItemContext(item);
+    const itemSubCache = itemContext?.subCache;
     const hasPendingRequests = Object.keys(itemSubCache?.pendingRequests || {}).length > 0;
 
     if (hasPendingRequests) {
@@ -786,10 +785,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       // Remove the sub-cache completely so it gets recreated on re-expand.
       // This forces the grid to request fresh data instead of using cached size=0
       // (which was set by callback([]) above).
-      const itemContext = dataProviderController.getItemContext(item);
-      if (itemContext) {
-        itemContext.cache.removeSubCache(itemContext.index);
-      }
+      itemContext.cache.removeSubCache(itemContext.index);
     }
 
     ensureSubCacheQueue = ensureSubCacheQueue.filter((item) => item.itemkey !== itemId);
