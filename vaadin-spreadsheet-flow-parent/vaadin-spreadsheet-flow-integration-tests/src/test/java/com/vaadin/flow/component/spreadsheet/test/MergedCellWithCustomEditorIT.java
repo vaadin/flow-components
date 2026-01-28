@@ -27,21 +27,58 @@ public class MergedCellWithCustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void pageLoads_customEditorDisplayed() {
-        var customEditor = $(TextFieldElement.class).waitForFirst();
-        Assert.assertNotNull("Custom editor should be displayed initially",
-                customEditor);
-        Assert.assertTrue("Custom editor should be visible",
-                customEditor.isDisplayed());
+        assertCustomEditorVisible();
     }
 
     @Test
     public void refreshMergedCell_customEditorPreserved() {
         clickElementWithJs("refresh-merged-cell");
+
+        assertCustomEditorVisible();
+    }
+
+    @Test
+    public void showEditorOnFocus_restoresCellValue() {
+        clickElementWithJs("toggle-show-editor-on-focus");
+
+        // Custom editor should be hidden
+        assertCustomEditorHidden();
+
+        // Cell should display its value
+        Assert.assertEquals("Cell should display its value", "Merged cell",
+                getMergedCellContent("B2"));
+
+        // Focus cell to show editor
+        clickCell("B2");
+
+        // Custom editor should be visible
+        assertCustomEditorVisible();
+
+        // No cell content
+        Assert.assertEquals("Cell content should be empty when editor is shown",
+                "", getMergedCellContent("B2"));
+
+        // Focus out to hide editor
+        clickCell("A1");
+
+        // Custom editor should be hidden
+        assertCustomEditorHidden();
+
+        // Cell should display its value again
+        Assert.assertEquals(
+                "Cell should display its value after editor is hidden",
+                "Merged cell", getMergedCellContent("B2"));
+    }
+
+    private void assertCustomEditorVisible() {
         var customEditor = $(TextFieldElement.class).waitForFirst();
-        Assert.assertNotNull("Custom editor should still be displayed",
-                customEditor);
+        Assert.assertNotNull("Custom editor should be displayed", customEditor);
         Assert.assertTrue("Custom editor should be visible",
                 customEditor.isDisplayed());
     }
 
+    private void assertCustomEditorHidden() {
+        Assert.assertFalse("Custom editor should be hidden",
+                $(TextFieldElement.class).exists());
+    }
 }

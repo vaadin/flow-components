@@ -77,6 +77,14 @@ public class MergedCellWithCustomEditorPage extends VerticalLayout {
         refreshMergedCell.setId("refresh-merged-cell");
         controls.add(refreshMergedCell);
 
+        var toggleShowEditorOnFocus = new Button("Toggle show editor on focus",
+                event -> {
+                    spreadsheet.setShowCustomEditorOnFocus(
+                            !spreadsheet.isShowCustomEditorOnFocus());
+                });
+        toggleShowEditorOnFocus.setId("toggle-show-editor-on-focus");
+        controls.add(toggleShowEditorOnFocus);
+
         add(controls, spreadsheet);
         setFlexGrow(1, spreadsheet);
     }

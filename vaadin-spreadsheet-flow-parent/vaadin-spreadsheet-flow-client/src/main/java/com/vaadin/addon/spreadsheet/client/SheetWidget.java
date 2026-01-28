@@ -5256,8 +5256,13 @@ public class SheetWidget extends Panel {
             var jsniUtil = getSheetJsniUtil();
             jsniUtil.parseColRow(address);
 
-            Cell cell = getCell(jsniUtil.getParsedCol(),
-                    jsniUtil.getParsedRow());
+            Cell cell;
+            if (isMergedCell(address)) {
+                cell = getMergedCell(address);
+            } else {
+                cell = getCell(jsniUtil.getParsedCol(),
+                        jsniUtil.getParsedRow());
+            }
             if (cell != null) {
                 CellData cd = cachedCellData.get(address);
                 cell.setValue(cd == null ? null : cd.value);
