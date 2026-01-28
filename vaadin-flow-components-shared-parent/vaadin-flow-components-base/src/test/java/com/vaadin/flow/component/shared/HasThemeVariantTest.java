@@ -22,8 +22,12 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.signals.BindingActiveException;
+import com.vaadin.signals.local.ValueSignal;
 
-public class HasThemeVariantTest {
+public class HasThemeVariantTest extends AbstractSignalsUnitTest {
+
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         TestComponent component = new TestComponent();
@@ -112,6 +116,79 @@ public class HasThemeVariantTest {
                 component.getThemeNames());
     }
 
+    @Test
+    public void bindThemeVariant_setSignalValueTrue_themeNamesContainsThemeVariant() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
+
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
+                component.getThemeNames());
+    }
+
+    @Test
+    public void bindThemeVariant_setSignalValueFalse_themeNamesDoesNotContainThemeVariant() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
+
+        signal.value(false);
+        Assert.assertTrue(component.getThemeNames().isEmpty());
+    }
+
+    @Test
+    public void bindThemeVariant_setThemeVariants_removesBinding() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
+        // setThemeVariants calls getThemeNames().clear() which removes the
+        // binding
+        component.setThemeVariants(); // clears all variants and biding
+
+        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assert.assertTrue(signal.peek());
+        signal.value(true); // no effect
+        Assert.assertTrue(component.getThemeNames().isEmpty());
+    }
+
+    @Test
+    public void bindThemeVariant_withNullSignal_removesBinding() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
+        Assert.assertFalse(component.getThemeNames().isEmpty());
+
+        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, null);
+        Assert.assertFalse(component.getThemeNames().isEmpty());
+        signal.value(false); // no effect
+        Assert.assertFalse(component.getThemeNames().isEmpty());
+    }
+
+    @Test
+    public void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<Boolean> signal = new ValueSignal<>(true);
+        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
+        Assert.assertFalse(component.getThemeNames().isEmpty());
+
+        Assert.assertThrows(BindingActiveException.class, () -> component
+                .removeThemeVariants(TestComponentVariant.TEST_VARIANT));
+        Assert.assertThrows(BindingActiveException.class, () -> component
+                .addThemeVariants(TestComponentVariant.TEST_VARIANT));
+        Assert.assertThrows(BindingActiveException.class, () -> component
+                .setThemeVariant(TestComponentVariant.TEST_VARIANT, false));
+        Assert.assertThrows(BindingActiveException.class, () -> component
+                .setThemeVariant(TestComponentVariant.TEST_VARIANT, true));
+        Assert.assertThrows(BindingActiveException.class, () -> component
+                .setThemeVariants(false, TestComponentVariant.TEST_VARIANT));
+    }
+
     private enum TestComponentVariant implements ThemeVariant {
         TEST_VARIANT("test1"), TEST_VARIANT_2("test2"), TEST_VARIANT_3("test3");
 
@@ -131,4 +208,5 @@ public class HasThemeVariantTest {
     private static class TestComponent extends Component
             implements HasThemeVariant<TestComponentVariant> {
     }
+
 }
