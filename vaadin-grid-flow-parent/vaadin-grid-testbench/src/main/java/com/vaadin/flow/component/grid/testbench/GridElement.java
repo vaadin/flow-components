@@ -449,6 +449,8 @@ public class GridElement extends TestBenchElement {
 
     /**
      * Selects the row with the given index.
+     * <p>
+     * Automatically scrolls the given row into view.
      *
      * @param rowIndex
      *            the row to select
