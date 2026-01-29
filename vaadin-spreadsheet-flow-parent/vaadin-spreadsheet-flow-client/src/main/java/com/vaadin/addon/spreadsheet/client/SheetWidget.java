@@ -3935,7 +3935,7 @@ public class SheetWidget extends Panel {
         return false;
     }
 
-    private Cell getMergedCell(String key) {
+    Cell getMergedCell(String key) {
         for (Cell cell : mergedCells.values()) {
             if (key.equals(toKey(cell.getCol(), cell.getRow()))) {
                 return cell;
@@ -3946,6 +3946,12 @@ public class SheetWidget extends Panel {
 
     private boolean setMergedCellValue(String key, String value,
             String cellStyle, boolean needsMeasure) {
+        var customEditorFactory = getSheetHandler().getCustomEditorFactory();
+        if (customEditorFactory != null
+                && customEditorFactory.hasCustomEditor(key)) {
+            return false;
+        }
+
         Cell cell = getMergedCell(key);
         if (cell != null) {
             cell.setValue(value, cellStyle, needsMeasure);
@@ -5250,8 +5256,13 @@ public class SheetWidget extends Panel {
             var jsniUtil = getSheetJsniUtil();
             jsniUtil.parseColRow(address);
 
-            Cell cell = getCell(jsniUtil.getParsedCol(),
-                    jsniUtil.getParsedRow());
+            Cell cell;
+            if (isMergedCell(address)) {
+                cell = getMergedCell(address);
+            } else {
+                cell = getCell(jsniUtil.getParsedCol(),
+                        jsniUtil.getParsedRow());
+            }
             if (cell != null) {
                 CellData cd = cachedCellData.get(address);
                 cell.setValue(cd == null ? null : cd.value);
