@@ -57,6 +57,17 @@ public class DialogHeaderFooterIT extends AbstractDialogIT {
     }
 
     @Test
+    public void headerTitle_getHeaderTitleReturnsCorrectValue() {
+        clickButton(ADD_HEADER_TITLE_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyOpened();
+
+        var dialog = getDialog();
+        Assert.assertEquals("Header title should match",
+                DialogHeaderFooterPage.HEADER_TITLE, dialog.getHeaderTitle());
+    }
+
+    @Test
     public void openedDialog_headerTitleIsSet_titleRendered() {
         clickButton(OPEN_DIALOG_BUTTON);
         verifyOpened();

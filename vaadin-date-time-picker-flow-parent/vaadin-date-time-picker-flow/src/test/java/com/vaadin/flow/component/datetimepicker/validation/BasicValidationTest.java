@@ -246,6 +246,22 @@ public class BasicValidationTest
         Assert.assertTrue(isInvalid.get());
     }
 
+    @Test
+    public void incompleteInput_setValidValueProgrammatically_invalidStateCleared() {
+        // Simulate incomplete input: date picker has value, time picker is
+        // empty
+        getDatePicker().setValue(LocalDate.of(2000, 1, 1));
+        fireUnparsableChangeDomEvent();
+        Assert.assertTrue("Field should be invalid with incomplete input",
+                testField.isInvalid());
+
+        // Set a valid complete value programmatically
+        testField.setValue(LocalDateTime.of(2000, 1, 1, 12, 0));
+
+        Assert.assertFalse("Field should be valid after setting complete value",
+                testField.isInvalid());
+    }
+
     @Override
     protected DateTimePicker createTestField() {
         return new DateTimePicker();
