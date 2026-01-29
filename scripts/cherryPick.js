@@ -121,8 +121,9 @@ function buildCherryPickBody(originalPRNumber, originalBody, targetBranch) {
 
   return `
 This PR cherry-picks changes from the original PR #${originalPRNumber} to branch ${targetBranch}.
+
 ---
-#### Original PR description
+
 ${quotedBody}
 `.trim();
 }
