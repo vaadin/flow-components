@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -23,16 +23,19 @@ public class LocaleTest {
 
     private Spreadsheet spreadsheet;
 
+    private Locale testLocale;
+
     @Before
     public void init() {
-        // make sure the default system locale will not be the same as the UI
-        // locale used in the test. Otherwise the tests could be false
-        // positives.
-        Assert.assertNotEquals(Locale.GERMANY,
-                Locale.getDefault(Locale.Category.FORMAT));
+        // Choose a test locale that differs from the system locale to ensure
+        // we're actually testing that the UI locale is used, not the system
+        // locale
+        Locale systemLocale = Locale.getDefault(Locale.Category.FORMAT);
+        testLocale = systemLocale.equals(Locale.GERMANY) ? Locale.FRANCE
+                : Locale.GERMANY;
 
         final UI ui = new UI();
-        ui.setLocale(Locale.GERMANY);
+        ui.setLocale(testLocale);
         UI.setCurrent(ui);
 
         spreadsheet = new Spreadsheet();
@@ -45,18 +48,16 @@ public class LocaleTest {
 
     @Test
     public void default_getLocale_equalsUILocale() {
-        Assert.assertEquals(Locale.GERMANY, spreadsheet.getLocale());
+        Assert.assertEquals(testLocale, spreadsheet.getLocale());
     }
 
     @Test
     public void default_getCellValueManagerDecimalSymbols_equalsUILocale() {
         var cellValueManagerDecimalSymbols = spreadsheet.getCellValueManager()
                 .getOriginalValueDecimalFormat().getDecimalFormatSymbols();
-        var expectedGermanySymbols = DecimalFormatSymbols
-                .getInstance(Locale.GERMANY);
+        var expectedSymbols = DecimalFormatSymbols.getInstance(testLocale);
 
-        Assert.assertEquals(expectedGermanySymbols,
-                cellValueManagerDecimalSymbols);
+        Assert.assertEquals(expectedSymbols, cellValueManagerDecimalSymbols);
     }
 
     @Test(expected = NullPointerException.class)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,31 +15,22 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class ComboBoxVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
-
-        ThemeList themeNames = comboBox.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(ComboBoxVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new ComboBox<>(), ComboBoxVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
-        comboBox.removeThemeVariants(ComboBoxVariant.LUMO_SMALL);
-
-        ThemeList themeNames = comboBox.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(ComboBoxVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new ComboBox<>(), ComboBoxVariant.LUMO_SMALL);
     }
 }

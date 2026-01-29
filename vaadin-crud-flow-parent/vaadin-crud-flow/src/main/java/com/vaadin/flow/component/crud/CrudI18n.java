@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -10,12 +10,10 @@ package com.vaadin.flow.component.crud;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.StringUtil;
 
 import tools.jackson.databind.JsonNode;
 
@@ -41,9 +39,8 @@ public class CrudI18n implements Serializable {
 
     static {
         try {
-            String jsonString = IOUtils.toString(
-                    CrudI18n.class.getResource("i18n.json"),
-                    StandardCharsets.UTF_8);
+            String jsonString = StringUtil.toUTF8String(
+                    CrudI18n.class.getResourceAsStream("i18n.json"));
             DEFAULT_I18N = JacksonUtils.readTree(jsonString);
         } catch (IOException e) {
             throw new IllegalStateException(

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -121,6 +121,30 @@ public class AbstractConfigurationObjectTest {
         Mockito.verify(changeCollectorMock)
                 .accept(testConfiguration.getNestedConfiguration());
         Mockito.verify(changeCollectorMock).accept(testConfiguration);
+    }
+
+    @Test
+    public void setNestedObject_addsAndRemovesChangeListener() {
+        TestConfiguration nestedObject = new TestConfiguration();
+        Assert.assertFalse(nestedObject.hasListeners());
+
+        testConfiguration.setNestedConfiguration(nestedObject);
+        Assert.assertTrue(nestedObject.hasListeners());
+
+        testConfiguration.addPropertyChangeListener(changeListenerMock);
+
+        nestedObject.setFoo("test");
+        Mockito.verify(changeListenerMock, Mockito.times(1))
+                .propertyChange(Mockito.any());
+
+        testConfiguration.setNestedConfiguration(null);
+        Assert.assertFalse(nestedObject.hasListeners());
+        Mockito.verify(changeListenerMock, Mockito.times(2))
+                .propertyChange(Mockito.any());
+
+        nestedObject.setFoo("anotherTest");
+        Mockito.verify(changeListenerMock, Mockito.times(2))
+                .propertyChange(Mockito.any());
     }
 
     @Test
@@ -289,13 +313,17 @@ public class AbstractConfigurationObjectTest {
                 TestConfiguration nestedConfiguration) {
             removeChild(this.nestedConfiguration);
             this.nestedConfiguration = nestedConfiguration;
-            addChild(nestedConfiguration);
+            addNullableChild(nestedConfiguration);
         }
 
         // Expose method for testing
         @Override
         protected void deepMarkAsDirty() {
             super.deepMarkAsDirty();
+        }
+
+        protected boolean hasListeners() {
+            return propertyChangeSupport.hasListeners("property");
         }
     }
 }

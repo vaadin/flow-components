@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -109,6 +109,16 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         expandAllButton.click();
         scrollToItemInput.sendKeys("Dad 30/1", Keys.TAB);
         assertFirstVisibleRowContent("Dad 30/1");
+    }
+
+    @Test
+    public void expandAll_scrollToAlreadyVisibleItem_doesNotScroll() {
+        expandAllButton.click();
+        scrollToItemInput.sendKeys("Son 30/1/0", Keys.TAB);
+        assertFirstVisibleRowContent("Son 30/1/0");
+
+        scrollToItemInput.sendKeys("Son 30/1/1", Keys.TAB);
+        assertFirstVisibleRowContent("Son 30/1/0");
     }
 
     @Test

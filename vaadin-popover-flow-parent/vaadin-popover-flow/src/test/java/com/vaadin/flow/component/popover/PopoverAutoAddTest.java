@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -184,6 +184,20 @@ public class PopoverAutoAddTest {
         Div modalElement = new Div();
         ui.setChildComponentModal(modalElement, true);
         fakeClientResponse();
+
+        Assert.assertEquals(ui, popover.getParent().orElseThrow());
+    }
+
+    @Test
+    public void openModal_setTargetOutsideOfModal_popoverIsAttachedToUi() {
+        Div modal = new Div();
+        ui.add(modal);
+        ui.setChildComponentModal(modal, true);
+
+        Div target = new Div();
+        Popover popover = new Popover();
+        popover.setTarget(target);
+        ui.add(target);
 
         Assert.assertEquals(ui, popover.getParent().orElseThrow());
     }

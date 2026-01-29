@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.upload.receivers.MultiFileBuffer;
+import com.vaadin.flow.internal.StringUtil;
 
 public class MultiFileBufferTest {
 
@@ -42,9 +42,8 @@ public class MultiFileBufferTest {
             }
         }
         for (TestData data : testData) {
-            final String readData = IOUtils.toString(
-                    fileBuffer.getInputStream(data.filename),
-                    Charset.defaultCharset());
+            final String readData = StringUtil
+                    .toUTF8String(fileBuffer.getInputStream(data.filename));
             Assert.assertEquals(data.data, readData);
         }
     }

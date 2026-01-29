@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -183,6 +183,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * The last click coords when editing formula
      */
     private int tempSelectionStartRow;
+
+    /**
+     * Stored reference to the map for use in onSheetRelayoutComplete
+     */
+    private HashMap<String, String> lastCellKeysToEditorIdMap;
 
     public SpreadsheetWidget() {
 
@@ -437,6 +442,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return customEditorFactory;
     }
 
+    @Override
+    public void onSheetRelayoutComplete() {
+        // Refresh custom editors after relayout (e.g., after scroll)
+        // This is needed because cell DOM elements are recycled/recreated
+        if (!isShowCustomEditorOnFocus() && customEditorFactory != null
+                && lastCellKeysToEditorIdMap != null) {
+            showCellCustomEditors(lastCellKeysToEditorIdMap);
+        }
+    }
+
     /**
      * @param customEditorFactory
      *            the customEditorFactory to set
@@ -457,6 +472,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void showCellCustomEditors(
             HashMap<String, String> cellKeysToEditorIdMap) {
 
+        // Store reference for use in onSheetRelayoutComplete
+        this.lastCellKeysToEditorIdMap = cellKeysToEditorIdMap == null ? null
+                : new HashMap<>(cellKeysToEditorIdMap);
+
         if (cellKeysToEditorIdMap == null || customEditorFactory == null) {
             return;
         }
@@ -470,7 +489,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 var col = jsniUtil.getParsedCol();
                 var row = jsniUtil.getParsedRow();
                 var cell = sheetWidget.getCell(col, row);
-                sheetWidget.displayCustomCellEditor(customEditor, false, cell);
+                // Only display if the cell is currently visible (not scrolled
+                // out of view)
+                if (cell != null) {
+                    sheetWidget.displayCustomCellEditor(customEditor, false,
+                            cell);
+                }
             }
         }
     }
@@ -554,6 +578,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             public void execute() {
                 // remove old, add new
                 clearMergedRegions();
+
+                // copy list for later
+                if (mergedRegions == null) {
+                    SpreadsheetWidget.this.mergedRegions = null;
+                } else {
+                    SpreadsheetWidget.this.mergedRegions = new ArrayList<>(
+                            mergedRegions);
+                }
+
                 if (mergedRegions != null) {
                     int i = 0;
                     while (i < mergedRegions.size()) {
@@ -570,14 +603,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         i++;
                     }
                     sheetWidget.checkMergedRegionPositions();
-                }
-
-                // copy list for later
-                if (mergedRegions == null) {
-                    SpreadsheetWidget.this.mergedRegions = null;
-                } else {
-                    SpreadsheetWidget.this.mergedRegions = new ArrayList<MergedRegion>(
-                            mergedRegions);
                 }
             }
         });
@@ -2160,7 +2185,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     /**
      * Returns whether the custom editor is shown when the cell gets focus.
-     * 
+     *
      * @return true if the custom editor is shown on focus, false otherwise
      */
     public boolean isShowCustomEditorOnFocus() {
@@ -2169,7 +2194,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     /**
      * Sets whether the custom editor should be shown when the cell gets focus.
-     * 
+     *
      * @param showCustomEditorOnFocus
      *            true to show the custom editor on focus, false to not show it
      */

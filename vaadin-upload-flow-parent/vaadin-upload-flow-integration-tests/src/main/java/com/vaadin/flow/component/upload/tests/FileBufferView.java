@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,13 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 
-import org.apache.commons.io.IOUtils;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.SucceededEvent;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileBuffer;
+import com.vaadin.flow.internal.StringUtil;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -71,7 +70,7 @@ public class FileBufferView extends Div {
             try {
                 output.add(event.getFileName());
                 output.add(
-                        IOUtils.toString(streamProvider.apply(event), "UTF-8"));
+                        StringUtil.toUTF8String(streamProvider.apply(event)));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

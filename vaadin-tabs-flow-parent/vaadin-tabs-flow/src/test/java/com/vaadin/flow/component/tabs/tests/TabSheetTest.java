@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,7 +29,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.component.tabs.TabSheetVariant;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -339,18 +338,6 @@ public class TabSheetTest {
     @Test(expected = IllegalArgumentException.class)
     public void setTextAsSuffix_throws() {
         tabSheet.setSuffixComponent(new Text("Suffix"));
-    }
-
-    @Test
-    public void addThemeVariants_hasThemeVariants() {
-        tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED,
-                TabSheetVariant.LUMO_BORDERED, TabSheetVariant.LUMO_NO_PADDING);
-        Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_TABS_CENTERED.getVariantName()));
-        Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_BORDERED.getVariantName()));
-        Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_NO_PADDING.getVariantName()));
     }
 
     @Test

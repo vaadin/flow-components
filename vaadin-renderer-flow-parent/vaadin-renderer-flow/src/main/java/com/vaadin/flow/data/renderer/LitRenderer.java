@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,7 +35,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
@@ -289,8 +288,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * }
      * </pre>
      *
-     * Any types supported by the {@link JsonSerializer} are valid types for the
-     * LitRenderer.
+     * Any Jackson types supported are valid for LitRenderer.
      *
      * @param property
      *            the name of the property used inside the template expression,

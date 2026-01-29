@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -151,7 +151,7 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * The minimum and maximum value of the axis as Instant.
-     * 
+     *
      * @param min
      *            Minimum value as Instant.
      * @param max

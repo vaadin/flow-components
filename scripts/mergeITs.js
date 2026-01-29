@@ -19,14 +19,53 @@ exclude = [
 // 'PreSelectedValueIT',
 //// We can disable tests of a specific component
 // '%regex[com.vaadin.flow.component.charts.*]',
+  '%regex[com.vaadin.flow.component.ai.*]',
 ]
 
 let modules = [];
+
+async function addDependentModules(dependencyParentModule) {
+  // Get all parent module from root POM
+  const rootPOM = await xml2js.parseStringPromise(fs.readFileSync(`pom.xml`, 'utf8'));
+  const allModules = rootPOM.project.modules[0].module.filter(m => !/shared-parent/.test(m)).filter(m => !/bom/.test(m));
+  // Determine artifact ID of the dependency: vaadin-grid-flow-parent -> vaadin-grid-flow
+  const dependencyArtifactId = dependencyParentModule.replace('-parent', '');
+
+  // Check all modules to see if they depend on the given dependency
+  for (const parentModule of allModules) {
+    // Check if there is a component module / pom.xml
+    const componentModule = parentModule.replace('-parent', '');
+    const pomPath = `${parentModule}/${componentModule}/pom.xml`;
+
+    if (fs.existsSync(pomPath)) {
+      try {
+        const componentPom = await xml2js.parseStringPromise(fs.readFileSync(pomPath, 'utf8'));
+        if (componentPom.project.dependencies && componentPom.project.dependencies[0].dependency) {
+          // Check if the component module depends on the given dependency
+          const hasDependency = componentPom.project.dependencies[0].dependency.some(dep =>
+            dep.groupId[0] === 'com.vaadin' && dep.artifactId[0] === dependencyArtifactId
+          );
+          if (hasDependency && !modules.includes(parentModule)) {
+            modules.push(parentModule);
+            await addDependentModules(parentModule);
+          }
+        }
+      } catch (e) {
+        // Skip modules that can't be parsed
+      }
+    }
+  }
+}
+
 async function computeModules() {
   if (process.argv.length > 2) {
     // Modules are passed as arguments
     for (let i = 2; i < process.argv.length; i++) {
       modules.push(`vaadin-${process.argv[i]}-flow-parent`);
+    }
+    // Detect and add modules that depend on the selected ones
+    for (let parentModule of [...modules]) {
+      await addDependentModules(parentModule);
     }
   } else {
     // Read modules from the parent pom.xml

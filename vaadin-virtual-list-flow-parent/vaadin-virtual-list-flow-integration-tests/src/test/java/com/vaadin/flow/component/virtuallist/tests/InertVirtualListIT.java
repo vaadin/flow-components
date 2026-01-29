@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,8 +24,6 @@ import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.JsonType;
-
 @TestPath("vaadin-virtual-list/inert")
 public class InertVirtualListIT extends AbstractComponentIT {
 
@@ -42,9 +40,9 @@ public class InertVirtualListIT extends AbstractComponentIT {
     @Test
     public void inertVirtualList_itemsAreRendered() {
         var items = VirtualListHelpers.getItems(getDriver(), virtualList);
-        Assert.assertTrue(items.length() > 0);
-        for (var i = 0; i < items.length(); i++) {
-            Assert.assertNotEquals(JsonType.NULL, items.get(i).getType());
+        Assert.assertFalse(items.isEmpty());
+        for (var i = 0; i < items.size(); i++) {
+            Assert.assertFalse(items.get(i).isNull());
         }
     }
 }

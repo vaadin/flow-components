@@ -7,7 +7,7 @@
         <version>3.0.0</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>25.0-SNAPSHOT</version>
+    <version>25.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
@@ -62,6 +62,7 @@
         <module>vaadin-field-highlighter-flow-parent</module>
         <module>vaadin-side-nav-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
+        <module>vaadin-ai-components-flow-parent</module>
     </modules>
     <scm>
         <connection>scm:https:https://github.com/vaadin/flow-components.git</connection>
@@ -69,19 +70,19 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>25.0-SNAPSHOT</flow.version>
-        <testbench.version>10.0.0-beta2</testbench.version>
+        <flow.version>25.1-SNAPSHOT</flow.version>
+        <testbench.version>10.0.0</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <jetty.version>12.1.2</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
-        <karaf-maven-plugin.version>4.4.8</karaf-maven-plugin.version>
+        <karaf-maven-plugin.version>4.4.9</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
-        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
-        <spotless.plugin.version>2.46.1</spotless.plugin.version>
+        <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
+        <spotless.plugin.version>3.2.1</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
@@ -95,11 +96,16 @@
         <cvdlName/>
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>4.0.0-RC1</spring-data-commons.version>
+        <spring-data-commons.version>4.0.2</spring-data-commons.version>
+        <reactor-core.version>3.8.2</reactor-core.version>
+        <langchain4j.version>1.10.0</langchain4j.version>
 
         <!-- spreadsheet -->
-        <poi.version>5.4.1</poi.version>
-        <javaparser.version>3.27.1</javaparser.version>
+        <poi.version>5.5.1</poi.version>
+        <javaparser.version>3.28.0</javaparser.version>
+
+        <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
+        <surefire.argLine/>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -110,50 +116,10 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>flow</artifactId>
+                <artifactId>flow-bom</artifactId>
                 <version>${flow.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-client</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-data</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-html-components</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-lit-template</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-osgi</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-polymer-template</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-server</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-server-production-mode</artifactId>
-                <version>${flow.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -163,11 +129,6 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-test-util</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-dev-server</artifactId>
                 <version>${flow.version}</version>
             </dependency>
             <dependency>
@@ -200,11 +161,6 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.13.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.19.0</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -278,7 +234,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.4.0</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -310,7 +266,7 @@
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
-                    <version>7.1.0</version>
+                    <version>7.2.1</version>
                     <configuration>
                         <bnd><![CDATA[
                           // macro reference: https://bnd.bndtools.org/chapters/855-macros-ref.html
@@ -400,9 +356,11 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
+                        <argLine>${surefire.argLine}</argLine>
                         <excludes>
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
+                        <skip>${skipUnitTests}</skip>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -476,7 +434,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
-                    <version>1.2.1</version>
+                    <version>1.3.0</version>
                     <executions>
                         <execution>
                             <goals>
@@ -503,7 +461,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.5.1</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                     </configuration>
@@ -524,7 +482,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -582,6 +540,17 @@
                         </sortPom>
                     </pom>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

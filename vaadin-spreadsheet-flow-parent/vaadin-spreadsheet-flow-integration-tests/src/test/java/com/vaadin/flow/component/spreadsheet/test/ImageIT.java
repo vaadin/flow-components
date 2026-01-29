@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -83,6 +83,26 @@ public class ImageIT extends AbstractSpreadsheetIT {
         var K72 = getCellElement("K72").getRect();
         assertInRange(K72.x, type3.get(2).x, K72.x + K72.width + 200);
         assertInRange(K72.y, type3.get(2).y, K72.y + K72.height);
+    }
+
+    @Test
+    public void shouldUpdateImageURIOnReattach() {
+        loadFile("group_image.xlsx");
+        var image = findElementInShadowRoot(
+                By.cssSelector(cellToCSS("D3") + " img"));
+        var originalSrc = image.getAttribute("src");
+        // Scroll to bottom so the image is detached
+        spreadsheet.scroll(1000);
+
+        // Scroll back to top so the image is reattached
+        spreadsheet.scroll(0);
+        image = waitUntil(e -> findElementInShadowRoot(
+                By.cssSelector(cellToCSS("D3") + " img")));
+
+        var newSrc = image.getAttribute("src");
+        Assert.assertNotEquals(
+                "Image src should be updated on reattach to avoid broken images",
+                originalSrc, newSrc);
     }
 
     private double imageWidth(String cell) {

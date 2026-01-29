@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,11 +29,11 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.JsonArray;
-import elemental.json.impl.JsonUtil;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 public class NotificationChildrenTest {
 
@@ -193,11 +193,11 @@ public class NotificationChildrenTest {
                 .collect(Collectors.toList());
 
         // Get the virtualChildNodeIds property from the dialog as a JsonArray
-        var jsonArrayOfIds = (JsonArray) JsonUtil.parse(
+        var jsonArrayOfIds = (ArrayNode) JacksonUtils.getMapper().readTree(
                 notification.getElement().getProperty("virtualChildNodeIds"));
 
-        var virtualChildNodeIds = JsonUtils.numberStream(jsonArrayOfIds)
-                .mapToInt(i -> (int) i).boxed().collect(Collectors.toList());
+        var virtualChildNodeIds = JacksonUtils.stream(jsonArrayOfIds)
+                .mapToInt(JsonNode::asInt).boxed().collect(Collectors.toList());
 
         Assert.assertEquals(childIds, virtualChildNodeIds);
     }

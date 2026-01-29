@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -32,7 +32,7 @@ public class GuideBox extends AbstractConfigurationObject {
 
     /**
      * Style options for the guide box default state.
-     * 
+     *
      * @param defaultState
      */
     public void setDefaultState(GuideBoxDefaultState defaultState) {

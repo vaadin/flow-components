@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -602,7 +602,9 @@ public class CellValueManager implements Serializable {
 
         // capture cell value to history
         CellValueCommand command = new CellValueCommand(spreadsheet);
-        command.captureCellValues(new CellReference(row - 1, col - 1));
+        command.captureCellValues(
+                new CellReference(spreadsheet.getActiveSheet().getSheetName(),
+                        row - 1, col - 1, false, false));
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         boolean updateHyperlinks = false;
         boolean formulaChanged = false;
@@ -781,8 +783,9 @@ public class CellValueManager implements Serializable {
     }
 
     private void fireCellValueChangeEvent(Cell cell) {
-        Set<CellReference> cells = new HashSet<CellReference>();
-        cells.add(new CellReference(cell));
+        Set<CellReference> cells = new HashSet<>();
+        CellReference ref = new CellReference(cell);
+        cells.add(ref);
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,9 +38,12 @@ public class UploadWithHandlerView extends Div {
         Div handlerEventsOutput = new Div();
 
         InMemoryUploadHandler handler = UploadHandler
-                .inMemory((metaData, bytes) -> UI.getCurrent().access(
-                        () -> output.setText(String.valueOf(bytes.length))))
-                .whenStart(() -> handlerEventsOutput.add("started"))
+                .inMemory((metaData, bytes) -> UI.getCurrent().access(() -> {
+                    String metaInfo = "%s-%s-%s".formatted(metaData.fileName(),
+                            metaData.contentType(),
+                            String.valueOf(bytes.length));
+                    output.setText(metaInfo);
+                })).whenStart(() -> handlerEventsOutput.add("started"))
                 .onProgress((transferred, total) -> handlerEventsOutput
                         .add("-progress"))
                 .whenComplete(success -> {

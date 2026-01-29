@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,8 +29,8 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
-import com.vaadin.tests.dataprovider.MockUI;
 
 public class ListBoxUnitTest {
 

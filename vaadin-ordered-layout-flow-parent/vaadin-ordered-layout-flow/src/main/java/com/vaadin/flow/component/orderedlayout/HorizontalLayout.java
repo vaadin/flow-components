@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
@@ -40,10 +41,11 @@ import com.vaadin.flow.shared.Registration;
  * it contains.
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.1.0-alpha3")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
-        FlexComponent, ClickNotifier<HorizontalLayout> {
+        FlexComponent, ClickNotifier<HorizontalLayout>,
+        HasThemeVariant<HorizontalLayoutVariant> {
 
     /**
      * Constructs an empty layout with spacing on by default.
@@ -323,9 +325,15 @@ public class HorizontalLayout extends Component implements ThemableLayout,
 
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Component oldComponent = getComponentCount() > index
-                ? getComponentAt(index)
-                : null;
+        int size = getComponentCount();
+
+        Component oldComponent = null;
+        if (index < size) {
+            oldComponent = getComponentAt(index);
+        } else if (size > 0) {
+            oldComponent = getComponentAt(size - 1);
+        }
+
         String slotName = oldComponent != null
                 ? oldComponent.getElement().getAttribute("slot")
                 : null;

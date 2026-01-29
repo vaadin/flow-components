@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -27,6 +27,9 @@ import com.vaadin.client.WidgetUtil;
 
 public class SheetTabSheet extends Widget {
 
+    private static final String SELECTED_TAB_PART = "tab-selected";
+    private static final String SCROLL_TAB_DISABLED_PART = "scroll-tabs-button-disabled";
+    private static final String SCROLL_TAB_PART = "scroll-tabs-button";
     private static final String HIDDEN = "hidden";
 
     public interface SheetTabSheetHandler {
@@ -94,10 +97,23 @@ public class SheetTabSheet extends Widget {
 
     private void initDOM() {
         scrollBeginning.setClassName("scroll-tabs-beginning");
+        SheetJsniUtil.partOf(scrollBeginning).add(SCROLL_TAB_PART,
+                "scroll-tabs-to-start-button");
+
         scrollEnd.setClassName("scroll-tabs-end");
+        SheetJsniUtil.partOf(scrollEnd).add(SCROLL_TAB_PART,
+                "scroll-tabs-to-end-button");
+
         scrollLeft.setClassName("scroll-tabs-left");
+        SheetJsniUtil.partOf(scrollLeft).add(SCROLL_TAB_PART,
+                "scroll-tabs-backward-button");
+
         scrollRight.setClassName("scroll-tabs-right");
+        SheetJsniUtil.partOf(scrollRight).add(SCROLL_TAB_PART,
+                "scroll-tabs-forward-button");
+
         addNewSheet.setClassName("add-new-tab");
+        SheetJsniUtil.partOf(addNewSheet).add("new-tab-button");
 
         options.setClassName("sheet-tabsheet-options");
         options.appendChild(scrollBeginning);
@@ -395,6 +411,7 @@ public class SheetTabSheet extends Widget {
         final Element e = Document.get().createDivElement();
         setTabName(e, tabName);
         e.setClassName("sheet-tabsheet-tab");
+        SheetJsniUtil.partOf(e).add("tab");
         return e;
     }
 
@@ -454,12 +471,14 @@ public class SheetTabSheet extends Widget {
      */
     public void setSelectedTab(int sheetIndex) {
         if (selectedTabIndex != -1) {
-            ((Element) tabs.get(selectedTabIndex).cast())
-                    .removeClassName(SELECTED_TAB_CLASSNAME);
+            Element selectedTab = ((Element) tabs.get(selectedTabIndex).cast());
+            selectedTab.removeClassName(SELECTED_TAB_CLASSNAME);
+            SheetJsniUtil.partOf(selectedTab).remove(SELECTED_TAB_PART);
         }
         selectedTabIndex = sheetIndex - 1;
         Element selectedTab = ((Element) tabs.get(selectedTabIndex).cast());
         selectedTab.addClassName(SELECTED_TAB_CLASSNAME);
+        SheetJsniUtil.partOf(selectedTab).add(SELECTED_TAB_PART);
         if (tabScrollIndex > selectedTabIndex) {
             setFirstVisibleTab(selectedTabIndex);
         } else if (root.getAbsoluteRight() < selectedTab.getAbsoluteRight()
@@ -495,18 +514,36 @@ public class SheetTabSheet extends Widget {
     private void showHideScrollIcons() {
         if (tabScrollIndex == 0) {
             scrollLeft.addClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollLeft).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
+
             scrollBeginning.addClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollBeginning).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
         } else {
             scrollLeft.removeClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollLeft).replace(SCROLL_TAB_DISABLED_PART,
+                    SCROLL_TAB_PART);
+
             scrollBeginning.removeClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollBeginning)
+                    .replace(SCROLL_TAB_DISABLED_PART, SCROLL_TAB_PART);
         }
         int lastTabVisibleWithScrollIndex = getLastTabVisibleWithScrollIndex();
         if (tabScrollIndex < lastTabVisibleWithScrollIndex) {
             scrollRight.removeClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollRight).replace(SCROLL_TAB_DISABLED_PART,
+                    SCROLL_TAB_PART);
             scrollEnd.removeClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollEnd).replace(SCROLL_TAB_DISABLED_PART,
+                    SCROLL_TAB_PART);
         } else {
             scrollRight.addClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollRight).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
             scrollEnd.addClassName(HIDDEN);
+            SheetJsniUtil.partOf(scrollEnd).replace(SCROLL_TAB_PART,
+                    SCROLL_TAB_DISABLED_PART);
         }
     }
 

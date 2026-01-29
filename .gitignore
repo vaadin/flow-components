@@ -36,3 +36,8 @@ error-screenshots
 **/frontend/*.tsx
 dev-bundle
 prod.bundle
+.vaadin-node-tasks.lock
+
+# Claude Code
+.claude/*.local.*
+CLAUDE.local.md

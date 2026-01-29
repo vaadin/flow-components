@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.util.Objects;
 
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -91,7 +91,6 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(getSorted()).append(getDirection())
-                .toHashCode();
+        return Objects.hash(getSorted(), getDirection());
     }
 }

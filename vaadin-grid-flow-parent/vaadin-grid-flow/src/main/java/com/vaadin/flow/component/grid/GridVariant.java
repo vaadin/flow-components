@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,7 +24,12 @@ public enum GridVariant {
     LUMO_COLUMN_BORDERS("column-borders"),
     LUMO_ROW_STRIPES("row-stripes"),
     LUMO_COMPACT("compact"),
-    LUMO_WRAP_CELL_CONTENT("wrap-cell-content");
+    LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
+    AURA_NO_BORDER("no-border"),
+    AURA_NO_ROW_BORDERS("no-row-borders"),
+    AURA_COLUMN_BORDERS("column-borders"),
+    AURA_ROW_STRIPES("row-stripes"),
+    AURA_WRAP_CELL_CONTENT("wrap-cell-content");
 
     private final String variant;
 

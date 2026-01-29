@@ -4,12 +4,15 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-dashboard-flow-parent</artifactId>
-        <version>25.0-SNAPSHOT</version>
+        <version>25.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-dashboard-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Dashboard</name>
     <description>Vaadin Dashboard</description>
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -30,6 +33,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-flow-components-base</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-test-util</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,6 +31,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.internal.AllowInert;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.virtuallist.paging.PagelessDataCommunicator;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -69,12 +70,13 @@ import tools.jackson.databind.node.ObjectNode;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/virtual-list", version = "25.1.0-alpha3")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
-public class VirtualList<T> extends Component implements HasDataProvider<T>,
-        HasStyle, HasSize, Focusable<VirtualList<T>> {
+public class VirtualList<T> extends Component
+        implements HasDataProvider<T>, HasStyle, HasSize,
+        Focusable<VirtualList<T>>, HasThemeVariant<VirtualListVariant> {
 
     private final class UpdateQueue implements Update {
         private transient List<Runnable> queue = new ArrayList<>();

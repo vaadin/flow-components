@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -198,6 +198,11 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
+    public void contextMenuClosed() {
+        spreadsheet.getContextMenuManager().onContextMenuClosed();
+    }
+
+    @Override
     public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1,
             int row2, int col2) {
         spreadsheet.onRowResized(newRowSizes, row1, col1, row2, col2);
@@ -337,7 +342,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         for (int x = region.getFirstColumn(); x <= region
                 .getLastColumn(); x++) {
             for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
-                cells.add(new CellReference(y, x));
+                cells.add(new CellReference(
+                        spreadsheet.getActiveSheet().getSheetName(), y, x,
+                        false, false));
             }
         }
         fireCellValueChangeEvent(cells);

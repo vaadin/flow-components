@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -204,7 +204,7 @@ public class DragDrop extends AbstractConfigurationObject {
 
     /**
      * Set the minimum Y value the points can be moved to.
-     * 
+     *
      * @param dragMinY
      */
     public void setDragMinY(Number dragMinY) {
@@ -222,7 +222,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * The X precision value to drag to for this series. Set to 0 to disable. By
      * default this is disabled, except for category axes, where the default is
      * 1. Defaults to 0.
-     * 
+     *
      * @param dragPrecisionX
      */
     public void setDragPrecisionX(Number dragPrecisionX) {
@@ -240,7 +240,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * The Y precision value to drag to for this series. Set to 0 to disable. By
      * default this is disabled, except for category axes, where the default is
      * 1. Defaults to 0.
-     * 
+     *
      * @param dragPrecisionY
      */
     public void setDragPrecisionY(Number dragPrecisionY) {
@@ -258,7 +258,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * The amount of pixels to drag the pointer before it counts as a drag
      * operation. This prevents drag/drop to fire when just clicking or
      * selecting points. Defaults to 2.
-     * 
+     *
      * @param dragSensitivity
      */
     public void setDragSensitivity(Number dragSensitivity) {
@@ -275,7 +275,7 @@ public class DragDrop extends AbstractConfigurationObject {
     /**
      * Group the points by a property. Points with the same property value will
      * be grouped together when moving. Defaults to undefined.
-     * 
+     *
      * @param groupBy
      */
     public void setGroupBy(String groupBy) {
@@ -295,9 +295,9 @@ public class DragDrop extends AbstractConfigurationObject {
     /**
      * Style options for the guide box. The guide box has one state by default,
      * the default state. Guide box is visible only when liveRedraw is false.
-     * 
+     *
      * @see #setLiveRedraw(Boolean)
-     * 
+     *
      * @param guideBox
      */
     public void setGuideBox(GuideBox guideBox) {
@@ -314,7 +314,7 @@ public class DragDrop extends AbstractConfigurationObject {
     /**
      * Update points as they are dragged. If false, a guide box is drawn to
      * illustrate the new point size. Defaults to true.
-     * 
+     *
      * @param liveRedraw
      */
     public void setLiveRedraw(Boolean liveRedraw) {
