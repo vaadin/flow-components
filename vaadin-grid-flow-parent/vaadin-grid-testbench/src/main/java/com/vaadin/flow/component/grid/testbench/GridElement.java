@@ -61,6 +61,66 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
+     * Scrolls horizontally to bring the specified column into view. This is
+     * useful when working with grids that have lazy column rendering.
+     *
+     * @param column
+     *            the column to scroll into view
+     */
+    public void scrollToColumn(GridColumnElement column) {
+        // Scroll to column using its sizer cell offset
+        executeScript("""
+                const grid = arguments[0];
+                const columnId = arguments[1];
+                const columns = grid._getColumns();
+                const col = columns.find(c => c.__generatedTbId === columnId);
+                if (col && col._sizerCell) {
+                    grid.$.table.scrollLeft = col._sizerCell.offsetLeft;
+                    grid.__updateColumnsBodyContentHidden();
+                }
+                """, this, column.get__generatedId());
+
+        // Wait for rendering to complete
+        waitUntilLoadingFinished();
+
+        // Wait for column to be in view
+        waitUntil(driver -> isColumnInView(column));
+
+    }
+
+    /**
+     * Scrolls horizontally to bring the column at the specified index into
+     * view. This is useful when working with grids that have lazy column
+     * rendering.
+     *
+     * @param columnIndex
+     *            the index of the column to scroll into view
+     */
+    public void scrollToColumn(int columnIndex) {
+        GridColumnElement column = getVisibleColumns().get(columnIndex);
+        scrollToColumn(column);
+    }
+
+    /**
+     * Checks if the specified column is currently in the visible viewport.
+     *
+     * @param column
+     *            the column to check
+     * @return {@code true} if the column is visible, {@code false} otherwise
+     */
+    public boolean isColumnInView(GridColumnElement column) {
+        Boolean result = (Boolean) executeScript(
+                """
+                        const grid = arguments[0];
+                        const columnId = arguments[1];
+                        const col = grid._getColumns().find(c => c.__generatedTbId === columnId);
+                        return col ? grid.__isColumnInViewport(col) : false;
+                        """,
+                this, column.get__generatedId());
+        return Boolean.TRUE.equals(result);
+    }
+
+    /**
      * Gets the page size used when fetching data.
      *
      * @return the page size
@@ -115,7 +175,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Gets the grid cell for the given row and column.
      * <p>
-     * Automatically scrolls the given row into view
+     * Automatically scrolls the given row and column into view
      *
      * @param rowIndex
      *            the row index
@@ -126,6 +186,11 @@ public class GridElement extends TestBenchElement {
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
         if (!isRowInView(rowIndex)) {
             scrollToRowByFlatIndex(rowIndex);
+        }
+
+        // Also scroll column into view if needed
+        if (!isColumnInView(column)) {
+            scrollToColumn(column);
         }
 
         GridTRElement row = getRow(rowIndex);
@@ -145,13 +210,15 @@ public class GridElement extends TestBenchElement {
     public GridTHTDElement getCell(String contents)
             throws NoSuchElementException {
 
-        String script = "const grid = arguments[0];"
-                + "const contents = arguments[1];"
-                + "const rowsInDom = Array.from(arguments[0].$.items.children);"
-                + "var tds = [];"
-                + "rowsInDom.forEach(function(tr) { Array.from(tr.children).forEach(function(td) { tds.push(td);})});"
-                + "const matches = tds.filter(function(td) { return td._content.textContent == contents});"
-                + "return matches.length ? matches[0] : null;";
+        String script = """
+                const grid = arguments[0];
+                const contents = arguments[1];
+                const rowsInDom = Array.from(arguments[0].$.items.children);
+                var tds = [];
+                rowsInDom.forEach(function(tr) { Array.from(tr.children).forEach(function(td) { tds.push(td);})});
+                const matches = tds.filter(function(td) { return td._content.textContent == contents});
+                return matches.length ? matches[0] : null;
+                """;
         TestBenchElement td = (TestBenchElement) executeScript(script, this,
                 contents);
         if (td == null) {
@@ -213,11 +280,13 @@ public class GridElement extends TestBenchElement {
                             + (rowCount - 1) + " but were " + firstRowIndex
                             + " and " + lastRowIndex);
         }
-        String script = "var grid = arguments[0];"
-                + "var firstRowIndex = arguments[1];"
-                + "var lastRowIndex = arguments[2];"
-                + "var rowsInDom = grid._getRenderedRows();"
-                + "return Array.from(rowsInDom).filter((row) => { return row.index >= firstRowIndex && row.index <= lastRowIndex;});";
+        String script = """
+                var grid = arguments[0];
+                var firstRowIndex = arguments[1];
+                var lastRowIndex = arguments[2];
+                var rowsInDom = grid._getRenderedRows();
+                return Array.from(rowsInDom).filter((row) => { return row.index >= firstRowIndex && row.index <= lastRowIndex;});
+                """;
         Object rows = executeScript(script, this, firstRowIndex, lastRowIndex);
         if (rows != null) {
             return ((ArrayList<?>) rows).stream().map(
@@ -286,18 +355,20 @@ public class GridElement extends TestBenchElement {
     }
 
     protected void generatedColumnIdsIfNeeded() {
-        String generateIds = "const grid = arguments[0];"
-                + "if (!grid.__generatedTbId) {"//
-                + "  grid.__generatedTbId = 1;"//
-                + "}" //
-                + "grid._getColumns().forEach(function(column) {"
-                + "  if (!column.__generatedTbId) {"
-                + "    column.__generatedTbId = grid.__generatedTbId++;" //
-                + "  }" //
-                + "});";
+        String generateIds = """
+                const grid = arguments[0];
+                if (!grid.__generatedTbId) {
+                    grid.__generatedTbId = 1;
+                }
+                grid._getColumns().forEach(function(column) {
+                    if (!column.__generatedTbId) {
+                        column.__generatedTbId = grid.__generatedTbId++;
+                    }
+                });
+                return grid._getColumns().length;
+                """;
 
         executeScript(generateIds, this);
-        //
     }
 
     /**
