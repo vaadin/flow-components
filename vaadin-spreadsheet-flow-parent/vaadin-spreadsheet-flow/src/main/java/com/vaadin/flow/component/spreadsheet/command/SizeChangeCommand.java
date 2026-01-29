@@ -92,8 +92,8 @@ public class SizeChangeCommand extends SpreadsheetCommand {
     private Object updateValue(int index, Object value) {
         if (type == Type.COLUMN) {
             Object columnWidth = getCurrentValue(index);
-            spreadsheet.setColumnWidth(index, 
-                    (int)Double.parseDouble(value.toString()));
+            spreadsheet.setColumnWidth(index,
+                    (int) Double.parseDouble(value.toString()));
             return columnWidth;
         } else if (type == Type.ROW) {
             Row row = spreadsheet.getActiveSheet().getRow(index);
