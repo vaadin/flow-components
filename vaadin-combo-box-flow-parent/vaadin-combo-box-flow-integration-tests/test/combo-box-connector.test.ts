@@ -1,7 +1,7 @@
 import { expect, fixtureSync } from '@open-wc/testing';
 import { comboBoxConnector, FlowComboBox, init } from './shared.ts';
 import '@vaadin/combo-box';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 
 describe('combo-box connector', () => {
   let comboBox: FlowComboBox;
@@ -56,6 +56,18 @@ describe('combo-box connector', () => {
       expect(comboBox.$server.setViewportRange).to.be.not.called;
       clock.tick(500);
       expect(comboBox.$server.setViewportRange).to.be.calledOnce;
-    })
+    });
+
+    it.only('should cancel filter request when the connector is reset', () => {
+      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'test' }, () => {});
+      expect(comboBox._filterDebouncer).to.exist;
+
+      comboBox.$connector.reset();
+      expect(comboBox._filterDebouncer).to.not.exist;
+      
+      clock.tick(600);
+
+      expect(comboBox.$server.setViewportRange).to.not.be.called;
+    });
   });
 });
