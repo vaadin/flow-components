@@ -18,6 +18,8 @@ package com.vaadin.flow.component.upload;
 import java.io.Serializable;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Helper class for linking upload components to an {@link UploadManager}.
@@ -31,6 +33,8 @@ import com.vaadin.flow.component.Component;
  * @author Vaadin Ltd.
  */
 class UploadManagerLink implements Serializable {
+
+    private static final String ATTACH_LISTENER_REGISTRATION_KEY = "UploadManagerAttachListenerRegistration";
 
     private UploadManagerLink() {
         // Utility class
@@ -47,8 +51,15 @@ class UploadManagerLink implements Serializable {
      *            the upload manager to link to
      */
     static void link(Component component, UploadManager manager) {
+        var oldRegistration = ComponentUtil.getData(component,
+                ATTACH_LISTENER_REGISTRATION_KEY);
+        if (oldRegistration instanceof Registration registration) {
+            registration.remove();
+        }
+        ComponentUtil.setData(component, ATTACH_LISTENER_REGISTRATION_KEY,
+                component.addAttachListener(
+                        event -> setTarget(component, manager)));
         setTarget(component, manager);
-        component.addAttachListener(event -> setTarget(component, manager));
     }
 
     private static void setTarget(Component component, UploadManager manager) {

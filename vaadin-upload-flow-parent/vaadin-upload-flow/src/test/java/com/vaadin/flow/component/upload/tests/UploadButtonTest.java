@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.After;
@@ -26,6 +27,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.Command;
@@ -138,5 +140,56 @@ public class UploadButtonTest {
         button.setCapture(null);
 
         Assert.assertNull(button.getCapture());
+    }
+
+    @Test
+    public void setManager_changeManager_detachAndReattach_onlyOneManagerLinkJsExecuted() {
+        // Create two managers
+        Div owner2 = new Div();
+        ui.add(owner2);
+        UploadManager manager2 = new UploadManager(owner2);
+
+        // Create button with first manager
+        UploadButton button = new UploadButton(manager);
+        ui.add(button);
+        fakeClientResponse();
+
+        // Change to second manager
+        button.setManager(manager2);
+        fakeClientResponse();
+
+        // Drain pending JS invocations
+        ui.getInternals().dumpPendingJavaScriptInvocations();
+
+        // Detach and reattach the button
+        ui.remove(button);
+        ui.add(button);
+
+        // Get pending JS invocations after reattach
+        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
+
+        // Count how many "this.manager = " JS invocations are pending
+        long managerLinkCount = pendingInvocations.stream().filter(inv -> inv
+                .getInvocation().getExpression().contains("this.manager"))
+                .count();
+
+        Assert.assertEquals(
+                "Only one 'this.manager' JS invocation should be pending after reattach. "
+                        + "Old attach listeners should be removed when setManager is called.",
+                1, managerLinkCount);
+
+        // Verify that the button is linked to manager2
+        Assert.assertSame(manager2, button.getManager());
+    }
+
+    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
+        fakeClientResponse();
+        return ui.getInternals().dumpPendingJavaScriptInvocations();
+    }
+
+    private void fakeClientResponse() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }
