@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -32,6 +36,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Message List allows you to show a list of messages, for example, a chat log.
@@ -313,5 +318,72 @@ public class MessageList extends Component
      */
     public boolean isAnnounceMessages() {
         return getElement().getProperty("announceMessages", false);
+    }
+
+    /**
+     * Adds a listener that is called when an attachment is clicked.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a registration that can be used to remove the listener
+     */
+    public Registration addAttachmentClickListener(
+            ComponentEventListener<AttachmentClickEvent> listener) {
+        return addListener(AttachmentClickEvent.class, listener);
+    }
+
+    /**
+     * Event fired when an attachment is clicked in the message list.
+     * <p>
+     * Note: This event listens to the {@code attachment-click-flow} event
+     * dispatched by the connector, which enriches the web component's
+     * {@code attachment-click} event with item and attachment indexes.
+     */
+    @DomEvent("attachment-click-flow")
+    public static class AttachmentClickEvent
+            extends ComponentEvent<MessageList> {
+
+        private final MessageListItem item;
+        private final MessageListItem.Attachment attachment;
+
+        /**
+         * Creates a new attachment click event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            whether the event originated from the client
+         * @param itemIndex
+         *            the index of the message item containing the clicked
+         *            attachment
+         * @param attachmentIndex
+         *            the index of the clicked attachment within the item's
+         *            attachments list
+         */
+        public AttachmentClickEvent(MessageList source, boolean fromClient,
+                @EventData("event.detail.itemIndex") int itemIndex,
+                @EventData("event.detail.attachmentIndex") int attachmentIndex) {
+            super(source, fromClient);
+            this.item = source.getItems().get(itemIndex);
+            this.attachment = item.getAttachments().get(attachmentIndex);
+        }
+
+        /**
+         * Gets the message item containing the clicked attachment.
+         *
+         * @return the message item
+         */
+        public MessageListItem getItem() {
+            return item;
+        }
+
+        /**
+         * Gets the clicked attachment.
+         *
+         * @return the clicked attachment
+         */
+        public MessageListItem.Attachment getAttachment() {
+            return attachment;
+        }
     }
 }

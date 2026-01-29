@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.messages.testbench;
 
+import java.util.List;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -89,6 +91,71 @@ public class MessageElement extends TestBenchElement {
      */
     public String getTheme() {
         return getDomAttribute("theme");
+    }
+
+    /**
+     * Gets the attachment elements rendered in this message.
+     *
+     * @return a list of attachment elements
+     */
+    public List<TestBenchElement> getAttachmentElements() {
+        return $(TestBenchElement.class)
+                .withAttributeContainingWord("part", "attachment").all();
+    }
+
+    /**
+     * Gets an attachment element by its name.
+     *
+     * @param name
+     *            the name of the attachment
+     * @return the attachment element, or {@code null} if not found
+     */
+    public TestBenchElement getAttachmentByName(String name) {
+        return getAttachmentElements().stream()
+                .filter(el -> name.equals(getAttachmentName(el))).findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Gets the name of an attachment element.
+     *
+     * @param attachmentElement
+     *            the attachment element
+     * @return the attachment name, or {@code null} if not available
+     */
+    public String getAttachmentName(TestBenchElement attachmentElement) {
+        // For file attachments, name is in span[part="attachment-name"]
+        List<TestBenchElement> nameSpans = attachmentElement
+                .$(TestBenchElement.class)
+                .withAttributeContainingWord("part", "attachment-name").all();
+        if (!nameSpans.isEmpty()) {
+            return nameSpans.get(0).getText();
+        }
+        // For image attachments, name is in aria-label
+        return attachmentElement.getDomAttribute("aria-label");
+    }
+
+    /**
+     * Checks if the message has any attachments.
+     *
+     * @return {@code true} if the message has attachments, {@code false}
+     *         otherwise
+     */
+    public boolean hasAttachments() {
+        return !getAttachmentElements().isEmpty();
+    }
+
+    /**
+     * Checks if an attachment is an image attachment.
+     *
+     * @param attachmentElement
+     *            the attachment element
+     * @return {@code true} if the attachment is an image, {@code false}
+     *         otherwise
+     */
+    public boolean isImageAttachment(TestBenchElement attachmentElement) {
+        String partAttr = attachmentElement.getDomAttribute("part");
+        return partAttr != null && partAttr.contains("attachment-image");
     }
 
 }
