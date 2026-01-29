@@ -21,6 +21,7 @@ import java.util.Locale;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.router.Route;
@@ -105,10 +106,26 @@ public class MessageListPage extends Div {
         });
 
         addButton("addAttachmentToFirstItem", () -> {
-                foo.addAttachment("agenda.pdf", "#agenda.pdf",
-                        "application/pdf");
+            foo.addAttachment("agenda.pdf", "#agenda.pdf", "application/pdf");
         });
 
+        // Output section for test verification
+        Div outputSection = new Div();
+        outputSection.getStyle().set("margin-top", "20px");
+
+        Span outputTitle = new Span("Clicked attachment: ");
+        Span clickedAttachment = new Span();
+        clickedAttachment.setId("clickedAttachment");
+        outputSection.add(outputTitle, clickedAttachment);
+
+        add(outputSection);
+
+        messageList.addAttachmentClickListener(event -> {
+            var item = event.getItem();
+            var attachment = event.getAttachment();
+            clickedAttachment.setText(item.getUserName() + " | "
+                    + attachment.getName() + " | " + attachment.getMimeType());
+        });
     }
 
     private void addButton(String id, Command action) {

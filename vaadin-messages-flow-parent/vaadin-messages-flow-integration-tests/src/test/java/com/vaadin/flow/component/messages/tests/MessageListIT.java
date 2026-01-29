@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.messages.testbench.MessageElement;
 import com.vaadin.flow.component.messages.testbench.MessageListElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -263,6 +264,88 @@ public class MessageListIT extends AbstractComponentIT {
         Assert.assertTrue("Image URL should start with 'VAADIN/dynamic'",
                 imageUrl.startsWith("VAADIN/dynamic"));
         checkLogsForErrors(); // would fail if the image wasn't hosted
+    }
+
+    @Test
+    public void addItemWithAttachments_attachmentsRendered() {
+        clickElementWithJs("addItemWithAttachments");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        MessageElement messageWithAttachments = messages
+                .get(messages.size() - 1);
+
+        Assert.assertTrue("Message should have attachments",
+                messageWithAttachments.hasAttachments());
+
+        List<TestBenchElement> attachments = messageWithAttachments
+                .getAttachmentElements();
+        Assert.assertEquals("Should have 3 attachments", 3, attachments.size());
+
+        // Check file attachment
+        TestBenchElement pdfAttachment = messageWithAttachments
+                .getAttachmentByName("proposal.pdf");
+        Assert.assertNotNull("Should find proposal.pdf attachment",
+                pdfAttachment);
+        Assert.assertFalse("PDF should not be an image attachment",
+                messageWithAttachments.isImageAttachment(pdfAttachment));
+
+        // Check image attachment
+        TestBenchElement imageAttachment = messageWithAttachments
+                .getAttachmentByName("chart.png");
+        Assert.assertNotNull("Should find chart.png attachment",
+                imageAttachment);
+        Assert.assertTrue("PNG should be an image attachment",
+                messageWithAttachments.isImageAttachment(imageAttachment));
+    }
+
+    @Test
+    public void addAttachmentToExistingItem_attachmentRendered() {
+        clickElementWithJs("addAttachmentToFirstItem");
+
+        MessageElement firstMessage = getFirstMessage(messageList);
+
+        Assert.assertTrue("First message should have attachments",
+                firstMessage.hasAttachments());
+
+        TestBenchElement attachment = firstMessage
+                .getAttachmentByName("agenda.pdf");
+        Assert.assertNotNull("Should find agenda.pdf attachment", attachment);
+    }
+
+    @Test
+    public void clickAttachment_eventFired() {
+        clickElementWithJs("addItemWithAttachments");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        MessageElement messageWithAttachments = messages
+                .get(messages.size() - 1);
+
+        TestBenchElement pdfAttachment = messageWithAttachments
+                .getAttachmentByName("proposal.pdf");
+        pdfAttachment.click();
+
+        TestBenchElement clickedAttachment = $("span").id("clickedAttachment");
+        // Event includes item's userName, attachment name, and mime type
+        Assert.assertEquals("User | proposal.pdf | application/pdf",
+                clickedAttachment.getText());
+    }
+
+    @Test
+    public void clickImageAttachment_eventFired() {
+        clickElementWithJs("addItemWithAttachments");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        MessageElement messageWithAttachments = messages
+                .get(messages.size() - 1);
+
+        TestBenchElement imageAttachment = messageWithAttachments
+                .getAttachmentByName("chart.png");
+        imageAttachment.click();
+
+        TestBenchElement clickedAttachment = $("span").id("clickedAttachment");
+        // Event includes item's userName, attachment name, and mime type
+        Assert.assertEquals("User | chart.png | image/png",
+                clickedAttachment.getText());
     }
 
     private MessageElement getFirstMessage(MessageListElement list) {
