@@ -42,7 +42,7 @@ public class CustomFormattingIT extends AbstractSpreadsheetIT {
         // Color values in hex, taken from the modified CellFormatPart.java
         // in vaadin-spreadsheet-flow. These are the 56 indexed Excel colors
         // @formatter:off
-        final int[] rgb_hex = { // new line here
+        final int[] hexRGB = { // new line here
             0x000000, 0xFFFFFF, 0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF,
             0x00FFFF, 0x800000, 0x008000, 0x000080, 0x808000, 0x800080, 0x008080,
             0xC0C0C0, 0x808080, 0x9999FF, 0x993366, 0xFFFFCC, 0xCCFFFF, 0x660066,
@@ -56,9 +56,9 @@ public class CustomFormattingIT extends AbstractSpreadsheetIT {
         // Convert table to CSS strings
         for (int i = 0; i < 56; ++i) {
             INDEXED_COLOR_CSS[i] = "rgba(" + // results returnd as rgba
-                    ((rgb_hex[i] >>> 16) & 0xff) + ", " + // red component
-                    ((rgb_hex[i] >>> 8) & 0xff) + ", " + // green component
-                    (rgb_hex[i] & 0xff) + ", 1)"; // blue component and opaque
+                    ((hexRGB[i] >>> 16) & 0xff) + ", " + // red component
+                    ((hexRGB[i] >>> 8) & 0xff) + ", " + // green component
+                    (hexRGB[i] & 0xff) + ", 1)"; // blue component and opaque
         }
     }
 
