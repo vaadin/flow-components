@@ -8,10 +8,10 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Pattern;
-import java.awt.Color;
 
 import org.apache.poi.ss.format.CellFormat;
 import org.apache.poi.ss.format.CellFormatResult;
@@ -158,7 +158,8 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
                 return null;
             }
 
-            CellFormatResult result = CellFormat.getInstance(locale, format).apply(cell);
+            CellFormatResult result = CellFormat.getInstance(locale, format)
+                    .apply(cell);
 
             if (result.textColor == null) {
                 return null;

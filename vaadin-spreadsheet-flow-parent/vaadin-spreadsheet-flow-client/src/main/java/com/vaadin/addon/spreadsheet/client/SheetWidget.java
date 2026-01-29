@@ -3654,7 +3654,7 @@ public class SheetWidget extends Panel {
         String cellStyle = getMergedRegionCellStyle(region);
         String textColor = getMergedRegionTextColor(region);
         mergedCell.setValue(getCellValue(region.col1, region.row1), cellStyle,
-                textColor,false);
+                textColor, false);
         DivElement element = mergedCell.getElement();
         element.addClassName(MERGED_CELL_CLASSNAME);
         updateMergedRegionRegionSize(region, mergedCell);
@@ -3835,8 +3835,8 @@ public class SheetWidget extends Panel {
         MergedCell mCell = mergedCells.get(region.id);
         Cell originalCell = getCell(region.col1, region.row1);
         if (originalCell != null) {
-            originalCell.setValue(mCell.getValue(), mCell.getCellStyle(), 
-                mCell.getTextColor(), false);
+            originalCell.setValue(mCell.getValue(), mCell.getCellStyle(),
+                    mCell.getTextColor(), false);
         }
         mergedCells.remove(region.id).getElement().removeFromParent();
         overflownMergedCells.remove(region);
@@ -4332,10 +4332,10 @@ public class SheetWidget extends Panel {
             Iterator<CellData> i = cellData2.iterator();
             while (i.hasNext()) {
                 CellData cd = i.next();
-                topLeftCells
-                        .get((cd.row - 1) * horizontalSplitPosition + cd.col
-                                - 1)
-                        .setValue(cd.value, cd.cellStyle, cd.textColor, cd.needsMeasure);
+                topLeftCells.get(
+                        (cd.row - 1) * horizontalSplitPosition + cd.col - 1)
+                        .setValue(cd.value, cd.cellStyle, cd.textColor,
+                                cd.needsMeasure);
                 String key = toKey(cd.col, cd.row);
                 setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor,
                         cd.needsMeasure);
@@ -4417,8 +4417,8 @@ public class SheetWidget extends Panel {
             } else {
                 cachedCellData.put(key, cd);
             }
-            if (!setMergedCellValue(key, cd.value, cd.cellStyle,
-                    cd.textColor, cd.needsMeasure)) {
+            if (!setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor,
+                    cd.needsMeasure)) {
                 Cell cell = null;
                 if (isCellRenderedInScrollPane(cd.col, cd.row)) {
                     cell = rows.get(cd.row - firstRowIndex)
