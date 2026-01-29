@@ -83,17 +83,6 @@ public class UploadManagerPage extends UploadDropZone {
         fileList.setId("file-list");
         add(fileList);
 
-        // Add status button
-        var statusButton = new NativeButton("Log Status",
-                event -> log("Status: enabled=" + manager.isEnabled()
-                        + ", uploading=" + manager.isUploading() + ", maxFiles="
-                        + manager.getMaxFiles() + ", maxFileSize="
-                        + manager.getMaxFileSize() + ", autoUpload="
-                        + manager.isAutoUpload() + ", acceptedTypes="
-                        + manager.getAcceptedFileTypes()));
-        statusButton.setId("status-button");
-        add(statusButton);
-
         // Add control buttons for testing various API methods
         addControlButtons();
 
@@ -216,9 +205,17 @@ public class UploadManagerPage extends UploadDropZone {
 
         // --- Log ---
         var logGroup = createButtonGroup("Log:");
+        var statusButton = new NativeButton("Status",
+                event -> log("Status: enabled=" + manager.isEnabled()
+                        + ", uploading=" + manager.isUploading() + ", maxFiles="
+                        + manager.getMaxFiles() + ", maxFileSize="
+                        + manager.getMaxFileSize() + ", autoUpload="
+                        + manager.isAutoUpload() + ", acceptedTypes="
+                        + manager.getAcceptedFileTypes()));
+        statusButton.setId("status-button");
         var clearLog = new NativeButton("Clear", event -> logArea.removeAll());
         clearLog.setId("clear-log");
-        logGroup.add(clearLog);
+        logGroup.add(statusButton, clearLog);
         add(logGroup);
     }
 
