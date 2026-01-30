@@ -587,6 +587,34 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
+     * Gets whether the dialog traps focus or not.
+     * <p>
+     * If the focus trap is enabled, the user cannot move focus outside the
+     * dialog using the keyboard (Tab/Shift+Tab). This is useful for modal
+     * dialogs to ensure accessibility. Focus trap is enabled by default.
+     *
+     * @return {@code true} if focus trap is enabled (default), {@code false}
+     *         otherwise
+     */
+    public boolean isFocusTrap() {
+        return !getElement().getProperty("noFocusTrap", false);
+    }
+
+    /**
+     * Sets whether the dialog should trap focus or not.
+     * <p>
+     * If the focus trap is enabled, the user cannot move focus outside the
+     * dialog using the keyboard (Tab/Shift+Tab). This is useful for modal
+     * dialogs to ensure accessibility. Focus trap is enabled by default.
+     *
+     * @param focusTrap
+     *            {@code true} to enable focus trap, {@code false} to disable it
+     */
+    public void setFocusTrap(boolean focusTrap) {
+        getElement().setProperty("noFocusTrap", !focusTrap);
+    }
+
+    /**
      * Opens the dialog.
      * <p>
      * If a dialog was not added manually to a parent component, it will be
