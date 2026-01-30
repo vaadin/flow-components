@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
@@ -119,5 +121,42 @@ public class GridViewClickListenersIT extends AbstractComponentIT {
 
         // No event
         Assert.assertEquals("", clickInfo.getText());
+    }
+
+    @Test
+    public void nonVisibleColumn_itemClickListener() {
+        $(ButtonElement.class).id("resize-grids").click();
+
+        GridElement grid = $(GridElement.class).id("item-click-listener");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridColumnElement ageColumn = grid.getColumn("Age");
+        GridTRElement row = grid.getRow(0);
+        row.getCell(ageColumn).click();
+
+        WebElement clickInfo = findElement(By.id("clicked-item"));
+
+        Assert.assertEquals("Clicked Item: Person 1", clickInfo.getText());
+
+    }
+
+    @Test
+    public void nonVisibleColumn_itemDoubleClickListener() {
+        $(ButtonElement.class).id("resize-grids").click();
+
+        GridElement grid = $(GridElement.class).id("item-doubleclick-listener");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridColumnElement ageColumn = grid.getColumn("Age");
+        GridTRElement row = grid.getRow(0);
+        row.getCell(ageColumn).doubleClick();
+
+        WebElement clickInfo = findElement(By.id("doubleclicked-item"));
+
+        Assert.assertEquals("Double Clicked Item: Person 1",
+                clickInfo.getText());
+
     }
 }
