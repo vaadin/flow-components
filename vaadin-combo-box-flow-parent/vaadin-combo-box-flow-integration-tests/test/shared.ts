@@ -1,11 +1,11 @@
 import './env-setup.js';
 import { ComboBox } from '@vaadin/combo-box';
 import '../frontend/generated/jar-resources/comboBoxConnector.js';
-import type {} from '@web/test-runner-mocha';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 
 export type ComboBoxConnector = {
   initLazy: (comboBox: ComboBox) => void;
+  reset: () => void;
 };
 
 export type ComboBoxServer = {
@@ -16,6 +16,7 @@ export type FlowComboBox = ComboBox & {
   $connector: ComboBoxConnector;
   $server: ComboBoxServer;
   _filterTimeout: number;
+  _filterDebouncer: unknown;
 };
 
 type Vaadin = {
