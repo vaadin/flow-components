@@ -153,6 +153,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
 
+        // Initialize value property to web component default to avoid initial
+        // client-side property change event when no value has been set
+        if (!getElement().hasProperty(PROP_VALUE)) {
+            getElement().setProperty(PROP_VALUE, "");
+        }
+
         // Sync server-side `selectedItem` property from client, so that the
         // client's property value can be restored when re-attaching
         addValueChangeListener(event -> {
