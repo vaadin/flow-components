@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -41,8 +40,6 @@ import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
 
-import reactor.core.Disposable;
-
 /**
  * Orchestrator for AI-powered chat interfaces.
  * <p>
@@ -55,7 +52,6 @@ import reactor.core.Disposable;
  * <li>Tool execution coordination</li>
  * <li>UI-safe updates via {@code UI.access()}</li>
  * <li>Programmatic invocation via {@link #prompt(String)}</li>
- * <li>Input validation for security</li>
  * </ul>
  * <p>
  * The orchestrator is configured via a fluent builder:
@@ -85,36 +81,17 @@ public class AiOrchestrator implements Serializable {
     /**
      * Default timeout for LLM response streaming in seconds.
      */
-    private static final int DEFAULT_TIMEOUT_SECONDS = 120;
-
-    /**
-     * Maximum allowed length for user messages.
-     */
-    private static final int MAX_MESSAGE_LENGTH = 100000;
-
-    /**
-     * Maximum number of attachments allowed per request. The limit is enforced
-     * such that requests with exactly this many attachments will be rejected.
-     */
-    private static final int MAX_ATTACHMENTS = 10;
-
-    /**
-     * Maximum total size of all pending attachments in bytes (50 MB).
-     */
-    private static final long MAX_TOTAL_ATTACHMENT_SIZE = 50L * 1024 * 1024;
+    private static final int TIMEOUT_SECONDS = 120;
 
     private final LLMProvider provider;
     private final String systemPrompt;
     private AiMessageList messageList;
     private AiInput input;
     private AiFileReceiver fileReceiver;
-    private InputValidator inputValidator;
     private final List<PendingAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private transient Object[] tools = new Object[0];
-    private int timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
-    private final AtomicReference<Disposable> currentSubscription = new AtomicReference<>();
 
     /**
      * Creates a new AI orchestrator.
@@ -191,65 +168,6 @@ public class AiOrchestrator implements Serializable {
     }
 
     /**
-     * Checks if a request is currently being processed.
-     *
-     * @return true if processing is in progress, false otherwise
-     */
-    public boolean isProcessing() {
-        return isProcessing.get();
-    }
-
-    /**
-     * Cancels any in-progress request.
-     * <p>
-     * If a request is currently being processed, it will be cancelled and the
-     * processing state will be reset.
-     * </p>
-     */
-    public void cancel() {
-        var subscription = currentSubscription.getAndSet(null);
-        if (subscription != null && !subscription.isDisposed()) {
-            subscription.dispose();
-            LOGGER.debug("Cancelled in-progress request");
-        }
-        isProcessing.set(false);
-    }
-
-    /**
-     * Sets the timeout for LLM response streaming.
-     *
-     * @param timeoutSeconds
-     *            the timeout in seconds
-     * @throws IllegalArgumentException
-     *             if timeoutSeconds is not positive
-     */
-    public void setTimeout(int timeoutSeconds) {
-        if (timeoutSeconds <= 0) {
-            throw new IllegalArgumentException(
-                    "Timeout must be positive, was: " + timeoutSeconds);
-        }
-        this.timeoutSeconds = timeoutSeconds;
-    }
-
-    /**
-     * Gets the current timeout for LLM response streaming.
-     *
-     * @return the timeout in seconds
-     */
-    public int getTimeout() {
-        return timeoutSeconds;
-    }
-
-    private void handleValidationRejection(String rejectionMessage) {
-        if (messageList != null) {
-            var errorMessage = messageList
-                    .createMessage("Error: " + rejectionMessage, "System");
-            messageList.addMessage(errorMessage);
-        }
-        LOGGER.warn("Input validation rejected: {}", rejectionMessage);
-    }
-
-    /**
      * Sends a prompt to the AI orchestrator programmatically. This method
      * allows sending prompts without requiring an input component.
      * <p>
@@ -259,9 +177,7 @@ public class AiOrchestrator implements Serializable {
      * </p>
      * <p>
      * If a request is already being processed, this method will log a warning
-     * and return without processing the new prompt. Use {@link #isProcessing()}
-     * to check the current state, or {@link #cancel()} to abort an in-progress
-     * request.
+     * and return without processing the new prompt.
      * </p>
      *
      * @param userMessage
@@ -301,35 +217,32 @@ public class AiOrchestrator implements Serializable {
     private void streamResponseToMessage(LLMProvider.LLMRequest request,
             AiMessage assistantMessage, UI ui) {
         var responseStream = provider.stream(request)
-                .timeout(Duration.ofSeconds(timeoutSeconds));
-        var subscription = responseStream.doFinally(signal -> {
-            currentSubscription.set(null);
-            isProcessing.set(false);
-        }).subscribe(token -> {
-            if (assistantMessage != null && messageList != null) {
-                ui.access(() -> assistantMessage.appendText(token));
-            }
-        }, error -> {
-            var errorMessage = error.getMessage();
-            if (error instanceof TimeoutException) {
-                errorMessage = "Request timed out after " + timeoutSeconds
-                        + " seconds";
-                LOGGER.warn("LLM request timed out after {} seconds",
-                        timeoutSeconds);
-            } else {
-                LOGGER.error("Error during LLM streaming", error);
-            }
-            if (assistantMessage != null && messageList != null) {
-                var finalErrorMessage = errorMessage;
-                ui.access(() -> assistantMessage
-                        .setText("Error: " + finalErrorMessage));
-            }
-        }, () -> LOGGER.debug("LLM streaming completed successfully"));
-        currentSubscription.set(subscription);
+                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
+        responseStream.doFinally(signal -> isProcessing.set(false))
+                .subscribe(token -> {
+                    if (assistantMessage != null && messageList != null) {
+                        ui.access(() -> assistantMessage.appendText(token));
+                    }
+                }, error -> {
+                    var errorMessage = error.getMessage();
+                    if (error instanceof TimeoutException) {
+                        errorMessage = "Request timed out after "
+                                + TIMEOUT_SECONDS + " seconds";
+                        LOGGER.warn("LLM request timed out after {} seconds",
+                                TIMEOUT_SECONDS);
+                    } else {
+                        LOGGER.error("Error during LLM streaming", error);
+                    }
+                    if (assistantMessage != null && messageList != null) {
+                        var finalErrorMessage = errorMessage;
+                        ui.access(() -> assistantMessage
+                                .setText("Error: " + finalErrorMessage));
+                    }
+                }, () -> LOGGER.debug("LLM streaming completed successfully"));
     }
 
     private void doPrompt(String userMessage) {
-        if (!validateMessageBasic(userMessage)) {
+        if (userMessage == null || userMessage.isBlank()) {
             return;
         }
         if (!isProcessing.compareAndSet(false, true)) {
@@ -340,36 +253,11 @@ public class AiOrchestrator implements Serializable {
         processUserInput(userMessage);
     }
 
-    private boolean validateMessageBasic(String userMessage) {
-        if (userMessage == null) {
-            return false;
-        }
-        userMessage = userMessage.trim();
-        if (userMessage.isEmpty()) {
-            return false;
-        }
-        var isInvalidLength = userMessage.length() > MAX_MESSAGE_LENGTH;
-        if (isInvalidLength) {
-            LOGGER.warn("Message exceeds maximum length of {} characters",
-                    MAX_MESSAGE_LENGTH);
-            if (messageList != null) {
-                handleValidationRejection("Message exceeds maximum length of "
-                        + MAX_MESSAGE_LENGTH + " characters");
-            }
-            return false;
-        }
-        return true;
-    }
-
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrent();
         if (ui == null) {
             throw new IllegalStateException(
                     "No UI found. Make sure the orchestrator is used within a UI context.");
-        }
-        if (!validateAttachmentCount() || !validateAttachmentSizes()
-                || !validateInput(userMessage) || !validateAttachments()) {
-            return;
         }
         addUserMessageToList(userMessage);
         var assistantMessage = createAssistantMessagePlaceholder();
@@ -406,66 +294,6 @@ public class AiOrchestrator implements Serializable {
         LOGGER.debug("Processing prompt with {} attachments",
                 attachments.size());
         streamResponseToMessage(request, assistantMessage, ui);
-    }
-
-    private boolean validateAttachments() {
-        if (inputValidator == null || pendingAttachments.isEmpty()) {
-            return true;
-        }
-        for (var pending : pendingAttachments) {
-            var result = inputValidator
-                    .validateAttachment(pending.toAttachment());
-            if (!result.isAccepted()) {
-                handleValidationRejection(result.getRejectionMessage());
-                clearPendingAttachments();
-                isProcessing.set(false);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean validateInput(String userMessage) {
-        if (inputValidator == null) {
-            return true;
-        }
-        var result = inputValidator.validateInput(userMessage);
-        if (!result.isAccepted()) {
-            handleValidationRejection(result.getRejectionMessage());
-            clearPendingAttachments();
-            isProcessing.set(false);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateAttachmentSizes() {
-        var totalSize = pendingAttachments.stream()
-                .mapToLong(a -> a.data().length).sum();
-        if (totalSize > MAX_TOTAL_ATTACHMENT_SIZE) {
-            LOGGER.warn(
-                    "Total attachment size {} bytes exceeds limit of {} bytes",
-                    totalSize, MAX_TOTAL_ATTACHMENT_SIZE);
-            handleValidationRejection(
-                    "Total attachment size exceeds maximum allowed (50 MB)");
-            clearPendingAttachments();
-            isProcessing.set(false);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateAttachmentCount() {
-        if (pendingAttachments.size() >= MAX_ATTACHMENTS) {
-            LOGGER.warn("Too many attachments: {} meets or exceeds limit of {}",
-                    pendingAttachments.size(), MAX_ATTACHMENTS);
-            handleValidationRejection("Too many attachments. Maximum allowed: "
-                    + MAX_ATTACHMENTS);
-            clearPendingAttachments();
-            isProcessing.set(false);
-            return false;
-        }
-        return true;
     }
 
     private void clearPendingAttachments() {
@@ -534,7 +362,6 @@ public class AiOrchestrator implements Serializable {
         private AiMessageList messageList;
         private AiInput input;
         private AiFileReceiver fileReceiver;
-        private InputValidator inputValidator;
         private Object[] tools = new Object[0];
 
         private Builder(LLMProvider provider, String systemPrompt) {
@@ -617,23 +444,6 @@ public class AiOrchestrator implements Serializable {
         }
 
         /**
-         * Sets the input validator for security checks.
-         * <p>
-         * Validators can prevent prompt injection attacks and enforce content
-         * policies by checking both text input and file attachments before they
-         * are sent to the LLM.
-         * </p>
-         *
-         * @param inputValidator
-         *            the input validator
-         * @return this builder
-         */
-        public Builder withInputValidator(InputValidator inputValidator) {
-            this.inputValidator = inputValidator;
-            return this;
-        }
-
-        /**
          * Sets the objects containing vendor-specific tool-annotated methods
          * that will be available to the LLM.
          * <p>
@@ -671,7 +481,6 @@ public class AiOrchestrator implements Serializable {
             orchestrator.messageList = messageList;
             orchestrator.input = input;
             orchestrator.fileReceiver = fileReceiver;
-            orchestrator.inputValidator = inputValidator;
             orchestrator.tools = tools == null ? new Object[0] : tools;
             if (input != null) {
                 input.addSubmitListener(
@@ -682,11 +491,10 @@ public class AiOrchestrator implements Serializable {
             }
             LOGGER.debug(
                     "Built AiOrchestrator with messageList={}, input={}, "
-                            + "fileReceiver={}, validator={}, tools={}",
+                            + "fileReceiver={}, tools={}",
                     orchestrator.messageList != null,
                     orchestrator.input != null,
                     orchestrator.fileReceiver != null,
-                    orchestrator.inputValidator != null,
                     orchestrator.tools.length);
 
             return orchestrator;
