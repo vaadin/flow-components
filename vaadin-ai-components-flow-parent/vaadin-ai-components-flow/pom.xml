@@ -43,13 +43,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-messages-flow</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-upload-flow</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
