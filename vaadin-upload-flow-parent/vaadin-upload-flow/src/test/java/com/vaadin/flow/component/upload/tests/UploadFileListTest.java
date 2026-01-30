@@ -82,7 +82,7 @@ public class UploadFileListTest {
     public void constructor_withManager_linksToManager() {
         UploadFileList fileList = new UploadFileList(manager);
 
-        Assert.assertSame(manager, fileList.getManager());
+        Assert.assertSame(manager, fileList.getUploadManager());
     }
 
     @Test(expected = NullPointerException.class)
@@ -91,19 +91,19 @@ public class UploadFileListTest {
     }
 
     @Test
-    public void setManager_linksToManager() {
+    public void setUploadManager_linksToManager() {
         UploadFileList fileList = new UploadFileList();
 
-        fileList.setManager(manager);
+        fileList.setUploadManager(manager);
 
-        Assert.assertSame(manager, fileList.getManager());
+        Assert.assertSame(manager, fileList.getUploadManager());
     }
 
     @Test
-    public void getManager_default_returnsNull() {
+    public void getUploadManager_default_returnsNull() {
         UploadFileList fileList = new UploadFileList();
 
-        Assert.assertNull(fileList.getManager());
+        Assert.assertNull(fileList.getUploadManager());
     }
 
     @Test

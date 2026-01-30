@@ -42,7 +42,7 @@ interface HasUploadManager extends Serializable {
      *
      * @return the upload manager, or {@code null} if not linked
      */
-    default UploadManager getManager() {
+    default UploadManager getUploadManager() {
         return ComponentUtil.getData((Component) this, UploadManager.class);
     }
 
@@ -52,7 +52,7 @@ interface HasUploadManager extends Serializable {
      * @param manager
      *            the upload manager, or {@code null} to unlink
      */
-    default void setManager(UploadManager manager) {
+    default void setUploadManager(UploadManager manager) {
         Component component = (Component) this;
         ComponentUtil.setData(component, UploadManager.class, manager);
         var oldRegistration = ComponentUtil.getData(component,

@@ -63,7 +63,7 @@ public class UploadManagerPage extends UploadDropZone {
                 }));
 
         // Link the drop zone to the manager
-        setManager(manager);
+        setUploadManager(manager);
 
         // Add event listeners
         manager.addFileRemovedListener(
@@ -186,17 +186,17 @@ public class UploadManagerPage extends UploadDropZone {
         // --- Unlink Components ---
         var unlinkGroup = createButtonGroup("Unlink:");
         var unlinkButton = new NativeButton("Unlink Button", event -> {
-            uploadButton.setManager(null);
+            uploadButton.setUploadManager(null);
             log("Upload button unlinked");
         });
         unlinkButton.setId("unlink-button");
         var unlinkFileList = new NativeButton("Unlink File List", event -> {
-            fileList.setManager(null);
+            fileList.setUploadManager(null);
             log("File list unlinked");
         });
         unlinkFileList.setId("unlink-file-list");
         var unlinkDropZone = new NativeButton("Unlink Drop Zone", event -> {
-            setManager(null);
+            setUploadManager(null);
             log("Drop zone unlinked");
         });
         unlinkDropZone.setId("unlink-drop-zone");

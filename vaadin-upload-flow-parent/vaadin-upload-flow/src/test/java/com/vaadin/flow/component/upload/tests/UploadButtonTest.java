@@ -83,7 +83,7 @@ public class UploadButtonTest {
     public void constructor_withManager_linksToManager() {
         UploadButton button = new UploadButton(manager);
 
-        Assert.assertSame(manager, button.getManager());
+        Assert.assertSame(manager, button.getUploadManager());
     }
 
     @Test(expected = NullPointerException.class)
@@ -92,19 +92,19 @@ public class UploadButtonTest {
     }
 
     @Test
-    public void setManager_linksToManager() {
+    public void setUploadManager_linksToManager() {
         UploadButton button = new UploadButton();
 
-        button.setManager(manager);
+        button.setUploadManager(manager);
 
-        Assert.assertSame(manager, button.getManager());
+        Assert.assertSame(manager, button.getUploadManager());
     }
 
     @Test
-    public void getManager_default_returnsNull() {
+    public void getUploadManager_default_returnsNull() {
         UploadButton button = new UploadButton();
 
-        Assert.assertNull(button.getManager());
+        Assert.assertNull(button.getUploadManager());
     }
 
     @Test
@@ -148,7 +148,7 @@ public class UploadButtonTest {
     }
 
     @Test
-    public void setManager_changeManager_detachAndReattach_onlyOneManagerLinkJsExecuted() {
+    public void setUploadManager_changeManager_detachAndReattach_onlyOneManagerLinkJsExecuted() {
         // Create two managers
         Div owner2 = new Div();
         ui.add(owner2);
@@ -160,7 +160,7 @@ public class UploadButtonTest {
         fakeClientResponse();
 
         // Change to second manager
-        button.setManager(manager2);
+        button.setUploadManager(manager2);
         fakeClientResponse();
 
         // Drain pending JS invocations
@@ -180,11 +180,11 @@ public class UploadButtonTest {
 
         Assert.assertEquals(
                 "Only one 'this.manager' JS invocation should be pending after reattach. "
-                        + "Old attach listeners should be removed when setManager is called.",
+                        + "Old attach listeners should be removed when setUploadManager is called.",
                 1, managerLinkCount);
 
         // Verify that the button is linked to manager2
-        Assert.assertSame(manager2, button.getManager());
+        Assert.assertSame(manager2, button.getUploadManager());
     }
 
     private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {

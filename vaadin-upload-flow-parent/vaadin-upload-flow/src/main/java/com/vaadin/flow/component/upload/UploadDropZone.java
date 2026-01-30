@@ -51,7 +51,7 @@ public class UploadDropZone extends Component
 
     /**
      * Creates a new empty drop zone without a manager. The manager must be set
-     * later using {@link #setManager(UploadManager)}.
+     * later using {@link #setUploadManager(UploadManager)}.
      */
     public UploadDropZone() {
     }
@@ -65,7 +65,7 @@ public class UploadDropZone extends Component
      *             if manager is {@code null}
      */
     public UploadDropZone(UploadManager manager) {
-        setManager(Objects.requireNonNull(manager,
+        setUploadManager(Objects.requireNonNull(manager,
                 "manager cannot be null, use the default constructor instead"));
     }
 

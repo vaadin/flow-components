@@ -45,7 +45,7 @@ public class UploadButton extends Button implements HasUploadManager {
 
     /**
      * Creates a new upload button without a manager. The manager must be set
-     * later using {@link #setManager(UploadManager)}.
+     * later using {@link #setUploadManager(UploadManager)}.
      */
     public UploadButton() {
     }
@@ -59,7 +59,7 @@ public class UploadButton extends Button implements HasUploadManager {
      *             if manager is {@code null}
      */
     public UploadButton(UploadManager manager) {
-        setManager(Objects.requireNonNull(manager,
+        setUploadManager(Objects.requireNonNull(manager,
                 "manager cannot be null, use the default constructor instead"));
     }
 
