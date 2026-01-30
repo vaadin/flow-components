@@ -612,7 +612,7 @@ public class AiOrchestrator implements Serializable {
          * @return this builder
          */
         public Builder withFileReceiver(UploadManager uploadManager) {
-            this.fileReceiver = wrapUpload(uploadManager);
+            this.fileReceiver = wrapUploadManager(uploadManager);
             return this;
         }
 
@@ -719,7 +719,8 @@ public class AiOrchestrator implements Serializable {
                     event -> listener.onSubmit(event::getValue));
         }
 
-        private static AiFileReceiver wrapUpload(UploadManager uploadManager) {
+        private static AiFileReceiver wrapUploadManager(
+                UploadManager uploadManager) {
             return new AiFileReceiver() {
                 @Override
                 public void setUploadHandler(UploadHandler uploadHandler) {
