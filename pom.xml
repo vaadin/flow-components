@@ -82,7 +82,7 @@
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
-        <spotless.plugin.version>3.1.0</spotless.plugin.version>
+        <spotless.plugin.version>3.2.1</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
@@ -98,10 +98,12 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.0.2</spring-data-commons.version>
         <reactor-core.version>3.8.2</reactor-core.version>
+        <langchain4j.version>1.10.0</langchain4j.version>
+        <spring-ai.version>2.0.0-M1</spring-ai.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
-        <javaparser.version>3.27.1</javaparser.version>
+        <javaparser.version>3.28.0</javaparser.version>
 
         <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
         <surefire.argLine/>
@@ -433,7 +435,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
-                    <version>1.2.1</version>
+                    <version>1.3.0</version>
                     <executions>
                         <execution>
                             <goals>
@@ -599,6 +601,8 @@
         <profile>
             <id>sonar-cloud</id>
             <properties>
+                <!-- Exclude I18N files from duplication checks (repetitive getter/setter boilerplate) -->
+                <sonar.cpd.exclusions>**/*I18N.java</sonar.cpd.exclusions>
                 <!-- SonarQube rule exclusions for: Integration tests -->
                 <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
                 <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->

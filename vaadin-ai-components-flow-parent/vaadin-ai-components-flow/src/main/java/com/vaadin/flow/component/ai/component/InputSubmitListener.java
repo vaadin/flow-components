@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,26 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai;
+package com.vaadin.flow.component.ai.component;
 
 import java.io.Serializable;
 
 /**
- * Interface for input components that are used in an AI conversation.
+ * Listener for input submit events.
  *
  * @author Vaadin Ltd
- * @see InputSubmitListener
+ * @see AiInput
  * @see InputSubmitEvent
  */
-public interface AiInput extends Serializable {
+@FunctionalInterface
+public interface InputSubmitListener extends Serializable {
 
     /**
-     * Adds a listener for submit events.
-     * <p>
-     * The listener is notified when the user submits input.
+     * Called when the user submits input.
      *
-     * @param listener
-     *            the listener to add, not {@code null}
+     * @param event
+     *            the submit event, not {@code null}
      */
-    void addSubmitListener(InputSubmitListener listener);
+    void onSubmit(InputSubmitEvent event);
 }
