@@ -73,6 +73,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.signals.Signal;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -695,6 +696,30 @@ public class CheckboxGroup<T>
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Binds a given boolean signal to the required state of the component.
+     * <p>
+     * The required state controls whether the component is considered required
+     * and whether the required indicator is shown.
+     * <p>
+     * {@code null} erases the binding. The binding is enabled when the
+     * component is attached and disabled when it is detached.
+     *
+     * @param signal
+     *            the signal to bind the required state to, or {@code null} to
+     *            clear the existing binding
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindRequired(Signal<Boolean> signal) {
+        getElement()
+                .bindProperty("required",
+                        signal == null ? null
+                                : signal.map(required -> required == null
+                                        ? Boolean.FALSE
+                                        : required));
     }
 
     /**
