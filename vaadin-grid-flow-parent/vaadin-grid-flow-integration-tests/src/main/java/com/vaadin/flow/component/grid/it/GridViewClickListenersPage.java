@@ -28,12 +28,23 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-grid-it-demo/click-listeners")
 public class GridViewClickListenersPage extends LegacyTestView {
 
+    private final Grid<Person> clickGrid;
+    private final Grid<Person> doubleClickGrid;
+
     public GridViewClickListenersPage() {
-        createClickListener();
-        createDoubleClickListener();
+        clickGrid = createClickListener();
+        doubleClickGrid = createDoubleClickListener();
+        Button resizeGridsButton = new Button("Resize grids", event -> {
+            clickGrid.setWidth("100px");
+            clickGrid.getColumns().getFirst().setWidth("1000px");
+            doubleClickGrid.setWidth("100px");
+            doubleClickGrid.getColumns().getFirst().setWidth("1000px");
+        });
+        resizeGridsButton.setId("resize-grids");
+        add(resizeGridsButton);
     }
 
-    private void createClickListener() {
+    private Grid<Person> createClickListener() {
         Div message = new Div();
         message.setId("clicked-item");
 
@@ -61,9 +72,11 @@ public class GridViewClickListenersPage extends LegacyTestView {
 
         message.addClickListener(event -> message.setText(""));
         addCard("Click Listeners", "Item Click Listener", message, grid);
+
+        return grid;
     }
 
-    private void createDoubleClickListener() {
+    private Grid<Person> createDoubleClickListener() {
         Div message = new Div();
         message.setId("doubleclicked-item");
 
@@ -78,5 +91,7 @@ public class GridViewClickListenersPage extends LegacyTestView {
         grid.setId("item-doubleclick-listener");
         message.addClickListener(event -> message.setText(""));
         addCard("Click Listeners", "Item Double Click Listener", message, grid);
+
+        return grid;
     }
 }
