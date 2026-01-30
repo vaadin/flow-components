@@ -5054,6 +5054,27 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         .executeJs("this.scrollToIndex(this._flatSize)")));
     }
 
+    /**
+     * Scrolls the grid horizontally to make the column with the given index
+     * visible. The index refers to visible columns, in their visual order.
+     * 
+     * @param columnIndex
+     *            the index of the column to scroll to
+     */
+    public void scrollToColumn(int columnIndex) {
+        getElement().callJsFunction("scrollToColumn", columnIndex);
+    }
+
+    /**
+     * Scrolls the grid horizontally to make the given column visible.
+     * 
+     * @param column
+     *            the column to scroll to
+     */
+    public void scrollToColumn(Column<T> column) {
+        getElement().callJsFunction("scrollToColumn", column.getElement());
+    }
+
     private void onDragStart(GridDragStartEvent<T> event) {
         ComponentUtil.setData(this, DRAG_SOURCE_DATA_KEY,
                 event.getDraggedItems());
