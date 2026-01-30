@@ -60,9 +60,8 @@ interface HasUploadManager extends Serializable {
         if (oldRegistration instanceof Registration registration) {
             registration.remove();
         }
-        ComponentUtil.setData(component, ATTACH_LISTENER_REGISTRATION,
-                component.addAttachListener(
-                        event -> linkToManager(component, manager)));
+        ComponentUtil.setData(component, ATTACH_LISTENER_REGISTRATION, component
+                .addAttachListener(event -> linkToManager(component, manager)));
         linkToManager(component, manager);
     }
 
