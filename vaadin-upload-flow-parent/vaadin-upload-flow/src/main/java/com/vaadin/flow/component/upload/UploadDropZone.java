@@ -44,9 +44,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-upload-drop-zone")
 @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha3")
 @JsModule("@vaadin/upload/src/vaadin-upload-drop-zone.js")
-public class UploadDropZone extends Component implements HasComponents {
-
-    private UploadManager manager;
+public class UploadDropZone extends Component
+        implements HasComponents, HasUploadManager {
 
     /**
      * Creates a new empty drop zone without a manager. The manager must be set
@@ -63,27 +62,6 @@ public class UploadDropZone extends Component implements HasComponents {
      */
     public UploadDropZone(UploadManager manager) {
         setManager(manager);
-    }
-
-    /**
-     * Sets the upload manager that this drop zone is linked to. When files are
-     * dropped, they will be added to the manager.
-     *
-     * @param manager
-     *            the upload manager, or {@code null} to unlink
-     */
-    public final void setManager(UploadManager manager) {
-        this.manager = manager;
-        UploadManagerLink.link(this, manager);
-    }
-
-    /**
-     * Gets the upload manager that this drop zone is linked to.
-     *
-     * @return the upload manager, or {@code null} if not linked
-     */
-    public UploadManager getManager() {
-        return manager;
     }
 
     /**
