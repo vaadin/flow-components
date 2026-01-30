@@ -65,10 +65,13 @@ public class UploadFileList extends Component implements HasUploadManager {
      * Creates a new file list linked to the given manager.
      *
      * @param manager
-     *            the upload manager to link to
+     *            the upload manager to link to, not {@code null}
+     * @throws NullPointerException
+     *             if manager is {@code null}
      */
     public UploadFileList(UploadManager manager) {
-        setManager(manager);
+        setManager(Objects.requireNonNull(manager,
+                "manager cannot be null, use the default constructor instead"));
     }
 
     /**

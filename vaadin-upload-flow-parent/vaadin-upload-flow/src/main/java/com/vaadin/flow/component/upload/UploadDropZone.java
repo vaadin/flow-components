@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
@@ -58,10 +60,13 @@ public class UploadDropZone extends Component
      * Creates a new drop zone linked to the given manager.
      *
      * @param manager
-     *            the upload manager to link to
+     *            the upload manager to link to, not {@code null}
+     * @throws NullPointerException
+     *             if manager is {@code null}
      */
     public UploadDropZone(UploadManager manager) {
-        setManager(manager);
+        setManager(Objects.requireNonNull(manager,
+                "manager cannot be null, use the default constructor instead"));
     }
 
     /**

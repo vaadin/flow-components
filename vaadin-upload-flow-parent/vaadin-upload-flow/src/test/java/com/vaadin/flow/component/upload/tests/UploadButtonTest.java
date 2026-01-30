@@ -86,6 +86,11 @@ public class UploadButtonTest {
         Assert.assertSame(manager, button.getManager());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void constructor_withNull_throws() {
+        new UploadButton(null);
+    }
+
     @Test
     public void setManager_linksToManager() {
         UploadButton button = new UploadButton();

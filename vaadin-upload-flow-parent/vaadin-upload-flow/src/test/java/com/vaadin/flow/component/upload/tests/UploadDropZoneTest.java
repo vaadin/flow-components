@@ -85,6 +85,11 @@ public class UploadDropZoneTest {
         Assert.assertSame(manager, dropZone.getManager());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void constructor_withNull_throws() {
+        new UploadDropZone(null);
+    }
+
     @Test
     public void setManager_linksToManager() {
         UploadDropZone dropZone = new UploadDropZone();
