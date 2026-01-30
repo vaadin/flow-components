@@ -215,9 +215,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.reset = function () {
-    // Cancel any pending filter debouncer to prevent getting stuck in a
-    // loading state when the filter is reset while a debounced request
-    // is pending.
+    // Cancel pending requests, as clearCache below will set the combo
+    // in a state where it will always request new data, regardless
+    // what is in the cache already.
     if (comboBox._filterDebouncer) {
       comboBox._filterDebouncer.cancel();
       comboBox._filterDebouncer = undefined;

@@ -58,7 +58,7 @@ describe('combo-box connector', () => {
       expect(comboBox.$server.setViewportRange).to.be.calledOnce;
     });
 
-    it.only('should cancel filter request when the connector is reset', () => {
+    it('should cancel filter request when the connector is reset', () => {
       comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'test' }, () => {});
       expect(comboBox._filterDebouncer).to.exist;
 
