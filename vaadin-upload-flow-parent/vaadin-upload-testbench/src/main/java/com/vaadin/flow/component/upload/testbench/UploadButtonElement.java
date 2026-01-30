@@ -13,25 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.upload.testbench;
 
-import java.io.Serializable;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * Listener for input submit events.
- *
- * @author Vaadin Ltd
- * @see AiInput
- * @see InputSubmitEvent
+ * A TestBench element representing a <code>&lt;vaadin-upload-button&gt;</code>
+ * element.
  */
-@FunctionalInterface
-public interface InputSubmitListener extends Serializable {
+@Element("vaadin-upload-button")
+public class UploadButtonElement extends TestBenchElement {
 
     /**
-     * Called when the user submits input.
+     * Gets a tester for the upload manager linked to this button.
      *
-     * @param event
-     *            the submit event, not {@code null}
+     * @return the upload manager tester
      */
-    void onSubmit(InputSubmitEvent event);
+    public UploadManagerTester getUploadManager() {
+        return new UploadManagerTester(this);
+    }
 }
