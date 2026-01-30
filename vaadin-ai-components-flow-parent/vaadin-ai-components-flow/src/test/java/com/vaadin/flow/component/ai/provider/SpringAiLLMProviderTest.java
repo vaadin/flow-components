@@ -599,26 +599,4 @@ public class SpringAiLLMProviderTest {
             return "20%";
         }
     }
-
-    private static class PrivateToolClass {
-        public String getPrivateMethodResult() {
-            return "Private method result";
-        }
-
-        @Tool(description = "Private method tool")
-        private String privateMethod() {
-            return getPrivateMethodResult();
-        }
-    }
-
-    private static class ErrorThrowingToolClass {
-        public String getErrorMessage() {
-            return "Tool execution failed";
-        }
-
-        @Tool(description = "Throws an error")
-        public String throwError() {
-            throw new RuntimeException(getErrorMessage());
-        }
-    }
 }
