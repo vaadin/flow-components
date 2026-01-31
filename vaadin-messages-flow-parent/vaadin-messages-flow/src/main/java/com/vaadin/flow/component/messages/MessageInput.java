@@ -149,8 +149,8 @@ public class MessageInput extends Component
      *            the i18n object, not {@code null}
      */
     public void setI18n(MessageInputI18n i18n) {
-        Objects.requireNonNull(i18n, "The i18n object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
         getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 }

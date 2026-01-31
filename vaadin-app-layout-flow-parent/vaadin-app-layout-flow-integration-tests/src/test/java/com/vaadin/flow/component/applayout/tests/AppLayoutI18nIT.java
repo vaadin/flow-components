@@ -35,36 +35,36 @@ public class AppLayoutI18nIT extends AbstractComponentIT {
 
     @Test
     public void setEmptyI18n_defaultI18nIsNotOverridden() {
-        clickButton("set-empty-i18n");
+        clickElementWithJs("set-empty-i18n");
 
-        Assert.assertNotNull(
-                "The i18n drawer property should contain the default value",
-                layout.getPropertyString("i18n", "drawer"));
+        Assert.assertEquals(
+                "The drawer aria-label should contain the default value",
+                "Drawer", getDrawerAriaLabel());
     }
 
     @Test
     public void setI18n_i18nIsUpdated() {
-        clickButton("set-i18n");
+        clickElementWithJs("set-i18n");
 
         Assert.assertEquals(
-                "The i18n drawer property should contain a custom value",
-                "Custom drawer", layout.getPropertyString("i18n", "drawer"));
+                "The drawer aria-label should contain a custom value",
+                "Custom drawer", getDrawerAriaLabel());
     }
 
     @Test
     public void setI18n_detach_attach_i18nIsPersisted() {
-        clickButton("set-i18n");
-        clickButton("toggle-attached");
-        clickButton("toggle-attached");
+        clickElementWithJs("set-i18n");
+        clickElementWithJs("toggle-attached");
+        clickElementWithJs("toggle-attached");
 
         layout = $(AppLayoutElement.class).first();
 
         Assert.assertEquals(
-                "The i18n drawer property should contain a custom value",
-                "Custom drawer", layout.getPropertyString("i18n", "drawer"));
+                "The drawer aria-label should contain a custom value",
+                "Custom drawer", getDrawerAriaLabel());
     }
 
-    private void clickButton(String id) {
-        $("button").id(id).click();
+    private String getDrawerAriaLabel() {
+        return layout.$("*").id("drawer").getAttribute("aria-label");
     }
 }

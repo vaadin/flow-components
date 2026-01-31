@@ -13,7 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
+import com.vaadin.flow.component.dashboard.testbench.DashboardWidgetElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
@@ -33,24 +35,34 @@ public class DashboardI18nIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dashboardHasCorrectDefaultI18nKeys() {
-        for (DashboardI18nPage.I18nEntry i18NEntry : DashboardI18nPage.I18nEntry
-                .values()) {
-            Assert.assertNotNull(getI18nValue(i18NEntry));
-        }
+    public void setCustomI18n_i18nIsAppliedToButtons() {
+        clickElementWithJs("set-custom-i18n");
+
+        DashboardWidgetElement widget = dashboardElement.getWidgets().get(0);
+
+        Assert.assertEquals("Custom remove",
+                getButtonTitle(widget, "remove-button"));
+        Assert.assertEquals("Custom move",
+                getButtonTitle(widget, "drag-handle"));
+        Assert.assertEquals("Custom resize",
+                getButtonTitle(widget, "resize-handle"));
     }
 
     @Test
-    public void setCustomI18n_i18nIsUpdated() {
-        clickElementWithJs("set-custom-i18n");
-        for (DashboardI18nPage.I18nEntry i18NEntry : DashboardI18nPage.I18nEntry
-                .values()) {
-            String expectedI18nValue = i18NEntry.getCustomValue();
-            Assert.assertEquals(expectedI18nValue, getI18nValue(i18NEntry));
-        }
+    public void setEmptyI18n_defaultI18nIsPreserved() {
+        clickElementWithJs("set-empty-i18n");
+
+        DashboardWidgetElement widget = dashboardElement.getWidgets().get(0);
+
+        Assert.assertEquals("Remove", getButtonTitle(widget, "remove-button"));
+        Assert.assertEquals("Move", getButtonTitle(widget, "drag-handle"));
+        Assert.assertEquals("Resize", getButtonTitle(widget, "resize-handle"));
     }
 
-    private String getI18nValue(DashboardI18nPage.I18nEntry i18NEntry) {
-        return dashboardElement.getPropertyString("i18n", i18NEntry.getKey());
+    private String getButtonTitle(DashboardWidgetElement widget,
+            String buttonId) {
+        TestBenchElement button = widget.$("vaadin-dashboard-button")
+                .withId(buttonId).first();
+        return button.getAttribute("title");
     }
 }

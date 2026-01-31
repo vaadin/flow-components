@@ -15,142 +15,73 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.upload.UploadFileListI18N;
+import com.vaadin.flow.component.upload.testbench.UploadButtonElement;
 import com.vaadin.flow.component.upload.testbench.UploadFileListElement;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.testutil.TestPath;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ObjectNode;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-upload/file-list-i18n")
 public class UploadFileListI18nIT extends AbstractUploadIT {
 
+    private UploadButtonElement uploadButton;
+    private UploadFileListElement fileList;
+
     @Before
     public void init() {
         open();
+        uploadButton = $(UploadButtonElement.class).waitForFirst();
+        fileList = $(UploadFileListElement.class).waitForFirst();
     }
 
     @Test
-    public void testFullI18n_allTranslationsAreApplied() {
-        UploadFileListElement fileList = $(UploadFileListElement.class)
-                .id("file-list-full");
-        ObjectNode i18nJson = getFileListI18nPropertyAsJson(fileList);
-        Map<String, String> translationMap = jsonToMap(i18nJson);
+    public void setCustomI18n_i18nIsAppliedToDOM() throws Exception {
+        clickElementWithJs("set-full-i18n");
 
-        UploadFileListI18N expected = UploadFileListI18nPage.FULL_I18N;
-        ObjectNode expectedJson = JacksonUtils.beanToJson(expected);
-        deeplyRemoveNullValuesFromJsonObject(expectedJson);
-        Map<String, String> expectedMap = jsonToMap(expectedJson);
+        File tempFile = createTempFile("txt");
+        uploadButton.getUploadManager().upload(tempFile, 0);
 
-        assertTranslationMapsAreEqual(expectedMap, translationMap);
+        TestBenchElement uploadFile = waitForUploadFile(fileList);
+
+        Assert.assertEquals("Poista",
+                getButtonAriaLabel(uploadFile, "remove-button"));
+        Assert.assertEquals("Aloita",
+                getButtonAriaLabel(uploadFile, "start-button"));
+        Assert.assertEquals("Odottaa", getStatusText(uploadFile));
     }
 
     @Test
-    public void testPartialI18n_onlyProvidedTranslationsAreOverridden() {
-        UploadFileListElement fileList = $(UploadFileListElement.class)
-                .id("file-list-partial");
-        ObjectNode i18nJson = getFileListI18nPropertyAsJson(fileList);
-        Map<String, String> translationMap = jsonToMap(i18nJson);
+    public void setEmptyI18n_defaultI18nIsPreserved() throws Exception {
+        clickElementWithJs("set-empty-i18n");
 
-        // Verify the partial translation is applied
-        Assert.assertEquals("\"Poista\"", translationMap.get("file.remove"));
+        File tempFile = createTempFile("txt");
+        uploadButton.getUploadManager().upload(tempFile, 0);
 
-        // Verify other file translations still have their default values
-        // (the web component has built-in defaults that are preserved)
-        Assert.assertEquals("\"Retry\"", translationMap.get("file.retry"));
-        Assert.assertEquals("\"Start\"", translationMap.get("file.start"));
+        TestBenchElement uploadFile = waitForUploadFile(fileList);
+
+        Assert.assertEquals("Remove",
+                getButtonAriaLabel(uploadFile, "remove-button"));
+        Assert.assertEquals("Start",
+                getButtonAriaLabel(uploadFile, "start-button"));
+        Assert.assertEquals("Queued", getStatusText(uploadFile));
     }
 
-    @Test
-    public void testDetachReattach_i18nIsPreserved() {
-        WebElement btnSetI18n = findElement(By.id("btn-set-i18n"));
-        WebElement btnToggleAttached = findElement(
-                By.id("btn-toggle-attached"));
-
-        // Set i18n
-        btnSetI18n.click();
-
-        // Detach and reattach
-        btnToggleAttached.click();
-        btnToggleAttached.click();
-
-        // Verify i18n is still applied
-        UploadFileListElement fileList = $(UploadFileListElement.class)
-                .id("file-list-detach");
-        ObjectNode i18nJson = getFileListI18nPropertyAsJson(fileList);
-        Map<String, String> translationMap = jsonToMap(i18nJson);
-
-        UploadFileListI18N expected = UploadFileListI18nPage.FULL_I18N;
-        ObjectNode expectedJson = JacksonUtils.beanToJson(expected);
-        deeplyRemoveNullValuesFromJsonObject(expectedJson);
-        Map<String, String> expectedMap = jsonToMap(expectedJson);
-
-        assertTranslationMapsAreEqual(expectedMap, translationMap);
+    private TestBenchElement waitForUploadFile(UploadFileListElement fileList) {
+        return fileList.$("vaadin-upload-file").waitForFirst();
     }
 
-    private void assertTranslationMapsAreEqual(Map<String, String> expected,
-            Map<String, String> actual) {
-        expected.keySet().forEach(expectedKey -> {
-            Assert.assertTrue("Missing translation key: " + expectedKey,
-                    actual.containsKey(expectedKey));
-            String expectedValue = expected.get(expectedKey);
-            String actualValue = actual.get(expectedKey);
-            Assert.assertEquals(
-                    String.format(
-                            "Mismatching translation for key '%s': %s != %s",
-                            expectedKey, expectedValue, actualValue),
-                    expectedValue, actualValue);
-        });
+    private String getButtonAriaLabel(TestBenchElement uploadFile,
+            String buttonPart) {
+        return uploadFile.$("[part~='" + buttonPart + "']").first()
+                .getAttribute("aria-label");
     }
 
-    private Map<String, String> jsonToMap(ObjectNode jsonObject) {
-        return jsonToMap(new HashMap<>(), "", jsonObject);
-    }
-
-    private Map<String, String> jsonToMap(Map<String, String> output,
-            String path, ObjectNode node) {
-        for (String key : node.propertyNames()) {
-            JsonNode jsonValue = node.get(key);
-            String subPath = path.isEmpty() ? key : path + "." + key;
-
-            if (jsonValue.isObject()) {
-                jsonToMap(output, subPath, (ObjectNode) jsonValue);
-            } else if (jsonValue.isNull()) {
-                output.put(subPath, null);
-            } else {
-                String stringValue = jsonValue.toString();
-                output.put(subPath, stringValue);
-            }
-        }
-        return output;
-    }
-
-    private ObjectNode getFileListI18nPropertyAsJson(
-            UploadFileListElement fileList) {
-        String i18nJsonString = (String) fileList.getCommandExecutor()
-                .executeScript("return JSON.stringify(arguments[0].i18n)",
-                        fileList);
-        return JacksonUtils.readTree(i18nJsonString);
-    }
-
-    private void deeplyRemoveNullValuesFromJsonObject(ObjectNode jsonObject) {
-        for (String key : jsonObject.propertyNames()) {
-            if (jsonObject.get(key).isObject()) {
-                deeplyRemoveNullValuesFromJsonObject(
-                        (ObjectNode) jsonObject.get(key));
-            } else if (jsonObject.get(key).isNull()) {
-                jsonObject.remove(key);
-            }
-        }
+    private String getStatusText(TestBenchElement uploadFile) {
+        return uploadFile.$("[part~='status']").first().getText();
     }
 }

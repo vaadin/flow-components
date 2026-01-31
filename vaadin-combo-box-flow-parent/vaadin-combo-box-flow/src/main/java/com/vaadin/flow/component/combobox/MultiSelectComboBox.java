@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
@@ -258,15 +257,6 @@ public class MultiSelectComboBox<TItem>
             TItem... items) {
         this(label, listener);
         setItems(items);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        if (getI18n() != null) {
-            updateI18n();
-        }
     }
 
     private static <T> Set<T> presentationToModel(
@@ -603,22 +593,7 @@ public class MultiSelectComboBox<TItem>
      */
     public void setI18n(MultiSelectComboBoxI18n i18n) {
         super.setI18n(i18n);
-        updateI18n();
-    }
-
-    /**
-     * Update I18N settings in the web component. Merges the
-     * {@link MultiSelectComboBoxI18n} settings with the current / default
-     * settings of the web component.
-     */
-    private void updateI18n() {
-        ObjectNode i18nJson = JacksonUtils.beanToJson(getI18n());
-
-        // Assign new I18N object to WC, by merging the existing
-        // WC I18N, and the values from the new I18n instance,
-        // into an empty object
-        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
-                i18nJson);
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**
