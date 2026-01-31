@@ -25,6 +25,8 @@ import com.vaadin.flow.router.Route;
 public class MultiSelectComboBoxI18nPage extends Div {
     public MultiSelectComboBoxI18nPage() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems("Item 1", "Item 2", "Item 3");
+        comboBox.setClearButtonVisible(true);
 
         NativeButton toggleAttached = new NativeButton("Toggle attached", e -> {
             if (comboBox.getParent().isPresent()) {

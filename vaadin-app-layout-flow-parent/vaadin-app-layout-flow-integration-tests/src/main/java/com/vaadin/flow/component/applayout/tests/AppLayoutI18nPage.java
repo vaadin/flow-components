@@ -19,12 +19,18 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.AppLayout.AppLayoutI18n;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-app-layout/i18n")
 public class AppLayoutI18nPage extends Div {
     public AppLayoutI18nPage() {
         AppLayout layout = new AppLayout();
+        // Add drawer content so the drawer is visible
+        layout.addToDrawer(new Span("Drawer content"));
+        // Enable overlay mode via CSS variable (required for aria-label to be
+        // applied)
+        layout.getStyle().set("--vaadin-app-layout-drawer-overlay", "true");
         add(layout);
 
         NativeButton toggleAttachedButton = new NativeButton("toggle attached",
