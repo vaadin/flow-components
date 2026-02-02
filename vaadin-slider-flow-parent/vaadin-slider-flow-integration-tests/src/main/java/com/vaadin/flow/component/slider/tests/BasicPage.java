@@ -23,8 +23,7 @@ import com.vaadin.flow.router.Route;
 public class BasicPage extends Div {
 
     public BasicPage() {
-        Slider slider = new Slider(10, 200, 50);
-        slider.setStep(5);
+        Slider slider = new Slider(10, 200, 5, 50);
         add(slider);
     }
 }

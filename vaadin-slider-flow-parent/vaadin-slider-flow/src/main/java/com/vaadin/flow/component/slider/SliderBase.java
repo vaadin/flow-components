@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -29,7 +26,6 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableRunnable;
 
 /**
  * Abstract base class for slider components.
@@ -45,8 +41,6 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasLabel, HasHelper, HasValidationProperties, HasSize,
         Focusable<TComponent>, KeyNotifier {
-    private Set<String> pendingBeforeClientResponseActions = new HashSet<>();
-
     /**
      * Constructs a slider with the given min, max, step, initial value, and
      * custom converters for the value property.
@@ -77,13 +71,10 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
 
         getElement().setProperty("manualValidation", true);
 
-        setMinDouble(min);
-        setMaxDouble(max);
-        setStepDouble(step);
-        setValue(value);
-
-        // workaround for // https://github.com/vaadin/flow/issues/3496
+        // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
+
+        setValue(min, max, step, value);
     }
 
     @Override
@@ -108,15 +99,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @param min
      *            the minimum value
-     * @throws IllegalArgumentException
-     *             if the min is greater than the max value
      */
-    void setMinDouble(double min) {
-        if (min > getMaxDouble()) {
-            throw new IllegalArgumentException(
-                    "The min value cannot be greater than the max value");
-        }
-
+    void setMin(double min) {
         getElement().setProperty("min", min);
     }
 
@@ -125,7 +109,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the minimum value
      */
-    double getMinDouble() {
+    double getMin() {
         return getElement().getProperty("min", 0);
     }
 
@@ -134,15 +118,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @param max
      *            the maximum value
-     * @throws IllegalArgumentException
-     *             if the max is less than the min value
      */
-    void setMaxDouble(double max) {
-        if (max < getMinDouble()) {
-            throw new IllegalArgumentException(
-                    "The max value cannot be less than the min value");
-        }
-
+    void setMax(double max) {
         getElement().setProperty("max", max);
     }
 
@@ -151,7 +128,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the maximum value
      */
-    double getMaxDouble() {
+    double getMax() {
         return getElement().getProperty("max", 100);
     }
 
@@ -161,15 +138,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @param step
      *            the step value
-     * @throws IllegalArgumentException
-     *             if the step is less than or equal to zero
      */
-    void setStepDouble(double step) {
-        if (step <= 0) {
-            throw new IllegalArgumentException(
-                    "The step value must be a positive number");
-        }
-
+    void setStep(double step) {
         getElement().setProperty("step", step);
     }
 
@@ -178,32 +148,84 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the step value
      */
-    double getStepDouble() {
+    double getStep() {
         return getElement().getProperty("step", 1);
     }
 
     /**
-     * Schedules the given action to be executed before the client response,
-     * identified by the given key. If an action with the same key is already
-     * scheduled, it will not be added again.
+     * Sets the value of the slider.
      *
-     * @param key
-     *            the unique key identifying the action
-     * @param action
-     *            the action to be executed
+     * @param value
+     *            the value
+     * @throws IllegalArgumentException
+     *             if value is not valid for the current range and step
      */
-    void scheduleBeforeClientResponse(String key, SerializableRunnable action) {
-        if (pendingBeforeClientResponseActions.contains(key)) {
-            return;
+    public void setValue(TValue value) {
+        requireValidValue(value);
+        super.setValue(value);
+    }
+
+    /**
+     * Sets the minimum, maximum, and value of the slider atomically.
+     * <p>
+     * The step remains unchanged.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param value
+     *            the value
+     * @throws IllegalArgumentException
+     *             if min is greater than max
+     * @throws IllegalArgumentException
+     *             if value is not valid for the given range and current step
+     */
+    void setValue(double min, double max, TValue value) {
+        setValue(min, max, getStep(), value);
+    }
+
+    /**
+     * Sets the minimum, maximum, step, and value of the slider atomically.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @param value
+     *            the value
+     * @throws IllegalArgumentException
+     *             if min is greater than max
+     * @throws IllegalArgumentException
+     *             if step is not positive
+     * @throws IllegalArgumentException
+     *             if value is not valid for the given range and step
+     */
+    void setValue(double min, double max, double step, TValue value) {
+        if (min > max) {
+            throw new IllegalArgumentException(
+                    "The min value cannot be greater than the max value");
         }
 
-        getElement().getNode().runWhenAttached(ui -> {
-            ui.beforeClientResponse(this, context -> {
-                pendingBeforeClientResponseActions.remove(key);
-                action.run();
-            });
-        });
+        if (step <= 0) {
+            throw new IllegalArgumentException(
+                    "The step value must be a positive number");
+        }
 
-        pendingBeforeClientResponseActions.add(key);
+        requireValidValue(min, max, step, value);
+
+        setMin(min);
+        setMax(max);
+        setStep(step);
+        super.setValue(value);
     }
+
+    TValue requireValidValue(TValue value) {
+        return requireValidValue(getMin(), getMax(), getStep(), value);
+    }
+
+    abstract TValue requireValidValue(double min, double max, double step,
+            TValue value);
 }
