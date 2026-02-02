@@ -30,6 +30,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -50,6 +51,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -118,6 +120,11 @@ public class DateTimePicker
 
     private LocalDateTime max;
     private LocalDateTime min;
+
+    private final SignalPropertySupport<LocalDateTime> minSupport = SignalPropertySupport
+            .create(this, value -> this.min = value);
+    private final SignalPropertySupport<LocalDateTime> maxSupport = SignalPropertySupport
+            .create(this, value -> this.max = value);
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
@@ -878,6 +885,32 @@ public class DateTimePicker
     }
 
     /**
+     * Binds the given signal to the minimum date and time allowed to be set for
+     * this field.
+     * <p>
+     * When a signal is bound, the minimum date and time is kept synchronized
+     * with the signal value while the component is attached. When the component
+     * is detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the minimum date and time
+     * manually through {@link #setMin(LocalDateTime)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the minimum date and time to, or
+     *            {@code null} to unbind
+     * @see #setMin(LocalDateTime)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMin(Signal<LocalDateTime> signal) {
+        getElement().bindProperty("min", signal.map(FORMATTER::apply));
+        minSupport.bind(signal);
+    }
+
+    /**
      * Sets the maximum date and time in the date time picker. Dates and times
      * above that will be disabled in the popups.
      *
@@ -899,6 +932,32 @@ public class DateTimePicker
      */
     public LocalDateTime getMax() {
         return PARSER.apply(getElement().getProperty("max"));
+    }
+
+    /**
+     * Binds the given signal to the maximum date and time allowed to be set for
+     * this field.
+     * <p>
+     * When a signal is bound, the maximum date and time is kept synchronized
+     * with the signal value while the component is attached. When the component
+     * is detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the maximum date and time
+     * manually through {@link #setMax(LocalDateTime)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the maximum date and time to, or
+     *            {@code null} to unbind
+     * @see #setMax(LocalDateTime)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMax(Signal<LocalDateTime> signal) {
+        getElement().bindProperty("max", signal.map(FORMATTER::apply));
+        maxSupport.bind(signal);
     }
 
     /**
