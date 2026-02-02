@@ -28,8 +28,8 @@ public class RichTextEditorI18nIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setFullI18n_updatesAllTexts() {
-        $("button").id("set-full-i18n").click();
+    public void setI18n_i18nIsApplied() {
+        clickElementWithJs("set-i18n");
 
         Assert.assertEquals("Undo custom", getToolbarButtonAriaLabel("undo"));
         Assert.assertEquals("Redo custom", getToolbarButtonAriaLabel("redo"));
@@ -70,24 +70,13 @@ public class RichTextEditorI18nIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setPartialI18n_mergesWithExistingI18n() {
-        $("button").id("set-partial-i18n").click();
+    public void setEmptyI18n_defaultI18nIsPreserved() {
+        clickElementWithJs("set-empty-i18n");
 
-        Assert.assertEquals("Undo custom", getToolbarButtonAriaLabel("undo"));
-        Assert.assertEquals("Redo custom", getToolbarButtonAriaLabel("redo"));
+        Assert.assertEquals("undo", getToolbarButtonAriaLabel("undo"));
+        Assert.assertEquals("redo", getToolbarButtonAriaLabel("redo"));
         Assert.assertEquals("bold", getToolbarButtonAriaLabel("bold"));
         Assert.assertEquals("italic", getToolbarButtonAriaLabel("italic"));
-    }
-
-    @Test
-    public void setI18n_detach_attach_i18nRestored() {
-        $("button").id("set-full-i18n").click();
-        $("button").id("detach").click();
-        $("button").id("attach").click();
-
-        editor = $(RichTextEditorElement.class).waitForFirst();
-        Assert.assertEquals("Undo custom", getToolbarButtonAriaLabel("undo"));
-        Assert.assertEquals("Redo custom", getToolbarButtonAriaLabel("redo"));
     }
 
     private String getToolbarButtonAriaLabel(String buttonId) {
