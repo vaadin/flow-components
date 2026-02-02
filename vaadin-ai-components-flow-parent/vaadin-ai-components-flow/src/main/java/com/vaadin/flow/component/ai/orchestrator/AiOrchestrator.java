@@ -33,6 +33,7 @@ import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
 import com.vaadin.flow.component.ai.component.AiMessage;
 import com.vaadin.flow.component.ai.component.AiMessageList;
+import com.vaadin.flow.component.ai.component.InputSubmitListener;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
