@@ -179,6 +179,36 @@ public class DialogTest {
     }
 
     @Test
+    public void isFocusTrap_trueByDefault() {
+        Dialog dialog = new Dialog();
+        Assert.assertTrue("focusTrap is true by default", dialog.isFocusTrap());
+        Assert.assertFalse("noFocusTrap property is false by default",
+                dialog.getElement().getProperty("noFocusTrap", false));
+    }
+
+    @Test
+    public void setFocusTrap_dialogFocusTrapCanBeDisabled() {
+        Dialog dialog = new Dialog();
+        dialog.setFocusTrap(false);
+        Assert.assertFalse("focusTrap can be set to false",
+                dialog.isFocusTrap());
+        Assert.assertTrue(
+                "noFocusTrap property is true when focus trap is disabled",
+                dialog.getElement().getProperty("noFocusTrap", false));
+    }
+
+    @Test
+    public void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
+        Dialog dialog = new Dialog();
+        dialog.setFocusTrap(false);
+        dialog.setFocusTrap(true);
+        Assert.assertTrue("focusTrap can be re-enabled", dialog.isFocusTrap());
+        Assert.assertFalse(
+                "noFocusTrap property is false when focus trap is enabled",
+                dialog.getElement().getProperty("noFocusTrap", false));
+    }
+
+    @Test
     public void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
 
