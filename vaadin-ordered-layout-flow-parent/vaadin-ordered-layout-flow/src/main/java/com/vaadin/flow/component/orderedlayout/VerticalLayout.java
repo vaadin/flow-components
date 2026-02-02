@@ -29,7 +29,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * parent component and its height is determined by the components it contains.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "25.1.0-alpha4")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "25.1.0-alpha5")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component
         implements ThemableLayout, FlexComponent, ClickNotifier<VerticalLayout>,
