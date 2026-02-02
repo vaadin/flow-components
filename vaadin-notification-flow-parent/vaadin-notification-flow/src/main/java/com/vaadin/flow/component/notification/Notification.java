@@ -210,8 +210,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with the text bound to the given Signal and given
-     * Integer rendered as its duration.
+     * Creates a Notification with the text bound to the given Signal and duration.
      * <p>
      * Set to {@code 0} or a negative number to disable the notification
      * auto-closing.
