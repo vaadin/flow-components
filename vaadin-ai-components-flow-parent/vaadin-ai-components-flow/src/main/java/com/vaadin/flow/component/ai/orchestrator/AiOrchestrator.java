@@ -467,12 +467,6 @@ public class AiOrchestrator implements Serializable {
          * @return the configured orchestrator
          */
         public AiOrchestrator build() {
-            if (messageList == null && input == null) {
-                LOGGER.warn("Building AiOrchestrator without messageList or "
-                        + "input - orchestrator will have limited functionality. "
-                        + "Use prompt() method to interact programmatically.");
-            }
-
             var orchestrator = new AiOrchestrator(provider, systemPrompt);
             orchestrator.messageList = messageList;
             orchestrator.input = input;
