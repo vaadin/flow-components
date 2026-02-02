@@ -28,9 +28,9 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-avatar/i18n-test")
-public class I18nPage extends Div {
+public class AvatarI18nPage extends Div {
 
-    public I18nPage() {
+    public AvatarI18nPage() {
         Avatar avatar = new Avatar();
         AvatarGroup avatarGroup = new AvatarGroup();
 

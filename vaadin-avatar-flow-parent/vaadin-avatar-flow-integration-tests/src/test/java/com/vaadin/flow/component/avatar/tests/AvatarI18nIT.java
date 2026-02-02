@@ -26,7 +26,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
- * Integration tests for the {@link I18nPage}.
+ * Integration tests for the {@link AvatarI18nPage}.
  *
  * @author Vaadin Ltd.
  */
