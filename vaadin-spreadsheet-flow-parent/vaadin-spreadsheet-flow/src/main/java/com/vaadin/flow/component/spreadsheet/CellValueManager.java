@@ -245,6 +245,14 @@ public class CellValueManager implements Serializable {
                 }
             }
 
+            if (formatter instanceof CustomDataFormatter) {
+                String color = ((CustomDataFormatter) formatter)
+                        .getCellTextColor(cell);
+                if (color != null) {
+                    cellData.textColor = color;
+                }
+            }
+
             if (cell.getCellStyle().getDataFormatString().contains("%")) {
                 cellData.isPercentage = true;
             }
