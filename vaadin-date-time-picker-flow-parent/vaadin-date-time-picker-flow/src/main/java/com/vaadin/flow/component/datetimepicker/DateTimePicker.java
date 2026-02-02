@@ -897,6 +897,9 @@ public class DateTimePicker
      * While a signal is bound, any attempt to set the minimum date and time
      * manually through {@link #setMin(LocalDateTime)} throws a
      * {@link com.vaadin.signals.BindingActiveException}.
+     * <p>
+     * Attempting to bind a new signal while one is already bound throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the minimum date and time to, or
@@ -906,7 +909,8 @@ public class DateTimePicker
      * @since 25.1
      */
     public void bindMin(Signal<LocalDateTime> signal) {
-        getElement().bindProperty("min", signal.map(FORMATTER::apply));
+        getElement().bindProperty("min",
+                signal == null ? null : signal.map(FORMATTER::apply));
         minSupport.bind(signal);
     }
 
@@ -947,6 +951,9 @@ public class DateTimePicker
      * While a signal is bound, any attempt to set the maximum date and time
      * manually through {@link #setMax(LocalDateTime)} throws a
      * {@link com.vaadin.signals.BindingActiveException}.
+     * <p>
+     * Attempting to bind a new signal while one is already bound throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the maximum date and time to, or
@@ -956,7 +963,8 @@ public class DateTimePicker
      * @since 25.1
      */
     public void bindMax(Signal<LocalDateTime> signal) {
-        getElement().bindProperty("max", signal.map(FORMATTER::apply));
+        getElement().bindProperty("max",
+                signal == null ? null : signal.map(FORMATTER::apply));
         maxSupport.bind(signal);
     }
 
