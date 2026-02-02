@@ -248,7 +248,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Creates a Notification with the text bound to the given Signal, given
+     * Creates a Notification with the text bound to the given Signal,
      * duration and position.
      * <P>
      * Set to {@code 0} or a negative number to disable the notification
