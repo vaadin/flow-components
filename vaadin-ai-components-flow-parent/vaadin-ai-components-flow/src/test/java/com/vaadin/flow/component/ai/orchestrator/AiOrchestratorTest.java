@@ -265,7 +265,8 @@ public class AiOrchestratorTest {
         Assert.assertTrue("Error message should be set within timeout",
                 latch.await(2, TimeUnit.SECONDS));
 
-        Mockito.verify(mockMessage).setText(Mockito.contains("Error:"));
+        Mockito.verify(mockMessage)
+                .setText("An error occurred. Please try again.");
     }
 
     @Test
@@ -532,7 +533,8 @@ public class AiOrchestratorTest {
         Assert.assertTrue("Timeout error should be set within timeout",
                 latch.await(2, TimeUnit.SECONDS));
 
-        Mockito.verify(mockMessage).setText(Mockito.contains("timed out"));
+        Mockito.verify(mockMessage)
+                .setText("Request timed out. Please try again.");
     }
 
     @Test

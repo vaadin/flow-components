@@ -229,19 +229,17 @@ public class AiOrchestrator implements Serializable {
                 ui.access(() -> assistantMessage.appendText(token));
             }
         }, error -> {
-            var errorMessage = error.getMessage();
+            String userMessage;
             if (error instanceof TimeoutException) {
-                errorMessage = "Request timed out after " + TIMEOUT_SECONDS
-                        + " seconds";
+                userMessage = "Request timed out. Please try again.";
                 LOGGER.warn("LLM request timed out after {} seconds",
                         TIMEOUT_SECONDS);
             } else {
+                userMessage = "An error occurred. Please try again.";
                 LOGGER.error("Error during LLM streaming", error);
             }
             if (assistantMessage != null && messageList != null) {
-                var finalErrorMessage = errorMessage;
-                ui.access(() -> assistantMessage
-                        .setText("Error: " + finalErrorMessage));
+                ui.access(() -> assistantMessage.setText(userMessage));
             }
         }, () -> LOGGER.debug("LLM streaming completed successfully"));
     }
