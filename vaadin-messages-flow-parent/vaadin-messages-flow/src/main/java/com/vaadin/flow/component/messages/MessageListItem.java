@@ -668,97 +668,22 @@ public class MessageListItem implements Serializable {
 
     /**
      * Represents an attachment that can be associated with a message.
-     * Attachments are displayed below the message text and can represent
-     * files, images, or other resources.
+     * Attachments are displayed below the message text and can represent files,
+     * images, or other resources.
+     * <p>
+     * This is an immutable record. To modify an attachment, create a new
+     * instance with the desired values.
+     *
+     * @param name
+     *            the name of the attachment (e.g., file name)
+     * @param url
+     *            the URL of the attachment
+     * @param mimeType
+     *            the MIME type of the attachment (e.g., "application/pdf",
+     *            "image/png"). Serialized as "type" in JSON.
      */
-    public static class Attachment implements Serializable {
-
-        private String name;
-        private String url;
-        @JsonProperty("type")
-        private String mimeType;
-
-        /**
-         * Creates an empty attachment.
-         */
-        public Attachment() {
-        }
-
-        /**
-         * Creates an attachment with the given name, URL, and MIME type.
-         *
-         * @param name
-         *            the name of the attachment (e.g., file name)
-         * @param url
-         *            the URL of the attachment
-         * @param mimeType
-         *            the MIME type of the attachment (e.g., "application/pdf",
-         *            "image/png")
-         */
-        public Attachment(String name, String url, String mimeType) {
-            this.name = name;
-            this.url = url;
-            this.mimeType = mimeType;
-        }
-
-        /**
-         * Gets the name of the attachment.
-         *
-         * @return the attachment name, or {@code null} if not set
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * Sets the name of the attachment.
-         *
-         * @param name
-         *            the attachment name to set
-         */
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        /**
-         * Gets the URL of the attachment.
-         *
-         * @return the attachment URL, or {@code null} if not set
-         */
-        public String getUrl() {
-            return url;
-        }
-
-        /**
-         * Sets the URL of the attachment.
-         *
-         * @param url
-         *            the attachment URL to set
-         */
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        /**
-         * Gets the MIME type of the attachment.
-         *
-         * @return the attachment MIME type, or {@code null} if not set
-         */
-        @JsonIgnore
-        public String getMimeType() {
-            return mimeType;
-        }
-
-        /**
-         * Sets the MIME type of the attachment.
-         *
-         * @param mimeType
-         *            the attachment MIME type to set (e.g., "application/pdf",
-         *            "image/png")
-         */
-        public void setMimeType(String mimeType) {
-            this.mimeType = mimeType;
-        }
+    public record Attachment(String name, String url,
+            @JsonProperty("type") String mimeType) implements Serializable {
     }
 
 }

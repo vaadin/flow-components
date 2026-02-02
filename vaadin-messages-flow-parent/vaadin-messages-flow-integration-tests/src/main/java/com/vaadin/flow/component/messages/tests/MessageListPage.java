@@ -124,7 +124,7 @@ public class MessageListPage extends Div {
             var item = event.getItem();
             var attachment = event.getAttachment();
             clickedAttachment.setText(item.getUserName() + " | "
-                    + attachment.getName() + " | " + attachment.getMimeType());
+                    + attachment.name() + " | " + attachment.mimeType());
         });
     }
 

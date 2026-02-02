@@ -25,8 +25,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.messages.testbench.MessageElement;
 import com.vaadin.flow.component.messages.testbench.MessageListElement;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-messages/message-list-test")

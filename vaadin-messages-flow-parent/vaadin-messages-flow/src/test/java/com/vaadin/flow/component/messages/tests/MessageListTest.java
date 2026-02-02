@@ -206,8 +206,8 @@ public class MessageListTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void getAttachments_returnsUnmodifiableList() {
-        item1.getAttachments()
-                .add(new MessageListItem.Attachment("test", "url", "text/plain"));
+        item1.getAttachments().add(
+                new MessageListItem.Attachment("test", "url", "text/plain"));
     }
 
     @Test
@@ -227,9 +227,9 @@ public class MessageListTest {
 
         Assert.assertEquals(1, item1.getAttachments().size());
         MessageListItem.Attachment attachment = item1.getAttachments().get(0);
-        Assert.assertEquals("file.pdf", attachment.getName());
-        Assert.assertEquals("http://example.com/file.pdf", attachment.getUrl());
-        Assert.assertEquals("application/pdf", attachment.getMimeType());
+        Assert.assertEquals("file.pdf", attachment.name());
+        Assert.assertEquals("http://example.com/file.pdf", attachment.url());
+        Assert.assertEquals("application/pdf", attachment.mimeType());
     }
 
     @Test
