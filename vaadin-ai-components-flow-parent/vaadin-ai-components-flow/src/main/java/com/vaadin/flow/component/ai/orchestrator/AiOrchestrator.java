@@ -88,7 +88,7 @@ public class AiOrchestrator implements Serializable {
     private AiMessageList messageList;
     private AiInput input;
     private AiFileReceiver fileReceiver;
-    private final List<PendingAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
+    private final List<LLMProvider.Attachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private transient Object[] tools = new Object[0];
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
@@ -262,8 +262,7 @@ public class AiOrchestrator implements Serializable {
             effectiveSystemPrompt = systemPrompt.trim();
         }
         final var finalSystemPrompt = effectiveSystemPrompt;
-        var attachments = pendingAttachments.stream()
-                .map(PendingAttachment::toAttachment).toList();
+        var attachments = pendingAttachments.stream().toList();
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -305,48 +304,36 @@ public class AiOrchestrator implements Serializable {
         }
         fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
             var isDuplicate = pendingAttachments.stream()
-                    .anyMatch(a -> a.fileName.equals(meta.fileName()));
+                    .anyMatch(a -> a.fileName().equals(meta.fileName()));
             if (isDuplicate) {
                 throw new IllegalArgumentException(
                         "Duplicate file name: " + meta.fileName());
             }
-            pendingAttachments.add(new PendingAttachment(meta.fileName(),
-                    meta.contentType(), data));
-            LOGGER.debug("Added attachment: {}", meta.fileName());
-        }));
-        fileReceiver.addFileRemovedListener(fileName -> {
-            var removed = pendingAttachments
-                    .removeIf(a -> a.fileName.equals(fileName));
-            if (removed) {
-                LOGGER.debug("Removed attachment: {}", fileName);
-            }
-        });
-    }
-
-    /**
-     * Represents a pending file attachment.
-     */
-    private record PendingAttachment(String fileName, String contentType,
-            byte[] data) {
-
-        LLMProvider.Attachment toAttachment() {
-            return new LLMProvider.Attachment() {
+            pendingAttachments.add(new LLMProvider.Attachment() {
                 @Override
                 public String fileName() {
-                    return fileName;
+                    return meta.fileName();
                 }
 
                 @Override
                 public String contentType() {
-                    return contentType;
+                    return meta.contentType();
                 }
 
                 @Override
                 public byte[] data() {
                     return data;
                 }
-            };
-        }
+            });
+            LOGGER.debug("Added attachment: {}", meta.fileName());
+        }));
+        fileReceiver.addFileRemovedListener(fileName -> {
+            var removed = pendingAttachments
+                    .removeIf(a -> a.fileName().equals(fileName));
+            if (removed) {
+                LOGGER.debug("Removed attachment: {}", fileName);
+            }
+        });
     }
 
     /**

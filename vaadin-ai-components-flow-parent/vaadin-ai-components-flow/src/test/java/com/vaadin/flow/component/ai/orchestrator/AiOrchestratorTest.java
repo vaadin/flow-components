@@ -653,7 +653,7 @@ public class AiOrchestratorTest {
 
         Assert.assertEquals(1, pendingAttachments.size());
         Assert.assertEquals("existing.txt",
-                getFileName(pendingAttachments.getFirst()));
+                pendingAttachments.getFirst().fileName());
     }
 
     private AiOrchestrator getSimpleOrchestrator() {
@@ -701,47 +701,30 @@ public class AiOrchestratorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Object> getPendingAttachments(
+    private static List<LLMProvider.Attachment> getPendingAttachments(
             AiOrchestrator orchestrator) throws Exception {
         var field = AiOrchestrator.class.getDeclaredField("pendingAttachments");
         field.setAccessible(true);
-        return (List<Object>) field.get(orchestrator);
+        return (List<LLMProvider.Attachment>) field.get(orchestrator);
     }
 
-    private static void addPendingAttachments(AiOrchestrator orchestrator,
-            int count) throws Exception {
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        for (var i = 0; i < count; i++) {
-            pendingAttachments
-                    .add(createPendingAttachment("file" + i + ".txt"));
-        }
-    }
+    private static LLMProvider.Attachment createPendingAttachment(
+            String fileName) {
+        return new LLMProvider.Attachment() {
+            @Override
+            public String fileName() {
+                return fileName;
+            }
 
-    private static Object createPendingAttachment(String fileName)
-            throws Exception {
-        var pendingAttachmentClass = Class.forName(
-                "com.vaadin.flow.component.ai.orchestrator.AiOrchestrator$PendingAttachment");
-        var constructor = pendingAttachmentClass.getDeclaredConstructor(
-                String.class, String.class, byte[].class);
-        constructor.setAccessible(true);
-        return constructor.newInstance(fileName, "text/plain",
-                "test".getBytes());
-    }
+            @Override
+            public String contentType() {
+                return "text/plain";
+            }
 
-    private static Object createLargePendingAttachment() throws Exception {
-        var pendingAttachmentClass = Class.forName(
-                "com.vaadin.flow.component.ai.orchestrator.AiOrchestrator$PendingAttachment");
-        var constructor = pendingAttachmentClass.getDeclaredConstructor(
-                String.class, String.class, byte[].class);
-        constructor.setAccessible(true);
-        return constructor.newInstance("large-file.bin",
-                "application/octet-stream", new byte[53477376]);
-    }
-
-    private static String getFileName(Object pendingAttachment)
-            throws Exception {
-        var method = pendingAttachment.getClass().getDeclaredMethod("fileName");
-        method.setAccessible(true);
-        return (String) method.invoke(pendingAttachment);
+            @Override
+            public byte[] data() {
+                return "test".getBytes();
+            }
+        };
     }
 }
