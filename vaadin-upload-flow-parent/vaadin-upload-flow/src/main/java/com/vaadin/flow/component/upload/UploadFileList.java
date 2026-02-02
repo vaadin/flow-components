@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -50,7 +51,8 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-upload-file-list")
 @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha5")
 @JsModule("@vaadin/upload/src/vaadin-upload-file-list.js")
-public class UploadFileList extends Component implements HasUploadManager {
+public class UploadFileList extends Component
+        implements HasUploadManager, HasThemeVariant<UploadFileListVariant> {
 
     private UploadFileListI18N i18n;
 
