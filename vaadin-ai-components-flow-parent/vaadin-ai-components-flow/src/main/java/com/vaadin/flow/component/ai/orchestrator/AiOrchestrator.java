@@ -254,11 +254,7 @@ public class AiOrchestrator implements Serializable {
     }
 
     private void processUserInput(String userMessage) {
-        var ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException(
-                    "No UI found. Make sure the orchestrator is used within a UI context.");
-        }
+        var ui = UI.getCurrentOrThrow();
         addUserMessageToList(userMessage);
         var assistantMessage = createAssistantMessagePlaceholder();
         String effectiveSystemPrompt = null;
