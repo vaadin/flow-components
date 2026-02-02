@@ -222,6 +222,11 @@ public class AiOrchestratorTest {
             throws Exception {
         mockUi();
         var mockMessage = createMockMessage();
+        var latch = new CountDownLatch(3);
+        Mockito.doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(mockMessage).appendText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
                 Mockito.anyString())).thenReturn(mockMessage);
         Mockito.when(
@@ -230,12 +235,9 @@ public class AiOrchestratorTest {
 
         prompt("Hi");
 
-        // Allow async processing to complete
-        Thread.sleep(100);
+        Assert.assertTrue("Tokens should be appended within timeout",
+                latch.await(2, TimeUnit.SECONDS));
 
-        // Verify all three tokens were appended
-        Mockito.verify(mockMessage, Mockito.times(3))
-                .appendText(Mockito.anyString());
         var inOrder = Mockito.inOrder(mockMessage);
         inOrder.verify(mockMessage).appendText("Hello");
         inOrder.verify(mockMessage).appendText(" ");
@@ -246,6 +248,11 @@ public class AiOrchestratorTest {
     public void prompt_withStreamingError_setsErrorMessage() throws Exception {
         mockUi();
         var mockMessage = createMockMessage();
+        var latch = new CountDownLatch(1);
+        Mockito.doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(mockMessage).setText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
                 Mockito.anyString())).thenReturn(mockMessage);
         Mockito.when(
@@ -255,7 +262,8 @@ public class AiOrchestratorTest {
         var orchestrator = getSimpleOrchestrator();
         orchestrator.prompt("Hi");
 
-        Thread.sleep(50);
+        Assert.assertTrue("Error message should be set within timeout",
+                latch.await(2, TimeUnit.SECONDS));
 
         Mockito.verify(mockMessage).setText(Mockito.contains("Error:"));
     }
@@ -508,6 +516,11 @@ public class AiOrchestratorTest {
     public void prompt_withTimeout_setsTimeoutErrorMessage() throws Exception {
         mockUi();
         var mockMessage = createMockMessage();
+        var latch = new CountDownLatch(1);
+        Mockito.doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(mockMessage).setText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
                 Mockito.anyString())).thenReturn(mockMessage);
         Mockito.when(
@@ -516,7 +529,8 @@ public class AiOrchestratorTest {
 
         prompt("Hello");
 
-        Thread.sleep(50);
+        Assert.assertTrue("Timeout error should be set within timeout",
+                latch.await(2, TimeUnit.SECONDS));
 
         Mockito.verify(mockMessage).setText(Mockito.contains("timed out"));
     }
@@ -579,6 +593,11 @@ public class AiOrchestratorTest {
     public void prompt_withMultipleTokens_appendsAllTokens() throws Exception {
         mockUi();
         var mockMessage = createMockMessage();
+        var latch = new CountDownLatch(4);
+        Mockito.doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(mockMessage).appendText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
                 Mockito.anyString())).thenReturn(mockMessage);
         Mockito.when(
@@ -587,7 +606,8 @@ public class AiOrchestratorTest {
 
         prompt("Hello");
 
-        Thread.sleep(150);
+        Assert.assertTrue("All tokens should be appended within timeout",
+                latch.await(2, TimeUnit.SECONDS));
 
         Mockito.verify(mockMessage, Mockito.times(4))
                 .appendText(Mockito.anyString());
