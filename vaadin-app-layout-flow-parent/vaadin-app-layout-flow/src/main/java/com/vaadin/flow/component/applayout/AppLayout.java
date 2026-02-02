@@ -52,7 +52,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/app-layout", version = "25.1.0-alpha4")
+@NpmPackage(value = "@vaadin/app-layout", version = "25.1.0-alpha5")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
