@@ -167,7 +167,8 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         summaryTextSignal.value("Changed");
         Assert.assertEquals("Changed", details.getSummaryText());
         Assert.assertEquals("Changed", summary.getElement().getText());
-        Assert.assertEquals("Should reuse existing summary component", summary, details.getSummary());
+        Assert.assertEquals("Should reuse existing summary component", summary,
+                details.getSummary());
         details.removeFromParent();
 
         // Test signal constructor variant 2
@@ -178,7 +179,8 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         summaryTextSignal.value("Changed Again");
         Assert.assertEquals("Changed Again", details.getSummaryText());
         Assert.assertEquals("Changed Again", summary.getElement().getText());
-        Assert.assertEquals("Should reuse existing summary component", summary, details.getSummary());
+        Assert.assertEquals("Should reuse existing summary component", summary,
+                details.getSummary());
         details.removeFromParent();
 
         // Test signal constructor variant 3
@@ -189,7 +191,8 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         summaryTextSignal.value("Final Change");
         Assert.assertEquals("Final Change", details.getSummaryText());
         Assert.assertEquals("Final Change", summary.getElement().getText());
-        Assert.assertEquals("Should reuse existing summary component", summary, details.getSummary());
+        Assert.assertEquals("Should reuse existing summary component", summary,
+                details.getSummary());
     }
 
     // E. Content Management Test
@@ -225,7 +228,8 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("First Update", details.getSummaryText());
         summaryTextSignal.value("Second Update");
         Assert.assertEquals("Second Update", details.getSummaryText());
-        Assert.assertEquals("Should reuse existing summary component", summary, details.getSummary());
+        Assert.assertEquals("Should reuse existing summary component", summary,
+                details.getSummary());
         Assert.assertEquals("Second Update", summary.getElement().getText());
     }
 

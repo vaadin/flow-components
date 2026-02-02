@@ -67,7 +67,8 @@ public class DetailsTest {
         details.setSummaryText("initial summary");
         var builtinSummary = details.getSummary();
         details.setSummaryText("updated summary");
-        Assert.assertEquals("updated summary", builtinSummary.getElement().getText());
+        Assert.assertEquals("updated summary",
+                builtinSummary.getElement().getText());
         Assert.assertEquals(builtinSummary, details.getSummary());
     }
 
@@ -76,7 +77,8 @@ public class DetailsTest {
         var customSummary = new Span("initial summary");
         details.setSummary(customSummary);
         details.setSummaryText("updated summary");
-        Assert.assertEquals("updated summary", customSummary.getElement().getText());
+        Assert.assertEquals("updated summary",
+                customSummary.getElement().getText());
         Assert.assertEquals(customSummary, details.getSummary());
     }
 
