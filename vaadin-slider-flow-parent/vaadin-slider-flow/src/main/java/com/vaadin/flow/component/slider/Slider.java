@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Tag;
@@ -31,9 +32,9 @@ import com.vaadin.flow.function.SerializableBiFunction;
 // @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
 // @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> {
-    private static final double DEFAULT_MIN = 0;
-    private static final double DEFAULT_MAX = 100;
-    private static final double DEFAULT_STEP = 1;
+    private static final double DEFAULT_MIN = 0.0;
+    private static final double DEFAULT_MAX = 100.0;
+    private static final double DEFAULT_STEP = 1.0;
 
     private static final SerializableBiFunction<Slider, Double, Double> PARSER = (
             component, value) -> {
@@ -285,7 +286,7 @@ public class Slider extends SliderBase<Slider, Double> {
         requireValidRange(min, getMax(), getStep());
 
         setMinDouble(min);
-        adjustValue();
+        adjustValueToRange();
     }
 
     /**
@@ -312,7 +313,7 @@ public class Slider extends SliderBase<Slider, Double> {
         requireValidRange(getMin(), max, getStep());
 
         setMaxDouble(max);
-        adjustValue();
+        adjustValueToRange();
     }
 
     /**
@@ -337,12 +338,11 @@ public class Slider extends SliderBase<Slider, Double> {
      */
     public void setStep(double step) {
         requireValidRange(getMin(), getMax(), step);
-
         setStepDouble(step);
-        adjustValue();
+        adjustValueToRange();
     }
 
-    private void adjustValue() {
+    private void adjustValueToRange() {
         double min = getMin();
         double max = getMax();
         double step = getStep();
@@ -379,12 +379,13 @@ public class Slider extends SliderBase<Slider, Double> {
 
         if (value < min || value > max) {
             throw new IllegalArgumentException(
-                    "The value must be between min and max");
+                    "Value must be between min and max");
         }
 
-        if (value % step != 0) {
+        if (BigDecimal.valueOf(value).remainder(BigDecimal.valueOf(step))
+                .compareTo(BigDecimal.ZERO) != 0) {
             throw new IllegalArgumentException(
-                    "The value is not aligned with the step value");
+                    "Value is not aligned with step");
         }
     }
 }

@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.math.BigDecimal;
+
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -100,7 +102,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @return the minimum value
      */
     double getMinDouble() {
-        return getElement().getProperty("min", 0);
+        return getElement().getProperty("min", 0.0);
     }
 
     /**
@@ -109,7 +111,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @return the maximum value
      */
     double getMaxDouble() {
-        return getElement().getProperty("max", 100);
+        return getElement().getProperty("max", 100.0);
     }
 
     /**
@@ -118,7 +120,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @return the step value
      */
     double getStepDouble() {
-        return getElement().getProperty("step", 1);
+        return getElement().getProperty("step", 1.0);
     }
 
     /**
@@ -227,15 +229,47 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *             if step is not positive
      */
     void requireValidRange(double min, double max, double step) {
-        if (min > max) {
-            throw new IllegalArgumentException(
-                    "The min value cannot be greater than the max value");
+        if (step <= 0) {
+            throw new IllegalArgumentException("Step must be positive");
         }
 
-        if (step <= 0) {
+        if (min > max) {
             throw new IllegalArgumentException(
-                    "The step value must be a positive number");
+                    "Min value cannot be greater than max");
         }
+
+        BigDecimal range = BigDecimal.valueOf(max)
+                .subtract(BigDecimal.valueOf(min));
+        if (range.remainder(BigDecimal.valueOf(step))
+                .compareTo(BigDecimal.ZERO) != 0) {
+            throw new IllegalArgumentException(
+                    "Range (max - min) must be divisible by step");
+        }
+    }
+
+    /**
+     * Clamps a value to the min/max range and aligns it to the step.
+     *
+     * @param value
+     *            the value to adjust
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @return the resulting value
+     */
+    double adjustValueToRange(double value, double min, double max,
+            double step) {
+        // Clamp to min/max
+        double clamped = Math.clamp(value, min, max);
+
+        // Align to step
+        double stepsFromMin = Math.ceil((clamped - min) / step);
+        double aligned = min + stepsFromMin * step;
+
+        return aligned;
     }
 
     /**
