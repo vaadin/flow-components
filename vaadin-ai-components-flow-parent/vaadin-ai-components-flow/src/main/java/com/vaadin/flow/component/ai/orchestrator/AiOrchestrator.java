@@ -348,6 +348,8 @@ public class AiOrchestrator implements Serializable {
         private AiInput input;
         private AiFileReceiver fileReceiver;
         private Object[] tools = new Object[0];
+        private String userName;
+        private String aiName;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -493,6 +495,8 @@ public class AiOrchestrator implements Serializable {
             orchestrator.input = input;
             orchestrator.fileReceiver = fileReceiver;
             orchestrator.tools = tools == null ? new Object[0] : tools;
+            orchestrator.userName = userName == null ? "You" : userName;
+            orchestrator.aiName = aiName == null ? "Assistant" : aiName;
             if (input != null) {
                 input.addSubmitListener(
                         e -> orchestrator.doPrompt(e.getValue()));
