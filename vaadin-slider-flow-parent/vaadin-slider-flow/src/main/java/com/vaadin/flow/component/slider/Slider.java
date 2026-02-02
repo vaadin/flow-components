@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
@@ -29,8 +31,8 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-slider")
-// @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
-// @JsModule("@vaadin/slider/src/vaadin-slider.js")
+@NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha5")
+@JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> {
     private static final double DEFAULT_MIN = 0.0;
     private static final double DEFAULT_MAX = 100.0;
@@ -283,10 +285,11 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if min is greater than the current max
      */
     public void setMin(double min) {
-        requireValidRange(min, getMax(), getStep());
-
+        requireValidRange(min, getMax());
         setMinDouble(min);
-        adjustValueToRange();
+
+        double adjustedValue = Math.max(getValue(), min);
+        setValue(adjustedValue);
     }
 
     /**
@@ -310,10 +313,11 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if max is less than the current min
      */
     public void setMax(double max) {
-        requireValidRange(getMin(), max, getStep());
-
+        requireValidRange(getMin(), max);
         setMaxDouble(max);
-        adjustValueToRange();
+
+        double adjustedValue = Math.min(getValue(), max);
+        setValue(adjustedValue);
     }
 
     /**
@@ -337,30 +341,12 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if step is not positive
      */
     public void setStep(double step) {
-        requireValidRange(getMin(), getMax(), step);
+        requireValidStep(step);
         setStepDouble(step);
-        adjustValueToRange();
-    }
 
-    private void adjustValueToRange() {
-        double min = getMin();
-        double max = getMax();
-        double step = getStep();
-        double value = getValue();
-
-        // Clamp to range
-        double adjusted = Math.max(min, Math.min(max, value));
-
-        // Align to step
-        double stepsFromMin = Math.round((adjusted - min) / step);
-        adjusted = min + stepsFromMin * step;
-
-        // Ensure we don't exceed max due to rounding
-        adjusted = Math.min(adjusted, max);
-
-        if (adjusted != value) {
-            super.setValue(adjusted);
-        }
+        double stepsFromMin = Math.round((getValue() - getMin()) / step);
+        double adjustedValue = Math.min(getMin() + stepsFromMin * step, getMax());
+        setValue(adjustedValue);
     }
 
     @Override

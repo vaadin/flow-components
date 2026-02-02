@@ -205,7 +205,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *             if value is not valid for the given range and step
      */
     void setValue(double min, double max, double step, TValue value) {
-        requireValidRange(min, max, step);
+        requireValidStep(step);
+        requireValidRange(min, max);
         requireValidValue(min, max, step, value);
 
         setMinDouble(min);
@@ -215,61 +216,34 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
-     * Validates that the given range parameters are valid.
+     * Validates that the given min/max range is valid.
      *
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param step
-     *            the step value
      * @throws IllegalArgumentException
      *             if min is greater than max
-     * @throws IllegalArgumentException
-     *             if step is not positive
      */
-    void requireValidRange(double min, double max, double step) {
-        if (step <= 0) {
-            throw new IllegalArgumentException("Step must be positive");
-        }
-
+    void requireValidRange(double min, double max) {
         if (min > max) {
             throw new IllegalArgumentException(
-                    "Min value cannot be greater than max");
-        }
-
-        BigDecimal range = BigDecimal.valueOf(max)
-                .subtract(BigDecimal.valueOf(min));
-        if (range.remainder(BigDecimal.valueOf(step))
-                .compareTo(BigDecimal.ZERO) != 0) {
-            throw new IllegalArgumentException(
-                    "Range (max - min) must be divisible by step");
+                    "Max must be greater than or equal to min");
         }
     }
 
     /**
-     * Clamps a value to the min/max range and aligns it to the step.
+     * Validates that the given step value is valid.
      *
-     * @param value
-     *            the value to adjust
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
      * @param step
      *            the step value
-     * @return the resulting value
+     * @throws IllegalArgumentException
+     *             if step is not positive
      */
-    double adjustValueToRange(double value, double min, double max,
-            double step) {
-        // Clamp to min/max
-        double clamped = Math.clamp(value, min, max);
-
-        // Align to step
-        double stepsFromMin = Math.ceil((clamped - min) / step);
-        double aligned = min + stepsFromMin * step;
-
-        return aligned;
+    void requireValidStep(double step) {
+        if (step <= 0) {
+            throw new IllegalArgumentException("Step must be positive");
+        }
     }
 
     /**

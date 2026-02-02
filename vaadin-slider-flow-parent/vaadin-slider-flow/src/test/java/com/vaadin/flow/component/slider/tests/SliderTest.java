@@ -207,11 +207,6 @@ public class SliderTest {
         Assert.assertThrows("setValue should throw when step < 0",
                 IllegalArgumentException.class,
                 () -> slider.setValue(0, 100, -0.5, 0.0));
-
-        Assert.assertThrows(
-                "setValue should throw when step is not divisible into (max - min)",
-                IllegalArgumentException.class,
-                () -> slider.setValue(0, 100, 0.3, 0.0));
     }
 
     @Test
@@ -308,10 +303,6 @@ public class SliderTest {
 
         Assert.assertThrows("setStep should throw when step < 0",
                 IllegalArgumentException.class, () -> slider.setStep(-5));
-
-        Assert.assertThrows(
-                "setStep should throw when step is not divisible into (max - min)",
-                IllegalArgumentException.class, () -> slider.setStep(0.3));
     }
 
     @Test
