@@ -57,8 +57,7 @@ public class AiOrchestratorPage extends Div {
         @Override
         public Flux<String> stream(LLMRequest request) {
             var response = "Echo: " + request.userMessage();
-            return Flux.fromArray(response.split(" ")).map(word -> word + " ")
-                    .delayElements(java.time.Duration.ofMillis(50));
+            return Flux.fromArray(response.split(" ")).map(word -> word + " ");
         }
     }
 }
