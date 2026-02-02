@@ -435,6 +435,32 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
+    public void stream_withToolExecutionDepthLimit_stopsAtMaxDepth() {
+        var request = new TestLLMRequest("Infinite loop", null,
+                Collections.emptyList(),
+                new Object[] { new SampleToolsClass() });
+
+        // Always return tool execution request (infinite loop)
+        var response = mockSimpleResponseWithTool("getTemperature");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        try {
+            provider.stream(request).blockFirst();
+            Assert.fail("Should have thrown IllegalStateException");
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(
+                    "Error message should mention depth exceeded: "
+                            + e.getMessage(),
+                    e.getMessage()
+                            .contains("Maximum tool execution depth exceeded"));
+        }
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(20)).chat(captor.capture());
+    }
+
+    @Test
     public void stream_withNullToolExecutor_addsToolNotFoundMessageToRequest() {
         var request = new TestLLMRequest("Call unknown tool", null,
                 Collections.emptyList(), new Object[0]);
