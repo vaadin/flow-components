@@ -49,7 +49,7 @@ public class DashboardI18nIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setEmptyI18n_defaultI18nIsPreserved() {
+    public void setI18n_setEmptyI18n_defaultI18nIsRestored() {
         clickElementWithJs("set-i18n");
         clickElementWithJs("set-empty-i18n");
 
