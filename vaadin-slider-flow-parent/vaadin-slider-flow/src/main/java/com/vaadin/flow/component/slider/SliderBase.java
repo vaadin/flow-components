@@ -121,14 +121,32 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         return getElement().getProperty("step", 1);
     }
 
+    /**
+     * Sets the minimum value of the slider.
+     *
+     * @param min
+     *            the minimum value
+     */
     void setMinDouble(double min) {
         getElement().setProperty("min", min);
     }
 
+    /**
+     * Sets the maximum value of the slider.
+     *
+     * @param max
+     *            the maximum value
+     */
     void setMaxDouble(double max) {
         getElement().setProperty("max", max);
     }
 
+    /**
+     * Sets the step value of the slider.
+     *
+     * @param step
+     *            the step value
+     */
     void setStepDouble(double step) {
         getElement().setProperty("step", step);
     }
@@ -194,6 +212,20 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         super.setValue(value);
     }
 
+    /**
+     * Validates that the given range parameters are valid.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @throws IllegalArgumentException
+     *             if min is greater than max
+     * @throws IllegalArgumentException
+     *             if step is not positive
+     */
     void requireValidRange(double min, double max, double step) {
         if (min > max) {
             throw new IllegalArgumentException(
@@ -206,11 +238,33 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         }
     }
 
+    /**
+     * Validates that the given value is valid for the current range and step.
+     *
+     * @param value
+     *            the value to validate
+     * @throws IllegalArgumentException
+     *             if value is not valid for the current range and step
+     */
     void requireValidValue(TValue value) {
         requireValidValue(getMinDouble(), getMaxDouble(), getStepDouble(),
                 value);
     }
 
+    /**
+     * Validates that the given value is valid for the given range and step.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @param value
+     *            the value to validate
+     * @throws IllegalArgumentException
+     *             if value is not valid for the given range and step
+     */
     abstract void requireValidValue(double min, double max, double step,
             TValue value);
 }
