@@ -37,7 +37,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  *
  * @author Vaadin Ltd
  */
-public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
+abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasLabel, HasHelper, HasValidationProperties, HasSize,
         Focusable<TComponent>, KeyNotifier {
@@ -95,32 +95,12 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
     }
 
     /**
-     * Sets the minimum value of the slider.
-     *
-     * @param min
-     *            the minimum value
-     */
-    void setMin(double min) {
-        getElement().setProperty("min", min);
-    }
-
-    /**
      * Gets the minimum value of the slider.
      *
      * @return the minimum value
      */
-    double getMin() {
+    double getMinDouble() {
         return getElement().getProperty("min", 0);
-    }
-
-    /**
-     * Sets the maximum value of the slider.
-     *
-     * @param max
-     *            the maximum value
-     */
-    void setMax(double max) {
-        getElement().setProperty("max", max);
     }
 
     /**
@@ -128,19 +108,8 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the maximum value
      */
-    double getMax() {
+    double getMaxDouble() {
         return getElement().getProperty("max", 100);
-    }
-
-    /**
-     * Sets the step value of the slider. The step is the amount the value
-     * changes when the user moves the handle.
-     *
-     * @param step
-     *            the step value
-     */
-    void setStep(double step) {
-        getElement().setProperty("step", step);
     }
 
     /**
@@ -148,8 +117,20 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *
      * @return the step value
      */
-    double getStep() {
+    double getStepDouble() {
         return getElement().getProperty("step", 1);
+    }
+
+    void setMinDouble(double min) {
+        getElement().setProperty("min", min);
+    }
+
+    void setMaxDouble(double max) {
+        getElement().setProperty("max", max);
+    }
+
+    void setStepDouble(double step) {
+        getElement().setProperty("step", step);
     }
 
     /**
@@ -160,9 +141,9 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if value is not valid for the current range and step
      */
+    @Override
     public void setValue(TValue value) {
-        requireValidValue(value);
-        super.setValue(value);
+        setValue(getMinDouble(), getMaxDouble(), getStepDouble(), value);
     }
 
     /**
@@ -182,7 +163,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *             if value is not valid for the given range and current step
      */
     void setValue(double min, double max, TValue value) {
-        setValue(min, max, getStep(), value);
+        setValue(min, max, getStepDouble(), value);
     }
 
     /**
@@ -204,6 +185,16 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *             if value is not valid for the given range and step
      */
     void setValue(double min, double max, double step, TValue value) {
+        requireValidRange(min, max, step);
+        requireValidValue(min, max, step, value);
+
+        setMinDouble(min);
+        setMaxDouble(max);
+        setStepDouble(step);
+        super.setValue(value);
+    }
+
+    void requireValidRange(double min, double max, double step) {
         if (min > max) {
             throw new IllegalArgumentException(
                     "The min value cannot be greater than the max value");
@@ -213,19 +204,13 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
             throw new IllegalArgumentException(
                     "The step value must be a positive number");
         }
-
-        requireValidValue(min, max, step, value);
-
-        setMin(min);
-        setMax(max);
-        setStep(step);
-        super.setValue(value);
     }
 
-    TValue requireValidValue(TValue value) {
-        return requireValidValue(getMin(), getMax(), getStep(), value);
+    void requireValidValue(TValue value) {
+        requireValidValue(getMinDouble(), getMaxDouble(), getStepDouble(),
+                value);
     }
 
-    abstract TValue requireValidValue(double min, double max, double step,
+    abstract void requireValidValue(double min, double max, double step,
             TValue value);
 }
