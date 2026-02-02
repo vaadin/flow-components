@@ -512,88 +512,117 @@ public class AiOrchestrator implements Serializable {
         }
 
         private static AiMessageList wrapMessageList(MessageList messageList) {
-            return new AiMessageList() {
-                @Override
-                public void addMessage(AiMessage message) {
-                    if (message instanceof MessageListItemWrapper messageListItemWrapper) {
-                        messageList.addItem(messageListItemWrapper.getItem());
-                    } else {
-                        var item = new MessageListItem();
-                        item.setText(message.getText());
-                        item.setTime(message.getTime());
-                        item.setUserName(message.getUserName());
-                        messageList.addItem(item);
-                    }
-                }
-
-                @Override
-                public AiMessage createMessage(String text, String userName) {
-                    return new MessageListItemWrapper(text, userName);
-                }
-            };
+            return new MessageListWrapper(messageList);
         }
 
         private static AiInput wrapInput(MessageInput messageInput) {
-            return listener -> messageInput.addSubmitListener(
-                    event -> listener.onSubmit(event::getValue));
+            return new MessageInputWrapper(messageInput);
         }
 
         private static AiFileReceiver wrapUploadManager(
                 UploadManager uploadManager) {
-            return new AiFileReceiver() {
-                @Override
-                public void setUploadHandler(UploadHandler uploadHandler) {
-                    uploadManager.setUploadHandler(uploadHandler);
-                }
+            return new UploadManagerWrapper(uploadManager);
+        }
+    }
 
-                @Override
-                public void addFileRemovedListener(Consumer<String> listener) {
-                    uploadManager.addFileRemovedListener(
-                            event -> listener.accept(event.getFileName()));
-                }
+    /**
+     * Wrapper for Flow MessageList component.
+     */
+    private record MessageListWrapper(
+            MessageList messageList) implements AiMessageList {
 
-                @Override
-                public void clearFileList() {
-                    uploadManager.clearFileList();
-                }
-            };
+        @Override
+        public void addMessage(AiMessage message) {
+            if (message instanceof MessageListItemWrapper messageListItemWrapper) {
+                messageList.addItem(messageListItemWrapper.getItem());
+            } else {
+                var item = new MessageListItem();
+                item.setText(message.getText());
+                item.setTime(message.getTime());
+                item.setUserName(message.getUserName());
+                messageList.addItem(item);
+            }
         }
 
-        private static class MessageListItemWrapper implements AiMessage {
-            private final MessageListItem item;
+        @Override
+        public AiMessage createMessage(String text, String userName) {
+            return new MessageListItemWrapper(text, userName);
+        }
+    }
 
-            public MessageListItemWrapper(String text, String userName) {
-                item = new MessageListItem(text, Instant.now(), userName);
-            }
+    /**
+     * Wrapper for Flow MessageInput component.
+     */
+    private record MessageInputWrapper(
+            MessageInput messageInput) implements AiInput {
 
-            public MessageListItem getItem() {
-                return item;
-            }
+        @Override
+        public void addSubmitListener(InputSubmitListener listener) {
+            messageInput.addSubmitListener(
+                    event -> listener.onSubmit(event::getValue));
+        }
+    }
 
-            @Override
-            public String getText() {
-                return item.getText();
-            }
+    /**
+     * Wrapper for Flow UploadManager component.
+     */
+    private record UploadManagerWrapper(
+            UploadManager uploadManager) implements AiFileReceiver {
 
-            @Override
-            public void setText(String text) {
-                item.setText(text);
-            }
+        @Override
+        public void setUploadHandler(UploadHandler uploadHandler) {
+            uploadManager.setUploadHandler(uploadHandler);
+        }
 
-            @Override
-            public Instant getTime() {
-                return item.getTime();
-            }
+        @Override
+        public void addFileRemovedListener(Consumer<String> listener) {
+            uploadManager.addFileRemovedListener(
+                    event -> listener.accept(event.getFileName()));
+        }
 
-            @Override
-            public String getUserName() {
-                return item.getUserName();
-            }
+        @Override
+        public void clearFileList() {
+            uploadManager.clearFileList();
+        }
+    }
 
-            @Override
-            public void appendText(String token) {
-                item.appendText(token);
-            }
+    /**
+     * Wrapper for MessageListItem as AiMessage.
+     */
+    private static class MessageListItemWrapper implements AiMessage {
+        private final MessageListItem item;
+
+        MessageListItemWrapper(String text, String userName) {
+            item = new MessageListItem(text, Instant.now(), userName);
+        }
+
+        MessageListItem getItem() {
+            return item;
+        }
+
+        @Override
+        public String getText() {
+            return item.getText();
+        }
+
+        @Override
+        public void setText(String text) {
+            item.setText(text);
+        }
+
+        @Override
+        public Instant getTime() {
+            return item.getTime();
+        }
+
+        @Override
+        public String getUserName() {
+            return item.getUserName();
+        }
+
+        @Override
+        public void appendText(String token) {
+            item.appendText(token);
         }
     }
 }

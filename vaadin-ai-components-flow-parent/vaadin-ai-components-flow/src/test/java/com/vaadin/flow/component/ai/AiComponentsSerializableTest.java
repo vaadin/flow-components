@@ -25,7 +25,7 @@ public class AiComponentsSerializableTest extends ClassesSerializableTest {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory",
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory\\$.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AiOrchestrator\\$.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AiOrchestrator\\$Builder",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LangChain4JLLMProvider\\$.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LLMProviderHelpers"));
     }
