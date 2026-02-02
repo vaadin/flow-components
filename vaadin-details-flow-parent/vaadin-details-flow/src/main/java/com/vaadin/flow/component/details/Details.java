@@ -315,14 +315,22 @@ public class Details extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Binds a signal to update the summary text of the details component.
+     * Binds a {@link Signal}'s value to the summary text content of this
+     * component and keeps the summary text synchronized with the signal value
+     * while the element is in attached state. When the element is in detached
+     * state, signal value changes have no effect. <code>null</code> signal
+     * unbinds the existing binding.
      * <p>
-     * When bound, the signal manages the summary text. Any previously set
-     * custom summary component will be replaced when the signal updates.
+     * While a Signal is bound, any attempt to set the summary text manually
+     * throws {@link com.vaadin.signals.BindingActiveException}. Same happens
+     * when trying to bind a new Signal while one is already bound.
      *
      * @param signal
-     *            the signal that provides the new summary text, or {@code null}
-     *            to remove the binding.
+     *            the signal to bind or <code>null</code> to unbind any existing
+     *            binding
+     * @throws com.vaadin.signals.BindingActiveException
+     *             thrown when there is already an existing binding
+     * @see #setSummaryText(String)
      */
     public void bindSummaryText(Signal<String> signal) {
         summaryTextSupport.bind(signal);
