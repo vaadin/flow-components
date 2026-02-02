@@ -63,6 +63,7 @@ public class MultiSelectComboBoxI18nIT extends AbstractComponentIT {
 
     @Test
     public void setEmptyI18n_defaultI18nIsPreserved() {
+        clickElementWithJs("set-i18n");
         clickElementWithJs("set-empty-i18n");
 
         // Select an item and verify default announcement

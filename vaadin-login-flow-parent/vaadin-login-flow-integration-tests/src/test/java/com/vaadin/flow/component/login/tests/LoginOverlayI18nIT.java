@@ -59,6 +59,7 @@ public class LoginOverlayI18nIT extends AbstractComponentIT {
 
     @Test
     public void setEmptyI18n_defaultI18nIsPreserved() {
+        clickElementWithJs("set-i18n");
         clickElementWithJs("set-empty-i18n");
         clickElementWithJs("open");
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)

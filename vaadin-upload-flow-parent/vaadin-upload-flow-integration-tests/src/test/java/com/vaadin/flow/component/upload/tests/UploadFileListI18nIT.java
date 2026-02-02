@@ -60,6 +60,7 @@ public class UploadFileListI18nIT extends AbstractUploadIT {
 
     @Test
     public void setEmptyI18n_defaultI18nIsPreserved() throws Exception {
+        clickElementWithJs("set-i18n");
         clickElementWithJs("set-empty-i18n");
 
         File tempFile = createTempFile("txt");
