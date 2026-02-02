@@ -656,6 +656,112 @@ public class AiOrchestratorTest {
                 pendingAttachments.getFirst().fileName());
     }
 
+    @Test
+    public void builder_namesNotConfigured_usesDefaultNames() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).createMessage("Hello", "You");
+        inOrder.verify(mockMessageList).createMessage("", "Assistant");
+    }
+
+    @Test
+    public void builder_withCustomUserName_usesCustomUserName() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList).withUserName("John Doe")
+                .build();
+        orchestrator.prompt("Hello");
+
+        Mockito.verify(mockMessageList).createMessage("Hello", "John Doe");
+    }
+
+    @Test
+    public void builder_withCustomAiName_usesCustomAiName() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList).withAiName("Claude").build();
+        orchestrator.prompt("Hello");
+
+        Mockito.verify(mockMessageList).createMessage("", "Claude");
+    }
+
+    @Test
+    public void builder_withCustomUserNameAndAiName_usesBothCustomNames() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList).withUserName("Alice")
+                .withAiName("Bot").build();
+        orchestrator.prompt("Hello");
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).createMessage("Hello", "Alice");
+        inOrder.verify(mockMessageList).createMessage("", "Bot");
+    }
+
+    @Test
+    public void builder_withNullUserName_throws() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.any())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var builder = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList);
+        Assert.assertThrows(NullPointerException.class,
+                () -> builder.withUserName(null));
+    }
+
+    @Test
+    public void builder_withNullAiName_throws() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.any())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var builder = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList);
+        Assert.assertThrows(NullPointerException.class,
+                () -> builder.withAiName(null));
+    }
+
     private AiOrchestrator getSimpleOrchestrator() {
         return AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
