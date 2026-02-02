@@ -37,7 +37,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  *
  * @author Vaadin Ltd
  */
-public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
+abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasLabel, HasHelper, HasValidationProperties, HasSize,
         Focusable<TComponent>, KeyNotifier {
@@ -95,22 +95,40 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
     }
 
     /**
+     * Gets the minimum value of the slider.
+     *
+     * @return the minimum value
+     */
+    double getMinDouble() {
+        return getElement().getProperty("min", 0);
+    }
+
+    /**
+     * Gets the maximum value of the slider.
+     *
+     * @return the maximum value
+     */
+    double getMaxDouble() {
+        return getElement().getProperty("max", 100);
+    }
+
+    /**
+     * Gets the step value of the slider.
+     *
+     * @return the step value
+     */
+    double getStepDouble() {
+        return getElement().getProperty("step", 1);
+    }
+
+    /**
      * Sets the minimum value of the slider.
      *
      * @param min
      *            the minimum value
      */
-    void setMin(double min) {
+    void setMinDouble(double min) {
         getElement().setProperty("min", min);
-    }
-
-    /**
-     * Gets the minimum value of the slider.
-     *
-     * @return the minimum value
-     */
-    double getMin() {
-        return getElement().getProperty("min", 0);
     }
 
     /**
@@ -119,37 +137,18 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @param max
      *            the maximum value
      */
-    void setMax(double max) {
+    void setMaxDouble(double max) {
         getElement().setProperty("max", max);
     }
 
     /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
-    double getMax() {
-        return getElement().getProperty("max", 100);
-    }
-
-    /**
-     * Sets the step value of the slider. The step is the amount the value
-     * changes when the user moves the handle.
+     * Sets the step value of the slider.
      *
      * @param step
      *            the step value
      */
-    void setStep(double step) {
+    void setStepDouble(double step) {
         getElement().setProperty("step", step);
-    }
-
-    /**
-     * Gets the step value of the slider.
-     *
-     * @return the step value
-     */
-    double getStep() {
-        return getElement().getProperty("step", 1);
     }
 
     /**
@@ -160,9 +159,9 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      * @throws IllegalArgumentException
      *             if value is not valid for the current range and step
      */
+    @Override
     public void setValue(TValue value) {
-        requireValidValue(value);
-        super.setValue(value);
+        setValue(getMinDouble(), getMaxDouble(), getStepDouble(), value);
     }
 
     /**
@@ -182,7 +181,7 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *             if value is not valid for the given range and current step
      */
     void setValue(double min, double max, TValue value) {
-        setValue(min, max, getStep(), value);
+        setValue(min, max, getStepDouble(), value);
     }
 
     /**
@@ -204,6 +203,30 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
      *             if value is not valid for the given range and step
      */
     void setValue(double min, double max, double step, TValue value) {
+        requireValidRange(min, max, step);
+        requireValidValue(min, max, step, value);
+
+        setMinDouble(min);
+        setMaxDouble(max);
+        setStepDouble(step);
+        super.setValue(value);
+    }
+
+    /**
+     * Validates that the given range parameters are valid.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @throws IllegalArgumentException
+     *             if min is greater than max
+     * @throws IllegalArgumentException
+     *             if step is not positive
+     */
+    void requireValidRange(double min, double max, double step) {
         if (min > max) {
             throw new IllegalArgumentException(
                     "The min value cannot be greater than the max value");
@@ -213,19 +236,35 @@ public abstract class SliderBase<TComponent extends SliderBase<TComponent, TValu
             throw new IllegalArgumentException(
                     "The step value must be a positive number");
         }
-
-        requireValidValue(min, max, step, value);
-
-        setMin(min);
-        setMax(max);
-        setStep(step);
-        super.setValue(value);
     }
 
-    TValue requireValidValue(TValue value) {
-        return requireValidValue(getMin(), getMax(), getStep(), value);
+    /**
+     * Validates that the given value is valid for the current range and step.
+     *
+     * @param value
+     *            the value to validate
+     * @throws IllegalArgumentException
+     *             if value is not valid for the current range and step
+     */
+    void requireValidValue(TValue value) {
+        requireValidValue(getMinDouble(), getMaxDouble(), getStepDouble(),
+                value);
     }
 
-    abstract TValue requireValidValue(double min, double max, double step,
+    /**
+     * Validates that the given value is valid for the given range and step.
+     *
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param step
+     *            the step value
+     * @param value
+     *            the value to validate
+     * @throws IllegalArgumentException
+     *             if value is not valid for the given range and step
+     */
+    abstract void requireValidValue(double min, double max, double step,
             TValue value);
 }
