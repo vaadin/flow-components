@@ -36,10 +36,16 @@ public class Slider extends SliderBase<Slider, Double> {
     private static final double DEFAULT_STEP = 1;
 
     private static final SerializableBiFunction<Slider, Double, Double> PARSER = (
-            component, value) -> component.requireValidValue(value);
+            component, value) -> {
+        component.requireValidValue(value);
+        return value;
+    };
 
     private static final SerializableBiFunction<Slider, Double, Double> FORMATTER = (
-            component, value) -> component.requireValidValue(value);
+            component, value) -> {
+        component.requireValidValue(value);
+        return value;
+    };
 
     /**
      * Constructs a {@code Slider} with range 0-100 and initial value 0.
@@ -256,39 +262,99 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * To update the minimum value, use the
-     * {@link #setValue(double, double, Double) setValue(min, max, value)
-     * method}.
+     * Gets the minimum value of the slider.
+     *
+     * @return the minimum value
      */
-    @Override
     public double getMin() {
-        return super.getMin();
+        return super.getMinDouble();
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the minimum value of the slider.
      * <p>
-     * To update the maximum value, use the
-     * {@link #setValue(double, double, Double) setValue(min, max, value)
-     * method}.
+     * If the current value is less than the new minimum, the value is adjusted
+     * to the new minimum.
+     *
+     * @param min
+     *            the minimum value
      */
-    @Override
+    public void setMin(double min) {
+        requireValidRange(min, getMax(), getStep());
+
+        setMinDouble(min);
+        adjustValue();
+    }
+
+    /**
+     * Gets the maximum value of the slider.
+     *
+     * @return the maximum value
+     */
     public double getMax() {
-        return super.getMax();
+        return super.getMaxDouble();
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the maximum value of the slider.
      * <p>
-     * To update the step value, use the
-     * {@link #setValue(double, double, double, Double) setValue(min, max, step,
-     * value) method}.
+     * If the current value is greater than the new maximum, the value is
+     * adjusted to the new maximum.
+     *
+     * @param max
+     *            the maximum value
      */
-    @Override
+    public void setMax(double max) {
+        requireValidRange(getMin(), max, getStep());
+
+        setMaxDouble(max);
+        adjustValue();
+    }
+
+    /**
+     * Gets the step value of the slider.
+     *
+     * @return the step value
+     */
     public double getStep() {
-        return super.getStep();
+        return super.getStepDouble();
+    }
+
+    /**
+     * Sets the step value of the slider.
+     * <p>
+     * If the current value is not aligned with the new step, the value is
+     * adjusted to the closest valid value.
+     *
+     * @param step
+     *            the step value
+     */
+    public void setStep(double step) {
+        requireValidRange(getMin(), getMax(), step);
+
+        setStepDouble(step);
+        adjustValue();
+    }
+
+    private void adjustValue() {
+        double min = getMin();
+        double max = getMax();
+        double step = getStep();
+        double value = getValue();
+
+        // Clamp to range
+        double adjusted = Math.max(min, Math.min(max, value));
+
+        // Align to step
+        double stepsFromMin = Math.round((adjusted - min) / step);
+        adjusted = min + stepsFromMin * step;
+
+        // Ensure we don't exceed max due to rounding
+        adjusted = Math.min(adjusted, max);
+
+        if (adjusted != value) {
+            super.setValue(adjusted);
+        }
     }
 
     @Override
@@ -302,8 +368,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     @Override
-    Double requireValidValue(double min, double max, double step,
-            Double value) {
+    void requireValidValue(double min, double max, double step, Double value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
         if (value < min || value > max) {
@@ -315,7 +380,5 @@ public class Slider extends SliderBase<Slider, Double> {
             throw new IllegalArgumentException(
                     "The value is not aligned with the step value");
         }
-
-        return value;
     }
 }
