@@ -17,7 +17,9 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
@@ -654,6 +656,66 @@ public class AiOrchestratorTest {
         Assert.assertEquals(1, pendingAttachments.size());
         Assert.assertEquals("existing.txt",
                 pendingAttachments.getFirst().fileName());
+    }
+
+    @Test
+    public void prompt_afterSuccessfulStreaming_clearsPendingAttachments()
+            throws Exception {
+        mockUi();
+        var mockMessage = createMockMessage();
+        var latch = new CountDownLatch(1);
+        Mockito.doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(mockFileReceiver).clearFileList();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        var pendingAttachments = getPendingAttachments(orchestrator);
+        pendingAttachments.add(createPendingAttachment("test.txt"));
+
+        orchestrator.prompt("Hello");
+
+        Assert.assertTrue("File list should be cleared within timeout",
+                latch.await(2, TimeUnit.SECONDS));
+
+        Assert.assertTrue("Pending attachments should be cleared",
+                pendingAttachments.isEmpty());
+        Mockito.verify(mockFileReceiver).clearFileList();
+    }
+
+    @Test
+    public void prompt_afterStreamingError_clearsPendingAttachments()
+            throws Exception {
+        mockUi();
+        var mockMessage = createMockMessage();
+        var latch = new CountDownLatch(1);
+        Mockito.doAnswer(inv -> {
+            latch.countDown();
+            return null;
+        }).when(mockFileReceiver).clearFileList();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var orchestrator = getSimpleOrchestrator();
+        var pendingAttachments = getPendingAttachments(orchestrator);
+        pendingAttachments.add(createPendingAttachment("test.txt"));
+
+        orchestrator.prompt("Hello");
+
+        Assert.assertTrue("File list should be cleared within timeout",
+                latch.await(2, TimeUnit.SECONDS));
+
+        Assert.assertTrue("Pending attachments should be cleared on error",
+                pendingAttachments.isEmpty());
+        Mockito.verify(mockFileReceiver).clearFileList();
     }
 
     @Test

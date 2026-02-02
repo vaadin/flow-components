@@ -220,27 +220,29 @@ public class AiOrchestrator implements Serializable {
             AiMessage assistantMessage, UI ui) {
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
-        responseStream.doFinally(signal -> isProcessing.set(false))
-                .subscribe(token -> {
-                    if (assistantMessage != null && messageList != null) {
-                        ui.access(() -> assistantMessage.appendText(token));
-                    }
-                }, error -> {
-                    var errorMessage = error.getMessage();
-                    if (error instanceof TimeoutException) {
-                        errorMessage = "Request timed out after "
-                                + TIMEOUT_SECONDS + " seconds";
-                        LOGGER.warn("LLM request timed out after {} seconds",
-                                TIMEOUT_SECONDS);
-                    } else {
-                        LOGGER.error("Error during LLM streaming", error);
-                    }
-                    if (assistantMessage != null && messageList != null) {
-                        var finalErrorMessage = errorMessage;
-                        ui.access(() -> assistantMessage
-                                .setText("Error: " + finalErrorMessage));
-                    }
-                }, () -> LOGGER.debug("LLM streaming completed successfully"));
+        responseStream.doFinally(signal -> {
+            isProcessing.set(false);
+            clearPendingAttachments(ui);
+        }).subscribe(token -> {
+            if (assistantMessage != null && messageList != null) {
+                ui.access(() -> assistantMessage.appendText(token));
+            }
+        }, error -> {
+            var errorMessage = error.getMessage();
+            if (error instanceof TimeoutException) {
+                errorMessage = "Request timed out after " + TIMEOUT_SECONDS
+                        + " seconds";
+                LOGGER.warn("LLM request timed out after {} seconds",
+                        TIMEOUT_SECONDS);
+            } else {
+                LOGGER.error("Error during LLM streaming", error);
+            }
+            if (assistantMessage != null && messageList != null) {
+                var finalErrorMessage = errorMessage;
+                ui.access(() -> assistantMessage
+                        .setText("Error: " + finalErrorMessage));
+            }
+        }, () -> LOGGER.debug("LLM streaming completed successfully"));
     }
 
     private void doPrompt(String userMessage) {
@@ -287,16 +289,15 @@ public class AiOrchestrator implements Serializable {
                 return tools;
             }
         };
-        clearPendingAttachments();
         LOGGER.debug("Processing prompt with {} attachments",
                 attachments.size());
         streamResponseToMessage(request, assistantMessage, ui);
     }
 
-    private void clearPendingAttachments() {
+    private void clearPendingAttachments(UI ui) {
         pendingAttachments.clear();
         if (fileReceiver != null) {
-            UI.getCurrent().access(() -> fileReceiver.clearFileList());
+            ui.access(() -> fileReceiver.clearFileList());
         }
     }
 
