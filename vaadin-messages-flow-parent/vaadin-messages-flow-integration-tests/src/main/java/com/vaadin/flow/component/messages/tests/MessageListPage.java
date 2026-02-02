@@ -95,18 +95,20 @@ public class MessageListPage extends Div {
         addButton("addItemWithAttachments", () -> {
             MessageListItem item = new MessageListItem("With Attachments",
                     Instant.now(), "User");
-            item.addAttachment("proposal.pdf", "#proposal.pdf",
-                    "application/pdf");
-            item.addAttachment("budget.xlsx", "#budget.xlsx",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            item.addAttachment("chart.png",
-                    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300",
-                    "image/png");
+            item.addAttachment(new MessageListItem.Attachment("proposal.pdf",
+                    "#proposal.pdf", "application/pdf"));
+            item.addAttachment(new MessageListItem.Attachment("budget.xlsx",
+                    "#budget.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            item.addAttachment(new MessageListItem.Attachment("chart.svg",
+                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23f0f0f0' width='200' height='150'/%3E%3Crect fill='%234CAF50' x='20' y='100' width='30' height='40'/%3E%3Crect fill='%232196F3' x='60' y='70' width='30' height='70'/%3E%3C/svg%3E",
+                    "image/svg+xml"));
             messageList.addItem(item);
         });
 
         addButton("addAttachmentToFirstItem", () -> {
-            foo.addAttachment("agenda.pdf", "#agenda.pdf", "application/pdf");
+            foo.addAttachment(new MessageListItem.Attachment("agenda.pdf",
+                    "#agenda.pdf", "application/pdf"));
         });
 
         // Output section for test verification

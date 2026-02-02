@@ -651,22 +651,6 @@ public class MessageListItem implements Serializable {
     }
 
     /**
-     * Adds an attachment with the given name, URL, and MIME type to this
-     * message.
-     *
-     * @param name
-     *            the name of the attachment (e.g., file name)
-     * @param url
-     *            the URL of the attachment
-     * @param mimeType
-     *            the MIME type of the attachment (e.g., "application/pdf",
-     *            "image/png")
-     */
-    public void addAttachment(String name, String url, String mimeType) {
-        addAttachment(new Attachment(name, url, mimeType));
-    }
-
-    /**
      * Represents an attachment that can be associated with a message.
      * Attachments are displayed below the message text and can represent files,
      * images, or other resources.

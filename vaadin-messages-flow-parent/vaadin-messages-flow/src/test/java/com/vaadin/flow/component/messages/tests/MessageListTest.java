@@ -212,8 +212,8 @@ public class MessageListTest {
 
     @Test
     public void addAttachment_getAttachments() {
-        MessageListItem.Attachment attachment = new MessageListItem.Attachment(
-                "file.pdf", "http://example.com/file.pdf", "application/pdf");
+        var attachment = new MessageListItem.Attachment("file.pdf",
+                "http://example.com/file.pdf", "application/pdf");
         item1.addAttachment(attachment);
 
         Assert.assertEquals(1, item1.getAttachments().size());
@@ -221,23 +221,11 @@ public class MessageListTest {
     }
 
     @Test
-    public void addAttachment_withStrings_getAttachments() {
-        item1.addAttachment("file.pdf", "http://example.com/file.pdf",
-                "application/pdf");
-
-        Assert.assertEquals(1, item1.getAttachments().size());
-        MessageListItem.Attachment attachment = item1.getAttachments().get(0);
-        Assert.assertEquals("file.pdf", attachment.name());
-        Assert.assertEquals("http://example.com/file.pdf", attachment.url());
-        Assert.assertEquals("application/pdf", attachment.mimeType());
-    }
-
-    @Test
     public void setAttachments_getAttachments() {
-        MessageListItem.Attachment attachment1 = new MessageListItem.Attachment(
-                "file1.pdf", "http://example.com/file1.pdf", "application/pdf");
-        MessageListItem.Attachment attachment2 = new MessageListItem.Attachment(
-                "file2.png", "http://example.com/file2.png", "image/png");
+        var attachment1 = new MessageListItem.Attachment("file1.pdf",
+                "http://example.com/file1.pdf", "application/pdf");
+        var attachment2 = new MessageListItem.Attachment("file2.png",
+                "http://example.com/file2.png", "image/png");
 
         item1.setAttachments(List.of(attachment1, attachment2));
 
@@ -248,8 +236,8 @@ public class MessageListTest {
 
     @Test
     public void setAttachments_emptyList_clearsAttachments() {
-        item1.addAttachment("file.pdf", "http://example.com/file.pdf",
-                "application/pdf");
+        item1.addAttachment(new MessageListItem.Attachment("file.pdf",
+                "http://example.com/file.pdf", "application/pdf"));
         item1.setAttachments(List.of());
 
         Assert.assertTrue(item1.getAttachments().isEmpty());
@@ -267,16 +255,17 @@ public class MessageListTest {
 
     @Test
     public void attachmentSerialization_containsExpectedFields() {
-        item1.addAttachment("proposal.pdf", "#proposal.pdf", "application/pdf");
+        item1.addAttachment(new MessageListItem.Attachment("proposal.pdf",
+                "#proposal.pdf", "application/pdf"));
 
-        JsonNode json = JacksonUtils.beanToJson(item1);
-        JsonNode attachments = json.get("attachments");
+        var json = JacksonUtils.beanToJson(item1);
+        var attachments = json.get("attachments");
 
         Assert.assertNotNull(attachments);
         Assert.assertTrue(attachments.isArray());
         Assert.assertEquals(1, attachments.size());
 
-        JsonNode attachment = attachments.get(0);
+        var attachment = attachments.get(0);
         Assert.assertEquals("proposal.pdf", attachment.get("name").asString());
         Assert.assertEquals("#proposal.pdf", attachment.get("url").asString());
         Assert.assertEquals("application/pdf",

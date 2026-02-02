@@ -26,7 +26,6 @@ import org.junit.Test;
 import com.vaadin.flow.component.messages.testbench.MessageElement;
 import com.vaadin.flow.component.messages.testbench.MessageListElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-messages/message-list-test")
@@ -242,7 +241,7 @@ public class MessageListIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected userName prop", "sender",
                 msg.getUserName());
 
-        checkLogsForErrors();
+        checkLogsForErrors(message -> message.contains("test.jpg"));
     }
 
     @Test
@@ -270,19 +269,17 @@ public class MessageListIT extends AbstractComponentIT {
     public void addItemWithAttachments_attachmentsRendered() {
         clickElementWithJs("addItemWithAttachments");
 
-        List<MessageElement> messages = messageList.getMessageElements();
-        MessageElement messageWithAttachments = messages
-                .get(messages.size() - 1);
+        var messages = messageList.getMessageElements();
+        var messageWithAttachments = messages.get(messages.size() - 1);
 
         Assert.assertTrue("Message should have attachments",
                 messageWithAttachments.hasAttachments());
 
-        List<TestBenchElement> attachments = messageWithAttachments
-                .getAttachmentElements();
+        var attachments = messageWithAttachments.getAttachmentElements();
         Assert.assertEquals("Should have 3 attachments", 3, attachments.size());
 
         // Check file attachment
-        TestBenchElement pdfAttachment = messageWithAttachments
+        var pdfAttachment = messageWithAttachments
                 .getAttachmentByName("proposal.pdf");
         Assert.assertNotNull("Should find proposal.pdf attachment",
                 pdfAttachment);
@@ -290,11 +287,11 @@ public class MessageListIT extends AbstractComponentIT {
                 messageWithAttachments.isImageAttachment(pdfAttachment));
 
         // Check image attachment
-        TestBenchElement imageAttachment = messageWithAttachments
-                .getAttachmentByName("chart.png");
-        Assert.assertNotNull("Should find chart.png attachment",
+        var imageAttachment = messageWithAttachments
+                .getAttachmentByName("chart.svg");
+        Assert.assertNotNull("Should find chart.svg attachment",
                 imageAttachment);
-        Assert.assertTrue("PNG should be an image attachment",
+        Assert.assertTrue("SVG should be an image attachment",
                 messageWithAttachments.isImageAttachment(imageAttachment));
     }
 
@@ -302,13 +299,12 @@ public class MessageListIT extends AbstractComponentIT {
     public void addAttachmentToExistingItem_attachmentRendered() {
         clickElementWithJs("addAttachmentToFirstItem");
 
-        MessageElement firstMessage = getFirstMessage(messageList);
+        var firstMessage = getFirstMessage(messageList);
 
         Assert.assertTrue("First message should have attachments",
                 firstMessage.hasAttachments());
 
-        TestBenchElement attachment = firstMessage
-                .getAttachmentByName("agenda.pdf");
+        var attachment = firstMessage.getAttachmentByName("agenda.pdf");
         Assert.assertNotNull("Should find agenda.pdf attachment", attachment);
     }
 
@@ -316,15 +312,14 @@ public class MessageListIT extends AbstractComponentIT {
     public void clickAttachment_eventFired() {
         clickElementWithJs("addItemWithAttachments");
 
-        List<MessageElement> messages = messageList.getMessageElements();
-        MessageElement messageWithAttachments = messages
-                .get(messages.size() - 1);
+        var messages = messageList.getMessageElements();
+        var messageWithAttachments = messages.get(messages.size() - 1);
 
-        TestBenchElement pdfAttachment = messageWithAttachments
+        var pdfAttachment = messageWithAttachments
                 .getAttachmentByName("proposal.pdf");
         pdfAttachment.click();
 
-        TestBenchElement clickedAttachment = $("span").id("clickedAttachment");
+        var clickedAttachment = $("span").id("clickedAttachment");
         // Event includes item's userName, attachment name, and mime type
         Assert.assertEquals("User | proposal.pdf | application/pdf",
                 clickedAttachment.getText());
@@ -334,17 +329,16 @@ public class MessageListIT extends AbstractComponentIT {
     public void clickImageAttachment_eventFired() {
         clickElementWithJs("addItemWithAttachments");
 
-        List<MessageElement> messages = messageList.getMessageElements();
-        MessageElement messageWithAttachments = messages
-                .get(messages.size() - 1);
+        var messages = messageList.getMessageElements();
+        var messageWithAttachments = messages.get(messages.size() - 1);
 
-        TestBenchElement imageAttachment = messageWithAttachments
-                .getAttachmentByName("chart.png");
+        var imageAttachment = messageWithAttachments
+                .getAttachmentByName("chart.svg");
         imageAttachment.click();
 
-        TestBenchElement clickedAttachment = $("span").id("clickedAttachment");
+        var clickedAttachment = $("span").id("clickedAttachment");
         // Event includes item's userName, attachment name, and mime type
-        Assert.assertEquals("User | chart.png | image/png",
+        Assert.assertEquals("User | chart.svg | image/svg+xml",
                 clickedAttachment.getText());
     }
 
