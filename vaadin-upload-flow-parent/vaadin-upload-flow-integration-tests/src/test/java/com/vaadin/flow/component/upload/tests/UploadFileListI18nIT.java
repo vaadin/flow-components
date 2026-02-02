@@ -40,19 +40,22 @@ public class UploadFileListI18nIT extends AbstractUploadIT {
     }
 
     @Test
-    public void setCustomI18n_i18nIsAppliedToDOM() throws Exception {
-        clickElementWithJs("set-full-i18n");
+    public void setI18n_i18nIsApplied() throws Exception {
+        clickElementWithJs("set-i18n");
 
         File tempFile = createTempFile("txt");
         uploadButton.getUploadManager().upload(tempFile, 0);
 
-        TestBenchElement uploadFile = waitForUploadFile(fileList);
+        TestBenchElement uploadFile = getUploadFile(fileList);
 
-        Assert.assertEquals("Poista",
+        Assert.assertEquals(
+                UploadFileListI18nPage.FULL_I18N.getFile().getRemove(),
                 getButtonAriaLabel(uploadFile, "remove-button"));
-        Assert.assertEquals("Aloita",
+        Assert.assertEquals(
+                UploadFileListI18nPage.FULL_I18N.getFile().getStart(),
                 getButtonAriaLabel(uploadFile, "start-button"));
-        Assert.assertEquals("Odottaa", getStatusText(uploadFile));
+        Assert.assertEquals(UploadFileListI18nPage.FULL_I18N.getUploading()
+                .getStatus().getHeld(), getStatusText(uploadFile));
     }
 
     @Test
@@ -62,7 +65,7 @@ public class UploadFileListI18nIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
         uploadButton.getUploadManager().upload(tempFile, 0);
 
-        TestBenchElement uploadFile = waitForUploadFile(fileList);
+        TestBenchElement uploadFile = getUploadFile(fileList);
 
         Assert.assertEquals("Remove",
                 getButtonAriaLabel(uploadFile, "remove-button"));
@@ -71,8 +74,8 @@ public class UploadFileListI18nIT extends AbstractUploadIT {
         Assert.assertEquals("Queued", getStatusText(uploadFile));
     }
 
-    private TestBenchElement waitForUploadFile(UploadFileListElement fileList) {
-        return fileList.$("vaadin-upload-file").waitForFirst();
+    private TestBenchElement getUploadFile(UploadFileListElement fileList) {
+        return fileList.$("vaadin-upload-file").first();
     }
 
     private String getButtonAriaLabel(TestBenchElement uploadFile,

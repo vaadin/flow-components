@@ -35,8 +35,8 @@ public class DashboardI18nIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setCustomI18n_i18nIsAppliedToButtons() {
-        clickElementWithJs("set-custom-i18n");
+    public void setI18n_i18nIsApplied() {
+        clickElementWithJs("set-i18n");
 
         DashboardWidgetElement widget = dashboardElement.getWidgets().get(0);
 

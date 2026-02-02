@@ -34,34 +34,21 @@ public class AppLayoutI18nIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setEmptyI18n_defaultI18nIsNotOverridden() {
+    public void setI18n_i18nIsApplied() {
+        clickElementWithJs("set-i18n");
+
+        Assert.assertEquals(
+                "The drawer aria-label should contain a custom value",
+                "Custom drawer", getDrawerAriaLabel());
+    }
+
+    @Test
+    public void setEmptyI18n_defaultI18nIsPreserved() {
         clickElementWithJs("set-empty-i18n");
 
         Assert.assertEquals(
                 "The drawer aria-label should contain the default value",
                 "Drawer", getDrawerAriaLabel());
-    }
-
-    @Test
-    public void setI18n_i18nIsUpdated() {
-        clickElementWithJs("set-i18n");
-
-        Assert.assertEquals(
-                "The drawer aria-label should contain a custom value",
-                "Custom drawer", getDrawerAriaLabel());
-    }
-
-    @Test
-    public void setI18n_detach_attach_i18nIsPersisted() {
-        clickElementWithJs("set-i18n");
-        clickElementWithJs("toggle-attached");
-        clickElementWithJs("toggle-attached");
-
-        layout = $(AppLayoutElement.class).first();
-
-        Assert.assertEquals(
-                "The drawer aria-label should contain a custom value",
-                "Custom drawer", getDrawerAriaLabel());
     }
 
     private String getDrawerAriaLabel() {

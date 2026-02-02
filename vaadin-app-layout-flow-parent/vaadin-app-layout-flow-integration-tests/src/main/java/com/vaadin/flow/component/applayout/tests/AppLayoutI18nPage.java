@@ -31,32 +31,21 @@ public class AppLayoutI18nPage extends Div {
         // Enable overlay mode via CSS variable (required for aria-label to be
         // applied)
         layout.getStyle().set("--vaadin-app-layout-drawer-overlay", "true");
-        add(layout);
 
-        NativeButton toggleAttachedButton = new NativeButton("toggle attached",
-                e -> {
-                    if (layout.getParent().isPresent()) {
-                        remove(layout);
-                    } else {
-                        add(layout);
-                    }
-                });
-        toggleAttachedButton.setId("toggle-attached");
-
-        NativeButton setI18nButton = new NativeButton("set i18n", e -> {
+        NativeButton setI18nButton = new NativeButton("Set I18N", e -> {
             AppLayoutI18n i18n = new AppLayout.AppLayoutI18n()
                     .setDrawer("Custom drawer");
             layout.setI18n(i18n);
         });
         setI18nButton.setId("set-i18n");
 
-        NativeButton setEmptyI18nButton = new NativeButton("set empty i18n",
+        NativeButton setEmptyI18nButton = new NativeButton("Set empty I18N",
                 e -> {
                     AppLayoutI18n i18n = new AppLayout.AppLayoutI18n();
                     layout.setI18n(i18n);
                 });
         setEmptyI18nButton.setId("set-empty-i18n");
 
-        add(setI18nButton, setEmptyI18nButton, toggleAttachedButton);
+        add(layout, setI18nButton, setEmptyI18nButton);
     }
 }

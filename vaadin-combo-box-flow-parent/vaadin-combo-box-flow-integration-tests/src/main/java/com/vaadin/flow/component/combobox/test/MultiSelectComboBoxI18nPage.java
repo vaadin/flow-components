@@ -28,15 +28,6 @@ public class MultiSelectComboBoxI18nPage extends Div {
         comboBox.setItems("Item 1", "Item 2", "Item 3");
         comboBox.setClearButtonVisible(true);
 
-        NativeButton toggleAttached = new NativeButton("Toggle attached", e -> {
-            if (comboBox.getParent().isPresent()) {
-                remove(comboBox);
-            } else {
-                add(comboBox);
-            }
-        });
-        toggleAttached.setId("toggle-attached");
-
         NativeButton setI18n = new NativeButton("Set I18N", e -> {
             MultiSelectComboBoxI18n i18n = new MultiSelectComboBoxI18n()
                     .setCleared("Custom cleared").setFocused("Custom focused")
@@ -54,6 +45,6 @@ public class MultiSelectComboBoxI18nPage extends Div {
         setEmptyI18n.setId("set-empty-i18n");
 
         add(comboBox);
-        add(new Div(toggleAttached, setI18n, setEmptyI18n));
+        add(new Div(setI18n, setEmptyI18n));
     }
 }

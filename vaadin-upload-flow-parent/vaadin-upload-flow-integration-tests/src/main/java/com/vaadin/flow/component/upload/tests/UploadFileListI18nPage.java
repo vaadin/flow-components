@@ -64,10 +64,10 @@ public class UploadFileListI18nPage extends Div {
 
         var fileList = new UploadFileList(manager);
 
-        NativeButton setFullI18n = new NativeButton("Set full I18N", e -> {
+        NativeButton setFullI18n = new NativeButton("Set I18N", e -> {
             fileList.setI18n(FULL_I18N);
         });
-        setFullI18n.setId("set-full-i18n");
+        setFullI18n.setId("set-i18n");
 
         NativeButton setEmptyI18n = new NativeButton("Set empty I18N", e -> {
             fileList.setI18n(new UploadFileListI18N());

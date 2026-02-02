@@ -26,19 +26,16 @@ public class DashboardI18nPage extends Div {
         DashboardSection section = dashboard.addSection();
         section.add(new DashboardWidget());
 
-        NativeButton setCustomI18n = new NativeButton("Set custom i18n",
-                e -> dashboard.setI18n(getCustomI18n()));
-        setCustomI18n.setId("set-custom-i18n");
+        NativeButton setI18n = new NativeButton("Set i18n",
+                e -> dashboard.setI18n(new Dashboard.DashboardI18n()
+                        .setRemove("Custom remove").setMove("Custom move")
+                        .setResize("Custom resize")));
+        setI18n.setId("set-i18n");
 
         NativeButton setEmptyI18n = new NativeButton("Set empty i18n",
                 e -> dashboard.setI18n(new Dashboard.DashboardI18n()));
         setEmptyI18n.setId("set-empty-i18n");
 
-        add(setCustomI18n, setEmptyI18n, dashboard);
-    }
-
-    private static Dashboard.DashboardI18n getCustomI18n() {
-        return new Dashboard.DashboardI18n().setRemove("Custom remove")
-                .setMove("Custom move").setResize("Custom resize");
+        add(setI18n, setEmptyI18n, dashboard);
     }
 }
