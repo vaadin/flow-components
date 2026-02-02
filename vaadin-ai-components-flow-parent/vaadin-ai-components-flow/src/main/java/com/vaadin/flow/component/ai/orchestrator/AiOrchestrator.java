@@ -81,7 +81,7 @@ public class AiOrchestrator implements Serializable {
     /**
      * Default timeout for LLM response streaming in seconds.
      */
-    private static final int TIMEOUT_SECONDS = 120;
+    private static final int TIMEOUT_SECONDS = 600;
 
     private final LLMProvider provider;
     private final String systemPrompt;
