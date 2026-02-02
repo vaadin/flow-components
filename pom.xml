@@ -71,7 +71,7 @@
     </scm>
     <properties>
         <flow.version>25.1-SNAPSHOT</flow.version>
-        <testbench.version>10.0.0</testbench.version>
+        <testbench.version>10.1.0-alpha1</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -601,6 +601,8 @@
         <profile>
             <id>sonar-cloud</id>
             <properties>
+                <!-- Exclude I18N files from duplication checks (repetitive getter/setter boilerplate) -->
+                <sonar.cpd.exclusions>**/*I18N.java</sonar.cpd.exclusions>
                 <!-- SonarQube rule exclusions for: Integration tests -->
                 <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
                 <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->
