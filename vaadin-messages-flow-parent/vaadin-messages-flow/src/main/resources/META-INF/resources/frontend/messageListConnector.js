@@ -81,6 +81,11 @@ window.Vaadin.Flow.messageListConnector = {
       const itemIndex = list.items.indexOf(item);
       const attachmentIndex = item?.attachments?.indexOf(attachment) ?? -1;
 
+      // Only dispatch if indexes are valid
+      if (itemIndex < 0 || attachmentIndex < 0) {
+        return;
+      }
+
       // Dispatch a new event with indexes for Flow's @DomEvent handling
       list.dispatchEvent(
         new CustomEvent('attachment-click-flow', {
