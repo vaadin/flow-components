@@ -291,7 +291,8 @@ public class SliderTest {
         slider.setStep(0.1);
 
         Assert.assertEquals(0.1, slider.getStep(), 0);
-        Assert.assertEquals(0.1, slider.getElement().getProperty("step", 0.0), 0);
+        Assert.assertEquals(0.1, slider.getElement().getProperty("step", 0.0),
+                0);
     }
 
     @Test

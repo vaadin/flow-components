@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.math.BigDecimal;
-
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;

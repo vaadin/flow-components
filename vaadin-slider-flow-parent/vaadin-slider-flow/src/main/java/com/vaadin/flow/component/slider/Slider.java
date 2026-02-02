@@ -345,7 +345,8 @@ public class Slider extends SliderBase<Slider, Double> {
         setStepDouble(step);
 
         double stepsFromMin = Math.round((getValue() - getMin()) / step);
-        double adjustedValue = Math.min(getMin() + stepsFromMin * step, getMax());
+        double adjustedValue = Math.min(getMin() + stepsFromMin * step,
+                getMax());
         setValue(adjustedValue);
     }
 
