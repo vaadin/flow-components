@@ -13,21 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.theme.aura;
+package com.vaadin.flow.component.upload;
 
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Aura theme base class.
+ * Set of theme variants applicable for {@code vaadin-upload-file-list}
+ * component.
  */
-@NpmPackage(value = "@vaadin/aura", version = "25.1.0-alpha5")
-public class Aura {
+public enum UploadFileListVariant implements ThemeVariant {
+    LUMO_THUMBNAILS("thumbnails"), AURA_THUMBNAILS("thumbnails");
+
+    private final String variant;
+
+    UploadFileListVariant(String variant) {
+        this.variant = variant;
+    }
+
     /**
-     * The path to the Aura stylesheet. Can be used as argument to a
-     * {@link StyleSheet} on an {@link AppShellConfigurator} class to apply the
-     * Aura theme to an application.
+     * Gets the variant name.
+     *
+     * @return variant name
      */
-    public static final String STYLESHEET = "aura/aura.css";
+    public String getVariantName() {
+        return variant;
+    }
 }
