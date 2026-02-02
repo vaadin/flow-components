@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.avatar.tests;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.Avatar.AvatarI18n;
 import com.vaadin.flow.component.avatar.AvatarGroup;
@@ -27,46 +24,31 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-avatar/i18n-test")
+@Route("vaadin-avatar/i18n")
 public class AvatarI18nPage extends Div {
 
     public AvatarI18nPage() {
         Avatar avatar = new Avatar();
+        avatar.setTooltipEnabled(true);
+
         AvatarGroup avatarGroup = new AvatarGroup();
+        avatarGroup.setItems(new AvatarGroupItem("User 1"),
+                new AvatarGroupItem("User 2"));
 
-        List<AvatarGroup.AvatarGroupItem> items = new ArrayList<>();
-
-        items.add(new AvatarGroupItem("Yuriy Yevstihnyeyev"));
-
-        AvatarGroupItem avatarWithAbbr = new AvatarGroupItem();
-        avatarWithAbbr.setAbbreviation("SK");
-        items.add(avatarWithAbbr);
-        items.add(new AvatarGroupItem("Jens Jansson"));
-        avatarGroup.setItems(items);
-
-        NativeButton addI18n = new NativeButton("Add i18n", e -> {
-            avatar.setI18n(new AvatarI18n().setAnonymous("анонимный"));
-            avatarGroup.setI18n(new AvatarGroupI18n().setAnonymous("анонимный")
-                    .setOneActiveUser("Один активный пользователь")
-                    .setManyActiveUsers("{count} активных пользователей"));
+        NativeButton setI18n = new NativeButton("Set i18n", e -> {
+            avatar.setI18n(new AvatarI18n().setAnonymous("Custom anonymous"));
+            avatarGroup.setI18n(new AvatarGroupI18n()
+                    .setOneActiveUser("Custom one active user")
+                    .setManyActiveUsers("Custom {count} active users"));
         });
-        addI18n.setId("set-i18n");
+        setI18n.setId("set-i18n");
 
-        Div dataTitle = new Div();
-        dataTitle.setId("data-title-i18n");
-
-        Div dataAriaLabel = new Div();
-        dataAriaLabel.setId("data-aria-label-i18n");
-
-        NativeButton getI18n = new NativeButton("Get i18n", e -> {
-            dataTitle.setText(avatar.getI18n().getAnonymous());
-            dataAriaLabel.setText(avatarGroup.getI18n().getManyActiveUsers()
-                    .replaceFirst("\\{count\\}",
-                            ((Integer) avatarGroup.getItems().size())
-                                    .toString()));
+        NativeButton setEmptyI18n = new NativeButton("Set empty i18n", e -> {
+            avatar.setI18n(new AvatarI18n());
+            avatarGroup.setI18n(new AvatarGroupI18n());
         });
-        getI18n.setId("get-i18n");
+        setEmptyI18n.setId("set-empty-i18n");
 
-        add(avatar, avatarGroup, addI18n, dataTitle, dataAriaLabel, getI18n);
+        add(setI18n, setEmptyI18n, avatar, avatarGroup);
     }
 }
