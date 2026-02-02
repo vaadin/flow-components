@@ -20,9 +20,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.slider.Slider;
 
 public class SliderTest {
@@ -184,23 +181,8 @@ public class SliderTest {
 
     @Test(expected = NullPointerException.class)
     public void setValue_null_throws() {
-        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
+        Slider slider = new Slider();
         slider.setValue(null);
-    }
-
-    public void implementsHasSizeInterface() {
-        Slider slider = new Slider();
-        Assert.assertTrue(slider instanceof HasSize);
-    }
-
-    public void implementsFocusableInterface() {
-        Slider slider = new Slider();
-        Assert.assertTrue(slider instanceof Focusable);
-    }
-
-    public void implementsKeyNotifierInterface() {
-        Slider slider = new Slider();
-        Assert.assertTrue(slider instanceof KeyNotifier);
     }
 
     @Test
@@ -210,11 +192,7 @@ public class SliderTest {
         slider.setValue(-10.0, 200.0, 50.0);
 
         Assert.assertEquals(-10.0, slider.getMin(), 0.0);
-        Assert.assertEquals(-10.0, slider.getElement().getProperty("min", 0.0),
-                0.0);
         Assert.assertEquals(200.0, slider.getMax(), 0.0);
-        Assert.assertEquals(200.0, slider.getElement().getProperty("max", 0.0),
-                0.0);
         Assert.assertEquals(50.0, slider.getValue(), 0.0);
     }
 
@@ -227,44 +205,124 @@ public class SliderTest {
         Assert.assertEquals(-10.0, slider.getMin(), 0.0);
         Assert.assertEquals(200.0, slider.getMax(), 0.0);
         Assert.assertEquals(5.0, slider.getStep(), 0.0);
-        Assert.assertEquals(5.0, slider.getElement().getProperty("step", 1.0),
-                0.0);
         Assert.assertEquals(50.0, slider.getValue(), 0.0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_minGreaterThanMax_throws() {
-        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
-        slider.setValue(150.0, 100.0, 50.0);
+    @Test
+    public void setInvalidMin_throws() {
+        Slider slider = new Slider();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setMin(slider.getMax() + 1));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setValue(slider.getMax() + 1, slider.getMax(),
+                        slider.getMin()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_stepNotPositive_throws() {
-        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
-        slider.setValue(0.0, 100.0, 0.0, 50.0);
+    @Test
+    public void setInvalidMax_throws() {
+        Slider slider = new Slider();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setMax(slider.getMin() - 1));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setValue(slider.getMin(), slider.getMin() - 1,
+                        slider.getMin()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_stepNegative_throws() {
-        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
-        slider.setValue(0.0, 100.0, -5.0, 50.0);
+    @Test
+    public void setInvalidStep_throws() {
+        Slider slider = new Slider();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setStep(0.0));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setStep(-5.0));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setValue(slider.getMin(), slider.getMax(), 0.0,
+                        slider.getMin()));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> slider.setValue(slider.getMin(), slider.getMax(), -5.0,
+                        slider.getMin()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setValue_valueNotAlignedWithStep_throws() {
-        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
+        Slider slider = new Slider();
         slider.setValue(0.0, 100.0, 10.0, 15.0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setValue_valueLessThanMin_throws() {
-        Slider slider = new Slider(0.0, 100.0, 1.0, 0.0);
+        Slider slider = new Slider();
         slider.setValue(10.0, 100.0, 5.0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setValue_valueGreaterThanMax_throws() {
-        Slider slider = new Slider(0.0, 100.0, 1.0, 50.0);
+        Slider slider = new Slider();
         slider.setValue(0.0, 40.0, 50.0);
+    }
+
+    @Test
+    public void setMin_updatesProperty() {
+        Slider slider = new Slider();
+        slider.setMin(10.0);
+
+        Assert.assertEquals(10.0, slider.getMin(), 0.0);
+        Assert.assertEquals(10.0, slider.getElement().getProperty("min", 0.0),
+                0.0);
+    }
+
+    @Test
+    public void setMin_valueBelowNewMin_adjustsValue() {
+        Slider slider = new Slider();
+        slider.setMin(50.0);
+
+        Assert.assertEquals(50.0, slider.getMin(), 0.0);
+        Assert.assertEquals(50.0, slider.getValue(), 0.0);
+    }
+
+    @Test
+    public void setMax_updatesProperty() {
+        Slider slider = new Slider();
+        slider.setMax(200.0);
+
+        Assert.assertEquals(200.0, slider.getMax(), 0.0);
+        Assert.assertEquals(200.0, slider.getElement().getProperty("max", 0.0),
+                0.0);
+    }
+
+    @Test
+    public void setMax_valueAboveNewMax_adjustsValue() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 80.0);
+        slider.setMax(50.0);
+
+        Assert.assertEquals(50.0, slider.getMax(), 0.0);
+        Assert.assertEquals(50.0, slider.getValue(), 0.0);
+    }
+
+    @Test
+    public void setStep_updatesProperty() {
+        Slider slider = new Slider();
+        slider.setStep(5.0);
+
+        Assert.assertEquals(5.0, slider.getStep(), 0.0);
+        Assert.assertEquals(5.0, slider.getElement().getProperty("step", 0.0),
+                0.0);
+    }
+
+    @Test
+    public void setStep_valueNotAligned_adjustsValue() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 53.0);
+        slider.setStep(10.0);
+
+        Assert.assertEquals(10.0, slider.getStep(), 0.0);
+        Assert.assertEquals(50.0, slider.getValue(), 0.0);
+    }
+
+    @Test
+    public void setStep_valueNotAligned_adjustsToClosestValue() {
+        Slider slider = new Slider(0.0, 100.0, 1.0, 57.0);
+        slider.setStep(10.0);
+
+        Assert.assertEquals(60.0, slider.getValue(), 0.0);
     }
 }

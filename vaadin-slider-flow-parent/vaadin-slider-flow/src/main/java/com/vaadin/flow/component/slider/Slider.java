@@ -278,6 +278,8 @@ public class Slider extends SliderBase<Slider, Double> {
      *
      * @param min
      *            the minimum value
+     * @throws IllegalArgumentException
+     *             if min is greater than the current max
      */
     public void setMin(double min) {
         requireValidRange(min, getMax(), getStep());
@@ -303,6 +305,8 @@ public class Slider extends SliderBase<Slider, Double> {
      *
      * @param max
      *            the maximum value
+     * @throws IllegalArgumentException
+     *             if max is less than the current min
      */
     public void setMax(double max) {
         requireValidRange(getMin(), max, getStep());
@@ -328,6 +332,8 @@ public class Slider extends SliderBase<Slider, Double> {
      *
      * @param step
      *            the step value
+     * @throws IllegalArgumentException
+     *             if step is not positive
      */
     public void setStep(double step) {
         requireValidRange(getMin(), getMax(), step);
