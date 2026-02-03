@@ -265,16 +265,6 @@ public class Button extends Component
     }
 
     @Override
-    public void setWhiteSpace(WhiteSpace value) {
-        textNode.setWhiteSpace(value);
-    }
-
-    @Override
-    public WhiteSpace getWhiteSpace() {
-        return textNode.getWhiteSpace();
-    }
-
-    @Override
     public void bindText(Signal<String> textSignal) {
         textNode.bindText(textSignal);
         textSupport.bind(textSignal);
