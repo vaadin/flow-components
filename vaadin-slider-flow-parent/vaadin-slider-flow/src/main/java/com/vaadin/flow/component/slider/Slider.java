@@ -368,16 +368,6 @@ public class Slider extends SliderBase<Slider, Double> {
         setValue(adjustedValue.doubleValue());
     }
 
-    @Override
-    public void setValue(double min, double max, Double value) {
-        super.setValue(min, max, value);
-    }
-
-    @Override
-    public void setValue(double min, double max, double step, Double value) {
-        super.setValue(min, max, step, value);
-    }
-
     /**
      * Gets the empty value of the slider, which is equal to the minimum value.
      *
