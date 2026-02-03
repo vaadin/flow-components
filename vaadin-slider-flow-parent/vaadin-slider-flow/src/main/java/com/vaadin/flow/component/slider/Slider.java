@@ -277,8 +277,10 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the minimum value of the slider.
      * <p>
-     * If the current value is less than the new minimum, the value is adjusted
-     * to the new minimum.
+     * If the current value is less than the new minimum, it's automatically
+     * clamped, which triggers a value change event. To set both the minimum and
+     * value explicitly, use the {@link #setValue(double, double, Double)
+     * setValue(min, max, value)} method instead.
      *
      * @param min
      *            the minimum value
@@ -305,8 +307,10 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the maximum value of the slider.
      * <p>
-     * If the current value is greater than the new maximum, the value is
-     * adjusted to the new maximum.
+     * If the current value is greater than the new maximum, it's automatically
+     * clamped, which triggers a value change event. To set both the maximum and
+     * value explicitly, use the {@link #setValue(double, double, Double)
+     * setValue(min, max, value)} method instead.
      *
      * @param max
      *            the maximum value
@@ -333,8 +337,11 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the step value of the slider.
      * <p>
-     * If the current value is not aligned with the new step, the value is
-     * adjusted to the closest valid value.
+     * If the current value is not aligned with the new step, it's automatically
+     * adjusted to the nearest value that matches the step, which triggers a
+     * value change event. To set both the step and value explicitly, use the
+     * {@link #setValue(double, double, double, Double) setValue(min, max, step,
+     * value)} method instead.
      *
      * @param step
      *            the step value
@@ -369,6 +376,27 @@ public class Slider extends SliderBase<Slider, Double> {
     @Override
     public void setValue(double min, double max, double step, Double value) {
         super.setValue(min, max, step, value);
+    }
+
+    /**
+     * Gets the empty value of the slider, which is equal to the minimum value.
+     *
+     * @return the empty value
+     * @see #getMin()
+     */
+    @Override
+    public Double getEmptyValue() {
+        return getMin();
+    }
+
+    /**
+     * Clears the slider value, setting it to the minimum value.
+     *
+     * @see #getEmptyValue()
+     */
+    @Override
+    public void clear() {
+        super.clear();
     }
 
     @Override
