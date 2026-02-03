@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -176,6 +176,36 @@ public class DialogTest {
 
         Assert.assertTrue("resizable can be set to true",
                 dialog.getElement().getProperty("resizable", false));
+    }
+
+    @Test
+    public void isFocusTrap_trueByDefault() {
+        Dialog dialog = new Dialog();
+        Assert.assertTrue("focusTrap is true by default", dialog.isFocusTrap());
+        Assert.assertFalse("noFocusTrap property is false by default",
+                dialog.getElement().getProperty("noFocusTrap", false));
+    }
+
+    @Test
+    public void setFocusTrap_dialogFocusTrapCanBeDisabled() {
+        Dialog dialog = new Dialog();
+        dialog.setFocusTrap(false);
+        Assert.assertFalse("focusTrap can be set to false",
+                dialog.isFocusTrap());
+        Assert.assertTrue(
+                "noFocusTrap property is true when focus trap is disabled",
+                dialog.getElement().getProperty("noFocusTrap", false));
+    }
+
+    @Test
+    public void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
+        Dialog dialog = new Dialog();
+        dialog.setFocusTrap(false);
+        dialog.setFocusTrap(true);
+        Assert.assertTrue("focusTrap can be re-enabled", dialog.isFocusTrap());
+        Assert.assertFalse(
+                "noFocusTrap property is false when focus trap is enabled",
+                dialog.getElement().getProperty("noFocusTrap", false));
     }
 
     @Test

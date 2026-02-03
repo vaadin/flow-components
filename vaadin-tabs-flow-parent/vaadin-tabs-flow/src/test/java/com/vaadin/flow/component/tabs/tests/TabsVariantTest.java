@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,33 +15,24 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class TabsVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        Tabs tabs = new Tabs();
-        tabs.addThemeVariants(TabsVariant.LUMO_SMALL);
-
-        ThemeList themeNames = tabs.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(TabsVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new Tabs(), TabsVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        Tabs tabs = new Tabs();
-        tabs.addThemeVariants(TabsVariant.LUMO_SMALL);
-        tabs.removeThemeVariants(TabsVariant.LUMO_SMALL);
-
-        ThemeList themeNames = tabs.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(TabsVariant.LUMO_SMALL.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new Tabs(), TabsVariant.LUMO_SMALL);
     }
 }

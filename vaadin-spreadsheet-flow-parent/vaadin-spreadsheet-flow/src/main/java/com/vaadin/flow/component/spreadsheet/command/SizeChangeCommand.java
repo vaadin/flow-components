@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -92,7 +92,8 @@ public class SizeChangeCommand extends SpreadsheetCommand {
     private Object updateValue(int index, Object value) {
         if (type == Type.COLUMN) {
             Object columnWidth = getCurrentValue(index);
-            spreadsheet.setColumnWidth(index, (Integer) value);
+            spreadsheet.setColumnWidth(index,
+                    (int) Double.parseDouble(value.toString()));
             return columnWidth;
         } else if (type == Type.ROW) {
             Row row = spreadsheet.getActiveSheet().getRow(index);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -58,6 +58,36 @@ public class GridElement extends TestBenchElement {
         waitUntilLoadingFinished();
         callFunction("_scrollToFlatIndex", rowFlatIndex);
         waitUntilLoadingFinished();
+    }
+
+    /**
+     * Scrolls the grid horizontally to make the column with the given index
+     * visible. The index refers to visible columns, in their visual order.
+     * 
+     * @param columnIndex
+     *            the index of the column to scroll to
+     */
+    public void scrollToColumn(int columnIndex) {
+        callFunction("scrollToColumn", columnIndex);
+    }
+
+    /**
+     * Scrolls the grid horizontally to make the given column visible.
+     * 
+     * @param column
+     *            the column to scroll to
+     */
+    public void scrollToColumn(GridColumnElement column) {
+        executeScript("""
+                  const grid = arguments[0];
+                  const columnId = arguments[1];
+                  const column = grid._getColumns().find((col) => {
+                    return col.__generatedTbId === columnId;
+                  });
+                  if (column) {
+                    grid.scrollToColumn(column);
+                  }
+                """, this, column.get__generatedId());
     }
 
     /**
@@ -449,12 +479,14 @@ public class GridElement extends TestBenchElement {
 
     /**
      * Selects the row with the given index.
+     * <p>
+     * Automatically scrolls the given row into view.
      *
      * @param rowIndex
      *            the row to select
      */
     public void select(int rowIndex) {
-        select(getRow(rowIndex));
+        select(getRow(rowIndex, true));
     }
 
     /**

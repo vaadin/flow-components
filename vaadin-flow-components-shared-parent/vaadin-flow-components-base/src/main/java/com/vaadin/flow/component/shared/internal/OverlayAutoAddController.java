@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -84,6 +84,13 @@ public class OverlayAutoAddController<C extends Component>
     public void add() {
         if (!isAttached()) {
             UI ui = getUI();
+            // Mark component as slot-ignored if being added inside another
+            // modal. This prevents web component SlotController from treating
+            // auto-added overlays as custom content that should hide default
+            // slot content
+            if (ui.hasModalComponent()) {
+                component.getElement().setAttribute("data-slot-ignore", "");
+            }
             ui.addToModalComponent(component);
             ui.setChildComponentModal(component, modalityModeSupplier.get());
             autoAdded = true;
@@ -137,20 +144,13 @@ public class OverlayAutoAddController<C extends Component>
     private void handleClose() {
         if (autoAdded) {
             autoAdded = false;
+            component.getElement().removeAttribute("data-slot-ignore");
             component.getElement().removeFromParent();
         }
     }
 
     private UI getUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
+        return UI.getCurrentOrThrow();
     }
 
     private boolean isOpened() {

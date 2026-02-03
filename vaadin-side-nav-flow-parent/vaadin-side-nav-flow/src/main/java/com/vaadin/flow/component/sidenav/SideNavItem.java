@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -58,7 +58,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.1.0-alpha5")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends Component implements HasSideNavItems,
         HasEnabled, HasPrefix, HasSuffix, HasTooltip {

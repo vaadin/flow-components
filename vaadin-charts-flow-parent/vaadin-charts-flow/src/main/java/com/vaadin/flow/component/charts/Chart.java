@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -89,7 +89,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/charts", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/charts", version = "25.1.0-alpha5")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -179,8 +179,8 @@ public class ClearValueIT extends AbstractComponentIT {
                 comboBox.getSelectedText());
         Assert.assertEquals(String.format(
                 "Unexpected 'allowCustomValue' property name for combo box with id '%s'",
-                comboBoxId), Boolean.toString(allowCustomValue),
-                comboBox.getPropertyString("allowCustomValue"));
+                comboBoxId), allowCustomValue,
+                comboBox.getPropertyBoolean("allowCustomValue"));
 
         findElement(By.id(buttonId)).click();
 

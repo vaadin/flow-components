@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -36,6 +36,7 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
@@ -49,10 +50,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-master-detail-layout")
-@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.1.0-alpha5")
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
-public class MasterDetailLayout extends Component
-        implements HasSize, RouterLayout {
+public class MasterDetailLayout extends Component implements HasSize,
+        HasThemeVariant<MasterDetailLayoutVariant>, RouterLayout {
 
     public static final String MASTER_SLOT = "";
 

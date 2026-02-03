@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -67,13 +67,6 @@ public class DialogTestPageIT extends AbstractDialogIT {
         Assert.assertEquals("Number of events is 2",
                 eventCounterMessage.getText());
         Assert.assertEquals("The event came from server",
-                eventSourceMessage.getText());
-
-        findElement(By.id("dialog-open")).click();
-        verifyOpened();
-        executeScript("arguments[0].opened = false",
-                findElement(By.id("dialog")));
-        Assert.assertEquals("The event came from client",
                 eventSourceMessage.getText());
     }
 

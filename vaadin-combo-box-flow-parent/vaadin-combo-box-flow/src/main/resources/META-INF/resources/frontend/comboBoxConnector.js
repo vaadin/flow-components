@@ -89,30 +89,34 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     if (filterChanged) {
       cache = {};
       lastFilter = params.filter;
-      this._filterDebouncer = Debouncer.debounce(this._filterDebouncer, timeOut.after(500), () => {
-        if (serverFacade.getLastFilterSentToServer() === params.filter) {
-          // Fixes the case when the filter changes
-          // to something else and back to the original value
-          // within debounce timeout, and the
-          // DataCommunicator thinks it doesn't need to send data
-          serverFacade.needsDataCommunicatorReset();
+      comboBox._filterDebouncer = Debouncer.debounce(
+        comboBox._filterDebouncer,
+        timeOut.after(comboBox._filterTimeout ?? 500),
+        () => {
+          if (serverFacade.getLastFilterSentToServer() === params.filter) {
+            // Fixes the case when the filter changes
+            // to something else and back to the original value
+            // within debounce timeout, and the
+            // DataCommunicator thinks it doesn't need to send data
+            serverFacade.needsDataCommunicatorReset();
+          }
+          if (params.filter !== lastFilter) {
+            throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
+          }
+          // Remove the debouncer before clearing page callbacks.
+          // This makes sure that they are executed.
+          comboBox._filterDebouncer = undefined;
+          // Call the method again after debounce.
+          clearPageCallbacks();
+          comboBox.dataProvider(params, callback);
         }
-        if (params.filter !== lastFilter) {
-          throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
-        }
-        // Remove the debouncer before clearing page callbacks.
-        // This makes sure that they are executed.
-        this._filterDebouncer = undefined;
-        // Call the method again after debounce.
-        clearPageCallbacks();
-        comboBox.dataProvider(params, callback);
-      });
+      );
       return;
     }
 
     // Postpone the execution of new callbacks if there is an active debouncer.
     // They will be executed when the page callbacks are cleared within the debouncer.
-    if (this._filterDebouncer) {
+    if (comboBox._filterDebouncer) {
       pageCallbacks[params.page] = callback;
       return;
     }
@@ -211,6 +215,13 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.reset = function () {
+    // Cancel pending requests, as clearCache below will set the combo
+    // in a state where it will always request new data, regardless
+    // what is in the cache already.
+    if (comboBox._filterDebouncer) {
+      comboBox._filterDebouncer.cancel();
+      comboBox._filterDebouncer = undefined;
+    }
     clearPageCallbacks();
     cache = {};
     comboBox.clearCache();

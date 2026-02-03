@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,7 +25,11 @@ public enum TabsVariant implements ThemeVariant {
     LUMO_SMALL("small"),
     LUMO_MINIMAL("minimal"),
     LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs");
+    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
+    LUMO_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
+    AURA_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    AURA_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
+    AURA_FILLED("filled");
 
     private final String variant;
 

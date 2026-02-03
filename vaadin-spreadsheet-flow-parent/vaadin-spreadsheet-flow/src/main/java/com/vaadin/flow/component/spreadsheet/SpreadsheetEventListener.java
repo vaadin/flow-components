@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -174,6 +174,8 @@ public class SpreadsheetEventListener
             handler.onPopupButtonClick(toInt(pars, 0), toInt(pars, 1));
         } else if ("popupClose".equals(type)) {
             handler.onPopupClose(toInt(pars, 0), toInt(pars, 1));
+        } else if ("contextMenuClosed".equals(type)) {
+            handler.contextMenuClosed();
         }
     }
 

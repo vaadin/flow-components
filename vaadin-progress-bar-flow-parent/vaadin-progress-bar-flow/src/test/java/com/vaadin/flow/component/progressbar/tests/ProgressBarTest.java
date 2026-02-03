@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -171,31 +171,5 @@ public class ProgressBarTest {
         Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
         Assert.assertEquals("updated value is wrong", max,
                 progressBar.getValue(), 0.0);
-    }
-
-    @Test
-    public void setValueShouldThrowIfValueLessThanMin() {
-        double min = 10.0;
-        double max = 100.0;
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
-
-        ProgressBar progressBar = new ProgressBar(min, max);
-        progressBar.setValue(9);
-    }
-
-    @Test
-    public void setValueShouldThrowIfValueGreaterThanMax() {
-        double min = 10.0;
-        double max = 100.0;
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
-
-        ProgressBar progressBar = new ProgressBar(min, max);
-        progressBar.setValue(101);
     }
 }

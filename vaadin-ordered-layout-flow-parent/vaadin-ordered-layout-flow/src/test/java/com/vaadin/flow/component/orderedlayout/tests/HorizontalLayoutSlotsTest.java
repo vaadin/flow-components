@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -302,6 +302,43 @@ public class HorizontalLayoutSlotsTest {
 
         layout.addComponentAtIndex(2, div1);
         Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
+    }
+
+    @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_start1() {
+        Div addedAtIndex = new Div();
+
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertNull(addedAtIndex.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_start2() {
+        layout.addToStart(new Div());
+
+        Div addedAtIndex = new Div();
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertNull(addedAtIndex.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_middle() {
+        layout.addToMiddle(new Div());
+
+        Div addedAtIndex = new Div();
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertEquals("middle",
+                addedAtIndex.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addComponentAtIndex_indexEqualsChildCount_addedToLatestSlot_end() {
+        layout.addToEnd(new Div());
+
+        Div addedAtIndex = new Div();
+        layout.addComponentAtIndex(layout.getComponentCount(), addedAtIndex);
+        Assert.assertEquals("end",
+                addedAtIndex.getElement().getAttribute("slot"));
     }
 
     @Test

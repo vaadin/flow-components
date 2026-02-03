@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -29,7 +29,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *             using Dashboard as an alternative.
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/board", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/board", version = "25.1.0-alpha5")
 @JsModule("@vaadin/board/src/vaadin-board.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Board extends Component

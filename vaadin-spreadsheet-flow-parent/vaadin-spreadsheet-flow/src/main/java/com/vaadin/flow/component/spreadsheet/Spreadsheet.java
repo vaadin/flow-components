@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -664,7 +664,8 @@ public class Spreadsheet extends Component
     void onPopupButtonClick(int row, int column) {
         PopupButton popup = sheetPopupButtons
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
-                        new CellReference(row - 1, column - 1)));
+                        new CellReference(getActiveSheet().getSheetName(),
+                                row - 1, column - 1, false, false)));
         if (popup != null) {
             popup.openPopup();
         }
@@ -673,7 +674,8 @@ public class Spreadsheet extends Component
     void onPopupClose(int row, int column) {
         PopupButton popup = sheetPopupButtons
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
-                        new CellReference(row - 1, column - 1)));
+                        new CellReference(getActiveSheet().getSheetName(),
+                                row - 1, column - 1, false, false)));
 
         if (popup != null) {
             popup.closePopup();
@@ -1217,7 +1219,7 @@ public class Spreadsheet extends Component
 
     /**
      * Create the default Spreadsheet handler.
-     * 
+     *
      * @return SpreadsheetHandlerImpl
      */
     protected SpreadsheetHandlerImpl createDefaultHandler() {
@@ -2830,16 +2832,14 @@ public class Spreadsheet extends Component
                     getHiddenRowIndexes());
             if (row == null) {
                 valueManager.updateDeletedRowsInClientCache(rowIndex, rowIndex);
-                if (_hiddenRowIndexes.contains(rowIndex)) {
-                    _hiddenRowIndexes.remove(rowIndex);
-                }
+                _hiddenRowIndexes.remove(rowIndex);
                 for (int c = 0; c < getCols(); c++) {
                     styler.clearCellStyle(r, c);
                 }
             } else {
                 if (row.getZeroHeight()) {
                     _hiddenRowIndexes.add(rowIndex);
-                } else if (_hiddenRowIndexes.contains(rowIndex)) {
+                } else {
                     _hiddenRowIndexes.remove(rowIndex);
                 }
                 for (int c = 0; c < getCols(); c++) {
@@ -2958,7 +2958,8 @@ public class Spreadsheet extends Component
                 } else if (numberOfRowsAboveWasChanged(row, last, first)) {
                     int newRow = cell.getRow() + n;
                     int col = cell.getCol();
-                    CellReference newCell = new CellReference(newRow, col, true,
+                    CellReference newCell = new CellReference(
+                            getActiveSheet().getSheetName(), newRow, col, true,
                             true);
                     pbutton.setCellReference(newCell);
                     updated.put(newCell, pbutton);
@@ -3602,8 +3603,7 @@ public class Spreadsheet extends Component
                 handler.inline();
             }
             resources.put(key, resource.toString());
-            getElement().setProperty("resources",
-                    Serializer.serialize(new ArrayList<>(resources.keySet())));
+            getElement().executeJs("this.resources=$0", resources.keySet());
             getElement().setAttribute("resource-" + key,
                     new StreamResourceRegistry.ElementStreamResource(resource,
                             this.getElement()));
@@ -4589,24 +4589,11 @@ public class Spreadsheet extends Component
      */
     private void loadCustomComponents() {
         if (customComponentFactory != null) {
+            // Preserve custom editor mappings to maintain StateNode connections
             HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap() != null
                     ? new HashMap<>(getCellKeysToEditorIdMap())
-                    : null;
-            if (_cellKeysToEditorIdMap == null) {
-                _cellKeysToEditorIdMap = new HashMap<String, String>();
-            } else {
-                _cellKeysToEditorIdMap.clear();
-            }
-            setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
-            HashMap<String, String> _componentIDtoCellKeysMap = getComponentIDtoCellKeysMap() != null
-                    ? new HashMap<>(getComponentIDtoCellKeysMap())
-                    : null;
-            if (_componentIDtoCellKeysMap == null) {
-                _componentIDtoCellKeysMap = new HashMap<String, String>();
-            } else {
-                _componentIDtoCellKeysMap.clear();
-            }
-            setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
+                    : new HashMap<>();
+            HashMap<String, String> _componentIDtoCellKeysMap = new HashMap<>();
             if (customComponents == null) {
                 customComponents = new HashSet<Component>();
             }
@@ -4617,31 +4604,45 @@ public class Spreadsheet extends Component
             int horizontalSplitPosition = getLastFrozenColumn();
             if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
                 // top left pane
-                loadRangeComponents(newCustomComponents, rowsWithComponents, 1,
-                        1, verticalSplitPosition, horizontalSplitPosition);
+                loadRangeComponents(newCustomComponents, rowsWithComponents,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1, 1,
+                        verticalSplitPosition, horizontalSplitPosition);
             }
             if (verticalSplitPosition > 0) {
                 // top right pane
-                loadRangeComponents(newCustomComponents, rowsWithComponents, 1,
+                loadRangeComponents(newCustomComponents, rowsWithComponents,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1,
                         firstColumn, verticalSplitPosition, lastColumn);
             }
             if (horizontalSplitPosition > 0) {
                 // bottom left pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
+                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap,
                         firstRow, 1, lastRow, horizontalSplitPosition);
             }
             loadRangeComponents(newCustomComponents, rowsWithComponents,
-                    firstRow, firstColumn, lastRow, lastColumn);
-            // unregister old
+                    _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, firstRow,
+                    firstColumn, lastRow, lastColumn);
+
+            // Keep custom editors registered to preserve StateNode connections
             for (Iterator<Component> i = customComponents.iterator(); i
                     .hasNext();) {
                 Component c = i.next();
                 if (!newCustomComponents.contains(c)) {
-                    unRegisterCustomComponent(c);
-                    i.remove();
+                    String nodeId = getComponentNodeId(c);
+                    if (_cellKeysToEditorIdMap.containsValue(nodeId)) {
+                        newCustomComponents.add(c);
+                    } else {
+                        unRegisterCustomComponent(c);
+                        _componentIDtoCellKeysMap.remove(nodeId);
+                        i.remove();
+                    }
                 }
             }
             customComponents = newCustomComponents;
+
+            setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
+            setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
 
             if (!rowsWithComponents.isEmpty()) {
                 handleRowSizes(rowsWithComponents);
@@ -4661,10 +4662,10 @@ public class Spreadsheet extends Component
     }
 
     void loadRangeComponents(HashSet<Component> newCustomComponents,
-            Set<Integer> rowsWithComponents, int row1, int col1, int row2,
-            int col2) {
-        HashMap<String, String> _componentIDtoCellKeysMap = getComponentIDtoCellKeysMap();
-        HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap();
+            Set<Integer> rowsWithComponents,
+            HashMap<String, String> cellKeysToEditorIdMap,
+            HashMap<String, String> componentIDtoCellKeysMap, int row1,
+            int col1, int row2, int col2) {
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {
@@ -4686,7 +4687,7 @@ public class Spreadsheet extends Component
                         if (!customComponents.contains(customComponent)) {
                             registerCustomComponent(customComponent);
                         }
-                        _componentIDtoCellKeysMap
+                        componentIDtoCellKeysMap
                                 .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
@@ -4704,7 +4705,7 @@ public class Spreadsheet extends Component
                                             .contains(customEditor)) {
                                 registerCustomComponent(customEditor);
                             }
-                            _cellKeysToEditorIdMap.put(key,
+                            cellKeysToEditorIdMap.put(key,
                                     getComponentNodeId(customEditor));
                             newCustomComponents.add(customEditor);
                             rowsWithComponents.add(r);
@@ -4716,8 +4717,6 @@ public class Spreadsheet extends Component
                 }
             }
         }
-        setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
-        setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
     }
 
     private String getComponentNodeId(Component component) {
@@ -4890,7 +4889,8 @@ public class Spreadsheet extends Component
      *            removes the pop-up button for the target cell.
      */
     public void setPopup(int row, int col, PopupButton popupButton) {
-        setPopup(new CellReference(row, col), popupButton);
+        setPopup(new CellReference(getActiveSheet().getSheetName(), row, col,
+                false, false), popupButton);
     }
 
     /**
@@ -5156,7 +5156,7 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * This is a parent class for a value change events.
+     * This is a parent class for value change events.
      */
     public abstract static class ValueChangeEvent
             extends ComponentEvent<Component> {
@@ -5165,9 +5165,19 @@ public class Spreadsheet extends Component
         public ValueChangeEvent(Component source,
                 Set<CellReference> changedCells) {
             super(source, false);
-            this.changedCells = changedCells;
+            this.changedCells = new CellSet(changedCells);
         }
 
+        /**
+         * Gets the changed cells.
+         * <p>
+         * When using {@link Set#contains(Object)}, you should only use
+         * {@link CellReference}s with sheet names. Otherwise, it will throw an
+         * {@link IllegalArgumentException}.
+         *
+         * @return the changed cells
+         * @see CellSet
+         */
         public Set<CellReference> getChangedCells() {
             return changedCells;
         }
@@ -5288,14 +5298,19 @@ public class Spreadsheet extends Component
 
         /**
          * Gets a combination of all selected cells.
+         * <p>
+         * When using {@link Set#contains(Object)}, you should only use
+         * {@link CellReference}s with sheet names. Otherwise, it will throw an
+         * {@link IllegalArgumentException}.
          *
          * @return A combination of all selected cells, regardless of selection
          *         mode. Doesn't contain duplicates.
+         * @see CellSet
          */
         public Set<CellReference> getAllSelectedCells() {
-            return Spreadsheet.getAllSelectedCells(selectedCellReference,
-                    individualSelectedCells, cellRangeAddresses);
-
+            return new CellSet(
+                    Spreadsheet.getAllSelectedCells(selectedCellReference,
+                            individualSelectedCells, cellRangeAddresses));
         }
     }
 
@@ -5303,10 +5318,7 @@ public class Spreadsheet extends Component
             CellReference selectedCellReference,
             List<CellReference> individualSelectedCells,
             List<CellRangeAddress> cellRangeAddresses) {
-        Set<CellReference> cells = new HashSet<CellReference>();
-        for (CellReference r : individualSelectedCells) {
-            cells.add(r);
-        }
+        Set<CellReference> cells = new HashSet<>(individualSelectedCells);
         cells.add(selectedCellReference);
 
         if (cellRangeAddresses != null) {
@@ -5314,7 +5326,9 @@ public class Spreadsheet extends Component
 
                 for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++) {
                     for (int y = a.getFirstRow(); y <= a.getLastRow(); y++) {
-                        cells.add(new CellReference(y, x));
+                        cells.add(new CellReference(
+                                selectedCellReference.getSheetName(), y, x,
+                                false, false));
                     }
                 }
             }
@@ -5510,10 +5524,9 @@ public class Spreadsheet extends Component
     public Set<CellReference> getSelectedCellReferences() {
         SelectionChangeEvent event = selectionManager.getLatestSelectionEvent();
         if (event == null) {
-            return new HashSet<CellReference>();
-        } else {
-            return event.getAllSelectedCells();
+            return new HashSet<>();
         }
+        return event.getAllSelectedCells();
     }
 
     /**

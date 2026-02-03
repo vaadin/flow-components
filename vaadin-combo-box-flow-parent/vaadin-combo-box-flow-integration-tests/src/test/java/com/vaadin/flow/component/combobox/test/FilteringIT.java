@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -138,6 +138,24 @@ public class FilteringIT extends AbstractComboBoxIT {
         box.setFilter("");
         waitUntil(driver -> getNonEmptyOverlayContents(box).size() > 0);
         assertRendered(box, "Item 0");
+    }
+
+    @Test
+    public void setFilter_close_filterReset() {
+        comboBoxWithFilteredItems.openPopup();
+
+        comboBoxWithFilteredItems.setFilter("444");
+        waitForItems(comboBoxWithFilteredItems, items -> items.size() == 1
+                && "Item 444".equals(getItemLabel(items, 0)));
+
+        comboBoxWithFilteredItems.closePopup();
+        waitForItems(comboBoxWithFilteredItems, items -> items.size() == 500);
+
+        comboBoxWithFilteredItems.openPopup();
+        waitForItems(comboBoxWithFilteredItems,
+                items -> items.size() == 500
+                        && "Item 0".equals(getItemLabel(items, 0))
+                        && "Item 49".equals(getItemLabel(items, 49)));
     }
 
     @Test

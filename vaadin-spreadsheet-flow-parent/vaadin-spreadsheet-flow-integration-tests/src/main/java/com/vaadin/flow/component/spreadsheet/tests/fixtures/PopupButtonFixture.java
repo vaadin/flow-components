@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -35,8 +35,9 @@ public class PopupButtonFixture implements SpreadsheetFixture {
             }
             List<String> values = new ArrayList<>(VALUES);
             CellReference ref = event.getSelectedCellReference();
-            CellReference newRef = new CellReference(ref.getRow(),
-                    ref.getCol());
+            CellReference newRef = new CellReference(
+                    spreadsheet.getActiveSheet().getSheetName(), ref.getRow(),
+                    ref.getCol(), false, false);
             DataValidationButton popupButton = new DataValidationButton(
                     spreadsheet, values);
             popupButton.setUp();

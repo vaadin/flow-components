@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -44,6 +44,7 @@ public enum TestFixtures {
     LockSheet(LockSheetFixture.class),
     CustomComponent(CustomComponentFixture.class),
     Action(ActionFixture.class),
+    IconAction(IconActionFixture.class),
     InsertRow(InsertRowFixture.class),
     DeleteRow(DeleteRowFixture.class),
     RowHeaderDoubleClick(RowHeaderDoubleClickFixture.class);

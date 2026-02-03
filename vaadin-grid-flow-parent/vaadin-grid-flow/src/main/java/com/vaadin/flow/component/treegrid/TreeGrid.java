@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -1005,11 +1005,9 @@ public class TreeGrid<T> extends Grid<T>
                     "At least one index should be provided.");
         }
 
-        String joinedIndexes = Arrays.stream(path).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex(...$0);", path)));
     }
 
     @Override
@@ -1087,52 +1085,43 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to an item within the tree. If the ancestors of the item are not
-     * expanded, this method expands them before scrolling. Does not fire any
-     * {@link ExpandEvent}s for the ancestors expanded during scrolling.
+     * Scrolls to the given item unless it is already fully visible. Before
+     * scrolling, this method automatically expands all ancestor items leading
+     * to the target item, but it does not fire any {@link ExpandEvent} while
+     * doing so.
      * <p>
-     * In order to be able to use this method, the data provider should
-     * implement {@link HierarchicalDataProvider#getParent(T)} and
-     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}. The
-     * following table shows which methods have to be explicitly implemented
-     * based on the data provider types.
+     * For this method to work, the data provider must implement two methods:
+     * {@link HierarchicalDataProvider#getParent(T)} and
+     * {@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)}.
+     * <p>
+     * Depending on the type of data provider, some of these methods may already
+     * be implemented. Otherwise, you have to implement them manually. The table
+     * below shows which methods are required in each case:
      * <table>
      * <tr>
-     * <th>HierarchicalDataProvider</th>
+     * <th>DataProvider</th>
      * <th>{@link HierarchicalDataProvider#isInMemory() isInMemory()}</th>
      * <th>{@link HierarchicalDataProvider#getItemIndex(T, HierarchicalQuery)
-     * getItemIndex()}</th>
-     * <th>{@link HierarchicalDataProvider#getParent(T) getParent()}</th>
-     * </tr>
-     * <tr>
-     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
-     * <td>true</td>
-     * <td>not required</td>
-     * <td>required</td>
-     * </tr>
-     * <tr>
-     * <td>{@link HierarchyFormat#NESTED HierarchyFormat.NESTED}</td>
-     * <td>false</td>
-     * <td>required</td>
-     * <td>required</td>
-     * </tr>
-     * <tr>
-     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
-     * <td>true</td>
-     * <td>not required</td>
-     * <td>required</td>
-     * </tr>
-     * <tr>
-     * <td>{@link HierarchyFormat#FLATTENED HierarchyFormat.FLATTENED}</td>
-     * <td>false</td>
-     * <td>required</td>
-     * <td>required</td>
+     * getItemIndex(item, query)}</th>
+     * <th>{@link HierarchicalDataProvider#getParent(T) getParent(item)}</th>
      * </tr>
      * <tr>
      * <td>{@link TreeDataProvider}</td>
      * <td>true</td>
      * <td>not required</td>
      * <td>not required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchicalDataProvider}</td>
+     * <td>true</td>
+     * <td>not required</td>
+     * <td>required</td>
+     * </tr>
+     * <tr>
+     * <td>{@link HierarchicalDataProvider}</td>
+     * <td>false</td>
+     * <td>required</td>
+     * <td>required</td>
      * </tr>
      * </table>
      *
@@ -1144,12 +1133,19 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void scrollToItem(T item) {
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
-        var indexPath = ((TreeGridDataCommunicator<T>) getDataCommunicator())
-                .resolveItem(item);
-        if (indexPath.length == 1) {
-            scrollToIndex(indexPath[0]);
-        } else {
-            scrollToIndex(indexPath);
-        }
+
+        var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
+        var itemKey = dataCommunicator.getKeyMapper().key(item);
+        var itemIndexPath = dataCommunicator.resolveItem(item);
+
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.$connector.scrollToItem($0, ...$1)", itemKey,
+                        itemIndexPath)));
+    }
+
+    @Override
+    protected void refreshViewport() {
+        ((TreeGridDataCommunicator<T>) getDataCommunicator()).refreshViewport();
     }
 }

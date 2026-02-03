@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,9 +53,10 @@ public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {
         allCellContents.forEach(vgcc -> {
             TestBenchElement slot = vgcc.getPropertyElement("assignedSlot");
             if (headerSlots.contains(slot) || bodySlots.contains(slot)) {
+                String text = vgcc.getText();
                 Assert.assertTrue(
                         "A grid cell was expected to have text content but had none.",
-                        StringUtils.isNotBlank(vgcc.getText()));
+                        text != null && !text.isBlank());
             }
         });
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -88,7 +88,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.1.0-alpha5")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -150,6 +150,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
                 ComboBox::modelToPresentation);
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        // Initialize value property to web component default to avoid initial
+        // client-side property change event when no value has been set
+        if (!getElement().hasProperty(PROP_VALUE)) {
+            getElement().setProperty(PROP_VALUE, "");
+        }
 
         // Sync server-side `selectedItem` property from client, so that the
         // client's property value can be restored when re-attaching

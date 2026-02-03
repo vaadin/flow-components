@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,11 @@
  */
 package com.vaadin.flow.component.avatar.tests;
 
-import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.avatar.AvatarVariant;
 
 public class AvatarTest {
 
@@ -71,25 +68,6 @@ public class AvatarTest {
 
         Assert.assertEquals(avatar.getName(), "foo");
         Assert.assertEquals(avatar.getImage(), "https://vaadin.com/");
-    }
-
-    @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        avatar.addThemeVariants(AvatarVariant.LUMO_LARGE);
-
-        Set<String> themeNames = avatar.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
-    }
-
-    @Test
-    public void addThemeVariant_removeThemeVariant_doesNotContainThemeVariant() {
-        avatar.addThemeVariants(AvatarVariant.LUMO_LARGE);
-        avatar.removeThemeVariants(AvatarVariant.LUMO_LARGE);
-
-        Set<String> themeNames = avatar.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
     }
 
     @Test

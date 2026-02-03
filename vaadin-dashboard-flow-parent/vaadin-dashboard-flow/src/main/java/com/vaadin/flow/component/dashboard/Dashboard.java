@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -59,7 +59,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-alpha5")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -72,6 +72,8 @@ public class Dashboard extends Component
 
     private DashboardI18n i18n;
 
+    private DashboardItemRemoveHandler itemRemoveHandler;
+
     private boolean pendingUpdate = false;
 
     /**
@@ -81,7 +83,7 @@ public class Dashboard extends Component
         childDetachHandler = getChildDetachHandler();
         initItemMovedClientEventListener();
         initItemResizedClientEventListener();
-        initItemRemovedClientEventListener();
+        initItemBeforeRemoveClientEventListener();
     }
 
     /**
@@ -176,6 +178,38 @@ public class Dashboard extends Component
         }
         doAddWidgetAtIndex(index, widget);
         updateClient();
+    }
+
+    @Override
+    public void addWidgetAfter(DashboardWidget referenceWidget,
+            DashboardWidget newWidget) {
+        Objects.requireNonNull(referenceWidget,
+                "Reference widget cannot be null.");
+        Objects.requireNonNull(newWidget, "Widget to add cannot be null.");
+
+        // Check if reference widget is at root level
+        int rootLevelIndex = childrenComponents.indexOf(referenceWidget);
+
+        if (rootLevelIndex != -1) {
+            // Reference widget is at root level, add after it
+            doAddWidgetAtIndex(rootLevelIndex + 1, newWidget);
+            updateClient();
+            return;
+        }
+
+        // Search in sections
+        for (Component component : childrenComponents) {
+            if (component instanceof DashboardSection section
+                    && section.getWidgets().contains(referenceWidget)) {
+                // Found the section containing the reference widget
+                section.addWidgetAfter(referenceWidget, newWidget);
+                return; // updateClient() is called by section
+            }
+        }
+
+        // Reference widget not found
+        throw new IllegalArgumentException(
+                "The reference widget is not a child of this dashboard");
     }
 
     @Override
@@ -431,6 +465,47 @@ public class Dashboard extends Component
     }
 
     /**
+     * Sets a handler for intercepting item removal from the dashboard.
+     * <p>
+     * When a handler is set, automatic removal triggered by user interaction is
+     * disabled. The handler must explicitly call
+     * {@link DashboardItemRemoveEvent#removeItem()} to proceed with removal.
+     * <p>
+     * Setting the handler to {@code null} restores the default behavior where
+     * items are removed immediately when the user clicks the remove button.
+     * <p>
+     * Example usage with a confirmation dialog:
+     *
+     * <pre>
+     * dashboard.setItemRemoveHandler(event -&gt; {
+     *     ConfirmDialog dialog = new ConfirmDialog();
+     *     dialog.setText("Remove this widget?");
+     *     dialog.addConfirmListener(e -&gt; event.removeItem());
+     *     dialog.open();
+     * });
+     * </pre>
+     *
+     * @param handler
+     *            the handler to set, or {@code null} to restore default
+     *            behavior
+     * @see DashboardItemRemoveHandler
+     * @see DashboardItemRemoveEvent
+     */
+    public void setItemRemoveHandler(DashboardItemRemoveHandler handler) {
+        this.itemRemoveHandler = handler;
+    }
+
+    /**
+     * Returns the current item remove handler.
+     *
+     * @return the current handler, or {@code null} if no handler is set
+     * @see #setItemRemoveHandler(DashboardItemRemoveHandler)
+     */
+    public DashboardItemRemoveHandler getItemRemoveHandler() {
+        return itemRemoveHandler;
+    }
+
+    /**
      * Adds an item selected change listener to this dashboard.
      *
      * @param listener
@@ -610,7 +685,7 @@ public class Dashboard extends Component
             }
         }
 
-        String appId = UI.getCurrent().getInternals().getAppId();
+        String appId = UI.getCurrentOrThrow().getInternals().getAppId();
         getElement().executeJs(
                 """
                         const items = $0;
@@ -754,21 +829,47 @@ public class Dashboard extends Component
                 getChildren().toList()));
     }
 
-    private void initItemRemovedClientEventListener() {
+    private void initItemBeforeRemoveClientEventListener() {
         String idKey = "event.detail.item.id";
-        getElement().addEventListener("dashboard-item-removed", e -> {
+        String sectionKey = "event.detail.section?.id";
+        getElement().addEventListener("dashboard-item-before-remove", e -> {
             if (!isEditable()) {
                 return;
             }
-            handleItemRemovedClientEvent(e, idKey);
-        }).addEventData(idKey);
+            handleItemBeforeRemoveClientEvent(e, idKey, sectionKey);
+        }).preventDefault().addEventData(idKey).addEventData(sectionKey);
     }
 
-    private void handleItemRemovedClientEvent(DomEvent e, String idKey) {
+    private void handleItemBeforeRemoveClientEvent(DomEvent e, String idKey,
+            String sectionKey) {
         int nodeId = e.getEventData().get(idKey).intValue();
-        Component removedItem = getItem(nodeId);
-        withoutClientUpdate(removedItem::removeFromParent);
-        fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
+        Component item = getItem(nodeId);
+        DashboardSection section = e.getEventData().has(sectionKey)
+                && !e.getEventData().get(sectionKey).isNull()
+                        ? (DashboardSection) getItem(
+                                e.getEventData().get(sectionKey).intValue())
+                        : null;
+
+        if (itemRemoveHandler != null) {
+            DashboardItemRemoveEvent event = new DashboardItemRemoveEvent(this,
+                    item, section);
+            itemRemoveHandler.onItemRemove(event);
+        } else {
+            performRemoval(item);
+        }
+    }
+
+    /**
+     * Performs the actual removal of an item from the dashboard. This method is
+     * called either directly (when no handler is set) or by
+     * {@link DashboardItemRemoveEvent#removeItem()} (when a handler is set).
+     *
+     * @param item
+     *            the item to remove
+     */
+    void performRemoval(Component item) {
+        item.removeFromParent();
+        fireEvent(new DashboardItemRemovedEvent(this, true, item,
                 getChildren().toList()));
     }
 

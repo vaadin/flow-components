@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -54,6 +54,17 @@ public class DialogHeaderFooterIT extends AbstractDialogIT {
         clickButton(OPEN_DIALOG_BUTTON);
 
         verifyContentRendered(DialogHeaderFooterPage.HEADER_TITLE);
+    }
+
+    @Test
+    public void headerTitle_getHeaderTitleReturnsCorrectValue() {
+        clickButton(ADD_HEADER_TITLE_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyOpened();
+
+        var dialog = getDialog();
+        Assert.assertEquals("Header title should match",
+                DialogHeaderFooterPage.HEADER_TITLE, dialog.getHeaderTitle());
     }
 
     @Test

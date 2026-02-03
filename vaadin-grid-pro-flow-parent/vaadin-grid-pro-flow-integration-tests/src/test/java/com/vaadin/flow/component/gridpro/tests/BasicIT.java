@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.gridpro.testbench.GridProElement;
@@ -398,6 +399,54 @@ public class BasicIT extends AbstractComponentIT {
 
         Assert.assertEquals("Updated Person 1",
                 grid.getCell(0, 1).getInnerHTML());
+    }
+
+    @Test
+    public void comboBoxColumn_openAndCloseEditorWithoutChange_valueUnchangedAndNoEventFired() {
+        // Record the initial value of the first cell in the custom column using
+        // combo box editor (for "Department" property)
+        GridTHTDElement cell = grid.getCell(0, 2);
+        String initialValue = cell.getText();
+
+        // Verify the initial value
+        Assert.assertNotNull("Initial cell value should not be null",
+                initialValue);
+        Assert.assertFalse("Initial cell value should not be empty",
+                initialValue.isEmpty());
+
+        // Get initial events panel text to count events
+        String initialEventsPanelText = getPanelText("events-panel");
+        int initialEventCount = initialEventsPanelText
+                .split("ItemPropertyChanged").length - 1;
+
+        // Open the editor for the cell (column index 2)
+        assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+
+        // Tab away from the cell without making changes
+        TestBenchElement comboBox = cell.$("vaadin-combo-box").first();
+        comboBox.sendKeys(Keys.TAB);
+
+        // Wait for editor to close
+        waitUntil(driver -> !cell.innerHTMLContains("vaadin-combo-box"));
+
+        // Assert that the cell still has the same value as initially
+        Assert.assertEquals(
+                "Cell value should remain unchanged after opening and closing editor without changes",
+                initialValue, cell.getText());
+        // Assert there's no element with 'updating-cell' part
+        Assert.assertTrue(
+                "Cell should not have 'updating-cell' part after closing editor without changes",
+                cell.getParent()
+                        .findElements(By.cssSelector("[part~='updating-cell']"))
+                        .isEmpty());
+
+        // Assert that no ItemPropertyChanged events were fired
+        String finalEventsPanelText = getPanelText("events-panel");
+        int finalEventCount = finalEventsPanelText
+                .split("ItemPropertyChanged").length - 1;
+        Assert.assertEquals(
+                "No ItemPropertyChanged event should be fired when editor is closed without changes",
+                initialEventCount, finalEventCount);
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,

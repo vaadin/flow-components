@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -51,13 +51,16 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadAnyFile() throws Exception {
-        File tempFile = createTempFile("txt");
+        File tempFile = createTempFile("some file", "txt");
         getUpload().upload(tempFile);
 
         String content = uploadOutput.getText();
 
+        String expectedContents = tempFile.getName() + "text/plain"
+                + getTempFileContents();
+
         Assert.assertTrue("Upload content does not contain file details",
-                content.contains(tempFile.getName() + getTempFileContents()));
+                content.contains(expectedContents));
         Assert.assertTrue("Progress update event was not fired properly",
                 content.contains("PROGRESS:" + tempFile.getName()));
     }
@@ -73,6 +76,20 @@ public class UploadIT extends AbstractUploadIT {
         $("button").id("print-file-count").click();
 
         Assert.assertEquals("File list should contain 3 files", 3,
+                getFileCount());
+
+        $("button").id("clear-file-list").click();
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
+
+        // Verify clear file list works multiple times
+        getUpload().upload(tempFile);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should contain 1 file", 1,
                 getFileCount());
 
         $("button").id("clear-file-list").click();

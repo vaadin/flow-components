@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,10 +20,10 @@ import java.time.LocalDate;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 @Route("vaadin-date-picker/fallback-parser")
 public class DatePickerFallbackParserPage extends Div {
@@ -43,7 +43,7 @@ public class DatePickerFallbackParserPage extends Div {
         valueChangeLog.setId("value-change-log");
 
         datePicker.addValueChangeListener(event -> {
-            JsonObject record = Json.createObject();
+            ObjectNode record = JacksonUtils.createObjectNode();
             record.put("eventFromClient", event.isFromClient());
             record.put("eventOldValue", formatDate(event.getOldValue()));
             record.put("eventNewValue", formatDate(event.getValue()));

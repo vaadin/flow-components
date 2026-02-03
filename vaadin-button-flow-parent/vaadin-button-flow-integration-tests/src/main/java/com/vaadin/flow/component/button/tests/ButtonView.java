@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -183,7 +183,8 @@ public class ButtonView extends Div {
 
     private boolean containsChild(Component parent, String tagName) {
         return parent.getElement().getChildren()
-                .anyMatch(element -> element.getTag().equals(tagName));
+                .anyMatch(element -> !element.isTextNode()
+                        && element.getTag().equals(tagName));
     }
 
     private void createButtonWithDisableOnClick() {

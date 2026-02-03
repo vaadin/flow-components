@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -150,7 +150,9 @@ public class FormulaBarWidget extends Composite {
         addressField = new TextBox();
         addressField.setTabIndex(1);
         formulaField.setStyleName("functionfield");
+        SheetJsniUtil.partOf(formulaField.getElement()).add("formula-field");
         addressField.setStyleName("addressfield");
+        SheetJsniUtil.partOf(addressField.getElement()).add("address-field");
 
         namedRangeBox = new ListBox();
         namedRangeBox.setStyleName("namedrangebox");

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -250,5 +250,10 @@ public interface SheetHandler extends GroupingHandler {
     boolean isRowProtected(int row);
 
     SpreadsheetCustomEditorFactory getCustomEditorFactory();
+
+    /**
+     * Called after the sheet has been relayouted (e.g., after scroll).
+     */
+    void onSheetRelayoutComplete();
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -95,7 +95,7 @@ public class Time extends AbstractConfigurationObject {
      * when correct Daylight Saving Time transitions are required.
      * <p>
      * Defaults to: true
-     * 
+     *
      * @deprecated This property is deprecated and should not be used in new
      *             code. Use {@link #setTimezone(String)} instead.
      */

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -22,6 +22,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 
     private Boolean animation;
     private Number animationLimit;
+    private String borderRadius;
     private String className;
     private Boolean clip;
     private Boolean colorByPoint;
@@ -91,6 +92,24 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      */
     public void setAnimationLimit(Number animationLimit) {
         this.animationLimit = animationLimit;
+    }
+
+    /**
+     * @see #setBorderRadius(String)
+     */
+    public String getBorderRadius() {
+        return borderRadius;
+    }
+
+    /**
+     * The corner radius of the border surrounding solid gauge. A number
+     * signifies pixels and percentage string, like for example 50%, signifies a
+     * relative size.
+     *
+     * @param borderRadius
+     */
+    public void setBorderRadius(String borderRadius) {
+        this.borderRadius = borderRadius;
     }
 
     /**

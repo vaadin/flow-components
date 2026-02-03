@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -129,7 +129,7 @@ public class PopupButton extends Component {
             parent.getElement().callJsFunction("onPopupButtonOpen",
                     getRow() + 1, getColumn() + 1,
                     getElement().getNode().getId(),
-                    UI.getCurrent().getInternals().getAppId());
+                    UI.getCurrentOrThrow().getInternals().getAppId());
         });
         fireOpen();
     }

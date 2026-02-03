@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -224,6 +224,35 @@ public class MessageListIT extends AbstractComponentIT {
                 messages.get(0).getTime().matches("1 gen 2021, [0-9]+:[0-9]+"));
         Assert.assertTrue("Unexpected time format", messages.get(2).getTime()
                 .matches("[0-9]+ [a-z]+ [0-9]{4}, [0-9]+:[0-9]+"));
+    }
+
+    @Test
+    public void changeLocaleVariant_messagesRendered() {
+        clickElementWithJs("setLocaleVariant");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 2, messages.size());
+
+        MessageElement msg = messages.get(0);
+        Assert.assertEquals("Unexpected text content", "foo", msg.getText());
+        // Should fallback to German locale formatting
+        Assert.assertTrue("Unexpected time prop", msg.getTime()
+                .matches("[0-9]+\\. [A-Za-z\\.]+ 2021, [0-9]+:[0-9]+"));
+        Assert.assertEquals("Unexpected userName prop", "sender",
+                msg.getUserName());
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void changeLocaleVariant_addItem_doesNotThrow() {
+        clickElementWithJs("setLocaleVariant");
+        clickElementWithJs("addItem");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 3, messages.size());
+
+        checkLogsForErrors(message -> message.contains("test.jpg"));
     }
 
     @Test

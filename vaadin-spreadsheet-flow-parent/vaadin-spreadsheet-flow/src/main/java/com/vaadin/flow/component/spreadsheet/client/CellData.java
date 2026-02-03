@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -22,6 +22,7 @@ public class CellData implements Serializable {
     public String formulaValue;
     public String originalValue;
     public String cellStyle = "cs0";
+    public String textColor;
     public boolean locked = false;
     public boolean needsMeasure;
     public boolean isPercentage;
@@ -56,7 +57,7 @@ public class CellData implements Serializable {
     @Override
     public String toString() {
         return new StringBuilder().append("r").append(row).append("c")
-                .append(col).append(cellStyle).append("|").append(value)
-                .toString();
+                .append(col).append(cellStyle).append("tc").append(textColor)
+                .append("|").append(value).toString();
     }
 }

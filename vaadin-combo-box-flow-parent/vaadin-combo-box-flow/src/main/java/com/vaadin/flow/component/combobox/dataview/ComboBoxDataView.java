@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -72,7 +72,10 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      */
     @Override
     public T getItem(int index) {
-        return ItemFetchHelper.getItem(dataCommunicator, index);
+        // TODO: change the implementation to make the returned item not depend
+        // on client-side filter applied
+        // https://github.com/vaadin/vaadin-flow-components/issues/282
+        return dataCommunicator.getItem(index);
     }
 
     @Override
@@ -91,7 +94,8 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      */
     @Override
     public Stream<T> getItems() {
-        return ItemFetchHelper.getItems(dataCommunicator);
+        return dataCommunicator.getDataProvider()
+                .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
     }
 
     @Override

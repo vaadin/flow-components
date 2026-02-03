@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -19,4 +19,6 @@ public class SpreadsheetActionDetails implements Serializable {
     public String key;
     /** 0 = cell, 1 = row, 2 = column */
     public int type;
+    /** Node id of the icon virtual child, 0 if no icon provided */
+    public String iconNodeId;
 }

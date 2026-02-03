@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,8 +30,8 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.0.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.0-beta3")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.1.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.1.0-alpha5")
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class Lumo implements AbstractTheme {
 
@@ -52,6 +52,19 @@ public class Lumo implements AbstractTheme {
      * application.
      */
     public static final String UTILITY_STYLESHEET = "lumo/utility.css";
+
+    /**
+     * The path to the stylesheet that contains the Lumo compact preset. Can be
+     * used as argument to a {@link StyleSheet} on an
+     * {@link AppShellConfigurator} class to apply the compact preset to an
+     * application.
+     * <p>
+     * The compact preset needs to be loaded in addition to the main Lumo
+     * stylesheet referenced by {@link #STYLESHEET}, not instead of it. Make
+     * sure to load the compact preset after the main Lumo stylesheet so that it
+     * can override the relevant CSS custom properties.
+     */
+    public static final String COMPACT_STYLESHEET = "lumo/presets/compact.css";
 
     @Override
     public String getBaseUrl() {

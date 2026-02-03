@@ -4,12 +4,15 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-text-field-flow-parent</artifactId>
-        <version>25.0-SNAPSHOT</version>
+        <version>25.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-text-field-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Text Field</name>
     <description>Vaadin Text Field</description>
+    <properties>
+        <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

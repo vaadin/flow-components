@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,12 +22,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 @TestPath("vaadin-date-picker/fallback-parser")
 public class DatePickerFallbackParserIT extends AbstractComponentIT {
@@ -95,18 +95,19 @@ public class DatePickerFallbackParserIT extends AbstractComponentIT {
         Assert.assertEquals("ValueChangeEvent should be fired only once", 1,
                 records.size());
 
-        JsonObject record = Json.parse(records.get(0).getText());
+        ObjectNode record = JacksonUtils.readTree(records.get(0).getText());
 
         Assert.assertTrue("eventFromClient should be true",
-                record.getBoolean("eventFromClient"));
+                record.get("eventFromClient").asBoolean());
         Assert.assertEquals("eventOldValue should contain old value",
-                expectedOldValue, record.getString("eventOldValue"));
+                expectedOldValue, record.get("eventOldValue").asString());
         Assert.assertEquals("eventNewValue should contain new value",
-                expectedNewValue, record.getString("eventNewValue"));
+                expectedNewValue, record.get("eventNewValue").asString());
         Assert.assertEquals("componentValue should contain new value",
-                expectedNewValue, record.getString("componentValue"));
+                expectedNewValue, record.get("componentValue").asString());
         Assert.assertEquals("componentValueProperty should contain new value",
-                expectedNewValue, record.getString("componentValueProperty"));
+                expectedNewValue,
+                record.get("componentValueProperty").asString());
 
         $("button").id("clear-value-change-log").click();
     }
