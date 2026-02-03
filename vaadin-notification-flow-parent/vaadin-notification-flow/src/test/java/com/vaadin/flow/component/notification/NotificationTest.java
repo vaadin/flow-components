@@ -36,7 +36,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.local.ValueSignal;
 
 import net.jcip.annotations.NotThreadSafe;
 

@@ -24,7 +24,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.signals.BindingActiveException;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
 public class NotificationSignalTest extends AbstractSignalsUnitTest {
