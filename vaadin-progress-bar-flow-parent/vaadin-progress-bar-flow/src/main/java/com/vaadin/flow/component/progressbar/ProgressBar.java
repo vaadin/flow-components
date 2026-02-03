@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.signals.Signal;
 
 /**
  * Progress Bar shows the completion status of a task or process. The progress
@@ -150,6 +151,54 @@ public class ProgressBar extends Component
      */
     public double getMin() {
         return getElement().getProperty("min", 0.0);
+    }
+
+    /**
+     * Binds the given signal to the minimum bound of the progressbar.
+     * <p>
+     * When a signal is bound, the minimum bound is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the minimum bound manually
+     * through {@link #setMin(double)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the minimum bound to, or {@code null} to
+     *            unbind
+     * @see #setMin(double)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMin(Signal<Double> signal) {
+        getElement().bindProperty("min", signal);
+    }
+
+    /**
+     * Binds the given signal to the maximum bound of the progressbar.
+     * <p>
+     * When a signal is bound, the maximum bound is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the maximum bound manually
+     * through {@link #setMax(double)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the maximum bound to, or {@code null} to
+     *            unbind
+     * @see #setMax(double)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMax(Signal<Double> signal) {
+        getElement().bindProperty("max", signal);
     }
 
     /**
