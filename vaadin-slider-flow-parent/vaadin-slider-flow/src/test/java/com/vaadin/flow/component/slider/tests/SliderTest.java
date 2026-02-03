@@ -230,6 +230,9 @@ public class SliderTest {
         Assert.assertThrows("setValue should throw when value is null",
                 NullPointerException.class,
                 () -> slider.setValue(null, 0, 100, 10));
+
+        Assert.assertThrows("setValue should throw when value is null",
+                NullPointerException.class, () -> slider.setValue(null));
     }
 
     @Test
