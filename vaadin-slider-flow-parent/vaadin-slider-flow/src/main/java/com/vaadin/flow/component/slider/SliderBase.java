@@ -16,15 +16,14 @@
 package com.vaadin.flow.component.slider;
 
 import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
@@ -38,9 +37,9 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd
  */
 abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
-        extends AbstractSinglePropertyField<TComponent, TValue>
-        implements HasLabel, HasHelper, HasValidationProperties, HasSize,
-        Focusable<TComponent>, KeyNotifier {
+        extends AbstractSinglePropertyField<TComponent, TValue> implements
+        InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
+        HasValidationProperties, Focusable<TComponent>, KeyNotifier {
     /**
      * Constructs a slider with the given min, max, step, initial value, and
      * custom converters for the value property.
