@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -92,13 +92,14 @@ window.Vaadin.Flow.gridProConnector = {
     // When stopping editing, getting the updated cell value for columns with
     // custom editors requires a server round-trip. During this time, we hide
     // the cell content and show an update animation.
-    grid.addEventListener('item-property-changed', () => {
+    grid.addEventListener('item-property-changed', (e) => {
       const { column, model } = grid.__edited;
 
       if (column.editorType !== 'custom') {
         return;
       }
 
+      e.preventDefault();
       grid.__pendingCellUpdate = `${model.item.key}:${column.path}`;
       grid.requestContentUpdate();
     });
@@ -112,7 +113,7 @@ window.Vaadin.Flow.gridProConnector = {
         const isUpdating =
           model && cell._column && grid.__pendingCellUpdate === `${model.item.key}:${cell._column.path}`;
         const target = cell._focusButton || cell;
-        updatePart(target, isUpdating, 'updating-cell');
+        updatePart(target, 'updating-cell', isUpdating);
       });
     };
   },

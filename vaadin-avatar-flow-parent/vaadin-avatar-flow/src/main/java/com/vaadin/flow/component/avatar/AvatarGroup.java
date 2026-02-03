@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -70,7 +70,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.1.0-alpha5")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -255,7 +255,7 @@ public class AvatarGroup extends Component
 
             setImageResource(new StreamResourceRegistry.ElementStreamResource(
                     downloadHandler, getHost() != null ? getHost().getElement()
-                            : UI.getCurrent().getElement()));
+                            : UI.getCurrentOrThrow().getElement()));
         }
 
         /**

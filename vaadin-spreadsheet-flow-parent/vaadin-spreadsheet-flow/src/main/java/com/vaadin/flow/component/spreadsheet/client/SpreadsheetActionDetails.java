@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -14,6 +14,11 @@ import java.io.Serializable;
 public class SpreadsheetActionDetails implements Serializable {
     public String caption;
     public String key;
-    /** 0 = cell, 1 = row, 2 = column TODO replace with enum type */
+    /**
+     * 0 = cell, 1 = row, 2 = column - kept as int for client-server
+     * compatibility
+     */
     public int type;
+    /** Node id of the icon virtual child, 0 if no icon provided */
+    public int iconNodeId;
 }

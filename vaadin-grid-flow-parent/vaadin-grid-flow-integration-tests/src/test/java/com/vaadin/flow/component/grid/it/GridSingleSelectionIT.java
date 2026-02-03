@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -106,6 +106,15 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
 
         grid.scrollToRow(500);
         Assert.assertTrue(grid.getRow(499).isSelected());
+    }
+
+    @Test
+    public void selectLastItemFromClient_itemSelected() {
+        // should automatically scroll before selecting via TestBench API
+        grid.select(499);
+
+        Assert.assertEquals("oldValue=null; newValue=499; fromClient=true",
+                selectionLog.getText());
     }
 
     /**

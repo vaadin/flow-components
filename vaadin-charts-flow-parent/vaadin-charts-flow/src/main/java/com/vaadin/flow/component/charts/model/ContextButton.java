@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -60,7 +60,7 @@ public class ContextButton extends AbstractConfigurationObject {
 
     /**
      * Gets the spacing between the context button and other exporting buttons.
-     * 
+     *
      * @return the button spacing
      */
     public Number getButtonSpacing() {
@@ -69,7 +69,7 @@ public class ContextButton extends AbstractConfigurationObject {
 
     /**
      * Sets the spacing between the context button and other exporting buttons.
-     * 
+     *
      * @param buttonSpacing
      *            the spacing value
      */

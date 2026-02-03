@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -99,7 +99,7 @@ public class MapSerializer {
             StreamRegistration registration = streamRegistrationCache
                     .get(resource);
             if (registration == null) {
-                StreamResourceRegistry resourceRegistry = UI.getCurrent()
+                StreamResourceRegistry resourceRegistry = UI.getCurrentOrThrow()
                         .getSession().getResourceRegistry();
                 registration = resourceRegistry.registerResource(resource);
                 streamRegistrationCache.put(resource, registration);
@@ -137,7 +137,7 @@ public class MapSerializer {
             StreamRegistration registration = streamRegistrationCache
                     .get(resource);
             if (registration == null) {
-                StreamResourceRegistry resourceRegistry = UI.getCurrent()
+                StreamResourceRegistry resourceRegistry = UI.getCurrentOrThrow()
                         .getSession().getResourceRegistry();
                 registration = resourceRegistry.registerResource(resource);
                 streamRegistrationCache.put(resource, registration);

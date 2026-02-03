@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -8,25 +8,21 @@
  */
 package com.vaadin.flow.component.map;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class MapVariantTest {
     @Test
-    public void addThemeVariants() {
-        Map map = new Map();
-        map.addThemeVariants(MapVariant.NO_BORDER);
-
-        Assert.assertEquals("no-border",
-                map.getElement().getAttribute("theme"));
+    public void addThemeVariant_themeNamesContainsThemeVariant() {
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new Map(), MapVariant.LUMO_NO_BORDER);
     }
 
     @Test
-    public void removeThemeVariants() {
-        Map map = new Map();
-        map.getElement().setAttribute("theme", "no-border");
-        map.removeThemeVariants(MapVariant.NO_BORDER);
-
-        Assert.assertNull(map.getElement().getAttribute("theme"));
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new Map(), MapVariant.LUMO_NO_BORDER);
     }
 }

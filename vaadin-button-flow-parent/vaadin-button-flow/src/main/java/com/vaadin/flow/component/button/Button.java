@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,11 +14,6 @@
  * the License.
  */
 package com.vaadin.flow.component.button;
-
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
@@ -35,7 +30,9 @@ import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.ShortcutRegistration;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -48,6 +45,7 @@ import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.signals.Signal;
 
 /**
  * The Button component allows users to perform actions. It comes in several
@@ -56,7 +54,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/button", version = "25.1.0-alpha5")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -68,10 +66,19 @@ public class Button extends Component
     private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
 
+    // Explicit text node is used to manage the text content and text signal
+    // bindings of the button separatly from its icon. All `HasText` methods
+    // delegate to this node.
+    private final Text textNode = new Text("");
+
+    private final SignalPropertySupport<String> textSupport = SignalPropertySupport
+            .<String> create(this, this::textChangeHandler);
+
     /**
      * Default constructor. Creates an empty button.
      */
     public Button() {
+        add(textNode);
     }
 
     /**
@@ -82,7 +89,19 @@ public class Button extends Component
      * @see #setText(String)
      */
     public Button(String text) {
+        this();
         setText(text);
+    }
+
+    /**
+     * Creates a button with a text bound to a signal.
+     *
+     * @param textSignal
+     *            the signal of text value
+     */
+    public Button(Signal<String> textSignal) {
+        this();
+        bindText(textSignal);
     }
 
     /**
@@ -93,6 +112,7 @@ public class Button extends Component
      * @see #setIcon(Component)
      */
     public Button(Component icon) {
+        this();
         setIcon(icon);
     }
 
@@ -110,8 +130,23 @@ public class Button extends Component
      * @see #setIcon(Component)
      */
     public Button(String text, Component icon) {
+        this();
         setIcon(icon);
         setText(text);
+    }
+
+    /**
+     * Creates a button with an icon and a text bound to a signal.
+     *
+     * @param textSignal
+     *            the signal of text value
+     * @param icon
+     *            the icon inside the button
+     */
+    public Button(Signal<String> textSignal, Component icon) {
+        this();
+        setIcon(icon);
+        bindText(textSignal);
     }
 
     /**
@@ -126,7 +161,24 @@ public class Button extends Component
      */
     public Button(String text,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         setText(text);
+        addClickListener(clickListener);
+    }
+
+    /**
+     * Creates a button with a text bound to a signal and a listener for click
+     * events.
+     *
+     * @param textSignal
+     *            the signal of text value
+     * @param clickListener
+     *            the event listener for click events
+     */
+    public Button(Signal<String> textSignal,
+            ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
+        bindText(textSignal);
         addClickListener(clickListener);
     }
 
@@ -142,6 +194,7 @@ public class Button extends Component
      */
     public Button(Component icon,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         setIcon(icon);
         addClickListener(clickListener);
     }
@@ -161,8 +214,28 @@ public class Button extends Component
      */
     public Button(String text, Component icon,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
         setIcon(icon);
         setText(text);
+        addClickListener(clickListener);
+    }
+
+    /**
+     * Creates a button with an icon, a text bound to a signal, and a listener
+     * for click events.
+     *
+     * @param textSignal
+     *            the signal of text value
+     * @param icon
+     *            the icon inside the button
+     * @param clickListener
+     *            the event listener for click events
+     */
+    public Button(Signal<String> textSignal, Component icon,
+            ComponentEventListener<ClickEvent<Button>> clickListener) {
+        this();
+        setIcon(icon);
+        bindText(textSignal);
         addClickListener(clickListener);
     }
 
@@ -182,11 +255,29 @@ public class Button extends Component
      */
     @Override
     public void setText(String text) {
-        removeAll(getNonTextNodes());
-        if (text != null && !text.isEmpty()) {
-            getElement().appendChild(Element.createText(text));
-        }
-        updateThemeAttribute();
+        textNode.setText(text);
+        textChangeHandler(text);
+    }
+
+    @Override
+    public String getText() {
+        return textNode.getText();
+    }
+
+    @Override
+    public void setWhiteSpace(WhiteSpace value) {
+        textNode.setWhiteSpace(value);
+    }
+
+    @Override
+    public WhiteSpace getWhiteSpace() {
+        return textNode.getWhiteSpace();
+    }
+
+    @Override
+    public void bindText(Signal<String> textSignal) {
+        textNode.bindText(textSignal);
+        textSupport.bind(textSignal);
     }
 
     /**
@@ -238,6 +329,9 @@ public class Button extends Component
      * <p>
      * At the element-level, this method determines whether to set
      * {@code slot="prefix"} or {@code slot="suffix"} attribute to the icon.
+     * <p>
+     * When there is no text content in the button, the icon will not have any
+     * slot attribute regardless of this setting.
      *
      * @param iconAfterText
      *            whether the icon should be positioned after the text content
@@ -245,9 +339,7 @@ public class Button extends Component
      */
     public void setIconAfterText(boolean iconAfterText) {
         this.iconAfterText = iconAfterText;
-        if (iconComponent != null) {
-            updateIconSlot();
-        }
+        updateIconSlot();
     }
 
     /**
@@ -453,8 +545,15 @@ public class Button extends Component
     }
 
     private void updateIconSlot() {
-        iconComponent.getElement().setAttribute("slot",
-                iconAfterText ? "suffix" : "prefix");
+        if (iconComponent == null) {
+            return;
+        }
+        if (hasIconOnly()) {
+            iconComponent.getElement().removeAttribute("slot");
+        } else {
+            iconComponent.getElement().setAttribute("slot",
+                    iconAfterText ? "suffix" : "prefix");
+        }
     }
 
     /**
@@ -477,37 +576,8 @@ public class Button extends Component
         }
     }
 
-    /**
-     * Removes all contents from this component except elements in
-     * {@code exclusion} array. This includes child components, text content as
-     * well as child elements that have been added directly to this component
-     * using the {@link Element} API.
-     */
-    private void removeAll(Element... exclusion) {
-        Set<Element> toExclude = Stream.of(exclusion)
-                .collect(Collectors.toSet());
-        Predicate<Element> filter = toExclude::contains;
-        getElement().getChildren().filter(filter.negate())
-                .forEach(child -> child.removeAttribute("slot"));
-        getElement().removeAllChildren();
-        getElement().appendChild(exclusion);
-    }
-
-    private Element[] getNonTextNodes() {
-        return getElement().getChildren()
-                .filter(element -> !element.isTextNode())
-                .toArray(Element[]::new);
-    }
-
     private void updateThemeAttribute() {
-        // Add theme attribute "icon" when the button contains only an icon to
-        // fully support themes like Lumo. This doesn't override explicitly set
-        // theme attribute.
-        long childCount = getElement().getChildren().filter(
-                el -> el.isTextNode() || !"vaadin-tooltip".equals(el.getTag()))
-                .count();
-
-        if (childCount == 1 && iconComponent != null) {
+        if (hasIconOnly()) {
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");
@@ -530,5 +600,51 @@ public class Button extends Component
 
         return FeatureFlags.get(ui.getSession().getService().getContext())
                 .isEnabled(feature);
+    }
+
+    /**
+     * Checks whether the component is icon-only, which is needed for automatic
+     * assignment of icon slot name and theme attribute.
+     *
+     * @return true when there is an icon and neither text content nor other
+     *         visible non-icon elements.
+     */
+    private boolean hasIconOnly() {
+        long childCount = getElement().getChildren()
+                .filter(el -> el.isTextNode() ? !el.getText().isEmpty()
+                        : !"vaadin-tooltip".equals(el.getTag()))
+                .count();
+
+        return childCount == 1 && iconComponent != null;
+    }
+
+    /**
+     * Clears arbitrary content potentially added on the client-side or from
+     * template. This is expected to happen whenever a new text is assigned by
+     * invoking {@code setText(text)} or from a signal update bound with
+     * {@code bindText(textSignal)}
+     */
+    private void updateChildren() {
+        Element[] elements = getElement().getChildren().toArray(Element[]::new);
+
+        // Remove all children. This results in the client-side content being
+        // cleared, which is needed to also remove content added through a
+        // template.
+        getElement().removeAllChildren();
+
+        getElement().appendChild(elements);
+    }
+
+    /**
+     * Makes DOM updates related and coinciding with changing text, including
+     * icon slot, theme attribute, and handling template content.
+     *
+     * @param text
+     *            the text inside the button
+     */
+    private void textChangeHandler(String text) {
+        updateChildren();
+        updateIconSlot();
+        updateThemeAttribute();
     }
 }

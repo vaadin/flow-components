@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -74,6 +74,7 @@ public class PopupButtonWidget extends FocusWidget
     public PopupButtonWidget() {
         root.setClassName(BUTTON_CLASSNAME);
         root.setAttribute("role", "button");
+        SheetJsniUtil.partOf(root).add("popup-button");
 
         popup = new SpreadsheetOverlay(true, false);
         popup.setStyleName(POPUP_OVERLAY_CLASSNAME);

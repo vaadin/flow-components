@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,7 +50,27 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
     }
 
     @Test
-    public void uploadWithHandler_uploadSingleFile_fileUploadedAndNoErrorThrown()
+    public void uploadWithHandler_uploadTextFile_fileUploadedAndNoErrorThrown()
+            throws Exception {
+        File tempFile = createTempFile("some file", "txt");
+        upload.upload(tempFile);
+
+        checkLogsForErrors();
+
+        Assert.assertEquals(
+                "Unexpected handler events for upload with using upload handler",
+                "started-completed", eventsOutput.getText());
+
+        String expectedMetadata = "%s-%s-%s".formatted(tempFile.getName(),
+                "text/plain", getTempFileContents().getBytes().length);
+
+        Assert.assertEquals(
+                "Unexpected file metadata for upload with upload handler",
+                expectedMetadata, uploadOutput.getText());
+    }
+
+    @Test
+    public void uploadWithHandler_withLargeBinaryFile_fileUploadedAndNoErrorThrown()
             throws Exception {
         File tempFile = createTempBinaryFile();
         upload.upload(tempFile);
@@ -61,9 +81,12 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
                 "Unexpected handler events for upload with using upload handler",
                 "started-progress-completed", eventsOutput.getText());
 
+        String expectedMetadata = "%s-%s-%s".formatted(tempFile.getName(),
+                "application/octet-stream", FILE_SIZE);
+
         Assert.assertEquals(
-                "Unexpected file size for upload with upload handler",
-                uploadOutput.getText(), String.valueOf(FILE_SIZE));
+                "Unexpected file metadata for upload with upload handler",
+                uploadOutput.getText(), expectedMetadata);
     }
 
     private File createTempBinaryFile() throws IOException {

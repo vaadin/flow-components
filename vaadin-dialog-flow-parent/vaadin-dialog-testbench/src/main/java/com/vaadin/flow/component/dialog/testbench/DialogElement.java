@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,5 +41,14 @@ public class DialogElement extends TestBenchElement {
             // -> it's not open
             return false;
         }
+    }
+
+    /**
+     * Gets the title set for the dialog header.
+     *
+     * @return the header title or an empty string if not defined
+     */
+    public String getHeaderTitle() {
+        return getPropertyString("headerTitle");
     }
 }

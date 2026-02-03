@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -933,6 +933,7 @@ public class SheetWidget extends Panel {
         input.setWidth("0");
         input.setValue("x");
         input.getElement().setId("cellinput");
+        SheetJsniUtil.partOf(input.getElement()).add("cell-input");
         DOM.appendChild(sheet, input.getElement());
         adopt(input);
 
@@ -2712,6 +2713,7 @@ public class SheetWidget extends Panel {
             for (int i = frozenColumnHeaders.size()
                     + 1; i <= horizontalSplitPosition; i++) {
                 DivElement colHeader = Document.get().createDivElement();
+                SheetJsniUtil.partOf(colHeader).add("column-header");
                 colHeader.setInnerHTML(
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 colHeader.setClassName("ch col" + (i));
@@ -2735,6 +2737,7 @@ public class SheetWidget extends Panel {
                 rowHeader.setInnerHTML(
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 rowHeader.setClassName("rh row" + (i));
+                SheetJsniUtil.partOf(rowHeader).add("row-header");
                 frozenRowHeaders.add(rowHeader);
                 topLeftPane.appendChild(rowHeader);
             }
@@ -2769,10 +2772,13 @@ public class SheetWidget extends Panel {
                     colHeaders.add(i - firstColumnIndex, colHeader);
                 }
                 colHeader.setClassName("ch col" + (i));
+                SheetJsniUtil.partOf(colHeader).add("column-header");
+                SheetJsniUtil.partOf(colHeader).remove("header-selected");
                 colHeader.setInnerHTML(
                         actionHandler.getColHeader(i) + createHeaderDNDHTML());
                 if (selectedColHeaderIndexes.contains(i)) {
                     colHeader.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+                    SheetJsniUtil.partOf(colHeader).add("header-selected");
                 }
             } else {
                 debugConsole.severe("Trying to add plain column header (index:"
@@ -2814,10 +2820,13 @@ public class SheetWidget extends Panel {
                     rowHeaders.add(i - firstRowIndex, rowHeader);
                 }
                 rowHeader.setClassName("rh row" + (i));
+                SheetJsniUtil.partOf(rowHeader).add("row-header");
+                SheetJsniUtil.partOf(rowHeader).remove("header-selected");
                 rowHeader.setInnerHTML(
                         actionHandler.getRowHeader(i) + createHeaderDNDHTML());
                 if (selectedRowHeaderIndexes.contains(i)) {
                     rowHeader.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
+                    SheetJsniUtil.partOf(rowHeader).add("header-selected");
                 }
             } else {
                 debugConsole.severe("Trying to add plain row header (index:" + i
@@ -3023,6 +3032,9 @@ public class SheetWidget extends Panel {
         resetRowAndColumnStyles();
         updateCells(vScrollDiff, hScrollDiff);
         ensureCellSelectionStyles();
+
+        // Notify handler to refresh custom editors after scroll
+        actionHandler.onSheetRelayoutComplete();
     }
 
     private void ensureCellSelectionStyles() {
@@ -3032,6 +3044,7 @@ public class SheetWidget extends Panel {
                 Cell cell = getCell(coord.getCol(), coord.getRow());
                 if (cell != null) {
                     cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                    SheetJsniUtil.partOf(cell.getElement()).add("cell-range");
                     cellRangeStyledCells.add(cell);
                 }
 
@@ -3040,6 +3053,8 @@ public class SheetWidget extends Panel {
                 if (mergedCell != null) {
                     cellRangeStyledCells.add(mergedCell);
                     mergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                    SheetJsniUtil.partOf(mergedCell.getElement())
+                            .add("cell-range");
                 }
             }
         }
@@ -3147,6 +3162,12 @@ public class SheetWidget extends Panel {
             final ArrayList<Cell> tempCols = new ArrayList<Cell>();
             for (Iterator<Cell> cells = row.iterator(); cells.hasNext();) {
                 Cell cell = cells.next();
+                if (cell == null) {
+                    // Cell can apparently be null here; scrolling will fail
+                    // unless this is checked for.
+                    continue;
+                }
+
                 int cIndex = cell.getCol();
                 // scroll right
                 if (hScrollDiff > 0) {
@@ -3304,10 +3325,10 @@ public class SheetWidget extends Panel {
     /**
      * Handles horizontal scrolling in the spreadsheet. It calculates the
      * visible columns and updates the column headers accordingly.
-     * 
+     *
      * The method takes the current scroll position and the difference since the
      * last update to determine how many columns to display.
-     * 
+     *
      * @param scrollLeft
      *            the current scroll position from the left
      * @param scrollDiff
@@ -3409,10 +3430,10 @@ public class SheetWidget extends Panel {
     /**
      * Handles vertical scrolling in the spreadsheet. It calculates the visible
      * rows and updates the row headers accordingly.
-     * 
+     *
      * The method takes the current scroll position and the difference since the
      * last update to determine how many rows to display.
-     * 
+     *
      * @param scrollTop
      *            the current scroll position from the top
      * @param scrollDiff
@@ -3630,13 +3651,10 @@ public class SheetWidget extends Panel {
         }
         String key = toKey(region.col1, region.row1);
         MergedCell mergedCell = new MergedCell(this, region.col1, region.row1);
-        String cellStyle = "cs0";
-        Cell cell = getCell(region.col1, region.row1);
-        if (cell != null) {
-            cellStyle = cell.getCellStyle();
-        }
+        String cellStyle = getMergedRegionCellStyle(region);
+        String textColor = getMergedRegionTextColor(region);
         mergedCell.setValue(getCellValue(region.col1, region.row1), cellStyle,
-                false);
+                textColor, false);
         DivElement element = mergedCell.getElement();
         element.addClassName(MERGED_CELL_CLASSNAME);
         updateMergedRegionRegionSize(region, mergedCell);
@@ -3661,6 +3679,30 @@ public class SheetWidget extends Panel {
             Widget customWidget = customWidgetMap.get(key);
             addCustomWidgetToCell(mergedCell, customWidget);
         }
+    }
+
+    private String getMergedRegionCellStyle(MergedRegion region) {
+        CellData cellData = getCellData(region.col1, region.row1);
+        if (cellData != null && cellData.cellStyle != null) {
+            return cellData.cellStyle;
+        }
+        Cell cell = getCell(region.col1, region.row1);
+        if (cell != null) {
+            return cell.getCellStyle();
+        }
+        return "cs0";
+    }
+
+    private String getMergedRegionTextColor(MergedRegion region) {
+        CellData cellData = getCellData(region.col1, region.row1);
+        if (cellData != null && cellData.cellStyle != null) {
+            return cellData.textColor;
+        }
+        Cell cell = getCell(region.col1, region.row1);
+        if (cell != null) {
+            return cell.getTextColor();
+        }
+        return null;
     }
 
     /**
@@ -3794,7 +3836,7 @@ public class SheetWidget extends Panel {
         Cell originalCell = getCell(region.col1, region.row1);
         if (originalCell != null) {
             originalCell.setValue(mCell.getValue(), mCell.getCellStyle(),
-                    false);
+                    mCell.getTextColor(), false);
         }
         mergedCells.remove(region.id).getElement().removeFromParent();
         overflownMergedCells.remove(region);
@@ -3912,7 +3954,7 @@ public class SheetWidget extends Panel {
         return false;
     }
 
-    private Cell getMergedCell(String key) {
+    Cell getMergedCell(String key) {
         for (Cell cell : mergedCells.values()) {
             if (key.equals(toKey(cell.getCol(), cell.getRow()))) {
                 return cell;
@@ -3922,10 +3964,16 @@ public class SheetWidget extends Panel {
     }
 
     private boolean setMergedCellValue(String key, String value,
-            String cellStyle, boolean needsMeasure) {
+            String cellStyle, String textColor, boolean needsMeasure) {
+        var customEditorFactory = getSheetHandler().getCustomEditorFactory();
+        if (customEditorFactory != null
+                && customEditorFactory.hasCustomEditor(key)) {
+            return false;
+        }
+
         Cell cell = getMergedCell(key);
         if (cell != null) {
-            cell.setValue(value, cellStyle, needsMeasure);
+            cell.setValue(value, cellStyle, textColor, needsMeasure);
             return true;
         }
         return false;
@@ -4284,12 +4332,12 @@ public class SheetWidget extends Panel {
             Iterator<CellData> i = cellData2.iterator();
             while (i.hasNext()) {
                 CellData cd = i.next();
-                topLeftCells
-                        .get((cd.row - 1) * horizontalSplitPosition + cd.col
-                                - 1)
-                        .setValue(cd.value, cd.cellStyle, cd.needsMeasure);
+                topLeftCells.get(
+                        (cd.row - 1) * horizontalSplitPosition + cd.col - 1)
+                        .setValue(cd.value, cd.cellStyle, cd.textColor,
+                                cd.needsMeasure);
                 String key = toKey(cd.col, cd.row);
-                setMergedCellValue(key, cd.value, cd.cellStyle,
+                setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor,
                         cd.needsMeasure);
                 if (cd.value == null) {
                     cachedCellData.remove(key);
@@ -4340,11 +4388,12 @@ public class SheetWidget extends Panel {
                         && customEditorFactory != null && customEditorFactory
                                 .hasCustomEditor(toKey(cd.col, cd.row)))) {
                     row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
-                            cd.needsMeasure);
+                            cd.textColor, cd.needsMeasure);
                 }
             }
             String key = toKey(cd.col, cd.row);
-            setMergedCellValue(key, cd.value, cd.cellStyle, cd.needsMeasure);
+            setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor,
+                    cd.needsMeasure);
             if (cd.value == null) {
                 cachedCellData.remove(key);
             } else {
@@ -4368,7 +4417,7 @@ public class SheetWidget extends Panel {
             } else {
                 cachedCellData.put(key, cd);
             }
-            if (!setMergedCellValue(key, cd.value, cd.cellStyle,
+            if (!setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor,
                     cd.needsMeasure)) {
                 Cell cell = null;
                 if (isCellRenderedInScrollPane(cd.col, cd.row)) {
@@ -4391,7 +4440,8 @@ public class SheetWidget extends Panel {
                     }
 
                     if (!(hasCustomEditor && !isShowCustomEditorOnFocus())) {
-                        cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
+                        cell.setValue(cd.value, cd.cellStyle, cd.textColor,
+                                cd.needsMeasure);
                         cell.markAsOverflowDirty();
                     }
                 }
@@ -4662,6 +4712,8 @@ public class SheetWidget extends Panel {
                     if (cell != null) {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                        SheetJsniUtil.partOf(cell.getElement())
+                                .add("cell-range");
                     }
 
                     Cell mergedCell = getMergedCell(toKey(c, r));
@@ -4669,6 +4721,8 @@ public class SheetWidget extends Panel {
                         cellRangeStyledCells.add(mergedCell);
                         mergedCell.getElement()
                                 .addClassName(CELL_RANGE_CLASSNAME);
+                        SheetJsniUtil.partOf(mergedCell.getElement())
+                                .add("cell-range");
                     }
                 }
             }
@@ -4686,14 +4740,16 @@ public class SheetWidget extends Panel {
     private void selectColHeader(int c) {
         if (frozenColumnHeaders != null && frozenColumnHeaders.size() > c - 1) {
             selectedFrozenColHeaderIndexes.add(c);
-            DivElement rh = frozenColumnHeaders.get(c - 1);
-            rh.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+            DivElement ch = frozenColumnHeaders.get(c - 1);
+            ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+            SheetJsniUtil.partOf(ch).add("header-selected");
         } else {
             selectedColHeaderIndexes.add(c);
             int targetCol = c - firstColumnIndex;
             if (targetCol >= 0 && colHeaders.size() > targetCol) {
                 DivElement ch = colHeaders.get(targetCol);
                 ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+                SheetJsniUtil.partOf(ch).add("header-selected");
             }
         }
     }
@@ -4703,12 +4759,14 @@ public class SheetWidget extends Panel {
             selectedFrozenRowHeaderIndexes.add(r);
             DivElement rh = frozenRowHeaders.get(r - 1);
             rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
+            SheetJsniUtil.partOf(rh).add("header-selected");
         } else {
             selectedRowHeaderIndexes.add(r);
             int targetRow = r - firstRowIndex;
             if (targetRow >= 0 && rowHeaders.size() > targetRow) {
                 DivElement rh = rowHeaders.get(targetRow);
                 rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
+                SheetJsniUtil.partOf(rh).add("header-selected");
             }
         }
     }
@@ -4716,18 +4774,22 @@ public class SheetWidget extends Panel {
     private void clearSelectedHeaderStyles() {
         for (DivElement rh : rowHeaders) {
             rh.removeClassName(SELECTED_ROW_HEADER_CLASSNAME);
+            SheetJsniUtil.partOf(rh).remove("header-selected");
         }
         for (DivElement ch : colHeaders) {
             ch.removeClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+            SheetJsniUtil.partOf(ch).remove("header-selected");
         }
         if (frozenRowHeaders != null) {
             for (DivElement rh : frozenRowHeaders) {
                 rh.removeClassName(SELECTED_ROW_HEADER_CLASSNAME);
+                SheetJsniUtil.partOf(rh).remove("header-selected");
             }
         }
         if (frozenColumnHeaders != null) {
             for (DivElement ch : frozenColumnHeaders) {
                 ch.removeClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+                SheetJsniUtil.partOf(ch).remove("header-selected");
             }
         }
         selectedRowHeaderIndexes.clear();
@@ -4739,6 +4801,7 @@ public class SheetWidget extends Panel {
     private void clearCellRangeStylesFromCells() {
         for (Cell cell : cellRangeStyledCells) {
             cell.getElement().removeClassName(CELL_RANGE_CLASSNAME);
+            SheetJsniUtil.partOf(cell.getElement()).remove("cell-range");
         }
         cellRangeStyledCells.clear();
         cellRangeStyledCoords.clear();
@@ -4839,10 +4902,14 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
+                SheetJsniUtil.partOf(oldSelectionCell.getElement())
+                        .add("cell-range");
             }
             if (oldMergedCell != null) {
                 cellRangeStyledCells.add(oldMergedCell);
                 oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                SheetJsniUtil.partOf(oldMergedCell.getElement())
+                        .add("cell-range");
             }
             cellRangeStylesCleared = false;
         } else {
@@ -4852,10 +4919,14 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
+                SheetJsniUtil.partOf(oldSelectionCell.getElement())
+                        .add("cell-range");
             }
             if (oldMergedCell != null) {
                 cellRangeStyledCells.add(oldMergedCell);
                 oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                SheetJsniUtil.partOf(oldMergedCell.getElement())
+                        .add("cell-range");
             }
             // highlight the new selected cell headers
             MergedRegion region = actionHandler
@@ -4925,6 +4996,8 @@ public class SheetWidget extends Panel {
             oldSelectionCell.getElement()
                     .removeClassName(CELL_SELECTION_CLASSNAME);
             oldSelectionCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+            SheetJsniUtil.partOf(oldSelectionCell.getElement())
+                    .add("cell-range");
         }
         if (oldMergedSelectionCell != null) {
             cellRangeStyledCells.add(oldMergedSelectionCell);
@@ -4932,16 +5005,22 @@ public class SheetWidget extends Panel {
                     .removeClassName(CELL_SELECTION_CLASSNAME);
             oldMergedSelectionCell.getElement()
                     .addClassName(CELL_RANGE_CLASSNAME);
+            SheetJsniUtil.partOf(oldMergedSelectionCell.getElement())
+                    .add("cell-range");
         }
         cellRangeStyledCoords.remove(new CellCoord(col, row));
         if (newSelectionCell != null) {
             cellRangeStyledCells.remove(newSelectionCell);
             newSelectionCell.getElement().removeClassName(CELL_RANGE_CLASSNAME);
+            SheetJsniUtil.partOf(newSelectionCell.getElement())
+                    .remove("cell-range");
         }
         if (newMergedSelectionCell != null) {
             cellRangeStyledCells.remove(newMergedSelectionCell);
             newMergedSelectionCell.getElement()
                     .removeClassName(CELL_RANGE_CLASSNAME);
+            SheetJsniUtil.partOf(newMergedSelectionCell.getElement())
+                    .remove("cell-range");
         }
         setSelectedCell(col, row);
     }
@@ -4965,6 +5044,8 @@ public class SheetWidget extends Panel {
                     if (cell != null) {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                        SheetJsniUtil.partOf(cell.getElement())
+                                .add("cell-range");
                     }
 
                     Cell mergedCell = getMergedCell(toKey(c, r));
@@ -4972,6 +5053,8 @@ public class SheetWidget extends Panel {
                         cellRangeStyledCells.add(mergedCell);
                         mergedCell.getElement()
                                 .addClassName(CELL_RANGE_CLASSNAME);
+                        SheetJsniUtil.partOf(mergedCell.getElement())
+                                .add("cell-range");
                     }
                 }
             }
@@ -5194,8 +5277,13 @@ public class SheetWidget extends Panel {
             var jsniUtil = getSheetJsniUtil();
             jsniUtil.parseColRow(address);
 
-            Cell cell = getCell(jsniUtil.getParsedCol(),
-                    jsniUtil.getParsedRow());
+            Cell cell;
+            if (isMergedCell(address)) {
+                cell = getMergedCell(address);
+            } else {
+                cell = getCell(jsniUtil.getParsedCol(),
+                        jsniUtil.getParsedRow());
+            }
             if (cell != null) {
                 CellData cd = cachedCellData.get(address);
                 cell.setValue(cd == null ? null : cd.value);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,33 +15,24 @@
  */
 package com.vaadin.flow.component.progressbar.tests;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
-import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class ProgressBarVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.addThemeVariants(ProgressBarVariant.LUMO_ERROR);
-
-        ThemeList themeNames = progressBar.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(ProgressBarVariant.LUMO_ERROR.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new ProgressBar(), ProgressBarVariant.LUMO_SUCCESS);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.addThemeVariants(ProgressBarVariant.LUMO_ERROR);
-        progressBar.removeThemeVariants(ProgressBarVariant.LUMO_ERROR);
-
-        ThemeList themeNames = progressBar.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(ProgressBarVariant.LUMO_ERROR.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new ProgressBar(), ProgressBarVariant.LUMO_SUCCESS);
     }
 }

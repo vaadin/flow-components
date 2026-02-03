@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogEntry;
@@ -373,6 +374,18 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 findElements(By.className("v-errorindicator")).isEmpty());
     }
 
+    protected void assertAddressFieldValue(String expected) {
+        try {
+            waitUntil(
+                    driver -> Objects.equals(expected, getAddressFieldValue()),
+                    2);
+        } catch (TimeoutException e) {
+            var actual = getAddressFieldValue();
+            Assert.fail("Expected " + expected + " on addressField, actual:"
+                    + actual);
+        }
+    }
+
     protected void assertAddressFieldValue(String expected, String actual) {
         Assert.assertEquals(
                 "Expected " + expected + " on addressField, actual:" + actual,
@@ -380,7 +393,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     protected void assertSelectedCell(String cell) {
-        assertSelectedCell(cell, isCellSelected(cell));
+        try {
+            waitUntil(driver -> isCellSelected(cell), 2);
+        } catch (TimeoutException e) {
+            Assert.fail("Cell " + cell + " should be the selected cell");
+        }
     }
 
     protected void assertSelectedCell(String cell, boolean selected) {
@@ -389,7 +406,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     protected void assertNotSelectedCell(String cell) {
-        assertNotSelectedCell(cell, isCellSelected(cell));
+        try {
+            waitUntil(driver -> !isCellSelected(cell), 2);
+        } catch (TimeoutException e) {
+            Assert.fail("Cell " + cell + " should not be selected cell");
+        }
     }
 
     protected void assertNotSelectedCell(String cell, boolean selected) {

@@ -713,14 +713,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   }
 
-  grid.cellClassNameGenerator = function (column, rowData) {
-    const style = rowData.item.style;
-    if (!style) {
-      return;
-    }
-    return (style.row || '') + ' ' + ((column && style[column._flowId]) || '');
-  };
-
   grid.cellPartNameGenerator = function (column, rowData) {
     const part = rowData.item.part;
     if (!part) {
@@ -760,5 +752,25 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.isItemSelectable = (item) => {
     // If there is no selectable data, assume the item is selectable
     return item?.selectable === undefined || item.selectable;
+  };
+
+  function isRowFullyInViewport(row) {
+    const rowRect = row.getBoundingClientRect();
+    const tableRect = grid.$.table.getBoundingClientRect();
+    const headerRect = grid.$.header.getBoundingClientRect();
+    const footerRect = grid.$.footer.getBoundingClientRect();
+    return rowRect.top >= tableRect.top + headerRect.height && rowRect.bottom <= tableRect.bottom - footerRect.height;
+  }
+
+  grid.$connector.scrollToItem = function (itemKey, ...args) {
+    const targetRow = grid._getRenderedRows().find((row) => {
+      const { item } = grid.__getRowModel(row);
+      return grid.getItemId(item) === itemKey;
+    });
+    if (targetRow && isRowFullyInViewport(targetRow)) {
+      return;
+    }
+
+    grid.scrollToIndex(...args);
   };
 };

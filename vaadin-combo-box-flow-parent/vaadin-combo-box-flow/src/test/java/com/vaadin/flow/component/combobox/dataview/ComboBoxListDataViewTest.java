@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.dataview;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,11 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBoxBase;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
-import com.vaadin.tests.dataprovider.MockUI;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
@@ -60,10 +62,10 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
-        ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        setClientFilter(component, "ba");
         // Close combo box drop down to trigger the filter erase
         component.setOpened(false);
-        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        fakeClientCommunication();
 
         Stream<String> filteredItems = dataView.getItems();
 
@@ -98,10 +100,10 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
-        ComboBoxDataViewTestHelper.setClientSideFilter(component, "ba");
+        setClientFilter(component, "ba");
         // Close combo box drop down to trigger the filter erase
         component.setOpened(false);
-        ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
+        fakeClientCommunication();
 
         int itemCount = dataView.getItemCount();
 
@@ -152,4 +154,25 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         return new ComboBox<>();
     }
 
+    private void setClientFilter(ComboBox<String> comboBox,
+            String clientFilter) {
+        try {
+            // Reset the client filter on server side as though it's sent from
+            // client
+            Method setViewportRangeMethod = ComboBoxBase.class
+                    .getDeclaredMethod("setViewportRange", int.class, int.class,
+                            String.class);
+            setViewportRangeMethod.setAccessible(true);
+            setViewportRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
+                    clientFilter);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
+    }
 }

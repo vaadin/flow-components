@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-dashboard-flow-parent</artifactId>
-        <version>25.0-SNAPSHOT</version>
+        <version>25.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-dashboard-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -38,14 +38,26 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dashboard-flow</artifactId>
+            <artifactId>vaadin-confirm-dialog-flow</artifactId>
             <version>25.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dashboard-testbench</artifactId>
+            <artifactId>vaadin-confirm-dialog-testbench</artifactId>
             <version>25.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dashboard-flow</artifactId>
+            <version>25.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dashboard-testbench</artifactId>
+            <version>25.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -92,6 +104,8 @@
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                        </fileset>
+                        <fileset>
                             <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
@@ -99,4 +100,50 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("first column", getCellContent("C3"));
         Assert.assertEquals("last column", getCellContent("C4"));
     }
+
+    @Test
+    public void contextMenu_itemsContainExpectedIcons() {
+        loadTestFixture(TestFixtures.IconAction);
+
+        var cell = getSpreadsheet().getCellAt("B2");
+        cell.contextClick();
+
+        var vaadinIcon = getIconFromAction("Vaadin icon");
+        Assert.assertEquals("vaadin:academy-cap",
+                vaadinIcon.getAttribute("icon"));
+
+        var lumoIcon = getIconFromAction("Lumo icon");
+        String lumoAttr = lumoIcon.getAttribute("icon");
+        Assert.assertEquals("lumo:angle-up", lumoAttr);
+    }
+
+    @Test
+    public void contextMenu_rowHeader_itemsContainExpectedIcons() {
+        loadTestFixture(TestFixtures.IconAction);
+
+        // Open context menu for row header
+        getSpreadsheet().getRowHeader(3).contextClick();
+
+        var rowIcon = getIconFromAction("Row action");
+        Assert.assertEquals("lumo:calendar", rowIcon.getAttribute("icon"));
+    }
+
+    @Test
+    public void contextMenu_columnHeader_itemsContainExpectedIcons() {
+        loadTestFixture(TestFixtures.IconAction);
+
+        // Open context menu for column header
+        getSpreadsheet().getColumnHeader(3).contextClick();
+
+        var colIcon = getIconFromAction("Column action");
+        Assert.assertEquals("lumo:cog", colIcon.getAttribute("icon"));
+    }
+
+    private WebElement getIconFromAction(String actionText) {
+        return findElements(By.className("gwt-MenuItem")).stream()
+                .filter(el -> el.getText().equals(actionText))
+                .map(el -> el.findElement(By.tagName("vaadin-icon")))
+                .findFirst().orElseThrow();
+    }
+
 }

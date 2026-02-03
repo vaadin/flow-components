@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -97,6 +97,15 @@ public class GridScrollToIT extends AbstractComponentIT {
         Assert.assertEquals(500, grid.getFirstVisibleRowIndex());
         Assert.assertEquals("500",
                 grid.getCell(grid.getFirstVisibleRowIndex(), 0).getText());
+    }
+
+    @Test
+    public void grid_scrollToAlreadyVisibleItem_doesNotScroll() {
+        clickElementWithJs("scroll-to-row-499");
+        Assert.assertEquals(499, grid.getFirstVisibleRowIndex());
+
+        clickElementWithJs("scroll-to-item-500");
+        Assert.assertEquals(499, grid.getFirstVisibleRowIndex());
     }
 
     @Test

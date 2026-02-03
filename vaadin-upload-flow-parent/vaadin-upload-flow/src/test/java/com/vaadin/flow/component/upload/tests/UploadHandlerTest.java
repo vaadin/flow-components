@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -42,6 +42,7 @@ import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
+import com.vaadin.flow.server.streams.UploadResult;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -214,8 +215,8 @@ public class UploadHandlerTest {
         // verify that the original methods of custom handler were called
         Mockito.verify(customHandler)
                 .handleUploadRequest(Mockito.any(UploadEvent.class));
-        Mockito.verify(customHandler).responseHandled(Mockito.anyBoolean(),
-                Mockito.any(VaadinResponse.class));
+        Mockito.verify(customHandler)
+                .responseHandled(Mockito.any(UploadResult.class));
         Assert.assertEquals(111L, customHandler.getRequestSizeMax());
         Assert.assertEquals(222L, customHandler.getFileSizeMax());
         Assert.assertEquals(333L, customHandler.getFileCountMax());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Synchronize;
@@ -48,7 +47,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/popover", version = "25.1.0-alpha5")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
@@ -78,6 +77,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         updateTrigger();
         setRole("dialog");
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -177,7 +179,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * {@code opened-changed} event is sent when the popover opened state
      * changes.
      */
-    @DomEvent("opened-changed")
     public static class OpenedChangeEvent extends ComponentEvent<Popover> {
         private final boolean opened;
 
@@ -200,7 +201,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     public void setOpened(boolean opened) {
         if (opened != isOpened()) {
             getElement().setProperty("opened", opened);
-            fireEvent(new OpenedChangeEvent(this, false));
         }
     }
 
@@ -745,7 +745,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
                                 parentComponent.getElement()
                                         .appendChild(getElement());
                             }
-                        }, () -> ui.addToModalComponent(this));
+                        }, () -> ui.add(this));
 
                 autoAddedToTheUi = true;
             }
@@ -835,7 +835,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *            the width to set, may be {@code null}
      */
     public void setWidth(String width) {
-        getElement().setProperty("contentWidth", width);
+        getElement().setProperty("width", width);
     }
 
     /**
@@ -852,7 +852,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *            the height to set, may be {@code null}
      */
     public void setHeight(String height) {
-        getElement().setProperty("contentHeight", height);
+        getElement().setProperty("height", height);
     }
 
     /**

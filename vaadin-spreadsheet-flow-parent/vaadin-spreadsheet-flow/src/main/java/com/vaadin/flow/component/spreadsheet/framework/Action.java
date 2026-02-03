@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -191,13 +191,12 @@ public class Action implements Serializable {
     }
 
     /**
-     * Sets the icon. TODO: Marked private since the feature is not yet
-     * implemented.
+     * Sets the icon.
      *
      * @param icon
      *            the icon to set.
      */
-    private void setIcon(Icon icon) {
+    public void setIcon(Icon icon) {
         this.icon = icon;
 
     }

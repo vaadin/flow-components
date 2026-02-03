@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -93,6 +93,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
 
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
+    private final SerializablePropertyChangeListener childChangeListener = this::notifyChange;
 
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
@@ -165,7 +166,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         Objects.requireNonNull(configurationObject,
                 "Child configuration object must not be null");
         children.add(configurationObject);
-        configurationObject.addPropertyChangeListener(this::notifyChange);
+        configurationObject.addPropertyChangeListener(childChangeListener);
         markAsDirty();
         // When adding a sub-hierarchy, we need to make sure that the client
         // receives the whole hierarchy. Otherwise objects that have been synced
@@ -198,7 +199,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         if (configurationObject == null)
             return;
         children.remove(configurationObject);
-        configurationObject.removePropertyChangeListener(this::notifyChange);
+        configurationObject.removePropertyChangeListener(childChangeListener);
         markAsDirty();
     }
 

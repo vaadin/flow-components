@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,8 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.Arrays;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -111,8 +109,8 @@ public class ItemClickListenerPage extends Div {
             String filterValue) {
         dataProvider.clearFilters();
         if (filterValue != null) {
-            dataProvider.addFilter(
-                    item -> StringUtils.containsIgnoreCase(item, filterValue));
+            dataProvider.addFilter(item -> item.toLowerCase()
+                    .contains(filterValue.toLowerCase()));
         }
     }
 }

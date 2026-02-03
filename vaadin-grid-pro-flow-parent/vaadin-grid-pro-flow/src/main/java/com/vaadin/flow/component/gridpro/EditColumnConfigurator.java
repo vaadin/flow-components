@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -61,7 +61,7 @@ public class EditColumnConfigurator<T> implements Serializable {
 
         column.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(column,
-                        context -> UI.getCurrent().getPage().executeJs(
+                        context -> UI.getCurrentOrThrow().getPage().executeJs(
                                 "window.Vaadin.Flow.gridProConnector.patchEditModeRenderer($0)",
                                 column.getElement())));
 

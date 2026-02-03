@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
@@ -24,7 +23,6 @@ import org.junit.Test;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -35,10 +33,6 @@ public class ButtonTest {
     private Icon icon;
 
     private static final String TEST_STRING = "lorem ipsum";
-
-    private static final String THEME_ATTRIBUTE = "theme";
-    private static final String THEME_ATTRIBUTE_ICON = "icon";
-    private static final String THEME_ATTRIBUTE_PRIMARY = "primary";
 
     @Test
     public void emptyCtor() {
@@ -140,52 +134,42 @@ public class ButtonTest {
     }
 
     @Test
-    public void updatingThemeAttribute() {
+    public void setIconWithoutText_noSlot() {
+        icon = new Icon();
         button = new Button();
-        assertButtonHasNoThemeAttribute();
 
-        button.setIcon(new Icon());
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
+        button.setIcon(icon);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
 
-        button.setText("foo");
-        assertButtonHasNoThemeAttribute();
+        // Changing icon position should have no effect
+        button.setIconAfterText(true);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
 
-        button.setIcon(null);
-        assertButtonHasNoThemeAttribute();
+        button.setIconAfterText(false);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+    }
 
-        button = new Button("foo", new Icon());
-        assertButtonHasNoThemeAttribute();
+    @Test
+    public void setIcon_setText_slotUpdated() {
+        icon = new Icon();
+        button = new Button();
 
-        button.setText("");
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
+        button.setIcon(icon);
+        button.setText(TEST_STRING);
 
-        button = new Button("foo", new Icon());
+        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void setIcon_setAndRemoveText_slotRemoved() {
+        icon = new Icon();
+        button = new Button();
+
+        button.setIcon(icon);
+        button.setText(TEST_STRING);
         button.setText(null);
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
 
-        // should ignore tooltips when determining theme
-        button = new Button();
-        button.setTooltipText("foo");
-        button.setIcon(new Icon());
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
-
-        button = new Button(new Icon());
-        button.setTooltipText("foo");
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
-
-        // don't override explicitly set theme-attribute
-        button = new Button();
-        button.getElement().setAttribute(THEME_ATTRIBUTE,
-                THEME_ATTRIBUTE_PRIMARY);
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_PRIMARY);
-        button.setIcon(new Icon());
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_PRIMARY);
-        button.setText("foo");
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_PRIMARY);
-        button.setIcon(null);
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_PRIMARY);
-        button.setText(null);
-        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_PRIMARY);
+        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
     }
 
     @Test
@@ -238,63 +222,6 @@ public class ButtonTest {
     }
 
     @Test
-    public void addThemeVariant_themeNamesContainsThemeVariant() {
-        button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-
-        Set<String> themeNames = button.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(ButtonVariant.LUMO_SMALL.getVariantName()));
-    }
-
-    @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-        button.removeThemeVariants(ButtonVariant.LUMO_SMALL);
-
-        Set<String> themeNames = button.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(ButtonVariant.LUMO_SMALL.getVariantName()));
-    }
-
-    @Test
-    public void addThemeVariant_setIcon_themeAttributeContainsThemeVariantAndIcon() {
-        button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-        button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
-
-        Set<String> themeNames = button.getThemeNames();
-        Assert.assertTrue(themeNames.contains("icon"));
-        Assert.assertTrue(themeNames
-                .contains(ButtonVariant.LUMO_SUCCESS.getVariantName()));
-    }
-
-    @Test
-    public void setIcon_addThemeVariant_themeAttributeContiansThemeVariantAndIcon() {
-        button = new Button();
-        button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
-        button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-
-        Set<String> themeNames = button.getThemeNames();
-        Assert.assertTrue(themeNames.contains("icon"));
-        Assert.assertTrue(themeNames
-                .contains(ButtonVariant.LUMO_SUCCESS.getVariantName()));
-    }
-
-    @Test
-    public void changeIcon_iconThemeIsPreserved() {
-        button = new Button();
-        button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
-
-        Assert.assertEquals("icon", button.getThemeName());
-
-        button.setIcon(new Icon(VaadinIcon.ALARM));
-
-        Assert.assertEquals("icon", button.getThemeName());
-    }
-
-    @Test
     public void disableOnClick_click_componentIsDisabled() {
         AtomicBoolean buttonIsEnabled = new AtomicBoolean(true);
 
@@ -335,15 +262,6 @@ public class ButtonTest {
 
         Assert.assertTrue(button.getAriaLabel().isPresent());
         Assert.assertEquals("Aria label", button.getAriaLabel().get());
-    }
-
-    private void assertButtonHasThemeAttribute(String theme) {
-        Assert.assertTrue("Expected " + theme + " to be in the theme attribute",
-                button.getThemeNames().contains(theme));
-    }
-
-    private void assertButtonHasNoThemeAttribute() {
-        Assert.assertNull(button.getElement().getAttribute("theme"));
     }
 
     private void assertIconBeforeText() {

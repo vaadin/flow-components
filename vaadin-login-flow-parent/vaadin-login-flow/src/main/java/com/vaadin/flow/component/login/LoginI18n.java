@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,12 +17,10 @@ package com.vaadin.flow.component.login;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.StringUtil;
 
 import tools.jackson.databind.JsonNode;
 
@@ -40,9 +38,8 @@ public class LoginI18n implements Serializable {
 
     static {
         try {
-            String jsonString = IOUtils.toString(
-                    LoginI18n.class.getResource("i18n.json"),
-                    StandardCharsets.UTF_8);
+            String jsonString = StringUtil.toUTF8String(
+                    LoginI18n.class.getResourceAsStream("i18n.json"));
             DEFAULT_I18N = JacksonUtils.readTree(jsonString);
         } catch (IOException e) {
             throw new IllegalStateException(

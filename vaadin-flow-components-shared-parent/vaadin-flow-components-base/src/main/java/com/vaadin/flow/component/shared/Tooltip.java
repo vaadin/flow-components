@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha5")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -106,7 +106,7 @@ public class Tooltip implements Serializable {
 
             // The host under which the <vaadin-tooltip> element is
             // auto-attached
-            var tooltipHost = UI.getCurrent().getElement();
+            var tooltipHost = UI.getCurrentOrThrow().getElement();
             tooltipHost.appendChild(tooltip.tooltipElement);
             tooltip.tooltipElement.executeJs("this.target = $0;", element);
         };

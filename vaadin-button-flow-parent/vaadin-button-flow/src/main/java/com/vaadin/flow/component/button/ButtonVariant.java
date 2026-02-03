@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,7 +30,10 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_WARNING("warning"),
     LUMO_ERROR("error"),
     LUMO_CONTRAST("contrast"),
-    LUMO_ICON("icon");
+    LUMO_ICON("icon"),
+    AURA_PRIMARY("primary"),
+    AURA_TERTIARY("tertiary"),
+    AURA_DANGER("danger");
 
     private final String variant;
 

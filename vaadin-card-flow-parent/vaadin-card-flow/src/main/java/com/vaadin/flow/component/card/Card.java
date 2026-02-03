@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,10 @@
  */
 package com.vaadin.flow.component.card;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
@@ -42,7 +38,7 @@ import com.vaadin.flow.dom.Element;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-card")
-@NpmPackage(value = "@vaadin/card", version = "25.0.0-beta2")
+@NpmPackage(value = "@vaadin/card", version = "25.1.0-alpha5")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component implements HasSize,
         HasThemeVariant<CardVariant>, HasComponents, HasAriaLabel {
@@ -57,8 +53,6 @@ public class Card extends Component implements HasSize,
 
     private static final String CARD_TITLE_PROPERTY = "cardTitle";
     private static final String TITLE_HEADING_LEVEL_PROPERTY = "titleHeadingLevel";
-
-    private Element contentRoot;
 
     /**
      * Sets the component used as the card's media. The media slot is typically
@@ -310,63 +304,13 @@ public class Card extends Component implements HasSize,
 
     @Override
     public Stream<Component> getChildren() {
-        if (contentRoot == null) {
-            return Stream.empty();
-        }
-        return contentRoot.getChildren()
-                .map(element -> element.getComponent().orElseThrow());
-    }
-
-    @Override
-    public void add(Collection<Component> components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        var componentsToAdd = components.stream()
-                .map(component -> Objects.requireNonNull(component,
-                        "Component to add cannot be null"))
-                .map(Component::getElement).toList();
-        if (!componentsToAdd.isEmpty()) {
-            if (contentRoot == null) {
-                initContentRoot();
-            }
-            componentsToAdd.forEach(contentRoot::appendChild);
-        }
-    }
-
-    @Override
-    public void remove(Collection<Component> components) {
-        Objects.requireNonNull(components, "Components should not be null.");
-        var toRemove = new ArrayList<Component>(components.size());
-        for (var component : components) {
-            Objects.requireNonNull(component,
-                    "Component to remove cannot be null");
-            var parent = component.getElement().getParent();
-            if (parent == null) {
-                LoggerFactory.getLogger(getClass()).debug(
-                        "Remove of a component with no parent does nothing.");
-                continue;
-            }
-            if (contentRoot != null && contentRoot.equals(parent)) {
-                toRemove.add(component);
-            } else {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-        }
-        toRemove.stream().map(Component::getElement)
-                .forEach(contentRoot::removeChild);
-        if (contentRoot != null && contentRoot.getChildCount() == 0) {
-            getElement().removeChild(contentRoot);
-            contentRoot = null;
-        }
+        return super.getChildren()
+                .filter(child -> !child.getElement().hasAttribute("slot"));
     }
 
     @Override
     public void removeAll() {
-        if (contentRoot != null) {
-            contentRoot.removeAllChildren();
-            getElement().removeChild(contentRoot);
-            contentRoot = null;
-        }
+        getChildren().toList().forEach(this::remove);
     }
 
     @Override
@@ -376,10 +320,24 @@ public class Card extends Component implements HasSize,
             throw new IllegalArgumentException(
                     "Cannot add a component with a negative index");
         }
-        if (contentRoot == null) {
-            initContentRoot();
+
+        var children = getChildren().toList();
+
+        if (index > children.size()) {
+            throw new IllegalArgumentException(
+                    "The 'index' argument is out of bounds. The specified index ("
+                            + index
+                            + ") is greater than the current number of child components in the default slot ("
+                            + children.size() + ").");
         }
-        contentRoot.insertChild(index, component.getElement());
+
+        if (index == children.size()) {
+            getElement().appendChild(component.getElement());
+        } else {
+            var reference = children.get(index);
+            var actualIndex = getElement().indexOfChild(reference.getElement());
+            getElement().insertChild(actualIndex, component.getElement());
+        }
     }
 
     /**
@@ -403,12 +361,6 @@ public class Card extends Component implements HasSize,
      */
     public Optional<String> getAriaRole() {
         return Optional.ofNullable(getElement().getAttribute("role"));
-    }
-
-    private void initContentRoot() {
-        contentRoot = new Element("div");
-        contentRoot.getStyle().set("display", "contents");
-        getElement().appendChild(contentRoot);
     }
 
     private void doSetTitle(String title) {

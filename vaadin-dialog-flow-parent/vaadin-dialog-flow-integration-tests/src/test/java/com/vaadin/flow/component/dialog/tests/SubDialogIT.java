@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,13 +40,15 @@ public class SubDialogIT extends AbstractComponentIT {
         // Scroll the scroller inside the dialog
         var scroller = ((TestBenchElement) findElement(By.id("scroller")));
         scroller.scroll(100);
-        Assert.assertEquals("100", scroller.getPropertyString("scrollTop"));
+        Assert.assertEquals(100,
+                (int) scroller.getPropertyInteger("scrollTop"));
 
         // Open the sub dialog
         clickElementWithJs("open-sub-dialog");
 
         // Expect the scroller scroll position to not have changed
-        Assert.assertEquals("100", scroller.getPropertyString("scrollTop"));
+        Assert.assertEquals(100,
+                (int) scroller.getPropertyInteger("scrollTop"));
     }
 
 }

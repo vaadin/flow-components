@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -121,7 +121,7 @@ public class GridScrollTest {
     private String getViewportRange(Grid<String> grid) {
         try {
             var communicator = grid.getDataCommunicator();
-            var viewportRangeField = communicator.getClass()
+            var viewportRangeField = communicator.getClass().getSuperclass()
                     .getDeclaredField("viewportRange");
             viewportRangeField.setAccessible(true);
             Range viewportRange = (Range) viewportRangeField.get(communicator);
