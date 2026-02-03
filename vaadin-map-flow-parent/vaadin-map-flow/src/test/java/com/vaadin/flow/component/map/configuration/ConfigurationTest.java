@@ -36,8 +36,8 @@ public class ConfigurationTest {
 
     @Test
     public void addControl() {
-        TestControl control1 = new TestControl();
-        TestControl control2 = new TestControl();
+        TestControl control1 = new TestControl("type-1");
+        TestControl control2 = new TestControl("type-2");
 
         configuration.addControl(control1);
         configuration.addControl(control2);
@@ -53,10 +53,19 @@ public class ConfigurationTest {
         configuration.addControl(null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void addControl_doesNotAllowDuplicateType() {
+        TestControl control1 = new TestControl("same-type");
+        TestControl control2 = new TestControl("same-type");
+
+        configuration.addControl(control1);
+        configuration.addControl(control2);
+    }
+
     @Test
     public void removeControl() {
-        TestControl control1 = new TestControl();
-        TestControl control2 = new TestControl();
+        TestControl control1 = new TestControl("type-1");
+        TestControl control2 = new TestControl("type-2");
 
         configuration.addControl(control1);
         configuration.addControl(control2);
@@ -84,11 +93,11 @@ public class ConfigurationTest {
 
     @Test
     public void getVisibleControls() {
-        TestControl control1 = new TestControl();
+        TestControl control1 = new TestControl("type-1");
         control1.setVisible(true);
-        TestControl control2 = new TestControl();
+        TestControl control2 = new TestControl("type-2");
         control2.setVisible(false);
-        TestControl control3 = new TestControl();
+        TestControl control3 = new TestControl("type-3");
         control3.setVisible(true);
 
         configuration.addControl(control1);
@@ -149,9 +158,19 @@ public class ConfigurationTest {
     }
 
     private static class TestControl extends Control {
+        private final String type;
+
+        public TestControl() {
+            this("test-control");
+        }
+
+        public TestControl(String type) {
+            this.type = type;
+        }
+
         @Override
         public String getType() {
-            return "test-control";
+            return type;
         }
 
         public void fireOtherPropertyChange() {

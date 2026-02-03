@@ -124,13 +124,25 @@ public class Configuration extends AbstractConfigurationObject {
     }
 
     /**
-     * Adds a control to the map.
+     * Adds a control to the map. Only one control instance of each type is
+     * allowed. Adding a control of a type that already exists will throw an
+     * {@link IllegalArgumentException}.
      *
      * @param control
      *            the control to be added
+     * @throws IllegalArgumentException
+     *             if a control of the same type already exists
      */
     public void addControl(Control control) {
         Objects.requireNonNull(control);
+
+        boolean typeExists = controls.stream()
+                .anyMatch(c -> c.getType().equals(control.getType()));
+        if (typeExists) {
+            throw new IllegalArgumentException("A control of type '"
+                    + control.getType()
+                    + "' already exists. Only one control instance of each type is allowed.");
+        }
 
         controls.add(control);
         addChild(control);
