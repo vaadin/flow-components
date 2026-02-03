@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -110,6 +111,11 @@ public class UploadDropZoneTest {
     public void implementsHasComponents() {
         Assert.assertTrue(
                 HasComponents.class.isAssignableFrom(UploadDropZone.class));
+    }
+
+    @Test
+    public void implementsHasSize() {
+        Assert.assertTrue(HasSize.class.isAssignableFrom(UploadDropZone.class));
     }
 
     @Test
