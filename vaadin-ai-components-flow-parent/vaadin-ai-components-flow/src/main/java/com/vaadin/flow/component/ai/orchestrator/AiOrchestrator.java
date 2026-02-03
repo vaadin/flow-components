@@ -494,15 +494,7 @@ public class AiOrchestrator {
 
         @Override
         public void addMessage(AiMessage message) {
-            if (message instanceof MessageListItemWrapper messageListItemWrapper) {
-                messageList.addItem(messageListItemWrapper.getItem());
-            } else {
-                var item = new MessageListItem();
-                item.setText(message.getText());
-                item.setTime(message.getTime());
-                item.setUserName(message.getUserName());
-                messageList.addItem(item);
-            }
+            messageList.addItem(((MessageListItemWrapper) message).getItem());
         }
 
         @Override
