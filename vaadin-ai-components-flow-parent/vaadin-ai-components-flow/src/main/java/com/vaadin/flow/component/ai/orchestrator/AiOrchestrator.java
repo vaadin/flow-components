@@ -51,7 +51,6 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * <li>LLM integration</li>
  * <li>Component wiring (input, message list, file receiver)</li>
  * <li>Tool execution coordination</li>
- * <li>UI-safe updates via {@code UI.access()}</li>
  * <li>Programmatic invocation via {@link #prompt(String)}</li>
  * </ul>
  * <p>
