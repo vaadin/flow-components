@@ -133,6 +133,27 @@ public class DialogTest {
     }
 
     @Test
+    public void isKeepInViewport_falseByDefault() {
+        Dialog dialog = new Dialog();
+
+        Assert.assertFalse("keepInViewport is false by default",
+                dialog.isKeepInViewport());
+        Assert.assertFalse("keepInViewport property is false by default",
+                dialog.getElement().getProperty("keepInViewport", false));
+    }
+
+    @Test
+    public void setKeepInViewport_updatesProperty() {
+        Dialog dialog = new Dialog();
+        dialog.setKeepInViewport(true);
+
+        Assert.assertTrue("keepInViewport can be set to true",
+                dialog.isKeepInViewport());
+        Assert.assertTrue("keepInViewport property is true",
+                dialog.getElement().getProperty("keepInViewport", false));
+    }
+
+    @Test
     public void draggedEvent_topLeftPropertiesSynced() {
         Dialog dialog = new Dialog();
 
