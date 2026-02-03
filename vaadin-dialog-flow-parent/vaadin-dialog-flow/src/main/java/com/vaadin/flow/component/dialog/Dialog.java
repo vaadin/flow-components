@@ -33,7 +33,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ModalityMode;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -76,7 +75,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha4")
+@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha5")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -106,14 +105,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
-
-        getElement().addPropertyChangeListener("opened", event -> {
-            // Only handle client-side changes, server-side changes are already
-            // handled by setOpened
-            if (event.isUserOriginated()) {
-                doSetOpened(this.isOpened(), event.isUserOriginated());
-            }
-        });
 
         addListener(DialogResizeEvent.class, event -> {
             setWidth(event.getWidth());
@@ -1052,7 +1043,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the {@code opened} property from the dialog
      */
-    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
