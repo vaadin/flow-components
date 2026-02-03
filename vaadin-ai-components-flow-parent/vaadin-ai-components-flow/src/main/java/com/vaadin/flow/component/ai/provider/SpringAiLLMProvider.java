@@ -37,6 +37,11 @@ import reactor.core.publisher.Flux;
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
  * history across components, reuse the same provider instance.
+ * <p>
+ * <b>Note:</b> SpringAiLLMProvider is not serializable. If your application
+ * uses session persistence, you will need to create a new provider instance
+ * after session restore.
+ * </p>
  *
  * @author Vaadin Ltd
  */
