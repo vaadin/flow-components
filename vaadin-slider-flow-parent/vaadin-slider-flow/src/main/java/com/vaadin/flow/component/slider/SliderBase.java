@@ -74,7 +74,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        setValue(min, max, step, value);
+        setValue(value, min, max, step);
     }
 
     @Override
@@ -161,7 +161,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     @Override
     public void setValue(TValue value) {
-        setValue(getMinDouble(), getMaxDouble(), getStepDouble(), value);
+        setValue(value, getMinDouble(), getMaxDouble(), getStepDouble());
     }
 
     /**
@@ -169,32 +169,32 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * <p>
      * The step remains unchanged.
      *
+     * @param value
+     *            the value
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param value
-     *            the value
      * @throws IllegalArgumentException
      *             if min is greater than max
      * @throws IllegalArgumentException
      *             if value is not valid for the given range and current step
      */
-    public void setValue(double min, double max, TValue value) {
-        setValue(min, max, getStepDouble(), value);
+    public void setValue(TValue value, double min, double max) {
+        setValue(value, min, max, getStepDouble());
     }
 
     /**
      * Sets the minimum, maximum, step, and value of the slider atomically.
      *
+     * @param value
+     *            the value
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
      * @param step
      *            the step value
-     * @param value
-     *            the value
      * @throws IllegalArgumentException
      *             if min is greater than max
      * @throws IllegalArgumentException
@@ -202,7 +202,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @throws IllegalArgumentException
      *             if value is not valid for the given range and step
      */
-    public void setValue(double min, double max, double step, TValue value) {
+    public void setValue(TValue value, double min, double max, double step) {
         requireValidStep(step);
         requireValidRange(min, max);
         requireValidValue(min, max, step, value);
