@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -72,10 +71,15 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * instance. Each orchestrator maintains its own conversation context through
  * its provider instance.
  * </p>
+ * <p>
+ * <b>Note:</b> AiOrchestrator is not serializable. If your application uses
+ * session persistence, you will need to create a new orchestrator instance
+ * after session restore.
+ * </p>
  *
  * @author Vaadin Ltd
  */
-public class AiOrchestrator implements Serializable {
+public class AiOrchestrator {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AiOrchestrator.class);
@@ -91,7 +95,7 @@ public class AiOrchestrator implements Serializable {
     private AiInput input;
     private AiFileReceiver fileReceiver;
     private final List<LLMProvider.Attachment> pendingAttachments = new CopyOnWriteArrayList<>();
-    private transient Object[] tools = new Object[0];
+    private Object[] tools = new Object[0];
     private String userName;
     private String aiName;
 
