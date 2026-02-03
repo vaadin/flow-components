@@ -327,6 +327,9 @@ public class Slider extends SliderBase<Slider, Double> {
 
     /**
      * Gets the step value of the slider.
+     * <p>
+     * Valid slider values are calculated relative to the minimum value:
+     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
      *
      * @return the step value
      */
