@@ -58,7 +58,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "25.1.0-alpha5")
+@NpmPackage(value = "@vaadin/avatar", version = "25.1.0-alpha6")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
