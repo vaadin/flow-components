@@ -8,6 +8,7 @@
  * license.
  */
 import Feature from 'ol/Feature';
+import LineString from 'ol/geom/LineString';
 import Point from 'ol/geom/Point';
 import Polygon from 'ol/geom/Polygon';
 import Fill from 'ol/style/Fill';
@@ -64,6 +65,16 @@ function synchronizeView(target, source, _context) {
   target.setCenter(source.center ? convertToCoordinateArray(source.center) : [0, 0]);
   target.setRotation(source.rotation || 0);
   target.setZoom(source.zoom || 0);
+
+  return target;
+}
+
+function synchronizeLineString(target, source, _context) {
+  if (!target) {
+    target = new LineString(source.coordinates.map((coord) => convertToCoordinateArray(coord)));
+  }
+
+  target.setCoordinates(source.coordinates.map((coord) => convertToCoordinateArray(coord)));
 
   return target;
 }
@@ -141,6 +152,7 @@ const synchronizerLookup = {
   'ol/source/Vector': synchronizeVectorSource,
   'ol/source/XYZ': synchronizeXYZSource,
   // Geometry
+  'ol/geom/LineString': synchronizeLineString,
   'ol/geom/Point': synchronizePoint,
   'ol/geom/Polygon': synchronizePolygon,
   // Styles
