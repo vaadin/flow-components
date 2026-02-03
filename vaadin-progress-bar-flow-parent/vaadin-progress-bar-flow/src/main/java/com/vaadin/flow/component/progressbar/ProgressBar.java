@@ -18,10 +18,12 @@ package com.vaadin.flow.component.progressbar;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.signals.Signal;
 
 /**
  * Progress Bar shows the completion status of a task or process. The progress
@@ -35,6 +37,14 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {
+
+    private double min;
+    private double max;
+
+    private final SignalPropertySupport<Double> minSupport = SignalPropertySupport
+            .create(this, value -> this.min = value);
+    private final SignalPropertySupport<Double> maxSupport = SignalPropertySupport
+            .create(this, value -> this.max = value);
 
     /**
      * Constructs a new object with a scale of 0 to 1, and an initial value of
@@ -121,6 +131,7 @@ public class ProgressBar extends Component
      *            the double value to set
      */
     public void setMax(double max) {
+        this.max = max;
         getElement().setProperty("max", max);
     }
 
@@ -130,7 +141,7 @@ public class ProgressBar extends Component
      * @return the {@code max} property of the progressbar
      */
     public double getMax() {
-        return getElement().getProperty("max", 0.0);
+        return this.max;
     }
 
     /**
@@ -140,6 +151,7 @@ public class ProgressBar extends Component
      *            the double value to set
      */
     public void setMin(double min) {
+        this.min = min;
         getElement().setProperty("min", min);
     }
 
@@ -149,7 +161,57 @@ public class ProgressBar extends Component
      * @return the {@code min} property of the progressbar
      */
     public double getMin() {
-        return getElement().getProperty("min", 0.0);
+        return this.min;
+    }
+
+    /**
+     * Binds the given signal to the minimum bound of the progressbar.
+     * <p>
+     * When a signal is bound, the minimum bound is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the minimum bound manually
+     * through {@link #setMin(double)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the minimum bound to, or {@code null} to
+     *            unbind
+     * @see #setMin(double)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMin(Signal<Double> signal) {
+        getElement().bindProperty("min", signal);
+        minSupport.bind(signal);
+    }
+
+    /**
+     * Binds the given signal to the maximum bound of the progressbar.
+     * <p>
+     * When a signal is bound, the maximum bound is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the maximum bound manually
+     * through {@link #setMax(double)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the maximum bound to, or {@code null} to
+     *            unbind
+     * @see #setMax(double)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMax(Signal<Double> signal) {
+        getElement().bindProperty("max", signal);
+        maxSupport.bind(signal);
     }
 
     /**
