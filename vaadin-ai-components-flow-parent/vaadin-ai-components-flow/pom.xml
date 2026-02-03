@@ -40,6 +40,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-messages-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-upload-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
             <version>${langchain4j.version}</version>
