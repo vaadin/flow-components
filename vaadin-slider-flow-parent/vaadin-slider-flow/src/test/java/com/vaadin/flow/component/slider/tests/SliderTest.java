@@ -241,7 +241,7 @@ public class SliderTest {
     }
 
     @Test
-    public void setInvalidMin_throws() {
+    public void setMin_invalidMin_throws() {
         Slider slider = new Slider();
 
         Assert.assertThrows("setMin should throw when min > current max",
@@ -251,10 +251,9 @@ public class SliderTest {
 
     @Test
     public void setMin_valueBelowNewMin_adjustsValue() {
-        Slider slider = new Slider();
+        Slider slider = new Slider(0, 100, 0);
         slider.setMin(50);
 
-        Assert.assertEquals(50, slider.getMin(), 0);
         Assert.assertEquals(50, slider.getValue(), 0);
     }
 
@@ -268,7 +267,7 @@ public class SliderTest {
     }
 
     @Test
-    public void setInvalidMax_throws() {
+    public void setMax_invalidMax_throws() {
         Slider slider = new Slider();
 
         Assert.assertThrows("setMax should throw when max < current min",
@@ -278,10 +277,9 @@ public class SliderTest {
 
     @Test
     public void setMax_valueAboveNewMax_adjustsValue() {
-        Slider slider = new Slider(0, 100, 1, 80);
+        Slider slider = new Slider(0, 100, 100);
         slider.setMax(50);
 
-        Assert.assertEquals(50, slider.getMax(), 0);
         Assert.assertEquals(50, slider.getValue(), 0);
     }
 
@@ -296,7 +294,7 @@ public class SliderTest {
     }
 
     @Test
-    public void setInvalidStep_throws() {
+    public void setStep_invalidStep_throws() {
         Slider slider = new Slider();
 
         Assert.assertThrows("setStep should throw when step = 0",
@@ -307,9 +305,26 @@ public class SliderTest {
     }
 
     @Test
-    public void setStep_valueNotAligned_adjustsValue() {
-        Slider slider = new Slider(0.0, 1.0, 0.1, 0.3);
-        slider.setStep(0.25);
-        Assert.assertEquals(0.25, slider.getValue(), 0);
+    public void setStep_valueNotAligned_roundsValueDownToNearestStep() {
+        Slider slider = new Slider(0.0, 1.0, 0.1, 0.1);
+        slider.setStep(0.5);
+
+        Assert.assertEquals(0.0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setStep_valueNotAligned_roundsValueUpToNearestStep() {
+        Slider slider = new Slider(0.0, 1.0, 0.1, 0.4);
+        slider.setStep(0.5);
+
+        Assert.assertEquals(0.5, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setStep_valueNotAligned_roundsValueWithoutPrecisionErrors() {
+        Slider slider = new Slider(0.1, 1.0, 0.05, 0.3);
+        slider.setStep(0.1);
+
+        Assert.assertEquals(0.3, slider.getValue(), 0);
     }
 }

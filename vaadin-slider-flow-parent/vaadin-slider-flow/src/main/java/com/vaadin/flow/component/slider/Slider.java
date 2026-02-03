@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.slider;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Tag;
@@ -344,10 +345,20 @@ public class Slider extends SliderBase<Slider, Double> {
         requireValidStep(step);
         setStepDouble(step);
 
-        double stepsFromMin = Math.round((getValue() - getMin()) / step);
-        double adjustedValue = Math.min(getMin() + stepsFromMin * step,
-                getMax());
-        setValue(adjustedValue);
+        BigDecimal minBd = BigDecimal.valueOf(getMin());
+        BigDecimal maxBd = BigDecimal.valueOf(getMax());
+        BigDecimal stepBd = BigDecimal.valueOf(step);
+        BigDecimal valueBd = BigDecimal.valueOf(getValue());
+
+        // Equivalent to Math.round((value - min) / step)
+        BigDecimal stepsFromMinBd = valueBd.subtract(minBd).divide(stepBd, 0,
+                RoundingMode.HALF_UP);
+
+        // Equivalent to Math.min(min + stepsFromMin * step, max)
+        BigDecimal adjustedValue = minBd.add(stepsFromMinBd.multiply(stepBd))
+                .min(maxBd);
+
+        setValue(adjustedValue.doubleValue());
     }
 
     @Override
