@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
@@ -89,6 +90,11 @@ public class AiOrchestrator {
      */
     private static final int TIMEOUT_SECONDS = 600;
 
+    /**
+     * The feature flag ID for AI components.
+     */
+    static final String FEATURE_FLAG_ID = "aiComponents";
+
     private final LLMProvider provider;
     private final String systemPrompt;
     private AiMessageList messageList;
@@ -100,6 +106,7 @@ public class AiOrchestrator {
     private String aiName;
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
+    private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
 
     /**
      * Creates a new AI orchestrator.
@@ -217,6 +224,7 @@ public class AiOrchestrator {
 
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
+        checkFeatureFlag(ui);
         addUserMessageToList(userMessage);
         var assistantMessage = createAssistantMessagePlaceholder();
         String effectiveSystemPrompt = null;
@@ -258,6 +266,18 @@ public class AiOrchestrator {
         if (fileReceiver != null) {
             ui.access(() -> fileReceiver.clearFileList());
         }
+    }
+
+    private void checkFeatureFlag(UI ui) {
+        if (featureFlagChecked.get()) {
+            return;
+        }
+        FeatureFlags featureFlags = FeatureFlags
+                .get(ui.getSession().getService().getContext());
+        if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
+            throw new AiOrchestratorExperimentalFeatureException();
+        }
+        featureFlagChecked.set(true);
     }
 
     private void configureFileReceiver() {

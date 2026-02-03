@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -52,6 +53,12 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/message-list", version = "25.1.0-alpha6")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
+
+    /**
+     * The feature flag ID for AI components (includes MessageListItem
+     * attachments).
+     */
+    static final String FEATURE_FLAG_ID = "aiComponents";
 
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
@@ -219,6 +226,8 @@ public class MessageList extends Component
      *            the UI the component is attached to
      */
     private void handleFullUpdate(UI ui) {
+        checkAttachmentsFeatureFlag(ui, items);
+
         // Sync clientText for items
         items.forEach(item -> item.clientText = item.getText());
 
@@ -263,6 +272,8 @@ public class MessageList extends Component
         }
 
         var newItems = items.subList(pendingAddItemsIndex, items.size());
+        checkAttachmentsFeatureFlag(ui, newItems);
+
         // Sync clientText for new items
         newItems.forEach(item -> item.clientText = item.getText());
 
@@ -270,6 +281,30 @@ public class MessageList extends Component
         // Call the connector function to add items
         getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
                 newItemsJson, ui.getLocale().toLanguageTag());
+    }
+
+    /**
+     * Checks if any of the given items have attachments and if so, verifies
+     * that the AI components feature flag is enabled.
+     *
+     * @param ui
+     *            the UI to get the feature flags from
+     * @param itemsToCheck
+     *            the items to check for attachments
+     * @throws MessageListAttachmentsExperimentalFeatureException
+     *             if attachments are used without the feature flag enabled
+     */
+    private void checkAttachmentsFeatureFlag(UI ui,
+            List<MessageListItem> itemsToCheck) {
+        boolean hasAttachments = itemsToCheck.stream()
+                .anyMatch(item -> !item.getAttachments().isEmpty());
+        if (hasAttachments) {
+            FeatureFlags featureFlags = FeatureFlags
+                    .get(ui.getSession().getService().getContext());
+            if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
+                throw new MessageListAttachmentsExperimentalFeatureException();
+            }
+        }
     }
 
     @Override

@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -418,6 +420,12 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * The feature flag ID for AI components (includes UploadManager and related
+     * components).
+     */
+    public static final String FEATURE_FLAG_ID = "aiComponents";
+
+    /**
      * Internal connector component that loads the JS module and handles
      * client-server communication. Added as a virtual child of the owner
      * component so it doesn't appear in the DOM.
@@ -426,6 +434,21 @@ public class UploadManager implements Serializable {
     @JsModule("./vaadin-upload-manager-connector.ts")
     @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha6")
     static class Connector extends Component {
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
+            super.onAttach(attachEvent);
+            checkFeatureFlag(attachEvent.getUI());
+        }
+
+        private void checkFeatureFlag(com.vaadin.flow.component.UI ui) {
+            FeatureFlags featureFlags = FeatureFlags
+                    .get(ui.getSession().getService().getContext());
+            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID);
+
+            if (!enabled) {
+                throw new UploadManagerExperimentalFeatureException();
+            }
+        }
     }
 
     /**
