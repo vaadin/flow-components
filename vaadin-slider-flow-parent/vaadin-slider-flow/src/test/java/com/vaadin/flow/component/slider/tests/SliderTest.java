@@ -323,7 +323,7 @@ public class SliderTest {
 
     @Test
     public void setStep_valueNotAligned_roundsValueWithoutPrecisionErrors() {
-        Slider slider = new Slider(0.1, 1.0, 0.05, 0.3);
+        Slider slider = new Slider(0.1, 1.0, 0.01, 0.25);
         slider.setStep(0.1);
 
         Assert.assertEquals(0.3, slider.getValue(), 0);
