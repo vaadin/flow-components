@@ -13,25 +13,25 @@ import java.util.List;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-import com.vaadin.flow.component.map.configuration.feature.LineFeature;
+import com.vaadin.flow.component.map.configuration.feature.LineStringFeature;
 import com.vaadin.flow.component.map.configuration.style.Stroke;
 import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-map/line-feature")
-public class LineFeaturePage extends Div {
-    public LineFeaturePage() {
+@Route("vaadin-map/line-string-feature")
+public class LineStringFeaturePage extends Div {
+    public LineStringFeaturePage() {
         Map map = new Map();
 
-        LineFeature lineFeature = new LineFeature(new Coordinate(-10, 10),
-                new Coordinate(10, 10), new Coordinate(-10, -10),
-                new Coordinate(10, -10));
+        LineStringFeature lineStringFeature = new LineStringFeature(
+                new Coordinate(-10, 10), new Coordinate(10, 10),
+                new Coordinate(-10, -10), new Coordinate(10, -10));
 
-        map.getFeatureLayer().addFeature(lineFeature);
+        map.getFeatureLayer().addFeature(lineStringFeature);
         add(map);
 
         NativeButton updateCoordinates = new NativeButton("Update coordinates",
-                event -> lineFeature.setCoordinates(List.of(
+                event -> lineStringFeature.setCoordinates(List.of(
                         new Coordinate(-10, 10), new Coordinate(10, 10),
                         new Coordinate(-10, -10), new Coordinate(10, -10),
                         new Coordinate(0, 0))));
@@ -41,7 +41,7 @@ public class LineFeaturePage extends Div {
         NativeButton updateStyle = new NativeButton("Update style", e -> {
             Style style = new Style();
             style.setStroke(new Stroke("red", 3));
-            lineFeature.setStyle(style);
+            lineStringFeature.setStyle(style);
         });
         updateStyle.setId("update-style");
         add(updateStyle);

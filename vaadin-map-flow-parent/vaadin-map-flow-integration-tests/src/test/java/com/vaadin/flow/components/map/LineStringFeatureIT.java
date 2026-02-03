@@ -17,8 +17,8 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-map/line-feature")
-public class LineFeatureIT extends AbstractComponentIT {
+@TestPath("vaadin-map/line-string-feature")
+public class LineStringFeatureIT extends AbstractComponentIT {
     private MapElement map;
     private TestBenchElement updateCoordinates;
     private TestBenchElement updateStyle;

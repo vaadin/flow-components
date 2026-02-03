@@ -23,56 +23,59 @@ import com.vaadin.flow.component.map.configuration.style.Stroke;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
 /**
- * A convenience class for displaying a line with one or more segments on the
- * map.
+ * A convenience class for displaying a line string with one or more segments on
+ * the map.
  * <p>
  * Technically this is a {@link Feature} that uses a {@link LineString} geometry
  * for representation.
  */
-public class LineFeature extends Feature {
+public class LineStringFeature extends Feature {
     /**
-     * Creates a new line feature with the default style using the provided
-     * coordinates. The provided coordinates define the vertices of the line. A
-     * line must have at least two coordinates. Using more than two coordinates
-     * creates a multi-segment line, for example to represent a path or route.
+     * Creates a new line string feature with the default style using the
+     * provided coordinates. The provided coordinates define the vertices of the
+     * line string. A line string must have at least two coordinates. Using more
+     * than two coordinates creates a multi-segment line string, for example to
+     * represent a path or route.
      * <p>
      * Coordinates must be specified in the map's user projection, which by
      * default is {@code EPSG:4326}, also referred to as GPS coordinates.
      *
      * @param coordinates
      *            the list of coordinates that define the vertices of the line
+     *            string
      * @throws IllegalArgumentException
      *             if the provided coordinate list is null or has fewer than 2
      *             coordinates
      */
-    public LineFeature(List<Coordinate> coordinates) {
+    public LineStringFeature(List<Coordinate> coordinates) {
         setGeometry(new LineString(coordinates));
         setStyle(createDefaultStyle());
     }
 
     /**
-     * Creates a new line feature with the default style using the provided
-     * coordinates. The provided coordinates define the vertices of the line. A
-     * line must have at least two coordinates. Using more than two coordinates
-     * creates a multi-segment line, for example to represent a path or route.
+     * Creates a new line string feature with the default style using the
+     * provided coordinates. The provided coordinates define the vertices of the
+     * line string. A line string must have at least two coordinates. Using more
+     * than two coordinates creates a multi-segment line string, for example to
+     * represent a path or route.
      * <p>
      * Coordinates must be specified in the map's user projection, which by
      * default is {@code EPSG:4326}, also referred to as GPS coordinates.
      *
      * @param coordinates
-     *            the coordinates that define the vertices of the line
+     *            the coordinates that define the vertices of the line string
      * @throws IllegalArgumentException
      *             if the provided coordinate array is null or has fewer than 2
      *             coordinates
      */
-    public LineFeature(Coordinate... coordinates) {
+    public LineStringFeature(Coordinate... coordinates) {
         setGeometry(new LineString(coordinates));
         setStyle(createDefaultStyle());
     }
 
     /**
-     * The coordinates that define the line, as an array. Each coordinate
-     * represents a vertex in the line.
+     * The coordinates that define the line string, as an array. Each coordinate
+     * represents a vertex in the line string.
      *
      * @return the current coordinates
      */
@@ -82,10 +85,10 @@ public class LineFeature extends Feature {
     }
 
     /**
-     * Sets the coordinates that define the line. The provided coordinates
-     * define the vertices of the line. A line must have at least two
-     * coordinates. Using more than two coordinates creates a multi-segment
-     * line, for example to represent a path or route.
+     * Sets the coordinates that define the line string. The provided
+     * coordinates define the vertices of the line string. A line string must
+     * have at least two coordinates. Using more than two coordinates creates a
+     * multi-segment line string, for example to represent a path or route.
      * <p>
      * Coordinates must be specified in the map's user projection, which by
      * default is {@code EPSG:4326}, also referred to as GPS coordinates.
@@ -102,10 +105,10 @@ public class LineFeature extends Feature {
     }
 
     /**
-     * Sets the coordinates that define the line. The provided coordinates
-     * define the vertices of the line. A line must have at least two
-     * coordinates. Using more than two coordinates creates a multi-segment
-     * line, for example to represent a path or route.
+     * Sets the coordinates that define the line string. The provided
+     * coordinates define the vertices of the line string. A line string must
+     * have at least two coordinates. Using more than two coordinates creates a
+     * multi-segment line string, for example to represent a path or route.
      * <p>
      * Coordinates must be specified in the map's user projection, which by
      * default is {@code EPSG:4326}, also referred to as GPS coordinates.
