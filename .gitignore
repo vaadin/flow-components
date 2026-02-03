@@ -37,3 +37,7 @@ error-screenshots
 dev-bundle
 prod.bundle
 .vaadin-node-tasks.lock
+
+# Claude Code
+.claude/*.local.*
+CLAUDE.local.md

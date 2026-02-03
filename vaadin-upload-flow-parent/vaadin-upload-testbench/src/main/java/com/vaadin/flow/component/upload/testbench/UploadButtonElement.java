@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,23 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai;
+package com.vaadin.flow.component.upload.testbench;
 
-import java.io.Serializable;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * Event fired when a user submits input.
- *
- * @author Vaadin Ltd
- * @see InputSubmitListener
- * @see AiInput
+ * A TestBench element representing a <code>&lt;vaadin-upload-button&gt;</code>
+ * element.
  */
-public interface InputSubmitEvent extends Serializable {
+@Element("vaadin-upload-button")
+public class UploadButtonElement extends TestBenchElement {
 
     /**
-     * Gets the submitted value.
+     * Gets a tester for the upload manager linked to this button.
      *
-     * @return the submitted value
+     * @return the upload manager tester
      */
-    String getValue();
+    public UploadManagerTester getUploadManager() {
+        return new UploadManagerTester(this);
+    }
 }

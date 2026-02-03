@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
     <version>25.1-SNAPSHOT</version>
@@ -71,7 +71,7 @@
     </scm>
     <properties>
         <flow.version>25.1-SNAPSHOT</flow.version>
-        <testbench.version>10.0.0</testbench.version>
+        <testbench.version>10.1.0-alpha1</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -82,7 +82,7 @@
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
-        <spotless.plugin.version>3.1.0</spotless.plugin.version>
+        <spotless.plugin.version>3.2.1</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
@@ -99,6 +99,7 @@
         <spring-data-commons.version>4.0.2</spring-data-commons.version>
         <reactor-core.version>3.8.2</reactor-core.version>
         <langchain4j.version>1.10.0</langchain4j.version>
+        <spring-ai.version>2.0.0-M2</spring-ai.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
@@ -229,7 +230,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.1</version>
+                    <version>3.15.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -434,7 +435,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
-                    <version>1.2.1</version>
+                    <version>1.3.0</version>
                     <executions>
                         <execution>
                             <goals>
@@ -600,6 +601,8 @@
         <profile>
             <id>sonar-cloud</id>
             <properties>
+                <!-- Exclude I18N files from duplication checks (repetitive getter/setter boilerplate) -->
+                <sonar.cpd.exclusions>**/*I18N.java</sonar.cpd.exclusions>
                 <!-- SonarQube rule exclusions for: Integration tests -->
                 <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
                 <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->

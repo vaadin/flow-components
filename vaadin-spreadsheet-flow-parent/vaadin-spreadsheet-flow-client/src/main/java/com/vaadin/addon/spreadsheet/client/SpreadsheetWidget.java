@@ -488,7 +488,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 jsniUtil.parseColRow(entry.getKey());
                 var col = jsniUtil.getParsedCol();
                 var row = jsniUtil.getParsedRow();
-                var cell = sheetWidget.getCell(col, row);
+                Cell cell;
+                if (sheetWidget.isMergedCell(entry.getKey())) {
+                    cell = sheetWidget.getMergedCell(entry.getKey());
+                } else {
+                    cell = sheetWidget.getCell(col, row);
+                }
                 // Only display if the cell is currently visible (not scrolled
                 // out of view)
                 if (cell != null) {
@@ -598,12 +603,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             // initial display only used single column width,
                             // re-calculate with merged width
                             cell.setValue(cell.getValue(), cell.getCellStyle(),
-                                    false);
+                                    cell.getTextColor(), false);
                         }
                         i++;
                     }
                     sheetWidget.checkMergedRegionPositions();
                 }
+                // Move custom editors to merged cells if needed
+                showCellCustomEditors(lastCellKeysToEditorIdMap);
             }
         });
     }

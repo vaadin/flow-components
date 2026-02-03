@@ -89,7 +89,7 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha3")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha5")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -400,8 +400,8 @@ public class DateTimePicker
         var shouldFireValidationStatusChangeEvent = oldValue == null
                 && value == null
                 && (isInputUnparsable() || isInputIncomplete());
-        super.setValue(value);
         synchronizeChildComponentValues(value);
+        super.setValue(value);
         if (shouldFireValidationStatusChangeEvent) {
             validate(true);
         }
