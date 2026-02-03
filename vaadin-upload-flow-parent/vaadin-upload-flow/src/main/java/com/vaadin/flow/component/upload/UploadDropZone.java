@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -47,7 +48,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha5")
 @JsModule("@vaadin/upload/src/vaadin-upload-drop-zone.js")
 public class UploadDropZone extends Component
-        implements HasComponents, HasUploadManager {
+        implements HasComponents, HasUploadManager, HasSize {
 
     /**
      * Creates a new empty drop zone without a manager. The manager must be set
