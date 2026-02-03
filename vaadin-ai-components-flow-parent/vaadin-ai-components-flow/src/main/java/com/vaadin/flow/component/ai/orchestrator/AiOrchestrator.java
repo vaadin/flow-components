@@ -185,6 +185,7 @@ public class AiOrchestrator {
             isProcessing.set(false);
             clearPendingAttachments(ui);
         }).subscribe(token -> {
+            clearPendingAttachments(ui);
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.appendText(token));
             }
@@ -254,6 +255,9 @@ public class AiOrchestrator {
     }
 
     private void clearPendingAttachments(UI ui) {
+        if (pendingAttachments.isEmpty()) {
+            return;
+        }
         pendingAttachments.clear();
         if (fileReceiver != null) {
             ui.access(() -> fileReceiver.clearFileList());
