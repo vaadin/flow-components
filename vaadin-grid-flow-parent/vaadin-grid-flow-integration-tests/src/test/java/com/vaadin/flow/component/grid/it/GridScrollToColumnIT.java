@@ -37,7 +37,6 @@ public class GridScrollToColumnIT extends AbstractComponentIT {
     @Test
     public void scrollToColumnByIndex_columnIsVisible() {
         var headerCell = grid.getHeaderCell(0, 10);
-        isCellVisible(headerCell);
 
         Assert.assertFalse(isCellVisible(headerCell));
 
@@ -49,7 +48,6 @@ public class GridScrollToColumnIT extends AbstractComponentIT {
     @Test
     public void scrollToColumnByReference_columnIsVisible() {
         var headerCell = grid.getHeaderCell(0, 10);
-        isCellVisible(headerCell);
 
         Assert.assertFalse(isCellVisible(headerCell));
 
@@ -61,7 +59,6 @@ public class GridScrollToColumnIT extends AbstractComponentIT {
     @Test
     public void scrollToColumnByIndexWithTestbench_columnIsVisible() {
         var headerCell = grid.getHeaderCell(0, 10);
-        isCellVisible(headerCell);
 
         Assert.assertFalse(isCellVisible(headerCell));
 
@@ -73,7 +70,6 @@ public class GridScrollToColumnIT extends AbstractComponentIT {
     @Test
     public void scrollToColumnByReferenceWithTestbench_columnIsVisible() {
         var headerCell = grid.getHeaderCell(0, 10);
-        isCellVisible(headerCell);
 
         Assert.assertFalse(isCellVisible(headerCell));
 
