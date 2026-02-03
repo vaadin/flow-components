@@ -514,7 +514,8 @@ public class AiOrchestratorTest {
     }
 
     @Test
-    public void prompt_withAttachments_includesAttachmentsInRequest() {
+    public void prompt_withAttachments_includesAttachmentsInRequest()
+            throws Exception {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
@@ -524,16 +525,19 @@ public class AiOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = getSimpleOrchestrator();
-
-        var handlerCaptor = ArgumentCaptor.forClass(UploadHandler.class);
-        Mockito.verify(mockFileReceiver)
-                .setUploadHandler(handlerCaptor.capture());
+        var pendingAttachments = getPendingAttachments(orchestrator);
+        pendingAttachments.add(createPendingAttachment("test.txt"));
+        pendingAttachments.add(createPendingAttachment("image.png"));
 
         orchestrator.prompt("Hello with attachment");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertNotNull(captor.getValue().attachments());
+        var attachments = captor.getValue().attachments();
+        Assert.assertNotNull(attachments);
+        Assert.assertEquals(2, attachments.size());
+        Assert.assertEquals("test.txt", attachments.get(0).fileName());
+        Assert.assertEquals("image.png", attachments.get(1).fileName());
     }
 
     @Test
