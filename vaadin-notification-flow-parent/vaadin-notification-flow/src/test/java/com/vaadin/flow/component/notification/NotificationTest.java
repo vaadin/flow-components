@@ -36,6 +36,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.signals.local.ValueSignal;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -118,7 +119,7 @@ public class NotificationTest {
 
     @Test
     public void constructorsWithNoDurationCreateNotCloseableNotifications() {
-        final long constructorsWithoutDurationParameter = 3L;
+        final long constructorsWithoutDurationParameter = 4L;
 
         long constructorsWithNoIntParameter = Stream
                 .of(Notification.class.getConstructors())
@@ -133,7 +134,8 @@ public class NotificationTest {
 
         Collection<Notification> notificationsToCheck = Arrays.asList(
                 new Notification(), new Notification("test"),
-                new Notification(new Span("one"), new Span("two")));
+                new Notification(new Span("one"), new Span("two")),
+                new Notification(new ValueSignal<>("signal")));
 
         Assert.assertEquals(
                 "Not all of the Notification constructors without duration parameter are tested",
