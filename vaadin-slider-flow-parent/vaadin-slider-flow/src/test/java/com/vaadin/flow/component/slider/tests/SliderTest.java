@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 
 public class SliderTest {
     @Test
@@ -326,5 +327,35 @@ public class SliderTest {
         slider.setStep(0.1);
 
         Assert.assertEquals(0.3, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueFromClient_valueNotAlignedWithStep_throws() {
+        Slider slider = new Slider(0, 100, 10, 0);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            slider.getElement().getNode().getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient("value", 15.0).run();
+        });
+    }
+
+    @Test
+    public void setValueFromClient_valueBelowMin_throws() {
+        Slider slider = new Slider(0, 100, 10, 0);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            slider.getElement().getNode().getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient("value", -10.0).run();
+        });
+    }
+
+    @Test
+    public void setValueFromClient_valueAboveMax_throws() {
+        Slider slider = new Slider(0, 100, 10, 0);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            slider.getElement().getNode().getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient("value", 110.0).run();
+        });
     }
 }
