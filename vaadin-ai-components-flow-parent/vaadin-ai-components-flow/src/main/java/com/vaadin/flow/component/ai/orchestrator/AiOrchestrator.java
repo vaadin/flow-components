@@ -140,42 +140,6 @@ public class AiOrchestrator {
     }
 
     /**
-     * Gets the LLM provider.
-     *
-     * @return the provider
-     */
-    public LLMProvider getProvider() {
-        return provider;
-    }
-
-    /**
-     * Gets the input component.
-     *
-     * @return the input component, or null if not set
-     */
-    public AiInput getInput() {
-        return input;
-    }
-
-    /**
-     * Gets the message list component.
-     *
-     * @return the message list component, or null if not set
-     */
-    public AiMessageList getMessageList() {
-        return messageList;
-    }
-
-    /**
-     * Gets the file receiver component.
-     *
-     * @return the file receiver component, or null if not set
-     */
-    public AiFileReceiver getFileReceiver() {
-        return fileReceiver;
-    }
-
-    /**
      * Sends a prompt to the AI orchestrator programmatically. This method
      * allows sending prompts without requiring an input component.
      * <p>
@@ -195,15 +159,6 @@ public class AiOrchestrator {
      */
     public void prompt(String userMessage) {
         doPrompt(userMessage);
-    }
-
-    /**
-     * Returns the system prompt for the LLM.
-     *
-     * @return the system prompt, or null if no system prompt was configured
-     */
-    public String getSystemPrompt() {
-        return systemPrompt;
     }
 
     private void addUserMessageToList(String userMessage) {

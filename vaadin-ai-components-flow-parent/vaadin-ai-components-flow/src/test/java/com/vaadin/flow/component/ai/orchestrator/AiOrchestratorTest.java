@@ -73,68 +73,78 @@ public class AiOrchestratorTest {
     }
 
     @Test
-    public void builder_withProvider_createsOrchestrator() {
-        var orchestrator = getSimpleOrchestrator();
-        Assert.assertNotNull(orchestrator);
-        Assert.assertEquals(mockProvider, orchestrator.getProvider());
-    }
+    public void builder_withProvider_usesProviderForPrompts() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
 
-    @Test
-    public void builder_withSystemPrompt_setsSystemPrompt() {
-        var systemPrompt = "You are a helpful assistant";
-        var orchestrator = AiOrchestrator.builder(mockProvider, systemPrompt)
-                .build();
-        Assert.assertEquals(systemPrompt, orchestrator.getSystemPrompt());
-    }
-
-    @Test
-    public void builder_withMessageList_setsMessageList() {
         var orchestrator = AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList).build();
-        Assert.assertEquals(mockMessageList, orchestrator.getMessageList());
+        orchestrator.prompt("Hello");
+
+        Mockito.verify(mockProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
     @Test
-    public void builder_withInput_setsInputAndAddsListener() {
-        var orchestrator = getSimpleOrchestrator();
-        Assert.assertNotNull(orchestrator);
-        Assert.assertEquals(mockInput, orchestrator.getInput());
+    public void builder_withSystemPrompt_includesSystemPromptInRequest() {
+        mockUi();
+        var systemPrompt = "You are a helpful assistant";
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider, systemPrompt)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assert.assertEquals(systemPrompt, captor.getValue().systemPrompt());
+    }
+
+    @Test
+    public void builder_withMessageList_addsMessagesToList() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        Mockito.verify(mockMessageList, Mockito.atLeast(1))
+                .addMessage(Mockito.any(AiMessage.class));
+    }
+
+    @Test
+    public void builder_withInput_addsSubmitListener() {
+        AiOrchestrator.builder(mockProvider).withInput(mockInput).build();
+
         Mockito.verify(mockInput)
                 .addSubmitListener(Mockito.any(InputSubmitListener.class));
     }
 
     @Test
     public void builder_withFileReceiver_configuresUploadHandler() {
-        var orchestrator = getSimpleOrchestrator();
-        Assert.assertNotNull(orchestrator);
+        AiOrchestrator.builder(mockProvider).withFileReceiver(mockFileReceiver)
+                .build();
+
         Mockito.verify(mockFileReceiver)
                 .setUploadHandler(Mockito.any(UploadHandler.class));
         Mockito.verify(mockFileReceiver)
                 .addFileRemovedListener(Mockito.any(Consumer.class));
-    }
-
-    @Test
-    public void getMessageList_returnsConfiguredMessageList() {
-        var orchestrator = getSimpleOrchestrator();
-        Assert.assertEquals(mockMessageList, orchestrator.getMessageList());
-    }
-
-    @Test
-    public void getMessageList_returnsNullWhenNotConfigured() {
-        var orchestrator = AiOrchestrator.builder(mockProvider).build();
-        Assert.assertNull(orchestrator.getMessageList());
-    }
-
-    @Test
-    public void getFileReceiver_returnsConfiguredFileReceiver() {
-        var orchestrator = getSimpleOrchestrator();
-        Assert.assertEquals(mockFileReceiver, orchestrator.getFileReceiver());
-    }
-
-    @Test
-    public void getFileReceiver_returnsNullWhenNotConfigured() {
-        var orchestrator = AiOrchestrator.builder(mockProvider).build();
-        Assert.assertNull(orchestrator.getFileReceiver());
     }
 
     @Test
@@ -375,9 +385,22 @@ public class AiOrchestratorTest {
     }
 
     @Test
-    public void getSystemPrompt_returnsNullWhenNotConfigured() {
-        var orchestrator = getSimpleOrchestrator();
-        Assert.assertNull(orchestrator.getSystemPrompt());
+    public void prompt_withoutSystemPrompt_sendsNullSystemPromptInRequest() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString())).thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assert.assertNull(captor.getValue().systemPrompt());
     }
 
     @Test
@@ -417,9 +440,9 @@ public class AiOrchestratorTest {
     @Test
     public void builder_withFlowMessageInput_wrapsCorrectly() {
         var flowMessageInput = Mockito.mock(MessageInput.class);
-        var orchestrator = AiOrchestrator.builder(mockProvider)
-                .withInput(flowMessageInput).build();
-        Assert.assertNotNull(orchestrator.getInput());
+        AiOrchestrator.builder(mockProvider).withInput(flowMessageInput)
+                .build();
+
         Mockito.verify(flowMessageInput).addSubmitListener(Mockito.any());
     }
 
