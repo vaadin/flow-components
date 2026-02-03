@@ -183,9 +183,7 @@ public class AiOrchestrator {
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
         responseStream.doFinally(signal -> {
             isProcessing.set(false);
-            clearPendingAttachments(ui);
         }).subscribe(token -> {
-            clearPendingAttachments(ui);
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.appendText(token));
             }
@@ -227,6 +225,7 @@ public class AiOrchestrator {
         }
         final var finalSystemPrompt = effectiveSystemPrompt;
         var attachments = pendingAttachments.stream().toList();
+        clearPendingAttachments(ui);
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -255,9 +254,6 @@ public class AiOrchestrator {
     }
 
     private void clearPendingAttachments(UI ui) {
-        if (pendingAttachments.isEmpty()) {
-            return;
-        }
         pendingAttachments.clear();
         if (fileReceiver != null) {
             ui.access(() -> fileReceiver.clearFileList());
