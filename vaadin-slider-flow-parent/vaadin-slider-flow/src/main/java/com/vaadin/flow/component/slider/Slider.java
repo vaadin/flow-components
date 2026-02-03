@@ -372,24 +372,13 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Gets the empty value of the slider, which is equal to the minimum value.
+     * Clears the slider value, setting it to the minimum value.
      *
-     * @return the empty value
      * @see #getMin()
      */
     @Override
-    public Double getEmptyValue() {
-        return getMin();
-    }
-
-    /**
-     * Clears the slider value, setting it to the minimum value.
-     *
-     * @see #getEmptyValue()
-     */
-    @Override
     public void clear() {
-        super.clear();
+        setValue(getMin());
     }
 
     @Override

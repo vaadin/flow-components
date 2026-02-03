@@ -361,4 +361,12 @@ public class SliderTest {
                     .deferredUpdateFromClient("value", 110.0).run();
         });
     }
+
+    @Test
+    public void clear_valueResetsToMin() {
+        Slider slider = new Slider(10, 50, 30);
+        slider.clear();
+
+        Assert.assertEquals(10, slider.getValue(), 0);
+    }
 }
