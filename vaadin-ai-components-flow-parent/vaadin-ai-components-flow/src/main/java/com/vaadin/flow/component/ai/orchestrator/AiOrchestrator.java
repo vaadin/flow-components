@@ -64,6 +64,8 @@ import com.vaadin.flow.server.streams.UploadHandler;
  *         .withMessageList(messageList) // optional
  *         .withFileReceiver(upload) // optional
  *         .withTools(toolObj) // optional, for @Tool annotations
+ *         .withUserName(userName) // optional
+ *         .withAiName(aiName) // optional
  *         .build();
  * </pre>
  * <p>
