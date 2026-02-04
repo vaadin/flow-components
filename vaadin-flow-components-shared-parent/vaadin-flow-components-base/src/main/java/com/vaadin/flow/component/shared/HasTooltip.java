@@ -17,6 +17,7 @@ package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.signals.Signal;
 
 /**
  * Mixin interface for components that have special handling for tooltips on the
@@ -81,6 +82,52 @@ public interface HasTooltip extends HasElement {
             tooltip = setTooltipText(null);
         }
         return tooltip;
+    }
+
+    /**
+     * Binds the tooltip text to the given signal.
+     * <p>
+     * When a signal is bound, the tooltip text value is kept synchronized with
+     * the signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the text value manually
+     * (other than through the signal) throws {@code BindingActiveException}.
+     * Attempting to bind a new signal while one is already bound also throws
+     * {@code BindingActiveException}.
+     *
+     * @param textSignal
+     *            the signal to bind to, or {@code null} to unbind
+     * @see #setTooltipText(String)
+     * @since 25.1
+     */
+    default void bindTooltipText(Signal<String> textSignal) {
+        getTooltip().bindText(textSignal);
+    }
+
+    /**
+     * Binds the tooltip markdown content to the given signal.
+     * <p>
+     * When a signal is bound, the tooltip markdown content value is kept
+     * synchronized with the signal value while the component is attached. When
+     * the component is detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the markdown value manually
+     * (other than through the signal) throws {@code BindingActiveException}.
+     * Attempting to bind a new signal while one is already bound also throws
+     * {@code BindingActiveException}.
+     *
+     * @param markdownSignal
+     *            the signal to bind to, or {@code null} to unbind
+     * @see #setTooltipMarkdown(String)
+     * @since 25.1
+     */
+    default void bindTooltipMarkdown(Signal<String> markdownSignal) {
+        getTooltip().bindMarkdown(markdownSignal);
     }
 
 }
