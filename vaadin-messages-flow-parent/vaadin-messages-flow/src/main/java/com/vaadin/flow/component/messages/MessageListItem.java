@@ -18,9 +18,13 @@ package com.vaadin.flow.component.messages;
 import java.io.Serializable;
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,6 +74,7 @@ public class MessageListItem implements Serializable {
 
     private Set<String> themeNames = new LinkedHashSet<>();
     private Set<String> classNames = new LinkedHashSet<>();
+    private List<Attachment> attachments = new ArrayList<>();
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -608,6 +613,61 @@ public class MessageListItem implements Serializable {
     @JsonIgnore
     MessageList getHost() {
         return host;
+    }
+
+    /**
+     * Gets the attachments of this message.
+     *
+     * @return an unmodifiable list of attachments, never {@code null}
+     */
+    public List<Attachment> getAttachments() {
+        return Collections.unmodifiableList(attachments);
+    }
+
+    /**
+     * Sets the attachments of this message. The attachments will be displayed
+     * below the message text.
+     *
+     * @param attachments
+     *            the attachments to set, or an empty list to clear attachments
+     */
+    public void setAttachments(List<Attachment> attachments) {
+        Objects.requireNonNull(attachments,
+                "Attachments list cannot be null. Use an empty list to clear attachments.");
+        this.attachments = new ArrayList<>(attachments);
+        propsChanged();
+    }
+
+    /**
+     * Adds an attachment to this message.
+     *
+     * @param attachment
+     *            the attachment to add, not {@code null}
+     */
+    public void addAttachment(Attachment attachment) {
+        Objects.requireNonNull(attachment, "Attachment cannot be null");
+        this.attachments.add(attachment);
+        propsChanged();
+    }
+
+    /**
+     * Represents an attachment that can be associated with a message.
+     * Attachments are displayed below the message text and can represent files,
+     * images, or other resources.
+     * <p>
+     * This is an immutable record. To modify an attachment, create a new
+     * instance with the desired values.
+     *
+     * @param name
+     *            the name of the attachment (e.g., file name)
+     * @param url
+     *            the URL of the attachment
+     * @param mimeType
+     *            the MIME type of the attachment (e.g., "application/pdf",
+     *            "image/png"). Serialized as "type" in JSON.
+     */
+    public record Attachment(String name, String url,
+            @JsonProperty("type") String mimeType) implements Serializable {
     }
 
 }
