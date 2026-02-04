@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.slider.tests;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.flow.router.Route;
@@ -26,6 +27,12 @@ public class RangeSliderBasicPage extends Div {
     public RangeSliderBasicPage() {
         RangeSlider rangeSlider = new RangeSlider(10, 200, 5,
                 new RangeSliderValue(25, 150));
-        add(rangeSlider);
+
+        Span serverValue = new Span();
+        serverValue.setId("server-value");
+        rangeSlider.addValueChangeListener(event -> serverValue.setText(
+                event.getValue().start() + "," + event.getValue().end()));
+
+        add(rangeSlider, serverValue);
     }
 }

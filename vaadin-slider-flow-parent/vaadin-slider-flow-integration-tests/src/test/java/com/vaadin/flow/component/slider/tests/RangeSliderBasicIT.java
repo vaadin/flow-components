@@ -21,17 +21,20 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.slider.testbench.RangeSliderElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-range-slider/basic")
 public class RangeSliderBasicIT extends AbstractComponentIT {
 
     private RangeSliderElement rangeSlider;
+    private TestBenchElement serverValue;
 
     @Before
     public void init() {
         open();
         rangeSlider = $(RangeSliderElement.class).first();
+        serverValue = $("span").id("server-value");
     }
 
     @Test
@@ -41,5 +44,26 @@ public class RangeSliderBasicIT extends AbstractComponentIT {
         Assert.assertEquals(5, rangeSlider.getStep(), 0);
         Assert.assertEquals(25, rangeSlider.getStartValue(), 0);
         Assert.assertEquals(150, rangeSlider.getEndValue(), 0);
+    }
+
+    @Test
+    public void setValue_valueSynchronizedToServer() {
+        rangeSlider.setValue(50, 100);
+
+        Assert.assertEquals("50.0,100.0", serverValue.getText());
+    }
+
+    @Test
+    public void setStartValue_valueSynchronizedToServer() {
+        rangeSlider.setStartValue(50);
+
+        Assert.assertEquals("50.0,150.0", serverValue.getText());
+    }
+
+    @Test
+    public void setEndValue_valueSynchronizedToServer() {
+        rangeSlider.setEndValue(100);
+
+        Assert.assertEquals("25.0,100.0", serverValue.getText());
     }
 }

@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.slider.testbench;
 
+import java.util.Collections;
+
+import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -23,7 +28,51 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-range-slider")
-public class RangeSliderElement extends TestBenchElement {
+public class RangeSliderElement extends TestBenchElement
+        implements HasLabel, HasHelper, HasValidation {
+
+    /**
+     * Sets the value of the range slider, emulating user input. The emulation
+     * is done by setting the value property to the given values and then
+     * triggering synthetic {@code input} and {@code change} DOM events to
+     * synchronize the value with the server side.
+     *
+     * @param start
+     *            the start value
+     * @param end
+     *            the end value
+     */
+    public void setValue(double start, double end) {
+        setProperty("value", "[" + start + "," + end + "]");
+        dispatchEvent("input", Collections.singletonMap("bubbles", true));
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
+    }
+
+    /**
+     * Sets the start value of the range slider, emulating user input. The
+     * emulation is done by setting the value property and then triggering
+     * synthetic {@code input} and {@code change} DOM events to synchronize the
+     * value with the server side.
+     *
+     * @param start
+     *            the start value
+     */
+    public void setStartValue(double start) {
+        setValue(start, getEndValue());
+    }
+
+    /**
+     * Sets the end value of the range slider, emulating user input. The
+     * emulation is done by setting the value property and then triggering
+     * synthetic {@code input} and {@code change} DOM events to synchronize the
+     * value with the server side.
+     *
+     * @param end
+     *            the end value
+     */
+    public void setEndValue(double end) {
+        setValue(getStartValue(), end);
+    }
 
     /**
      * Gets the start value of the range slider.
