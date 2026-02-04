@@ -220,6 +220,30 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     @Test
+    public void reattachOwner_setMaxFiles_maxFilesIsEnforced()
+            throws Exception {
+        // Detach the owner component
+        clickButton("detach-owner");
+        assertLogContains("Owner detached");
+
+        // Reattach the owner component
+        clickButton("reattach-owner");
+        assertLogContains("Owner reattached");
+
+        // Set max files limit after reattach
+        clickButton("set-max-files-1");
+
+        // Try to upload two files - second should be rejected
+        File tempFile1 = createTempFile("file1", "txt");
+        File tempFile2 = createTempFile("file2", "txt");
+
+        uploadFiles(tempFile1, tempFile2);
+
+        // Verify that max files constraint is enforced
+        assertLogContains("Rejected:");
+    }
+
+    @Test
     public void unlinkButton_uploadFails() throws Exception {
         // Unlink the upload button from the manager
         clickButton("unlink-button");
