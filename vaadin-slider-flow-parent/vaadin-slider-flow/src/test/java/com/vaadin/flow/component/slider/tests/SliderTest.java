@@ -334,16 +334,18 @@ public class SliderTest {
     }
 
     @Test
-    public void setValueFromClient_valueNotAlignedWithStep_ignored() throws PropertyChangeDeniedException {
+    public void setValueFromClient_valueNotAlignedWithStep_ignored()
+            throws PropertyChangeDeniedException {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().getNode().getFeature(ElementPropertyMap.class)
-                    .deferredUpdateFromClient("value", 15.0).run();
+                .deferredUpdateFromClient("value", 15.0).run();
 
         Assert.assertEquals(0, slider.getValue(), 0);
     }
 
     @Test
-    public void setValueFromClient_valueBelowMin_ignored() throws PropertyChangeDeniedException {
+    public void setValueFromClient_valueBelowMin_ignored()
+            throws PropertyChangeDeniedException {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().getNode().getFeature(ElementPropertyMap.class)
                 .deferredUpdateFromClient("value", -10.0).run();
@@ -352,7 +354,8 @@ public class SliderTest {
     }
 
     @Test
-    public void setValueFromClient_valueAboveMax_ignored() throws PropertyChangeDeniedException {
+    public void setValueFromClient_valueAboveMax_ignored()
+            throws PropertyChangeDeniedException {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().getNode().getFeature(ElementPropertyMap.class)
                 .deferredUpdateFromClient("value", 110.0).run();
