@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -61,13 +60,17 @@ import reactor.core.publisher.FluxSink;
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
  * history across components, reuse the same provider instance.
+ * <p>
+ * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
+ * uses session persistence, you will need to create a new provider instance
+ * after session restore.
+ * </p>
  *
  * @author Vaadin Ltd
  */
 public class LangChain4JLLMProvider implements LLMProvider {
 
     private static final int MAX_MESSAGES = 30;
-    private static final int MAX_TOOL_EXECUTION_DEPTH = 20;
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
@@ -163,13 +166,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private void executeChat(ChatExecutionContext context) {
-        if (context.getDepth() == MAX_TOOL_EXECUTION_DEPTH) {
-            context.getSink()
-                    .error(new IllegalStateException(
-                            "Maximum tool execution depth exceeded: "
-                                    + context.getDepth()));
-            return;
-        }
         var messages = buildMessages(context.getRequest(),
                 context.getChatMemory());
         if (streamingChatModel != null) {
@@ -249,7 +245,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
         if (aiMessage.hasToolExecutionRequests()) {
             executeToolRequests(aiMessage, context);
-            context.incrementDepth();
             executeChat(context);
         } else {
             context.getSink().complete();
@@ -361,7 +356,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final FluxSink<String> sink;
         private final ChatMemory chatMemory;
         private final ToolContext toolContext;
-        private final AtomicInteger depth;
 
         ChatExecutionContext(LLMRequest request, FluxSink<String> sink,
                 ChatMemory chatMemory, ToolContext toolContext) {
@@ -369,7 +363,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             this.sink = sink;
             this.chatMemory = chatMemory;
             this.toolContext = toolContext;
-            this.depth = new AtomicInteger(0);
         }
 
         LLMRequest getRequest() {
@@ -386,14 +379,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
         ToolContext getToolContext() {
             return toolContext;
-        }
-
-        void incrementDepth() {
-            depth.incrementAndGet();
-        }
-
-        int getDepth() {
-            return depth.get();
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -141,6 +141,15 @@ public class UploadManager implements Serializable {
                 event -> startUpload());
         ComponentUtil.addListener(connector, UploadCompleteEvent.class,
                 event -> endUpload());
+    }
+
+    /**
+     * Gets the internal connector component.
+     *
+     * @return the connector component
+     */
+    Connector getConnector() {
+        return connector;
     }
 
     /**
@@ -415,7 +424,7 @@ public class UploadManager implements Serializable {
      */
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload-manager-connector.ts")
-    @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha3")
+    @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha6")
     static class Connector extends Component {
     }
 

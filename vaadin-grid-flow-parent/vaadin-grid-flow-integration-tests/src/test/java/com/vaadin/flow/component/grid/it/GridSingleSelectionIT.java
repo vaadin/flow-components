@@ -108,6 +108,15 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
         Assert.assertTrue(grid.getRow(499).isSelected());
     }
 
+    @Test
+    public void selectLastItemFromClient_itemSelected() {
+        // should automatically scroll before selecting via TestBench API
+        grid.select(499);
+
+        Assert.assertEquals("oldValue=null; newValue=499; fromClient=true",
+                selectionLog.getText());
+    }
+
     /**
      * Test that aria-multiselectable=false & the selectable children should
      * have aria-selected=true|false depending on their state

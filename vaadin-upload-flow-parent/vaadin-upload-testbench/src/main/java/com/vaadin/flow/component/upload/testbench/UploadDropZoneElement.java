@@ -13,17 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai;
+package com.vaadin.flow.component.upload.testbench;
 
-import java.util.stream.Stream;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
-import com.vaadin.flow.testutil.ClassesSerializableTest;
+/**
+ * A TestBench element representing a
+ * <code>&lt;vaadin-upload-drop-zone&gt;</code> element.
+ */
+@Element("vaadin-upload-drop-zone")
+public class UploadDropZoneElement extends TestBenchElement {
 
-public class AiComponentsSerializableTest extends ClassesSerializableTest {
-    @Override
-    protected Stream<String> getExcludedPatterns() {
-        return Stream.concat(super.getExcludedPatterns(), Stream.of(
-                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LangChain4JLLMProvider\\$.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LLMProviderHelpers"));
+    /**
+     * Gets a tester for the upload manager linked to this drop zone.
+     *
+     * @return the upload manager tester
+     */
+    public UploadManagerTester getUploadManager() {
+        return new UploadManagerTester(this);
     }
 }

@@ -6,11 +6,11 @@ This is a maven multi-module project including all vaadin flow components.
 
 ## Quick start
 
-It's provided a script that facilitates running most common tasks for running or testing components.
+The repository contains an interactive script for common tasks like running unit tests, integration tests and serving integration test pages.
 
-Execute `./scripts/run.sh` and select the appropriate menu options.
+To run it, execute `./scripts/run.js` and select the appropriate menu options.
 
-NOTE: a valid unix terminal with a regular shell is needed for running the utility.
+NOTE: The script requires a terminal and shell with TTY support, as well as a recent Node.js version.
 
 ## Compiling all modules but excluding ITs
 

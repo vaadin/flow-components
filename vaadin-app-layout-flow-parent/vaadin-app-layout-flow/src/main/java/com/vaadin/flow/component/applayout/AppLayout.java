@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasStyle;
@@ -28,15 +27,11 @@ import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.RouterLayout;
-
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * App Layout is a component for building common application layouts.
@@ -52,7 +47,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/app-layout", version = "25.1.0-alpha3")
+@NpmPackage(value = "@vaadin/app-layout", version = "25.1.0-alpha6")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -87,37 +82,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     public void setI18n(AppLayoutI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-
-        runBeforeClientResponse(ui -> {
-            if (i18n == this.i18n) {
-                setI18nWithJS();
-            }
-        });
-    }
-
-    private void setI18nWithJS() {
-        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
-
-        // Assign new I18N object to WC, by merging the existing
-        // WC I18N, and the values from the new AppLayoutI18n instance,
-        // into an empty object
-        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
-                i18nJson);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        // Element state is not persisted across attach/detach
-        if (this.i18n != null) {
-            setI18nWithJS();
-        }
-    }
-
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**

@@ -16,15 +16,14 @@
 package com.vaadin.flow.component.slider;
 
 import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
@@ -38,9 +37,9 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd
  */
 abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
-        extends AbstractSinglePropertyField<TComponent, TValue>
-        implements HasLabel, HasHelper, HasValidationProperties, HasSize,
-        Focusable<TComponent>, KeyNotifier {
+        extends AbstractSinglePropertyField<TComponent, TValue> implements
+        InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
+        HasValidationProperties, Focusable<TComponent>, KeyNotifier {
     /**
      * Constructs a slider with the given min, max, step, initial value, and
      * custom converters for the value property.
@@ -69,12 +68,13 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
 
+        setSynchronizedEvent("change");
         getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        setValue(min, max, step, value);
+        setValue(value, min, max, step);
     }
 
     @Override
@@ -100,7 +100,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @return the minimum value
      */
     double getMinDouble() {
-        return getElement().getProperty("min", 0);
+        return getElement().getProperty("min", 0.0);
     }
 
     /**
@@ -109,7 +109,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @return the maximum value
      */
     double getMaxDouble() {
-        return getElement().getProperty("max", 100);
+        return getElement().getProperty("max", 100.0);
     }
 
     /**
@@ -118,7 +118,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @return the step value
      */
     double getStepDouble() {
-        return getElement().getProperty("step", 1);
+        return getElement().getProperty("step", 1.0);
     }
 
     /**
@@ -157,11 +157,11 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param value
      *            the value
      * @throws IllegalArgumentException
-     *             if value is not valid for the current range and step
+     *             if value is not valid for the current min, max and step
      */
     @Override
     public void setValue(TValue value) {
-        setValue(getMinDouble(), getMaxDouble(), getStepDouble(), value);
+        setValue(value, getMinDouble(), getMaxDouble(), getStepDouble());
     }
 
     /**
@@ -169,41 +169,42 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * <p>
      * The step remains unchanged.
      *
+     * @param value
+     *            the value
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param value
-     *            the value
      * @throws IllegalArgumentException
      *             if min is greater than max
      * @throws IllegalArgumentException
-     *             if value is not valid for the given range and current step
+     *             if value is not valid for the given min, max and current step
      */
-    void setValue(double min, double max, TValue value) {
-        setValue(min, max, getStepDouble(), value);
+    public void setValue(TValue value, double min, double max) {
+        setValue(value, min, max, getStepDouble());
     }
 
     /**
      * Sets the minimum, maximum, step, and value of the slider atomically.
      *
+     * @param value
+     *            the value
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
      * @param step
      *            the step value
-     * @param value
-     *            the value
      * @throws IllegalArgumentException
      *             if min is greater than max
      * @throws IllegalArgumentException
      *             if step is not positive
      * @throws IllegalArgumentException
-     *             if value is not valid for the given range and step
+     *             if value is not valid for the given min, max and step
      */
-    void setValue(double min, double max, double step, TValue value) {
-        requireValidRange(min, max, step);
+    public void setValue(TValue value, double min, double max, double step) {
+        requireValidStep(step);
+        requireValidMinMax(min, max);
         requireValidValue(min, max, step, value);
 
         setMinDouble(min);
@@ -213,38 +214,44 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
-     * Validates that the given range parameters are valid.
+     * Validates that the given min/max range is valid.
      *
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param step
-     *            the step value
      * @throws IllegalArgumentException
      *             if min is greater than max
-     * @throws IllegalArgumentException
-     *             if step is not positive
      */
-    void requireValidRange(double min, double max, double step) {
+    void requireValidMinMax(double min, double max) {
         if (min > max) {
             throw new IllegalArgumentException(
-                    "The min value cannot be greater than the max value");
-        }
-
-        if (step <= 0) {
-            throw new IllegalArgumentException(
-                    "The step value must be a positive number");
+                    "Max must be greater than or equal to min");
         }
     }
 
     /**
-     * Validates that the given value is valid for the current range and step.
+     * Validates that the given step value is valid.
+     *
+     * @param step
+     *            the step value
+     * @throws IllegalArgumentException
+     *             if step is not positive
+     */
+    void requireValidStep(double step) {
+        if (step <= 0) {
+            throw new IllegalArgumentException("Step must be positive");
+        }
+    }
+
+    /**
+     * Validates that the given value is valid for the current min, max and
+     * step.
      *
      * @param value
      *            the value to validate
      * @throws IllegalArgumentException
-     *             if value is not valid for the current range and step
+     *             if value is not valid for the current min, max and step
      */
     void requireValidValue(TValue value) {
         requireValidValue(getMinDouble(), getMaxDouble(), getStepDouble(),
@@ -252,7 +259,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
-     * Validates that the given value is valid for the given range and step.
+     * Validates that the given value is valid for the given min, max and step.
      *
      * @param min
      *            the minimum value
@@ -263,7 +270,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param value
      *            the value to validate
      * @throws IllegalArgumentException
-     *             if value is not valid for the given range and step
+     *             if value is not valid for the given min, max and step
      */
     abstract void requireValidValue(double min, double max, double step,
             TValue value);

@@ -8,12 +8,14 @@
  * license.
  */
 import Feature from 'ol/Feature';
+import LineString from 'ol/geom/LineString';
 import Point from 'ol/geom/Point';
 import Polygon from 'ol/geom/Polygon';
 import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import View from 'ol/View';
+import { synchronizeAttribution, synchronizeScaleLine, synchronizeZoom } from './controls.js';
 import {
   synchronizeFeatureLayer,
   synchronizeImageLayer,
@@ -47,6 +49,7 @@ function synchronizeMap(target, source, context) {
   }
 
   synchronizeCollection(target.getLayers(), source.layers, context);
+  synchronizeCollection(target.getControls(), source.visibleControls, context);
   target.setView(context.lookup.get(source.view));
 
   return target;
@@ -62,6 +65,16 @@ function synchronizeView(target, source, _context) {
   target.setCenter(source.center ? convertToCoordinateArray(source.center) : [0, 0]);
   target.setRotation(source.rotation || 0);
   target.setZoom(source.zoom || 0);
+
+  return target;
+}
+
+function synchronizeLineString(target, source, _context) {
+  if (!target) {
+    target = new LineString(source.coordinates.map((coord) => convertToCoordinateArray(coord)));
+  }
+
+  target.setCoordinates(source.coordinates.map((coord) => convertToCoordinateArray(coord)));
 
   return target;
 }
@@ -139,6 +152,7 @@ const synchronizerLookup = {
   'ol/source/Vector': synchronizeVectorSource,
   'ol/source/XYZ': synchronizeXYZSource,
   // Geometry
+  'ol/geom/LineString': synchronizeLineString,
   'ol/geom/Point': synchronizePoint,
   'ol/geom/Polygon': synchronizePolygon,
   // Styles
@@ -146,7 +160,11 @@ const synchronizerLookup = {
   'ol/style/Fill': synchronizeFill,
   'ol/style/Stroke': synchronizeStroke,
   'ol/style/Style': synchronizeStyle,
-  'ol/style/Text': synchronizeText
+  'ol/style/Text': synchronizeText,
+  // Controls
+  'ol/control/Attribution': synchronizeAttribution,
+  'ol/control/ScaleLine': synchronizeScaleLine,
+  'ol/control/Zoom': synchronizeZoom
 };
 
 /**

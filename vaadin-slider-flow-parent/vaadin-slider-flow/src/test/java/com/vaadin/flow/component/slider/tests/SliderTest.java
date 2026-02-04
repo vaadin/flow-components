@@ -67,24 +67,24 @@ public class SliderTest {
 
     @Test
     public void minMaxStepValueConstructor() {
-        Slider slider = new Slider(10, 50, 5, 25);
-        Assert.assertEquals(10, slider.getMin(), 0);
-        Assert.assertEquals(50, slider.getMax(), 0);
-        Assert.assertEquals(5, slider.getStep(), 0);
-        Assert.assertEquals(25, slider.getValue(), 0);
+        Slider slider = new Slider(0.1, 1.0, 0.1, 0.5);
+        Assert.assertEquals(0.1, slider.getMin(), 0);
+        Assert.assertEquals(1.0, slider.getMax(), 0);
+        Assert.assertEquals(0.1, slider.getStep(), 0);
+        Assert.assertEquals(0.5, slider.getValue(), 0);
     }
 
     @Test
     public void minMaxStepValueListenerConstructor() {
         AtomicBoolean listenerInvoked = new AtomicBoolean(false);
-        Slider slider = new Slider(10, 50, 5, 25,
+        Slider slider = new Slider(0.1, 1.0, 0.1, 0.5,
                 e -> listenerInvoked.set(true));
-        Assert.assertEquals(10, slider.getMin(), 0);
-        Assert.assertEquals(50, slider.getMax(), 0);
-        Assert.assertEquals(5, slider.getStep(), 0);
-        Assert.assertEquals(25, slider.getValue(), 0);
+        Assert.assertEquals(0.1, slider.getMin(), 0);
+        Assert.assertEquals(1.0, slider.getMax(), 0);
+        Assert.assertEquals(0.1, slider.getStep(), 0);
+        Assert.assertEquals(0.5, slider.getValue(), 0);
 
-        slider.setValue(30.0);
+        slider.setValue(0.6);
         Assert.assertTrue(listenerInvoked.get());
     }
 
@@ -160,35 +160,10 @@ public class SliderTest {
         Assert.assertTrue(listenerInvoked.get());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_lessThanMin_throws() {
-        Slider slider = new Slider(0, 100, 1, 0);
-        slider.setValue(-150.0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_greaterThanMax_throws() {
-        Slider slider = new Slider(0, 100, 1, 0);
-        slider.setValue(150.0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_notAlignedWithStep_throws() {
-        Slider slider = new Slider(0, 100, 10, 0);
-        slider.setValue(15.0);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setValue_null_throws() {
-        Slider slider = new Slider();
-        slider.setValue(null);
-    }
-
     @Test
     public void setValue_minMaxValue_updatesProperties() {
-        Slider slider = new Slider(0, 100, 1, 0);
-
-        slider.setValue(-10, 200, 50.0);
+        Slider slider = new Slider();
+        slider.setValue(50.0, -10, 200);
 
         Assert.assertEquals(-10, slider.getMin(), 0);
         Assert.assertEquals(200, slider.getMax(), 0);
@@ -197,67 +172,66 @@ public class SliderTest {
 
     @Test
     public void setValue_minMaxStepValue_updatesProperties() {
-        Slider slider = new Slider(0, 100, 1, 0);
+        Slider slider = new Slider();
+        slider.setValue(0.5, 0.1, 0.9, 0.1);
 
-        slider.setValue(-10, 200, 5, 50.0);
-
-        Assert.assertEquals(-10, slider.getMin(), 0);
-        Assert.assertEquals(200, slider.getMax(), 0);
-        Assert.assertEquals(5, slider.getStep(), 0);
-        Assert.assertEquals(50, slider.getValue(), 0);
+        Assert.assertEquals(0.1, slider.getMin(), 0);
+        Assert.assertEquals(0.9, slider.getMax(), 0);
+        Assert.assertEquals(0.1, slider.getStep(), 0);
+        Assert.assertEquals(0.5, slider.getValue(), 0);
     }
 
     @Test
-    public void setInvalidMin_throws() {
+    public void setValue_invalidRange_throws() {
         Slider slider = new Slider();
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setMin(slider.getMax() + 1));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setValue(slider.getMax() + 1, slider.getMax(),
-                        slider.getMin()));
+
+        Assert.assertThrows("setValue should throw when max < min",
+                IllegalArgumentException.class,
+                () -> slider.setValue(slider.getMin(), slider.getMin(),
+                        slider.getMin() - 0.5, 0.5));
+
+        Assert.assertThrows("setValue should throw when min > max",
+                IllegalArgumentException.class,
+                () -> slider.setValue(slider.getMin(), slider.getMax() + 0.5,
+                        slider.getMax(), 0.5));
     }
 
     @Test
-    public void setInvalidMax_throws() {
+    public void setValue_invalidStep_throws() {
         Slider slider = new Slider();
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setMax(slider.getMin() - 1));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setValue(slider.getMin(), slider.getMin() - 1,
-                        slider.getMin()));
+
+        Assert.assertThrows("setValue should throw when step = 0",
+                IllegalArgumentException.class,
+                () -> slider.setValue(0.0, 0, 100, 0));
+
+        Assert.assertThrows("setValue should throw when step < 0",
+                IllegalArgumentException.class,
+                () -> slider.setValue(0.0, 0, 100, -0.5));
     }
 
     @Test
-    public void setInvalidStep_throws() {
+    public void setValue_invalidValue_throws() {
         Slider slider = new Slider();
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setStep(0));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setStep(-5));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setValue(slider.getMin(), slider.getMax(), 0,
-                        slider.getMin()));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> slider.setValue(slider.getMin(), slider.getMax(), -5,
-                        slider.getMin()));
-    }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_valueNotAlignedWithStep_throws() {
-        Slider slider = new Slider();
-        slider.setValue(0, 100, 10, 15.0);
-    }
+        Assert.assertThrows(
+                "setValue should throw when value is not aligned with step",
+                IllegalArgumentException.class,
+                () -> slider.setValue(15.0, 0, 100, 10));
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_valueLessThanMin_throws() {
-        Slider slider = new Slider();
-        slider.setValue(10, 100, 5.0);
-    }
+        Assert.assertThrows("setValue should throw when value < min",
+                IllegalArgumentException.class,
+                () -> slider.setValue(5.0, 10, 100));
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setValue_valueGreaterThanMax_throws() {
-        Slider slider = new Slider();
-        slider.setValue(0, 40, 50.0);
+        Assert.assertThrows("setValue should throw when value > max",
+                IllegalArgumentException.class,
+                () -> slider.setValue(50.0, 0, 40));
+
+        Assert.assertThrows("setValue should throw when value is null",
+                NullPointerException.class,
+                () -> slider.setValue(null, 0, 100, 10));
+
+        Assert.assertThrows("setValue should throw when value is null",
+                NullPointerException.class, () -> slider.setValue(null));
     }
 
     @Test
@@ -270,11 +244,19 @@ public class SliderTest {
     }
 
     @Test
-    public void setMin_valueBelowNewMin_adjustsValue() {
+    public void setMin_invalidMin_throws() {
         Slider slider = new Slider();
+
+        Assert.assertThrows("setMin should throw when min > current max",
+                IllegalArgumentException.class,
+                () -> slider.setMin(slider.getMax() + 0.5));
+    }
+
+    @Test
+    public void setMin_valueBelowNewMin_adjustsValue() {
+        Slider slider = new Slider(0, 100, 0);
         slider.setMin(50);
 
-        Assert.assertEquals(50, slider.getMin(), 0);
         Assert.assertEquals(50, slider.getValue(), 0);
     }
 
@@ -288,37 +270,93 @@ public class SliderTest {
     }
 
     @Test
+    public void setMax_invalidMax_throws() {
+        Slider slider = new Slider();
+
+        Assert.assertThrows("setMax should throw when max < current min",
+                IllegalArgumentException.class,
+                () -> slider.setMax(slider.getMin() - 0.5));
+    }
+
+    @Test
     public void setMax_valueAboveNewMax_adjustsValue() {
-        Slider slider = new Slider(0, 100, 1, 80);
+        Slider slider = new Slider(0, 100, 100);
         slider.setMax(50);
 
-        Assert.assertEquals(50, slider.getMax(), 0);
         Assert.assertEquals(50, slider.getValue(), 0);
     }
 
     @Test
     public void setStep_updatesProperty() {
         Slider slider = new Slider();
-        slider.setStep(5);
+        slider.setStep(0.1);
 
-        Assert.assertEquals(5, slider.getStep(), 0);
-        Assert.assertEquals(5, slider.getElement().getProperty("step", 0), 0);
+        Assert.assertEquals(0.1, slider.getStep(), 0);
+        Assert.assertEquals(0.1, slider.getElement().getProperty("step", 0.0),
+                0);
     }
 
     @Test
-    public void setStep_valueNotAligned_adjustsValue() {
-        Slider slider = new Slider(0, 100, 1, 53);
-        slider.setStep(10);
+    public void setStep_invalidStep_throws() {
+        Slider slider = new Slider();
 
-        Assert.assertEquals(10, slider.getStep(), 0);
-        Assert.assertEquals(50, slider.getValue(), 0);
+        Assert.assertThrows("setStep should throw when step = 0",
+                IllegalArgumentException.class, () -> slider.setStep(0));
+
+        Assert.assertThrows("setStep should throw when step < 0",
+                IllegalArgumentException.class, () -> slider.setStep(-5));
     }
 
     @Test
-    public void setStep_valueNotAligned_adjustsToClosestValue() {
-        Slider slider = new Slider(0, 100, 1, 57);
-        slider.setStep(10);
+    public void setStep_valueNotAligned_roundsValueDownToNearestStep() {
+        Slider slider = new Slider(0.0, 1.0, 0.1, 0.1);
+        slider.setStep(0.5);
 
-        Assert.assertEquals(60, slider.getValue(), 0);
+        Assert.assertEquals(0.0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setStep_valueNotAligned_roundsValueUpToNearestStep() {
+        Slider slider = new Slider(0.0, 1.0, 0.1, 0.4);
+        slider.setStep(0.5);
+
+        Assert.assertEquals(0.5, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setStep_valueNotAligned_roundsValueWithoutPrecisionErrors() {
+        Slider slider = new Slider(0.1, 1.0, 0.01, 0.25);
+        slider.setStep(0.1);
+
+        Assert.assertEquals(0.3, slider.getValue(), 0);
+    }
+
+    @Test
+    public void clear_valueResetsToMin() {
+        Slider slider = new Slider(10, 50, 30);
+        slider.clear();
+
+        Assert.assertEquals(10, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueFromClient_valueNotAlignedWithStep_ignored() {
+        Slider slider = new Slider(0, 100, 10, 0);
+        slider.getElement().setProperty("value", 15.0);
+        Assert.assertEquals(0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueFromClient_valueBelowMin_ignored() {
+        Slider slider = new Slider(0, 100, 10, 0);
+        slider.getElement().setProperty("value", -10.0);
+        Assert.assertEquals(0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueFromClient_valueAboveMax_ignored() {
+        Slider slider = new Slider(0, 100, 10, 0);
+        slider.getElement().setProperty("value", 110.0);
+        Assert.assertEquals(0, slider.getValue(), 0);
     }
 }

@@ -33,7 +33,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ModalityMode;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -76,7 +75,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha3")
+@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha6")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -106,14 +105,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
-
-        getElement().addPropertyChangeListener("opened", event -> {
-            // Only handle client-side changes, server-side changes are already
-            // handled by setOpened
-            if (event.isUserOriginated()) {
-                doSetOpened(this.isOpened(), event.isUserOriginated());
-            }
-        });
 
         addListener(DialogResizeEvent.class, event -> {
             setWidth(event.getWidth());
@@ -587,6 +578,34 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
+     * Gets whether the dialog traps focus or not.
+     * <p>
+     * If the focus trap is enabled, the user cannot move focus outside the
+     * dialog using the keyboard (Tab/Shift+Tab). This is useful for modal
+     * dialogs to ensure accessibility. Focus trap is enabled by default.
+     *
+     * @return {@code true} if focus trap is enabled (default), {@code false}
+     *         otherwise
+     */
+    public boolean isFocusTrap() {
+        return !getElement().getProperty("noFocusTrap", false);
+    }
+
+    /**
+     * Sets whether the dialog should trap focus or not.
+     * <p>
+     * If the focus trap is enabled, the user cannot move focus outside the
+     * dialog using the keyboard (Tab/Shift+Tab). This is useful for modal
+     * dialogs to ensure accessibility. Focus trap is enabled by default.
+     *
+     * @param focusTrap
+     *            {@code true} to enable focus trap, {@code false} to disable it
+     */
+    public void setFocusTrap(boolean focusTrap) {
+        getElement().setProperty("noFocusTrap", !focusTrap);
+    }
+
+    /**
      * Opens the dialog.
      * <p>
      * If a dialog was not added manually to a parent component, it will be
@@ -712,6 +731,34 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     public boolean isDraggable() {
         return getElement().getProperty("draggable", false);
+    }
+
+    /**
+     * Sets whether dragging the dialog outside the viewport is prevented.
+     * <p>
+     * When enabled, all four edges of the dialog will remain visible during
+     * dragging. The dialog may still become partially hidden when the viewport
+     * is resized.
+     * <p>
+     * Note: This property only has an effect when the dialog is
+     * {@link #setDraggable(boolean) draggable}.
+     *
+     * @param keepInViewport
+     *            {@code true} to prevent dragging outside the viewport,
+     *            {@code false} otherwise
+     */
+    public void setKeepInViewport(boolean keepInViewport) {
+        getElement().setProperty("keepInViewport", keepInViewport);
+    }
+
+    /**
+     * Gets whether dragging the dialog outside the viewport is prevented.
+     *
+     * @return {@code true} if dragging outside the viewport is prevented,
+     *         {@code false} otherwise (default).
+     */
+    public boolean isKeepInViewport() {
+        return getElement().getProperty("keepInViewport", false);
     }
 
     /**
@@ -1024,7 +1071,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the {@code opened} property from the dialog
      */
-    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }

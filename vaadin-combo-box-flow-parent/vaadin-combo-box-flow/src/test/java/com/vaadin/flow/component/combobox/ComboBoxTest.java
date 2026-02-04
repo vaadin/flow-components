@@ -75,6 +75,12 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
+    public void initialPropertyValue() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertEquals("", comboBox.getElement().getProperty("value"));
+    }
+
+    @Test
     public void setValue() {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
