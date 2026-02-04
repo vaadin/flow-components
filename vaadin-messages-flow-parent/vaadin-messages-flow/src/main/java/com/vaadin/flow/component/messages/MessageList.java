@@ -34,6 +34,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.AiComponentsExperimentalFeatureException;
+import com.vaadin.flow.component.shared.AiComponentsFeatureFlagProvider;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -58,7 +60,7 @@ public class MessageList extends Component
      * The feature flag ID for AI components (includes MessageListItem
      * attachments).
      */
-    static final String FEATURE_FLAG_ID = "aiComponents";
+    static final String FEATURE_FLAG_ID = AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
@@ -291,7 +293,7 @@ public class MessageList extends Component
      *            the UI to get the feature flags from
      * @param itemsToCheck
      *            the items to check for attachments
-     * @throws MessageListAttachmentsExperimentalFeatureException
+     * @throws AiComponentsExperimentalFeatureException
      *             if attachments are used without the feature flag enabled
      */
     private void checkAttachmentsFeatureFlag(UI ui,
@@ -302,7 +304,8 @@ public class MessageList extends Component
             FeatureFlags featureFlags = FeatureFlags
                     .get(ui.getSession().getService().getContext());
             if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
-                throw new MessageListAttachmentsExperimentalFeatureException();
+                throw new AiComponentsExperimentalFeatureException(
+                        "MessageListItem attachments");
             }
         }
     }

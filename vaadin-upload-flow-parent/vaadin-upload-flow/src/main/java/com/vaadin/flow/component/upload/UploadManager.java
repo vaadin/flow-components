@@ -29,6 +29,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.AiComponentsExperimentalFeatureException;
+import com.vaadin.flow.component.shared.AiComponentsFeatureFlagProvider;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -423,7 +425,7 @@ public class UploadManager implements Serializable {
      * The feature flag ID for AI components (includes UploadManager and related
      * components).
      */
-    public static final String FEATURE_FLAG_ID = "aiComponents";
+    public static final String FEATURE_FLAG_ID = AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
     /**
      * Internal connector component that loads the JS module and handles
@@ -446,7 +448,8 @@ public class UploadManager implements Serializable {
             boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID);
 
             if (!enabled) {
-                throw new UploadManagerExperimentalFeatureException();
+                throw new AiComponentsExperimentalFeatureException(
+                        "UploadManager");
             }
         }
     }

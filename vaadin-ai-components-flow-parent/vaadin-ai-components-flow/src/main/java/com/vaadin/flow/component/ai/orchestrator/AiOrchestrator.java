@@ -38,6 +38,8 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.shared.AiComponentsExperimentalFeatureException;
+import com.vaadin.flow.component.shared.AiComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
 
@@ -93,7 +95,7 @@ public class AiOrchestrator {
     /**
      * The feature flag ID for AI components.
      */
-    static final String FEATURE_FLAG_ID = "aiComponents";
+    static final String FEATURE_FLAG_ID = AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
     private final LLMProvider provider;
     private final String systemPrompt;
@@ -275,7 +277,8 @@ public class AiOrchestrator {
         FeatureFlags featureFlags = FeatureFlags
                 .get(ui.getSession().getService().getContext());
         if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
-            throw new AiOrchestratorExperimentalFeatureException();
+            throw new AiComponentsExperimentalFeatureException(
+                    "AiOrchestrator");
         }
         featureFlagChecked.set(true);
     }
