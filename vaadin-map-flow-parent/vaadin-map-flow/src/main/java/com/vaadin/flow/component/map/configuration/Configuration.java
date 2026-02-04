@@ -225,10 +225,10 @@ public class Configuration extends AbstractConfigurationObject {
     }
 
     private void handleControlPropertyChange(PropertyChangeEvent event) {
-        // When visibility of a control changes, resync the configuration itself
-        // to send an updated list of visible controls to the client
-        if ("visible".equals(event.getPropertyName())) {
-            markAsDirty();
-        }
+        // When property of a control changes, resync the configuration itself:
+        // - Sends an updated list of visible controls
+        // - Recreates controls on the client side in cases where OpenLayers
+        // classes have non-mutable properties (e.g. ScaleLineControl)
+        markAsDirty();
     }
 }
