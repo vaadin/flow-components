@@ -13,17 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai;
+package com.vaadin.flow.component.upload;
 
-import java.util.stream.Stream;
+import com.vaadin.flow.component.shared.ThemeVariant;
 
-import com.vaadin.flow.testutil.ClassesSerializableTest;
+/**
+ * Set of theme variants applicable for {@code vaadin-upload-file-list}
+ * component.
+ */
+public enum UploadFileListVariant implements ThemeVariant {
+    LUMO_THUMBNAILS("thumbnails"), AURA_THUMBNAILS("thumbnails");
 
-public class AiComponentsSerializableTest extends ClassesSerializableTest {
-    @Override
-    protected Stream<String> getExcludedPatterns() {
-        return Stream.concat(super.getExcludedPatterns(), Stream.of(
-                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LangChain4JLLMProvider\\$.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LLMProviderHelpers"));
+    private final String variant;
+
+    UploadFileListVariant(String variant) {
+        this.variant = variant;
+    }
+
+    /**
+     * Gets the variant name.
+     *
+     * @return variant name
+     */
+    public String getVariantName() {
+        return variant;
     }
 }

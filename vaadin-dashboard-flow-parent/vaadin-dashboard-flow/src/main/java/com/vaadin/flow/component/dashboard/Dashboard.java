@@ -59,7 +59,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-alpha4")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-alpha6")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -563,12 +563,7 @@ public class Dashboard extends Component
     public void setI18n(DashboardI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    if (i18n.equals(this.i18n)) {
-                        setI18nWithJS();
-                    }
-                }));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     @Override
@@ -702,16 +697,6 @@ public class Dashboard extends Component
                         this.items = items;
                         """,
                 itemsJson, appId);
-    }
-
-    private void setI18nWithJS() {
-        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
-
-        // Assign new I18N object to WC, by merging the existing
-        // WC I18N, and the values from the new DashboardI18n instance,
-        // into an empty object
-        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
-                i18nJson);
     }
 
     private static ObjectNode getWidgetRepresentation(DashboardWidget widget) {

@@ -20,6 +20,10 @@ import { createLookup, getFeatureInfo } from './util';
 openLayersSetUserProjection('EPSG:4326');
 
 function init(mapElement) {
+  // Clear default controls from web component, so that we can cleanly synchronize controls from server configuration
+  // Consider changing this in the future, so that the web component comes without default controls
+  mapElement.configuration.getControls().clear();
+
   mapElement.$connector = {
     /**
      * Lookup for storing and retrieving every OL instance used in the map's configuration

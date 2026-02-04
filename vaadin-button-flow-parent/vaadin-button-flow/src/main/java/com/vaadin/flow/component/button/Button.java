@@ -54,7 +54,7 @@ import com.vaadin.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.1.0-alpha4")
+@NpmPackage(value = "@vaadin/button", version = "25.1.0-alpha6")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -262,16 +262,6 @@ public class Button extends Component
     @Override
     public String getText() {
         return textNode.getText();
-    }
-
-    @Override
-    public void setWhiteSpace(WhiteSpace value) {
-        textNode.setWhiteSpace(value);
-    }
-
-    @Override
-    public WhiteSpace getWhiteSpace() {
-        return textNode.getWhiteSpace();
     }
 
     @Override

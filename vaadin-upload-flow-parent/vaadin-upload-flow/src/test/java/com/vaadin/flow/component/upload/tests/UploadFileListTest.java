@@ -28,6 +28,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.UploadFileListI18N;
+import com.vaadin.flow.component.upload.UploadFileListVariant;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -292,5 +293,24 @@ public class UploadFileListTest {
         Assert.assertEquals(customSizes, i18n.getUnits().getSize());
         Assert.assertEquals(Integer.valueOf(1024),
                 i18n.getUnits().getSizeBase());
+    }
+
+    @Test
+    public void addThemeVariant_variantIsAdded() {
+        UploadFileList fileList = new UploadFileList();
+
+        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+
+        Assert.assertTrue(fileList.getThemeNames().contains("thumbnails"));
+    }
+
+    @Test
+    public void removeThemeVariant_variantIsRemoved() {
+        UploadFileList fileList = new UploadFileList();
+        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+
+        fileList.removeThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+
+        Assert.assertFalse(fileList.getThemeNames().contains("thumbnails"));
     }
 }

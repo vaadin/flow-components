@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.map.configuration;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +18,9 @@ import java.util.function.Consumer;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vaadin.flow.component.map.configuration.controls.Control;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 
 /**
@@ -25,7 +28,10 @@ import com.vaadin.flow.component.map.configuration.layer.Layer;
  */
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
+    private final List<Control> controls = new ArrayList<>();
     private View view;
+
+    private final SerializablePropertyChangeListener controlPropertyChangeListener = this::handleControlPropertyChange;
 
     public Configuration() {
         setView(new View());
@@ -96,6 +102,69 @@ public class Configuration extends AbstractConfigurationObject {
     }
 
     /**
+     * The list of controls added to the map. This returns an immutable list.
+     * 
+     * @return the list of controls added to the map
+     */
+    @JsonIgnore
+    public List<Control> getControls() {
+        return Collections.unmodifiableList(controls);
+    }
+
+    /**
+     * The list of visible controls added to the map. This returns an immutable
+     * list.
+     *
+     * @return the list of visible controls added to the map
+     */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    public List<Control> getVisibleControls() {
+        return controls.stream().filter(Control::isVisible).toList();
+    }
+
+    /**
+     * Adds a control to the map. Only one control instance of each type is
+     * allowed. Adding a control of a type that already exists will throw an
+     * {@link IllegalArgumentException}.
+     *
+     * @param control
+     *            the control to be added
+     * @throws IllegalArgumentException
+     *             if a control of the same type already exists
+     */
+    public void addControl(Control control) {
+        Objects.requireNonNull(control);
+
+        boolean typeExists = controls.stream()
+                .anyMatch(c -> c.getType().equals(control.getType()));
+        if (typeExists) {
+            throw new IllegalArgumentException("A control of type '"
+                    + control.getType()
+                    + "' already exists. Only one control instance of each type is allowed.");
+        }
+
+        controls.add(control);
+        addChild(control);
+        control.addPropertyChangeListener(this.controlPropertyChangeListener);
+    }
+
+    /**
+     * Removes a control from the map.
+     *
+     * @param control
+     *            the control to be removed
+     */
+    public void removeControl(Control control) {
+        Objects.requireNonNull(control);
+
+        controls.remove(control);
+        removeChild(control);
+        control.removePropertyChangeListener(
+                this.controlPropertyChangeListener);
+    }
+
+    /**
      * Gets the view of the map. The view gives access to properties like center
      * and zoom level of the viewport.
      *
@@ -153,5 +222,13 @@ public class Configuration extends AbstractConfigurationObject {
     public void collectChanges(
             Consumer<AbstractConfigurationObject> changeCollector) {
         super.collectChanges(changeCollector);
+    }
+
+    private void handleControlPropertyChange(PropertyChangeEvent event) {
+        // When visibility of a control changes, resync the configuration itself
+        // to send an updated list of visible controls to the client
+        if ("visible".equals(event.getPropertyName())) {
+            markAsDirty();
+        }
     }
 }

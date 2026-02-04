@@ -27,6 +27,7 @@ public class Constants {
     public static final String OL_SOURCE_TILE_WMS = "ol/source/TileWMS";
     public static final String OL_SOURCE_IMAGE_WMS = "ol/source/ImageWMS";
     // Geometry
+    public static final String OL_GEOMETRY_LINESTRING = "ol/geom/LineString";
     public static final String OL_GEOMETRY_POINT = "ol/geom/Point";
     public static final String OL_GEOMETRY_POLYGON = "ol/geom/Polygon";
     // Style
@@ -35,6 +36,10 @@ public class Constants {
     public static final String OL_STYLE_STROKE = "ol/style/Stroke";
     public static final String OL_STYLE_STYLE = "ol/style/Style";
     public static final String OL_STYLE_TEXT = "ol/style/Text";
+    // Controls
+    public static final String OL_CONTROL_ATTRIBUTION = "ol/control/Attribution";
+    public static final String OL_CONTROL_SCALE_LINE = "ol/control/ScaleLine";
+    public static final String OL_CONTROL_ZOOM = "ol/control/Zoom";
 
     public static final String OL_MAP = "ol/Map";
     public static final String OL_VIEW = "ol/View";
