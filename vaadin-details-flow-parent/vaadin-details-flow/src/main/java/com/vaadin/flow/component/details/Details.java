@@ -87,7 +87,7 @@ public class Details extends Component implements HasComponents, HasSize,
         SlotUtils.addToSlot(this, "summary", summaryContainer);
 
         if (getElement().getPropertyRaw("opened") == null) {
-            getElement().setProperty("opened", false);
+            doSetOpened(false);
         }
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
@@ -426,7 +426,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *            the boolean value to set
      */
     public void setOpened(boolean opened) {
-        getElement().setProperty("opened", opened);
+        doSetOpened(opened);
     }
 
     public static class OpenedChangeEvent extends ComponentEvent<Details> {
@@ -453,5 +453,9 @@ public class Details extends Component implements HasComponents, HasSize,
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
         return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    private void doSetOpened(boolean opened) {
+        getElement().setProperty("opened", opened);
     }
 }
