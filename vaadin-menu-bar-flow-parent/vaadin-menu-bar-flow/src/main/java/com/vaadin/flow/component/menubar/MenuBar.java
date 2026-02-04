@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -44,8 +43,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
 
-import tools.jackson.databind.node.ObjectNode;
-
 /**
  * Menu Bar is a horizontal button bar with hierarchical drop-down menus. Menu
  * items can either trigger an action, open a menu, or work as a toggle.
@@ -56,8 +53,8 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.1.0-alpha3")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha3")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha6")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 
@@ -427,32 +424,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     public void setI18n(MenuBarI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-
-        runBeforeClientResponse(ui -> {
-            if (i18n == this.i18n) {
-                setI18nWithJS();
-            }
-        });
-    }
-
-    private void setI18nWithJS() {
-        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
-
-        // Assign new I18N object to WC, by merging the existing
-        // WC I18N, and the values from the new MenuBarI18n instance,
-        // into an empty object
-        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
-                i18nJson);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        // Element state is not persisted across attach/detach
-        if (this.i18n != null) {
-            setI18nWithJS();
-        }
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     void resetContent() {

@@ -136,6 +136,27 @@ public class DialogTest {
     }
 
     @Test
+    public void isKeepInViewport_falseByDefault() {
+        Dialog dialog = new Dialog();
+
+        Assert.assertFalse("keepInViewport is false by default",
+                dialog.isKeepInViewport());
+        Assert.assertFalse("keepInViewport property is false by default",
+                dialog.getElement().getProperty("keepInViewport", false));
+    }
+
+    @Test
+    public void setKeepInViewport_updatesProperty() {
+        Dialog dialog = new Dialog();
+        dialog.setKeepInViewport(true);
+
+        Assert.assertTrue("keepInViewport can be set to true",
+                dialog.isKeepInViewport());
+        Assert.assertTrue("keepInViewport property is true",
+                dialog.getElement().getProperty("keepInViewport", false));
+    }
+
+    @Test
     public void draggedEvent_topLeftPropertiesSynced() {
         Dialog dialog = new Dialog();
 
@@ -176,6 +197,36 @@ public class DialogTest {
 
         Assert.assertTrue("resizable can be set to true",
                 dialog.getElement().getProperty("resizable", false));
+    }
+
+    @Test
+    public void isFocusTrap_trueByDefault() {
+        Dialog dialog = new Dialog();
+        Assert.assertTrue("focusTrap is true by default", dialog.isFocusTrap());
+        Assert.assertFalse("noFocusTrap property is false by default",
+                dialog.getElement().getProperty("noFocusTrap", false));
+    }
+
+    @Test
+    public void setFocusTrap_dialogFocusTrapCanBeDisabled() {
+        Dialog dialog = new Dialog();
+        dialog.setFocusTrap(false);
+        Assert.assertFalse("focusTrap can be set to false",
+                dialog.isFocusTrap());
+        Assert.assertTrue(
+                "noFocusTrap property is true when focus trap is disabled",
+                dialog.getElement().getProperty("noFocusTrap", false));
+    }
+
+    @Test
+    public void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
+        Dialog dialog = new Dialog();
+        dialog.setFocusTrap(false);
+        dialog.setFocusTrap(true);
+        Assert.assertTrue("focusTrap can be re-enabled", dialog.isFocusTrap());
+        Assert.assertFalse(
+                "noFocusTrap property is false when focus trap is enabled",
+                dialog.getElement().getProperty("noFocusTrap", false));
     }
 
     @Test

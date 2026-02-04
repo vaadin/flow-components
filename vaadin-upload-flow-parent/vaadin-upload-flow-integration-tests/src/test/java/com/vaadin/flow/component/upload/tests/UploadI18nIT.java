@@ -15,215 +15,46 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.testbench.UploadElement;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.testutil.TestPath;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ObjectNode;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-upload/i18n")
 public class UploadI18nIT extends AbstractUploadIT {
-    @Test
-    public void testFullI18nShouldAffectLabels() {
+    private UploadElement upload;
+
+    @Before
+    public void init() {
         open();
-
-        UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        WebElement addButton = upload.$("*").withAttribute("slot", "add-button")
-                .first();
-        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
-                .first();
-
-        Assert.assertEquals(UploadTestsI18N.RUSSIAN_FULL.getAddFiles().getOne(),
-                addButton.getText());
-        Assert.assertEquals(
-                UploadTestsI18N.RUSSIAN_FULL.getDropFiles().getOne(),
-                dropLabel.getText());
-    }
-
-    /**
-     * Verifies that every single translation provided by the UploadI18N
-     * instance is set in the web component.
-     *
-     * Testing internals here, in favour of setting up the web component with
-     * files/event handlers for every possible state.
-     */
-    @Test
-    public void testFullI18nShouldOverrideCompleteConfigurationInWebComponentProperty() {
-        open();
-
-        UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        ObjectNode i18nJson = getUploadI18nPropertyAsJson(upload);
-        Map<String, String> translationMap = jsonToMap(i18nJson);
-
-        UploadI18N expected = UploadTestsI18N.RUSSIAN_FULL;
-        ObjectNode expectedJson = JacksonUtils.beanToJson(expected);
-        deeplyRemoveNullValuesFromJsonObject(expectedJson);
-        Map<String, String> expectedMap = jsonToMap(expectedJson);
-
-        assertTranslationMapsAreEqual(expectedMap, translationMap);
+        upload = $(UploadElement.class).first();
     }
 
     @Test
-    public void testPartialI18nShouldAffectLabels() {
-        open();
+    public void setI18n_i18nIsApplied() {
+        clickElementWithJs("set-i18n");
 
-        UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        WebElement addButton = upload.$("*").withAttribute("slot", "add-button")
-                .first();
-        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
-                .first();
-
-        // This label should still be the default one
-        Assert.assertEquals("Upload File...", addButton.getText());
-        // This one should be overwritten by the UploadI18N config
-        Assert.assertEquals(
-                UploadTestsI18N.RUSSIAN_PARTIAL.getDropFiles().getOne(),
-                dropLabel.getText());
-    }
-
-    /**
-     * Verifies that setting a partial UploadI18N configuration still results in
-     * a complete configuration in the web component, and that null values in
-     * the UploadI18N configuration are ignored.
-     *
-     * Testing internals here, in favour of setting up the web component with
-     * files/event handlers for every possible state.
-     */
-    @Test
-    public void testPartialI18nShouldSetFullConfigurationWithoutNullValuesInWebComponentProperty() {
-        open();
-
-        UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        ObjectNode i18nJson = getUploadI18nPropertyAsJson(upload);
-        Map<String, String> translationMap = jsonToMap(i18nJson);
-
-        UploadI18N fullTranslation = UploadTestsI18N.RUSSIAN_FULL;
-        ObjectNode fullTranslationJson = JacksonUtils
-                .beanToJson(fullTranslation);
-        deeplyRemoveNullValuesFromJsonObject(fullTranslationJson);
-        Map<String, String> fullTranslationMap = jsonToMap(fullTranslationJson);
-        UploadTestsI18N.OPTIONAL_KEYS.forEach(fullTranslationMap::remove);
-
-        assertTranslationMapsHaveSameKeys(fullTranslationMap, translationMap);
-        assertTranslationMapHasNoMissingTranslations(translationMap);
+        Assert.assertEquals(UploadI18nView.RUSSIAN_FULL.getAddFiles().getOne(),
+                getSlottedElement("add-button").getText());
+        Assert.assertEquals(UploadI18nView.RUSSIAN_FULL.getDropFiles().getOne(),
+                getSlottedElement("drop-label").getText());
     }
 
     @Test
-    public void testDetachReattachI18nIsPreserved() {
-        open();
+    public void setI18n_setEmptyI18n_defaultI18nIsRestored() {
+        clickElementWithJs("set-i18n");
+        clickElementWithJs("set-empty-i18n");
 
-        WebElement btnSetI18n = findElement(By.id("btn-set-i18n"));
-        WebElement btnToggleAttached = findElement(
-                By.id("btn-toggle-attached"));
-
-        btnSetI18n.click();
-
-        btnToggleAttached.click();
-        btnToggleAttached.click();
-
-        UploadElement upload = $(UploadElement.class)
-                .id("upload-detach-reattach-i18n");
-
-        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
-                .first();
-
-        Assert.assertEquals(
-                UploadTestsI18N.RUSSIAN_FULL.getDropFiles().getOne(),
-                dropLabel.getText());
+        Assert.assertEquals("Upload File...",
+                getSlottedElement("add-button").getText());
+        Assert.assertEquals("Drop file here",
+                getSlottedElement("drop-label").getText());
     }
 
-    private void assertTranslationMapsAreEqual(Map<String, String> expected,
-            Map<String, String> actual) {
-        expected.keySet().forEach(expectedKey -> {
-            Assert.assertTrue("Missing translation key: " + expectedKey,
-                    actual.containsKey(expectedKey));
-            String expectedValue = expected.get(expectedKey);
-            String actualValue = actual.get(expectedKey);
-            Assert.assertEquals(
-                    String.format("Mismatching translation: %s!=%s",
-                            expectedValue, actualValue),
-                    expectedValue, actualValue);
-        });
-    }
-
-    private void assertTranslationMapsHaveSameKeys(Map<String, String> expected,
-            Map<String, String> actual) {
-        expected.keySet().forEach(expectedKey -> {
-            // Cancel was removed in
-            // https://github.com/vaadin/web-components/pull/2723
-            if (!"cancel".equals(expectedKey)) {
-                Assert.assertTrue("Missing translation key: " + expectedKey,
-                        actual.containsKey(expectedKey));
-            }
-        });
-    }
-
-    private void assertTranslationMapHasNoMissingTranslations(
-            Map<String, String> map) {
-        map.keySet().forEach(key -> {
-            // Cancel was removed in
-            // https://github.com/vaadin/web-components/pull/2723
-            if (!"cancel".equals(key)) {
-                String value = map.get(key);
-                Assert.assertNotNull("Missing translation value: " + key,
-                        value);
-            }
-        });
-    }
-
-    /**
-     * Converts a deeply nested JsonObject into a Map of key / value pairs,
-     * where the key is the path through the object to the property, and the
-     * value is the string value of the property, or null if the property was
-     * null
-     */
-    private Map<String, String> jsonToMap(ObjectNode jsonObject) {
-        return jsonToMap(new HashMap<>(), "", jsonObject);
-    }
-
-    private Map<String, String> jsonToMap(Map<String, String> output,
-            String path, ObjectNode node) {
-        for (String key : node.propertyNames()) {
-            JsonNode jsonValue = node.get(key);
-            String subPath = path.isEmpty() ? key : path + "." + key;
-
-            if (jsonValue.isObject()) {
-                jsonToMap(output, subPath, (ObjectNode) jsonValue);
-            } else if (jsonValue.isNull()) {
-                output.put(subPath, null);
-            } else {
-                String stringValue = jsonValue.toString();
-                output.put(subPath, stringValue);
-            }
-        }
-        return output;
-    }
-
-    private ObjectNode getUploadI18nPropertyAsJson(UploadElement upload) {
-        String i18nJsonString = (String) upload.getCommandExecutor()
-                .executeScript("return JSON.stringify(arguments[0].i18n)",
-                        upload);
-        return JacksonUtils.readTree(i18nJsonString);
-    }
-
-    private void deeplyRemoveNullValuesFromJsonObject(ObjectNode jsonObject) {
-        for (String key : jsonObject.propertyNames()) {
-            if (jsonObject.get(key).isObject()) {
-                deeplyRemoveNullValuesFromJsonObject(
-                        (ObjectNode) jsonObject.get(key));
-            } else if (jsonObject.get(key).isNull()) {
-                jsonObject.remove(key);
-            }
-        }
+    private TestBenchElement getSlottedElement(String slotName) {
+        return upload.$("*").withAttribute("slot", slotName).first();
     }
 }
