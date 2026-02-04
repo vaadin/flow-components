@@ -58,16 +58,16 @@ public class ControlsIT extends AbstractComponentIT {
 
     @Test
     public void scaleLine_toggleVisibility() {
-        // Scale lint should *not* be visible initially
-        Assert.assertFalse(queryScaleLineControl().exists());
+        // Scale should *not* be visible initially
+        Assert.assertFalse(queryScaleControl().exists());
 
-        clickElementWithJs("toggle-scale-line");
+        clickElementWithJs("toggle-scale");
 
-        Assert.assertTrue(queryScaleLineControl().exists());
+        Assert.assertTrue(queryScaleControl().exists());
 
-        clickElementWithJs("toggle-scale-line");
+        clickElementWithJs("toggle-scale");
 
-        Assert.assertFalse(queryScaleLineControl().exists());
+        Assert.assertFalse(queryScaleControl().exists());
     }
 
     private ElementQuery<TestBenchElement> queryAttributionsControl() {
@@ -80,7 +80,7 @@ public class ControlsIT extends AbstractComponentIT {
                 .withClassName("ol-control");
     }
 
-    private ElementQuery<TestBenchElement> queryScaleLineControl() {
+    private ElementQuery<TestBenchElement> queryScaleControl() {
         return map.$(TestBenchElement.class).withClassName("ol-scale-line");
     }
 }

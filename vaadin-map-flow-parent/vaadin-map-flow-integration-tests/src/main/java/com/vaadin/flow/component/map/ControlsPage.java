@@ -11,7 +11,7 @@ package com.vaadin.flow.component.map;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.controls.AttributionControl;
-import com.vaadin.flow.component.map.configuration.controls.ScaleLineControl;
+import com.vaadin.flow.component.map.configuration.controls.ScaleControl;
 import com.vaadin.flow.component.map.configuration.controls.ZoomControl;
 import com.vaadin.flow.router.Route;
 
@@ -35,13 +35,12 @@ public class ControlsPage extends Div {
         });
         toggleZoom.setId("toggle-zoom");
 
-        NativeButton toggleScaleLine = new NativeButton("Toggle scale line",
-                (e) -> {
-                    ScaleLineControl control = map.getControls().getScaleLine();
-                    control.setVisible(!control.isVisible());
-                });
-        toggleScaleLine.setId("toggle-scale-line");
+        NativeButton toggleScale = new NativeButton("Toggle scale", (e) -> {
+            ScaleControl control = map.getControls().getScale();
+            control.setVisible(!control.isVisible());
+        });
+        toggleScale.setId("toggle-scale");
 
-        add(new Div(toggleAttributions, toggleZoom, toggleScaleLine));
+        add(new Div(toggleAttributions, toggleZoom, toggleScale));
     }
 }
