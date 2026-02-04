@@ -245,7 +245,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
-     * Validates that the given value is valid for the current min, max and step.
+     * Validates that the given value is valid for the current min, max and
+     * step.
      *
      * @param value
      *            the value to validate

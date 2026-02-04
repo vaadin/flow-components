@@ -206,8 +206,8 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min, max, initial value,
-     * and a value change listener.
+     * Constructs a {@code Slider} with the given label, min, max, initial
+     * value, and a value change listener.
      *
      * @param label
      *            the text to set as the label
