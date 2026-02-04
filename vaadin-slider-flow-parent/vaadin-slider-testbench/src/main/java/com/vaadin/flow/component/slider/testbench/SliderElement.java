@@ -17,10 +17,8 @@ package com.vaadin.flow.component.slider.testbench;
 
 import java.util.Collections;
 
-import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
-import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -30,8 +28,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-slider")
-public class SliderElement extends TestBenchElement implements HasLabel,
-        HasPlaceholder, HasHelper, HasClearButton, HasValidation {
+public class SliderElement extends TestBenchElement
+        implements HasLabel, HasHelper, HasValidation {
 
     /**
      * Sets the value of the slider, emulating user input. The emulation is done

@@ -41,7 +41,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
             component, arrayValue) -> {
         try {
             RangeSliderValue value = new RangeSliderValue(
-                arrayValue.get(0).asDouble(), arrayValue.get(1).asDouble());
+                    arrayValue.get(0).asDouble(), arrayValue.get(1).asDouble());
 
             component.requireValidValue(value);
 
