@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.slider.tests;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.router.Route;
 
@@ -24,6 +25,12 @@ public class BasicPage extends Div {
 
     public BasicPage() {
         Slider slider = new Slider(10, 200, 5, 50);
-        add(slider);
+
+        Span serverValue = new Span();
+        serverValue.setId("server-value");
+        slider.addValueChangeListener(
+                event -> serverValue.setText(String.valueOf(event.getValue())));
+
+        add(slider, serverValue);
     }
 }
