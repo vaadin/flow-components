@@ -103,9 +103,6 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary) {
         this();
-        if (summary == null) {
-            summary = "";
-        }
         updateSummaryText(summary);
     }
 
@@ -146,9 +143,6 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary, Component content) {
         this();
-        if (summary == null) {
-            summary = "";
-        }
         updateSummaryText(summary);
         contentContainer.add(content);
     }
@@ -275,9 +269,6 @@ public class Details extends Component implements HasComponents, HasSize,
      * @see #bindSummaryText(Signal)
      */
     public void setSummaryText(String summary) {
-        if (summary == null) {
-            summary = "";
-        }
         summaryTextSupport.set(summary);
     }
 
