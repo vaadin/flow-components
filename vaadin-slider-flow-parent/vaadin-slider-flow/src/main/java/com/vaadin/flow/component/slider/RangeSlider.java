@@ -382,8 +382,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
 
         RangeSliderValue value = getValue();
         setValue(new RangeSliderValue(
-                adjustDoubleValueToStep(value.start(), step),
-                adjustDoubleValueToStep(value.end(), step)));
+                adjustDoubleValueToStep(value.start(), getMin(), getMax(), step),
+                adjustDoubleValueToStep(value.end(), getMin(), getMax(), step)));
     }
 
     @Override
@@ -402,12 +402,12 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
                     "End value must be between min and max");
         }
 
-        if (adjustDoubleValueToStep(value.start(), step) != value.start()) {
+        if (adjustDoubleValueToStep(value.start(), min, max, step) != value.start()) {
             throw new IllegalArgumentException(
                     "Start value must be aligned with step");
         }
 
-        if (adjustDoubleValueToStep(value.end(), step) != value.end()) {
+        if (adjustDoubleValueToStep(value.end(), min, max, step) != value.end()) {
             throw new IllegalArgumentException(
                     "End value must be aligned with step");
         }

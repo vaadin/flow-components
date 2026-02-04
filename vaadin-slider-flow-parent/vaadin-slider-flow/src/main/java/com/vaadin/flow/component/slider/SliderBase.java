@@ -292,9 +292,9 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *            the step value
      * @return the adjusted value
      */
-    double adjustDoubleValueToStep(double value, double step) {
-        BigDecimal minBd = BigDecimal.valueOf(getMinDouble());
-        BigDecimal maxBd = BigDecimal.valueOf(getMaxDouble());
+    double adjustDoubleValueToStep(double value, double min, double max, double step) {
+        BigDecimal minBd = BigDecimal.valueOf(min);
+        BigDecimal maxBd = BigDecimal.valueOf(max);
         BigDecimal stepBd = BigDecimal.valueOf(step);
         BigDecimal valueBd = BigDecimal.valueOf(value);
 

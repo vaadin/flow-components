@@ -359,7 +359,7 @@ public class Slider extends SliderBase<Slider, Double> {
         requireValidStep(step);
         setStepDouble(step);
 
-        double adjustedValue = adjustDoubleValueToStep(getValue(), step);
+        double adjustedValue = adjustDoubleValueToStep(getValue(), getMin(), getMax(), step);
         setValue(adjustedValue);
     }
 
@@ -382,7 +382,7 @@ public class Slider extends SliderBase<Slider, Double> {
                     "Value must be between min and max");
         }
 
-        if (adjustDoubleValueToStep(value, step) != value) {
+        if (adjustDoubleValueToStep(value, min, max, step) != value) {
             throw new IllegalArgumentException(
                     "Value must be aligned with step");
         }
