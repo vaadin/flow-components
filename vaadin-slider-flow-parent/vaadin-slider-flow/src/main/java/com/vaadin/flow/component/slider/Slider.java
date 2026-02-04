@@ -58,7 +58,7 @@ public class Slider extends SliderBase<Slider, Double> {
     };
 
     /**
-     * Constructs a {@code Slider} with range 0-100 and initial value 0.
+     * Constructs a {@code Slider} with min 0, max 100, and initial value 0.
      * <p>
      * The step defaults to 1.
      */
@@ -67,7 +67,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with range 0-100, initial value 0, and a
+     * Constructs a {@code Slider} with min 0, max 100, initial value 0, and a
      * value change listener.
      * <p>
      * The step defaults to 1.
@@ -81,7 +81,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given range and initial value.
+     * Constructs a {@code Slider} with the given min, max and initial value.
      * <p>
      * The step defaults to 1.
      *
@@ -97,7 +97,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given range, initial value, and a
+     * Constructs a {@code Slider} with the given min, max, initial value, and a
      * value change listener.
      * <p>
      * The step defaults to 1.
@@ -117,7 +117,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given range, step, and initial
+     * Constructs a {@code Slider} with the given min, max, step, and initial
      * value.
      *
      * @param min
@@ -134,7 +134,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given range, step, initial value,
+     * Constructs a {@code Slider} with the given min, max, step, initial value,
      * and a value change listener.
      *
      * @param min
@@ -155,7 +155,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, range 0-100, and
+     * Constructs a {@code Slider} with the given label, min 0, max 100, and
      * initial value 0.
      * <p>
      * The step defaults to 1.
@@ -169,7 +169,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, range 0-100, initial
+     * Constructs a {@code Slider} with the given label, min 0, max 100, initial
      * value 0, and a value change listener.
      * <p>
      * The step defaults to 1.
@@ -186,7 +186,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, range, and initial
+     * Constructs a {@code Slider} with the given label, min, max, and initial
      * value.
      * <p>
      * The step defaults to 1.
@@ -206,7 +206,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, range, initial value,
+     * Constructs a {@code Slider} with the given label, min, max, initial value,
      * and a value change listener.
      *
      * @param label
@@ -227,7 +227,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, range, step, and
+     * Constructs a {@code Slider} with the given label, min, max, step, and
      * initial value.
      *
      * @param label
@@ -248,7 +248,7 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, range, step, initial
+     * Constructs a {@code Slider} with the given label, min, max, step, initial
      * value, and a value change listener.
      *
      * @param label
@@ -294,7 +294,7 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if min is greater than the current max
      */
     public void setMin(double min) {
-        requireValidRange(min, getMax());
+        requireValidMinMax(min, getMax());
         setMinDouble(min);
 
         double adjustedValue = Math.max(getValue(), min);
@@ -324,7 +324,7 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if max is less than the current min
      */
     public void setMax(double max) {
-        requireValidRange(getMin(), max);
+        requireValidMinMax(getMin(), max);
         setMaxDouble(max);
 
         double adjustedValue = Math.min(getValue(), max);

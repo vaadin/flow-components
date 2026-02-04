@@ -157,7 +157,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param value
      *            the value
      * @throws IllegalArgumentException
-     *             if value is not valid for the current range and step
+     *             if value is not valid for the current min, max and step
      */
     @Override
     public void setValue(TValue value) {
@@ -178,7 +178,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @throws IllegalArgumentException
      *             if min is greater than max
      * @throws IllegalArgumentException
-     *             if value is not valid for the given range and current step
+     *             if value is not valid for the given min, max and current step
      */
     public void setValue(TValue value, double min, double max) {
         setValue(value, min, max, getStepDouble());
@@ -200,11 +200,11 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @throws IllegalArgumentException
      *             if step is not positive
      * @throws IllegalArgumentException
-     *             if value is not valid for the given range and step
+     *             if value is not valid for the given min, max and step
      */
     public void setValue(TValue value, double min, double max, double step) {
         requireValidStep(step);
-        requireValidRange(min, max);
+        requireValidMinMax(min, max);
         requireValidValue(min, max, step, value);
 
         setMinDouble(min);
@@ -223,7 +223,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @throws IllegalArgumentException
      *             if min is greater than max
      */
-    void requireValidRange(double min, double max) {
+    void requireValidMinMax(double min, double max) {
         if (min > max) {
             throw new IllegalArgumentException(
                     "Max must be greater than or equal to min");
@@ -245,12 +245,12 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
-     * Validates that the given value is valid for the current range and step.
+     * Validates that the given value is valid for the current min, max and step.
      *
      * @param value
      *            the value to validate
      * @throws IllegalArgumentException
-     *             if value is not valid for the current range and step
+     *             if value is not valid for the current min, max and step
      */
     void requireValidValue(TValue value) {
         requireValidValue(getMinDouble(), getMaxDouble(), getStepDouble(),
@@ -258,7 +258,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
-     * Validates that the given value is valid for the given range and step.
+     * Validates that the given value is valid for the given min, max and step.
      *
      * @param min
      *            the minimum value
@@ -269,7 +269,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param value
      *            the value to validate
      * @throws IllegalArgumentException
-     *             if value is not valid for the given range and step
+     *             if value is not valid for the given min, max and step
      */
     abstract void requireValidValue(double min, double max, double step,
             TValue value);
