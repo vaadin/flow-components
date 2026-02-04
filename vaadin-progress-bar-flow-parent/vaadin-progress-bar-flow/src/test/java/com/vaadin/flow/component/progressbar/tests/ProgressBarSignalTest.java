@@ -31,12 +31,14 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
     private ProgressBar progressBar;
     private ValueSignal<Double> minSignal;
     private ValueSignal<Double> maxSignal;
+    private ValueSignal<Double> valueSignal;
 
     @Before
     public void setup() {
         progressBar = new ProgressBar();
         minSignal = new ValueSignal<>(0.0);
         maxSignal = new ValueSignal<>(100.0);
+        valueSignal = new ValueSignal<>(50.0);
     }
 
     @After
@@ -198,5 +200,82 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
 
         ValueSignal<Double> anotherSignal = new ValueSignal<>(500.0);
         progressBar.bindMax(anotherSignal);
+    }
+
+    // ===== VALUE BINDING TESTS =====
+
+    @Test
+    public void bindValue_signalBound_valueSynchronizedWhenAttached() {
+        progressBar.bindValue(valueSignal);
+        UI.getCurrent().add(progressBar);
+
+        Assert.assertEquals(50.0, progressBar.getValue(), 0.001);
+
+        valueSignal.value(75.0);
+        Assert.assertEquals(75.0, progressBar.getValue(), 0.001);
+
+        valueSignal.value(25.5);
+        Assert.assertEquals(25.5, progressBar.getValue(), 0.001);
+    }
+
+    @Test
+    public void bindValue_signalBound_noEffectWhenDetached() {
+        progressBar.bindValue(valueSignal);
+        // Not attached to UI
+
+        double initialValue = progressBar.getValue();
+        valueSignal.value(75.0);
+        Assert.assertEquals(initialValue, progressBar.getValue(), 0.001);
+    }
+
+    @Test
+    public void bindValue_signalBound_detachAndReattach() {
+        progressBar.bindValue(valueSignal);
+        UI.getCurrent().add(progressBar);
+        Assert.assertEquals(50.0, progressBar.getValue(), 0.001);
+
+        // Detach
+        progressBar.removeFromParent();
+        valueSignal.value(75.0);
+        Assert.assertEquals(50.0, progressBar.getValue(), 0.001);
+
+        // Reattach
+        UI.getCurrent().add(progressBar);
+        Assert.assertEquals(75.0, progressBar.getValue(), 0.001);
+
+        valueSignal.value(90.0);
+        Assert.assertEquals(90.0, progressBar.getValue(), 0.001);
+    }
+
+    @Test
+    public void bindValue_nullUnbindsSignal() {
+        progressBar.bindValue(valueSignal);
+        UI.getCurrent().add(progressBar);
+        Assert.assertEquals(50.0, progressBar.getValue(), 0.001);
+
+        progressBar.bindValue(null);
+        valueSignal.value(75.0);
+        Assert.assertEquals(50.0, progressBar.getValue(), 0.001);
+
+        // Should be able to set manually after unbinding
+        progressBar.setValue(80.0);
+        Assert.assertEquals(80.0, progressBar.getValue(), 0.001);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindValue_setValueWhileBound_throwsException() {
+        progressBar.bindValue(valueSignal);
+        UI.getCurrent().add(progressBar);
+
+        progressBar.setValue(75.0);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindValue_bindAgainWhileBound_throwsException() {
+        progressBar.bindValue(valueSignal);
+        UI.getCurrent().add(progressBar);
+
+        ValueSignal<Double> anotherSignal = new ValueSignal<>(80.0);
+        progressBar.bindValue(anotherSignal);
     }
 }

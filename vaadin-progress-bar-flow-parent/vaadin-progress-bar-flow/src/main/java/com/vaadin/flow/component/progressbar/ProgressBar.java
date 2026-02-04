@@ -116,6 +116,29 @@ public class ProgressBar extends Component
     }
 
     /**
+     * Binds the given signal to the value of the progressbar.
+     * <p>
+     * When a signal is bound, the value is kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the value manually through
+     * {@link #setValue(double)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the value to, or {@code null} to unbind
+     * @see #setValue(double)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindValue(Signal<Double> signal) {
+        getElement().bindProperty("value", signal);
+    }
+
+    /**
      * Sets the maximum bound of the progressbar.
      *
      * @param max
