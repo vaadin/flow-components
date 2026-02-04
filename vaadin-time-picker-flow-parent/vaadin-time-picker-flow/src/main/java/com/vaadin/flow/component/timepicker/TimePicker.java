@@ -846,8 +846,9 @@ public class TimePicker
      * @since 25.1
      */
     public void bindMin(Signal<LocalTime> signal) {
-        getElement().bindProperty("min",
-                signal == null ? null : signal.map(TimePicker::format));
+        getElement().bindProperty("min", signal == null ? null
+                : signal.map(
+                        time -> Objects.requireNonNullElse(format(time), "")));
         minSupport.bind(signal);
     }
 
@@ -873,8 +874,9 @@ public class TimePicker
      * @since 25.1
      */
     public void bindMax(Signal<LocalTime> signal) {
-        getElement().bindProperty("max",
-                signal == null ? null : signal.map(TimePicker::format));
+        getElement().bindProperty("max", signal == null ? null
+                : signal.map(
+                        time -> Objects.requireNonNullElse(format(time), "")));
         maxSupport.bind(signal);
     }
 
