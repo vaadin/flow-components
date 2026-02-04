@@ -15,6 +15,13 @@
  */
 package com.vaadin.flow.component.slider.testbench;
 
+import java.util.Collections;
+
+import com.vaadin.testbench.HasClearButton;
+import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasPlaceholder;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -23,7 +30,20 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-slider")
-public class SliderElement extends TestBenchElement {
+public class SliderElement extends TestBenchElement implements HasLabel,
+        HasPlaceholder, HasHelper, HasClearButton, HasValidation {
+
+    /**
+     * Sets the value of the slider, emulating user input. The emulation is done
+     * by setting the value property to the given value and then triggering
+     * synthetic {@code input} and {@code change} DOM events to synchronize the
+     * value with the server side.
+     */
+    public void setValue(double value) {
+        setProperty("value", value);
+        dispatchEvent("input", Collections.singletonMap("bubbles", true));
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
+    }
 
     /**
      * Gets the current value of the slider.

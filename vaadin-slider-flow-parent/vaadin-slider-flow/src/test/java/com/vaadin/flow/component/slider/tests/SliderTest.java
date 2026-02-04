@@ -21,8 +21,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.slider.Slider;
-import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
-import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 
 public class SliderTest {
     @Test
@@ -334,40 +332,31 @@ public class SliderTest {
     }
 
     @Test
-    public void setValueFromClient_valueNotAlignedWithStep_ignored()
-            throws PropertyChangeDeniedException {
-        Slider slider = new Slider(0, 100, 10, 0);
-        slider.getElement().getNode().getFeature(ElementPropertyMap.class)
-                .deferredUpdateFromClient("value", 15.0).run();
-
-        Assert.assertEquals(0, slider.getValue(), 0);
-    }
-
-    @Test
-    public void setValueFromClient_valueBelowMin_ignored()
-            throws PropertyChangeDeniedException {
-        Slider slider = new Slider(0, 100, 10, 0);
-        slider.getElement().getNode().getFeature(ElementPropertyMap.class)
-                .deferredUpdateFromClient("value", -10.0).run();
-
-        Assert.assertEquals(0, slider.getValue(), 0);
-    }
-
-    @Test
-    public void setValueFromClient_valueAboveMax_ignored()
-            throws PropertyChangeDeniedException {
-        Slider slider = new Slider(0, 100, 10, 0);
-        slider.getElement().getNode().getFeature(ElementPropertyMap.class)
-                .deferredUpdateFromClient("value", 110.0).run();
-
-        Assert.assertEquals(0, slider.getValue(), 0);
-    }
-
-    @Test
     public void clear_valueResetsToMin() {
         Slider slider = new Slider(10, 50, 30);
         slider.clear();
 
         Assert.assertEquals(10, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueFromClient_valueNotAlignedWithStep_ignored() {
+        Slider slider = new Slider(0, 100, 10, 0);
+        slider.getElement().setProperty("value", 15.0);
+        Assert.assertEquals(0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueFromClient_valueBelowMin_ignored() {
+        Slider slider = new Slider(0, 100, 10, 0);
+        slider.getElement().setProperty("value", -10.0);
+        Assert.assertEquals(0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueFromClient_valueAboveMax_ignored() {
+        Slider slider = new Slider(0, 100, 10, 0);
+        slider.getElement().setProperty("value", 110.0);
+        Assert.assertEquals(0, slider.getValue(), 0);
     }
 }

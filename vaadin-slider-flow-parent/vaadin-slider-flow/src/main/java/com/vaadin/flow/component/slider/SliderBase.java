@@ -68,6 +68,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
 
+        setSynchronizedEvent("change");
         getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
