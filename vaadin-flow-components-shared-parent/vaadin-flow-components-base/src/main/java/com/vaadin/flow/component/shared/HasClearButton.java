@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.signals.Signal;
 
 /**
  * Mixin interface for components that support a clear button.
@@ -46,5 +47,35 @@ public interface HasClearButton extends HasElement {
      */
     default void setClearButtonVisible(boolean clearButtonVisible) {
         getElement().setProperty("clearButtonVisible", clearButtonVisible);
+    }
+
+    /**
+     * Binds a given signal to the visibility of the clear button.
+     * <p>
+     * When a signal is bound, the clear button visibility is kept synchronized
+     * with the signal value while the element is in the attached state. When
+     * the element is detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the visibility manually
+     * through {@link #setClearButtonVisible(boolean)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     * <p>
+     * Attempting to bind a new signal while one is already bound throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     * <p>
+     * Signal's value {@code null} is treated as {@code false}.
+     *
+     * @param signal
+     *            the signal to bind the clear button visibility to, or
+     *            {@code null} to unbind
+     * @see #setClearButtonVisible(boolean)
+     * @since 25.1
+     */
+    default void bindClearButtonVisible(Signal<Boolean> signal) {
+        getElement().bindProperty("clearButtonVisible", signal == null ? null
+                : signal.map(
+                        visible -> visible == null ? Boolean.FALSE : visible));
     }
 }

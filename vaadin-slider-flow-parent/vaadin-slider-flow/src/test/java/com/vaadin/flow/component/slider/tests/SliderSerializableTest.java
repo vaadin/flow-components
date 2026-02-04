@@ -13,17 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai;
-
-import java.util.stream.Stream;
+package com.vaadin.flow.component.slider.tests;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class AiComponentsSerializableTest extends ClassesSerializableTest {
-    @Override
-    protected Stream<String> getExcludedPatterns() {
-        return Stream.concat(super.getExcludedPatterns(), Stream.of(
-                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LangChain4JLLMProvider\\$.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\.LLMProviderHelpers"));
-    }
+public class SliderSerializableTest extends ClassesSerializableTest {
 }
