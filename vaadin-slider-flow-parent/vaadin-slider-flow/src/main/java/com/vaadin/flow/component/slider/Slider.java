@@ -41,7 +41,13 @@ public class Slider extends SliderBase<Slider, Double> {
 
     private static final SerializableBiFunction<Slider, Double, Double> PARSER = (
             component, value) -> {
-        component.requireValidValue(value);
+        try {
+            component.requireValidValue(value);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Ignore invalid values from the client side
+            return component.getValue();
+        }
+
         return value;
     };
 
