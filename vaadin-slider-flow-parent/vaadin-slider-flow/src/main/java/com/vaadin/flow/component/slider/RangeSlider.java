@@ -39,17 +39,17 @@ import tools.jackson.databind.node.ArrayNode;
 public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     private static final SerializableBiFunction<RangeSlider, ArrayNode, RangeSliderValue> PARSER = (
             component, arrayValue) -> {
-        RangeSliderValue value = new RangeSliderValue(
+        try {
+            RangeSliderValue value = new RangeSliderValue(
                 arrayValue.get(0).asDouble(), arrayValue.get(1).asDouble());
 
-        try {
             component.requireValidValue(value);
+
+            return value;
         } catch (IllegalArgumentException | NullPointerException e) {
             // Ignore invalid values from the client side
             return component.getValue();
         }
-
-        return value;
     };
 
     private static final SerializableBiFunction<RangeSlider, RangeSliderValue, ArrayNode> FORMATTER = (
@@ -410,11 +410,6 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
         if (adjustDoubleValueToStep(value.end(), step) != value.end()) {
             throw new IllegalArgumentException(
                     "End value must be aligned with step");
-        }
-
-        if (value.start() % step != 0 || value.end() % step != 0) {
-            throw new IllegalArgumentException(
-                    "Value is not aligned with step");
         }
     }
 }
