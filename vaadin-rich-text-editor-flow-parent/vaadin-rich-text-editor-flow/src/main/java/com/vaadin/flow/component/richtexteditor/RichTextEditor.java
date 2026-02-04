@@ -42,7 +42,6 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Rich Text Editor is an input field for entering rich text. It allows you to
@@ -62,7 +61,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.1.0-alpha5")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.1.0-alpha6")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -98,22 +97,7 @@ public class RichTextEditor
     public void setI18n(RichTextEditorI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-
-        runBeforeClientResponse(ui -> {
-            if (i18n == this.i18n) {
-                setI18nWithJS();
-            }
-        });
-    }
-
-    private void setI18nWithJS() {
-        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
-
-        // Assign new I18N object to WC, by merging the existing
-        // WC I18N, and the values from the new RichTextEditorI18n instance,
-        // into an empty object
-        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
-                i18nJson);
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -155,11 +139,6 @@ public class RichTextEditor
         // presentation value to run the necessary JS for initializing the
         // client-side element
         setPresentationValue(getValue());
-
-        // Element state is not persisted across attach/detach
-        if (this.i18n != null) {
-            setI18nWithJS();
-        }
     }
 
     /**

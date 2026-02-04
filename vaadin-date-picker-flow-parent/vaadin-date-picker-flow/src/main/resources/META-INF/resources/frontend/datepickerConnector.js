@@ -171,8 +171,8 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     const usedFormats = hasCustomFormats ? i18n.dateFormats : [createLocaleBasedDateFormat(locale)];
     const formatterAndParser = createFormatterAndParser(usedFormats);
 
-    // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
-    datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
+    // Merge new I18N settings with formatting and parsing functions
+    datepicker.i18n = Object.assign({}, i18n, formatterAndParser);
   };
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));

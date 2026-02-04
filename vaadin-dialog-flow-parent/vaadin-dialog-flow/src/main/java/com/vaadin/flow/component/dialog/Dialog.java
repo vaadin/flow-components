@@ -75,7 +75,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha5")
+@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha6")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -731,6 +731,34 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     public boolean isDraggable() {
         return getElement().getProperty("draggable", false);
+    }
+
+    /**
+     * Sets whether dragging the dialog outside the viewport is prevented.
+     * <p>
+     * When enabled, all four edges of the dialog will remain visible during
+     * dragging. The dialog may still become partially hidden when the viewport
+     * is resized.
+     * <p>
+     * Note: This property only has an effect when the dialog is
+     * {@link #setDraggable(boolean) draggable}.
+     *
+     * @param keepInViewport
+     *            {@code true} to prevent dragging outside the viewport,
+     *            {@code false} otherwise
+     */
+    public void setKeepInViewport(boolean keepInViewport) {
+        getElement().setProperty("keepInViewport", keepInViewport);
+    }
+
+    /**
+     * Gets whether dragging the dialog outside the viewport is prevented.
+     *
+     * @return {@code true} if dragging outside the viewport is prevented,
+     *         {@code false} otherwise (default).
+     */
+    public boolean isKeepInViewport() {
+        return getElement().getProperty("keepInViewport", false);
     }
 
     /**

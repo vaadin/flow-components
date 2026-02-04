@@ -89,7 +89,7 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha5")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha6")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -948,9 +948,8 @@ public class DateTimePicker
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(DateTimePickerI18n i18n) {
-        Objects.requireNonNull(i18n,
+        this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        this.i18n = i18n;
         updateI18n();
     }
 
