@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -40,6 +43,10 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasValidationProperties, Focusable<TComponent>, KeyNotifier {
+    static final double DEFAULT_MIN = 0;
+    static final double DEFAULT_MAX = 100;
+    static final double DEFAULT_STEP = 1;
+
     /**
      * Constructs a slider with the given min, max, step, initial value, and
      * custom converters for the value property.
@@ -274,4 +281,44 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     abstract void requireValidValue(double min, double max, double step,
             TValue value);
+
+    /**
+     * Adjusts the given value to align with the step, clamped to the current
+     * min/max range.
+     *
+     * @param value
+     *            the value to adjust
+     * @param step
+     *            the step value
+     * @return the adjusted value
+     */
+    double adjustDoubleValueToStep(double value, double step) {
+        BigDecimal minBd = BigDecimal.valueOf(getMinDouble());
+        BigDecimal maxBd = BigDecimal.valueOf(getMaxDouble());
+        BigDecimal stepBd = BigDecimal.valueOf(step);
+        BigDecimal valueBd = BigDecimal.valueOf(value);
+
+        // Equivalent to Math.round((value - min) / step)
+        BigDecimal stepsFromMin = valueBd.subtract(minBd).divide(stepBd, 0,
+                RoundingMode.HALF_UP);
+
+        // Equivalent to Math.min(min + stepsFromMin * step, max)
+        return minBd.add(stepsFromMin.multiply(stepBd)).min(maxBd)
+                .doubleValue();
+    }
+
+    /**
+     * Adjusts the given value to be within the given min/max range.
+     *
+     * @param value
+     *            the value to adjust
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @return the adjusted value
+     */
+    double adjustDoubleValueToMinMax(double value, double min, double max) {
+        return Math.clamp(value, min, max);
+    }
 }

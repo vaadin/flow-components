@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -32,19 +34,22 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-range-slider")
-// @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha1")
-// @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
+@NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha6")
+@JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
-    private static final double DEFAULT_MIN = 0;
-    private static final double DEFAULT_MAX = 100;
-    private static final double DEFAULT_STEP = 1;
-
     private static final SerializableBiFunction<RangeSlider, ArrayNode, RangeSliderValue> PARSER = (
             component, arrayValue) -> {
         RangeSliderValue value = new RangeSliderValue(
                 arrayValue.get(0).asDouble(), arrayValue.get(1).asDouble());
 
-        return component.requireValidValue(value);
+        try {
+            component.requireValidValue(value);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Ignore invalid values from the client side
+            return component.getValue();
+        }
+
+        return value;
     };
 
     private static final SerializableBiFunction<RangeSlider, RangeSliderValue, ArrayNode> FORMATTER = (
@@ -56,8 +61,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     };
 
     /**
-     * Constructs a {@code RangeSlider} with range 0-100 and initial value
-     * 0-100.
+     * Constructs a {@code RangeSlider} with min 0, max 100, and initial value
+     * [0, 100].
      * <p>
      * The step defaults to 1.
      */
@@ -67,8 +72,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with range 0-100, initial value 0-100,
-     * and a value change listener.
+     * Constructs a {@code RangeSlider} with min 0, max 100, initial value [0,
+     * 100], and a value change listener.
      * <p>
      * The step defaults to 1.
      *
@@ -82,7 +87,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given range and initial value.
+     * Constructs a {@code RangeSlider} with the given min, max, and initial
+     * value.
      * <p>
      * The step defaults to 1.
      *
@@ -98,8 +104,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given range, initial value, and
-     * a value change listener.
+     * Constructs a {@code RangeSlider} with the given min, max, initial value,
+     * and a value change listener.
      * <p>
      * The step defaults to 1.
      *
@@ -118,8 +124,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given range, step, and initial
-     * value.
+     * Constructs a {@code RangeSlider} with the given min, max, step, and
+     * initial value.
      *
      * @param min
      *            the minimum value
@@ -136,7 +142,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given range, step, initial
+     * Constructs a {@code RangeSlider} with the given min, max, step, initial
      * value, and a value change listener.
      *
      * @param min
@@ -158,8 +164,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, range 0-100, and
-     * initial value 0-100.
+     * Constructs a {@code RangeSlider} with the given label, min 0, max 100,
+     * and initial value [0, 100].
      * <p>
      * The step defaults to 1.
      *
@@ -172,8 +178,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, range 0-100,
-     * initial value 0-100, and a value change listener.
+     * Constructs a {@code RangeSlider} with the given label, min 0, max 100,
+     * initial value [0, 100], and a value change listener.
      * <p>
      * The step defaults to 1.
      *
@@ -189,8 +195,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, range, and initial
-     * value.
+     * Constructs a {@code RangeSlider} with the given label, min, max, and
+     * initial value.
      * <p>
      * The step defaults to 1.
      *
@@ -210,7 +216,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, range, initial
+     * Constructs a {@code RangeSlider} with the given label, min, max, initial
      * value, and a value change listener.
      * <p>
      * The step defaults to 1.
@@ -234,8 +240,8 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, range, step, and
-     * initial value.
+     * Constructs a {@code RangeSlider} with the given label, min, max, step,
+     * and initial value.
      *
      * @param label
      *            the text to set as the label
@@ -255,7 +261,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, range, step,
+     * Constructs a {@code RangeSlider} with the given label, min, max, step,
      * initial value, and a value change listener.
      *
      * @param label
@@ -279,52 +285,36 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Sets the minimum value of the slider.
-     *
-     * @param min
-     *            the minimum value
-     * @throws IllegalArgumentException
-     *             if the min is greater than the max value
-     * @throws IllegalArgumentException
-     *             if the current start value is below the new minimum value
-     */
-    public void setMin(double min) {
-        if (getValue().start() < min) {
-            throw new IllegalArgumentException(
-                    "The current start value {} is below the new minimum value {}"
-                            .formatted(getValue().start(), min));
-        }
-
-        super.setMinDouble(min);
-    }
-
-    /**
      * Gets the minimum value of the slider.
      *
      * @return the minimum value
      */
     public double getMin() {
-        return getMinDouble();
+        return super.getMinDouble();
     }
 
     /**
-     * Sets the maximum value of the slider.
+     * Sets the minimum value of the slider.
+     * <p>
+     * This method automatically clamps both the current start and end values to
+     * be no less than the new minimum, which may trigger a value change event.
+     * To set the value explicitly along with the new minimum, use the
+     * {@link #setValue(RangeSliderValue, double, double) setValue(value, min,
+     * max)} method instead.
      *
-     * @param max
-     *            the maximum value
+     * @param min
+     *            the minimum value
      * @throws IllegalArgumentException
-     *             if the max is less than the min value
-     * @throws IllegalArgumentException
-     *             if the current end value exceeds the new maximum value
+     *             if min is greater than the current max
      */
-    public void setMax(double max) {
-        if (getValue().end() > max) {
-            throw new IllegalArgumentException(
-                    "The current end value {} exceeds the new maximum value {}"
-                            .formatted(getValue().end(), max));
-        }
+    public void setMin(double min) {
+        requireValidMinMax(min, getMax());
+        setMinDouble(min);
 
-        super.setMaxDouble(max);
+        RangeSliderValue value = getValue();
+        setValue(new RangeSliderValue(
+                adjustDoubleValueToMinMax(value.start(), min, getMax()),
+                adjustDoubleValueToMinMax(value.end(), min, getMax())));
     }
 
     /**
@@ -333,53 +323,98 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      * @return the maximum value
      */
     public double getMax() {
-        return getMaxDouble();
+        return super.getMaxDouble();
     }
 
     /**
-     * Sets the step value of the slider. The step is the amount the value
-     * changes when the user moves a handle.
+     * Sets the maximum value of the slider.
+     * <p>
+     * This method automatically clamps both the current start and end values to
+     * be no greater than the new maximum, which may trigger a value change
+     * event. To set the value explicitly along with the new maximum, use the
+     * {@link #setValue(RangeSliderValue, double, double) setValue(value, min,
+     * max)} method instead.
      *
-     * @param step
-     *            the step value
+     * @param max
+     *            the maximum value
      * @throws IllegalArgumentException
-     *             if the step is less than or equal to zero
-     * @throws IllegalArgumentException
-     *             if the current value is not aligned with the new step value
+     *             if max is less than the current min
      */
-    public void setStep(double step) {
-        if (getValue().start() % step != 0 || getValue().end() % step != 0) {
-            throw new IllegalArgumentException(
-                    "The current value [{}, {}] is not aligned with the new step value {}"
-                            .formatted(getValue().start(), getValue().end(),
-                                    step));
-        }
+    public void setMax(double max) {
+        requireValidMinMax(getMin(), max);
+        setMaxDouble(max);
 
-        super.setStepDouble(step);
+        RangeSliderValue value = getValue();
+        setValue(new RangeSliderValue(
+                adjustDoubleValueToMinMax(value.start(), getMin(), max),
+                adjustDoubleValueToMinMax(value.end(), getMin(), max)));
     }
 
     /**
      * Gets the step value of the slider.
+     * <p>
+     * Valid slider values are calculated relative to the minimum value:
+     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
      *
      * @return the step value
      */
     public double getStep() {
-        return getStepDouble();
+        return super.getStepDouble();
     }
 
-    private RangeSliderValue requireValidValue(RangeSliderValue value) {
+    /**
+     * Sets the step value of the slider.
+     * <p>
+     * This method automatically adjusts both the current start and end values
+     * to be aligned with the new step, which may trigger a value change event.
+     * To set the value explicitly along with the new step, use the
+     * {@link #setValue(RangeSliderValue, double, double, double)
+     * setValue(value, min, max, step)} method instead.
+     *
+     * @param step
+     *            the step value
+     * @throws IllegalArgumentException
+     *             if step is not positive
+     */
+    public void setStep(double step) {
+        requireValidStep(step);
+        setStepDouble(step);
+
+        RangeSliderValue value = getValue();
+        setValue(new RangeSliderValue(
+                adjustDoubleValueToStep(value.start(), step),
+                adjustDoubleValueToStep(value.end(), step)));
+    }
+
+    @Override
+    void requireValidValue(double min, double max, double step,
+            RangeSliderValue value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
-        if (value.start() < getMin() || value.end() > getMax()) {
+        if (adjustDoubleValueToMinMax(value.start(), min, max) != value
+                .start()) {
             throw new IllegalArgumentException(
-                    "The value must be between min and max");
+                    "Start value must be between min and max");
         }
 
-        if (value.start() % getStep() != 0 || value.end() % getStep() != 0) {
+        if (adjustDoubleValueToMinMax(value.end(), min, max) != value.end()) {
             throw new IllegalArgumentException(
-                    "The value is not aligned with the step value");
+                    "End value must be between min and max");
         }
 
-        return value;
+        if (adjustDoubleValueToStep(value.start(), step) != value.start()) {
+            throw new IllegalArgumentException(
+                    "Start value must be aligned with step");
+        }
+
+        if (adjustDoubleValueToStep(value.end(), step) != value.end()) {
+            throw new IllegalArgumentException(
+                    "End value must be aligned with step");
+        }
+
+        if (value.start() % step != 0 || value.end() % step != 0) {
+            throw new IllegalArgumentException(
+                    "Value is not aligned with step");
+        }
     }
 }
