@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.signals.Signal;
 
 /**
  * Component for displaying an icon from the
@@ -50,6 +51,22 @@ public class Icon extends AbstractIcon<Icon> {
      */
     public Icon(VaadinIcon icon) {
         setIcon(icon);
+    }
+
+    /**
+     * Creates an Icon component that displays the icon from the given signal.
+     * <p>
+     * The icon is kept synchronized with the signal value while the component
+     * is attached. When the component is detached, signal value changes have no
+     * effect.
+     *
+     * @param iconSignal
+     *            the signal providing the icon to display
+     * @see #bindIcon(Signal)
+     * @since 25.1
+     */
+    public Icon(Signal<VaadinIcon> iconSignal) {
+        bindIcon(iconSignal);
     }
 
     /**
@@ -117,8 +134,33 @@ public class Icon extends AbstractIcon<Icon> {
      *            the icon name
      */
     public void setIcon(VaadinIcon icon) {
-        setIcon(VAADIN_ICON_COLLECTION_NAME,
-                icon.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
+        setIcon(VAADIN_ICON_COLLECTION_NAME, normalizeIcon(icon));
+    }
+
+    /**
+     * Binds the given signal to the icon of the component.
+     * <p>
+     * When a signal is bound, the icon is kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the icon manually through
+     * {@link #setIcon(VaadinIcon)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the icon to, or {@code null} to unbind
+     * @see #setIcon(VaadinIcon)
+     * @see com.vaadin.flow.dom.Element#bindAttribute(String, Signal)
+     * @since 25.1
+     */
+    public void bindIcon(Signal<VaadinIcon> signal) {
+        getElement().bindAttribute(ICON_ATTRIBUTE_NAME,
+                signal == null ? null
+                        : signal.map(icon -> VAADIN_ICON_COLLECTION_NAME + ":"
+                                + normalizeIcon(icon)));
     }
 
     /**
@@ -180,5 +222,9 @@ public class Icon extends AbstractIcon<Icon> {
     @Override
     public String getColor() {
         return getStyle().get(STYLE_FILL);
+    }
+
+    private static String normalizeIcon(VaadinIcon icon) {
+        return icon.name().toLowerCase(Locale.ENGLISH).replace('_', '-');
     }
 }
