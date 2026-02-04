@@ -32,7 +32,7 @@ import com.vaadin.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-alpha5")
+@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-alpha6")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {

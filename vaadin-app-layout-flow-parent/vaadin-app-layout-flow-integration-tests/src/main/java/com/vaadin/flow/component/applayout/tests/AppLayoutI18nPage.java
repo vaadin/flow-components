@@ -19,38 +19,33 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.AppLayout.AppLayoutI18n;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-app-layout/i18n")
 public class AppLayoutI18nPage extends Div {
     public AppLayoutI18nPage() {
         AppLayout layout = new AppLayout();
-        add(layout);
+        // Add drawer content so the drawer is visible
+        layout.addToDrawer(new Span("Drawer content"));
+        // Enable overlay mode via CSS variable (required for aria-label to be
+        // applied)
+        layout.getStyle().set("--vaadin-app-layout-drawer-overlay", "true");
 
-        NativeButton toggleAttachedButton = new NativeButton("toggle attached",
-                e -> {
-                    if (layout.getParent().isPresent()) {
-                        remove(layout);
-                    } else {
-                        add(layout);
-                    }
-                });
-        toggleAttachedButton.setId("toggle-attached");
-
-        NativeButton setI18nButton = new NativeButton("set i18n", e -> {
+        NativeButton setI18nButton = new NativeButton("Set I18N", e -> {
             AppLayoutI18n i18n = new AppLayout.AppLayoutI18n()
                     .setDrawer("Custom drawer");
             layout.setI18n(i18n);
         });
         setI18nButton.setId("set-i18n");
 
-        NativeButton setEmptyI18nButton = new NativeButton("set empty i18n",
+        NativeButton setEmptyI18nButton = new NativeButton("Set empty I18N",
                 e -> {
                     AppLayoutI18n i18n = new AppLayout.AppLayoutI18n();
                     layout.setI18n(i18n);
                 });
         setEmptyI18nButton.setId("set-empty-i18n");
 
-        add(setI18nButton, setEmptyI18nButton, toggleAttachedButton);
+        add(layout, setI18nButton, setEmptyI18nButton);
     }
 }
