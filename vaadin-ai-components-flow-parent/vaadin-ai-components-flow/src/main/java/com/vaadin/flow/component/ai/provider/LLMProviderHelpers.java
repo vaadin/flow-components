@@ -22,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
+import com.vaadin.flow.component.ai.component.AiAttachment;
+
 /**
  * Utility methods for LLM provider implementations.
  * <p>
@@ -60,19 +62,6 @@ final class LLMProviderHelpers {
         }
     }
 
-    /**
-     * Converts binary data to a Base64-encoded data URL.
-     *
-     * @param data
-     *            the binary data to encode
-     * @param contentType
-     *            the MIME content type (e.g., "image/png")
-     * @return a data URL in the format "data:{contentType};base64,{data}"
-     */
-    public static String toBase64DataUrl(byte[] data, String contentType) {
-        return "data:" + contentType + ";base64," + getBase64Data(data);
-    }
-
     public static String getBase64Data(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
     }
@@ -100,9 +89,9 @@ final class LLMProviderHelpers {
      * @throws NullPointerException
      *             if attachment, content type, or data is {@code null}
      */
-    public static void validateAttachment(LLMProvider.Attachment attachment) {
+    public static void validateAttachment(AiAttachment attachment) {
         Objects.requireNonNull(attachment, "Attachment must not be null");
-        Objects.requireNonNull(attachment.contentType(),
+        Objects.requireNonNull(attachment.mimeType(),
                 "Attachment content type must not be null");
         Objects.requireNonNull(attachment.data(),
                 "Attachment data must not be null");

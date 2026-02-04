@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.component.AiAttachment;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
 import com.vaadin.flow.component.ai.component.AiMessage;
@@ -94,7 +96,7 @@ public class AiOrchestrator {
     private AiMessageList messageList;
     private AiInput input;
     private AiFileReceiver fileReceiver;
-    private final List<LLMProvider.Attachment> pendingAttachments = new CopyOnWriteArrayList<>();
+    private final List<AiAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private Object[] tools = new Object[0];
     private String userName;
     private String aiName;
@@ -161,9 +163,11 @@ public class AiOrchestrator {
         doPrompt(userMessage);
     }
 
-    private void addUserMessageToList(String userMessage) {
+    private void addUserMessageToList(String userMessage,
+            List<AiAttachment> attachments) {
         if (messageList != null) {
-            var userItem = messageList.createMessage(userMessage, userName);
+            var userItem = messageList.createMessage(userMessage, userName,
+                    attachments);
             messageList.addMessage(userItem);
         }
     }
@@ -172,7 +176,8 @@ public class AiOrchestrator {
         if (messageList == null) {
             return null;
         }
-        var assistantMessage = messageList.createMessage("", aiName);
+        var assistantMessage = messageList.createMessage("", aiName,
+                Collections.emptyList());
         messageList.addMessage(assistantMessage);
         return assistantMessage;
     }
@@ -217,15 +222,15 @@ public class AiOrchestrator {
 
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
-        addUserMessageToList(userMessage);
+        var attachments = pendingAttachments.stream().toList();
+        addUserMessageToList(userMessage, attachments);
+        clearPendingAttachments(ui);
         var assistantMessage = createAssistantMessagePlaceholder();
         String effectiveSystemPrompt = null;
         if (systemPrompt != null && !systemPrompt.isBlank()) {
             effectiveSystemPrompt = systemPrompt.trim();
         }
         final var finalSystemPrompt = effectiveSystemPrompt;
-        var attachments = pendingAttachments.stream().toList();
-        clearPendingAttachments(ui);
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -234,7 +239,7 @@ public class AiOrchestrator {
             }
 
             @Override
-            public List<LLMProvider.Attachment> attachments() {
+            public List<AiAttachment> attachments() {
                 return attachments;
             }
 
@@ -266,32 +271,18 @@ public class AiOrchestrator {
         }
         fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
             var isDuplicate = pendingAttachments.stream()
-                    .anyMatch(a -> a.fileName().equals(meta.fileName()));
+                    .anyMatch(a -> a.name().equals(meta.fileName()));
             if (isDuplicate) {
                 throw new IllegalArgumentException(
                         "Duplicate file name: " + meta.fileName());
             }
-            pendingAttachments.add(new LLMProvider.Attachment() {
-                @Override
-                public String fileName() {
-                    return meta.fileName();
-                }
-
-                @Override
-                public String contentType() {
-                    return meta.contentType();
-                }
-
-                @Override
-                public byte[] data() {
-                    return data;
-                }
-            });
+            pendingAttachments.add(new AiAttachment(meta.fileName(),
+                    meta.contentType(), data));
             LOGGER.debug("Added attachment: {}", meta.fileName());
         }));
         fileReceiver.addFileRemovedListener(fileName -> {
             var removed = pendingAttachments
-                    .removeIf(a -> a.fileName().equals(fileName));
+                    .removeIf(a -> a.name().equals(fileName));
             if (removed) {
                 LOGGER.debug("Removed attachment: {}", fileName);
             }
@@ -494,12 +485,21 @@ public class AiOrchestrator {
 
         @Override
         public void addMessage(AiMessage message) {
-            messageList.addItem(((MessageListItemWrapper) message).getItem());
+            if (message instanceof MessageListItemWrapper wrapper) {
+                messageList.addItem(wrapper.getItem());
+            } else {
+                var item = new MessageListItem();
+                item.setText(message.getText());
+                item.setTime(message.getTime());
+                item.setUserName(message.getUserName());
+                messageList.addItem(item);
+            }
         }
 
         @Override
-        public AiMessage createMessage(String text, String userName) {
-            return new MessageListItemWrapper(text, userName);
+        public AiMessage createMessage(String text, String userName,
+                List<AiAttachment> attachments) {
+            return new MessageListItemWrapper(text, userName, attachments);
         }
     }
 
@@ -545,8 +545,16 @@ public class AiOrchestrator {
     private static class MessageListItemWrapper implements AiMessage {
         private final MessageListItem item;
 
-        MessageListItemWrapper(String text, String userName) {
+        MessageListItemWrapper(String text, String userName,
+                List<AiAttachment> attachments) {
             item = new MessageListItem(text, Instant.now(), userName);
+            if (attachments != null && !attachments.isEmpty()) {
+                var messageAttachments = attachments.stream()
+                        .map(a -> new MessageListItem.Attachment(a.name(),
+                                a.toDataUrl(), a.mimeType()))
+                        .toList();
+                item.setAttachments(messageAttachments);
+            }
         }
 
         MessageListItem getItem() {

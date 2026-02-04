@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.orchestrator;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
@@ -31,6 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.component.AiAttachment;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
 import com.vaadin.flow.component.ai.component.AiMessage;
@@ -77,7 +79,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -96,7 +99,8 @@ public class AiOrchestratorTest {
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -115,7 +119,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -153,7 +158,8 @@ public class AiOrchestratorTest {
         var tool = new SampleTool();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -181,7 +187,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -213,7 +220,8 @@ public class AiOrchestratorTest {
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -238,7 +246,8 @@ public class AiOrchestratorTest {
             return null;
         }).when(mockMessage).appendText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Hello", " ", "World"));
@@ -264,7 +273,8 @@ public class AiOrchestratorTest {
             return null;
         }).when(mockMessage).setText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.error(new RuntimeException("API Error")));
@@ -284,7 +294,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -307,7 +318,11 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -324,7 +339,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -332,7 +348,8 @@ public class AiOrchestratorTest {
         var orchestrator = getSimpleOrchestrator();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList).createMessage("", "Assistant");
+        Mockito.verify(mockMessageList).createMessage("", "Assistant",
+                Collections.emptyList());
     }
 
     @Test
@@ -340,7 +357,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -370,7 +388,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.never());
@@ -389,7 +408,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -408,7 +428,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -490,7 +511,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.never());
@@ -519,7 +541,11 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -536,8 +562,43 @@ public class AiOrchestratorTest {
         var attachments = captor.getValue().attachments();
         Assert.assertNotNull(attachments);
         Assert.assertEquals(2, attachments.size());
-        Assert.assertEquals("test.txt", attachments.get(0).fileName());
-        Assert.assertEquals("image.png", attachments.get(1).fileName());
+        Assert.assertEquals("test.txt", attachments.get(0).name());
+        Assert.assertEquals("image.png", attachments.get(1).name());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void prompt_withAttachments_createsMessageWithAttachments()
+            throws Exception {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        var pendingAttachments = getPendingAttachments(orchestrator);
+        pendingAttachments.add(createPendingAttachment("test.txt"));
+
+        orchestrator.prompt("Hello with attachment");
+
+        var attachmentsCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(mockMessageList).createMessage(
+                Mockito.eq("Hello with attachment"), Mockito.eq("You"),
+                attachmentsCaptor.capture());
+
+        var aiAttachments = (List<AiAttachment>) attachmentsCaptor.getValue();
+        Assert.assertEquals(1, aiAttachments.size());
+        Assert.assertEquals("test.txt", aiAttachments.getFirst().name());
+        Assert.assertEquals("text/plain", aiAttachments.getFirst().mimeType());
+        Assert.assertTrue("URL should be a data URL", aiAttachments.getFirst()
+                .toDataUrl().startsWith("data:text/plain;base64,"));
     }
 
     @Test
@@ -550,7 +611,8 @@ public class AiOrchestratorTest {
             return null;
         }).when(mockMessage).setText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.error(new TimeoutException("Timed out")));
@@ -582,7 +644,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.empty());
@@ -601,7 +664,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -628,7 +692,8 @@ public class AiOrchestratorTest {
             return null;
         }).when(mockMessage).appendText(Mockito.anyString());
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Token1", "Token2", "Token3", "Token4"));
@@ -647,7 +712,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -672,7 +738,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -704,7 +771,7 @@ public class AiOrchestratorTest {
 
         Assert.assertEquals(1, pendingAttachments.size());
         Assert.assertEquals("existing.txt",
-                pendingAttachments.getFirst().fileName());
+                pendingAttachments.getFirst().name());
     }
 
     @Test
@@ -712,7 +779,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -730,7 +798,11 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -740,8 +812,10 @@ public class AiOrchestratorTest {
         orchestrator.prompt("Hello");
 
         var inOrder = Mockito.inOrder(mockMessageList);
-        inOrder.verify(mockMessageList).createMessage("Hello", "You");
-        inOrder.verify(mockMessageList).createMessage("", "Assistant");
+        inOrder.verify(mockMessageList).createMessage(Mockito.eq("Hello"),
+                Mockito.eq("You"), Mockito.anyList());
+        inOrder.verify(mockMessageList).createMessage("", "Assistant",
+                Collections.emptyList());
     }
 
     @Test
@@ -749,7 +823,11 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -759,7 +837,8 @@ public class AiOrchestratorTest {
                 .build();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList).createMessage("Hello", "John Doe");
+        Mockito.verify(mockMessageList).createMessage(Mockito.eq("Hello"),
+                Mockito.eq("John Doe"), Mockito.anyList());
     }
 
     @Test
@@ -767,7 +846,8 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -776,7 +856,8 @@ public class AiOrchestratorTest {
                 .withMessageList(mockMessageList).withAiName("Claude").build();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList).createMessage("", "Claude");
+        Mockito.verify(mockMessageList).createMessage("", "Claude",
+                Collections.emptyList());
     }
 
     @Test
@@ -784,7 +865,11 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.anyString())).thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -795,8 +880,10 @@ public class AiOrchestratorTest {
         orchestrator.prompt("Hello");
 
         var inOrder = Mockito.inOrder(mockMessageList);
-        inOrder.verify(mockMessageList).createMessage("Hello", "Alice");
-        inOrder.verify(mockMessageList).createMessage("", "Bot");
+        inOrder.verify(mockMessageList).createMessage(Mockito.eq("Hello"),
+                Mockito.eq("Alice"), Mockito.anyList());
+        inOrder.verify(mockMessageList).createMessage("", "Bot",
+                Collections.emptyList());
     }
 
     @Test
@@ -804,7 +891,7 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.any())).thenReturn(mockMessage);
+                Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -820,7 +907,7 @@ public class AiOrchestratorTest {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
-                Mockito.any())).thenReturn(mockMessage);
+                Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -876,30 +963,14 @@ public class AiOrchestratorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<LLMProvider.Attachment> getPendingAttachments(
+    private static List<AiAttachment> getPendingAttachments(
             AiOrchestrator orchestrator) throws Exception {
         var field = AiOrchestrator.class.getDeclaredField("pendingAttachments");
         field.setAccessible(true);
-        return (List<LLMProvider.Attachment>) field.get(orchestrator);
+        return (List<AiAttachment>) field.get(orchestrator);
     }
 
-    private static LLMProvider.Attachment createPendingAttachment(
-            String fileName) {
-        return new LLMProvider.Attachment() {
-            @Override
-            public String fileName() {
-                return fileName;
-            }
-
-            @Override
-            public String contentType() {
-                return "text/plain";
-            }
-
-            @Override
-            public byte[] data() {
-                return "test".getBytes();
-            }
-        };
+    private static AiAttachment createPendingAttachment(String fileName) {
+        return new AiAttachment(fileName, "text/plain", "test".getBytes());
     }
 }

@@ -38,7 +38,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.annotation.Tool;
 
-import com.vaadin.flow.component.ai.provider.LLMProvider.Attachment;
+import com.vaadin.flow.component.ai.component.AiAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 
 import reactor.core.publisher.Flux;
@@ -223,10 +223,9 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withNullAttachmentInList_throwsNullPointerException() {
-        var attachment = new TestAttachment(
-                "Test".getBytes(StandardCharsets.UTF_8), "text/plain",
-                "test.txt");
-        var attachments = new ArrayList<Attachment>();
+        var attachment = new AiAttachment("test.txt", "text/plain",
+                "Test".getBytes(StandardCharsets.UTF_8));
+        var attachments = new ArrayList<AiAttachment>();
         attachments.add(attachment);
         attachments.add(null);
 
@@ -241,8 +240,8 @@ public class SpringAiLLMProviderTest {
     @Test
     public void stream_withUnsupportedAttachmentType_ignoresAttachment() {
         provider.setStreaming(false);
-        var attachment = new TestAttachment("data".getBytes(),
-                "application/octet-stream", "file.bin");
+        var attachment = new AiAttachment("file.bin",
+                "application/octet-stream", "data".getBytes());
         var request = new TestLLMRequest("Process this", null,
                 List.of(attachment), new Object[0]);
 
@@ -257,8 +256,8 @@ public class SpringAiLLMProviderTest {
     public void stream_withPdfAttachment_handlesPdf() {
         provider.setStreaming(false);
         var pdfData = "PDF binary content".getBytes(StandardCharsets.UTF_8);
-        var attachment = new TestAttachment(pdfData, "application/pdf",
-                "document.pdf");
+        var attachment = new AiAttachment("document.pdf", "application/pdf",
+                pdfData);
         var request = new TestLLMRequest("Summarize this document", null,
                 List.of(attachment), new Object[0]);
 
@@ -276,8 +275,8 @@ public class SpringAiLLMProviderTest {
         // Binary PDF data should be handled correctly
         var binaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46, (byte) 0xFF,
                 (byte) 0xFE, (byte) 0x00, (byte) 0x80 };
-        var attachment = new TestAttachment(binaryPdfData, "application/pdf",
-                "binary.pdf");
+        var attachment = new AiAttachment("binary.pdf", "application/pdf",
+                binaryPdfData);
         var request = new TestLLMRequest("Summarize", null, List.of(attachment),
                 new Object[0]);
 
@@ -293,7 +292,7 @@ public class SpringAiLLMProviderTest {
     public void stream_withImageAttachment_processesImage() {
         provider.setStreaming(false);
         var imageData = "fake-image-data".getBytes();
-        var attachment = new TestAttachment(imageData, "image/png", "test.png");
+        var attachment = new AiAttachment("test.png", "image/png", imageData);
         var request = new TestLLMRequest("Describe this image", null,
                 List.of(attachment), new Object[0]);
 
@@ -309,9 +308,8 @@ public class SpringAiLLMProviderTest {
     public void stream_withTextAttachment_processesText() {
         provider.setStreaming(false);
         var textContent = "Test UTF-8: é à ü";
-        var attachment = new TestAttachment(
-                textContent.getBytes(StandardCharsets.UTF_8), "text/plain",
-                "test.txt");
+        var attachment = new AiAttachment("test.txt", "text/plain",
+                textContent.getBytes(StandardCharsets.UTF_8));
         var request = new TestLLMRequest("Summarize this", null,
                 List.of(attachment), new Object[0]);
 
@@ -477,16 +475,14 @@ public class SpringAiLLMProviderTest {
     @Test
     public void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
         provider.setStreaming(false);
-        var imageAttachment = new TestAttachment("fake-image".getBytes(),
-                "image/jpeg", "photo.jpg");
-        var textAttachment = new TestAttachment(
-                "Hello world".getBytes(StandardCharsets.UTF_8), "text/plain",
-                "doc.txt");
-        var pdfAttachment = new TestAttachment(
-                "PDF content".getBytes(StandardCharsets.UTF_8),
-                "application/pdf", "file.pdf");
-        var unsupportedBinaryAttachment = new TestAttachment(
-                "binary".getBytes(), "application/octet-stream", "data.bin");
+        var imageAttachment = new AiAttachment("photo.jpg", "image/jpeg",
+                "fake-image".getBytes());
+        var textAttachment = new AiAttachment("doc.txt", "text/plain",
+                "Hello world".getBytes(StandardCharsets.UTF_8));
+        var pdfAttachment = new AiAttachment("file.pdf", "application/pdf",
+                "PDF content".getBytes(StandardCharsets.UTF_8));
+        var unsupportedBinaryAttachment = new AiAttachment("data.bin",
+                "application/octet-stream", "binary".getBytes());
         var request = new TestLLMRequest("Process all", null,
                 Arrays.asList(imageAttachment, textAttachment, pdfAttachment,
                         unsupportedBinaryAttachment),
@@ -506,8 +502,7 @@ public class SpringAiLLMProviderTest {
     public void stream_withAudioAttachment_processesAudio() {
         provider.setStreaming(false);
         var audioData = "fake-audio-data".getBytes();
-        var attachment = new TestAttachment(audioData, "audio/mpeg",
-                "audio.mp3");
+        var attachment = new AiAttachment("audio.mp3", "audio/mpeg", audioData);
         var request = new TestLLMRequest("Transcribe this audio", null,
                 List.of(attachment), new Object[0]);
 
@@ -527,8 +522,7 @@ public class SpringAiLLMProviderTest {
     public void stream_withVideoAttachment_processesVideo() {
         provider.setStreaming(false);
         var videoData = "fake-video-data".getBytes();
-        var attachment = new TestAttachment(videoData, "video/mp4",
-                "video.mp4");
+        var attachment = new AiAttachment("video.mp4", "video/mp4", videoData);
         var request = new TestLLMRequest("Describe this video", null,
                 List.of(attachment), new Object[0]);
 
@@ -573,12 +567,8 @@ public class SpringAiLLMProviderTest {
     }
 
     private record TestLLMRequest(String userMessage, String systemPrompt,
-            List<Attachment> attachments,
+            List<AiAttachment> attachments,
             Object[] tools) implements LLMRequest {
-    }
-
-    private record TestAttachment(byte[] data, String contentType,
-            String fileName) implements Attachment {
     }
 
     private static class SampleToolsClass {
