@@ -17,10 +17,6 @@ package com.vaadin.flow.component.slider.testbench;
 
 import java.util.Collections;
 
-import com.vaadin.testbench.HasHelper;
-import com.vaadin.testbench.HasLabel;
-import com.vaadin.testbench.HasValidation;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
@@ -28,8 +24,7 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-range-slider")
-public class RangeSliderElement extends TestBenchElement
-        implements HasLabel, HasHelper, HasValidation {
+public class RangeSliderElement extends SliderBaseElement {
 
     /**
      * Sets the value of the range slider, emulating user input. The emulation
@@ -92,30 +87,4 @@ public class RangeSliderElement extends TestBenchElement
         return getPropertyDouble("value", "1");
     }
 
-    /**
-     * Gets the minimum value of the range slider.
-     *
-     * @return the minimum value
-     */
-    public double getMin() {
-        return getPropertyDouble("min");
-    }
-
-    /**
-     * Gets the maximum value of the range slider.
-     *
-     * @return the maximum value
-     */
-    public double getMax() {
-        return getPropertyDouble("max");
-    }
-
-    /**
-     * Gets the step value of the range slider.
-     *
-     * @return the step value
-     */
-    public double getStep() {
-        return getPropertyDouble("step");
-    }
 }

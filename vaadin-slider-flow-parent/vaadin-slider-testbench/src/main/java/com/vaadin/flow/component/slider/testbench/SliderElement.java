@@ -17,10 +17,6 @@ package com.vaadin.flow.component.slider.testbench;
 
 import java.util.Collections;
 
-import com.vaadin.testbench.HasHelper;
-import com.vaadin.testbench.HasLabel;
-import com.vaadin.testbench.HasValidation;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
@@ -28,8 +24,7 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-slider")
-public class SliderElement extends TestBenchElement
-        implements HasLabel, HasHelper, HasValidation {
+public class SliderElement extends SliderBaseElement {
 
     /**
      * Sets the value of the slider, emulating user input. The emulation is done
@@ -52,30 +47,4 @@ public class SliderElement extends TestBenchElement
         return getPropertyDouble("value");
     }
 
-    /**
-     * Gets the minimum value of the slider.
-     *
-     * @return the minimum value
-     */
-    public double getMin() {
-        return getPropertyDouble("min");
-    }
-
-    /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
-    public double getMax() {
-        return getPropertyDouble("max");
-    }
-
-    /**
-     * Gets the step value of the slider.
-     *
-     * @return the step value
-     */
-    public double getStep() {
-        return getPropertyDouble("step");
-    }
 }
