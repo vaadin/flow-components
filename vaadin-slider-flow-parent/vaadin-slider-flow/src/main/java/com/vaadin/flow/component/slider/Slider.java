@@ -289,10 +289,10 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if min is greater than the current max
      */
     public void setMin(double min) {
-        requireValidMinMax(min, getMax());
+        SliderUtil.requireValidMinMax(min, getMax());
         setMinDouble(min);
 
-        double adjustedValue = adjustDoubleValueToMinMax(getValue(), min,
+        double adjustedValue = SliderUtil.clampToMinMax(getValue(), min,
                 getMax());
         setValue(adjustedValue);
     }
@@ -321,10 +321,10 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if max is less than the current min
      */
     public void setMax(double max) {
-        requireValidMinMax(getMin(), max);
+        SliderUtil.requireValidMinMax(getMin(), max);
         setMaxDouble(max);
 
-        double adjustedValue = adjustDoubleValueToMinMax(getValue(), getMin(),
+        double adjustedValue = SliderUtil.clampToMinMax(getValue(), getMin(),
                 max);
         setValue(adjustedValue);
     }
@@ -356,10 +356,11 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if step is not positive
      */
     public void setStep(double step) {
-        requireValidStep(step);
+        SliderUtil.requireValidStep(step);
         setStepDouble(step);
 
-        double adjustedValue = adjustDoubleValueToStep(getValue(), getMin(), getMax(), step);
+        double adjustedValue = SliderUtil.snapToStep(getValue(), getMin(),
+                getMax(), step);
         setValue(adjustedValue);
     }
 
@@ -377,12 +378,12 @@ public class Slider extends SliderBase<Slider, Double> {
     void requireValidValue(double min, double max, double step, Double value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
-        if (adjustDoubleValueToMinMax(value, min, max) != value) {
+        if (SliderUtil.clampToMinMax(value, min, max) != value) {
             throw new IllegalArgumentException(
                     "Value must be between min and max");
         }
 
-        if (adjustDoubleValueToStep(value, min, max, step) != value) {
+        if (SliderUtil.snapToStep(value, min, max, step) != value) {
             throw new IllegalArgumentException(
                     "Value must be aligned with step");
         }

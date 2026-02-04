@@ -308,13 +308,13 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      *             if min is greater than the current max
      */
     public void setMin(double min) {
-        requireValidMinMax(min, getMax());
+        SliderUtil.requireValidMinMax(min, getMax());
         setMinDouble(min);
 
         RangeSliderValue value = getValue();
         setValue(new RangeSliderValue(
-                adjustDoubleValueToMinMax(value.start(), min, getMax()),
-                adjustDoubleValueToMinMax(value.end(), min, getMax())));
+                SliderUtil.clampToMinMax(value.start(), min, getMax()),
+                SliderUtil.clampToMinMax(value.end(), min, getMax())));
     }
 
     /**
@@ -341,13 +341,13 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      *             if max is less than the current min
      */
     public void setMax(double max) {
-        requireValidMinMax(getMin(), max);
+        SliderUtil.requireValidMinMax(getMin(), max);
         setMaxDouble(max);
 
         RangeSliderValue value = getValue();
         setValue(new RangeSliderValue(
-                adjustDoubleValueToMinMax(value.start(), getMin(), max),
-                adjustDoubleValueToMinMax(value.end(), getMin(), max)));
+                SliderUtil.clampToMinMax(value.start(), getMin(), max),
+                SliderUtil.clampToMinMax(value.end(), getMin(), max)));
     }
 
     /**
@@ -377,13 +377,13 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      *             if step is not positive
      */
     public void setStep(double step) {
-        requireValidStep(step);
+        SliderUtil.requireValidStep(step);
         setStepDouble(step);
 
         RangeSliderValue value = getValue();
         setValue(new RangeSliderValue(
-                adjustDoubleValueToStep(value.start(), getMin(), getMax(), step),
-                adjustDoubleValueToStep(value.end(), getMin(), getMax(), step)));
+                SliderUtil.snapToStep(value.start(), getMin(), getMax(), step),
+                SliderUtil.snapToStep(value.end(), getMin(), getMax(), step)));
     }
 
     @Override
@@ -391,23 +391,24 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
             RangeSliderValue value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
-        if (adjustDoubleValueToMinMax(value.start(), min, max) != value
+        if (SliderUtil.clampToMinMax(value.start(), min, max) != value
                 .start()) {
             throw new IllegalArgumentException(
                     "Start value must be between min and max");
         }
 
-        if (adjustDoubleValueToMinMax(value.end(), min, max) != value.end()) {
+        if (SliderUtil.clampToMinMax(value.end(), min, max) != value.end()) {
             throw new IllegalArgumentException(
                     "End value must be between min and max");
         }
 
-        if (adjustDoubleValueToStep(value.start(), min, max, step) != value.start()) {
+        if (SliderUtil.snapToStep(value.start(), min, max, step) != value
+                .start()) {
             throw new IllegalArgumentException(
                     "Start value must be aligned with step");
         }
 
-        if (adjustDoubleValueToStep(value.end(), min, max, step) != value.end()) {
+        if (SliderUtil.snapToStep(value.end(), min, max, step) != value.end()) {
             throw new IllegalArgumentException(
                     "End value must be aligned with step");
         }
