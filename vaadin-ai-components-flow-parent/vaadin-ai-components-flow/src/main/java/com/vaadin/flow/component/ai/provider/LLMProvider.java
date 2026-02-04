@@ -29,7 +29,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Vaadin Ltd.
  */
-public interface LLMProvider extends Serializable {
+public interface LLMProvider {
 
     /**
      * Streams a response from the LLM based on the provided request. This

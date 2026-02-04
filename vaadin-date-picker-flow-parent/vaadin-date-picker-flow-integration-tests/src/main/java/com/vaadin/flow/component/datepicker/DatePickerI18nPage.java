@@ -15,38 +15,38 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.html.H1;
+import java.time.LocalDate;
+import java.util.List;
+
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-date-picker/date-picker-i18n")
-public class DatePickerI18nPage extends VerticalLayout {
-
-    public static final String ID_INITIAL_I18N_DATE_PICKER = "initial-i18n-date-picker";
-    public static final String ID_DYNAMIC_I18N_DATE_PICKER = "dynamic-i18n-date-picker";
-    public static final String ID_SET_FINNISH_BUTTON = "set-finnish-button";
-    public static final String ID_SET_PARTIAL_I18N_BUTTON = "set-partial-i18n-button";
+@Route("vaadin-date-picker/i18n")
+public class DatePickerI18nPage extends Div {
 
     public DatePickerI18nPage() {
-        DatePicker initialI18nDatePicker = new DatePicker();
-        initialI18nDatePicker.setId(ID_INITIAL_I18N_DATE_PICKER);
-        initialI18nDatePicker.setI18n(TestI18N.FINNISH);
+        DatePicker datePicker = new DatePicker();
+        // Set initial value to January to test month name
+        datePicker.setValue(LocalDate.of(2021, 1, 15));
 
-        DatePicker dynamicI18nDatePicker = new DatePicker();
-        dynamicI18nDatePicker.setId(ID_DYNAMIC_I18N_DATE_PICKER);
+        NativeButton setI18n = new NativeButton("Set i18n", e -> {
+            DatePickerI18n i18n = new DatePickerI18n();
+            i18n.setToday("Custom today");
+            i18n.setCancel("Custom cancel");
+            i18n.setMonthNames(List.of("Custom January", "Custom February",
+                    "Custom March", "Custom April", "Custom May", "Custom June",
+                    "Custom July", "Custom August", "Custom September",
+                    "Custom October", "Custom November", "Custom December"));
+            datePicker.setI18n(i18n);
+        });
+        setI18n.setId("set-i18n");
 
-        NativeButton setFinnishButton = new NativeButton("Set Finnish",
-                e -> dynamicI18nDatePicker.setI18n(TestI18N.FINNISH));
-        setFinnishButton.setId(ID_SET_FINNISH_BUTTON);
+        NativeButton setEmptyI18n = new NativeButton("Set empty i18n",
+                e -> datePicker.setI18n(new DatePickerI18n()));
+        setEmptyI18n.setId("set-empty-i18n");
 
-        NativeButton setPartialI18nButton = new NativeButton(
-                "Set partial I18N config",
-                e -> dynamicI18nDatePicker.setI18n(TestI18N.FINNISH_PARTIAL));
-        setPartialI18nButton.setId(ID_SET_PARTIAL_I18N_BUTTON);
-
-        add(new H1("Initial I18N"), initialI18nDatePicker);
-        add(new H1("Dynamic I18N"), dynamicI18nDatePicker, setFinnishButton,
-                setPartialI18nButton);
+        add(setI18n, setEmptyI18n, datePicker);
     }
 }

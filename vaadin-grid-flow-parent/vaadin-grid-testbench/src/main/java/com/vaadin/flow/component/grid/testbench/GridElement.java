@@ -61,6 +61,36 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
+     * Scrolls the grid horizontally to make the column with the given index
+     * visible. The index refers to visible columns, in their visual order.
+     * 
+     * @param columnIndex
+     *            the index of the column to scroll to
+     */
+    public void scrollToColumn(int columnIndex) {
+        callFunction("scrollToColumn", columnIndex);
+    }
+
+    /**
+     * Scrolls the grid horizontally to make the given column visible.
+     * 
+     * @param column
+     *            the column to scroll to
+     */
+    public void scrollToColumn(GridColumnElement column) {
+        executeScript("""
+                  const grid = arguments[0];
+                  const columnId = arguments[1];
+                  const column = grid._getColumns().find((col) => {
+                    return col.__generatedTbId === columnId;
+                  });
+                  if (column) {
+                    grid.scrollToColumn(column);
+                  }
+                """, this, column.get__generatedId());
+    }
+
+    /**
      * Gets the page size used when fetching data.
      *
      * @return the page size
