@@ -25,7 +25,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.signals.BindingActiveException;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
 /**
