@@ -116,7 +116,9 @@ public class ProgressBar extends Component
     }
 
     /**
-     * Binds the given signal to the value of the progressbar.
+     * Binds the given signal to the value of the progressbar as a one-way
+     * binding so that the property is updated when the signal's value is
+     * updated.
      * <p>
      * When a signal is bound, the value is kept synchronized with the signal
      * value while the component is attached. When the component is detached,
