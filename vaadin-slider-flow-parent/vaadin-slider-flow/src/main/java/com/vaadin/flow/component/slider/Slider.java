@@ -22,7 +22,6 @@ import java.util.Objects;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
  * Slider is an input field that allows the user to select a numeric value
@@ -38,9 +37,6 @@ public class Slider extends SliderBase<Slider, Double> {
     private static final double DEFAULT_MIN = 0.0;
     private static final double DEFAULT_MAX = 100.0;
     private static final double DEFAULT_STEP = 1.0;
-
-    private static final SerializableBiFunction<Slider, Double, Double> IDENTITY = (
-            component, value) -> value;
 
     /**
      * Constructs a {@code Slider} with min 0, max 100, and initial value 0.
@@ -115,7 +111,7 @@ public class Slider extends SliderBase<Slider, Double> {
      *            the initial value
      */
     public Slider(double min, double max, double step, double value) {
-        super(min, max, step, value, Double.class, IDENTITY, IDENTITY);
+        super(min, max, step, value, Double.class, (v) -> v, (v) -> v);
     }
 
     /**
