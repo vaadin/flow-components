@@ -21,6 +21,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.signals.Signal;
 
 /**
  * IntegerField is an extension of Text Field that only accepts integer numbers.
@@ -277,6 +278,56 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      */
     public int getStep() {
         return (int) getStepDouble();
+    }
+
+    /**
+     * Binds the given signal to the minimum value for this field.
+     * <p>
+     * When a signal is bound, the minimum value is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the minimum value manually
+     * through {@link #setMin(int)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the minimum value to, or {@code null} to
+     *            unbind
+     * @see #setMin(int)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMin(Signal<Integer> signal) {
+        bindMinInternal(
+                signal == null ? null : signal.map(Integer::doubleValue));
+    }
+
+    /**
+     * Binds the given signal to the maximum value for this field.
+     * <p>
+     * When a signal is bound, the maximum value is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the maximum value manually
+     * through {@link #setMax(int)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the maximum value to, or {@code null} to
+     *            unbind
+     * @see #setMax(int)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMax(Signal<Integer> signal) {
+        bindMaxInternal(
+                signal == null ? null : signal.map(Integer::doubleValue));
     }
 
     /**
