@@ -20,7 +20,6 @@ import java.util.Objects;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
  * Slider is an input field that allows the user to select a numeric value
