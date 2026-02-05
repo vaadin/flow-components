@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.nimbusds.jose.shaded.gson.JsonNull;
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -355,6 +356,14 @@ public class RangeSliderTest {
         slider.setStep(0.1);
 
         Assert.assertEquals(new RangeSliderValue(0.3, 0.8), slider.getValue());
+    }
+
+    @Test
+    public void setValueFromClient_null_ignored() {
+        RangeSlider slider = new RangeSlider(0, 100, 10,
+                new RangeSliderValue(0, 100));
+        slider.getElement().setPropertyJson("value", JacksonUtils.nullNode());
+        Assert.assertEquals(new RangeSliderValue(0, 100), slider.getValue());
     }
 
     @Test

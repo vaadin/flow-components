@@ -24,7 +24,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Abstract base class for slider components.
@@ -67,8 +67,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     <TPresentation> SliderBase(double min, double max, double step,
             TValue value, Class<TPresentation> presentationType,
-            SerializableBiFunction<TComponent, TPresentation, TValue> presentationToModel,
-            SerializableBiFunction<TComponent, TValue, TPresentation> modelToPresentation) {
+            SerializableFunction<TPresentation, TValue> presentationToModel,
+            SerializableFunction<TValue, TPresentation> modelToPresentation) {
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
 

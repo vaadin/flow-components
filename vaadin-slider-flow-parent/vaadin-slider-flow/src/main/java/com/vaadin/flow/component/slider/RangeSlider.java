@@ -21,7 +21,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -37,25 +37,14 @@ import tools.jackson.databind.node.ArrayNode;
 @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
-    private static final SerializableBiFunction<RangeSlider, ArrayNode, RangeSliderValue> PARSER = (
-            component, arrayValue) -> {
-        try {
-            RangeSliderValue value = new RangeSliderValue(
-                    arrayValue.get(0).asDouble(), arrayValue.get(1).asDouble());
-
-            component.requireValidValue(value);
-
-            return value;
-        } catch (IllegalArgumentException | NullPointerException e) {
-            // Ignore invalid values from the client side
-            return component.getValue();
-        }
+    private static final SerializableFunction<ArrayNode, RangeSliderValue> PARSER = (
+            arrayValue) -> {
+        return new RangeSliderValue(arrayValue.get(0).asDouble(),
+                arrayValue.get(1).asDouble());
     };
 
-    private static final SerializableBiFunction<RangeSlider, RangeSliderValue, ArrayNode> FORMATTER = (
-            component, value) -> {
-        component.requireValidValue(value);
-
+    private static final SerializableFunction<RangeSliderValue, ArrayNode> FORMATTER = (
+            value) -> {
         return JacksonUtils
                 .listToJson(Arrays.asList(value.start(), value.end()));
     };
@@ -396,6 +385,17 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     @Override
     public void clear() {
         setValue(new RangeSliderValue(getMin(), getMax()));
+    }
+
+    @Override
+    protected boolean hasValidValue() {
+        try {
+            ArrayNode arrayValue = (ArrayNode) getElement().getPropertyRaw("value");
+            requireValidValue(PARSER.apply(arrayValue));
+            return true;
+        } catch (IllegalArgumentException | NullPointerException | ClassCastException e) {
+            return false;
+        }
     }
 
     @Override

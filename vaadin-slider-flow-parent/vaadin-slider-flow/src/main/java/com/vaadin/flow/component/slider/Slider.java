@@ -33,24 +33,6 @@ import com.vaadin.flow.function.SerializableBiFunction;
 @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> {
-    private static final SerializableBiFunction<Slider, Double, Double> PARSER = (
-            component, value) -> {
-        try {
-            component.requireValidValue(value);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            // Ignore invalid values from the client side
-            return component.getValue();
-        }
-
-        return value;
-    };
-
-    private static final SerializableBiFunction<Slider, Double, Double> FORMATTER = (
-            component, value) -> {
-        component.requireValidValue(value);
-        return value;
-    };
-
     /**
      * Constructs a {@code Slider} with min 0, max 100, and initial value 0.
      * <p>
@@ -124,7 +106,7 @@ public class Slider extends SliderBase<Slider, Double> {
      *            the initial value
      */
     public Slider(double min, double max, double step, double value) {
-        super(min, max, step, value, Double.class, PARSER, FORMATTER);
+        super(min, max, step, value, Double.class, (v) -> v, (v) -> v);
     }
 
     /**
@@ -372,6 +354,17 @@ public class Slider extends SliderBase<Slider, Double> {
     @Override
     public void clear() {
         setValue(getMin());
+    }
+
+    @Override
+    protected boolean hasValidValue() {
+        Double value = getElement().getProperty("value", 0.0);
+        try {
+            requireValidValue(value);
+            return true;
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return false;
+        }
     }
 
     @Override
