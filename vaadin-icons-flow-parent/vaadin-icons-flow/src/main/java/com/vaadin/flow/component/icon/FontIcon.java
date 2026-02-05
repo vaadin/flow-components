@@ -114,6 +114,30 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
+     * Binds the given signal to the character code of the font icon.
+     * <p>
+     * When a signal is bound, the character code is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the character code manually
+     * through {@link #setCharCode(String)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the character code to, or {@code null} to
+     *            unbind
+     * @see #setCharCode(String)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindCharCode(Signal<String> signal) {
+        getElement().bindProperty("char", signal);
+    }
+
+    /**
      * Sets the ligature name that specifies an icon from an icon font with
      * support for ligatures.
      *
@@ -157,30 +181,6 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      */
     public void bindLigature(Signal<String> signal) {
         getElement().bindProperty("ligature", signal);
-    }
-
-    /**
-     * Binds the given signal to the character code of the font icon.
-     * <p>
-     * When a signal is bound, the character code is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
-     * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
-     * While a signal is bound, any attempt to set the character code manually
-     * through {@link #setCharCode(String)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
-     *
-     * @param signal
-     *            the signal to bind the character code to, or {@code null} to
-     *            unbind
-     * @see #setCharCode(String)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
-     * @since 25.1
-     */
-    public void bindCharCode(Signal<String> signal) {
-        getElement().bindProperty("char", signal);
     }
 
     @Override
