@@ -390,10 +390,12 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     @Override
     protected boolean hasValidValue() {
         try {
-            ArrayNode arrayValue = (ArrayNode) getElement().getPropertyRaw("value");
+            ArrayNode arrayValue = (ArrayNode) getElement()
+                    .getPropertyRaw("value");
             requireValidValue(PARSER.apply(arrayValue));
             return true;
-        } catch (IllegalArgumentException | NullPointerException | ClassCastException e) {
+        } catch (IllegalArgumentException | NullPointerException
+                | ClassCastException e) {
             return false;
         }
     }
