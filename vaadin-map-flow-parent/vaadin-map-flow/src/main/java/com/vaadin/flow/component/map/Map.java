@@ -22,7 +22,7 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.controls.AttributionControl;
 import com.vaadin.flow.component.map.configuration.controls.Control;
-import com.vaadin.flow.component.map.configuration.controls.ScaleLineControl;
+import com.vaadin.flow.component.map.configuration.controls.ScaleControl;
 import com.vaadin.flow.component.map.configuration.controls.ZoomControl;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
@@ -183,7 +183,7 @@ public class Map extends MapBase {
 
         // Setup default control instances
         getConfiguration().addControl(controls.attributionControl);
-        getConfiguration().addControl(controls.scaleLineControl);
+        getConfiguration().addControl(controls.scaleControl);
         getConfiguration().addControl(controls.zoomControl);
     }
 
@@ -387,12 +387,12 @@ public class Map extends MapBase {
      */
     public static final class Controls implements Serializable {
         private final AttributionControl attributionControl = new AttributionControl();
-        private final ScaleLineControl scaleLineControl = new ScaleLineControl();
+        private final ScaleControl scaleControl = new ScaleControl();
         private final ZoomControl zoomControl = new ZoomControl();
 
         private Controls() {
             attributionControl.setVisible(true);
-            scaleLineControl.setVisible(false);
+            scaleControl.setVisible(false);
             zoomControl.setVisible(true);
         }
 
@@ -406,12 +406,12 @@ public class Map extends MapBase {
         }
 
         /**
-         * Gets the scale line control of the map.
+         * Gets the scale control of the map.
          *
-         * @return the scale line control
+         * @return the scale control
          */
-        public ScaleLineControl getScaleLine() {
-            return scaleLineControl;
+        public ScaleControl getScale() {
+            return scaleControl;
         }
 
         /**

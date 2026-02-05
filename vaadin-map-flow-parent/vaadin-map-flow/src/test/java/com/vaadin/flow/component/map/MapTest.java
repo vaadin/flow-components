@@ -36,8 +36,8 @@ public class MapTest {
         Assert.assertNotNull(map.getControls().getAttribution());
         Assert.assertTrue(map.getControls().getAttribution().isVisible());
 
-        Assert.assertNotNull(map.getControls().getScaleLine());
-        Assert.assertFalse(map.getControls().getScaleLine().isVisible());
+        Assert.assertNotNull(map.getControls().getScale());
+        Assert.assertFalse(map.getControls().getScale().isVisible());
 
         Assert.assertNotNull(map.getControls().getZoom());
         Assert.assertTrue(map.getControls().getZoom().isVisible());
