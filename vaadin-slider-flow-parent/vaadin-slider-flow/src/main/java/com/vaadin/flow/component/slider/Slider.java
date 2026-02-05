@@ -262,10 +262,11 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the minimum value of the slider.
      * <p>
-     * If the current value is less than the new minimum, it's automatically
-     * clamped, which triggers a value change event. To set both the minimum and
-     * value explicitly, use the {@link #setValue(Double, double, double)
-     * setValue(value, min, max)} method instead.
+     * This method automatically clamps the current value to be no less than the
+     * new minimum, which may trigger a value change event. To set the value
+     * explicitly along with the new minimum, use the
+     * {@link #setValue(Double, double, double) setValue(value, min, max)}
+     * method instead.
      *
      * @param min
      *            the minimum value
@@ -293,10 +294,11 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the maximum value of the slider.
      * <p>
-     * If the current value is greater than the new maximum, it's automatically
-     * clamped, which triggers a value change event. To set both the maximum and
-     * value explicitly, use the {@link #setValue(Double, double, double)
-     * setValue(value, min, max)} method instead.
+     * This method automatically clamps the current value to be no greater than
+     * the new maximum, which may trigger a value change event. To set the value
+     * explicitly along with the new maximum, use the
+     * {@link #setValue(Double, double, double) setValue(value, min, max)}
+     * method instead.
      *
      * @param max
      *            the maximum value
@@ -327,9 +329,9 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the step value of the slider.
      * <p>
-     * If the current value is not aligned with the new step, it's automatically
-     * adjusted to the nearest value that matches the step, which triggers a
-     * value change event. To set both the step and value explicitly, use the
+     * This method automatically adjusts the current value to be aligned with
+     * the new step, which may trigger a value change event. To set the value
+     * explicitly along with the new step, use the
      * {@link #setValue(Double, double, double, double) setValue(value, min,
      * max, step)} method instead.
      *
