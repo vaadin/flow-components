@@ -34,7 +34,7 @@ public class AiAttachmentTest {
     }
 
     @Test
-    public void toDataUrl() {
+    public void toDataUrl_returnsCorrectDataUrl() {
         var attachment = new AiAttachment(getFileName(), getMimeType(),
                 getData());
         var dataUrl = attachment.toDataUrl();
