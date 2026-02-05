@@ -24,7 +24,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Abstract base class for slider components.
@@ -63,8 +63,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     <TPresentation> SliderBase(double min, double max, double step,
             TValue value, Class<TPresentation> presentationType,
-            SerializableBiFunction<TComponent, TPresentation, TValue> presentationToModel,
-            SerializableBiFunction<TComponent, TValue, TPresentation> modelToPresentation) {
+            SerializableFunction<TPresentation, TValue> presentationToModel,
+            SerializableFunction<TValue, TPresentation> modelToPresentation) {
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
 
@@ -203,45 +203,14 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *             if value is not valid for the given min, max and step
      */
     public void setValue(TValue value, double min, double max, double step) {
-        requireValidStep(step);
-        requireValidMinMax(min, max);
+        SliderUtil.requireValidStep(step);
+        SliderUtil.requireValidMinMax(min, max);
         requireValidValue(min, max, step, value);
 
         setMinDouble(min);
         setMaxDouble(max);
         setStepDouble(step);
         super.setValue(value);
-    }
-
-    /**
-     * Validates that the given min/max range is valid.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @throws IllegalArgumentException
-     *             if min is greater than max
-     */
-    void requireValidMinMax(double min, double max) {
-        if (min > max) {
-            throw new IllegalArgumentException(
-                    "Max must be greater than or equal to min");
-        }
-    }
-
-    /**
-     * Validates that the given step value is valid.
-     *
-     * @param step
-     *            the step value
-     * @throws IllegalArgumentException
-     *             if step is not positive
-     */
-    void requireValidStep(double step) {
-        if (step <= 0) {
-            throw new IllegalArgumentException("Step must be positive");
-        }
     }
 
     /**
