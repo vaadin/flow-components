@@ -27,6 +27,7 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.signals.Signal;
 
 /**
  * Number Field sports many of the same features as Text Field but only accepts
@@ -282,6 +283,54 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      */
     public double getStep() {
         return getStepDouble();
+    }
+
+    /**
+     * Binds the given signal to the minimum value for this field.
+     * <p>
+     * When a signal is bound, the minimum value is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the minimum value manually
+     * through {@link #setMin(double)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the minimum value to, or {@code null} to
+     *            unbind
+     * @see #setMin(double)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMin(Signal<Double> signal) {
+        bindMinInternal(signal);
+    }
+
+    /**
+     * Binds the given signal to the maximum value for this field.
+     * <p>
+     * When a signal is bound, the maximum value is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the maximum value manually
+     * through {@link #setMax(double)} throws a
+     * {@link com.vaadin.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the maximum value to, or {@code null} to
+     *            unbind
+     * @see #setMax(double)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindMax(Signal<Double> signal) {
+        bindMaxInternal(signal);
     }
 
     /**
