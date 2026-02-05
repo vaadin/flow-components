@@ -386,6 +386,18 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
                 SliderUtil.snapToStep(value.end(), getMin(), getMax(), step)));
     }
 
+    /**
+     * Clears the slider value, setting it to the full range from minimum to
+     * maximum.
+     *
+     * @see #getMin()
+     * @see #getMax()
+     */
+    @Override
+    public void clear() {
+        setValue(new RangeSliderValue(getMin(), getMax()));
+    }
+
     @Override
     void requireValidValue(double min, double max, double step,
             RangeSliderValue value) {
