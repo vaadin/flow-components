@@ -49,6 +49,10 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
                 .listToJson(Arrays.asList(value.start(), value.end()));
     };
 
+    private static final double DEFAULT_MIN = 0.0;
+    private static final double DEFAULT_MAX = 100.0;
+    private static final double DEFAULT_STEP = 1.0;
+
     /**
      * Constructs a {@code RangeSlider} with min 0, max 100, and initial value
      * [0, 100].

@@ -40,10 +40,6 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasValidationProperties, Focusable<TComponent>, KeyNotifier {
-    static final double DEFAULT_MIN = 0;
-    static final double DEFAULT_MAX = 100;
-    static final double DEFAULT_STEP = 1;
-
     /**
      * Constructs a slider with the given min, max, step, initial value, and
      * custom converters for the value property.
@@ -247,5 +243,4 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     abstract void requireValidValue(double min, double max, double step,
             TValue value);
-
 }

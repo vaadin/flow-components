@@ -32,6 +32,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> {
+    private static final double DEFAULT_MIN = 0.0;
+    private static final double DEFAULT_MAX = 100.0;
+    private static final double DEFAULT_STEP = 1.0;
+
     /**
      * Constructs a {@code Slider} with min 0, max 100, and initial value 0.
      * <p>
