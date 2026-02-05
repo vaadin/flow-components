@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -31,6 +32,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.signals.Signal;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -111,6 +113,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private ValidationController<AbstractNumberField<C, T>, T> validationController = new ValidationController<>(
             this);
+
+    private final SignalPropertySupport<Double> minSupport = SignalPropertySupport
+            .create(this, value -> this.min = value);
+    private final SignalPropertySupport<Double> maxSupport = SignalPropertySupport
+            .create(this, value -> this.max = value);
 
     /**
      * Sets up the common logic for number fields.
@@ -329,6 +336,22 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     protected double getMaxDouble() {
         return max;
+    }
+
+    /**
+     * Internal helper to bind a signal to the minimum value.
+     */
+    protected final void bindMinInternal(Signal<Double> signal) {
+        getElement().bindProperty("min", signal);
+        minSupport.bind(signal);
+    }
+
+    /**
+     * Internal helper to bind a signal to the maximum value.
+     */
+    protected final void bindMaxInternal(Signal<Double> signal) {
+        getElement().bindProperty("max", signal);
+        maxSupport.bind(signal);
     }
 
     /**
