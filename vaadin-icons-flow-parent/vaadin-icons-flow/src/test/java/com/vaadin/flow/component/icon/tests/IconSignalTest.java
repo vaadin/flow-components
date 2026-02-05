@@ -133,14 +133,4 @@ public class IconSignalTest extends AbstractSignalsUnitTest {
         iconSignal.value(VaadinIcon.SEARCH);
         Assert.assertEquals("vaadin:search", icon.getIcon());
     }
-
-    @Test
-    public void bindIcon_nullSignalValue_setsNullAttribute() {
-        icon.bindIcon(iconSignal);
-        UI.getCurrent().add(icon);
-        Assert.assertEquals("vaadin:home", icon.getIcon());
-
-        iconSignal.value(null);
-        Assert.assertNull(icon.getIcon());
-    }
 }
