@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.UploadFileList;
@@ -293,6 +294,11 @@ public class UploadFileListTest {
         Assert.assertEquals(customSizes, i18n.getUnits().getSize());
         Assert.assertEquals(Integer.valueOf(1024),
                 i18n.getUnits().getSizeBase());
+    }
+
+    @Test
+    public void implementsHasSize() {
+        Assert.assertTrue(HasSize.class.isAssignableFrom(UploadFileList.class));
     }
 
     @Test
