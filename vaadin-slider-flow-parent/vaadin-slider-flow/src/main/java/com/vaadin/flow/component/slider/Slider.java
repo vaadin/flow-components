@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Tag;
@@ -275,10 +273,11 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if min is greater than the current max
      */
     public void setMin(double min) {
-        requireValidMinMax(min, getMax());
+        SliderUtil.requireValidMinMax(min, getMax());
         setMinDouble(min);
 
-        double adjustedValue = Math.max(getValue(), min);
+        double adjustedValue = SliderUtil.clampToMinMax(getValue(), min,
+                getMax());
         setValue(adjustedValue);
     }
 
@@ -305,10 +304,11 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if max is less than the current min
      */
     public void setMax(double max) {
-        requireValidMinMax(getMin(), max);
+        SliderUtil.requireValidMinMax(getMin(), max);
         setMaxDouble(max);
 
-        double adjustedValue = Math.min(getValue(), max);
+        double adjustedValue = SliderUtil.clampToMinMax(getValue(), getMin(),
+                max);
         setValue(adjustedValue);
     }
 
@@ -339,23 +339,12 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if step is not positive
      */
     public void setStep(double step) {
-        requireValidStep(step);
+        SliderUtil.requireValidStep(step);
         setStepDouble(step);
 
-        BigDecimal minBd = BigDecimal.valueOf(getMin());
-        BigDecimal maxBd = BigDecimal.valueOf(getMax());
-        BigDecimal stepBd = BigDecimal.valueOf(step);
-        BigDecimal valueBd = BigDecimal.valueOf(getValue());
-
-        // Equivalent to Math.round((value - min) / step)
-        BigDecimal stepsFromMinBd = valueBd.subtract(minBd).divide(stepBd, 0,
-                RoundingMode.HALF_UP);
-
-        // Equivalent to Math.min(min + stepsFromMin * step, max)
-        BigDecimal adjustedValue = minBd.add(stepsFromMinBd.multiply(stepBd))
-                .min(maxBd);
-
-        setValue(adjustedValue.doubleValue());
+        double adjustedValue = SliderUtil.snapToStep(getValue(), getMin(),
+                getMax(), step);
+        setValue(adjustedValue);
     }
 
     /**
@@ -383,15 +372,14 @@ public class Slider extends SliderBase<Slider, Double> {
     void requireValidValue(double min, double max, double step, Double value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
-        if (value < min || value > max) {
+        if (SliderUtil.clampToMinMax(value, min, max) != value) {
             throw new IllegalArgumentException(
                     "Value must be between min and max");
         }
 
-        if (BigDecimal.valueOf(value).remainder(BigDecimal.valueOf(step))
-                .compareTo(BigDecimal.ZERO) != 0) {
+        if (SliderUtil.snapToStep(value, min, max, step) != value) {
             throw new IllegalArgumentException(
-                    "Value is not aligned with step");
+                    "Value must be aligned with step");
         }
     }
 }
