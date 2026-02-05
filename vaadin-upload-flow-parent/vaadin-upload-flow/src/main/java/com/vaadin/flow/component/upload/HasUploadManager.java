@@ -36,6 +36,7 @@ import com.vaadin.flow.shared.Registration;
 interface HasUploadManager extends Serializable {
 
     static final String ATTACH_LISTENER_REGISTRATION = "UploadManagerAttachListenerRegistration";
+    static final String CONNECTOR_ATTACH_LISTENER_REGISTRATION = "UploadManagerConnectorAttachListenerRegistration";
 
     /**
      * Gets the upload manager that this component is linked to.
@@ -55,13 +56,34 @@ interface HasUploadManager extends Serializable {
     default void setUploadManager(UploadManager manager) {
         Component component = (Component) this;
         ComponentUtil.setData(component, UploadManager.class, manager);
+
+        // Remove old attach listener registrations
         var oldRegistration = ComponentUtil.getData(component,
                 ATTACH_LISTENER_REGISTRATION);
         if (oldRegistration instanceof Registration registration) {
             registration.remove();
         }
+        var oldConnectorRegistration = ComponentUtil.getData(component,
+                CONNECTOR_ATTACH_LISTENER_REGISTRATION);
+        if (oldConnectorRegistration instanceof Registration registration) {
+            registration.remove();
+        }
+
+        // Add attach listener for this component
         ComponentUtil.setData(component, ATTACH_LISTENER_REGISTRATION, component
                 .addAttachListener(event -> linkToManager(component, manager)));
+
+        // Add attach listener for the connector (when owner is reattached,
+        // a new client-side manager instance is created and we need to re-link)
+        if (manager != null) {
+            var connectorRegistration = manager.getConnector()
+                    .addAttachListener(
+                            event -> linkToManager(component, manager));
+            ComponentUtil.setData(component,
+                    CONNECTOR_ATTACH_LISTENER_REGISTRATION,
+                    connectorRegistration);
+        }
+
         linkToManager(component, manager);
     }
 
