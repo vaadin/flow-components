@@ -46,5 +46,4 @@ public class SliderElement extends SliderBaseElement {
     public double getValue() {
         return getPropertyDouble("value");
     }
-
 }
