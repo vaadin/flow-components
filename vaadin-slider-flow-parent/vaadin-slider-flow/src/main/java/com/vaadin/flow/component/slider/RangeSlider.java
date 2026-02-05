@@ -28,7 +28,7 @@ import tools.jackson.databind.node.ArrayNode;
 
 /**
  * RangeSlider is an input field that allows the user to select a numeric range
- * within bounds by dragging two handles along a track or using arrow keys for
+ * within bounds by dragging two thumbs along a track or using arrow keys for
  * precise input.
  *
  * @author Vaadin Ltd.
