@@ -34,8 +34,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.AiComponentsExperimentalFeatureException;
-import com.vaadin.flow.component.shared.AiComponentsFeatureFlagProvider;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -292,7 +290,7 @@ public class MessageList extends Component
      *            the UI to get the feature flags from
      * @param itemsToCheck
      *            the items to check for attachments
-     * @throws AiComponentsExperimentalFeatureException
+     * @throws MessageListAttachmentsExperimentalFeatureException
      *             if attachments are used without the feature flag enabled
      */
     private void checkAttachmentsFeatureFlag(UI ui,
@@ -306,12 +304,10 @@ public class MessageList extends Component
             // Check if either the specific messageListAttachments flag or the
             // umbrella aiComponents flag is enabled
             boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
-                    || featureFlags.isEnabled(
-                            AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID);
+                    || featureFlags.isEnabled("aiComponents");
 
             if (!enabled) {
-                throw new AiComponentsExperimentalFeatureException(
-                        "MessageListItem attachments", FEATURE_FLAG_ID);
+                throw new MessageListAttachmentsExperimentalFeatureException();
             }
         }
     }

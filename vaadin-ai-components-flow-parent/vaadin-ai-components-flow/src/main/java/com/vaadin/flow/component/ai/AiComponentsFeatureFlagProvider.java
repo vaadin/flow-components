@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.ai;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import com.vaadin.experimental.FeatureFlagProvider;
 
 /**
  * Provides the AI components feature flag for AI-related features such as
- * UploadManager, MessageListItem attachments, and AiOrchestrator.
+ * AiOrchestrator, modular upload components, and MessageListItem attachments.
  *
  * @author Vaadin Ltd
  */
@@ -35,8 +35,8 @@ public class AiComponentsFeatureFlagProvider implements FeatureFlagProvider {
 
     /**
      * The AI components feature flag. When enabled, allows use of AI-related
-     * features including UploadManager, UploadButton, UploadFileList,
-     * MessageListItem attachments, and AiOrchestrator.
+     * features including AiOrchestrator, modular upload components, and
+     * MessageListItem attachments.
      */
     public static final Feature AI_COMPONENTS = new Feature("AI Components", // title
             FEATURE_FLAG_ID, // id

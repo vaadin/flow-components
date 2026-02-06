@@ -13,15 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.ai;
 
 /**
  * An exception which is thrown when somebody attempts to use AI component
  * features without activating the associated feature flag first.
- * <p>
- * AI component features include modular upload components (UploadManager,
- * UploadButton, UploadFileList), MessageListItem attachments, and
- * AiOrchestrator.
  *
  * @author Vaadin Ltd
  */
@@ -36,7 +32,7 @@ public class AiComponentsExperimentalFeatureException extends RuntimeException {
 
     /**
      * Creates a new exception with a message that includes the specific
-     * component name, using the umbrella AI components feature flag.
+     * component name.
      *
      * @param componentName
      *            the name of the component that requires the feature flag, or
@@ -74,10 +70,12 @@ public class AiComponentsExperimentalFeatureException extends RuntimeException {
         if (specificFeatureFlagId != null) {
             flagInfo = "`com.vaadin.experimental." + specificFeatureFlagId
                     + "=true` or `com.vaadin.experimental."
-                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID + "=true`";
+                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID
+                    + "=true`";
         } else {
             flagInfo = "`com.vaadin.experimental."
-                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID + "=true`";
+                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID
+                    + "=true`";
         }
 
         return prefix + " currently experimental and needs to be explicitly "

@@ -29,8 +29,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.AiComponentsExperimentalFeatureException;
-import com.vaadin.flow.component.shared.AiComponentsFeatureFlagProvider;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -449,12 +447,10 @@ public class UploadManager implements Serializable {
             // Check if either the specific modularUpload flag or the umbrella
             // aiComponents flag is enabled
             boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
-                    || featureFlags.isEnabled(
-                            AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID);
+                    || featureFlags.isEnabled("aiComponents");
 
             if (!enabled) {
-                throw new AiComponentsExperimentalFeatureException(
-                        "Modular upload components", FEATURE_FLAG_ID);
+                throw new ModularUploadExperimentalFeatureException();
             }
         }
     }

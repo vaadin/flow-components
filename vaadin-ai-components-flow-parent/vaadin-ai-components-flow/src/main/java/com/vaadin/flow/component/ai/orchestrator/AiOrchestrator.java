@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.AiComponentsExperimentalFeatureException;
+import com.vaadin.flow.component.ai.AiComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
 import com.vaadin.flow.component.ai.component.AiMessage;
@@ -38,8 +40,6 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.component.shared.AiComponentsExperimentalFeatureException;
-import com.vaadin.flow.component.shared.AiComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
 
