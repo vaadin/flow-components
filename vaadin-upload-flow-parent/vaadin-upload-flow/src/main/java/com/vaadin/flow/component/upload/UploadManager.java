@@ -422,10 +422,10 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * The feature flag ID for AI components (includes UploadManager and related
-     * components).
+     * The feature flag ID for modular upload components (UploadManager and
+     * related components).
      */
-    public static final String FEATURE_FLAG_ID = AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
+    public static final String FEATURE_FLAG_ID = ModularUploadFeatureFlagProvider.FEATURE_FLAG_ID;
 
     /**
      * Internal connector component that loads the JS module and handles
@@ -445,11 +445,16 @@ public class UploadManager implements Serializable {
         private void checkFeatureFlag(com.vaadin.flow.component.UI ui) {
             FeatureFlags featureFlags = FeatureFlags
                     .get(ui.getSession().getService().getContext());
-            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID);
+
+            // Check if either the specific modularUpload flag or the umbrella
+            // aiComponents flag is enabled
+            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
+                    || featureFlags.isEnabled(
+                            AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID);
 
             if (!enabled) {
                 throw new AiComponentsExperimentalFeatureException(
-                        "UploadManager");
+                        "Modular upload components", FEATURE_FLAG_ID);
             }
         }
     }

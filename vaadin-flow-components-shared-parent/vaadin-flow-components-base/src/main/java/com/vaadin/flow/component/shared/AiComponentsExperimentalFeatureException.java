@@ -19,8 +19,9 @@ package com.vaadin.flow.component.shared;
  * An exception which is thrown when somebody attempts to use AI component
  * features without activating the associated feature flag first.
  * <p>
- * AI component features include UploadManager, UploadButton, UploadFileList,
- * MessageListItem attachments, and AiOrchestrator.
+ * AI component features include modular upload components (UploadManager,
+ * UploadButton, UploadFileList), MessageListItem attachments, and
+ * AiOrchestrator.
  *
  * @author Vaadin Ltd
  */
@@ -30,30 +31,59 @@ public class AiComponentsExperimentalFeatureException extends RuntimeException {
      * Creates a new exception with a default message.
      */
     public AiComponentsExperimentalFeatureException() {
-        this(null);
+        this(null, null);
     }
 
     /**
      * Creates a new exception with a message that includes the specific
-     * component name.
+     * component name, using the umbrella AI components feature flag.
      *
      * @param componentName
      *            the name of the component that requires the feature flag, or
      *            {@code null} for a generic message
      */
     public AiComponentsExperimentalFeatureException(String componentName) {
-        super(buildMessage(componentName));
+        this(componentName, null);
     }
 
-    private static String buildMessage(String componentName) {
+    /**
+     * Creates a new exception with a message that includes the specific
+     * component name and feature flag ID. When a specific feature flag ID is
+     * provided, the message will mention both the specific flag and the
+     * umbrella AI components flag.
+     *
+     * @param componentName
+     *            the name of the component that requires the feature flag, or
+     *            {@code null} for a generic message
+     * @param specificFeatureFlagId
+     *            the specific feature flag ID that can enable this feature, or
+     *            {@code null} to only mention the umbrella AI components flag
+     */
+    public AiComponentsExperimentalFeatureException(String componentName,
+            String specificFeatureFlagId) {
+        super(buildMessage(componentName, specificFeatureFlagId));
+    }
+
+    private static String buildMessage(String componentName,
+            String specificFeatureFlagId) {
         String prefix = componentName != null
                 ? "The " + componentName + " feature is"
                 : "AI component features are";
-        return prefix + " part of the AI components feature which is currently "
-                + "experimental and needs to be explicitly enabled. These features "
-                + "can be enabled using Copilot, in the experimental features tab, "
-                + "or by adding a `src/main/resources/vaadin-featureflags.properties` "
-                + "file with the following content: `com.vaadin.experimental."
-                + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID + "=true`";
+
+        String flagInfo;
+        if (specificFeatureFlagId != null) {
+            flagInfo = "`com.vaadin.experimental." + specificFeatureFlagId
+                    + "=true` or `com.vaadin.experimental."
+                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID + "=true`";
+        } else {
+            flagInfo = "`com.vaadin.experimental."
+                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID + "=true`";
+        }
+
+        return prefix + " currently experimental and needs to be explicitly "
+                + "enabled. This feature can be enabled using Copilot, in the "
+                + "experimental features tab, or by adding a "
+                + "`src/main/resources/vaadin-featureflags.properties` file "
+                + "with the following content: " + flagInfo;
     }
 }

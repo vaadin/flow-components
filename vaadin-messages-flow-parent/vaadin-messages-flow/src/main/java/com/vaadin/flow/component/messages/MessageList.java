@@ -57,10 +57,9 @@ public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
     /**
-     * The feature flag ID for AI components (includes MessageListItem
-     * attachments).
+     * The feature flag ID for MessageList attachments.
      */
-    static final String FEATURE_FLAG_ID = AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
+    static final String FEATURE_FLAG_ID = MessageListAttachmentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
@@ -287,7 +286,7 @@ public class MessageList extends Component
 
     /**
      * Checks if any of the given items have attachments and if so, verifies
-     * that the AI components feature flag is enabled.
+     * that the feature flag is enabled.
      *
      * @param ui
      *            the UI to get the feature flags from
@@ -303,9 +302,16 @@ public class MessageList extends Component
         if (hasAttachments) {
             FeatureFlags featureFlags = FeatureFlags
                     .get(ui.getSession().getService().getContext());
-            if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
+
+            // Check if either the specific messageListAttachments flag or the
+            // umbrella aiComponents flag is enabled
+            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
+                    || featureFlags.isEnabled(
+                            AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID);
+
+            if (!enabled) {
                 throw new AiComponentsExperimentalFeatureException(
-                        "MessageListItem attachments");
+                        "MessageListItem attachments", FEATURE_FLAG_ID);
             }
         }
     }
