@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.component.AiAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
 import com.vaadin.flow.component.ai.component.AiMessage;

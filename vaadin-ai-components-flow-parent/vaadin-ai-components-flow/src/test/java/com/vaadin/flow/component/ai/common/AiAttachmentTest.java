@@ -13,10 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.ai.common;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,16 +30,6 @@ public class AiAttachmentTest {
                 () -> new AiAttachment(getFileName(), null, getData()));
         Assert.assertThrows(NullPointerException.class,
                 () -> new AiAttachment(getFileName(), getMimeType(), null));
-    }
-
-    @Test
-    public void toDataUrl_returnsCorrectDataUrl() {
-        var attachment = new AiAttachment(getFileName(), getMimeType(),
-                getData());
-        var dataUrl = attachment.toDataUrl();
-        Assert.assertTrue(dataUrl.startsWith("data:" + getMimeType()));
-        Assert.assertTrue(dataUrl.endsWith(
-                ";base64," + Base64.getEncoder().encodeToString(getData())));
     }
 
     private static byte[] getData() {

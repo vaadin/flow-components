@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.ai.component.AiAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 
 public class LLMProviderHelpersTest {
 

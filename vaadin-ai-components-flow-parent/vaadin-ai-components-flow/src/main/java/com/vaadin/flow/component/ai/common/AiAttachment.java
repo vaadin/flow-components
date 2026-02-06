@@ -13,18 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.ai.common;
 
 import java.io.Serializable;
-import java.util.Base64;
 import java.util.Objects;
 
 /**
  * Represents an attachment that can be sent to an LLM and displayed in
  * messages.
  * <p>
- * This record holds both the raw file data for sending to the LLM provider and
- * provides methods for generating display URLs for the message list UI.
+ * This record holds the raw file data for sending to the LLM provider.
  *
  * @param name
  *            the display name of the attachment (e.g., file name), not
@@ -55,16 +53,5 @@ public record AiAttachment(String name, String mimeType,
         Objects.requireNonNull(name, "Name cannot be null");
         Objects.requireNonNull(mimeType, "MIME type cannot be null");
         Objects.requireNonNull(data, "Data cannot be null");
-    }
-
-    /**
-     * Returns a data URL representation of this attachment suitable for use in
-     * HTML elements like img src or anchor href.
-     *
-     * @return a data URL in the format "data:{mimeType};base64,{encodedData}"
-     */
-    public String toDataUrl() {
-        return "data:" + mimeType + ";base64,"
-                + Base64.getEncoder().encodeToString(data);
     }
 }

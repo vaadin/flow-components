@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-import com.vaadin.flow.component.ai.component.AiAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 
 /**
  * Utility methods for LLM provider implementations.

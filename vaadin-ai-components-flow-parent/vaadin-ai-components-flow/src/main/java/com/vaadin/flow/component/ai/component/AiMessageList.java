@@ -18,6 +18,8 @@ package com.vaadin.flow.component.ai.component;
 import java.io.Serializable;
 import java.util.List;
 
+import com.vaadin.flow.component.ai.common.AiAttachment;
+
 /**
  * Interface for message list components that can display AI conversation
  * messages.

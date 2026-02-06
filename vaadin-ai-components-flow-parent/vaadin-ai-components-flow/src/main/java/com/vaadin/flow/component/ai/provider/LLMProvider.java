@@ -18,7 +18,7 @@ package com.vaadin.flow.component.ai.provider;
 import java.io.Serializable;
 import java.util.List;
 
-import com.vaadin.flow.component.ai.component.AiAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 
 import reactor.core.publisher.Flux;
 

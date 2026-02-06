@@ -38,7 +38,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.annotation.Tool;
 
-import com.vaadin.flow.component.ai.component.AiAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 
 import reactor.core.publisher.Flux;

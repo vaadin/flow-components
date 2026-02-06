@@ -27,7 +27,8 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
-import com.vaadin.flow.component.ai.component.AiAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AttachmentContentType;
 
 import reactor.core.publisher.Flux;
 
