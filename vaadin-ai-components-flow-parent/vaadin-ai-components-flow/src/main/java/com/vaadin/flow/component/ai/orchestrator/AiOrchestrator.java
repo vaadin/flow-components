@@ -16,14 +16,12 @@
 package com.vaadin.flow.component.ai.orchestrator;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +32,9 @@ import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
 import com.vaadin.flow.component.ai.component.AiMessage;
 import com.vaadin.flow.component.ai.component.AiMessageList;
-import com.vaadin.flow.component.ai.component.InputSubmitListener;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
 
@@ -474,116 +470,6 @@ public class AiOrchestrator {
         private static AiFileReceiver wrapUploadManager(
                 UploadManager uploadManager) {
             return new UploadManagerWrapper(uploadManager);
-        }
-    }
-
-    /**
-     * Wrapper for Flow MessageList component.
-     */
-    private record MessageListWrapper(
-            MessageList messageList) implements AiMessageList {
-
-        @Override
-        public void addMessage(AiMessage message) {
-            if (message instanceof MessageListItemWrapper wrapper) {
-                messageList.addItem(wrapper.getItem());
-            } else {
-                var item = new MessageListItem();
-                item.setText(message.getText());
-                item.setTime(message.getTime());
-                item.setUserName(message.getUserName());
-                messageList.addItem(item);
-            }
-        }
-
-        @Override
-        public AiMessage createMessage(String text, String userName,
-                List<AiAttachment> attachments) {
-            return new MessageListItemWrapper(text, userName, attachments);
-        }
-    }
-
-    /**
-     * Wrapper for Flow MessageInput component.
-     */
-    private record MessageInputWrapper(
-            MessageInput messageInput) implements AiInput {
-
-        @Override
-        public void addSubmitListener(InputSubmitListener listener) {
-            messageInput.addSubmitListener(
-                    event -> listener.onSubmit(event::getValue));
-        }
-    }
-
-    /**
-     * Wrapper for Flow UploadManager component.
-     */
-    private record UploadManagerWrapper(
-            UploadManager uploadManager) implements AiFileReceiver {
-
-        @Override
-        public void setUploadHandler(UploadHandler uploadHandler) {
-            uploadManager.setUploadHandler(uploadHandler);
-        }
-
-        @Override
-        public void addFileRemovedListener(Consumer<String> listener) {
-            uploadManager.addFileRemovedListener(
-                    event -> listener.accept(event.getFileName()));
-        }
-
-        @Override
-        public void clearFileList() {
-            uploadManager.clearFileList();
-        }
-    }
-
-    /**
-     * Wrapper for MessageListItem as AiMessage.
-     */
-    private static class MessageListItemWrapper implements AiMessage {
-        private final MessageListItem item;
-
-        MessageListItemWrapper(String text, String userName,
-                List<AiAttachment> attachments) {
-            item = new MessageListItem(text, Instant.now(), userName);
-            if (attachments != null && !attachments.isEmpty()) {
-                var messageAttachments = attachments.stream()
-                        .map(a -> new MessageListItem.Attachment(a.name(),
-                                a.toDataUrl(), a.mimeType()))
-                        .toList();
-                item.setAttachments(messageAttachments);
-            }
-        }
-
-        MessageListItem getItem() {
-            return item;
-        }
-
-        @Override
-        public String getText() {
-            return item.getText();
-        }
-
-        @Override
-        public void setText(String text) {
-            item.setText(text);
-        }
-
-        @Override
-        public Instant getTime() {
-            return item.getTime();
-        }
-
-        @Override
-        public String getUserName() {
-            return item.getUserName();
-        }
-
-        @Override
-        public void appendText(String token) {
-            item.appendText(token);
         }
     }
 }
