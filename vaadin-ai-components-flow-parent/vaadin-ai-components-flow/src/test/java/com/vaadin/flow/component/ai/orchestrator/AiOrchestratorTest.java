@@ -15,7 +15,13 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -23,6 +29,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import javax.imageio.ImageIO;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -562,7 +569,7 @@ public class AiOrchestratorTest {
         var attachments = captor.getValue().attachments();
         Assert.assertNotNull(attachments);
         Assert.assertEquals(2, attachments.size());
-        Assert.assertEquals("test.txt", attachments.get(0).name());
+        Assert.assertEquals("test.txt", attachments.getFirst().name());
         Assert.assertEquals("image.png", attachments.get(1).name());
     }
 
@@ -597,8 +604,8 @@ public class AiOrchestratorTest {
         Assert.assertEquals(1, aiAttachments.size());
         Assert.assertEquals("test.txt", aiAttachments.getFirst().name());
         Assert.assertEquals("text/plain", aiAttachments.getFirst().mimeType());
-        Assert.assertTrue("URL should be a data URL", aiAttachments.getFirst()
-                .toDataUrl().startsWith("data:text/plain;base64,"));
+        Assert.assertArrayEquals("test".getBytes(),
+                aiAttachments.getFirst().data());
     }
 
     @Test
@@ -972,5 +979,114 @@ public class AiOrchestratorTest {
 
     private static AiAttachment createPendingAttachment(String fileName) {
         return new AiAttachment(fileName, "text/plain", "test".getBytes());
+    }
+
+    @Test
+    public void prompt_withFlowMessageList_scalesImageAttachmentThumbnails()
+            throws Exception {
+        var initialWidth = 500;
+        var initialHeight = 400;
+        mockUi();
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(flowMessageList).build();
+
+        var largeImageData = createTestImage(initialWidth, initialHeight);
+        var pendingAttachments = getPendingAttachments(orchestrator);
+        pendingAttachments.add(
+                new AiAttachment("large.png", "image/png", largeImageData));
+
+        orchestrator.prompt("Check this image");
+
+        var attachment = flowMessageList.getItems().getFirst().getAttachments()
+                .getFirst();
+        Assert.assertTrue(
+                attachment.url().startsWith("data:image/jpeg;base64,"));
+
+        var scaledImage = decodeDataUrlToImage(attachment.url());
+        // 200 is the hardcoded max size for thumbnails
+        var scaleFactor = (double) 200 / Math.max(initialWidth, initialHeight);
+        Assert.assertEquals((int) (scaleFactor * initialWidth),
+                scaledImage.getWidth());
+        Assert.assertEquals((int) (scaleFactor * initialHeight),
+                scaledImage.getHeight());
+    }
+
+    @Test
+    public void prompt_withFlowMessageList_smallImageNotScaled()
+            throws Exception {
+        var initialWidth = 100;
+        var initialHeight = 80;
+        mockUi();
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(flowMessageList).build();
+
+        var smallImageData = createTestImage(initialWidth, initialHeight);
+        var pendingAttachments = getPendingAttachments(orchestrator);
+        pendingAttachments.add(
+                new AiAttachment("small.png", "image/png", smallImageData));
+
+        orchestrator.prompt("Check this small image");
+
+        var attachment = flowMessageList.getItems().getFirst().getAttachments()
+                .getFirst();
+        Assert.assertTrue(
+                attachment.url().startsWith("data:image/png;base64,"));
+
+        var image = decodeDataUrlToImage(attachment.url());
+        Assert.assertEquals(initialWidth, image.getWidth());
+        Assert.assertEquals(initialHeight, image.getHeight());
+    }
+
+    @Test
+    public void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl()
+            throws Exception {
+        mockUi();
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var orchestrator = AiOrchestrator.builder(mockProvider)
+                .withMessageList(flowMessageList).build();
+
+        var pendingAttachments = getPendingAttachments(orchestrator);
+        pendingAttachments.add(new AiAttachment("document.pdf",
+                "application/pdf", "fake pdf content".getBytes()));
+        orchestrator.prompt("Check this document");
+
+        var attachment = flowMessageList.getItems().getFirst().getAttachments()
+                .getFirst();
+        Assert.assertEquals("document.pdf", attachment.name());
+        Assert.assertEquals("application/pdf", attachment.mimeType());
+        Assert.assertNull(attachment.url());
+    }
+
+    private static byte[] createTestImage(int width, int height)
+            throws IOException {
+        var image = new BufferedImage(width, height,
+                BufferedImage.TYPE_INT_RGB);
+        var g2d = image.createGraphics();
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        var baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", baos);
+        return baos.toByteArray();
+    }
+
+    private static BufferedImage decodeDataUrlToImage(String dataUrl)
+            throws IOException {
+        var base64Data = dataUrl.substring(dataUrl.indexOf(",") + 1);
+        var imageBytes = Base64.getDecoder().decode(base64Data);
+        return ImageIO.read(new ByteArrayInputStream(imageBytes));
     }
 }
