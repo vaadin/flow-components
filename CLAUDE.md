@@ -40,6 +40,12 @@ Shared modules used across components:
 - Some components use additional client-side JavaScript for integrating with the web component or to add extra functionality. These so-called "connectors" are located in `src/main/resources/META-INF/resources/frontend`
 - Connector initialization, as well as any inline JavaScript run with `Element.executeJs()`, are run in the component's attach handler to ensure they are always run again when Flow creates a new element for the same component instance on the client side
 
+### Web Component Integration
+
+- Vaadin Flow components wrap Vaadin web components
+- The Vaadin web-components monorepo is located at `../web-components`
+- The package name in `@JsModule` indicates the location of the web component in the web-components monorepo (e.g., `@vaadin/button` → `..web-components/packages/button/src/vaadin-button.js`)
+
 ### Testing
 
 - Unit tests: Standard JUnit tests, located in component modules
@@ -80,6 +86,8 @@ mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am 
 - Integration test server can be used for testing pages manually using Playwright MCP, if installed
 - Server needs to be restarted after code changes
 - Integration tests can fail if the 8080 port is already in use. At that point stop and ask the user whether to kill the process using that port. If you started the server yourself and want to run tests against it, add `-DskipJetty` to the integration test command.
+- When waiting for the server to start, use `TaskOutput` with `block=false` to poll the background task output for the message "Frontend compiled successfully" rather than using arbitrary sleep commands.
+- When stopping a server that was started as a background task in the current session, use the `TaskStop` tool with the task ID instead of killing the process directly.
 
 ### Code Quality
 

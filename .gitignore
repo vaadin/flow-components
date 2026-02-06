@@ -41,3 +41,4 @@ prod.bundle
 # Claude Code
 .claude/*.local.*
 CLAUDE.local.md
+.playwright-cli/
