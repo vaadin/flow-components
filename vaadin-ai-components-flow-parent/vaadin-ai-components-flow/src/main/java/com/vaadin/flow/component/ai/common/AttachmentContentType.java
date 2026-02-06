@@ -13,14 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.provider;
+package com.vaadin.flow.component.ai.common;
 
 /**
  * Supported content type categories for attachments.
  * <p>
  * Intended only for internal use and can be removed in the future.
  */
-enum AttachmentContentType {
+public enum AttachmentContentType {
     /** Image content types (image/*). */
     IMAGE,
     /** Text content types (text/*). */
