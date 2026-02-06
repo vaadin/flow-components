@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,27 +16,25 @@
 package com.vaadin.flow.component.ai.orchestrator;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
 import com.vaadin.flow.component.ai.component.AiInput;
 import com.vaadin.flow.component.ai.component.AiMessage;
 import com.vaadin.flow.component.ai.component.AiMessageList;
-import com.vaadin.flow.component.ai.component.InputSubmitListener;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
 
@@ -94,7 +92,7 @@ public class AiOrchestrator {
     private AiMessageList messageList;
     private AiInput input;
     private AiFileReceiver fileReceiver;
-    private final List<LLMProvider.Attachment> pendingAttachments = new CopyOnWriteArrayList<>();
+    private final List<AiAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private Object[] tools = new Object[0];
     private String userName;
     private String aiName;
@@ -161,9 +159,11 @@ public class AiOrchestrator {
         doPrompt(userMessage);
     }
 
-    private void addUserMessageToList(String userMessage) {
+    private void addUserMessageToList(String userMessage,
+            List<AiAttachment> attachments) {
         if (messageList != null) {
-            var userItem = messageList.createMessage(userMessage, userName);
+            var userItem = messageList.createMessage(userMessage, userName,
+                    attachments);
             messageList.addMessage(userItem);
         }
     }
@@ -172,7 +172,8 @@ public class AiOrchestrator {
         if (messageList == null) {
             return null;
         }
-        var assistantMessage = messageList.createMessage("", aiName);
+        var assistantMessage = messageList.createMessage("", aiName,
+                Collections.emptyList());
         messageList.addMessage(assistantMessage);
         return assistantMessage;
     }
@@ -217,15 +218,15 @@ public class AiOrchestrator {
 
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
-        addUserMessageToList(userMessage);
+        var attachments = pendingAttachments.stream().toList();
+        addUserMessageToList(userMessage, attachments);
+        clearPendingAttachments(ui);
         var assistantMessage = createAssistantMessagePlaceholder();
         String effectiveSystemPrompt = null;
         if (systemPrompt != null && !systemPrompt.isBlank()) {
             effectiveSystemPrompt = systemPrompt.trim();
         }
         final var finalSystemPrompt = effectiveSystemPrompt;
-        var attachments = pendingAttachments.stream().toList();
-        clearPendingAttachments(ui);
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -234,7 +235,7 @@ public class AiOrchestrator {
             }
 
             @Override
-            public List<LLMProvider.Attachment> attachments() {
+            public List<AiAttachment> attachments() {
                 return attachments;
             }
 
@@ -266,32 +267,18 @@ public class AiOrchestrator {
         }
         fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
             var isDuplicate = pendingAttachments.stream()
-                    .anyMatch(a -> a.fileName().equals(meta.fileName()));
+                    .anyMatch(a -> a.name().equals(meta.fileName()));
             if (isDuplicate) {
                 throw new IllegalArgumentException(
                         "Duplicate file name: " + meta.fileName());
             }
-            pendingAttachments.add(new LLMProvider.Attachment() {
-                @Override
-                public String fileName() {
-                    return meta.fileName();
-                }
-
-                @Override
-                public String contentType() {
-                    return meta.contentType();
-                }
-
-                @Override
-                public byte[] data() {
-                    return data;
-                }
-            });
+            pendingAttachments.add(new AiAttachment(meta.fileName(),
+                    meta.contentType(), data));
             LOGGER.debug("Added attachment: {}", meta.fileName());
         }));
         fileReceiver.addFileRemovedListener(fileName -> {
             var removed = pendingAttachments
-                    .removeIf(a -> a.fileName().equals(fileName));
+                    .removeIf(a -> a.name().equals(fileName));
             if (removed) {
                 LOGGER.debug("Removed attachment: {}", fileName);
             }
@@ -483,99 +470,6 @@ public class AiOrchestrator {
         private static AiFileReceiver wrapUploadManager(
                 UploadManager uploadManager) {
             return new UploadManagerWrapper(uploadManager);
-        }
-    }
-
-    /**
-     * Wrapper for Flow MessageList component.
-     */
-    private record MessageListWrapper(
-            MessageList messageList) implements AiMessageList {
-
-        @Override
-        public void addMessage(AiMessage message) {
-            messageList.addItem(((MessageListItemWrapper) message).getItem());
-        }
-
-        @Override
-        public AiMessage createMessage(String text, String userName) {
-            return new MessageListItemWrapper(text, userName);
-        }
-    }
-
-    /**
-     * Wrapper for Flow MessageInput component.
-     */
-    private record MessageInputWrapper(
-            MessageInput messageInput) implements AiInput {
-
-        @Override
-        public void addSubmitListener(InputSubmitListener listener) {
-            messageInput.addSubmitListener(
-                    event -> listener.onSubmit(event::getValue));
-        }
-    }
-
-    /**
-     * Wrapper for Flow UploadManager component.
-     */
-    private record UploadManagerWrapper(
-            UploadManager uploadManager) implements AiFileReceiver {
-
-        @Override
-        public void setUploadHandler(UploadHandler uploadHandler) {
-            uploadManager.setUploadHandler(uploadHandler);
-        }
-
-        @Override
-        public void addFileRemovedListener(Consumer<String> listener) {
-            uploadManager.addFileRemovedListener(
-                    event -> listener.accept(event.getFileName()));
-        }
-
-        @Override
-        public void clearFileList() {
-            uploadManager.clearFileList();
-        }
-    }
-
-    /**
-     * Wrapper for MessageListItem as AiMessage.
-     */
-    private static class MessageListItemWrapper implements AiMessage {
-        private final MessageListItem item;
-
-        MessageListItemWrapper(String text, String userName) {
-            item = new MessageListItem(text, Instant.now(), userName);
-        }
-
-        MessageListItem getItem() {
-            return item;
-        }
-
-        @Override
-        public String getText() {
-            return item.getText();
-        }
-
-        @Override
-        public void setText(String text) {
-            item.setText(text);
-        }
-
-        @Override
-        public Instant getTime() {
-            return item.getTime();
-        }
-
-        @Override
-        public String getUserName() {
-            return item.getUserName();
-        }
-
-        @Override
-        public void appendText(String token) {
-            item.appendText(token);
         }
     }
 }
