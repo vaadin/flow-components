@@ -464,6 +464,12 @@ public class DialogTest {
                 .onComponentEvent(Mockito.any(Dialog.ClosedEvent.class));
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void bindChildren_throwsUnsupportedOperationException() {
+        Dialog dialog = new Dialog();
+        dialog.bindChildren(null, null);
+    }
+
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
