@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -299,6 +300,12 @@ public class UploadFileListTest {
     @Test
     public void implementsHasSize() {
         Assert.assertTrue(HasSize.class.isAssignableFrom(UploadFileList.class));
+    }
+
+    @Test
+    public void implementsHasEnabled() {
+        Assert.assertTrue(
+                HasEnabled.class.isAssignableFrom(UploadFileList.class));
     }
 
     @Test
