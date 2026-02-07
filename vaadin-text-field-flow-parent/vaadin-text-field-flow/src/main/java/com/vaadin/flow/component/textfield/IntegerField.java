@@ -21,7 +21,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * IntegerField is an extension of Text Field that only accepts integer numbers.
@@ -291,7 +291,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      * <p>
      * While a signal is bound, any attempt to set the minimum value manually
      * through {@link #setMin(int)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the minimum value to, or {@code null} to
@@ -316,7 +316,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      * <p>
      * While a signal is bound, any attempt to set the maximum value manually
      * through {@link #setMax(int)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the maximum value to, or {@code null} to

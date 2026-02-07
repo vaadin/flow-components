@@ -18,7 +18,7 @@ package com.vaadin.flow.component.shared;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasTheme;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Mixin interface that allows adding and removing typed theme variants to /

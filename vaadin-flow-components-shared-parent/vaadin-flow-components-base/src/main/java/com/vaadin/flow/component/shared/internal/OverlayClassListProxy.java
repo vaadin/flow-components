@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.dom.ClassList;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Internal class that provides shared functionality for setting CSS class names

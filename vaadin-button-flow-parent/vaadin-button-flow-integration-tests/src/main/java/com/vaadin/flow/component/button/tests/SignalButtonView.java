@@ -21,8 +21,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * View for {@link Button} demo.

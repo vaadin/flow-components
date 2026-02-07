@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.HasElement;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Mixin interface for components that support a clear button.
@@ -60,10 +60,10 @@ public interface HasClearButton extends HasElement {
      * <p>
      * While a signal is bound, any attempt to set the visibility manually
      * through {@link #setClearButtonVisible(boolean)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Attempting to bind a new signal while one is already bound throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Signal's value {@code null} is treated as {@code false}.
      *

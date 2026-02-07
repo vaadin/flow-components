@@ -45,7 +45,7 @@ import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * The Button component allows users to perform actions. It comes in several

@@ -60,7 +60,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Time Picker is an input field for entering or selecting a specific time. The
@@ -836,7 +836,7 @@ public class TimePicker
      * <p>
      * While a signal is bound, any attempt to set the minimum time manually
      * through {@link #setMin(LocalTime)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the minimum time to, or {@code null} to
@@ -864,7 +864,7 @@ public class TimePicker
      * <p>
      * While a signal is bound, any attempt to set the maximum time manually
      * through {@link #setMax(LocalTime)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the maximum time to, or {@code null} to

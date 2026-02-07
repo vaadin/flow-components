@@ -51,7 +51,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -896,10 +896,10 @@ public class DateTimePicker
      * <p>
      * While a signal is bound, any attempt to set the minimum date and time
      * manually through {@link #setMin(LocalDateTime)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Attempting to bind a new signal while one is already bound throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the minimum date and time to, or
@@ -950,10 +950,10 @@ public class DateTimePicker
      * <p>
      * While a signal is bound, any attempt to set the maximum date and time
      * manually through {@link #setMax(LocalDateTime)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Attempting to bind a new signal while one is already bound throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the maximum date and time to, or
