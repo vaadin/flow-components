@@ -22,7 +22,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Progress Bar shows the completion status of a task or process. The progress
@@ -128,7 +128,7 @@ public class ProgressBar extends Component
      * <p>
      * While a signal is bound, any attempt to set the value manually through
      * {@link #setValue(double)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the value to, or {@code null} to unbind
@@ -189,7 +189,7 @@ public class ProgressBar extends Component
      * <p>
      * While a signal is bound, any attempt to set the minimum bound manually
      * through {@link #setMin(double)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the minimum bound to, or {@code null} to
@@ -213,7 +213,7 @@ public class ProgressBar extends Component
      * <p>
      * While a signal is bound, any attempt to set the maximum bound manually
      * through {@link #setMax(double)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the maximum bound to, or {@code null} to

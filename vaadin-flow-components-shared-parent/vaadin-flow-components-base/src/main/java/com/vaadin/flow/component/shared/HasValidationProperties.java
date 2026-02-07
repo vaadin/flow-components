@@ -17,7 +17,7 @@ package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Mixin interface for components that provide properties for setting invalid
