@@ -23,8 +23,8 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.signals.BindingActiveException;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 public class HasThemeVariantTest extends AbstractSignalsUnitTest {
 
