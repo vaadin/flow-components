@@ -27,6 +27,9 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AttachmentContentType;
+
 import reactor.core.publisher.Flux;
 
 /**
@@ -161,10 +164,10 @@ public class SpringAiLLMProvider implements LLMProvider {
                 .toArray(Media[]::new);
     }
 
-    private static Optional<Media> getAttachmentMedia(Attachment attachment) {
+    private static Optional<Media> getAttachmentMedia(AiAttachment attachment) {
         LLMProviderHelpers.validateAttachment(attachment);
         var contentType = AttachmentContentType
-                .fromMimeType(attachment.contentType());
+                .fromMimeType(attachment.mimeType());
         return switch (contentType) {
         case TEXT -> Optional.of(getTextMedia(attachment));
         case IMAGE, PDF, AUDIO, VIDEO -> Optional.of(getMedia(attachment));
@@ -172,17 +175,17 @@ public class SpringAiLLMProvider implements LLMProvider {
         };
     }
 
-    private static Media getMedia(Attachment attachment) {
-        var mimeType = MimeType.valueOf(attachment.contentType());
+    private static Media getMedia(AiAttachment attachment) {
+        var mimeType = MimeType.valueOf(attachment.mimeType());
         var resource = new ByteArrayResource(attachment.data());
         return Media.builder().mimeType(mimeType).data(resource).build();
     }
 
-    private static Media getTextMedia(Attachment attachment) {
+    private static Media getTextMedia(AiAttachment attachment) {
         var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
-                attachment.fileName(), false);
+                attachment.name(), false);
         var formattedText = LLMProviderHelpers
-                .formatTextAttachment(attachment.fileName(), textContent);
+                .formatTextAttachment(attachment.name(), textContent);
         return Media.builder().mimeType(MimeType.valueOf("text/plain"))
                 .data(formattedText).build();
     }
