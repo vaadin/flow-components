@@ -24,6 +24,8 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
@@ -39,7 +41,13 @@ import com.vaadin.flow.function.SerializableFunction;
 abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
-        HasValidationProperties, Focusable<TComponent>, KeyNotifier {
+        HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
+        KeyNotifier {
+
+    private ValueChangeMode currentMode;
+
+    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
+
     /**
      * Constructs a slider with the given min, max, step, initial value, and
      * custom converters for the value property.
@@ -68,7 +76,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
 
-        setSynchronizedEvent("change");
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
         getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
@@ -243,4 +251,38 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     abstract void requireValidValue(double min, double max, double step,
             TValue value);
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The default value is {@link ValueChangeMode#ON_CHANGE}.
+     */
+    @Override
+    public ValueChangeMode getValueChangeMode() {
+        return currentMode;
+    }
+
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        currentMode = valueChangeMode;
+        setSynchronizedEvent(
+                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
+        applyChangeTimeout();
+    }
+
+    @Override
+    public void setValueChangeTimeout(int valueChangeTimeout) {
+        this.valueChangeTimeout = valueChangeTimeout;
+        applyChangeTimeout();
+    }
+
+    @Override
+    public int getValueChangeTimeout() {
+        return valueChangeTimeout;
+    }
+
+    private void applyChangeTimeout() {
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+                getValueChangeTimeout(), getSynchronizationRegistration());
+    }
 }

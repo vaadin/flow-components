@@ -20,55 +20,42 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.slider.testbench.RangeSliderElement;
+import com.vaadin.flow.component.slider.testbench.SliderElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-range-slider/basic")
-public class RangeSliderBasicIT extends AbstractComponentIT {
+@TestPath("vaadin-slider/basic")
+public class SliderBasicIT extends AbstractComponentIT {
 
-    private RangeSliderElement rangeSlider;
+    private SliderElement slider;
     private TestBenchElement serverValue;
 
     @Before
     public void init() {
         open();
-        rangeSlider = $(RangeSliderElement.class).first();
+        slider = $(SliderElement.class).first();
         serverValue = $("span").id("server-value");
     }
 
     @Test
     public void basicProperties() {
-        Assert.assertEquals(10, rangeSlider.getMin(), 0);
-        Assert.assertEquals(200, rangeSlider.getMax(), 0);
-        Assert.assertEquals(5, rangeSlider.getStep(), 0);
-        Assert.assertEquals(25, rangeSlider.getStartValue(), 0);
-        Assert.assertEquals(150, rangeSlider.getEndValue(), 0);
+        Assert.assertEquals(10, slider.getMin(), 0);
+        Assert.assertEquals(200, slider.getMax(), 0);
+        Assert.assertEquals(50, slider.getValue(), 0);
+        Assert.assertEquals(5, slider.getStep(), 0);
     }
 
     @Test
     public void setValue_valueSynchronizedToServer() {
-        rangeSlider.setValue(50, 100);
-        Assert.assertEquals("50.0,100.0", serverValue.getText());
-    }
-
-    @Test
-    public void setStartValue_valueSynchronizedToServer() {
-        rangeSlider.setStartValue(50);
-        Assert.assertEquals("50.0,150.0", serverValue.getText());
-    }
-
-    @Test
-    public void setEndValue_valueSynchronizedToServer() {
-        rangeSlider.setEndValue(100);
-        Assert.assertEquals("25.0,100.0", serverValue.getText());
+        slider.setValue(100);
+        Assert.assertEquals("100.0", serverValue.getText());
     }
 
     @Test
     public void valueChangeMode_defaultMode_valueUpdatedOnThumbRelease() {
-        new Actions(getDriver()).moveToElement(rangeSlider.getStartThumb())
-                .clickAndHold().moveByOffset(50, 0).perform();
+        new Actions(getDriver()).moveToElement(slider.getThumb()).clickAndHold()
+                .moveByOffset(50, 0).perform();
         Assert.assertEquals("Value should not be updated while dragging thumb",
                 "", serverValue.getText());
 
@@ -81,8 +68,8 @@ public class RangeSliderBasicIT extends AbstractComponentIT {
     public void valueChangeMode_eagerMode_valueUpdatedOnThumbDrag() {
         $("button").id("set-eager-mode").click();
 
-        new Actions(getDriver()).moveToElement(rangeSlider.getStartThumb())
-                .clickAndHold().moveByOffset(50, 0).perform();
+        new Actions(getDriver()).moveToElement(slider.getThumb()).clickAndHold()
+                .moveByOffset(50, 0).perform();
         Assert.assertNotEquals("Value should be updated while dragging thumb",
                 "", serverValue.getText());
 
@@ -97,8 +84,8 @@ public class RangeSliderBasicIT extends AbstractComponentIT {
 
         long start = System.currentTimeMillis();
 
-        new Actions(getDriver()).moveToElement(rangeSlider.getStartThumb())
-                .clickAndHold().moveByOffset(50, 0).perform();
+        new Actions(getDriver()).moveToElement(slider.getThumb()).clickAndHold()
+                .moveByOffset(50, 0).perform();
         Assert.assertEquals("Value should not be updated before timeout", "",
                 serverValue.getText());
 

@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -431,6 +433,26 @@ public class RangeSliderTest {
                 new RangeSliderValue(0, 100));
         slider.getElement().setPropertyJson("value", createValueArray(80, 20));
         Assert.assertEquals(new RangeSliderValue(0, 100), slider.getValue());
+    }
+
+    @Test
+    public void setValueChangeMode_getValueChangeMode() {
+        RangeSlider slider = new RangeSlider();
+        Assert.assertEquals(ValueChangeMode.ON_CHANGE,
+                slider.getValueChangeMode());
+
+        slider.setValueChangeMode(ValueChangeMode.EAGER);
+        Assert.assertEquals(ValueChangeMode.EAGER, slider.getValueChangeMode());
+    }
+
+    @Test
+    public void setValueChangeTimeout_getValueChangeTimeout() {
+        RangeSlider slider = new RangeSlider();
+        Assert.assertEquals(HasValueChangeMode.DEFAULT_CHANGE_TIMEOUT,
+                slider.getValueChangeTimeout());
+
+        slider.setValueChangeTimeout(500);
+        Assert.assertEquals(500, slider.getValueChangeTimeout());
     }
 
     private ArrayNode createValueArray(double start, double end) {
