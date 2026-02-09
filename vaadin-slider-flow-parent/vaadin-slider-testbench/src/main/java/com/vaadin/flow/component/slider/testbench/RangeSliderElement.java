@@ -92,8 +92,7 @@ public class RangeSliderElement extends SliderBaseElement {
     }
 
     /**
-     * Gets the draggable thumb element for the start value of the range
-     * slider.
+     * Gets the draggable thumb element for the start value of the range slider.
      *
      * @return the start draggable thumb element
      */
@@ -102,8 +101,7 @@ public class RangeSliderElement extends SliderBaseElement {
     }
 
     /**
-     * Gets the draggable thumb element for the end value of the range
-     * slider.
+     * Gets the draggable thumb element for the end value of the range slider.
      *
      * @return the end draggable thumb element
      */
