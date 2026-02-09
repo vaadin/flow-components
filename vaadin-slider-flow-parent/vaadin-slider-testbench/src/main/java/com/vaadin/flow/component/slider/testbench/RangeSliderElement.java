@@ -38,7 +38,10 @@ public class RangeSliderElement extends SliderBaseElement {
      *            the end value
      */
     public void setValue(double start, double end) {
-        setProperty("value", "[" + start + "," + end + "]");
+        executeScript("""
+                    const [element, start, end] = arguments;
+                    element.value = [start, end];
+                """, this, start, end);
         dispatchEvent("input", Collections.singletonMap("bubbles", true));
         dispatchEvent("change", Collections.singletonMap("bubbles", true));
     }
