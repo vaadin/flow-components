@@ -441,6 +441,33 @@ public class UploadManagerIT extends AbstractUploadIT {
         waitUntil(driver -> getLogText().contains("All uploads finished"), 10);
     }
 
+    @Test
+    public void disableManager_buttonIsDisabled() {
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        Assert.assertFalse("Button should be enabled initially",
+                uploadButton.hasAttribute("disabled"));
+
+        clickButton("disable-manager");
+
+        Assert.assertTrue("Button should be disabled when manager is disabled",
+                uploadButton.hasAttribute("disabled"));
+    }
+
+    @Test
+    public void unlinkButton_buttonIsDisabled() {
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        Assert.assertFalse("Button should be enabled initially",
+                uploadButton.hasAttribute("disabled"));
+
+        clickButton("unlink-button");
+
+        Assert.assertTrue(
+                "Button should be disabled when unlinked from manager",
+                uploadButton.hasAttribute("disabled"));
+    }
+
     private UploadManagerTester getUploadManagerTester() {
         return $(UploadButtonElement.class).id("upload-button")
                 .getUploadManager();
