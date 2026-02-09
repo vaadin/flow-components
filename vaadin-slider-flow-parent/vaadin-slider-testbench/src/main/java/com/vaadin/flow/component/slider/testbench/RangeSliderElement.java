@@ -17,6 +17,7 @@ package com.vaadin.flow.component.slider.testbench;
 
 import java.util.Collections;
 
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
@@ -90,4 +91,21 @@ public class RangeSliderElement extends SliderBaseElement {
         return getPropertyDouble("value", "1");
     }
 
+    /**
+     * Gets the input element that controls the start value of the range slider.
+     *
+     * @return the start input element
+     */
+    public TestBenchElement getStartInputElement() {
+        return $("input").first();
+    }
+
+    /**
+     * Gets the input element that controls the end value of the range slider.
+     *
+     * @return the end input element
+     */
+    public TestBenchElement getEndInputElement() {
+        return $("input").last();
+    }
 }

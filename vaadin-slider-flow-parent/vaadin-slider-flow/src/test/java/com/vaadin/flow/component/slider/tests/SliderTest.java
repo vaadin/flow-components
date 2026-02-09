@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class SliderTest {
     @Test
@@ -432,5 +434,25 @@ public class SliderTest {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().setProperty("value", 110.0);
         Assert.assertEquals(0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueChangeMode_getValueChangeMode() {
+        Slider slider = new Slider();
+        Assert.assertEquals(ValueChangeMode.ON_CHANGE,
+                slider.getValueChangeMode());
+
+        slider.setValueChangeMode(ValueChangeMode.EAGER);
+        Assert.assertEquals(ValueChangeMode.EAGER, slider.getValueChangeMode());
+    }
+
+    @Test
+    public void setValueChangeTimeout_getValueChangeTimeout() {
+        Slider slider = new Slider();
+        Assert.assertEquals(HasValueChangeMode.DEFAULT_CHANGE_TIMEOUT,
+                slider.getValueChangeTimeout());
+
+        slider.setValueChangeTimeout(500);
+        Assert.assertEquals(500, slider.getValueChangeTimeout());
     }
 }
