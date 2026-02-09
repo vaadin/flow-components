@@ -372,6 +372,48 @@ public class SliderTest {
     }
 
     @Test
+    public void setValueAlwaysVisible_defaultFalse() {
+        Slider slider = new Slider();
+        Assert.assertFalse(slider.isValueAlwaysVisible());
+    }
+
+    @Test
+    public void setValueAlwaysVisible_updatesProperty() {
+        Slider slider = new Slider();
+        slider.setValueAlwaysVisible(true);
+
+        Assert.assertTrue(slider.isValueAlwaysVisible());
+        Assert.assertTrue(
+                slider.getElement().getProperty("valueAlwaysVisible", false));
+
+        slider.setValueAlwaysVisible(false);
+        Assert.assertFalse(slider.isValueAlwaysVisible());
+        Assert.assertFalse(
+                slider.getElement().getProperty("valueAlwaysVisible", false));
+    }
+
+    @Test
+    public void setMinMaxVisible_defaultFalse() {
+        Slider slider = new Slider();
+        Assert.assertFalse(slider.isMinMaxVisible());
+    }
+
+    @Test
+    public void setMinMaxVisible_updatesProperty() {
+        Slider slider = new Slider();
+        slider.setMinMaxVisible(true);
+
+        Assert.assertTrue(slider.isMinMaxVisible());
+        Assert.assertTrue(
+                slider.getElement().getProperty("minMaxVisible", false));
+
+        slider.setMinMaxVisible(false);
+        Assert.assertFalse(slider.isMinMaxVisible());
+        Assert.assertFalse(
+                slider.getElement().getProperty("minMaxVisible", false));
+    }
+
+    @Test
     public void setValueFromClient_valueNotAlignedWithStep_ignored() {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().setProperty("value", 15.0);

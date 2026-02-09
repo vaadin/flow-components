@@ -152,6 +152,52 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
+     * Sets whether the value bubble is always visible, regardless of focus or
+     * hover state. By default, bubble is hidden and only shown on interaction.
+     *
+     * @param valueAlwaysVisible
+     *            {@code true} to always show the value bubble, {@code false}
+     *            otherwise
+     */
+    public void setValueAlwaysVisible(boolean valueAlwaysVisible) {
+        getElement().setProperty("valueAlwaysVisible", valueAlwaysVisible);
+    }
+
+    /**
+     * Gets whether the value bubble is always visible, regardless of focus or
+     * hover state. By default, bubble is hidden and only shown on interaction.
+     *
+     * @return {@code true} if the value bubble is always visible, {@code false}
+     *         otherwise
+     */
+    public boolean isValueAlwaysVisible() {
+        return getElement().getProperty("valueAlwaysVisible", false);
+    }
+
+    /**
+     * Sets whether the min and max values are displayed below the slider track.
+     * By default, min and max values are hidden.
+     *
+     * @param minMaxVisible
+     *            {@code true} to display min and max values, {@code false}
+     *            otherwise
+     */
+    public void setMinMaxVisible(boolean minMaxVisible) {
+        getElement().setProperty("minMaxVisible", minMaxVisible);
+    }
+
+    /**
+     * Gets whether the min and max values are displayed below the slider track.
+     * By default, min and max values are hidden.
+     *
+     * @return {@code true} if the min and max values are displayed,
+     *         {@code false} otherwise
+     */
+    public boolean isMinMaxVisible() {
+        return getElement().getProperty("minMaxVisible", false);
+    }
+
+    /**
      * Sets the value of the slider.
      *
      * @param value
