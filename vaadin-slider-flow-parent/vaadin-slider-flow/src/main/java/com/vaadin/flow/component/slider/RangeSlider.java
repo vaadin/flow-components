@@ -279,7 +279,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Sets the accessible name for the start handle of the range slider.
+     * Sets the accessible name for the start thumb of the range slider.
      *
      * @param accessibleName
      *            the accessible name to set, or {@code null} to remove it
@@ -289,7 +289,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Gets the accessible name for the start handle of the range slider.
+     * Gets the accessible name for the start thumb of the range slider.
      *
      * @return an optional accessible name, or an empty optional if no
      *         accessible name has been set
@@ -300,7 +300,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Sets the accessible name for the end handle of the range slider.
+     * Sets the accessible name for the end thumb of the range slider.
      *
      * @param accessibleName
      *            the accessible name to set, or {@code null} to remove it
@@ -310,7 +310,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     /**
-     * Gets the accessible name for the end handle of the range slider.
+     * Gets the accessible name for the end thumb of the range slider.
      *
      * @return an optional accessible name, or an empty optional if no
      *         accessible name has been set
