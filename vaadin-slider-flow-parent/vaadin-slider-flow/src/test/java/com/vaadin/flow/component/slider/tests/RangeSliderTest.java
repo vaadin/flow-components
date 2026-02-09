@@ -386,6 +386,44 @@ public class RangeSliderTest {
     }
 
     @Test
+    public void setValueAlwaysVisible_defaultFalse() {
+        RangeSlider slider = new RangeSlider();
+        Assert.assertFalse(slider.isValueAlwaysVisible());
+    }
+
+    @Test
+    public void setValueAlwaysVisible_updatesProperty() {
+        RangeSlider slider = new RangeSlider();
+        slider.setValueAlwaysVisible(true);
+
+        Assert.assertTrue(slider.isValueAlwaysVisible());
+        Assert.assertTrue(
+                slider.getElement().getProperty("valueAlwaysVisible", false));
+
+        slider.setValueAlwaysVisible(false);
+        Assert.assertFalse(slider.isValueAlwaysVisible());
+    }
+
+    @Test
+    public void setMinMaxVisible_defaultFalse() {
+        RangeSlider slider = new RangeSlider();
+        Assert.assertFalse(slider.isMinMaxVisible());
+    }
+
+    @Test
+    public void setMinMaxVisible_updatesProperty() {
+        RangeSlider slider = new RangeSlider();
+        slider.setMinMaxVisible(true);
+
+        Assert.assertTrue(slider.isMinMaxVisible());
+        Assert.assertTrue(
+                slider.getElement().getProperty("minMaxVisible", false));
+
+        slider.setMinMaxVisible(false);
+        Assert.assertFalse(slider.isMinMaxVisible());
+    }
+
+    @Test
     public void setValueFromClient_null_ignored() {
         RangeSlider slider = new RangeSlider(0, 100, 10,
                 new RangeSliderValue(0, 100));
