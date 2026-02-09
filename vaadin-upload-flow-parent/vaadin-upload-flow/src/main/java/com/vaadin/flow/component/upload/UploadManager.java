@@ -136,6 +136,12 @@ public class UploadManager implements Serializable {
         }).addEventData(eventDetailFileName)
                 .addEventData(eventDetailErrorMessage);
 
+        // Listen for all-finished event from client (triggered when all
+        // uploads are complete, including success, error, or abort)
+        connector.getElement().addEventListener("all-finished",
+                event -> ComponentUtil.fireEvent(owner,
+                        new AllFinishedEvent(owner)));
+
         // Register internal listeners for upload state tracking
         ComponentUtil.addListener(connector, UploadStartEvent.class,
                 event -> startUpload());
@@ -361,19 +367,10 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * End upload state and check if all uploads are finished.
+     * End upload state.
      */
     private void endUpload() {
-        int remaining = activeUploads.decrementAndGet();
-        if (remaining == 0) {
-            fireAllFinished();
-        }
-    }
-
-    private void fireAllFinished() {
-        // Use UI.access() since this may be called from upload handler thread
-        owner.getUI().ifPresent(ui -> ui.access(() -> ComponentUtil
-                .fireEvent(owner, new AllFinishedEvent(owner))));
+        activeUploads.decrementAndGet();
     }
 
     /**
