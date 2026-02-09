@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.slider;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
@@ -33,6 +34,28 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String ariaLabelledBy) {
+        getElement().setProperty("accessibleNameRef", ariaLabelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
     private static final double DEFAULT_MIN = 0.0;
     private static final double DEFAULT_MAX = 100.0;
     private static final double DEFAULT_STEP = 1.0;

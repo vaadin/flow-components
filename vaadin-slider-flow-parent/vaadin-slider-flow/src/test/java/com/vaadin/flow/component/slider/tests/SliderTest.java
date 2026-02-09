@@ -347,6 +347,31 @@ public class SliderTest {
     }
 
     @Test
+    public void setAriaLabel() {
+        Slider slider = new Slider();
+        slider.setAriaLabel("aria-label");
+
+        Assert.assertTrue(slider.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", slider.getAriaLabel().get());
+
+        slider.setAriaLabel(null);
+        Assert.assertTrue(slider.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        Slider slider = new Slider();
+        slider.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(slider.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                slider.getAriaLabelledBy().get());
+
+        slider.setAriaLabelledBy(null);
+        Assert.assertTrue(slider.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
     public void setValueFromClient_valueNotAlignedWithStep_ignored() {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().setProperty("value", 15.0);
