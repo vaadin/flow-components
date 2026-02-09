@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.slider.Slider;
 
 public class SliderTest {
@@ -337,6 +338,12 @@ public class SliderTest {
         slider.clear();
 
         Assert.assertEquals(10, slider.getValue(), 0);
+    }
+
+    @Test
+    public void implementsHasAriaLabel() {
+        Slider slider = new Slider();
+        Assert.assertTrue(slider instanceof HasAriaLabel);
     }
 
     @Test

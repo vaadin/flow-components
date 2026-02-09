@@ -358,6 +358,34 @@ public class RangeSliderTest {
     }
 
     @Test
+    public void setAccessibleNameStart() {
+        RangeSlider slider = new RangeSlider();
+        slider.setAccessibleNameStart("Start");
+
+        Assert.assertTrue(slider.getAccessibleNameStart().isPresent());
+        Assert.assertEquals("Start", slider.getAccessibleNameStart().get());
+        Assert.assertEquals("Start",
+                slider.getElement().getProperty("accessibleNameStart"));
+
+        slider.setAccessibleNameStart(null);
+        Assert.assertTrue(slider.getAccessibleNameStart().isEmpty());
+    }
+
+    @Test
+    public void setAccessibleNameEnd() {
+        RangeSlider slider = new RangeSlider();
+        slider.setAccessibleNameEnd("End");
+
+        Assert.assertTrue(slider.getAccessibleNameEnd().isPresent());
+        Assert.assertEquals("End", slider.getAccessibleNameEnd().get());
+        Assert.assertEquals("End",
+                slider.getElement().getProperty("accessibleNameEnd"));
+
+        slider.setAccessibleNameEnd(null);
+        Assert.assertTrue(slider.getAccessibleNameEnd().isEmpty());
+    }
+
+    @Test
     public void setValueFromClient_null_ignored() {
         RangeSlider slider = new RangeSlider(0, 100, 10,
                 new RangeSliderValue(0, 100));
