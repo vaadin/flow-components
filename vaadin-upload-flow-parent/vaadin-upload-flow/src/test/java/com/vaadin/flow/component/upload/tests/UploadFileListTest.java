@@ -22,8 +22,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
@@ -34,6 +36,8 @@ import com.vaadin.flow.component.upload.UploadFileListVariant;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -44,13 +48,22 @@ public class UploadFileListTest {
     private UI ui;
     private Div owner;
     private UploadManager manager;
+    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
         ui = Mockito.spy(new UI());
         UI.setCurrent(ui);
 
+        // Mock feature flags to enable the upload manager component
+        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
+        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
+        Mockito.when(mockFeatureFlags.isEnabled(UploadManager.FEATURE_FLAG_ID))
+                .thenReturn(true);
+
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
+        VaadinService mockService = Mockito.mock(VaadinService.class);
+        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
         StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
                 mockSession);
         Mockito.when(mockSession.getResourceRegistry())
@@ -60,6 +73,10 @@ public class UploadFileListTest {
                     invocation.getArgument(0, Command.class).execute();
                     return new CompletableFuture<>();
                 });
+        Mockito.when(mockSession.getService()).thenReturn(mockService);
+        Mockito.when(mockService.getContext()).thenReturn(mockContext);
+        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
+                .thenReturn(mockFeatureFlags);
         ui.getInternals().setSession(mockSession);
 
         owner = new Div();
@@ -69,6 +86,7 @@ public class UploadFileListTest {
 
     @After
     public void tearDown() {
+        mockFeatureFlagsStatic.close();
         UI.setCurrent(null);
     }
 
