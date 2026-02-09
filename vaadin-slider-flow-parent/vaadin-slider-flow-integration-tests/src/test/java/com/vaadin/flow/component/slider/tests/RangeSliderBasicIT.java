@@ -67,7 +67,8 @@ public class RangeSliderBasicIT extends AbstractComponentIT {
 
     @Test
     public void valueChangeMode_defaultMode_valueUpdatedOnThumbRelease() {
-        new Actions(getDriver()).moveToElement(rangeSlider.getStartThumb())
+        new Actions(getDriver())
+                .moveToElement(rangeSlider.getStartInputElement())
                 .clickAndHold().moveByOffset(50, 0).perform();
         Assert.assertEquals("Value should not be updated while dragging thumb",
                 "", serverValue.getText());
@@ -81,7 +82,8 @@ public class RangeSliderBasicIT extends AbstractComponentIT {
     public void valueChangeMode_eagerMode_valueUpdatedOnThumbDrag() {
         $("button").id("set-eager-mode").click();
 
-        new Actions(getDriver()).moveToElement(rangeSlider.getStartThumb())
+        new Actions(getDriver())
+                .moveToElement(rangeSlider.getStartInputElement())
                 .clickAndHold().moveByOffset(50, 0).perform();
         Assert.assertNotEquals("Value should be updated while dragging thumb",
                 "", serverValue.getText());
@@ -97,7 +99,8 @@ public class RangeSliderBasicIT extends AbstractComponentIT {
 
         long start = System.currentTimeMillis();
 
-        new Actions(getDriver()).moveToElement(rangeSlider.getStartThumb())
+        new Actions(getDriver())
+                .moveToElement(rangeSlider.getStartInputElement())
                 .clickAndHold().moveByOffset(50, 0).perform();
         Assert.assertEquals("Value should not be updated before timeout", "",
                 serverValue.getText());

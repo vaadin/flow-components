@@ -49,11 +49,11 @@ public class SliderElement extends SliderBaseElement {
     }
 
     /**
-     * Gets the draggable thumb element of the slider.
+     * Gets the input element of the slider.
      *
-     * @return the draggable thumb element
+     * @return the input element
      */
-    public TestBenchElement getThumb() {
+    public TestBenchElement getInputElement() {
         return $("input").first();
     }
 }

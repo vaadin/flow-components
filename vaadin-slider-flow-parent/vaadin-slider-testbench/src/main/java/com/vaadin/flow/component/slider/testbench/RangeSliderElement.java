@@ -92,20 +92,20 @@ public class RangeSliderElement extends SliderBaseElement {
     }
 
     /**
-     * Gets the draggable thumb element for the start value of the range slider.
+     * Gets the input element that controls the start value of the range slider.
      *
-     * @return the start draggable thumb element
+     * @return the start input element
      */
-    public TestBenchElement getStartThumb() {
+    public TestBenchElement getStartInputElement() {
         return $("input").first();
     }
 
     /**
-     * Gets the draggable thumb element for the end value of the range slider.
+     * Gets the input element that controls the end value of the range slider.
      *
-     * @return the end draggable thumb element
+     * @return the end input element
      */
-    public TestBenchElement getEndThumb() {
+    public TestBenchElement getEndInputElement() {
         return $("input").last();
     }
 }

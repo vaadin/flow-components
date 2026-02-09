@@ -54,8 +54,8 @@ public class SliderBasicIT extends AbstractComponentIT {
 
     @Test
     public void valueChangeMode_defaultMode_valueUpdatedOnThumbRelease() {
-        new Actions(getDriver()).moveToElement(slider.getThumb()).clickAndHold()
-                .moveByOffset(50, 0).perform();
+        new Actions(getDriver()).moveToElement(slider.getInputElement())
+                .clickAndHold().moveByOffset(50, 0).perform();
         Assert.assertEquals("Value should not be updated while dragging thumb",
                 "", serverValue.getText());
 
@@ -68,8 +68,8 @@ public class SliderBasicIT extends AbstractComponentIT {
     public void valueChangeMode_eagerMode_valueUpdatedOnThumbDrag() {
         $("button").id("set-eager-mode").click();
 
-        new Actions(getDriver()).moveToElement(slider.getThumb()).clickAndHold()
-                .moveByOffset(50, 0).perform();
+        new Actions(getDriver()).moveToElement(slider.getInputElement())
+                .clickAndHold().moveByOffset(50, 0).perform();
         Assert.assertNotEquals("Value should be updated while dragging thumb",
                 "", serverValue.getText());
 
@@ -84,8 +84,8 @@ public class SliderBasicIT extends AbstractComponentIT {
 
         long start = System.currentTimeMillis();
 
-        new Actions(getDriver()).moveToElement(slider.getThumb()).clickAndHold()
-                .moveByOffset(50, 0).perform();
+        new Actions(getDriver()).moveToElement(slider.getInputElement())
+                .clickAndHold().moveByOffset(50, 0).perform();
         Assert.assertEquals("Value should not be updated before timeout", "",
                 serverValue.getText());
 
