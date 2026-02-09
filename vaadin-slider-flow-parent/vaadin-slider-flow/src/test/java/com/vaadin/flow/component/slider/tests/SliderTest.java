@@ -388,6 +388,8 @@ public class SliderTest {
 
         slider.setValueAlwaysVisible(false);
         Assert.assertFalse(slider.isValueAlwaysVisible());
+        Assert.assertFalse(
+                slider.getElement().getProperty("valueAlwaysVisible", false));
     }
 
     @Test
@@ -407,6 +409,8 @@ public class SliderTest {
 
         slider.setMinMaxVisible(false);
         Assert.assertFalse(slider.isMinMaxVisible());
+        Assert.assertFalse(
+                slider.getElement().getProperty("minMaxVisible", false));
     }
 
     @Test
