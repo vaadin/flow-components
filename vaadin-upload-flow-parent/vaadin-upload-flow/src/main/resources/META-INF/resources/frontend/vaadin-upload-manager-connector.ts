@@ -50,6 +50,8 @@ class UploadManagerConnector extends HTMLElement {
     this.manager.files = [];
   }
 
+  private uploading = false;
+
   constructor() {
     super();
 
@@ -74,6 +76,23 @@ class UploadManagerConnector extends HTMLElement {
         })
       );
     });
+
+    // Track upload state to detect when all uploads finish
+    this.manager.addEventListener('upload-start', () => {
+      this.uploading = true;
+    });
+
+    const checkAllFinished = () => {
+      const isUploading = this.manager.files.some((file: { uploading?: boolean }) => file.uploading);
+      if (this.uploading && !isUploading) {
+        this.dispatchEvent(new CustomEvent('all-finished', { bubbles: false }));
+      }
+      this.uploading = isUploading;
+    };
+
+    this.manager.addEventListener('upload-success', checkAllFinished);
+    this.manager.addEventListener('upload-error', checkAllFinished);
+    this.manager.addEventListener('upload-abort', checkAllFinished);
   }
 }
 
