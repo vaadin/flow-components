@@ -34,15 +34,31 @@ public class FontIconIT extends AbstractComponentIT {
     @Test
     public void fontIconUsingFont() {
         var icon = findElement(By.className("fa-user"));
-        // Get the ::before element's width and height separated by a space
-        var beforeBounds = executeScript(
-                """
-                        const { width, height } = window.getComputedStyle(arguments[0], '::before');
-                        return `${width} ${height}`;
-                        """,
-                icon);
+        // Verify the FontAwesome icon renders correctly by checking
+        // that the ::before pseudo-element has the correct glyph and
+        // uses the FontAwesome font family
+        var result = executeScript("""
+                const style = window.getComputedStyle(arguments[0], '::before');
+                const content = style.content;
+                const fontFamily = style.fontFamily;
+                // Get the code point of the glyph character (content is quoted)
+                const codePoint = content.length >= 2
+                    ? content.codePointAt(1).toString(16)
+                    : null;
+                return { fontFamily, codePoint };
+                """, icon);
 
-        // Expect the icon size to match FontAwesome "user" icon's size
-        Assert.assertEquals("21px 24px", beforeBounds);
+        @SuppressWarnings("unchecked")
+        var map = (java.util.Map<String, Object>) result;
+        var fontFamily = (String) map.get("fontFamily");
+        var codePoint = (String) map.get("codePoint");
+
+        // Verify the glyph is the FontAwesome "user" icon (U+F007)
+        Assert.assertEquals("Icon should be the 'user' glyph (f007)", "f007",
+                codePoint);
+
+        // Font family should be FontAwesome
+        Assert.assertTrue("Font family should be Font Awesome",
+                fontFamily.contains("Font Awesome"));
     }
 }

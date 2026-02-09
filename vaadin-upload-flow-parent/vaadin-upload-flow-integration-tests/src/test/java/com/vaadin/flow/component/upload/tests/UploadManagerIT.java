@@ -220,6 +220,30 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     @Test
+    public void reattachOwner_setMaxFiles_maxFilesIsEnforced()
+            throws Exception {
+        // Detach the owner component
+        clickButton("detach-owner");
+        assertLogContains("Owner detached");
+
+        // Reattach the owner component
+        clickButton("reattach-owner");
+        assertLogContains("Owner reattached");
+
+        // Set max files limit after reattach
+        clickButton("set-max-files-1");
+
+        // Try to upload two files - second should be rejected
+        File tempFile1 = createTempFile("file1", "txt");
+        File tempFile2 = createTempFile("file2", "txt");
+
+        uploadFiles(tempFile1, tempFile2);
+
+        // Verify that max files constraint is enforced
+        assertLogContains("Rejected:");
+    }
+
+    @Test
     public void unlinkButton_uploadFails() throws Exception {
         // Unlink the upload button from the manager
         clickButton("unlink-button");
@@ -398,6 +422,23 @@ public class UploadManagerIT extends AbstractUploadIT {
 
         // If we got here without timeout, the wait worked correctly
         assertLogContains("Uploaded: " + tempFile.getName());
+    }
+
+    @Test
+    public void allFinishedEvent_firesWithoutAdditionalRoundtrip()
+            throws Exception {
+        File tempFile = createTempFile("txt");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        tester.upload(tempFile, 0);
+        tester.waitForUploads(60);
+
+        // Wait for "All uploads finished" message WITHOUT triggering any
+        // additional server roundtrip (e.g., no button clicks).
+        // This verifies that the allFinished event properly triggers a UI
+        // update from the client-side event, not requiring Push or additional
+        // requests.
+        waitUntil(driver -> getLogText().contains("All uploads finished"), 10);
     }
 
     private UploadManagerTester getUploadManagerTester() {
