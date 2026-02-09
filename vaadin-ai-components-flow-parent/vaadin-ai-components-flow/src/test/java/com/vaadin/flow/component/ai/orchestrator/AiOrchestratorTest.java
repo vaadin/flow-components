@@ -36,8 +36,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
@@ -51,6 +53,9 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 import reactor.core.publisher.Flux;
@@ -61,6 +66,7 @@ public class AiOrchestratorTest {
     private AiMessageList mockMessageList;
     private AiInput mockInput;
     private AiFileReceiver mockFileReceiver;
+    private static MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
@@ -72,6 +78,10 @@ public class AiOrchestratorTest {
 
     @After
     public void tearDown() {
+        if (mockFeatureFlagsStatic != null) {
+            mockFeatureFlagsStatic.close();
+            mockFeatureFlagsStatic = null;
+        }
         UI.setCurrent(null);
     }
 
@@ -952,6 +962,22 @@ public class AiOrchestratorTest {
             new Thread(futureTask).start();
             return futureTask;
         }).when(mockUI).access(Mockito.any(Command.class));
+
+        // Mock feature flags to enable the AI components feature
+        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
+        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
+        Mockito.when(mockFeatureFlags.isEnabled(AiOrchestrator.FEATURE_FLAG_ID))
+                .thenReturn(true);
+
+        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
+        VaadinService mockService = Mockito.mock(VaadinService.class);
+        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
+        Mockito.when(mockUI.getSession()).thenReturn(mockSession);
+        Mockito.when(mockSession.getService()).thenReturn(mockService);
+        Mockito.when(mockService.getContext()).thenReturn(mockContext);
+        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
+                .thenReturn(mockFeatureFlags);
+
         UI.setCurrent(mockUI);
     }
 

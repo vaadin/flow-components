@@ -424,6 +424,23 @@ public class UploadManagerIT extends AbstractUploadIT {
         assertLogContains("Uploaded: " + tempFile.getName());
     }
 
+    @Test
+    public void allFinishedEvent_firesWithoutAdditionalRoundtrip()
+            throws Exception {
+        File tempFile = createTempFile("txt");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        tester.upload(tempFile, 0);
+        tester.waitForUploads(60);
+
+        // Wait for "All uploads finished" message WITHOUT triggering any
+        // additional server roundtrip (e.g., no button clicks).
+        // This verifies that the allFinished event properly triggers a UI
+        // update from the client-side event, not requiring Push or additional
+        // requests.
+        waitUntil(driver -> getLogText().contains("All uploads finished"), 10);
+    }
+
     private UploadManagerTester getUploadManagerTester() {
         return $(UploadButtonElement.class).id("upload-button")
                 .getUploadManager();
