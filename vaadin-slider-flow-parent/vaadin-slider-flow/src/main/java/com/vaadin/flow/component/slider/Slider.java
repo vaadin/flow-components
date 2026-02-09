@@ -35,6 +35,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
 
+    /**
+     * Sets an accessible name for the range input element of the slider.
+     *
+     * @param ariaLabel
+     *            the accessible name to set, or {@code null} to remove it
+     */
     @Override
     public void setAriaLabel(String ariaLabel) {
         getElement().setProperty("accessibleName", ariaLabel);
@@ -45,6 +51,14 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
         return Optional.ofNullable(getElement().getProperty("accessibleName"));
     }
 
+    /**
+     * Sets the id of an element to be used as the accessible name for the range
+     * input element of the slider.
+     *
+     * @param ariaLabelledBy
+     *            the id of the element to be used as the label, or {@code null}
+     *            to remove it
+     */
     @Override
     public void setAriaLabelledBy(String ariaLabelledBy) {
         getElement().setProperty("accessibleNameRef", ariaLabelledBy);
