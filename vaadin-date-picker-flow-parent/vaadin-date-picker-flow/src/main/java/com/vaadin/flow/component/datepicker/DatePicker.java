@@ -68,7 +68,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -452,7 +452,7 @@ public class DatePicker
      * <p>
      * While a signal is bound, any attempt to set the minimum date manually
      * through {@link #setMin(LocalDate)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the minimum date to, or {@code null} to
@@ -506,7 +506,7 @@ public class DatePicker
      * <p>
      * While a signal is bound, any attempt to set the maximum date manually
      * through {@link #setMax(LocalDate)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the maximum date to, or {@code null} to
@@ -956,7 +956,7 @@ public class DatePicker
      * <p>
      * While a signal is bound, any attempt to set the initial position manually
      * through {@link #setInitialPosition(LocalDate)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the initial position to, or {@code null} to
