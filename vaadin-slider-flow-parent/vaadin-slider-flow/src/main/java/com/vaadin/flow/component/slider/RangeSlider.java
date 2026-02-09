@@ -17,6 +17,7 @@ package com.vaadin.flow.component.slider;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -275,6 +276,48 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
             ValueChangeListener<? super ComponentValueChangeEvent<RangeSlider, RangeSliderValue>> listener) {
         this(min, max, step, value, listener);
         setLabel(label);
+    }
+
+    /**
+     * Sets an accessible name for the start range input element of the slider.
+     *
+     * @param accessibleName
+     *            the accessible name to set, or {@code null} to remove it
+     */
+    public void setAccessibleNameStart(String accessibleName) {
+        getElement().setProperty("accessibleNameStart", accessibleName);
+    }
+
+    /**
+     * Gets the accessible name for the start range input element of the slider.
+     *
+     * @return an optional accessible name, or an empty optional if no
+     *         accessible name has been set
+     */
+    public Optional<String> getAccessibleNameStart() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameStart"));
+    }
+
+    /**
+     * Sets an accessible name for the end range input element of the slider.
+     *
+     * @param accessibleName
+     *            the accessible name to set, or {@code null} to remove it
+     */
+    public void setAccessibleNameEnd(String accessibleName) {
+        getElement().setProperty("accessibleNameEnd", accessibleName);
+    }
+
+    /**
+     * Gets the accessible name for the end range input element of the slider.
+     *
+     * @return an optional accessible name, or an empty optional if no
+     *         accessible name has been set
+     */
+    public Optional<String> getAccessibleNameEnd() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameEnd"));
     }
 
     /**
