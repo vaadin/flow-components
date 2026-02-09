@@ -1,0 +1,37 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.upload;
+
+/**
+ * An exception which is thrown when somebody attempts to use modular upload
+ * components (UploadManager, UploadButton, UploadFileList, UploadDropZone)
+ * without activating the associated feature flag first.
+ *
+ * @author Vaadin Ltd
+ */
+public class ModularUploadExperimentalFeatureException
+        extends RuntimeException {
+    public ModularUploadExperimentalFeatureException() {
+        super("The modular upload components feature is currently experimental "
+                + "and needs to be explicitly enabled. This feature can be "
+                + "enabled using Copilot, in the experimental features tab, "
+                + "or by adding a "
+                + "`src/main/resources/vaadin-featureflags.properties` file "
+                + "with the following content: " + "`com.vaadin.experimental."
+                + ModularUploadFeatureFlagProvider.FEATURE_FLAG_ID
+                + "=true` or `com.vaadin.experimental.aiComponents=true`");
+    }
+}
