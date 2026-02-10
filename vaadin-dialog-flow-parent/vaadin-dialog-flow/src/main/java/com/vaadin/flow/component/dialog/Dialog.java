@@ -45,10 +45,14 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.dom.ElementEffect;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
 
 /**
  * A Dialog is a small window that can be used to present information and user
@@ -95,6 +99,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
     private ModalityMode modality = ModalityMode.VISUAL;
+
+    private boolean valueSetFromSignal;
 
     /**
      * Creates an empty dialog.
@@ -1347,5 +1353,72 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "Dialog does not support binding children directly. "
                         + "Add a container component, such as Div, to the Dialog "
                         + "and use bindChildren on the container component instead.");
+    }
+
+    /**
+     * Binds a {@link WritableSignal}'s value to the opened state of this
+     * component and keeps the state synchronized with the signal value while
+     * the UI is in attached state. <code>null</code> signal unbinds the
+     * existing binding.
+     * <p>
+     * While a Signal is bound to an opened state, any attempt to bind a new
+     * Signal while one is already bound throws
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     * <p>
+     * While a Signal is bound to an opened state and the UI is in attached
+     * state, setting the value with {@link #setOpened(boolean)} or when a
+     * change originates from the client, will update the signal value.
+     * <p>
+     * Note: The binding is owned by the UI element, not the dialog element
+     * itself. This means the binding remains active as long as a UI is
+     * available, regardless of whether the dialog is attached to the DOM.
+     * <p>
+     * Signal's value {@code null} is treated as {@code false}.
+     *
+     * @param openedSignal
+     *            the writable signal to bind the opened state to, or
+     *            {@code null} to unbind
+     * @throws com.vaadin.flow.signals.BindingActiveException
+     *             if attempting to bind while a binding is already active
+     * @see #setOpened(boolean)
+     * @see #isOpened()
+     */
+    public void bindOpened(WritableSignal<Boolean> openedSignal) {
+        SignalBindingFeature feature = getElement().getNode()
+                .getFeature(SignalBindingFeature.class);
+
+        if (openedSignal == null) {
+            // SignalBindingFeature.VALUE key is free to be used for opened
+            // state since Dialog doesn't have any actual value.
+            feature.removeBinding(SignalBindingFeature.VALUE);
+        } else {
+            if (feature.hasBinding(SignalBindingFeature.VALUE)) {
+                throw new BindingActiveException();
+            }
+
+            Registration openedPropertyRegistration = getElement()
+                    .addPropertyChangeListener("opened", event -> {
+                        if (!valueSetFromSignal) {
+                            openedSignal.value((Boolean) event.getValue());
+                        }
+                    });
+            Registration signalRegistration = ElementEffect.bind(
+                    getUI().orElseGet(UI::getCurrent).getElement(),
+                    openedSignal,
+                    (element, value) -> setValueFromSignal(value));
+            feature.setBinding(SignalBindingFeature.VALUE, () -> {
+                signalRegistration.remove();
+                openedPropertyRegistration.remove();
+            }, openedSignal);
+        }
+    }
+
+    private void setValueFromSignal(Boolean value) {
+        try {
+            valueSetFromSignal = true;
+            setOpened(value != null && value);
+        } finally {
+            valueSetFromSignal = false;
+        }
     }
 }
