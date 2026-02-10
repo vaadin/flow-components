@@ -20,7 +20,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class SliderTest {
     @Test
@@ -340,6 +343,79 @@ public class SliderTest {
     }
 
     @Test
+    public void implementsHasAriaLabel() {
+        Slider slider = new Slider();
+        Assert.assertTrue(slider instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        Slider slider = new Slider();
+        slider.setAriaLabel("aria-label");
+
+        Assert.assertTrue(slider.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", slider.getAriaLabel().get());
+
+        slider.setAriaLabel(null);
+        Assert.assertTrue(slider.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        Slider slider = new Slider();
+        slider.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(slider.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                slider.getAriaLabelledBy().get());
+
+        slider.setAriaLabelledBy(null);
+        Assert.assertTrue(slider.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void setValueAlwaysVisible_defaultFalse() {
+        Slider slider = new Slider();
+        Assert.assertFalse(slider.isValueAlwaysVisible());
+    }
+
+    @Test
+    public void setValueAlwaysVisible_updatesProperty() {
+        Slider slider = new Slider();
+        slider.setValueAlwaysVisible(true);
+
+        Assert.assertTrue(slider.isValueAlwaysVisible());
+        Assert.assertTrue(
+                slider.getElement().getProperty("valueAlwaysVisible", false));
+
+        slider.setValueAlwaysVisible(false);
+        Assert.assertFalse(slider.isValueAlwaysVisible());
+        Assert.assertFalse(
+                slider.getElement().getProperty("valueAlwaysVisible", false));
+    }
+
+    @Test
+    public void setMinMaxVisible_defaultFalse() {
+        Slider slider = new Slider();
+        Assert.assertFalse(slider.isMinMaxVisible());
+    }
+
+    @Test
+    public void setMinMaxVisible_updatesProperty() {
+        Slider slider = new Slider();
+        slider.setMinMaxVisible(true);
+
+        Assert.assertTrue(slider.isMinMaxVisible());
+        Assert.assertTrue(
+                slider.getElement().getProperty("minMaxVisible", false));
+
+        slider.setMinMaxVisible(false);
+        Assert.assertFalse(slider.isMinMaxVisible());
+        Assert.assertFalse(
+                slider.getElement().getProperty("minMaxVisible", false));
+    }
+
+    @Test
     public void setValueFromClient_valueNotAlignedWithStep_ignored() {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().setProperty("value", 15.0);
@@ -358,5 +434,25 @@ public class SliderTest {
         Slider slider = new Slider(0, 100, 10, 0);
         slider.getElement().setProperty("value", 110.0);
         Assert.assertEquals(0, slider.getValue(), 0);
+    }
+
+    @Test
+    public void setValueChangeMode_getValueChangeMode() {
+        Slider slider = new Slider();
+        Assert.assertEquals(ValueChangeMode.ON_CHANGE,
+                slider.getValueChangeMode());
+
+        slider.setValueChangeMode(ValueChangeMode.EAGER);
+        Assert.assertEquals(ValueChangeMode.EAGER, slider.getValueChangeMode());
+    }
+
+    @Test
+    public void setValueChangeTimeout_getValueChangeTimeout() {
+        Slider slider = new Slider();
+        Assert.assertEquals(HasValueChangeMode.DEFAULT_CHANGE_TIMEOUT,
+                slider.getValueChangeTimeout());
+
+        slider.setValueChangeTimeout(500);
+        Assert.assertEquals(500, slider.getValueChangeTimeout());
     }
 }

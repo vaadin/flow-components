@@ -13,24 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.slider.tests;
+package com.vaadin.flow.component.slider.validation;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.slider.Slider;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.slider.RangeSlider;
+import com.vaadin.flow.component.slider.RangeSliderValue;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-@Route("vaadin-slider/basic")
-public class BasicPage extends Div {
+public class RangeSliderBasicValidationTest
+        extends AbstractBasicValidationTest<RangeSlider, RangeSliderValue> {
 
-    public BasicPage() {
-        Slider slider = new Slider(10, 200, 5, 50);
-
-        Span serverValue = new Span();
-        serverValue.setId("server-value");
-        slider.addValueChangeListener(
-                event -> serverValue.setText(String.valueOf(event.getValue())));
-
-        add(slider, serverValue);
+    @Override
+    protected RangeSlider createTestField() {
+        return new RangeSlider();
     }
 }

@@ -26,13 +26,13 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.signals.BindingActiveException;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
 /**
  * Unit tests for
- * {@link HasValidationProperties#bindErrorMessage(com.vaadin.signals.Signal)}.
+ * {@link HasValidationProperties#bindErrorMessage(com.vaadin.flow.signals.Signal)}.
  */
 public class HasValidationPropertiesBindingTest
         extends AbstractSignalsUnitTest {
