@@ -16,21 +16,34 @@
 package com.vaadin.flow.component.slider.tests;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-slider/basic")
-public class BasicPage extends Div {
+public class SliderBasicPage extends Div {
 
-    public BasicPage() {
+    public SliderBasicPage() {
         Slider slider = new Slider(10, 200, 5, 50);
+        slider.setWidth("200px");
 
         Span serverValue = new Span();
         serverValue.setId("server-value");
         slider.addValueChangeListener(
                 event -> serverValue.setText(String.valueOf(event.getValue())));
 
-        add(slider, serverValue);
+        NativeButton setEagerMode = new NativeButton("Set eager mode",
+                e -> slider.setValueChangeMode(ValueChangeMode.EAGER));
+        setEagerMode.setId("set-eager-mode");
+
+        NativeButton setLazyMode = new NativeButton("Set lazy mode", e -> {
+            slider.setValueChangeMode(ValueChangeMode.LAZY);
+            slider.setValueChangeTimeout(1500);
+        });
+        setLazyMode.setId("set-lazy-mode");
+
+        add(slider, serverValue, setEagerMode, setLazyMode);
     }
 }
