@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Collections;
@@ -40,6 +41,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.PushConfiguration;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.component.AiFileReceiver;
@@ -57,6 +59,7 @@ import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
 
@@ -935,6 +938,40 @@ public class AiOrchestratorTest {
                 () -> builder.withAiName(null));
     }
 
+    @Test
+    public void prompt_withPushDisabled_logsWarning() {
+        mockUi();
+
+        var ui = UI.getCurrent();
+        PushConfiguration mockPushConfig = Mockito
+                .mock(PushConfiguration.class);
+        Mockito.when(mockPushConfig.getPushMode())
+                .thenReturn(PushMode.DISABLED);
+        Mockito.when(ui.getPushConfiguration()).thenReturn(mockPushConfig);
+
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var originalErr = System.err;
+        var errContent = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errContent));
+        try {
+            var orchestrator = AiOrchestrator.builder(mockProvider)
+                    .withMessageList(mockMessageList).build();
+            orchestrator.prompt("Hello");
+
+            var logOutput = errContent.toString();
+            Assert.assertTrue(logOutput.contains("Push is not enabled"));
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
     private AiOrchestrator getSimpleOrchestrator() {
         return AiOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList)
@@ -977,6 +1014,12 @@ public class AiOrchestratorTest {
         Mockito.when(mockService.getContext()).thenReturn(mockContext);
         mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
                 .thenReturn(mockFeatureFlags);
+
+        PushConfiguration mockPushConfig = Mockito
+                .mock(PushConfiguration.class);
+        Mockito.when(mockPushConfig.getPushMode())
+                .thenReturn(PushMode.AUTOMATIC);
+        Mockito.when(mockUI.getPushConfiguration()).thenReturn(mockPushConfig);
 
         UI.setCurrent(mockUI);
     }

@@ -40,6 +40,7 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.shared.communication.PushMode;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -228,6 +229,7 @@ public class AiOrchestrator {
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
+        checkPushConfiguration(ui);
         var attachments = pendingAttachments.stream().toList();
         addUserMessageToList(userMessage, attachments);
         clearPendingAttachments(ui);
@@ -282,6 +284,14 @@ public class AiOrchestrator {
                     "AiOrchestrator");
         }
         featureFlagChecked.set(true);
+    }
+
+    private void checkPushConfiguration(UI ui) {
+        if (ui.getPushConfiguration().getPushMode() == PushMode.DISABLED) {
+            LOGGER.warn("Push is not enabled. Streaming LLM responses "
+                    + "require @Push annotation or programmatic push "
+                    + "configuration to update the UI in real-time.");
+        }
     }
 
     private void configureFileReceiver() {
