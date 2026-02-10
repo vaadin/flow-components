@@ -207,56 +207,136 @@ public class UploadManagerTest {
         Assert.assertEquals(0, manager.getMaxFileSize());
     }
 
-    @Test
-    public void setAcceptedFileTypes_setsProperty() {
-        manager.setAcceptedFileTypes("image/*", "application/pdf");
+    // --- Accepted MIME Types ---
 
-        List<String> accepted = manager.getAcceptedFileTypes();
+    @Test
+    public void setAcceptedMimeTypes_setsValues() {
+        manager.setAcceptedMimeTypes("image/*", "application/pdf");
+
+        List<String> accepted = manager.getAcceptedMimeTypes();
         Assert.assertEquals(2, accepted.size());
         Assert.assertTrue(accepted.contains("image/*"));
         Assert.assertTrue(accepted.contains("application/pdf"));
     }
 
     @Test
-    public void setAcceptedFileTypes_withNull_clearsRestrictions() {
-        manager.setAcceptedFileTypes("image/*");
-        manager.setAcceptedFileTypes((String[]) null);
+    public void setAcceptedMimeTypes_withNull_clears() {
+        manager.setAcceptedMimeTypes("image/*");
+        manager.setAcceptedMimeTypes((String[]) null);
 
-        Assert.assertTrue(manager.getAcceptedFileTypes().isEmpty());
+        Assert.assertTrue(manager.getAcceptedMimeTypes().isEmpty());
     }
 
     @Test
-    public void setAcceptedFileTypes_withEmptyArray_clearsRestrictions() {
-        manager.setAcceptedFileTypes("image/*");
-        manager.setAcceptedFileTypes(new String[0]);
+    public void setAcceptedMimeTypes_withEmptyArray_clears() {
+        manager.setAcceptedMimeTypes("image/*");
+        manager.setAcceptedMimeTypes(new String[0]);
 
-        Assert.assertTrue(manager.getAcceptedFileTypes().isEmpty());
+        Assert.assertTrue(manager.getAcceptedMimeTypes().isEmpty());
     }
 
     @Test
-    public void setAcceptedFileTypes_withSingleType_setsProperty() {
-        manager.setAcceptedFileTypes("image/*");
-
-        List<String> accepted = manager.getAcceptedFileTypes();
-        Assert.assertEquals(1, accepted.size());
-        Assert.assertEquals("image/*", accepted.get(0));
-    }
-
-    @Test
-    public void setAcceptedFileTypes_withNullValue_throws() {
+    public void setAcceptedMimeTypes_withNullValue_throws() {
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> manager.setAcceptedFileTypes("image/*", null, ".pdf"));
+                () -> manager.setAcceptedMimeTypes("image/*", null));
     }
 
     @Test
-    public void setAcceptedFileTypes_withBlankValue_throws() {
+    public void setAcceptedMimeTypes_withBlankValue_throws() {
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> manager.setAcceptedFileTypes("image/*", "   ", ".pdf"));
+                () -> manager.setAcceptedMimeTypes("image/*", "   "));
     }
 
     @Test
-    public void getAcceptedFileTypes_defaultIsEmpty() {
-        Assert.assertTrue(manager.getAcceptedFileTypes().isEmpty());
+    public void setAcceptedMimeTypes_withoutSlash_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> manager.setAcceptedMimeTypes("imagepng"));
+    }
+
+    @Test
+    public void getAcceptedMimeTypes_defaultIsEmpty() {
+        Assert.assertTrue(manager.getAcceptedMimeTypes().isEmpty());
+    }
+
+    // --- Accepted File Extensions ---
+
+    @Test
+    public void setAcceptedFileExtensions_setsValues() {
+        manager.setAcceptedFileExtensions(".pdf", ".txt");
+
+        List<String> accepted = manager.getAcceptedFileExtensions();
+        Assert.assertEquals(2, accepted.size());
+        Assert.assertTrue(accepted.contains(".pdf"));
+        Assert.assertTrue(accepted.contains(".txt"));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withNull_clears() {
+        manager.setAcceptedFileExtensions(".pdf");
+        manager.setAcceptedFileExtensions((String[]) null);
+
+        Assert.assertTrue(manager.getAcceptedFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withEmptyArray_clears() {
+        manager.setAcceptedFileExtensions(".pdf");
+        manager.setAcceptedFileExtensions(new String[0]);
+
+        Assert.assertTrue(manager.getAcceptedFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withNullValue_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> manager.setAcceptedFileExtensions(".pdf", null));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withBlankValue_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> manager.setAcceptedFileExtensions(".pdf", "   "));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withoutDot_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> manager.setAcceptedFileExtensions("pdf"));
+    }
+
+    @Test
+    public void getAcceptedFileExtensions_defaultIsEmpty() {
+        Assert.assertTrue(manager.getAcceptedFileExtensions().isEmpty());
+    }
+
+    // --- Accept property derivation ---
+
+    @Test
+    public void setAcceptedMimeTypes_setsAcceptProperty() {
+        manager.setAcceptedMimeTypes("image/*", "application/pdf");
+
+        String accept = getConnector(manager).getElement()
+                .getProperty("accept");
+        Assert.assertEquals("image/*,application/pdf", accept);
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_setsAcceptProperty() {
+        manager.setAcceptedFileExtensions(".pdf", ".txt");
+
+        String accept = getConnector(manager).getElement()
+                .getProperty("accept");
+        Assert.assertEquals(".pdf,.txt", accept);
+    }
+
+    @Test
+    public void setBoth_combinesInAcceptProperty() {
+        manager.setAcceptedMimeTypes("image/*");
+        manager.setAcceptedFileExtensions(".pdf");
+
+        String accept = getConnector(manager).getElement()
+                .getProperty("accept");
+        Assert.assertEquals("image/*,.pdf", accept);
     }
 
     @Test
