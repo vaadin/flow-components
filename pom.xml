@@ -69,7 +69,7 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>24.9-SNAPSHOT</flow.version>
+        <flow.version>24.10-SNAPSHOT</flow.version>
         <testbench.version>9.5.4</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
