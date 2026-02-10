@@ -27,7 +27,7 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Number Field sports many of the same features as Text Field but only accepts
@@ -296,7 +296,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * <p>
      * While a signal is bound, any attempt to set the minimum value manually
      * through {@link #setMin(double)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the minimum value to, or {@code null} to
@@ -320,7 +320,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * <p>
      * While a signal is bound, any attempt to set the maximum value manually
      * through {@link #setMax(double)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the maximum value to, or {@code null} to

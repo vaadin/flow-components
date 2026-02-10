@@ -17,6 +17,7 @@ package com.vaadin.flow.component.slider.testbench;
 
 import java.util.Collections;
 
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
@@ -45,5 +46,14 @@ public class SliderElement extends SliderBaseElement {
      */
     public double getValue() {
         return getPropertyDouble("value");
+    }
+
+    /**
+     * Gets the input element of the slider.
+     *
+     * @return the input element
+     */
+    public TestBenchElement getInputElement() {
+        return $("input").first();
     }
 }

@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.slider;
 
 import java.util.Objects;
+import java.util.Optional;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -31,7 +33,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
-public class Slider extends SliderBase<Slider, Double> {
+public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
+
     private static final double DEFAULT_MIN = 0.0;
     private static final double DEFAULT_MAX = 100.0;
     private static final double DEFAULT_STEP = 1.0;
@@ -248,6 +251,54 @@ public class Slider extends SliderBase<Slider, Double> {
             ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
         this(min, max, step, value, listener);
         setLabel(label);
+    }
+
+    /**
+     * Sets an accessible name for the range input element of the slider.
+     *
+     * @param ariaLabel
+     *            the accessible name to set, or {@code null} to remove it
+     */
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    /**
+     * Gets the accessible name for the range input element of the slider.
+     *
+     * @return an optional accessible name, or an empty optional if no
+     *         accessible name has been set
+     */
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    /**
+     * Sets the id of an element to be used as the accessible name for the range
+     * input element of the slider.
+     *
+     * @param ariaLabelledBy
+     *            the id of the element to be used as the label, or {@code null}
+     *            to remove it
+     */
+    @Override
+    public void setAriaLabelledBy(String ariaLabelledBy) {
+        getElement().setProperty("accessibleNameRef", ariaLabelledBy);
+    }
+
+    /**
+     * Gets the id of the element used as the accessible name for the range
+     * input element of the slider.
+     *
+     * @return an optional id of the element used as the label, or an empty
+     *         optional if no id has been set
+     */
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     /**
