@@ -40,12 +40,6 @@ Shared modules used across components:
 - Some components use additional client-side JavaScript for integrating with the web component or to add extra functionality. These so-called "connectors" are located in `src/main/resources/META-INF/resources/frontend`
 - Connector initialization, as well as any inline JavaScript run with `Element.executeJs()`, are run in the component's attach handler to ensure they are always run again when Flow creates a new element for the same component instance on the client side
 
-### Web Component Integration
-
-- Vaadin Flow components wrap Vaadin web components
-- The Vaadin web-components monorepo is located at `../web-components`
-- The package name in `@JsModule` indicates the location of the web component in the web-components monorepo (e.g., `@vaadin/button` → `..web-components/packages/button/src/vaadin-button.js`)
-
 ### Testing
 
 - Unit tests: Standard JUnit tests, located in component modules
