@@ -20,13 +20,48 @@ public enum GridProVariant {
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
     LUMO_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
     LUMO_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells"),
+    /**
+     * @deprecated Use {@link #NO_BORDER} instead.
+     */
+    @Deprecated
     AURA_NO_BORDER("no-border"),
+    /**
+     * @deprecated Use {@link #NO_ROW_BORDERS} instead.
+     */
+    @Deprecated
     AURA_NO_ROW_BORDERS("no-row-borders"),
+    /**
+     * @deprecated Use {@link #COLUMN_BORDERS} instead.
+     */
+    @Deprecated
     AURA_COLUMN_BORDERS("column-borders"),
+    /**
+     * @deprecated Use {@link #ROW_STRIPES} instead.
+     */
+    @Deprecated
     AURA_ROW_STRIPES("row-stripes"),
+    /**
+     * @deprecated Use {@link #WRAP_CELL_CONTENT} instead.
+     */
+    @Deprecated
     AURA_WRAP_CELL_CONTENT("wrap-cell-content"),
+    /**
+     * @deprecated Use {@link #HIGHLIGHT_EDITABLE_CELLS} instead.
+     */
+    @Deprecated
     AURA_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
-    AURA_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells");
+    /**
+     * @deprecated Use {@link #HIGHLIGHT_READ_ONLY_CELLS} instead.
+     */
+    @Deprecated
+    AURA_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells"),
+    NO_BORDER("no-border"),
+    NO_ROW_BORDERS("no-row-borders"),
+    COLUMN_BORDERS("column-borders"),
+    ROW_STRIPES("row-stripes"),
+    WRAP_CELL_CONTENT("wrap-cell-content"),
+    HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
+    HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells");
 
     private final String variant;
 

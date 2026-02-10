@@ -31,9 +31,26 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_ERROR("error"),
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
+    /**
+     * @deprecated Use {@link #PRIMARY} instead.
+     */
+    @Deprecated
     AURA_PRIMARY("primary"),
+    /**
+     * @deprecated Use {@link #TERTIARY} instead.
+     */
+    @Deprecated
     AURA_TERTIARY("tertiary"),
-    AURA_DANGER("danger");
+    /**
+     * @deprecated Use {@link #ERROR} instead.
+     */
+    @Deprecated
+    AURA_DANGER("danger"),
+    PRIMARY("primary"),
+    TERTIARY("tertiary"),
+    SUCCESS("success"),
+    WARNING("warning"),
+    ERROR("error");
 
     private final String variant;
 
