@@ -24,7 +24,9 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Abstract base class for slider components.
@@ -39,7 +41,13 @@ import com.vaadin.flow.function.SerializableBiFunction;
 abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
-        HasValidationProperties, Focusable<TComponent>, KeyNotifier {
+        HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
+        KeyNotifier {
+
+    private ValueChangeMode currentMode;
+
+    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
+
     /**
      * Constructs a slider with the given min, max, step, initial value, and
      * custom converters for the value property.
@@ -63,12 +71,12 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     <TPresentation> SliderBase(double min, double max, double step,
             TValue value, Class<TPresentation> presentationType,
-            SerializableBiFunction<TComponent, TPresentation, TValue> presentationToModel,
-            SerializableBiFunction<TComponent, TValue, TPresentation> modelToPresentation) {
+            SerializableFunction<TPresentation, TValue> presentationToModel,
+            SerializableFunction<TValue, TPresentation> modelToPresentation) {
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
 
-        setSynchronizedEvent("change");
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
         getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
@@ -152,6 +160,52 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     /**
+     * Sets whether the value bubble is always visible, regardless of focus or
+     * hover state. By default, bubble is hidden and only shown on interaction.
+     *
+     * @param valueAlwaysVisible
+     *            {@code true} to always show the value bubble, {@code false}
+     *            otherwise
+     */
+    public void setValueAlwaysVisible(boolean valueAlwaysVisible) {
+        getElement().setProperty("valueAlwaysVisible", valueAlwaysVisible);
+    }
+
+    /**
+     * Gets whether the value bubble is always visible, regardless of focus or
+     * hover state. By default, bubble is hidden and only shown on interaction.
+     *
+     * @return {@code true} if the value bubble is always visible, {@code false}
+     *         otherwise
+     */
+    public boolean isValueAlwaysVisible() {
+        return getElement().getProperty("valueAlwaysVisible", false);
+    }
+
+    /**
+     * Sets whether the min and max values are displayed below the slider track.
+     * By default, min and max values are hidden.
+     *
+     * @param minMaxVisible
+     *            {@code true} to display min and max values, {@code false}
+     *            otherwise
+     */
+    public void setMinMaxVisible(boolean minMaxVisible) {
+        getElement().setProperty("minMaxVisible", minMaxVisible);
+    }
+
+    /**
+     * Gets whether the min and max values are displayed below the slider track.
+     * By default, min and max values are hidden.
+     *
+     * @return {@code true} if the min and max values are displayed,
+     *         {@code false} otherwise
+     */
+    public boolean isMinMaxVisible() {
+        return getElement().getProperty("minMaxVisible", false);
+    }
+
+    /**
      * Sets the value of the slider.
      *
      * @param value
@@ -203,45 +257,14 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *             if value is not valid for the given min, max and step
      */
     public void setValue(TValue value, double min, double max, double step) {
-        requireValidStep(step);
-        requireValidMinMax(min, max);
+        SliderUtil.requireValidStep(step);
+        SliderUtil.requireValidMinMax(min, max);
         requireValidValue(min, max, step, value);
 
         setMinDouble(min);
         setMaxDouble(max);
         setStepDouble(step);
         super.setValue(value);
-    }
-
-    /**
-     * Validates that the given min/max range is valid.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @throws IllegalArgumentException
-     *             if min is greater than max
-     */
-    void requireValidMinMax(double min, double max) {
-        if (min > max) {
-            throw new IllegalArgumentException(
-                    "Max must be greater than or equal to min");
-        }
-    }
-
-    /**
-     * Validates that the given step value is valid.
-     *
-     * @param step
-     *            the step value
-     * @throws IllegalArgumentException
-     *             if step is not positive
-     */
-    void requireValidStep(double step) {
-        if (step <= 0) {
-            throw new IllegalArgumentException("Step must be positive");
-        }
     }
 
     /**
@@ -274,4 +297,38 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     abstract void requireValidValue(double min, double max, double step,
             TValue value);
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The default value is {@link ValueChangeMode#ON_CHANGE}.
+     */
+    @Override
+    public ValueChangeMode getValueChangeMode() {
+        return currentMode;
+    }
+
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        currentMode = valueChangeMode;
+        setSynchronizedEvent(
+                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
+        applyChangeTimeout();
+    }
+
+    @Override
+    public void setValueChangeTimeout(int valueChangeTimeout) {
+        this.valueChangeTimeout = valueChangeTimeout;
+        applyChangeTimeout();
+    }
+
+    @Override
+    public int getValueChangeTimeout() {
+        return valueChangeTimeout;
+    }
+
+    private void applyChangeTimeout() {
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+                getValueChangeTimeout(), getSynchronizationRegistration());
+    }
 }

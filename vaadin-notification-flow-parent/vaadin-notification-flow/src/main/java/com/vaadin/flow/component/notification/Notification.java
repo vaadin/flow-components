@@ -46,7 +46,7 @@ import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Notifications are used to provide feedback to the user. They communicate

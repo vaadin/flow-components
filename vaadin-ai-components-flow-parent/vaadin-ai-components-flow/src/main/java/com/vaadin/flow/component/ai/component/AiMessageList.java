@@ -16,6 +16,9 @@
 package com.vaadin.flow.component.ai.component;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.vaadin.flow.component.ai.common.AiAttachment;
 
 /**
  * Interface for message list components that can display AI conversation
@@ -35,13 +38,16 @@ public interface AiMessageList extends Serializable {
     void addMessage(AiMessage message);
 
     /**
-     * Creates a new message with the given parameters.
+     * Creates a new message with the given parameters and attachments.
      *
      * @param text
      *            the initial message text
      * @param userName
      *            the name of the message sender, not {@code null}
+     * @param attachments
+     *            the list of attachments to include with the message
      * @return the created message instance, not {@code null}
      */
-    AiMessage createMessage(String text, String userName);
+    AiMessage createMessage(String text, String userName,
+            List<AiAttachment> attachments);
 }

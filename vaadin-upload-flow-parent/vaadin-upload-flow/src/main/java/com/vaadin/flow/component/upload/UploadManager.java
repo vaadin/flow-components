@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -135,6 +137,12 @@ public class UploadManager implements Serializable {
                     new FileRejectedEvent(owner, true, errorMessage, fileName));
         }).addEventData(eventDetailFileName)
                 .addEventData(eventDetailErrorMessage);
+
+        // Listen for all-finished event from client (triggered when all
+        // uploads are complete, including success, error, or abort)
+        connector.getElement().addEventListener("all-finished",
+                event -> ComponentUtil.fireEvent(owner,
+                        new AllFinishedEvent(owner)));
 
         // Register internal listeners for upload state tracking
         ComponentUtil.addListener(connector, UploadStartEvent.class,
@@ -361,19 +369,10 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * End upload state and check if all uploads are finished.
+     * End upload state.
      */
     private void endUpload() {
-        int remaining = activeUploads.decrementAndGet();
-        if (remaining == 0) {
-            fireAllFinished();
-        }
-    }
-
-    private void fireAllFinished() {
-        // Use UI.access() since this may be called from upload handler thread
-        owner.getUI().ifPresent(ui -> ui.access(() -> ComponentUtil
-                .fireEvent(owner, new AllFinishedEvent(owner))));
+        activeUploads.decrementAndGet();
     }
 
     /**
@@ -418,6 +417,12 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * The feature flag ID for modular upload components (UploadManager and
+     * related components).
+     */
+    public static final String FEATURE_FLAG_ID = ModularUploadFeatureFlagProvider.FEATURE_FLAG_ID;
+
+    /**
      * Internal connector component that loads the JS module and handles
      * client-server communication. Added as a virtual child of the owner
      * component so it doesn't appear in the DOM.
@@ -426,6 +431,25 @@ public class UploadManager implements Serializable {
     @JsModule("./vaadin-upload-manager-connector.ts")
     @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha6")
     static class Connector extends Component {
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
+            super.onAttach(attachEvent);
+            checkFeatureFlag(attachEvent.getUI());
+        }
+
+        private void checkFeatureFlag(com.vaadin.flow.component.UI ui) {
+            FeatureFlags featureFlags = FeatureFlags
+                    .get(ui.getSession().getService().getContext());
+
+            // Check if either the specific modularUpload flag or the umbrella
+            // aiComponents flag is enabled
+            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
+                    || featureFlags.isEnabled("aiComponents");
+
+            if (!enabled) {
+                throw new ModularUploadExperimentalFeatureException();
+            }
+        }
     }
 
     /**
