@@ -48,7 +48,7 @@ import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * A Dialog is a small window that can be used to present information and user
