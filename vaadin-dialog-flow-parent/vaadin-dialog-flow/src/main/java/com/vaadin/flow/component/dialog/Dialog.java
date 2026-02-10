@@ -17,6 +17,7 @@ package com.vaadin.flow.component.dialog;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,7 +46,9 @@ import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * A Dialog is a small window that can be used to present information and user
@@ -1313,5 +1316,36 @@ public class Dialog extends Component implements HasComponents, HasSize,
                     && modality == ModalityMode.STRICT;
             ui.setChildComponentModal(this, modal);
         });
+    }
+
+    /**
+     * Dialog does not support binding children directly.
+     * <p>
+     * Add a container component, such as {@code Div}, to the Dialog and use
+     * {@code bindChildren} on the container component instead.
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * {@code
+     * Dialog dialog = new Dialog();
+     * Div container = new Div();
+     * dialog.add(container);
+     * container.bindChildren(itemsSignal, item -> new Span(item.getText()));
+     * }
+     * </pre>
+     *
+     * @throws UnsupportedOperationException
+     *             always thrown, as Dialog does not support binding children
+     *             directly
+     */
+    @Override
+    public <T, S extends Signal<T>> Registration bindChildren(
+            Signal<List<S>> list,
+            SerializableFunction<S, Component> childFactory) {
+        throw new UnsupportedOperationException(
+                "Dialog does not support binding children directly. "
+                        + "Add a container component, such as Div, to the Dialog "
+                        + "and use bindChildren on the container component instead.");
     }
 }
