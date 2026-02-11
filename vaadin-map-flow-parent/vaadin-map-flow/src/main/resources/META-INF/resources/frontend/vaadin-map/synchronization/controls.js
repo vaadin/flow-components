@@ -1,7 +1,7 @@
 import Attribution from 'ol/control/Attribution.js';
 import ScaleLine from 'ol/control/ScaleLine.js';
 import Zoom from 'ol/control/Zoom.js';
-import { createOptions } from './util.js';
+import { convertEnumValue, createOptions } from './util.js';
 
 export function synchronizeAttribution(target, source) {
   if (!target) {
@@ -11,10 +11,16 @@ export function synchronizeAttribution(target, source) {
 }
 
 export function synchronizeScaleLine(target, source) {
-  if (!target) {
-    target = new ScaleLine(createOptions(source));
-  }
-  return target;
+  // Most properties are not mutable, so we recreate the control
+  const options = createOptions({
+    minWidth: source.minWidth,
+    maxWidth: source.maxWidth,
+    units: convertEnumValue(source.units),
+    bar: source.displayMode === 'BAR',
+    steps: source.scaleBarSteps,
+    text: source.scaleBarTextVisible
+  });
+  return new ScaleLine(options);
 }
 
 export function synchronizeZoom(target, source) {

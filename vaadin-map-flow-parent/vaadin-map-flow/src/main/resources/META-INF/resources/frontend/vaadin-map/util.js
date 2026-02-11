@@ -54,13 +54,20 @@ class WeakReferenceLookup {
   }
 
   put(id, instance) {
-    // Skip if reference is already tracked
-    if (this.map.has(id)) return;
+    // Check if there's an existing entry
+    const existingRef = this.map.get(id);
+    if (existingRef) {
+      // Unregister the old instance to prevent its cleanup callback from
+      // removing the new instance once the old one is garbage collected
+      this.registry.unregister(existingRef);
+    }
     // Store weak reference in map
     const ref = new WeakRef(instance);
     this.map.set(id, ref);
-    // Track reference for garbage collection, so that we can clean up the map entry
-    this.registry.register(instance, id);
+    // Track reference for garbage collection, so that we can clean up the map entry.
+    // Use the WeakRef as the unregister token so we can cancel the callback if the
+    // entry is overwritten later.
+    this.registry.register(instance, id, ref);
   }
 }
 
