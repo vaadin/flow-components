@@ -22,12 +22,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.signals.BindingActiveException;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
 /**
- * Unit tests for {@link AbstractLogin#bindError(com.vaadin.signals.Signal)}.
+ * Unit tests for
+ * {@link AbstractLogin#bindError(com.vaadin.flow.signals.Signal)}.
  */
 public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
 

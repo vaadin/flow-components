@@ -31,7 +31,7 @@ import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.BaseJsonNode;
@@ -181,10 +181,10 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * <p>
      * While a errorSignal is bound, any attempt to set the error state manually
      * through {@link #setError(boolean)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Attempting to bind a new errorSignal while one is already bound throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Signal's value {@code null} is treated as {@code false}.
      *
