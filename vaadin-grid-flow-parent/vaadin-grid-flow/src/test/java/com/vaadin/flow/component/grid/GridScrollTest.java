@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +39,11 @@ public class GridScrollTest {
         ui = new MockUI();
         grid = new Grid<>();
         grid.setPageSize(50);
+    }
+    
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
