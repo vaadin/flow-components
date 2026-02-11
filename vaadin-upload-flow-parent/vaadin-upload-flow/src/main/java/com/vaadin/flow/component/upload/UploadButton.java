@@ -82,29 +82,4 @@ public class UploadButton extends Button implements HasUploadManager {
         super.setEnabled(enabled);
     }
 
-    /**
-     * Sets the capture attribute for mobile file input. This controls whether
-     * to use the device's camera or microphone to capture files directly.
-     * <p>
-     * Common values are:
-     * <ul>
-     * <li>{@code "user"} - Use the front-facing camera</li>
-     * <li>{@code "environment"} - Use the back-facing camera</li>
-     * </ul>
-     *
-     * @param capture
-     *            the capture attribute value, or {@code null} to remove
-     */
-    public void setCapture(String capture) {
-        getElement().setProperty("capture", capture);
-    }
-
-    /**
-     * Gets the capture attribute for mobile file input.
-     *
-     * @return the capture attribute value, or {@code null} if not set
-     */
-    public String getCapture() {
-        return getElement().getProperty("capture");
-    }
 }
