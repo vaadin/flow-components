@@ -150,7 +150,7 @@ public class ScaleControl extends Control {
      * is only used when {@link #getDisplayMode()} returns
      * {@link DisplayMode#BAR}.
      *
-     * @return {@code true} if text is shown above the scale bar
+     * @return {@code true} if text is shown below the scale bar
      */
     public boolean isScaleBarTextVisible() {
         return scaleBarTextVisible;
@@ -162,7 +162,7 @@ public class ScaleControl extends Control {
      * {@link DisplayMode#BAR}. Default value is {@code false}.
      *
      * @param scaleBarTextVisible
-     *            {@code true} to show text above the scale bar
+     *            {@code true} to show text below the scale bar
      */
     public void setScaleBarTextVisible(boolean scaleBarTextVisible) {
         this.scaleBarTextVisible = scaleBarTextVisible;
