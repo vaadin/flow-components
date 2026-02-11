@@ -17,6 +17,7 @@ package com.vaadin.flow.component.messages.tests;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -196,6 +197,79 @@ public class MessageListTest {
         Assert.assertTrue(messageList.isAnnounceMessages());
         Assert.assertTrue(messageList.getElement()
                 .getProperty("announceMessages", false));
+    }
+
+    @Test
+    public void getAttachments_defaultIsEmpty() {
+        Assert.assertTrue(item1.getAttachments().isEmpty());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getAttachments_returnsUnmodifiableList() {
+        item1.getAttachments().add(
+                new MessageListItem.Attachment("test", "url", "text/plain"));
+    }
+
+    @Test
+    public void addAttachment_getAttachments() {
+        var attachment = new MessageListItem.Attachment("file.pdf",
+                "http://example.com/file.pdf", "application/pdf");
+        item1.addAttachment(attachment);
+
+        Assert.assertEquals(1, item1.getAttachments().size());
+        Assert.assertEquals(attachment, item1.getAttachments().get(0));
+    }
+
+    @Test
+    public void setAttachments_getAttachments() {
+        var attachment1 = new MessageListItem.Attachment("file1.pdf",
+                "http://example.com/file1.pdf", "application/pdf");
+        var attachment2 = new MessageListItem.Attachment("file2.png",
+                "http://example.com/file2.png", "image/png");
+
+        item1.setAttachments(List.of(attachment1, attachment2));
+
+        Assert.assertEquals(2, item1.getAttachments().size());
+        Assert.assertEquals(attachment1, item1.getAttachments().get(0));
+        Assert.assertEquals(attachment2, item1.getAttachments().get(1));
+    }
+
+    @Test
+    public void setAttachments_emptyList_clearsAttachments() {
+        item1.addAttachment(new MessageListItem.Attachment("file.pdf",
+                "http://example.com/file.pdf", "application/pdf"));
+        item1.setAttachments(List.of());
+
+        Assert.assertTrue(item1.getAttachments().isEmpty());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setAttachments_null_throws() {
+        item1.setAttachments(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void addAttachment_null_throws() {
+        item1.addAttachment(null);
+    }
+
+    @Test
+    public void attachmentSerialization_containsExpectedFields() {
+        item1.addAttachment(new MessageListItem.Attachment("proposal.pdf",
+                "#proposal.pdf", "application/pdf"));
+
+        var json = JacksonUtils.beanToJson(item1);
+        var attachments = json.get("attachments");
+
+        Assert.assertNotNull(attachments);
+        Assert.assertTrue(attachments.isArray());
+        Assert.assertEquals(1, attachments.size());
+
+        var attachment = attachments.get(0);
+        Assert.assertEquals("proposal.pdf", attachment.get("name").asString());
+        Assert.assertEquals("#proposal.pdf", attachment.get("url").asString());
+        Assert.assertEquals("application/pdf",
+                attachment.get("type").asString());
     }
 
     private String getSerializedThemeProperty(MessageListItem item) {

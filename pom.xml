@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>3.0.1</version>
+        <version>3.0.0</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
     <version>25.1-SNAPSHOT</version>
@@ -61,6 +61,7 @@
         <module>vaadin-spreadsheet-flow-parent</module>
         <module>vaadin-field-highlighter-flow-parent</module>
         <module>vaadin-side-nav-flow-parent</module>
+        <module>vaadin-slider-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
         <module>vaadin-ai-components-flow-parent</module>
     </modules>
@@ -98,7 +99,7 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.0.2</spring-data-commons.version>
         <reactor-core.version>3.8.2</reactor-core.version>
-        <langchain4j.version>1.10.0</langchain4j.version>
+        <langchain4j.version>1.11.0</langchain4j.version>
         <spring-ai.version>2.0.0-M2</spring-ai.version>
 
         <!-- spreadsheet -->
