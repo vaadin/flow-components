@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,8 +41,11 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.annotation.Tool;
 
+import com.vaadin.flow.component.PushConfiguration;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
+import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
 
@@ -52,6 +58,11 @@ public class SpringAiLLMProviderTest {
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         provider = new SpringAiLLMProvider(mockChatModel);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -536,6 +547,58 @@ public class SpringAiLLMProviderTest {
         Assert.assertEquals(1, media.size());
         Assert.assertEquals("video/mp4",
                 media.getFirst().getMimeType().toString());
+    }
+
+    @Test
+    public void stream_withStreamingAndPushDisabled_logsWarning() {
+        var ui = Mockito.mock(UI.class);
+        var pushConfig = Mockito.mock(PushConfiguration.class);
+        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
+        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
+        UI.setCurrent(ui);
+
+        var originalErr = System.err;
+        var errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        try {
+            var request = createSimpleRequest("Hello");
+            var tokens = List.of("Hello", " ", "World");
+            Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                    .thenReturn(Flux.fromIterable(tokens.stream()
+                            .map(this::mockSimpleChatResponse).toList()));
+
+            provider.stream(request).collectList().block();
+
+            var errContent = errStream.toString(StandardCharsets.UTF_8);
+            Assert.assertTrue(errContent.contains("Push is not enabled"));
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
+    @Test
+    public void stream_withNonStreamingAndPushDisabled_doesNotLogWarning() {
+        provider.setStreaming(false);
+        var ui = Mockito.mock(UI.class);
+        var pushConfig = Mockito.mock(PushConfiguration.class);
+        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
+        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
+        UI.setCurrent(ui);
+
+        var originalErr = System.err;
+        var errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        try {
+            var request = createSimpleRequest("Hello");
+            mockSimpleChat("Hi there");
+
+            provider.stream(request).collectList().block();
+
+            var errContent = errStream.toString(StandardCharsets.UTF_8);
+            Assert.assertFalse(errContent.contains("Push is not enabled"));
+        } finally {
+            System.setErr(originalErr);
+        }
     }
 
     private void mockSimpleChat(String responseText) {
