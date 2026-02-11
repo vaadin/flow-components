@@ -61,7 +61,7 @@ export function synchronizeCollection(collection, updatedIds, options) {
   // Check if we have changes
   const hasChanges =
     updatedIds.length !== collection.getLength() ||
-    collection.getArray().some((existingItem, index) => existingItem.id !== updatedIds[index]);
+    collection.getArray().some((existingItem, index) => existingItem !== options.lookup.get(updatedIds[index]));
   // Skip if there aren't any changes
   if (!hasChanges) return;
   // Get instance references from ids, these must have been synchronized earlier
