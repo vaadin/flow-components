@@ -18,7 +18,7 @@ package com.vaadin.flow.component.icon;
 import java.util.Optional;
 
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Component for displaying an icon from a font icon collection. Note that the
@@ -147,7 +147,7 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      * <p>
      * While a signal is bound, any attempt to set the ligature manually through
      * {@link #setLigature(String)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the ligature to, or {@code null} to unbind
@@ -170,7 +170,7 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      * <p>
      * While a signal is bound, any attempt to set the character code manually
      * through {@link #setCharCode(String)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the character code to, or {@code null} to

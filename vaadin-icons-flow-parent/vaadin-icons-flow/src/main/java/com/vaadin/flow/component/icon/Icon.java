@@ -19,7 +19,7 @@ import java.util.Locale;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Component for displaying an icon from the
@@ -148,7 +148,7 @@ public class Icon extends AbstractIcon<Icon> {
      * <p>
      * While a signal is bound, any attempt to set the icon manually through
      * {@link #setIcon(VaadinIcon)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the icon to, or {@code null} to unbind

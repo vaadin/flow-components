@@ -20,7 +20,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Component for displaying an icon from a SVG file.
@@ -337,7 +337,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * <p>
      * While a signal is bound, any attempt to set the symbol manually through
      * {@link #setSymbol(String)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
      *            the signal to bind the symbol to, or {@code null} to unbind
