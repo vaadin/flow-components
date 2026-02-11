@@ -1164,15 +1164,16 @@ public class TreeGrid<T> extends Grid<T>
         getDataCommunicator().setViewportRange(firstRootIndex, pageSize);
         String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
                 .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        ctx -> getElement().executeJs(
+                                "this.scrollToIndex(" + joinedIndexes + ");")));
     }
 
     @Override
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, ctx -> getElement().executeJs(
                         "this.scrollToIndex(...Array(10).fill(Infinity))")));
     }
 
