@@ -19,16 +19,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.tests.MockUI;
 
+@NotThreadSafe
 public class GridScrollTest {
 
     private UI ui;
@@ -40,7 +42,7 @@ public class GridScrollTest {
         grid = new Grid<>();
         grid.setPageSize(50);
     }
-    
+
     @After
     public void tearDown() {
         UI.setCurrent(null);
