@@ -72,7 +72,7 @@
     </scm>
     <properties>
         <flow.version>25.1-SNAPSHOT</flow.version>
-        <testbench.version>10.1.0-alpha1</testbench.version>
+        <testbench.version>10.1.0-alpha2</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -98,8 +98,8 @@
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.0.2</spring-data-commons.version>
-        <reactor-core.version>3.8.2</reactor-core.version>
-        <langchain4j.version>1.10.0</langchain4j.version>
+        <reactor-core.version>3.8.3</reactor-core.version>
+        <langchain4j.version>1.11.0</langchain4j.version>
         <spring-ai.version>2.0.0-M2</spring-ai.version>
 
         <!-- spreadsheet -->

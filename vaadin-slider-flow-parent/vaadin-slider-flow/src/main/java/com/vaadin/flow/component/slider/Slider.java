@@ -15,14 +15,13 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.Optional;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
  * Slider is an input field that allows the user to select a numeric value
@@ -34,28 +33,11 @@ import com.vaadin.flow.function.SerializableBiFunction;
 @Tag("vaadin-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
-public class Slider extends SliderBase<Slider, Double> {
+public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
+
     private static final double DEFAULT_MIN = 0.0;
     private static final double DEFAULT_MAX = 100.0;
     private static final double DEFAULT_STEP = 1.0;
-
-    private static final SerializableBiFunction<Slider, Double, Double> PARSER = (
-            component, value) -> {
-        try {
-            component.requireValidValue(value);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            // Ignore invalid values from the client side
-            return component.getValue();
-        }
-
-        return value;
-    };
-
-    private static final SerializableBiFunction<Slider, Double, Double> FORMATTER = (
-            component, value) -> {
-        component.requireValidValue(value);
-        return value;
-    };
 
     /**
      * Constructs a {@code Slider} with min 0, max 100, and initial value 0.
@@ -130,7 +112,7 @@ public class Slider extends SliderBase<Slider, Double> {
      *            the initial value
      */
     public Slider(double min, double max, double step, double value) {
-        super(min, max, step, value, Double.class, PARSER, FORMATTER);
+        super(min, max, step, value, Double.class, (v) -> v, (v) -> v);
     }
 
     /**
@@ -272,6 +254,54 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     /**
+     * Sets an accessible name for the range input element of the slider.
+     *
+     * @param ariaLabel
+     *            the accessible name to set, or {@code null} to remove it
+     */
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    /**
+     * Gets the accessible name for the range input element of the slider.
+     *
+     * @return an optional accessible name, or an empty optional if no
+     *         accessible name has been set
+     */
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    /**
+     * Sets the id of an element to be used as the accessible name for the range
+     * input element of the slider.
+     *
+     * @param ariaLabelledBy
+     *            the id of the element to be used as the label, or {@code null}
+     *            to remove it
+     */
+    @Override
+    public void setAriaLabelledBy(String ariaLabelledBy) {
+        getElement().setProperty("accessibleNameRef", ariaLabelledBy);
+    }
+
+    /**
+     * Gets the id of the element used as the accessible name for the range
+     * input element of the slider.
+     *
+     * @return an optional id of the element used as the label, or an empty
+     *         optional if no id has been set
+     */
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
      * Gets the minimum value of the slider.
      *
      * @return the minimum value
@@ -283,10 +313,11 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the minimum value of the slider.
      * <p>
-     * If the current value is less than the new minimum, it's automatically
-     * clamped, which triggers a value change event. To set both the minimum and
-     * value explicitly, use the {@link #setValue(Double, double, double)
-     * setValue(value, min, max)} method instead.
+     * This method automatically clamps the current value to be no less than the
+     * new minimum, which may trigger a value change event. To set the value
+     * explicitly along with the new minimum, use the
+     * {@link #setValue(Double, double, double) setValue(value, min, max)}
+     * method instead.
      *
      * @param min
      *            the minimum value
@@ -294,10 +325,11 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if min is greater than the current max
      */
     public void setMin(double min) {
-        requireValidMinMax(min, getMax());
+        SliderUtil.requireValidMinMax(min, getMax());
         setMinDouble(min);
 
-        double adjustedValue = Math.max(getValue(), min);
+        double adjustedValue = SliderUtil.clampToMinMax(getValue(), min,
+                getMax());
         setValue(adjustedValue);
     }
 
@@ -313,10 +345,11 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the maximum value of the slider.
      * <p>
-     * If the current value is greater than the new maximum, it's automatically
-     * clamped, which triggers a value change event. To set both the maximum and
-     * value explicitly, use the {@link #setValue(Double, double, double)
-     * setValue(value, min, max)} method instead.
+     * This method automatically clamps the current value to be no greater than
+     * the new maximum, which may trigger a value change event. To set the value
+     * explicitly along with the new maximum, use the
+     * {@link #setValue(Double, double, double) setValue(value, min, max)}
+     * method instead.
      *
      * @param max
      *            the maximum value
@@ -324,10 +357,11 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if max is less than the current min
      */
     public void setMax(double max) {
-        requireValidMinMax(getMin(), max);
+        SliderUtil.requireValidMinMax(getMin(), max);
         setMaxDouble(max);
 
-        double adjustedValue = Math.min(getValue(), max);
+        double adjustedValue = SliderUtil.clampToMinMax(getValue(), getMin(),
+                max);
         setValue(adjustedValue);
     }
 
@@ -346,9 +380,9 @@ public class Slider extends SliderBase<Slider, Double> {
     /**
      * Sets the step value of the slider.
      * <p>
-     * If the current value is not aligned with the new step, it's automatically
-     * adjusted to the nearest value that matches the step, which triggers a
-     * value change event. To set both the step and value explicitly, use the
+     * This method automatically adjusts the current value to be aligned with
+     * the new step, which may trigger a value change event. To set the value
+     * explicitly along with the new step, use the
      * {@link #setValue(Double, double, double, double) setValue(value, min,
      * max, step)} method instead.
      *
@@ -358,23 +392,12 @@ public class Slider extends SliderBase<Slider, Double> {
      *             if step is not positive
      */
     public void setStep(double step) {
-        requireValidStep(step);
+        SliderUtil.requireValidStep(step);
         setStepDouble(step);
 
-        BigDecimal minBd = BigDecimal.valueOf(getMin());
-        BigDecimal maxBd = BigDecimal.valueOf(getMax());
-        BigDecimal stepBd = BigDecimal.valueOf(step);
-        BigDecimal valueBd = BigDecimal.valueOf(getValue());
-
-        // Equivalent to Math.round((value - min) / step)
-        BigDecimal stepsFromMinBd = valueBd.subtract(minBd).divide(stepBd, 0,
-                RoundingMode.HALF_UP);
-
-        // Equivalent to Math.min(min + stepsFromMin * step, max)
-        BigDecimal adjustedValue = minBd.add(stepsFromMinBd.multiply(stepBd))
-                .min(maxBd);
-
-        setValue(adjustedValue.doubleValue());
+        double adjustedValue = SliderUtil.snapToStep(getValue(), getMin(),
+                getMax(), step);
+        setValue(adjustedValue);
     }
 
     /**
@@ -388,18 +411,28 @@ public class Slider extends SliderBase<Slider, Double> {
     }
 
     @Override
+    protected boolean hasValidValue() {
+        Double value = getElement().getProperty("value", 0.0);
+        try {
+            requireValidValue(value);
+            return true;
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return false;
+        }
+    }
+
+    @Override
     void requireValidValue(double min, double max, double step, Double value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
-        if (value < min || value > max) {
+        if (SliderUtil.clampToMinMax(value, min, max) != value) {
             throw new IllegalArgumentException(
                     "Value must be between min and max");
         }
 
-        if (BigDecimal.valueOf(value).remainder(BigDecimal.valueOf(step))
-                .compareTo(BigDecimal.ZERO) != 0) {
+        if (SliderUtil.snapToStep(value, min, max, step) != value) {
             throw new IllegalArgumentException(
-                    "Value is not aligned with step");
+                    "Value must be aligned with step");
         }
     }
 }

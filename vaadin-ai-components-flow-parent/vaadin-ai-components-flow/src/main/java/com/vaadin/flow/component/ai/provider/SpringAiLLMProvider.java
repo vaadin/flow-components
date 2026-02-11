@@ -18,6 +18,8 @@ package com.vaadin.flow.component.ai.provider;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -26,6 +28,11 @@ import org.springframework.ai.content.Media;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AttachmentContentType;
+import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
 
@@ -46,6 +53,9 @@ import reactor.core.publisher.Flux;
  * @author Vaadin Ltd
  */
 public class SpringAiLLMProvider implements LLMProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(SpringAiLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
     private static final String CONVERSATION_ID = "default";
@@ -92,6 +102,7 @@ public class SpringAiLLMProvider implements LLMProvider {
         Objects.requireNonNull(request.userMessage(),
                 "User message must not be null");
         if (isStreaming) {
+            checkPushConfiguration();
             return executeStreamingChat(request);
         }
         return executeNonStreamingChat(request);
@@ -161,10 +172,10 @@ public class SpringAiLLMProvider implements LLMProvider {
                 .toArray(Media[]::new);
     }
 
-    private static Optional<Media> getAttachmentMedia(Attachment attachment) {
+    private static Optional<Media> getAttachmentMedia(AiAttachment attachment) {
         LLMProviderHelpers.validateAttachment(attachment);
         var contentType = AttachmentContentType
-                .fromMimeType(attachment.contentType());
+                .fromMimeType(attachment.mimeType());
         return switch (contentType) {
         case TEXT -> Optional.of(getTextMedia(attachment));
         case IMAGE, PDF, AUDIO, VIDEO -> Optional.of(getMedia(attachment));
@@ -172,18 +183,28 @@ public class SpringAiLLMProvider implements LLMProvider {
         };
     }
 
-    private static Media getMedia(Attachment attachment) {
-        var mimeType = MimeType.valueOf(attachment.contentType());
+    private static Media getMedia(AiAttachment attachment) {
+        var mimeType = MimeType.valueOf(attachment.mimeType());
         var resource = new ByteArrayResource(attachment.data());
         return Media.builder().mimeType(mimeType).data(resource).build();
     }
 
-    private static Media getTextMedia(Attachment attachment) {
+    private static Media getTextMedia(AiAttachment attachment) {
         var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
-                attachment.fileName(), false);
+                attachment.name(), false);
         var formattedText = LLMProviderHelpers
-                .formatTextAttachment(attachment.fileName(), textContent);
+                .formatTextAttachment(attachment.name(), textContent);
         return Media.builder().mimeType(MimeType.valueOf("text/plain"))
                 .data(formattedText).build();
+    }
+
+    private static void checkPushConfiguration() {
+        var ui = UI.getCurrent();
+        if (ui != null && PushMode.DISABLED
+                .equals(ui.getPushConfiguration().getPushMode())) {
+            LOGGER.warn("Push is not enabled. Streaming LLM responses "
+                    + "require @Push annotation or programmatic push "
+                    + "configuration to update the UI in real-time.");
+        }
     }
 }

@@ -25,6 +25,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AttachmentContentType;
+import com.vaadin.flow.shared.communication.PushMode;
+
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -69,6 +77,9 @@ import reactor.core.publisher.FluxSink;
  * @author Vaadin Ltd
  */
 public class LangChain4JLLMProvider implements LLMProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(LangChain4JLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
 
@@ -169,6 +180,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         var messages = buildMessages(context.getRequest(),
                 context.getChatMemory());
         if (streamingChatModel != null) {
+            checkPushConfiguration();
             executeStreamingChat(messages, context);
         } else {
             executeNonStreamingChat(messages, context);
@@ -296,10 +308,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private static Optional<Content> getAttachmentContent(
-            Attachment attachment) {
+            AiAttachment attachment) {
         LLMProviderHelpers.validateAttachment(attachment);
         var contentType = AttachmentContentType
-                .fromMimeType(attachment.contentType());
+                .fromMimeType(attachment.mimeType());
         return switch (contentType) {
         case IMAGE -> Optional.of(getImageAttachmentContent(attachment));
         case TEXT -> Optional.of(getTextAttachmentContent(attachment));
@@ -310,35 +322,46 @@ public class LangChain4JLLMProvider implements LLMProvider {
         };
     }
 
-    private static TextContent getTextAttachmentContent(Attachment attachment) {
+    private static TextContent getTextAttachmentContent(
+            AiAttachment attachment) {
         var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
-                attachment.fileName(), false);
+                attachment.name(), false);
         return TextContent.from(LLMProviderHelpers
-                .formatTextAttachment(attachment.fileName(), textContent));
+                .formatTextAttachment(attachment.name(), textContent));
     }
 
     private static PdfFileContent getPdfAttachmentContent(
-            Attachment attachment) {
+            AiAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return PdfFileContent.from(base64, attachment.contentType());
+        return PdfFileContent.from(base64, attachment.mimeType());
     }
 
     private static ImageContent getImageAttachmentContent(
-            Attachment attachment) {
+            AiAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return ImageContent.from(base64, attachment.contentType());
+        return ImageContent.from(base64, attachment.mimeType());
     }
 
     private static AudioContent getAudioAttachmentContent(
-            Attachment attachment) {
+            AiAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return AudioContent.from(base64, attachment.contentType());
+        return AudioContent.from(base64, attachment.mimeType());
     }
 
     private static VideoContent getVideoAttachmentContent(
-            Attachment attachment) {
+            AiAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return VideoContent.from(base64, attachment.contentType());
+        return VideoContent.from(base64, attachment.mimeType());
+    }
+
+    private static void checkPushConfiguration() {
+        var ui = UI.getCurrent();
+        if (ui != null && PushMode.DISABLED
+                .equals(ui.getPushConfiguration().getPushMode())) {
+            LOGGER.warn("Push is not enabled. Streaming LLM responses "
+                    + "require @Push annotation or programmatic push "
+                    + "configuration to update the UI in real-time.");
+        }
     }
 
     /**
