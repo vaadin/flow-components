@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.upload.tests;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadFormat;
 import com.vaadin.flow.router.Route;
@@ -23,40 +24,34 @@ import com.vaadin.flow.router.Route;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
-/**
- * View for {@link Upload} tests.
- *
- * @author Vaadin Ltd
- */
 @Route("vaadin-upload/format")
 public class UploadFormatView extends Div {
 
     public UploadFormatView() {
         Upload upload = new Upload();
-
         upload.setUploadFormat(UploadFormat.MULTIPART);
 
         upload.setUploadHandler(uploadEvent -> {
-            String fileName = uploadEvent.getFileName();
-
-            HttpServletRequest r = (HttpServletRequest) uploadEvent
+            HttpServletRequest request = (HttpServletRequest) uploadEvent
                     .getRequest();
             try {
-                r.getParts();
+                // Try to get parts to check if the request is parsed as
+                // multipart
+                request.getParts();
                 uploadEvent.getUI().access(() -> {
-                    add("multipart=true");
+                    Span output = new Span("Parsed multipart request");
+                    output.setId("output");
+                    add(output);
                 });
             } catch (ServletException e) {
-                throw new RuntimeException(e);
+                uploadEvent.getUI().access(() -> {
+                    Span output = new Span("Failed to parse multipart request");
+                    output.setId("output");
+                    add(output);
+                });
             }
-
-            uploadEvent.getInputStream().readAllBytes();
-            uploadEvent.getUI().access(() -> {
-                add(fileName + " uploaded");
-            });
         });
 
         add(upload);
     }
-
 }

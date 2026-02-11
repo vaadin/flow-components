@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-upload/format")
 public class UploadFormatIT extends AbstractUploadIT {
@@ -41,12 +42,10 @@ public class UploadFormatIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
         upload.upload(tempFile);
 
-        checkLogsForErrors();
+        TestBenchElement output = $(TestBenchElement.class).withId("output")
+                .waitForFirst();
 
-        waitUntil(driver -> getDriver().getPageSource()
-                .contains("multipart=true"));
-        Assert.assertTrue("Expected multipart request to be detected",
-                getDriver().getPageSource().contains("multipart=true"));
+        Assert.assertEquals("Expected multipart request to be detected",
+                "Parsed multipart request", output.getText());
     }
-
 }

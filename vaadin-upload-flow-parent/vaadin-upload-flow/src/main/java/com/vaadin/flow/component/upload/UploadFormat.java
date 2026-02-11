@@ -20,16 +20,16 @@ package com.vaadin.flow.component.upload;
  */
 public enum UploadFormat {
     /**
-     * Send file as raw binary data with the file's MIME type as Content-Type
-     * (default). This is the default. Typically less hassle for example with
-     * large files in application servers and front proxies.
+     * Send files as raw binary data with the file's MIME type as Content-Type.
+     * This is the default. Typically less hassle for example with large files
+     * in application and proxy servers.
      */
     RAW,
     /**
-     * The old default. Note, that the client-side component still sends only
-     * one file per request. This option adds some overhead, but e.g. certain
-     * application security proxies may drop large request bodies, unless they
-     * are multipart requests.
+     * Sends individual files as multi-part requests. Note, that the client-side
+     * component still sends only one file per request. Can be useful for
+     * certain application security proxies that may drop large request bodies
+     * unless they are multipart requests.
      */
     MULTIPART
 }
