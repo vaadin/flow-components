@@ -17,11 +17,12 @@ package com.vaadin.flow.component.upload;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
@@ -464,11 +465,11 @@ public class UploadManager implements Serializable {
      * configured MIME types and file extensions.
      */
     private void updateAcceptProperty() {
-        List<String> combined = new ArrayList<>();
-        combined.addAll(acceptedMimeTypes);
-        combined.addAll(acceptedFileExtensions);
-        connector.getElement().setProperty("accept",
-                String.join(",", combined));
+        String accept = Stream
+                .concat(acceptedMimeTypes.stream(),
+                        acceptedFileExtensions.stream())
+                .collect(Collectors.joining(","));
+        connector.getElement().setProperty("accept", accept);
     }
 
     /**

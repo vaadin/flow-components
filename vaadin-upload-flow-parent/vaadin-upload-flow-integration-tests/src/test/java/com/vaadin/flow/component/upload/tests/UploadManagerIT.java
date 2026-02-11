@@ -144,7 +144,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         tester.upload(htmlFile, 0);
         tester.waitForUploads(60);
 
-        logStatus();
+        assertFileListContains("Upload forbidden");
         Assert.assertFalse(
                 "HTML file should be rejected server-side when extension "
                         + "doesn't match even though MIME type matches",
@@ -176,7 +176,7 @@ public class UploadManagerIT extends AbstractUploadIT {
         UploadManagerTester tester = getUploadManagerTester();
         tester.waitForUploads(60);
 
-        logStatus();
+        assertFileListContains("Upload forbidden");
         Assert.assertFalse(
                 "HTML file with spoofed PDF MIME type should be rejected "
                         + "server-side because extension .html doesn't "
@@ -543,6 +543,12 @@ public class UploadManagerIT extends AbstractUploadIT {
 
     private String getLogText() {
         return findElement(By.id("log-area")).getText();
+    }
+
+    private void assertFileListContains(String text) {
+        UploadFileListElement fileList = $(UploadFileListElement.class)
+                .id("file-list");
+        waitUntil(driver -> fileList.getText().contains(text), 60);
     }
 
     private void assertLogContains(String text) {
