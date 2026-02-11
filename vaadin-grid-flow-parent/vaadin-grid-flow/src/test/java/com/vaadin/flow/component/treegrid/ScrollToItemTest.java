@@ -244,6 +244,34 @@ public class ScrollToItemTest {
                 () -> treeGrid.scrollToItem(null));
     }
 
+    @Test
+    public void scrollToItem_afterAttach_schedulesJsExecution() {
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
+
+        var item = treeData.getRootItems().get(10);
+        treeGrid.scrollToItem(item);
+
+        fakeClientCommunication();
+        assertScrollToItemInvocation(item, new int[] { 10 });
+    }
+
+    @Test
+    public void scrollToItem_beforeAttach_thenAttach_schedulesJsExecution() {
+        ui.remove(treeGrid);
+
+        treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
+                HierarchicalDataProvider.HierarchyFormat.NESTED));
+
+        var item = treeData.getRootItems().get(10);
+        treeGrid.scrollToItem(item);
+
+        ui.add(treeGrid);
+
+        fakeClientCommunication();
+        assertScrollToItemInvocation(item, new int[] { 10 });
+    }
+
     private void scrollToMissingItem() {
         treeGrid.scrollToItem(new HierarchicalTestBean("NOT PRESENT", -2, -2));
     }
