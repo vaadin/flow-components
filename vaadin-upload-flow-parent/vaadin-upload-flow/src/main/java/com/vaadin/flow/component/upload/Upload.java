@@ -243,6 +243,16 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     }
 
     /**
+     * Sets the upload format to use when sending files to the server.
+     *
+     * @param type
+     *            the format type
+     */
+    public void setUploadFormat(UploadFormat type) {
+        getElement().setAttribute("upload-format", type.name().toLowerCase());
+    }
+
+    /**
      * Get the maximum number of files allowed for the user to select to upload.
      *
      * @return the maximum number of files
