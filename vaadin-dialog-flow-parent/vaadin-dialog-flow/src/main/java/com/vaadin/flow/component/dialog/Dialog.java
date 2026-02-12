@@ -1340,7 +1340,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *             directly
      */
     @Override
-    public <T, S extends Signal<T>> Registration bindChildren(
+    public <T, S extends Signal<T>> void bindChildren(
             Signal<List<S>> list,
             SerializableFunction<S, Component> childFactory) {
         throw new UnsupportedOperationException(
