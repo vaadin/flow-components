@@ -47,9 +47,12 @@ import com.vaadin.flow.server.VaadinSession;
 public class TimePickerTest {
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
+    private UI ui;
+
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -230,7 +233,7 @@ public class TimePickerTest {
 
         String value = LocalTime.now().plus(31l, ChronoUnit.MINUTES).toString();
         element.setProperty("value", value);
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);

@@ -25,17 +25,20 @@ public class ClipboardTest {
 
     private Spreadsheet spreadsheet;
 
+    private UI ui;
+
     @Before
     public void init() {
         spreadsheet = new Spreadsheet();
         spreadsheet.setLocale(Locale.US);
-        var ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
     }
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test

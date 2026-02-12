@@ -33,6 +33,8 @@ import com.vaadin.flow.server.VaadinSession;
 
 class ComponentFromTest {
 
+    private static UI ui;
+
     static <T extends Serializable> void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
             T value, Class<? extends Component> componentClass) {
         Optional<Tag> tag = AnnotationReader.getAnnotationFor(componentClass,
@@ -42,7 +44,7 @@ class ComponentFromTest {
         element.getStateProvider().setProperty(element.getNode(), "value",
                 value, true);
 
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);
@@ -60,5 +62,6 @@ class ComponentFromTest {
         Assert.assertEquals(value, field.getElement().getPropertyRaw("value"));
 
         UI.setCurrent(null);
+        ui = null;
     }
 }

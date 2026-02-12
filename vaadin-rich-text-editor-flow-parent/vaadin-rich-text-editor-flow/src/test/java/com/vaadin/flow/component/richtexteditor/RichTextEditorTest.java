@@ -35,12 +35,15 @@ import tools.jackson.databind.node.ArrayNode;
  */
 public class RichTextEditorTest {
 
+    private UI ui;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -223,7 +226,7 @@ public class RichTextEditorTest {
         Element element = new Element("vaadin-rich-text-editor");
 
         element.setProperty("value", "foo");
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);

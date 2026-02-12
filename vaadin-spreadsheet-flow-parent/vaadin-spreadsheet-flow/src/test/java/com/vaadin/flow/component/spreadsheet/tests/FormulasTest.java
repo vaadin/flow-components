@@ -24,10 +24,12 @@ public class FormulasTest {
 
     private Spreadsheet spreadsheet;
 
+    private UI ui;
+
     @Before
     public void init() {
         spreadsheet = new Spreadsheet();
-        var ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
 
         // onSheetScroll must be invoked once, otherwise cell comments are not
@@ -39,6 +41,7 @@ public class FormulasTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
