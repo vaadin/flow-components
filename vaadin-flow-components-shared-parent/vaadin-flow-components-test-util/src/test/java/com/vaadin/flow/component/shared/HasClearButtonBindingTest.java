@@ -41,6 +41,7 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
 
     @Test
     public void bindClearButtonVisible_elementAttached_updatesWithSignal_andNullMapsToFalse() {
+        checkUISetup("HasClearButtonBindingTest");
         TestComponent component = new TestComponent();
         // Attach component so that Element.bindProperty becomes active
         UI.getCurrent().add(component);
@@ -67,6 +68,7 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
 
     @Test
     public void bindClearButtonVisible_elementNotAttached_bindingInactive_untilAttach() {
+        checkUISetup("HasClearButtonBindingTest");
         TestComponent component = new TestComponent();
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindClearButtonVisible(signal);
@@ -87,6 +89,7 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
 
     @Test
     public void setClearButtonVisible_whileBindingActive_throwsBindingActiveException() {
+        checkUISetup("HasClearButtonBindingTest");
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
@@ -99,6 +102,7 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
 
     @Test
     public void bindClearButtonVisible_againWhileActive_throwsBindingActiveException() {
+        checkUISetup("HasClearButtonBindingTest");
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
@@ -111,6 +115,7 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
 
     @Test
     public void bindClearButtonVisible_passingNull_unbindsExistingBinding() {
+        checkUISetup("HasClearButtonBindingTest");
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);

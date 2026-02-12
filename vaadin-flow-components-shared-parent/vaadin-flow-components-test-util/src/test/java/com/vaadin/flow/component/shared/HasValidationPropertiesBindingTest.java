@@ -44,6 +44,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void bindErrorMessage_elementAttached_updatesWithSignal_andNullMapsToEmpty() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         // Attach component so that Element.bindProperty becomes active
         UI.getCurrent().add(component);
@@ -70,6 +71,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void bindErrorMessage_elementNotAttached_bindingInactive_untilAttach() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         ValueSignal<String> signal = new ValueSignal<>("msg");
         component.bindErrorMessage(signal);
@@ -86,6 +88,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void setErrorMessage_whileBindingActive_throwsBindingActiveException() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<String> signal = new ValueSignal<>("foo");
@@ -98,6 +101,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void bindErrorMessage_againWhileActive_throwsBindingActiveException() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<String> signal = new ValueSignal<>("foo");
@@ -110,6 +114,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void bindInvalid_elementAttached_updatesWithSignal_andNullMapsToFalse() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         // Attach component so that Element.bindProperty becomes active
         UI.getCurrent().add(component);
@@ -133,6 +138,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void bindInvalid_elementNotAttached_bindingInactive_untilAttach() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindInvalid(signal);
@@ -153,6 +159,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void setInvalid_whileBindingActive_throwsBindingActiveException() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
@@ -165,6 +172,7 @@ public class HasValidationPropertiesBindingTest
 
     @Test
     public void bindInvalid_againWhileActive_throwsBindingActiveException() {
+        checkUISetup("HasValidationPropertiesBindingTest");
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
