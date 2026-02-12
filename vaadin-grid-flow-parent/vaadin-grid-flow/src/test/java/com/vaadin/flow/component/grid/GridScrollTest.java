@@ -28,7 +28,7 @@ import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.dataprovider.MockUI;
 
 @NotThreadSafe
 public class GridScrollTest {
