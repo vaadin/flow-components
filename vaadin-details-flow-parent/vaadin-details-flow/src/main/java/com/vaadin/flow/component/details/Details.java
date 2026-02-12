@@ -318,7 +318,6 @@ public class Details extends Component implements HasComponents, HasSize,
         var binding = ComponentEffect.bindChildren(contentContainer, list,
                 childFactory);
         feature.setBinding(SignalBindingFeature.CHILDREN, binding, list);
-        return () -> feature.removeBinding(SignalBindingFeature.CHILDREN);
     }
 
     /**
