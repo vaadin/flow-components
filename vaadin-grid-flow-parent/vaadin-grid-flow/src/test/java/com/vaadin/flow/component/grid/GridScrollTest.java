@@ -19,20 +19,33 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
+import com.vaadin.tests.dataprovider.MockUI;
 
+@NotThreadSafe
 public class GridScrollTest {
 
+    private UI ui;
     private Grid<String> grid;
 
     @Before
     public void setUp() {
+        ui = new MockUI();
         grid = new Grid<>();
         grid.setPageSize(50);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -116,6 +129,48 @@ public class GridScrollTest {
 
         Assert.assertThrows(NoSuchElementException.class,
                 () -> grid.scrollToItem("Not present"));
+    }
+
+    @Test
+    public void scrollToEnd_afterAttach_schedulesJsExecution() {
+        ui.add(grid);
+
+        grid.scrollToEnd();
+
+        assertPendingScrollToEndInvocation();
+    }
+
+    @Test
+    public void scrollToEnd_beforeAttach_thenAttach_schedulesJsExecution() {
+        grid.scrollToEnd();
+
+        ui.add(grid);
+
+        assertPendingScrollToEndInvocation();
+    }
+
+    private void assertPendingScrollToEndInvocation() {
+        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
+
+        long scrollToEndCount = pendingInvocations.stream()
+                .filter(inv -> inv.getInvocation().getExpression()
+                        .contains("scrollToIndex(this._flatSize)"))
+                .count();
+
+        Assert.assertEquals(
+                "Expected one scrollToEnd JS invocation to be scheduled", 1,
+                scrollToEndCount);
+    }
+
+    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
+        fakeClientResponse();
+        return ui.getInternals().dumpPendingJavaScriptInvocations();
+    }
+
+    private void fakeClientResponse() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 
     private String getViewportRange(Grid<String> grid) {

@@ -5049,7 +5049,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(
+        getElement().getNode().runWhenAttached(
                 ui -> ui.beforeClientResponse(this, ctx -> getElement()
                         .executeJs("this.scrollToIndex(this._flatSize)")));
     }
