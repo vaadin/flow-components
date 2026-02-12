@@ -28,7 +28,7 @@ import com.vaadin.flow.server.VaadinSession;
 
 public class LoginOverlaySlotsTest {
 
-    private UI ui = new UI();
+    private UI ui;
     private LoginOverlay overlay;
 
     @Tag("div")
@@ -37,6 +37,7 @@ public class LoginOverlaySlotsTest {
 
     @Before
     public void setup() {
+        ui = new UI();
         UI.setCurrent(ui);
 
         VaadinSession session = Mockito.mock(VaadinSession.class);
@@ -56,6 +57,9 @@ public class LoginOverlaySlotsTest {
     public void customFormArea_addBeforeOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
+
+        ui = new UI();
+        UI.setCurrent(ui);
 
         overlay.getCustomFormArea().add(foo, bar);
 

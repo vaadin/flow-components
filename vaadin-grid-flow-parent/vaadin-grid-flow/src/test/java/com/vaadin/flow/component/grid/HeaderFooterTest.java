@@ -52,6 +52,8 @@ public class HeaderFooterTest {
     Column<String> secondColumn;
     Column<String> thirdColumn;
 
+    private UI ui;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -60,12 +62,14 @@ public class HeaderFooterTest {
         grid = new Grid<>();
         addColumns();
 
-        UI.setCurrent(new UI());
+        ui = new UI();
+        UI.setCurrent(ui);
     }
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     private void addColumns() {

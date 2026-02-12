@@ -20,6 +20,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Component for displaying an icon from a SVG file.
@@ -125,6 +126,53 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     public SvgIcon(DownloadHandler src, String symbol) {
         this(src);
         setSymbol(symbol);
+    }
+
+    /**
+     * Creates an SVG icon with the given download handler resource and binds
+     * the given signal to the symbol.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
+     * <p>
+     * The symbol is kept synchronized with the signal value while the component
+     * is attached. When the component is detached, signal value changes have no
+     * effect.
+     *
+     * @param src
+     *            the download handler resource
+     * @param symbolSignal
+     *            the signal providing the symbol reference of the icon
+     * @see #setSrc(AbstractStreamResource)
+     * @see #bindSymbol(Signal)
+     * @since 25.1
+     */
+    public SvgIcon(DownloadHandler src, Signal<String> symbolSignal) {
+        this(src);
+        bindSymbol(symbolSignal);
+    }
+
+    /**
+     * Creates an SVG icon with the given source and binds the given signal to
+     * the symbol.
+     * <p>
+     * The symbol is kept synchronized with the signal value while the component
+     * is attached. When the component is detached, signal value changes have no
+     * effect.
+     *
+     * @param src
+     *            the SVG file path
+     * @param symbolSignal
+     *            the signal providing the symbol reference of the icon
+     * @see #setSrc(String)
+     * @see #bindSymbol(Signal)
+     * @since 25.1
+     */
+    public SvgIcon(String src, Signal<String> symbolSignal) {
+        this(src);
+        bindSymbol(symbolSignal);
     }
 
     /**
@@ -276,6 +324,29 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      */
     public String getSymbol() {
         return getElement().getProperty("symbol");
+    }
+
+    /**
+     * Binds the given signal to the symbol of the SVG icon.
+     * <p>
+     * When a signal is bound, the symbol is kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the symbol manually through
+     * {@link #setSymbol(String)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the symbol to, or {@code null} to unbind
+     * @see #setSymbol(String)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @since 25.1
+     */
+    public void bindSymbol(Signal<String> signal) {
+        getElement().bindProperty("symbol", signal);
     }
 
     @Override

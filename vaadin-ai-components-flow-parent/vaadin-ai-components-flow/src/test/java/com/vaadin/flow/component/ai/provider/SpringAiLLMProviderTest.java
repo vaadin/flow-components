@@ -54,6 +54,8 @@ public class SpringAiLLMProviderTest {
     private ChatModel mockChatModel;
     private SpringAiLLMProvider provider;
 
+    private UI ui;
+
     @Before
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
@@ -63,6 +65,7 @@ public class SpringAiLLMProviderTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -551,7 +554,7 @@ public class SpringAiLLMProviderTest {
 
     @Test
     public void stream_withStreamingAndPushDisabled_logsWarning() {
-        var ui = Mockito.mock(UI.class);
+        ui = Mockito.mock(UI.class);
         var pushConfig = Mockito.mock(PushConfiguration.class);
         Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
         Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
@@ -579,7 +582,7 @@ public class SpringAiLLMProviderTest {
     @Test
     public void stream_withNonStreamingAndPushDisabled_doesNotLogWarning() {
         provider.setStreaming(false);
-        var ui = Mockito.mock(UI.class);
+        ui = Mockito.mock(UI.class);
         var pushConfig = Mockito.mock(PushConfiguration.class);
         Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
         Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);

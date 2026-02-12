@@ -43,6 +43,8 @@ public class IntegerFieldTest extends TextFieldTest {
 
     private IntegerField field;
 
+    private UI ui;
+
     @Before
     public void setup() {
         field = new IntegerField();
@@ -51,6 +53,7 @@ public class IntegerFieldTest extends TextFieldTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Override
@@ -88,7 +91,7 @@ public class IntegerFieldTest extends TextFieldTest {
     public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-integer-field");
         element.setProperty("value", "1");
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);

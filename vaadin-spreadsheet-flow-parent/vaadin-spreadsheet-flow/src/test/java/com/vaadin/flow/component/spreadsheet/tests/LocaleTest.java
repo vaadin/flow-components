@@ -25,6 +25,8 @@ public class LocaleTest {
 
     private Locale testLocale;
 
+    private UI ui;
+
     @Before
     public void init() {
         // Choose a test locale that differs from the system locale to ensure
@@ -34,7 +36,7 @@ public class LocaleTest {
         testLocale = systemLocale.equals(Locale.GERMANY) ? Locale.FRANCE
                 : Locale.GERMANY;
 
-        final UI ui = new UI();
+        ui = new UI();
         ui.setLocale(testLocale);
         UI.setCurrent(ui);
 
@@ -44,6 +46,7 @@ public class LocaleTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
