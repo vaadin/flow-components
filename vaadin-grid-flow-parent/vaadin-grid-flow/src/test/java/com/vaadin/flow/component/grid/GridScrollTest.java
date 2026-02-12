@@ -23,22 +23,24 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.dataprovider.MockUI;
+import com.vaadin.flow.server.VaadinSession;
 
 @NotThreadSafe
 public class GridScrollTest {
 
-    private UI ui;
+    private UI ui = new UI();
     private Grid<String> grid;
 
     @Before
     public void setUp() {
-        ui = new MockUI();
+        ui.getInternals().setSession(Mockito.mock(VaadinSession.class));
+        UI.setCurrent(ui);
         grid = new Grid<>();
         grid.setPageSize(50);
     }
