@@ -25,7 +25,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
@@ -39,8 +38,10 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.tests.MockUI;
 
+import net.jcip.annotations.NotThreadSafe;
+
 @NotThreadSafe
-public class ScrollToItemTest {
+public class TreeGridScrollToItemTest {
 
     private TreeGrid<HierarchicalTestBean> treeGrid;
     private TreeData<HierarchicalTestBean> treeData;
@@ -269,10 +270,10 @@ public class ScrollToItemTest {
     public void scrollToIndex_scrollToItem_onlyScrollToItemExecuted() {
         var item = treeData.getRootItems().get(10);
         treeGrid.setTreeData(treeData);
+        ui.add(treeGrid);
 
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToItem(item);
-        ui.add(treeGrid);
         fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 10 });
     }
@@ -293,16 +294,18 @@ public class ScrollToItemTest {
     }
 
     private void assertSingleJavaScriptScrollToItemInvocation(
-            HierarchicalTestBean item, int[] path) {
-        var itemKey = treeGrid.getDataCommunicator().getKeyMapper().key(item);
+            HierarchicalTestBean expectedItem, int[] expectedPath) {
+        var expectedItemKey = treeGrid.getDataCommunicator().getKeyMapper()
+                .key(expectedItem);
 
-        List<JavaScriptInvocation> invocations = getJavaScriptScrollInvocations();
+        var invocations = getJavaScriptScrollInvocations();
         Assert.assertEquals(1, invocations.size());
-        Assert.assertTrue(invocations.get(0).getExpression()
-                .contains("$connector.scrollToItem"));
-        Assert.assertEquals(itemKey, invocations.get(0).getParameters().get(0));
-        Assert.assertArrayEquals(path,
-                (int[]) invocations.get(0).getParameters().get(1));
+
+        var invocation = invocations.get(0);
+        Assert.assertTrue(invocation.getExpression().contains("scrollToItem"));
+        Assert.assertEquals(expectedItemKey, invocation.getParameters().get(0));
+        Assert.assertArrayEquals(expectedPath,
+                (int[]) invocation.getParameters().get(1));
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {

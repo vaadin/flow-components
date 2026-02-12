@@ -22,17 +22,19 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.editor.EditorBeanTest.MockUI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
+
+import net.jcip.annotations.NotThreadSafe;
+
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
 @NotThreadSafe
-public class ScrollToIndexTest {
+public class TreeGridScrollToIndexTest {
 
     private MockUI ui = new MockUI();
     private TreeGrid<String> treeGrid;
@@ -69,7 +71,7 @@ public class ScrollToIndexTest {
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToIndex(5);
         fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex($0)");
+        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
     @Test
@@ -78,7 +80,7 @@ public class ScrollToIndexTest {
         treeGrid.scrollToIndex(5);
         ui.add(treeGrid);
         fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex($0)");
+        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
     @Test
@@ -87,7 +89,8 @@ public class ScrollToIndexTest {
         treeGrid.scrollToIndex(1, 2);
         treeGrid.scrollToIndex(1, 2);
         fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex(...$0)");
+        assertSingleJavaScriptScrollInvocation("scrollToIndex",
+                new int[] { 1, 2 });
     }
 
     @Test
@@ -96,7 +99,8 @@ public class ScrollToIndexTest {
         treeGrid.scrollToIndex(1, 2);
         ui.add(treeGrid);
         fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex(...$0)");
+        assertSingleJavaScriptScrollInvocation("scrollToIndex",
+                new int[] { 1, 2 });
     }
 
     @Test
@@ -121,9 +125,10 @@ public class ScrollToIndexTest {
 
     @Test
     public void onlyLastScrollInvocationExecuted() {
-        ui.add(treeGrid);
         treeData.addRootItems("Item 0");
         treeGrid.setTreeData(treeData);
+        ui.add(treeGrid);
+
         treeGrid.scrollToItem("Item 0");
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToIndex(5, 2);
@@ -135,11 +140,18 @@ public class ScrollToIndexTest {
     }
 
     private void assertSingleJavaScriptScrollInvocation(
-            String expectedExpression) {
-        List<JavaScriptInvocation> invocations = getJavaScriptScrollInvocations();
+            String expectedExpression, Object... expectedParams) {
+        var invocations = getJavaScriptScrollInvocations();
         Assert.assertEquals(1, invocations.size());
-        Assert.assertTrue(invocations.get(0).getExpression()
-                .contains(expectedExpression));
+
+        var invocation = invocations.get(0);
+        Assert.assertTrue(
+                invocation.getExpression().contains(expectedExpression));
+
+        var params = invocation.getParameters();
+        for (int i = 1; i < expectedParams.length; i++) {
+            Assert.assertEquals(expectedParams[i], params.get(i));
+        }
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {

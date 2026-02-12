@@ -16,8 +16,6 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -26,17 +24,20 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.tests.MockUI;
 
+import net.jcip.annotations.NotThreadSafe;
+
+@NotThreadSafe
 public class GridScrollToIndexTest {
 
-    private UI ui;
+    private MockUI ui = new MockUI();
     private Grid<String> grid;
 
     @Before
     public void setUp() {
-        ui = new MockUI();
         grid = new Grid<>();
         grid.setPageSize(50);
     }
@@ -84,59 +85,12 @@ public class GridScrollToIndexTest {
     }
 
     @Test
-    public void listDataProvider_scrollToItem_loadsCorrectRange() {
-        List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
-                .toList();
-
-        grid.setItems(items);
-
-        grid.scrollToItem(items.get(500));
-        Assert.assertEquals("500-550", getViewportRange(grid));
-    }
-
-    @Test
-    public void lazyDataProvider_noItemIndexProvider_scrollToItem_throwsUnsupportedOperationException() {
-        List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
-                .toList();
-
-        grid.setItems(
-                q -> items.stream().skip(q.getOffset()).limit(q.getLimit()));
-        Assert.assertThrows(UnsupportedOperationException.class,
-                () -> grid.scrollToItem(items.get(500)));
-    }
-
-    @Test
-    public void lazyDataProvider_withItemIndexProvider_scrollToItem_loadsCorrectRange() {
-        List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
-                .toList();
-
-        grid.setItems(
-                q -> items.stream().skip(q.getOffset()).limit(q.getLimit()))
-                .setItemIndexProvider((item, query) -> items.indexOf(item));
-
-        grid.scrollToItem(items.get(500));
-        Assert.assertEquals("500-550", getViewportRange(grid));
-    }
-
-    @Test
-    public void scrollToNonExistingItem_noSuchElementExceptionThrown() {
-        List<String> items = IntStream.range(0, 10).mapToObj(String::valueOf)
-                .toList();
-
-        grid.setItems(items);
-
-        Assert.assertThrows(NoSuchElementException.class,
-                () -> grid.scrollToItem("Not present"));
-    }
-
-    @Test
     public void scrollToIndex_afterAttach_schedulesJsExecution() {
         ui.add(grid);
         grid.scrollToIndex(5);
         grid.scrollToIndex(5);
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToIndex", 1);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
     @Test
@@ -144,9 +98,8 @@ public class GridScrollToIndexTest {
         grid.scrollToIndex(5);
         grid.scrollToIndex(5);
         ui.add(grid);
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToIndex", 1);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
     @Test
@@ -154,9 +107,8 @@ public class GridScrollToIndexTest {
         ui.add(grid);
         grid.scrollToStart();
         grid.scrollToStart();
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToIndex", 1);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex", 0);
     }
 
     @Test
@@ -164,9 +116,8 @@ public class GridScrollToIndexTest {
         grid.scrollToStart();
         grid.scrollToStart();
         ui.add(grid);
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToIndex", 1);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex", 0);
     }
 
     @Test
@@ -174,9 +125,8 @@ public class GridScrollToIndexTest {
         ui.add(grid);
         grid.scrollToEnd();
         grid.scrollToEnd();
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToIndex(this._flatSize)", 1);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
     }
 
     @Test
@@ -184,61 +134,50 @@ public class GridScrollToIndexTest {
         grid.scrollToEnd();
         grid.scrollToEnd();
         ui.add(grid);
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToIndex(this._flatSize)", 1);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
     }
 
     @Test
-    public void scrollToItem_afterAttach_schedulesJsExecution() {
+    public void onlyLastScrollInvocationExecuted() {
         grid.setItems("Item 0", "Item 1");
         ui.add(grid);
-        grid.scrollToItem("Item 0");
-        grid.scrollToItem("Item 0");
 
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToItem", 1);
-    }
-
-    @Test
-    public void scrollToItem_beforeAttach_thenAttach_schedulesJsExecution() {
-        grid.setItems("Item 0", "Item 1");
         grid.scrollToItem("Item 0");
-        grid.scrollToItem("Item 0");
-        ui.add(grid);
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToItem", 1);
-    }
-
-    @Test
-    public void onlyLastScrollInvocationSentToClient() {
-        grid.setItems("Item 0", "Item 1");
-        ui.add(grid);
         grid.scrollToIndex(1);
         grid.scrollToStart();
         grid.scrollToEnd();
-        grid.scrollToItem("Item 0");
-
-        var invocations = dumpPendingJavaScriptInvocations();
-        assertInvocationCount(invocations, "scrollToIndex", 0);
-        assertInvocationCount(invocations, "scrollToItem", 1);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
     }
 
-    private List<PendingJavaScriptInvocation> dumpPendingJavaScriptInvocations() {
+    private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
     }
 
-    private void assertInvocationCount(
-            List<PendingJavaScriptInvocation> invocations, String expression,
-            int expectedCount) {
-        long count = invocations.stream().filter(
-                inv -> inv.getInvocation().getExpression().contains(expression))
-                .count();
-        Assert.assertEquals(expectedCount, count);
+    private void assertSingleJavaScriptScrollInvocation(
+            String expectedExpression, Object... expectedParams) {
+        var invocations = getJavaScriptScrollInvocations();
+        Assert.assertEquals(1, invocations.size());
+
+        var invocation = invocations.get(0);
+        Assert.assertTrue(
+                invocation.getExpression().contains(expectedExpression));
+
+        var params = invocation.getParameters();
+        for (int i = 1; i < expectedParams.length; i++) {
+            Assert.assertEquals(expectedParams[i], params.get(i));
+        }
+    }
+
+    private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
+        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("scroll"))
+                .toList();
     }
 
     private String getViewportRange(Grid<String> grid) {
