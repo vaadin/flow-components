@@ -422,6 +422,24 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void isFileTypeAccepted_mimeWithParameters_exactMatch_accepted() {
+        Assert.assertTrue(isFileTypeAccepted("file.html",
+                "text/html; charset=utf-8", List.of("text/html"), List.of()));
+    }
+
+    @Test
+    public void isFileTypeAccepted_mimeWithParameters_wildcardMatch_accepted() {
+        Assert.assertTrue(isFileTypeAccepted("file.html",
+                "text/html; charset=utf-8", List.of("text/*"), List.of()));
+    }
+
+    @Test
+    public void isFileTypeAccepted_mimeWithParameters_nonMatch_rejected() {
+        Assert.assertFalse(isFileTypeAccepted("file.html",
+                "text/html; charset=utf-8", List.of("image/*"), List.of()));
+    }
+
+    @Test
     public void isFileTypeAccepted_multipleMimeTypes_oneMatches_accepted() {
         Assert.assertTrue(isFileTypeAccepted("file.pdf", "application/pdf",
                 List.of("image/*", "application/pdf"), List.of()));

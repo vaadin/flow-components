@@ -443,11 +443,18 @@ public class UploadManager implements Serializable {
 
     /**
      * Checks whether an actual MIME type matches a pattern. Supports exact
-     * match and wildcard patterns like {@code "image/*"}.
+     * match and wildcard patterns like {@code "image/*"}. Parameters in the
+     * actual MIME type (e.g. {@code "text/html; charset=utf-8"}) are stripped
+     * before comparison.
      */
     private static boolean matchesMimeType(String actual, String pattern) {
         if (actual == null || pattern == null) {
             return false;
+        }
+        // Strip MIME type parameters (e.g. "; charset=utf-8")
+        int semicolonIndex = actual.indexOf(';');
+        if (semicolonIndex >= 0) {
+            actual = actual.substring(0, semicolonIndex).trim();
         }
         if (actual.equalsIgnoreCase(pattern)) {
             return true;
