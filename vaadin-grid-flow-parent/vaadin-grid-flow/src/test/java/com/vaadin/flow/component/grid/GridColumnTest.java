@@ -48,6 +48,8 @@ public class GridColumnTest {
 
     IconRenderer<String> renderer;
 
+    private UI ui;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -60,12 +62,14 @@ public class GridColumnTest {
         renderer = new IconRenderer<String>(generator -> new Span(":D"));
         fourthColumn = grid.addColumn(renderer);
 
-        UI.setCurrent(new UI());
+        ui = new UI();
+        UI.setCurrent(ui);
     }
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
