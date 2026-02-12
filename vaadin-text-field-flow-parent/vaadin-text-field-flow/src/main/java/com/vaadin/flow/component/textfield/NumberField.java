@@ -299,7 +299,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * @param signal
      *            the signal to bind the minimum value to, not {@code null}
      * @see #setMin(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<Double> signal) {
@@ -320,7 +321,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * @param signal
      *            the signal to bind the maximum value to, not {@code null}
      * @see #setMax(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<Double> signal) {

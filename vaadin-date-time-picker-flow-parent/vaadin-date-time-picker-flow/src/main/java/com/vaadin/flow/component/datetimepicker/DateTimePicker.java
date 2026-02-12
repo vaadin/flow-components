@@ -48,6 +48,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
@@ -903,12 +904,13 @@ public class DateTimePicker
      *            the signal to bind the minimum date and time to, not
      *            {@code null}
      * @see #setMin(LocalDateTime)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<LocalDateTime> signal) {
         getElement().bindProperty("min",
-                signal == null ? null : signal.map(FORMATTER::apply));
+                signal == null ? null : signal.map(FORMATTER::apply), null);
         minSupport.bind(signal);
     }
 
@@ -955,12 +957,13 @@ public class DateTimePicker
      *            the signal to bind the maximum date and time to, not
      *            {@code null}
      * @see #setMax(LocalDateTime)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<LocalDateTime> signal) {
         getElement().bindProperty("max",
-                signal == null ? null : signal.map(FORMATTER::apply));
+                signal == null ? null : signal.map(FORMATTER::apply), null);
         maxSupport.bind(signal);
     }
 

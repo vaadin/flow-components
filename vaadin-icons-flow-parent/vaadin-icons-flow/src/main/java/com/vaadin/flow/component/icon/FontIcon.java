@@ -18,6 +18,7 @@ package com.vaadin.flow.component.icon;
 import java.util.Optional;
 
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -127,11 +128,12 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      * @param signal
      *            the signal to bind the character code to, not {@code null}
      * @see #setCharCode(String)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindCharCode(Signal<String> signal) {
-        getElement().bindProperty("char", signal);
+        getElement().bindProperty("char", signal, null);
     }
 
     /**
@@ -171,11 +173,12 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      * @param signal
      *            the signal to bind the ligature to, not {@code null}
      * @see #setLigature(String)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindLigature(Signal<String> signal) {
-        getElement().bindProperty("ligature", signal);
+        getElement().bindProperty("ligature", signal, null);
     }
 
     @Override

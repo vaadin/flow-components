@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.icon;
 
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -340,11 +341,12 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @param signal
      *            the signal to bind the symbol to, not {@code null}
      * @see #setSymbol(String)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindSymbol(Signal<String> signal) {
-        getElement().bindProperty("symbol", signal);
+        getElement().bindProperty("symbol", signal, null);
     }
 
     @Override
