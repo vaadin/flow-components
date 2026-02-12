@@ -25,7 +25,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -126,9 +126,9 @@ public class UploadDropZoneTest {
     }
 
     @Test
-    public void implementsHasComponents() {
+    public void implementsHasEnabled() {
         Assert.assertTrue(
-                HasComponents.class.isAssignableFrom(UploadDropZone.class));
+                HasEnabled.class.isAssignableFrom(UploadDropZone.class));
     }
 
     @Test
@@ -137,12 +137,44 @@ public class UploadDropZoneTest {
     }
 
     @Test
-    public void add_addsChildComponent() {
+    public void setContent_setsChildComponent() {
         UploadDropZone dropZone = new UploadDropZone();
         Span span = new Span("Drop files here");
 
-        dropZone.add(span);
+        dropZone.setContent(span);
 
         Assert.assertEquals(1, dropZone.getElement().getChildCount());
+        Assert.assertSame(span, dropZone.getContent());
+    }
+
+    @Test
+    public void setContent_replacesExistingContent() {
+        UploadDropZone dropZone = new UploadDropZone();
+        Span first = new Span("First");
+        Span second = new Span("Second");
+
+        dropZone.setContent(first);
+        dropZone.setContent(second);
+
+        Assert.assertEquals(1, dropZone.getElement().getChildCount());
+        Assert.assertSame(second, dropZone.getContent());
+    }
+
+    @Test
+    public void setContent_null_removesContent() {
+        UploadDropZone dropZone = new UploadDropZone();
+        dropZone.setContent(new Span("Content"));
+
+        dropZone.setContent(null);
+
+        Assert.assertEquals(0, dropZone.getElement().getChildCount());
+        Assert.assertNull(dropZone.getContent());
+    }
+
+    @Test
+    public void getContent_default_returnsNull() {
+        UploadDropZone dropZone = new UploadDropZone();
+
+        Assert.assertNull(dropZone.getContent());
     }
 }
