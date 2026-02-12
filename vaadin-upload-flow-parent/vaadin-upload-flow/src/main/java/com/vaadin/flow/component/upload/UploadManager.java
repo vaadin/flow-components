@@ -32,6 +32,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
@@ -358,6 +359,10 @@ public class UploadManager implements Serializable {
      * reads the current {@link #acceptedMimeTypes} and
      * {@link #acceptedFileExtensions} at the time of each upload request, so
      * changes made after {@link #setUploadHandler} are picked up.
+     * <p>
+     * NOTE: If new methods are added to {@link UploadHandler} or
+     * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
+     * be explicitly delegated here.
      */
     private UploadHandler wrapWithFileTypeValidation(UploadHandler delegate) {
         return new UploadHandler() {
@@ -395,6 +400,21 @@ public class UploadManager implements Serializable {
             @Override
             public long getFileCountMax() {
                 return delegate.getFileCountMax();
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return delegate.getUrlPostfix();
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return delegate.isAllowInert();
+            }
+
+            @Override
+            public DisabledUpdateMode getDisabledUpdateMode() {
+                return delegate.getDisabledUpdateMode();
             }
         };
     }

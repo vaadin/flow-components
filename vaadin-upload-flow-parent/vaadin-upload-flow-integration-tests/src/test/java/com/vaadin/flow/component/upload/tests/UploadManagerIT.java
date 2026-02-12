@@ -277,6 +277,24 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     @Test
+    public void disableManager_withAlwaysDisabledModeHandler_uploadSucceeds()
+            throws Exception {
+        // Switch to a handler that overrides getDisabledUpdateMode() to
+        // ALWAYS. This test would fail if the file-type-validation wrapper
+        // did not delegate getDisabledUpdateMode() to the original handler,
+        // because the default ONLY_WHEN_ENABLED would reject the upload.
+        clickButton("set-always-disabled-handler");
+        assertLogContains("Handler set: ALWAYS disabled mode");
+
+        clickButton("disable-manager");
+
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+
+        assertLogContains("Uploaded: " + tempFile.getName());
+    }
+
+    @Test
     public void detachOwner_uploadFails() throws Exception {
         // Detach the owner component
         clickButton("detach-owner");
