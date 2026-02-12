@@ -27,9 +27,11 @@ import com.vaadin.flow.component.UI;
  */
 public class AbstractSignalsUnitTest {
 
+    private static UI mockUI;
+
     @BeforeClass
     public static void setupUI() {
-        var mockUI = new MockUI();
+        mockUI = new MockUI();
         UI.setCurrent(mockUI);
     }
 
@@ -39,5 +41,6 @@ public class AbstractSignalsUnitTest {
             UI.getCurrent().removeAll();
             UI.setCurrent(null);
         }
+        mockUI = null;
     }
 }

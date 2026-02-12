@@ -36,9 +36,11 @@ public class CardTest {
 
     private Card card;
 
+    private UI ui;
+
     @Before
     public void setup() {
-        var ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         card = new Card();
         ui.add(card);
@@ -47,6 +49,7 @@ public class CardTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test

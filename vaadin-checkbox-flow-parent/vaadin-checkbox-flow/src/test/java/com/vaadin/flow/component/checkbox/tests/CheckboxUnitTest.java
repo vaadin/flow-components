@@ -35,9 +35,12 @@ import com.vaadin.flow.server.VaadinSession;
 
 public class CheckboxUnitTest {
 
+    private UI ui;
+
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -101,7 +104,7 @@ public class CheckboxUnitTest {
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-checkbox");
         element.setProperty("checked", true);
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);
