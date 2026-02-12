@@ -17,29 +17,35 @@ package com.vaadin.flow.component.treegrid;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
+import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.grid.editor.EditorBeanTest.MockUI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.flow.server.VaadinSession;
 
+@NotThreadSafe
 public class ScrollToIndexTest {
 
-    private UI ui;
+    private MockUI ui = new MockUI();
     private TreeGrid<String> treeGrid;
     private TreeData<String> treeData = new TreeData<>();
 
     @Before
     public void setup() {
-        ui = new UI();
-        ui.getInternals().setSession(Mockito.mock(VaadinSession.class));
         treeGrid = new TreeGrid<>();
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -60,100 +66,91 @@ public class ScrollToIndexTest {
     @Test
     public void scrollToIndex_afterAttach_schedulesJsExecution() {
         ui.add(treeGrid);
-
         treeGrid.scrollToIndex(5);
-
-        assertPendingScrollToIndexInvocation();
+        treeGrid.scrollToIndex(5);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex($0)");
     }
 
     @Test
     public void scrollToIndex_beforeAttach_thenAttach_schedulesJsExecution() {
         treeGrid.scrollToIndex(5);
-
+        treeGrid.scrollToIndex(5);
         ui.add(treeGrid);
-
-        assertPendingScrollToIndexInvocation();
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex($0)");
     }
 
     @Test
     public void scrollToIndexPath_afterAttach_schedulesJsExecution() {
         ui.add(treeGrid);
-
         treeGrid.scrollToIndex(1, 2);
-
-        assertPendingScrollToIndexPathInvocation();
+        treeGrid.scrollToIndex(1, 2);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex(...$0)");
     }
 
     @Test
     public void scrollToIndexPath_beforeAttach_thenAttach_schedulesJsExecution() {
         treeGrid.scrollToIndex(1, 2);
-
+        treeGrid.scrollToIndex(1, 2);
         ui.add(treeGrid);
-
-        assertPendingScrollToIndexPathInvocation();
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation("scrollToIndex(...$0)");
     }
 
     @Test
     public void scrollToEnd_afterAttach_schedulesJsExecution() {
         ui.add(treeGrid);
-
         treeGrid.scrollToEnd();
-
-        assertPendingScrollToEndInvocation();
+        treeGrid.scrollToEnd();
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation(
+                "scrollToIndex(...Array(10).fill(-1))");
     }
 
     @Test
     public void scrollToEnd_beforeAttach_thenAttach_schedulesJsExecution() {
         treeGrid.scrollToEnd();
-
+        treeGrid.scrollToEnd();
         ui.add(treeGrid);
-
-        assertPendingScrollToEndInvocation();
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation(
+                "scrollToIndex(...Array(10).fill(-1))");
     }
 
-    private void assertPendingScrollToIndexInvocation() {
-        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
-
-        long scrollToIndexCount = pendingInvocations.stream().filter(inv -> inv
-                .getInvocation().getExpression().contains("scrollToIndex($0)"))
-                .count();
-
-        Assert.assertEquals(
-                "Expected one scrollToIndex JS invocation to be scheduled", 1,
-                scrollToIndexCount);
+    @Test
+    public void onlyLastScrollInvocationExecuted() {
+        ui.add(treeGrid);
+        treeData.addRootItems("Item 0");
+        treeGrid.setTreeData(treeData);
+        treeGrid.scrollToItem("Item 0");
+        treeGrid.scrollToIndex(5);
+        treeGrid.scrollToIndex(5, 2);
+        treeGrid.scrollToStart();
+        treeGrid.scrollToEnd();
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollInvocation(
+                "scrollToIndex(...Array(10).fill(-1))");
     }
 
-    private void assertPendingScrollToIndexPathInvocation() {
-        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
-
-        long scrollToIndexCount = pendingInvocations.stream()
-                .filter(inv -> inv.getInvocation().getExpression()
-                        .contains("scrollToIndex(...$0)"))
-                .count();
-
-        Assert.assertEquals(
-                "Expected one scrollToIndex path JS invocation to be scheduled",
-                1, scrollToIndexCount);
+    private void assertSingleJavaScriptScrollInvocation(
+            String expectedExpression) {
+        List<JavaScriptInvocation> invocations = getJavaScriptScrollInvocations();
+        Assert.assertEquals(1, invocations.size());
+        Assert.assertTrue(invocations.get(0).getExpression()
+                .contains(expectedExpression));
     }
 
-    private void assertPendingScrollToEndInvocation() {
-        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
-
-        long scrollToEndCount = pendingInvocations.stream().filter(inv -> inv
-                .getInvocation().getExpression().contains("Array(10).fill(-1)"))
-                .count();
-
-        Assert.assertEquals(
-                "Expected one scrollToEnd JS invocation to be scheduled", 1,
-                scrollToEndCount);
+    private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
+        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("scroll"))
+                .toList();
     }
 
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        fakeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void fakeClientResponse() {
+    private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
