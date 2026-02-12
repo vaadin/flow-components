@@ -26,16 +26,20 @@ import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadDropLabelTest {
+
+    private UI ui;
+
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     // Regression test for:
     // https://github.com/vaadin/flow-components/issues/3053
     @Test
     public void setLabelAndIcon_updateLabel_doesNotThrow() {
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         Upload upload = new Upload();
         upload.setDropLabel(new Span("Label"));

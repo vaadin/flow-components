@@ -61,6 +61,8 @@ public class LangChain4JLLMProviderTest {
     private LangChain4JLLMProvider provider;
     private LangChain4JLLMProvider streamingProvider;
 
+    private UI ui;
+
     @Before
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
@@ -72,6 +74,7 @@ public class LangChain4JLLMProviderTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -572,7 +575,7 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withStreamingModelAndPushDisabled_logsWarning() {
-        var ui = Mockito.mock(UI.class);
+        ui = Mockito.mock(UI.class);
         var pushConfig = Mockito.mock(PushConfiguration.class);
         Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
         Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
@@ -608,7 +611,7 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withNonStreamingModelAndPushDisabled_doesNotLogWarning() {
-        var ui = Mockito.mock(UI.class);
+        ui = Mockito.mock(UI.class);
         var pushConfig = Mockito.mock(PushConfiguration.class);
         Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
         Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);

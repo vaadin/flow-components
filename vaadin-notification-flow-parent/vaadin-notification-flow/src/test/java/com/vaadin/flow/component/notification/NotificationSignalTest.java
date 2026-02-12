@@ -33,9 +33,12 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
     private ValueSignal<String> textSignal;
     private Signal<String> computedSignal;
 
+    private UI ui;
+
     @Before
     public void setup() {
-        UI.setCurrent(new UI());
+        ui = new UI();
+        UI.setCurrent(ui);
         textSignal = new ValueSignal<>("foo");
         computedSignal = Signal.computed(() -> textSignal.value() + " bar");
     }
@@ -49,6 +52,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
             }
         }
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test

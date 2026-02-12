@@ -49,9 +49,12 @@ public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
 
+    private UI ui;
+
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -152,7 +155,7 @@ public class DatePickerTest {
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-date-picker");
         element.setProperty("value", "2007-12-03");
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);

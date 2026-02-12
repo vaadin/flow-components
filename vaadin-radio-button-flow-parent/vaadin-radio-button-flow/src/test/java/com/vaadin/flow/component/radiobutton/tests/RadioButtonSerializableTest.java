@@ -23,9 +23,13 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
 public class RadioButtonSerializableTest extends ClassesSerializableTest {
+
+    private UI ui;
+
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -34,7 +38,7 @@ public class RadioButtonSerializableTest extends ClassesSerializableTest {
         var group = new RadioButtonGroup<>();
         group.setItems("Item 1", "Item 2");
 
-        var ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         ui.add(group);
 
