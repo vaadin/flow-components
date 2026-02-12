@@ -1340,8 +1340,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *             directly
      */
     @Override
-    public <T, S extends Signal<T>> Registration bindChildren(
-            Signal<List<S>> list,
+    public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,
             SerializableFunction<S, Component> childFactory) {
         throw new UnsupportedOperationException(
                 "Dialog does not support binding children directly. "
