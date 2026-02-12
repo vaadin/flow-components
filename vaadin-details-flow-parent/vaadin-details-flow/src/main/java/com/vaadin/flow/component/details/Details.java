@@ -305,8 +305,7 @@ public class Details extends Component implements HasComponents, HasSize,
     }
 
     @Override
-    public <T, S extends Signal<T>> Registration bindChildren(
-            Signal<List<S>> list,
+    public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,
             SerializableFunction<S, Component> childFactory) {
         Objects.requireNonNull(list, "ListSignal cannot be null");
         Objects.requireNonNull(childFactory,
