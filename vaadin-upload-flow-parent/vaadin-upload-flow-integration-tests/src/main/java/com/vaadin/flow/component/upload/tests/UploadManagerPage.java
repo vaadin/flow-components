@@ -80,7 +80,6 @@ public class UploadManagerPage extends UploadDropZone {
         // Create upload button linked to the manager
         uploadButton = new UploadButton(manager);
         uploadButton.setId("upload-button");
-        uploadButton.setText("Select Files");
         layout.add(uploadButton);
 
         // Create file list linked to the manager

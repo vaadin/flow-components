@@ -21,6 +21,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * A button component for triggering file uploads. When clicked, it opens a file
@@ -41,6 +42,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha7")
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 public class UploadButton extends Button implements HasUploadManager {
+
+    private UploadButtonI18N i18n;
 
     /**
      * Creates a new upload button without a manager. The manager must be set
@@ -80,6 +83,31 @@ public class UploadButton extends Button implements HasUploadManager {
 
     private void doSetText(String text) {
         super.setText(text);
+    }
+
+    /**
+     * Set the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(UploadButtonI18N i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    /**
+     * Get the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(UploadButtonI18N)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public UploadButtonI18N getI18n() {
+        return i18n;
     }
 
     /**
