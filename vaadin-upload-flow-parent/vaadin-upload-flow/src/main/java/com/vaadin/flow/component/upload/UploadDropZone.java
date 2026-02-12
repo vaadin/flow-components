@@ -36,8 +36,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * <pre>
  * var manager = new UploadManager(uploadHandler);
- * var dropZone = new UploadDropZone(manager);
- * dropZone.setContent(new Span("Drop files here"));
+ * var dropZone = new UploadDropZone(new Span("Drop files here"), manager);
  * add(dropZone);
  * </pre>
  *
@@ -71,6 +70,22 @@ public class UploadDropZone extends Component
     }
 
     /**
+     * Creates a new drop zone with the given content, linked to the given
+     * manager.
+     *
+     * @param content
+     *            the content to set
+     * @param manager
+     *            the upload manager to link to, not {@code null}
+     * @throws NullPointerException
+     *             if manager is {@code null}
+     */
+    public UploadDropZone(Component content, UploadManager manager) {
+        this(manager);
+        setContent(content);
+    }
+
+    /**
      * Returns the content of the drop zone. Returns {@code null} if the drop
      * zone has no content.
      *
@@ -81,8 +96,8 @@ public class UploadDropZone extends Component
     }
 
     /**
-     * Sets the content of the drop zone. Set {@code null} to remove the
-     * current content.
+     * Sets the content of the drop zone. Set {@code null} to remove the current
+     * content.
      *
      * @param content
      *            the content to set
