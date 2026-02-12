@@ -22,8 +22,8 @@ import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 
@@ -172,17 +172,16 @@ public class UploadManagerPage extends UploadDropZone {
         var enableManager = new NativeButton("Enable",
                 event -> manager.setEnabled(true));
         enableManager.setId("enable-manager");
-        var setAlwaysDisabledHandler = new NativeButton(
-                "ALWAYS disabled mode", e -> {
+        var setAlwaysDisabledHandler = new NativeButton("ALWAYS disabled mode",
+                e -> {
                     manager.setUploadHandler(new UploadHandler() {
                         @Override
-                        public void handleUploadRequest(
-                                UploadEvent uploadEvent)
+                        public void handleUploadRequest(UploadEvent uploadEvent)
                                 throws java.io.IOException {
                             byte[] data = uploadEvent.getInputStream()
                                     .readAllBytes();
-                            UI.getCurrent().access(
-                                    () -> log("Uploaded: "
+                            UI.getCurrent()
+                                    .access(() -> log("Uploaded: "
                                             + uploadEvent.getFileName() + " ("
                                             + data.length + " bytes)"));
                         }

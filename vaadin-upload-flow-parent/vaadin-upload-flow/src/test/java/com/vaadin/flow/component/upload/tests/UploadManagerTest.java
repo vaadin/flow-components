@@ -39,6 +39,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -52,7 +53,6 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
 import com.vaadin.flow.server.streams.UploadHandler;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -851,12 +851,10 @@ public class UploadManagerTest {
     private ElementRequestHandler getRegisteredHandler() {
         Element connectorElement = getConnector(manager).getElement();
         String targetUri = connectorElement.getAttribute("target");
-        StreamResourceRegistry registry = ui.getSession()
-                .getResourceRegistry();
+        StreamResourceRegistry registry = ui.getSession().getResourceRegistry();
         URI uri = URI.create(targetUri);
         StreamResourceRegistry.ElementStreamResource resource = registry
-                .getResource(
-                        StreamResourceRegistry.ElementStreamResource.class,
+                .getResource(StreamResourceRegistry.ElementStreamResource.class,
                         uri)
                 .orElseThrow(() -> new AssertionError(
                         "No ElementStreamResource found for URI: "
