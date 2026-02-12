@@ -68,6 +68,8 @@ public class AiOrchestratorTest {
     private AiFileReceiver mockFileReceiver;
     private static MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
+    private static UI mockUI;
+
     @Before
     public void setup() {
         mockProvider = Mockito.mock(LLMProvider.class);
@@ -83,6 +85,7 @@ public class AiOrchestratorTest {
             mockFeatureFlagsStatic = null;
         }
         UI.setCurrent(null);
+        mockUI = null;
     }
 
     @Test
@@ -947,7 +950,7 @@ public class AiOrchestratorTest {
     }
 
     private static void mockUi() {
-        var mockUI = Mockito.mock(UI.class);
+        mockUI = Mockito.mock(UI.class);
         Mockito.doAnswer(invocation -> {
             Command command = invocation.getArgument(0);
             var futureTask = new FutureTask<Void>(() -> {

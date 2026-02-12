@@ -44,12 +44,15 @@ import com.vaadin.flow.server.VaadinSession;
  */
 public class PasswordFieldTest {
 
+    private UI ui;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -84,7 +87,7 @@ public class PasswordFieldTest {
     public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-password-field");
         element.setProperty("value", "test");
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);

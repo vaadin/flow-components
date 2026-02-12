@@ -24,15 +24,18 @@ import com.vaadin.flow.component.UI;
 
 public class LitRendererTest {
 
+    private UI ui;
+
     @Before
     public void setup() {
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
     }
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -33,14 +33,18 @@ public class NotificationTest {
 
     private Notification notification;
 
+    private UI ui;
+
     @Before
     public void setup() {
-        UI.setCurrent(new UI());
+        ui = new UI();
+        UI.setCurrent(ui);
     }
 
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
