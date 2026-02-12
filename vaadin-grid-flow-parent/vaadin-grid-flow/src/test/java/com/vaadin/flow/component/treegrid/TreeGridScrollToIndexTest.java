@@ -27,11 +27,10 @@ import com.vaadin.flow.component.grid.editor.EditorBeanTest.MockUI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
-
-import net.jcip.annotations.NotThreadSafe;
-
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+
+import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class TreeGridScrollToIndexTest {
