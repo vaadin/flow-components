@@ -29,13 +29,15 @@ public class BuiltinFormatsTest {
     CellStyle cellStyle;
     DataFormat dataFormat;
 
+    private UI ui;
+
     @Before
     public void init() {
         setupWithLocale(Locale.US);
     }
 
     private void setupWithLocale(Locale locale) {
-        var ui = new UI();
+        ui = new UI();
         ui.setLocale(locale);
         UI.setCurrent(ui);
 
@@ -51,6 +53,7 @@ public class BuiltinFormatsTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test

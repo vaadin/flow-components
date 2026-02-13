@@ -212,8 +212,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.1.0-alpha6")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/grid", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha7")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -5049,7 +5049,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(
+        getElement().getNode().runWhenAttached(
                 ui -> ui.beforeClientResponse(this, ctx -> getElement()
                         .executeJs("this.scrollToIndex(this._flatSize)")));
     }

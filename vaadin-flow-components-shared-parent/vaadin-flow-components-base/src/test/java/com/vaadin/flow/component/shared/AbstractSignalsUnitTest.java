@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.shared;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 
 import com.vaadin.flow.component.UI;
 
@@ -27,17 +27,20 @@ import com.vaadin.flow.component.UI;
  */
 public class AbstractSignalsUnitTest {
 
-    @BeforeClass
-    public static void setupUI() {
-        var mockUI = new MockUI();
+    private UI mockUI;
+
+    @Before
+    public void setupUI() {
+        mockUI = new MockUI();
         UI.setCurrent(mockUI);
     }
 
-    @AfterClass
-    public static void teardownUI() {
+    @After
+    public void teardownUI() {
         if (UI.getCurrent() != null) {
             UI.getCurrent().removeAll();
             UI.setCurrent(null);
         }
+        mockUI = null;
     }
 }

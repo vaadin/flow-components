@@ -41,10 +41,10 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
     public void bindMin_synchronizedWhenAttached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindMin(signal);
-        Assert.assertEquals(signal.value(), datePicker.getMin());
+        Assert.assertEquals(signal.get(), datePicker.getMin());
 
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(signal.value(), datePicker.getMin());
+        signal.set(LocalDate.of(2023, 2, 1));
+        Assert.assertEquals(signal.get(), datePicker.getMin());
     }
 
     @Test
@@ -53,7 +53,7 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
         datePicker.bindMin(signal);
         UI.getCurrent().add(datePicker);
 
-        signal.value(LocalDate.of(2023, 2, 1));
+        signal.set(LocalDate.of(2023, 2, 1));
 
         // Use reflection to check the private field 'min'
         java.lang.reflect.Field minField = DatePicker.class
@@ -70,24 +70,11 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
         datePicker.bindMin(signal);
         datePicker.removeFromParent();
 
-        signal.value(LocalDate.of(2023, 2, 1));
+        signal.set(LocalDate.of(2023, 2, 1));
         Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMin());
 
         UI.getCurrent().add(datePicker);
         Assert.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMin());
-    }
-
-    @Test
-    public void bindMin_unbindWithNull() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMin(signal);
-        datePicker.bindMin(null);
-
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMin());
-
-        datePicker.setMin(LocalDate.of(2023, 3, 1));
-        Assert.assertEquals(LocalDate.of(2023, 3, 1), datePicker.getMin());
     }
 
     @Test(expected = BindingActiveException.class)
@@ -108,10 +95,10 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
     public void bindMax_synchronizedWhenAttached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindMax(signal);
-        Assert.assertEquals(signal.value(), datePicker.getMax());
+        Assert.assertEquals(signal.get(), datePicker.getMax());
 
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(signal.value(), datePicker.getMax());
+        signal.set(LocalDate.of(2023, 2, 1));
+        Assert.assertEquals(signal.get(), datePicker.getMax());
     }
 
     @Test
@@ -120,7 +107,7 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
         datePicker.bindMax(signal);
         UI.getCurrent().add(datePicker);
 
-        signal.value(LocalDate.of(2023, 2, 1));
+        signal.set(LocalDate.of(2023, 2, 1));
 
         // Use reflection to check the private field 'max'
         java.lang.reflect.Field maxField = DatePicker.class
@@ -137,24 +124,11 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
         datePicker.bindMax(signal);
         datePicker.removeFromParent();
 
-        signal.value(LocalDate.of(2023, 2, 1));
+        signal.set(LocalDate.of(2023, 2, 1));
         Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMax());
 
         UI.getCurrent().add(datePicker);
         Assert.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMax());
-    }
-
-    @Test
-    public void bindMax_unbindWithNull() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMax(signal);
-        datePicker.bindMax(null);
-
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMax());
-
-        datePicker.setMax(LocalDate.of(2023, 3, 1));
-        Assert.assertEquals(LocalDate.of(2023, 3, 1), datePicker.getMax());
     }
 
     @Test(expected = BindingActiveException.class)
@@ -175,10 +149,10 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
     public void bindInitialPosition_synchronizedWhenAttached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindInitialPosition(signal);
-        Assert.assertEquals(signal.value(), datePicker.getInitialPosition());
+        Assert.assertEquals(signal.get(), datePicker.getInitialPosition());
 
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(signal.value(), datePicker.getInitialPosition());
+        signal.set(LocalDate.of(2023, 2, 1));
+        Assert.assertEquals(signal.get(), datePicker.getInitialPosition());
     }
 
     @Test
@@ -187,27 +161,12 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
         datePicker.bindInitialPosition(signal);
         datePicker.removeFromParent();
 
-        signal.value(LocalDate.of(2023, 2, 1));
+        signal.set(LocalDate.of(2023, 2, 1));
         Assert.assertEquals(LocalDate.of(2023, 1, 1),
                 datePicker.getInitialPosition());
 
         UI.getCurrent().add(datePicker);
         Assert.assertEquals(LocalDate.of(2023, 2, 1),
-                datePicker.getInitialPosition());
-    }
-
-    @Test
-    public void bindInitialPosition_unbindWithNull() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindInitialPosition(signal);
-        datePicker.bindInitialPosition(null);
-
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1),
-                datePicker.getInitialPosition());
-
-        datePicker.setInitialPosition(LocalDate.of(2023, 3, 1));
-        Assert.assertEquals(LocalDate.of(2023, 3, 1),
                 datePicker.getInitialPosition());
     }
 

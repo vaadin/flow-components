@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,14 +24,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.PushConfiguration;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
+import com.vaadin.flow.shared.communication.PushMode;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -55,12 +61,20 @@ public class LangChain4JLLMProviderTest {
     private LangChain4JLLMProvider provider;
     private LangChain4JLLMProvider streamingProvider;
 
+    private UI ui;
+
     @Before
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         mockStreamingChatModel = Mockito.mock(StreamingChatModel.class);
         provider = new LangChain4JLLMProvider(mockChatModel);
         streamingProvider = new LangChain4JLLMProvider(mockStreamingChatModel);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -557,6 +571,68 @@ public class LangChain4JLLMProviderTest {
         Assert.assertEquals(1, toolResultMessages.size());
         Assert.assertEquals(toolObject.getErrorMessage(),
                 toolResultMessages.getFirst().text());
+    }
+
+    @Test
+    public void stream_withStreamingModelAndPushDisabled_logsWarning() {
+        ui = Mockito.mock(UI.class);
+        var pushConfig = Mockito.mock(PushConfiguration.class);
+        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
+        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
+        UI.setCurrent(ui);
+
+        var originalErr = System.err;
+        var errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        try {
+            var request = createSimpleRequest("Hello");
+            Mockito.doAnswer(invocation -> {
+                StreamingChatResponseHandler handler = invocation
+                        .getArgument(1);
+                handler.onPartialResponse("Hi");
+                var aiMessage = Mockito.mock(AiMessage.class);
+                Mockito.when(aiMessage.hasToolExecutionRequests())
+                        .thenReturn(false);
+                var response = Mockito.mock(ChatResponse.class);
+                Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+                handler.onCompleteResponse(response);
+                return null;
+            }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                    Mockito.any(StreamingChatResponseHandler.class));
+
+            streamingProvider.stream(request).collectList().block();
+
+            var errContent = errStream.toString(StandardCharsets.UTF_8);
+            Assert.assertTrue(errContent.contains("Push is not enabled"));
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
+    @Test
+    public void stream_withNonStreamingModelAndPushDisabled_doesNotLogWarning() {
+        ui = Mockito.mock(UI.class);
+        var pushConfig = Mockito.mock(PushConfiguration.class);
+        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
+        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
+        UI.setCurrent(ui);
+
+        var originalErr = System.err;
+        var errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        try {
+            var request = createSimpleRequest("Hello");
+            var response = mockSimpleResponse("Hi there");
+            Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                    .thenReturn(response);
+
+            provider.stream(request).collectList().block();
+
+            var errContent = errStream.toString(StandardCharsets.UTF_8);
+            Assert.assertFalse(errContent.contains("Push is not enabled"));
+        } finally {
+            System.setErr(originalErr);
+        }
     }
 
     private void mockSimpleChat(LLMRequest request, String responseText) {

@@ -61,6 +61,8 @@ public class SelectTest {
     private Select<String> select;
     private Supplier<Select> selectSupplier = () -> select;
 
+    private UI ui;
+
     @Before
     public void setup() {
         select = new Select<>();
@@ -69,6 +71,7 @@ public class SelectTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -692,7 +695,7 @@ public class SelectTest {
     public void elementHasValue_wrapIntoField_doesNotThrow() {
         Element element = new Element("vaadin-select");
         element.setProperty("value", "foo");
-        UI ui = new UI();
+        ui = new UI();
         UI.setCurrent(ui);
         VaadinSession session = Mockito.mock(VaadinSession.class);
         ui.getInternals().setSession(session);
