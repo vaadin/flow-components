@@ -30,9 +30,27 @@ public enum MenuBarVariant implements ThemeVariant {
     LUMO_ICON("icon"),
     LUMO_END_ALIGNED("end-aligned"),
     LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
+    /**
+     * @deprecated Use {@link #ALIGN_END} instead.
+     */
+    @Deprecated
     AURA_END_ALIGNED("end-aligned"),
+    /**
+     * @deprecated Use {@link #PRIMARY} instead.
+     */
+    @Deprecated
     AURA_PRIMARY("primary"),
-    AURA_TERTIARY("tertiary");
+    /**
+     * @deprecated Use {@link #TERTIARY} instead.
+     */
+    @Deprecated
+    AURA_TERTIARY("tertiary"),
+    PRIMARY("primary"),
+    TERTIARY("tertiary"),
+    SUCCESS("success"),
+    WARNING("warning"),
+    ERROR("error"),
+    ALIGN_END("end-aligned");
 
     private final String variant;
 
