@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.slider;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
@@ -46,9 +45,6 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
         KeyNotifier {
-
-    private static final Logger logger = LoggerFactory
-            .getLogger(SliderBase.class);
 
     private static final double DEFAULT_STEP = 1.0;
 
@@ -280,21 +276,21 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         TValue value = getValue();
 
         if (min > max) {
-            logger.warn(
+            LoggerFactory.getLogger(getClass()).warn(
                     "{}: min ({}) is greater than max ({})."
                             + " This can lead to unexpected behavior and a broken UI.",
                     getClass().getSimpleName(), min, max);
         }
 
         if (min <= max && !isValueWithinMinMax(value)) {
-            logger.warn(
+            LoggerFactory.getLogger(getClass()).warn(
                     "{}: value ({}) is out of [min, max] range (min={}, max={})."
                             + " This can lead to unexpected behavior and a broken UI.",
                     getClass().getSimpleName(), value, min, max);
         }
 
         if (min <= max && step > 0 && !isValueAlignedWithStep(value)) {
-            logger.warn(
+            LoggerFactory.getLogger(getClass()).warn(
                     "{}: value ({}) is not aligned with step"
                             + " (min={}, max={}, step={})."
                             + " This can lead to unexpected behavior and a broken UI.",
