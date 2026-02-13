@@ -20,16 +20,16 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AiAttachmentTest {
+public class AIAttachmentTest {
 
     @Test
     public void nullParameter_throws() {
         Assert.assertThrows(NullPointerException.class,
-                () -> new AiAttachment(null, getMimeType(), getData()));
+                () -> new AIAttachment(null, getMimeType(), getData()));
         Assert.assertThrows(NullPointerException.class,
-                () -> new AiAttachment(getFileName(), null, getData()));
+                () -> new AIAttachment(getFileName(), null, getData()));
         Assert.assertThrows(NullPointerException.class,
-                () -> new AiAttachment(getFileName(), getMimeType(), null));
+                () -> new AIAttachment(getFileName(), getMimeType(), null));
     }
 
     private static byte[] getData() {

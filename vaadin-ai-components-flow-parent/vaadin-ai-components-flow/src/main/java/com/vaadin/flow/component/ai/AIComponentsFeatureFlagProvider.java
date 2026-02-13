@@ -22,11 +22,11 @@ import com.vaadin.experimental.FeatureFlagProvider;
 
 /**
  * Provides the AI components feature flag for AI-related features such as
- * AiOrchestrator, modular upload components, and MessageListItem attachments.
+ * AIOrchestrator, modular upload components, and MessageListItem attachments.
  *
  * @author Vaadin Ltd
  */
-public class AiComponentsFeatureFlagProvider implements FeatureFlagProvider {
+public class AIComponentsFeatureFlagProvider implements FeatureFlagProvider {
 
     /**
      * The feature flag ID for AI components.
@@ -35,7 +35,7 @@ public class AiComponentsFeatureFlagProvider implements FeatureFlagProvider {
 
     /**
      * The AI components feature flag. When enabled, allows use of AI-related
-     * features including AiOrchestrator, modular upload components, and
+     * features including AIOrchestrator, modular upload components, and
      * MessageListItem attachments.
      */
     public static final Feature AI_COMPONENTS = new Feature("AI Components", // title
