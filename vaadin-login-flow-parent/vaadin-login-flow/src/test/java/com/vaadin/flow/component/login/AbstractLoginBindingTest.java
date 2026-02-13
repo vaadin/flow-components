@@ -46,12 +46,12 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         assertTrue(form.getElement().getProperty("error", false));
 
         // Update to a different non-null value
-        signal.value(false);
+        signal.set(false);
         assertFalse(form.isError());
         assertFalse(form.getElement().getProperty("error", false));
 
         // Update to null -> should map to false
-        signal.value(null);
+        signal.set(null);
         assertFalse(form.isError());
         assertFalse(form.getElement().getProperty("error", false));
     }
@@ -64,7 +64,7 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
 
         // While detached, binding should be inactive
         assertFalse(form.isError());
-        signal.value(false);
+        signal.set(false);
         assertFalse(form.isError());
 
         // Attach -> latest value is applied
@@ -72,7 +72,7 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         assertFalse(form.isError());
 
         // Update after attach -> applied
-        signal.value(true);
+        signal.set(true);
         assertTrue(form.isError());
         assertTrue(form.isEnabled()); // error=true enables component
     }
@@ -116,7 +116,7 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         assertFalse(form.isError());
 
         // Signal update should not affect component anymore
-        signal.value(true);
+        signal.set(true);
         assertFalse(form.isError());
     }
 
@@ -131,7 +131,7 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         assertFalse(form.isEnabled());
 
         // When error becomes true, component should be enabled
-        signal.value(true);
+        signal.set(true);
         assertTrue(form.isError());
         assertTrue(form.isEnabled());
     }
@@ -146,7 +146,7 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         assertTrue(form.isEnabled()); // error=true enables it
 
         // When error becomes false, component should remain enabled
-        signal.value(false);
+        signal.set(false);
         assertFalse(form.isError());
         assertTrue(form.isEnabled()); // Should still be enabled
     }
@@ -163,12 +163,12 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         assertFalse(form.isError());
 
         // error: false -> true (should enable)
-        signal.value(true);
+        signal.set(true);
         assertTrue(form.isError());
         assertTrue(form.isEnabled());
 
         // error: true -> false (should stay enabled)
-        signal.value(false);
+        signal.set(false);
         assertFalse(form.isError());
         assertTrue(form.isEnabled());
 
@@ -177,7 +177,7 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         assertFalse(form.isEnabled());
 
         // error: false -> true (should enable again)
-        signal.value(true);
+        signal.set(true);
         assertTrue(form.isError());
         assertTrue(form.isEnabled());
     }
@@ -193,10 +193,10 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         // Verify element property is synchronized
         assertFalse(form.getElement().getProperty("error", false));
 
-        signal.value(true);
+        signal.set(true);
         assertTrue(form.getElement().getProperty("error", false));
 
-        signal.value(false);
+        signal.set(false);
         assertFalse(form.getElement().getProperty("error", false));
     }
 
@@ -216,11 +216,11 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
         form.setEnabled(false);
 
         // Signal changes should not affect component anymore
-        signal.value(false);
+        signal.set(false);
         assertTrue(form.isError()); // Should still be true
         assertFalse(form.isEnabled()); // Should still be false
 
-        signal.value(true);
+        signal.set(true);
         assertTrue(form.isError()); // Should still be true (unchanged)
         assertFalse(form.isEnabled()); // Should still be false
     }

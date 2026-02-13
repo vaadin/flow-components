@@ -32,7 +32,7 @@ public class SignalButtonView extends Div {
     public SignalButtonView() {
         var textSignal = new ValueSignal<>("initial text");
         var computedSignal = Signal
-                .computed(() -> textSignal.value() + " computed");
+                .computed(() -> textSignal.get() + " computed");
 
         var computedSignalButton = new Button(computedSignal);
         computedSignalButton.setId("computed-signal-button");
@@ -47,7 +47,7 @@ public class SignalButtonView extends Div {
 
         var signalIconClickListenerButton = new Button(textSignal,
                 new Icon(VaadinIcon.SIGNAL), event -> {
-                    textSignal.value("signal-icon-click-button clicked");
+                    textSignal.set("signal-icon-click-button clicked");
                 });
         signalIconClickListenerButton.setIconAfterText(true);
         signalIconClickListenerButton.setId("signal-icon-click-button");
@@ -55,14 +55,14 @@ public class SignalButtonView extends Div {
                 new HtmlComponent("br"));
 
         var signalClickListenerButton = new Button(textSignal, event -> {
-            textSignal.value("signal-click-button clicked");
+            textSignal.set("signal-click-button clicked");
         });
         signalClickListenerButton.setId("signal-click-button");
         add(new Text("signal-click-button"), signalClickListenerButton,
                 new HtmlComponent("br"));
 
         var clearTextButton = new Button("Clear text", event -> {
-            textSignal.value("");
+            textSignal.set("");
         });
         clearTextButton.setId("clear-text-button");
         add(clearTextButton, new HtmlComponent("br"));

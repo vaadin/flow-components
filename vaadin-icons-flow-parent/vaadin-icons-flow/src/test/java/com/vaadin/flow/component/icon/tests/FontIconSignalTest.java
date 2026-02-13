@@ -55,10 +55,10 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals("home", fontIcon.getLigature());
 
-        ligatureSignal.value("settings");
+        ligatureSignal.set("settings");
         Assert.assertEquals("settings", fontIcon.getLigature());
 
-        ligatureSignal.value("search");
+        ligatureSignal.set("search");
         Assert.assertEquals("search", fontIcon.getLigature());
     }
 
@@ -68,7 +68,7 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         String initialLigature = fontIcon.getLigature();
-        ligatureSignal.value("settings");
+        ligatureSignal.set("settings");
         Assert.assertEquals(initialLigature, fontIcon.getLigature());
     }
 
@@ -80,14 +80,14 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         fontIcon.removeFromParent();
-        ligatureSignal.value("settings");
+        ligatureSignal.set("settings");
         Assert.assertEquals("home", fontIcon.getLigature());
 
         // Reattach
         UI.getCurrent().add(fontIcon);
         Assert.assertEquals("settings", fontIcon.getLigature());
 
-        ligatureSignal.value("search");
+        ligatureSignal.set("search");
         Assert.assertEquals("search", fontIcon.getLigature());
     }
 
@@ -98,7 +98,7 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("home", fontIcon.getLigature());
 
         fontIcon.bindLigature(null);
-        ligatureSignal.value("settings");
+        ligatureSignal.set("settings");
         Assert.assertEquals("home", fontIcon.getLigature());
 
         // Should be able to set manually after unbinding
@@ -132,10 +132,10 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals("e001", fontIcon.getCharCode());
 
-        charCodeSignal.value("e002");
+        charCodeSignal.set("e002");
         Assert.assertEquals("e002", fontIcon.getCharCode());
 
-        charCodeSignal.value("e003");
+        charCodeSignal.set("e003");
         Assert.assertEquals("e003", fontIcon.getCharCode());
     }
 
@@ -145,7 +145,7 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         String initialCharCode = fontIcon.getCharCode();
-        charCodeSignal.value("e002");
+        charCodeSignal.set("e002");
         Assert.assertEquals(initialCharCode, fontIcon.getCharCode());
     }
 
@@ -157,14 +157,14 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         fontIcon.removeFromParent();
-        charCodeSignal.value("e002");
+        charCodeSignal.set("e002");
         Assert.assertEquals("e001", fontIcon.getCharCode());
 
         // Reattach
         UI.getCurrent().add(fontIcon);
         Assert.assertEquals("e002", fontIcon.getCharCode());
 
-        charCodeSignal.value("e003");
+        charCodeSignal.set("e003");
         Assert.assertEquals("e003", fontIcon.getCharCode());
     }
 
@@ -175,7 +175,7 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("e001", fontIcon.getCharCode());
 
         fontIcon.bindCharCode(null);
-        charCodeSignal.value("e002");
+        charCodeSignal.set("e002");
         Assert.assertEquals("e001", fontIcon.getCharCode());
 
         // Should be able to set manually after unbinding

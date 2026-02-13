@@ -55,10 +55,10 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals(0, integerField.getMin());
 
-        minSignal.value(10);
+        minSignal.set(10);
         Assert.assertEquals(10, integerField.getMin());
 
-        minSignal.value(5);
+        minSignal.set(5);
         Assert.assertEquals(5, integerField.getMin());
     }
 
@@ -68,7 +68,7 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         int initialMin = integerField.getMin();
-        minSignal.value(10);
+        minSignal.set(10);
         Assert.assertEquals(initialMin, integerField.getMin());
     }
 
@@ -80,14 +80,14 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         integerField.removeFromParent();
-        minSignal.value(10);
+        minSignal.set(10);
         Assert.assertEquals(0, integerField.getMin());
 
         // Reattach
         UI.getCurrent().add(integerField);
         Assert.assertEquals(10, integerField.getMin());
 
-        minSignal.value(15);
+        minSignal.set(15);
         Assert.assertEquals(15, integerField.getMin());
     }
 
@@ -98,7 +98,7 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(0, integerField.getMin());
 
         integerField.bindMin(null);
-        minSignal.value(10);
+        minSignal.set(10);
         Assert.assertEquals(0, integerField.getMin());
 
         // Should be able to set manually after unbinding
@@ -132,10 +132,10 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals(100, integerField.getMax());
 
-        maxSignal.value(200);
+        maxSignal.set(200);
         Assert.assertEquals(200, integerField.getMax());
 
-        maxSignal.value(150);
+        maxSignal.set(150);
         Assert.assertEquals(150, integerField.getMax());
     }
 
@@ -145,7 +145,7 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         int initialMax = integerField.getMax();
-        maxSignal.value(200);
+        maxSignal.set(200);
         Assert.assertEquals(initialMax, integerField.getMax());
     }
 
@@ -157,14 +157,14 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         integerField.removeFromParent();
-        maxSignal.value(200);
+        maxSignal.set(200);
         Assert.assertEquals(100, integerField.getMax());
 
         // Reattach
         UI.getCurrent().add(integerField);
         Assert.assertEquals(200, integerField.getMax());
 
-        maxSignal.value(250);
+        maxSignal.set(250);
         Assert.assertEquals(250, integerField.getMax());
     }
 
@@ -175,7 +175,7 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(100, integerField.getMax());
 
         integerField.bindMax(null);
-        maxSignal.value(200);
+        maxSignal.set(200);
         Assert.assertEquals(100, integerField.getMax());
 
         // Should be able to set manually after unbinding
