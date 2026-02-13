@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
@@ -22,7 +24,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * <p>
  * Intended only for internal use and can be removed or changed in the future.
  */
-public class UploadHelper {
+public class UploadHelper implements Serializable {
 
     /**
      * Checks whether the given {@link UploadManager} has an
