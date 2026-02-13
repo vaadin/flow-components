@@ -91,21 +91,6 @@ public class NumberFieldSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(15.0, numberField.getMin(), 0.001);
     }
 
-    @Test
-    public void bindMin_nullUnbindsSignal() {
-        numberField.bindMin(minSignal);
-        UI.getCurrent().add(numberField);
-        Assert.assertEquals(0.0, numberField.getMin(), 0.001);
-
-        numberField.bindMin(null);
-        minSignal.value(10.0);
-        Assert.assertEquals(0.0, numberField.getMin(), 0.001);
-
-        // Should be able to set manually after unbinding
-        numberField.setMin(20.0);
-        Assert.assertEquals(20.0, numberField.getMin(), 0.001);
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindMin_setMinWhileBound_throwsException() {
         numberField.bindMin(minSignal);
@@ -166,21 +151,6 @@ public class NumberFieldSignalTest extends AbstractSignalsUnitTest {
 
         maxSignal.value(250.0);
         Assert.assertEquals(250.0, numberField.getMax(), 0.001);
-    }
-
-    @Test
-    public void bindMax_nullUnbindsSignal() {
-        numberField.bindMax(maxSignal);
-        UI.getCurrent().add(numberField);
-        Assert.assertEquals(100.0, numberField.getMax(), 0.001);
-
-        numberField.bindMax(null);
-        maxSignal.value(200.0);
-        Assert.assertEquals(100.0, numberField.getMax(), 0.001);
-
-        // Should be able to set manually after unbinding
-        numberField.setMax(300.0);
-        Assert.assertEquals(300.0, numberField.getMax(), 0.001);
     }
 
     @Test(expected = BindingActiveException.class)

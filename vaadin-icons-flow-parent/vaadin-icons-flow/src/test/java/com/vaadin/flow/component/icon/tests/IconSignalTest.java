@@ -90,21 +90,6 @@ public class IconSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("vaadin:user", icon.getIcon());
     }
 
-    @Test
-    public void bindIcon_nullUnbindsSignal() {
-        icon.bindIcon(iconSignal);
-        UI.getCurrent().add(icon);
-        Assert.assertEquals("vaadin:home", icon.getIcon());
-
-        icon.bindIcon(null);
-        iconSignal.value(VaadinIcon.SEARCH);
-        Assert.assertEquals("vaadin:home", icon.getIcon());
-
-        // Should be able to set manually after unbinding
-        icon.setIcon(VaadinIcon.USER);
-        Assert.assertEquals("vaadin:user", icon.getIcon());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindIcon_setIconWhileBound_throwsException() {
         icon.bindIcon(iconSignal);

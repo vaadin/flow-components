@@ -107,21 +107,6 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textSignal_removeBinding() {
-        notification = new Notification(textSignal);
-        UI.getCurrent().add(notification);
-
-        notification.bindText(null);
-        assertTextSignalBindingInactive();
-
-        notification.setText("bar");
-        Assert.assertEquals("bar", getNotificationText());
-
-        notification.setText(null);
-        Assert.assertEquals("", getNotificationText());
-    }
-
-    @Test
     public void textSignal_notOpened() {
         notification = new Notification(textSignal);
         UI.getCurrent().add(notification);
@@ -152,19 +137,6 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
     public void textComputedSignalCtor_bindText() {
         notification = new Notification(computedSignal);
         notification.bindText(textSignal);
-    }
-
-    @Test
-    public void textComputedSignalCtor_removeBindingAndBindText() {
-        notification = new Notification(computedSignal);
-        UI.getCurrent().add(notification);
-
-        notification.bindText(null);
-        notification.bindText(textSignal);
-        assertTextSignalBindingActive();
-
-        notification.bindText(null);
-        assertTextSignalBindingInactive();
     }
 
     @Test
@@ -255,24 +227,6 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         // Update value
         notification.setText("updated");
         Assert.assertEquals("updated", notification.getTextSupport().get());
-    }
-
-    @Test
-    public void bindText_null_removesBindingFromTextSupport() {
-        notification = new Notification(textSignal);
-        UI.getCurrent().add(notification);
-
-        // Verify binding is active initially
-        assertTextSignalBindingActive();
-
-        // Remove binding
-        notification.bindText(null);
-        textSignal.value("updated");
-
-        // Verify textSupport no longer has active binding
-        Assert.assertEquals("bar", notification.getTextSupport().get());
-        textSignal.value("should not update");
-        Assert.assertEquals("bar", notification.getTextSupport().get());
     }
 
     private void assertTextSignalBindingActive() {

@@ -108,24 +108,4 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
         assertThrows(BindingActiveException.class, () -> component
                 .bindClearButtonVisible(new ValueSignal<>(false)));
     }
-
-    @Test
-    public void bindClearButtonVisible_passingNull_unbindsExistingBinding() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindClearButtonVisible(signal);
-        assertTrue(component.isClearButtonVisible());
-
-        // Unbind
-        component.bindClearButtonVisible(null);
-
-        // Manual set should work now
-        component.setClearButtonVisible(false);
-        assertFalse(component.isClearButtonVisible());
-
-        // Signal update should not affect component anymore
-        signal.value(true);
-        assertFalse(component.isClearButtonVisible());
-    }
 }

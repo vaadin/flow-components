@@ -91,21 +91,6 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("search", fontIcon.getLigature());
     }
 
-    @Test
-    public void bindLigature_nullUnbindsSignal() {
-        fontIcon.bindLigature(ligatureSignal);
-        UI.getCurrent().add(fontIcon);
-        Assert.assertEquals("home", fontIcon.getLigature());
-
-        fontIcon.bindLigature(null);
-        ligatureSignal.value("settings");
-        Assert.assertEquals("home", fontIcon.getLigature());
-
-        // Should be able to set manually after unbinding
-        fontIcon.setLigature("search");
-        Assert.assertEquals("search", fontIcon.getLigature());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindLigature_setLigatureWhileBound_throwsException() {
         fontIcon.bindLigature(ligatureSignal);
@@ -165,21 +150,6 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("e002", fontIcon.getCharCode());
 
         charCodeSignal.value("e003");
-        Assert.assertEquals("e003", fontIcon.getCharCode());
-    }
-
-    @Test
-    public void bindCharCode_nullUnbindsSignal() {
-        fontIcon.bindCharCode(charCodeSignal);
-        UI.getCurrent().add(fontIcon);
-        Assert.assertEquals("e001", fontIcon.getCharCode());
-
-        fontIcon.bindCharCode(null);
-        charCodeSignal.value("e002");
-        Assert.assertEquals("e001", fontIcon.getCharCode());
-
-        // Should be able to set manually after unbinding
-        fontIcon.setCharCode("e003");
         Assert.assertEquals("e003", fontIcon.getCharCode());
     }
 

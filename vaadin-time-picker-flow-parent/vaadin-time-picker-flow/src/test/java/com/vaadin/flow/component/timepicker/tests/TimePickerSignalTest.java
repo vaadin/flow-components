@@ -93,21 +93,6 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(LocalTime.of(11, 0), timePicker.getMin());
     }
 
-    @Test
-    public void bindMin_nullUnbindsSignal() {
-        timePicker.bindMin(minSignal);
-        UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
-
-        timePicker.bindMin(null);
-        minSignal.value(LocalTime.of(10, 0));
-        Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
-
-        // Should be able to set manually after unbinding
-        timePicker.setMin(LocalTime.of(11, 0));
-        Assert.assertEquals(LocalTime.of(11, 0), timePicker.getMin());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindMin_setMinWhileBound_throwsException() {
         timePicker.bindMin(minSignal);
@@ -179,21 +164,6 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(LocalTime.of(18, 0), timePicker.getMax());
 
         maxSignal.value(LocalTime.of(19, 0));
-        Assert.assertEquals(LocalTime.of(19, 0), timePicker.getMax());
-    }
-
-    @Test
-    public void bindMax_nullUnbindsSignal() {
-        timePicker.bindMax(maxSignal);
-        UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
-
-        timePicker.bindMax(null);
-        maxSignal.value(LocalTime.of(18, 0));
-        Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
-
-        // Should be able to set manually after unbinding
-        timePicker.setMax(LocalTime.of(19, 0));
         Assert.assertEquals(LocalTime.of(19, 0), timePicker.getMax());
     }
 

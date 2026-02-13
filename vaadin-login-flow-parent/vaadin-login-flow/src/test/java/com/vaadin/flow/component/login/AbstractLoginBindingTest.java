@@ -101,26 +101,6 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindError_passingNull_unbindsExistingBinding() {
-        LoginForm form = new LoginForm();
-        UI.getCurrent().add(form);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        form.bindError(signal);
-        assertTrue(form.isError());
-
-        // Unbind
-        form.bindError(null);
-
-        // Manual set should work now
-        form.setError(false);
-        assertFalse(form.isError());
-
-        // Signal update should not affect component anymore
-        signal.value(true);
-        assertFalse(form.isError());
-    }
-
-    @Test
     public void bindError_errorTrueEnablesComponent() {
         LoginForm form = new LoginForm();
         UI.getCurrent().add(form);
@@ -198,30 +178,5 @@ public class AbstractLoginBindingTest extends AbstractSignalsUnitTest {
 
         signal.value(false);
         assertFalse(form.getElement().getProperty("error", false));
-    }
-
-    @Test
-    public void bindError_unbind_stopsUpdates() {
-        LoginForm form = new LoginForm();
-        UI.getCurrent().add(form);
-        form.setEnabled(false);
-
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        form.bindError(signal);
-        assertTrue(form.isError());
-        assertTrue(form.isEnabled());
-
-        // Unbind
-        form.bindError(null);
-        form.setEnabled(false);
-
-        // Signal changes should not affect component anymore
-        signal.value(false);
-        assertTrue(form.isError()); // Should still be true
-        assertFalse(form.isEnabled()); // Should still be false
-
-        signal.value(true);
-        assertTrue(form.isError()); // Should still be true (unchanged)
-        assertFalse(form.isEnabled()); // Should still be false
     }
 }

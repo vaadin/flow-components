@@ -104,21 +104,6 @@ public class SvgIconSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("icon-user", svgIcon.getSymbol());
     }
 
-    @Test
-    public void bindSymbol_nullUnbindsSignal() {
-        svgIcon.bindSymbol(symbolSignal);
-        UI.getCurrent().add(svgIcon);
-        Assert.assertEquals("icon-home", svgIcon.getSymbol());
-
-        svgIcon.bindSymbol(null);
-        symbolSignal.value("icon-search");
-        Assert.assertEquals("icon-home", svgIcon.getSymbol());
-
-        // Should be able to set manually after unbinding
-        svgIcon.setSymbol("icon-user");
-        Assert.assertEquals("icon-user", svgIcon.getSymbol());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindSymbol_setSymbolWhileBound_throwsException() {
         svgIcon.bindSymbol(symbolSignal);

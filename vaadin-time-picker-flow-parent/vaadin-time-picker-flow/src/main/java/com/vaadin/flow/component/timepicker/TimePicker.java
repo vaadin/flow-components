@@ -832,15 +832,12 @@ public class TimePicker
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the minimum time manually
      * through {@link #setMin(LocalTime)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the minimum time to, or {@code null} to
-     *            unbind
+     *            the signal to bind the minimum time to, not {@code null}
      * @see #setMin(LocalTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
@@ -860,15 +857,12 @@ public class TimePicker
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the maximum time manually
      * through {@link #setMax(LocalTime)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the maximum time to, or {@code null} to
-     *            unbind
+     *            the signal to bind the maximum time to, not {@code null}
      * @see #setMax(LocalTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1

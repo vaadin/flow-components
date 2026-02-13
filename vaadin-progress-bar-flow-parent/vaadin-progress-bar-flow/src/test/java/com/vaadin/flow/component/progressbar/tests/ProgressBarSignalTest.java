@@ -93,21 +93,6 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(15.0, progressBar.getMin(), 0.001);
     }
 
-    @Test
-    public void bindMin_nullUnbindsSignal() {
-        progressBar.bindMin(minSignal);
-        UI.getCurrent().add(progressBar);
-        Assert.assertEquals(0.0, progressBar.getMin(), 0.001);
-
-        progressBar.bindMin(null);
-        minSignal.value(10.0);
-        Assert.assertEquals(0.0, progressBar.getMin(), 0.001);
-
-        // Should be able to set manually after unbinding
-        progressBar.setMin(20.0);
-        Assert.assertEquals(20.0, progressBar.getMin(), 0.001);
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindMin_setMinWhileBound_throwsException() {
         progressBar.bindMin(minSignal);
@@ -170,21 +155,6 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(250.0, progressBar.getMax(), 0.001);
     }
 
-    @Test
-    public void bindMax_nullUnbindsSignal() {
-        progressBar.bindMax(maxSignal);
-        UI.getCurrent().add(progressBar);
-        Assert.assertEquals(100.0, progressBar.getMax(), 0.001);
-
-        progressBar.bindMax(null);
-        maxSignal.value(200.0);
-        Assert.assertEquals(100.0, progressBar.getMax(), 0.001);
-
-        // Should be able to set manually after unbinding
-        progressBar.setMax(300.0);
-        Assert.assertEquals(300.0, progressBar.getMax(), 0.001);
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindMax_setMaxWhileBound_throwsException() {
         progressBar.bindMax(maxSignal);
@@ -245,21 +215,6 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
 
         valueSignal.value(90.0);
         Assert.assertEquals(90.0, progressBar.getValue(), 0.001);
-    }
-
-    @Test
-    public void bindValue_nullUnbindsSignal() {
-        progressBar.bindValue(valueSignal);
-        UI.getCurrent().add(progressBar);
-        Assert.assertEquals(50.0, progressBar.getValue(), 0.001);
-
-        progressBar.bindValue(null);
-        valueSignal.value(75.0);
-        Assert.assertEquals(50.0, progressBar.getValue(), 0.001);
-
-        // Should be able to set manually after unbinding
-        progressBar.setValue(80.0);
-        Assert.assertEquals(80.0, progressBar.getValue(), 0.001);
     }
 
     @Test(expected = BindingActiveException.class)

@@ -77,19 +77,6 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMin());
     }
 
-    @Test
-    public void bindMin_unbindWithNull() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMin(signal);
-        datePicker.bindMin(null);
-
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMin());
-
-        datePicker.setMin(LocalDate.of(2023, 3, 1));
-        Assert.assertEquals(LocalDate.of(2023, 3, 1), datePicker.getMin());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindMin_manualSetThrows() {
         UI.getCurrent().add(datePicker);

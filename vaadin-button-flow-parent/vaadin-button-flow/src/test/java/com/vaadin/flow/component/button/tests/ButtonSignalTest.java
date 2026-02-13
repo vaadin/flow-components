@@ -112,21 +112,6 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textSignal_removeBinding() {
-        button = new Button(textSignal, new Icon());
-        UI.getCurrent().add(button);
-
-        button.bindText(null);
-        assertTextSignalBindingInactive();
-
-        button.setText("bar");
-        Assert.assertEquals("bar", button.getText());
-
-        button.setText(null);
-        Assert.assertEquals("", button.getText());
-    }
-
-    @Test
     public void setIcon_textSignalChange_slotRemoved() {
         icon = new Icon();
         button = new Button(textSignal, icon);
@@ -180,19 +165,6 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(button);
 
         button.bindText(textSignal);
-    }
-
-    @Test
-    public void textComputedSignalCtor_removeBindingAndBindText() {
-        button = new Button(computedSignal);
-        UI.getCurrent().add(button);
-
-        button.bindText(null);
-        button.bindText(textSignal);
-        assertTextSignalBindingActive();
-
-        button.bindText(null);
-        assertTextSignalBindingInactive();
     }
 
     @Test
