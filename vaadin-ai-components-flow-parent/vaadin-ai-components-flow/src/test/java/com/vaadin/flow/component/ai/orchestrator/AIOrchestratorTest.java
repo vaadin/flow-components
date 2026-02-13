@@ -862,7 +862,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withCustomAiName_usesCustomAiName() {
+    public void builder_withCustomAssistantName_usesCustomAssistantName() {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
@@ -873,7 +873,8 @@ public class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = AIOrchestrator.builder(mockProvider)
-                .withMessageList(mockMessageList).withAIName("Claude").build();
+                .withMessageList(mockMessageList).withAssistantName("Claude")
+                .build();
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockMessageList).createMessage("", "Claude",
@@ -881,7 +882,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withCustomUserNameAndAiName_usesBothCustomNames() {
+    public void builder_withCustomUserNameAndAssistantName_usesBothCustomNames() {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
@@ -896,7 +897,7 @@ public class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList).withUserName("Alice")
-                .withAIName("Bot").build();
+                .withAssistantName("Bot").build();
         orchestrator.prompt("Hello");
 
         var inOrder = Mockito.inOrder(mockMessageList);
@@ -923,7 +924,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withNullAiName_throws() {
+    public void builder_withNullAssistantName_throws() {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
@@ -935,7 +936,7 @@ public class AIOrchestratorTest {
         var builder = AIOrchestrator.builder(mockProvider)
                 .withMessageList(mockMessageList);
         Assert.assertThrows(NullPointerException.class,
-                () -> builder.withAIName(null));
+                () -> builder.withAssistantName(null));
     }
 
     private AIOrchestrator getSimpleOrchestrator() {
