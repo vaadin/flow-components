@@ -86,7 +86,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     @Test
-    public void setAcceptedFileTypes_wrongType_fileIsRejected()
+    public void setAcceptedMimeTypes_wrongType_fileIsRejected()
             throws Exception {
         clickButton("set-accept-image");
 
@@ -97,7 +97,7 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     @Test
-    public void setAcceptedFileTypes_correctType_fileIsUploaded()
+    public void setAcceptedMimeTypes_correctType_fileIsUploaded()
             throws Exception {
         clickButton("set-accept-text");
 
@@ -105,6 +105,83 @@ public class UploadManagerIT extends AbstractUploadIT {
 
         uploadFile(textFile);
         assertLogContains("Uploaded: " + textFile.getName());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_correctExtension_fileIsUploaded()
+            throws Exception {
+        clickButton("set-accept-ext-txt");
+
+        File textFile = createTempFile("txt");
+
+        uploadFile(textFile);
+        assertLogContains("Uploaded: " + textFile.getName());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_wrongExtension_fileIsRejected()
+            throws Exception {
+        clickButton("set-accept-ext-pdf");
+
+        File textFile = createTempFile("txt");
+
+        uploadFile(textFile);
+        assertLogContains("Rejected: " + textFile.getName());
+    }
+
+    @Test
+    public void setMimeAndExtension_htmlFileWithMatchingMimeButWrongExtension_rejectedServerSide()
+            throws Exception {
+        // Configure MIME text/* AND extension .pdf
+        // Client-side accept="text/*,.pdf" allows .html (text/html matches
+        // text/*), but server-side AND logic rejects because .html != .pdf
+        clickButton("set-accept-text");
+        clickButton("set-accept-ext-pdf");
+
+        File htmlFile = createTempFile("html");
+
+        UploadManagerTester tester = getUploadManagerTester();
+        tester.upload(htmlFile, 0);
+        tester.waitForUploads(60);
+
+        assertFileListContains("Upload forbidden");
+        Assert.assertFalse(
+                "HTML file should be rejected server-side when extension "
+                        + "doesn't match even though MIME type matches",
+                getLogText().contains("Uploaded:"));
+    }
+
+    @Test
+    public void setMimeAndExtension_htmlFileWithSpoofedPdfMimeType_rejectedServerSide() {
+        // Configure both application/pdf MIME type AND .pdf extension.
+        // With the old combined setAcceptedFileTypes("application/pdf", ".pdf")
+        // this file would have been accepted because the spoofed MIME type
+        // matched. With the new split API + AND logic, the extension check
+        // catches it.
+        clickButton("set-accept-mime-pdf");
+        clickButton("set-accept-ext-pdf");
+
+        // Create an HTML file with MIME type spoofed to application/pdf via JS.
+        // This simulates an attacker changing the Content-Type to bypass
+        // validation. The extension check should still block it.
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        uploadButton.getCommandExecutor().executeScript(
+                "var file = new File("
+                        + "['<html><body>Not a PDF</body></html>'], "
+                        + "'spoofed.html', {type: 'application/pdf'});"
+                        + "arguments[0].manager.addFiles([file]);",
+                uploadButton);
+
+        UploadManagerTester tester = getUploadManagerTester();
+        tester.waitForUploads(60);
+
+        assertFileListContains("Upload forbidden");
+        Assert.assertFalse(
+                "HTML file with spoofed PDF MIME type should be rejected "
+                        + "server-side because extension .html doesn't "
+                        + "match .pdf",
+                getLogText().contains("Uploaded:"));
     }
 
     @Test
@@ -197,6 +274,24 @@ public class UploadManagerIT extends AbstractUploadIT {
         // Verify no upload happened when manager is disabled
         Assert.assertFalse("Upload should fail when manager is disabled",
                 getLogText().contains("Uploaded:"));
+    }
+
+    @Test
+    public void disableManager_withAlwaysDisabledModeHandler_uploadSucceeds()
+            throws Exception {
+        // Switch to a handler that overrides getDisabledUpdateMode() to
+        // ALWAYS. This test would fail if the file-type-validation wrapper
+        // did not delegate getDisabledUpdateMode() to the original handler,
+        // because the default ONLY_WHEN_ENABLED would reject the upload.
+        clickButton("set-always-disabled-handler");
+        assertLogContains("Handler set: ALWAYS disabled mode");
+
+        clickButton("disable-manager");
+
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+
+        assertLogContains("Uploaded: " + tempFile.getName());
     }
 
     @Test
@@ -493,6 +588,12 @@ public class UploadManagerIT extends AbstractUploadIT {
 
     private String getLogText() {
         return findElement(By.id("log-area")).getText();
+    }
+
+    private void assertFileListContains(String text) {
+        UploadFileListElement fileList = $(UploadFileListElement.class)
+                .id("file-list");
+        waitUntil(driver -> fileList.getText().contains(text), 60);
     }
 
     private void assertLogContains(String text) {
