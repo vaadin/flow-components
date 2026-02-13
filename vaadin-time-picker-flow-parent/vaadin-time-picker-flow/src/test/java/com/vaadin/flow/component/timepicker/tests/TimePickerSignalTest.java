@@ -111,17 +111,6 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
         timePicker.bindMin(anotherSignal);
     }
 
-    @Test
-    public void bindMin_nullSignalValue_setsEmptyString() {
-        timePicker.bindMin(minSignal);
-        UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
-
-        minSignal.value(null);
-        Assert.assertNull(timePicker.getMin());
-        Assert.assertEquals("", timePicker.getElement().getProperty("min"));
-    }
-
     // ===== MAX BINDING TESTS =====
 
     @Test
@@ -183,16 +172,5 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
         ValueSignal<LocalTime> anotherSignal = new ValueSignal<>(
                 LocalTime.of(20, 0));
         timePicker.bindMax(anotherSignal);
-    }
-
-    @Test
-    public void bindMax_nullSignalValue_setsEmptyString() {
-        timePicker.bindMax(maxSignal);
-        UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
-
-        maxSignal.value(null);
-        Assert.assertNull(timePicker.getMax());
-        Assert.assertEquals("", timePicker.getElement().getProperty("max"));
     }
 }

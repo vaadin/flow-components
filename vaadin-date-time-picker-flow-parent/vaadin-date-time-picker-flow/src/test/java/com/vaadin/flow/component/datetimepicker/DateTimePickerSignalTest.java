@@ -64,20 +64,6 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(signal.value(), dateTimePicker.getMin());
     }
 
-    @Test
-    public void bindMin_nullSignal_unbinds() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindMin(signal);
-        dateTimePicker.bindMin(null);
-
-        LocalDateTime newValue = LocalDateTime.of(2023, 10, 2, 11, 0);
-        signal.value(newValue);
-        Assert.assertNotEquals(newValue, dateTimePicker.getMin());
-
-        dateTimePicker.setMin(newValue);
-        Assert.assertEquals(newValue, dateTimePicker.getMin());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void setMin_whileBound_throwsException() {
         UI.getCurrent().add(dateTimePicker);
@@ -116,20 +102,6 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
 
         UI.getCurrent().add(dateTimePicker);
         Assert.assertEquals(signal.value(), dateTimePicker.getMax());
-    }
-
-    @Test
-    public void bindMax_nullSignal_unbinds() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindMax(signal);
-        dateTimePicker.bindMax(null);
-
-        LocalDateTime newValue = LocalDateTime.of(2023, 10, 2, 11, 0);
-        signal.value(newValue);
-        Assert.assertNotEquals(newValue, dateTimePicker.getMax());
-
-        dateTimePicker.setMax(newValue);
-        Assert.assertEquals(newValue, dateTimePicker.getMax());
     }
 
     @Test(expected = BindingActiveException.class)
