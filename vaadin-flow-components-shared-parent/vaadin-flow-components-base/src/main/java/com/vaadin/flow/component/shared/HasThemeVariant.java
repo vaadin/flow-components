@@ -110,7 +110,7 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      * @param variant
      *            the theme variant to bind, not {@code null} or blank
      * @param signal
-     *            the boolean signal to bind to, or {@code null} to unbind
+     *            the boolean signal to bind to, not {@code null}
      * @see HasTheme#bindThemeName(String, Signal)
      */
     default void bindThemeVariant(TVariantEnum variant,

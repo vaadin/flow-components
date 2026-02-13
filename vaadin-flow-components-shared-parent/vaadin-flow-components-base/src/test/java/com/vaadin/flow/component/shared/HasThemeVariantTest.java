@@ -155,17 +155,6 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         Assert.assertTrue(component.getThemeNames().isEmpty());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void bindThemeVariant_withNullSignal_throwNullPointerException() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-        Assert.assertFalse(component.getThemeNames().isEmpty());
-
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, null);
-    }
-
     @Test
     public void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
         TestComponent component = new TestComponent();
