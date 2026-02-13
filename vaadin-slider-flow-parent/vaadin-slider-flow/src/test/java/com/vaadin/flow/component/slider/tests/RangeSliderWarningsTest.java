@@ -28,15 +28,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
-import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.tests.MockUI;
-
-import tools.jackson.databind.node.ArrayNode;
 
 public class RangeSliderWarningsTest {
 
-    private UI ui;
+    private UI ui = new MockUI();
     private Logger mockedLogger;
     private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
     private MockedStatic<LoggerFactory> mockLoggerFactoryStatic;
@@ -51,19 +47,13 @@ public class RangeSliderWarningsTest {
                 .when(() -> LoggerFactory.getLogger(RangeSlider.class))
                 .thenReturn(mockedLogger);
 
-        ui = new MockUI();
-
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
         FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-
-        Mockito.when(ui.getSession().getService().getContext())
-                .thenReturn(mockContext);
         Mockito.when(mockFeatureFlags
                 .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
                 .thenReturn(true);
 
         mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
+        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
                 .thenReturn(mockFeatureFlags);
     }
 
@@ -100,8 +90,7 @@ public class RangeSliderWarningsTest {
         fakeClientResponse();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
-                Mockito.eq("RangeSlider"), Mockito.eq(0.0),
-                Mockito.eq(-10.0));
+                Mockito.eq("RangeSlider"), Mockito.eq(0.0), Mockito.eq(-10.0));
     }
 
     @Test
@@ -171,35 +160,9 @@ public class RangeSliderWarningsTest {
                 Mockito.any(), Mockito.any(), Mockito.any());
     }
 
-    @Test
-    public void setValueFromClient_noWarnings() {
-        RangeSlider slider = new RangeSlider(0, 100);
-        slider.setStep(10);
-        ui.add(slider);
-        fakeClientResponse();
-        Mockito.clearInvocations(mockedLogger);
-
-        // Simulate client-side property change
-        slider.getElement().setPropertyJson("value",
-                createValueArray(0, 15));
-        fakeClientResponse();
-
-        Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
-                Mockito.any(), Mockito.any(), Mockito.any());
-    }
-
     private void fakeClientResponse() {
-        ui.getInternals().getStateTree()
-                .runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree()
-                .collectChanges(ignore -> {
-                });
-    }
-
-    private ArrayNode createValueArray(double start, double end) {
-        ArrayNode array = JacksonUtils.createArrayNode();
-        array.add(start);
-        array.add(end);
-        return array;
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }

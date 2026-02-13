@@ -276,24 +276,25 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         TValue value = getValue();
 
         if (min > max) {
-            LoggerFactory.getLogger(getClass()).warn(
-                    "{}: min ({}) is greater than max ({})."
-                            + " This can lead to unexpected behavior and a broken UI.",
+            LoggerFactory.getLogger(getClass()).warn("""
+                    {}: min ({}) is greater than max ({}). \
+                    This can lead to unexpected behavior and a broken UI.""",
                     getClass().getSimpleName(), min, max);
         }
 
         if (min <= max && !isValueWithinMinMax(value)) {
-            LoggerFactory.getLogger(getClass()).warn(
-                    "{}: value ({}) is out of [min, max] range (min={}, max={})."
-                            + " This can lead to unexpected behavior and a broken UI.",
+            LoggerFactory.getLogger(getClass()).warn("""
+                    {}: value ({}) is out of [min, max] range \
+                    (min={}, max={}). \
+                    This can lead to unexpected behavior and a broken UI.""",
                     getClass().getSimpleName(), value, min, max);
         }
 
         if (min <= max && step > 0 && !isValueAlignedWithStep(value)) {
-            LoggerFactory.getLogger(getClass()).warn(
-                    "{}: value ({}) is not aligned with step"
-                            + " (min={}, max={}, step={})."
-                            + " This can lead to unexpected behavior and a broken UI.",
+            LoggerFactory.getLogger(getClass()).warn("""
+                    {}: value ({}) is not aligned with step \
+                    (min={}, max={}, step={}). \
+                    This can lead to unexpected behavior and a broken UI.""",
                     getClass().getSimpleName(), value, min, max, step);
         }
     }

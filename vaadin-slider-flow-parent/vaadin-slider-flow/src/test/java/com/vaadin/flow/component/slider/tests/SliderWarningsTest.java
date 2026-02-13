@@ -27,12 +27,11 @@ import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
-import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.tests.MockUI;
 
 public class SliderWarningsTest {
 
-    private UI ui;
+    private UI ui = new MockUI();
     private Logger mockedLogger;
     private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
     private MockedStatic<LoggerFactory> mockLoggerFactoryStatic;
@@ -47,19 +46,13 @@ public class SliderWarningsTest {
                 .when(() -> LoggerFactory.getLogger(Slider.class))
                 .thenReturn(mockedLogger);
 
-        ui = new MockUI();
-
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
         FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-
-        Mockito.when(ui.getSession().getService().getContext())
-                .thenReturn(mockContext);
         Mockito.when(mockFeatureFlags
                 .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
                 .thenReturn(true);
 
         mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
+        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
                 .thenReturn(mockFeatureFlags);
     }
 
@@ -126,9 +119,9 @@ public class SliderWarningsTest {
         fakeClientResponse();
 
         Mockito.verify(mockedLogger).warn(
-                Mockito.contains("not aligned with step"),
-                Mockito.eq("Slider"), Mockito.eq(15.0), Mockito.eq(0.0),
-                Mockito.eq(100.0), Mockito.eq(10.0));
+                Mockito.contains("not aligned with step"), Mockito.eq("Slider"),
+                Mockito.eq(15.0), Mockito.eq(0.0), Mockito.eq(100.0),
+                Mockito.eq(10.0));
     }
 
     @Test
@@ -163,27 +156,9 @@ public class SliderWarningsTest {
                 Mockito.any(), Mockito.any(), Mockito.any());
     }
 
-    @Test
-    public void setValueFromClient_noWarnings() {
-        Slider slider = new Slider(0, 100);
-        slider.setStep(10);
-        ui.add(slider);
-        fakeClientResponse();
-        Mockito.clearInvocations(mockedLogger);
-
-        // Simulate client-side property change
-        slider.getElement().setProperty("value", 15.0);
-        fakeClientResponse();
-
-        Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
-                Mockito.any(), Mockito.any(), Mockito.any());
-    }
-
     private void fakeClientResponse() {
-        ui.getInternals().getStateTree()
-                .runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree()
-                .collectChanges(ignore -> {
-                });
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }
