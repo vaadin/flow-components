@@ -13,14 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.tests;
+package com.vaadin.flow.component.shared;
 
 import java.util.Set;
 
 import org.junit.Assert;
-
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Helper class that provides methods for testing that a component correctly

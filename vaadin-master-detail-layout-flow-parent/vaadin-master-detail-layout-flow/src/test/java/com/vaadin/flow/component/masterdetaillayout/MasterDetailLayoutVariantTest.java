@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout;
 import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayoutVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 
 public class MasterDetailLayoutVariantTest {
 

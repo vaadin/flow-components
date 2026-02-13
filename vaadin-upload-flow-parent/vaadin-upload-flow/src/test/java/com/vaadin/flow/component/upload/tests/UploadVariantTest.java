@@ -17,9 +17,9 @@ package com.vaadin.flow.component.upload.tests;
 
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class UploadVariantTest {
 

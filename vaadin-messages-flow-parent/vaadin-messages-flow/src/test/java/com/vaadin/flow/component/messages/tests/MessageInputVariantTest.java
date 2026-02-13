@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 
 public class MessageInputVariantTest {
 

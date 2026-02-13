@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroupVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 
 public class AvatarGroupVariantTest {
 
