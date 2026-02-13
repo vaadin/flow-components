@@ -57,10 +57,10 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
 
-        minSignal.value(LocalTime.of(10, 0));
+        minSignal.set(LocalTime.of(10, 0));
         Assert.assertEquals(LocalTime.of(10, 0), timePicker.getMin());
 
-        minSignal.value(LocalTime.of(8, 30));
+        minSignal.set(LocalTime.of(8, 30));
         Assert.assertEquals(LocalTime.of(8, 30), timePicker.getMin());
     }
 
@@ -70,7 +70,7 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         LocalTime initialMin = timePicker.getMin();
-        minSignal.value(LocalTime.of(10, 0));
+        minSignal.set(LocalTime.of(10, 0));
         Assert.assertEquals(initialMin, timePicker.getMin());
     }
 
@@ -82,14 +82,14 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         timePicker.removeFromParent();
-        minSignal.value(LocalTime.of(10, 0));
+        minSignal.set(LocalTime.of(10, 0));
         Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
 
         // Reattach
         UI.getCurrent().add(timePicker);
         Assert.assertEquals(LocalTime.of(10, 0), timePicker.getMin());
 
-        minSignal.value(LocalTime.of(11, 0));
+        minSignal.set(LocalTime.of(11, 0));
         Assert.assertEquals(LocalTime.of(11, 0), timePicker.getMin());
     }
 
@@ -120,10 +120,10 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
 
-        maxSignal.value(LocalTime.of(18, 0));
+        maxSignal.set(LocalTime.of(18, 0));
         Assert.assertEquals(LocalTime.of(18, 0), timePicker.getMax());
 
-        maxSignal.value(LocalTime.of(16, 30));
+        maxSignal.set(LocalTime.of(16, 30));
         Assert.assertEquals(LocalTime.of(16, 30), timePicker.getMax());
     }
 
@@ -133,7 +133,7 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         LocalTime initialMax = timePicker.getMax();
-        maxSignal.value(LocalTime.of(18, 0));
+        maxSignal.set(LocalTime.of(18, 0));
         Assert.assertEquals(initialMax, timePicker.getMax());
     }
 
@@ -145,14 +145,14 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         timePicker.removeFromParent();
-        maxSignal.value(LocalTime.of(18, 0));
+        maxSignal.set(LocalTime.of(18, 0));
         Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
 
         // Reattach
         UI.getCurrent().add(timePicker);
         Assert.assertEquals(LocalTime.of(18, 0), timePicker.getMax());
 
-        maxSignal.value(LocalTime.of(19, 0));
+        maxSignal.set(LocalTime.of(19, 0));
         Assert.assertEquals(LocalTime.of(19, 0), timePicker.getMax());
     }
 

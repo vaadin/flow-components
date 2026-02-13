@@ -46,7 +46,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     @Before
     public void setup() {
         textSignal = new ValueSignal<>("foo");
-        computedSignal = Signal.computed(() -> textSignal.value() + " bar");
+        computedSignal = Signal.computed(() -> textSignal.get() + " bar");
     }
 
     @After
@@ -116,7 +116,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         icon = new Icon();
         button = new Button(textSignal, icon);
 
-        textSignal.value("");
+        textSignal.set("");
 
         Assert.assertFalse(icon.getElement().hasAttribute("slot"));
     }
@@ -129,7 +129,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         icon.getElement().setAttribute("slot", "prefix");
         button.setIcon(icon);
 
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
     }
 
@@ -155,7 +155,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         button = new Button(computedSignal);
         UI.getCurrent().add(button);
         Assert.assertEquals("foo bar", button.getText());
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("bar bar", button.getText());
     }
 
@@ -202,15 +202,15 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     }
 
     private void assertTextSignalBindingActive() {
-        textSignal.value("foo");
+        textSignal.set("foo");
         Assert.assertEquals("foo", button.getText());
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("bar", button.getText());
     }
 
     private void assertTextSignalBindingInactive() {
         var currentText = button.getText();
-        textSignal.value(currentText + " with change");
+        textSignal.set(currentText + " with change");
         Assert.assertEquals(currentText, button.getText());
     }
 
