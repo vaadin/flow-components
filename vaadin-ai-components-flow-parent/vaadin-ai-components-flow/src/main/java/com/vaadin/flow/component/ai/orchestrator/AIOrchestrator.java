@@ -64,7 +64,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  *         .withFileReceiver(upload) // optional
  *         .withTools(toolObj) // optional, for @Tool annotations
  *         .withUserName(userName) // optional
- *         .withAIName(aiName) // optional
+ *         .withAssistantName(assistantName) // optional
  *         .build();
  * </pre>
  * <p>
@@ -103,7 +103,7 @@ public class AIOrchestrator {
     private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private Object[] tools = new Object[0];
     private String userName;
-    private String aiName;
+    private String assistantName;
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
@@ -181,7 +181,7 @@ public class AIOrchestrator {
         if (messageList == null) {
             return null;
         }
-        var assistantMessage = messageList.createMessage("", aiName,
+        var assistantMessage = messageList.createMessage("", assistantName,
                 Collections.emptyList());
         messageList.addMessage(assistantMessage);
         return assistantMessage;
@@ -319,7 +319,7 @@ public class AIOrchestrator {
         private AIFileReceiver fileReceiver;
         private Object[] tools = new Object[0];
         private String userName;
-        private String aiName;
+        private String assistantName;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -441,13 +441,14 @@ public class AIOrchestrator {
          * not set, defaults to "Assistant".
          * </p>
          *
-         * @param aiName
+         * @param assistantName
          *            the display name for AI messages, not {@code null}
          * @return this builder
          */
-        public Builder withAIName(String aiName) {
-            Objects.requireNonNull(aiName, "AI name cannot be null");
-            this.aiName = aiName;
+        public Builder withAssistantName(String assistantName) {
+            Objects.requireNonNull(assistantName,
+                    "Assistant name cannot be null");
+            this.assistantName = assistantName;
             return this;
         }
 
@@ -463,7 +464,8 @@ public class AIOrchestrator {
             orchestrator.fileReceiver = fileReceiver;
             orchestrator.tools = tools == null ? new Object[0] : tools;
             orchestrator.userName = userName == null ? "You" : userName;
-            orchestrator.aiName = aiName == null ? "Assistant" : aiName;
+            orchestrator.assistantName = assistantName == null ? "Assistant"
+                    : assistantName;
             if (input != null) {
                 input.addSubmitListener(
                         e -> orchestrator.doPrompt(e.getValue()));
@@ -472,12 +474,12 @@ public class AIOrchestrator {
                 orchestrator.configureFileReceiver();
             }
             LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
-                    + "fileReceiver={}, tools={}, userName={}, aiName={}",
+                    + "fileReceiver={}, tools={}, userName={}, assistantName={}",
                     orchestrator.messageList != null,
                     orchestrator.input != null,
                     orchestrator.fileReceiver != null,
                     orchestrator.tools.length, orchestrator.userName,
-                    orchestrator.aiName);
+                    orchestrator.assistantName);
 
             return orchestrator;
         }
