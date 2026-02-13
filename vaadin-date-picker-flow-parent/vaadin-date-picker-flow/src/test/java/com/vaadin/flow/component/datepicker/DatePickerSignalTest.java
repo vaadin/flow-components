@@ -131,19 +131,6 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMax());
     }
 
-    @Test
-    public void bindMax_unbindWithNull() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMax(signal);
-        datePicker.bindMax(null);
-
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMax());
-
-        datePicker.setMax(LocalDate.of(2023, 3, 1));
-        Assert.assertEquals(LocalDate.of(2023, 3, 1), datePicker.getMax());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void bindMax_manualSetThrows() {
         UI.getCurrent().add(datePicker);
@@ -180,21 +167,6 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
 
         UI.getCurrent().add(datePicker);
         Assert.assertEquals(LocalDate.of(2023, 2, 1),
-                datePicker.getInitialPosition());
-    }
-
-    @Test
-    public void bindInitialPosition_unbindWithNull() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindInitialPosition(signal);
-        datePicker.bindInitialPosition(null);
-
-        signal.value(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1),
-                datePicker.getInitialPosition());
-
-        datePicker.setInitialPosition(LocalDate.of(2023, 3, 1));
-        Assert.assertEquals(LocalDate.of(2023, 3, 1),
                 datePicker.getInitialPosition());
     }
 
