@@ -44,13 +44,15 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
         KeyNotifier {
 
+    private static final double DEFAULT_STEP = 1.0;
+
     private ValueChangeMode currentMode;
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     /**
-     * Constructs a slider with the given min, max, step, initial value, and
-     * custom converters for the value property.
+     * Constructs a slider with the given min, max, and custom converters for
+     * the value property.
      *
      * @param <TPresentation>
      *            the presentation type used by the element property
@@ -58,10 +60,6 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param step
-     *            the step value
-     * @param value
-     *            the initial value
      * @param presentationType
      *            the class of the presentation type
      * @param presentationToModel
@@ -69,20 +67,24 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param modelToPresentation
      *            a function to convert from model to presentation
      */
-    <TPresentation> SliderBase(double min, double max, double step,
-            TValue value, Class<TPresentation> presentationType,
+    <TPresentation> SliderBase(double min, double max,
+            Class<TPresentation> presentationType,
             SerializableFunction<TPresentation, TValue> presentationToModel,
             SerializableFunction<TValue, TPresentation> modelToPresentation) {
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
 
-        setValueChangeMode(ValueChangeMode.ON_CHANGE);
         getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        setValue(value, min, max, step);
+        setMinDouble(min);
+        setMaxDouble(max);
+        setStepDouble(DEFAULT_STEP);
+        clear();
+
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
     @Override
@@ -204,99 +206,6 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     public boolean isMinMaxVisible() {
         return getElement().getProperty("minMaxVisible", false);
     }
-
-    /**
-     * Sets the value of the slider.
-     *
-     * @param value
-     *            the value
-     * @throws IllegalArgumentException
-     *             if value is not valid for the current min, max and step
-     */
-    @Override
-    public void setValue(TValue value) {
-        setValue(value, getMinDouble(), getMaxDouble(), getStepDouble());
-    }
-
-    /**
-     * Sets the minimum, maximum, and value of the slider atomically.
-     * <p>
-     * The step remains unchanged.
-     *
-     * @param value
-     *            the value
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @throws IllegalArgumentException
-     *             if min is greater than max
-     * @throws IllegalArgumentException
-     *             if value is not valid for the given min, max and current step
-     */
-    public void setValue(TValue value, double min, double max) {
-        setValue(value, min, max, getStepDouble());
-    }
-
-    /**
-     * Sets the minimum, maximum, step, and value of the slider atomically.
-     *
-     * @param value
-     *            the value
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param step
-     *            the step value
-     * @throws IllegalArgumentException
-     *             if min is greater than max
-     * @throws IllegalArgumentException
-     *             if step is not positive
-     * @throws IllegalArgumentException
-     *             if value is not valid for the given min, max and step
-     */
-    public void setValue(TValue value, double min, double max, double step) {
-        SliderUtil.requireValidStep(step);
-        SliderUtil.requireValidMinMax(min, max);
-        requireValidValue(min, max, step, value);
-
-        setMinDouble(min);
-        setMaxDouble(max);
-        setStepDouble(step);
-        super.setValue(value);
-    }
-
-    /**
-     * Validates that the given value is valid for the current min, max and
-     * step.
-     *
-     * @param value
-     *            the value to validate
-     * @throws IllegalArgumentException
-     *             if value is not valid for the current min, max and step
-     */
-    void requireValidValue(TValue value) {
-        requireValidValue(getMinDouble(), getMaxDouble(), getStepDouble(),
-                value);
-    }
-
-    /**
-     * Validates that the given value is valid for the given min, max and step.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param step
-     *            the step value
-     * @param value
-     *            the value to validate
-     * @throws IllegalArgumentException
-     *             if value is not valid for the given min, max and step
-     */
-    abstract void requireValidValue(double min, double max, double step,
-            TValue value);
 
     /**
      * {@inheritDoc}

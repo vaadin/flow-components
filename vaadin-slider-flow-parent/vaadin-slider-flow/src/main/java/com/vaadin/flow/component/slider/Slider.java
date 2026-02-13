@@ -37,33 +37,20 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
 
     private static final double DEFAULT_MIN = 0.0;
     private static final double DEFAULT_MAX = 100.0;
-    private static final double DEFAULT_STEP = 1.0;
 
     /**
-     * Constructs a {@code Slider} with min 0, max 100, and initial value 0.
+     * Constructs a {@code Slider} with min 0 and max 100. The initial value is
+     * 0.
      * <p>
      * The step defaults to 1.
      */
     public Slider() {
-        this(DEFAULT_MIN, DEFAULT_MAX, DEFAULT_STEP, DEFAULT_MIN);
+        this(DEFAULT_MIN, DEFAULT_MAX);
     }
 
     /**
-     * Constructs a {@code Slider} with min 0, max 100, initial value 0, and a
-     * value change listener.
-     * <p>
-     * The step defaults to 1.
-     *
-     * @param listener
-     *            the value change listener
-     */
-    public Slider(
-            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this(DEFAULT_MIN, DEFAULT_MAX, DEFAULT_STEP, DEFAULT_MIN, listener);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given min, max and initial value.
+     * Constructs a {@code Slider} with the given min and max. The initial value
+     * is set to the minimum value.
      * <p>
      * The step defaults to 1.
      *
@@ -71,74 +58,14 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param value
-     *            the initial value
      */
-    public Slider(double min, double max, double value) {
-        this(min, max, DEFAULT_STEP, value);
+    public Slider(double min, double max) {
+        super(min, max, Double.class, (v) -> v, (v) -> v);
     }
 
     /**
-     * Constructs a {@code Slider} with the given min, max, initial value, and a
-     * value change listener.
-     * <p>
-     * The step defaults to 1.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param value
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     */
-    public Slider(double min, double max, double value,
-            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this(min, max, DEFAULT_STEP, value, listener);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given min, max, step, and initial
-     * value.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param step
-     *            the step value
-     * @param value
-     *            the initial value
-     */
-    public Slider(double min, double max, double step, double value) {
-        super(min, max, step, value, Double.class, (v) -> v, (v) -> v);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given min, max, step, initial value,
-     * and a value change listener.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param step
-     *            the step value
-     * @param value
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     */
-    public Slider(double min, double max, double step, double value,
-            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this(min, max, step, value);
-        addValueChangeListener(listener);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given label, min 0, max 100, and
-     * initial value 0.
+     * Constructs a {@code Slider} with the given label, min 0, and max 100. The
+     * initial value is 0.
      * <p>
      * The step defaults to 1.
      *
@@ -151,25 +78,8 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min 0, max 100, initial
-     * value 0, and a value change listener.
-     * <p>
-     * The step defaults to 1.
-     *
-     * @param label
-     *            the text to set as the label
-     * @param listener
-     *            the value change listener
-     */
-    public Slider(String label,
-            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this(listener);
-        setLabel(label);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given label, min, max, and initial
-     * value.
+     * Constructs a {@code Slider} with the given label, min and max. The
+     * initial value is set to the minimum value.
      * <p>
      * The step defaults to 1.
      *
@@ -179,77 +89,9 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param value
-     *            the initial value
      */
-    public Slider(String label, double min, double max, double value) {
-        this(min, max, value);
-        setLabel(label);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given label, min, max, initial
-     * value, and a value change listener.
-     *
-     * @param label
-     *            the text to set as the label
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param value
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     */
-    public Slider(String label, double min, double max, double value,
-            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this(min, max, value, listener);
-        setLabel(label);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given label, min, max, step, and
-     * initial value.
-     *
-     * @param label
-     *            the text to set as the label
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param step
-     *            the step value
-     * @param value
-     *            the initial value
-     */
-    public Slider(String label, double min, double max, double step,
-            double value) {
-        this(min, max, step, value);
-        setLabel(label);
-    }
-
-    /**
-     * Constructs a {@code Slider} with the given label, min, max, step, initial
-     * value, and a value change listener.
-     *
-     * @param label
-     *            the text to set as the label
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @param step
-     *            the step value
-     * @param value
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     */
-    public Slider(String label, double min, double max, double step,
-            double value,
-            ValueChangeListener<? super ComponentValueChangeEvent<Slider, Double>> listener) {
-        this(min, max, step, value, listener);
+    public Slider(String label, double min, double max) {
+        this(min, max);
         setLabel(label);
     }
 
@@ -312,25 +154,12 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
 
     /**
      * Sets the minimum value of the slider.
-     * <p>
-     * This method automatically clamps the current value to be no less than the
-     * new minimum, which may trigger a value change event. To set the value
-     * explicitly along with the new minimum, use the
-     * {@link #setValue(Double, double, double) setValue(value, min, max)}
-     * method instead.
      *
      * @param min
      *            the minimum value
-     * @throws IllegalArgumentException
-     *             if min is greater than the current max
      */
     public void setMin(double min) {
-        SliderUtil.requireValidMinMax(min, getMax());
         setMinDouble(min);
-
-        double adjustedValue = SliderUtil.clampToMinMax(getValue(), min,
-                getMax());
-        setValue(adjustedValue);
     }
 
     /**
@@ -344,25 +173,12 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
 
     /**
      * Sets the maximum value of the slider.
-     * <p>
-     * This method automatically clamps the current value to be no greater than
-     * the new maximum, which may trigger a value change event. To set the value
-     * explicitly along with the new maximum, use the
-     * {@link #setValue(Double, double, double) setValue(value, min, max)}
-     * method instead.
      *
      * @param max
      *            the maximum value
-     * @throws IllegalArgumentException
-     *             if max is less than the current min
      */
     public void setMax(double max) {
-        SliderUtil.requireValidMinMax(getMin(), max);
         setMaxDouble(max);
-
-        double adjustedValue = SliderUtil.clampToMinMax(getValue(), getMin(),
-                max);
-        setValue(adjustedValue);
     }
 
     /**
@@ -380,24 +196,14 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
     /**
      * Sets the step value of the slider.
      * <p>
-     * This method automatically adjusts the current value to be aligned with
-     * the new step, which may trigger a value change event. To set the value
-     * explicitly along with the new step, use the
-     * {@link #setValue(Double, double, double, double) setValue(value, min,
-     * max, step)} method instead.
+     * Valid slider values are calculated relative to the minimum value:
+     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
      *
      * @param step
      *            the step value
-     * @throws IllegalArgumentException
-     *             if step is not positive
      */
     public void setStep(double step) {
-        SliderUtil.requireValidStep(step);
         setStepDouble(step);
-
-        double adjustedValue = SliderUtil.snapToStep(getValue(), getMin(),
-                getMax(), step);
-        setValue(adjustedValue);
     }
 
     /**
@@ -414,15 +220,15 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
     protected boolean hasValidValue() {
         Double value = getElement().getProperty("value", 0.0);
         try {
-            requireValidValue(value);
+            requireValidValue(getMin(), getMax(), getStep(), value);
             return true;
         } catch (IllegalArgumentException | NullPointerException e) {
             return false;
         }
     }
 
-    @Override
-    void requireValidValue(double min, double max, double step, Double value) {
+    private void requireValidValue(double min, double max, double step,
+            Double value) {
         Objects.requireNonNull(value, "Value cannot be null");
 
         if (SliderUtil.clampToMinMax(value, min, max) != value) {
