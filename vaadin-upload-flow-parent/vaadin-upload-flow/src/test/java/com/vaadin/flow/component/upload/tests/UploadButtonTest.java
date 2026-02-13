@@ -104,9 +104,22 @@ public class UploadButtonTest {
         Assert.assertSame(manager, button.getUploadManager());
     }
 
+    @Test
+    public void constructor_withTextAndManager_setsTextAndLinksToManager() {
+        UploadButton button = new UploadButton("Upload", manager);
+
+        Assert.assertEquals("Upload", button.getText());
+        Assert.assertSame(manager, button.getUploadManager());
+    }
+
     @Test(expected = NullPointerException.class)
     public void constructor_withNull_throws() {
         new UploadButton(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void constructor_withTextAndNullManager_throws() {
+        new UploadButton("Upload", null);
     }
 
     @Test
