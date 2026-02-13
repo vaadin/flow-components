@@ -30,8 +30,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route("vaadin-button/signal-button")
 public class SignalButtonView extends Div {
     public SignalButtonView() {
-        var textSignal = new ValueSignal<>("initial text");
-        var computedSignal = Signal
+        ValueSignal<String> textSignal = new ValueSignal<>("initial text");
+        Signal<String> computedSignal = Signal
                 .computed(() -> textSignal.value() + " computed");
 
         var computedSignalButton = new Button(computedSignal);
