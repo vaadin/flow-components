@@ -892,8 +892,6 @@ public class DateTimePicker
      * with the signal value while the component is attached. When the component
      * is detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the minimum date and time
      * manually through {@link #setMin(LocalDateTime)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
@@ -902,8 +900,8 @@ public class DateTimePicker
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the minimum date and time to, or
-     *            {@code null} to unbind
+     *            the signal to bind the minimum date and time to, not
+     *            {@code null}
      * @see #setMin(LocalDateTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
@@ -946,8 +944,6 @@ public class DateTimePicker
      * with the signal value while the component is attached. When the component
      * is detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the maximum date and time
      * manually through {@link #setMax(LocalDateTime)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
@@ -956,8 +952,8 @@ public class DateTimePicker
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the maximum date and time to, or
-     *            {@code null} to unbind
+     *            the signal to bind the maximum date and time to, not
+     *            {@code null}
      * @see #setMax(LocalDateTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1

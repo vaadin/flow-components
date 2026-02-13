@@ -144,14 +144,12 @@ public class Icon extends AbstractIcon<Icon> {
      * value while the component is attached. When the component is detached,
      * signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the icon manually through
      * {@link #setIcon(VaadinIcon)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the icon to, or {@code null} to unbind
+     *            the signal to bind the icon to, not {@code null}
      * @see #setIcon(VaadinIcon)
      * @see com.vaadin.flow.dom.Element#bindAttribute(String, Signal)
      * @since 25.1
