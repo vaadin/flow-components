@@ -25,6 +25,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.signals.BindingActiveException;
+import com.vaadin.signals.Signal;
 
 /**
  * A handle that can be used to configure and control tooltips.
@@ -41,6 +43,9 @@ public class Tooltip implements Serializable {
      * The {@code <vaadin-tooltip>} element controlled by this tooltip instance.
      */
     private final Element tooltipElement = new Element("vaadin-tooltip");
+
+    private boolean textBound = false;
+    private boolean markdownBound = false;
 
     private Tooltip() {
         super();
@@ -175,6 +180,16 @@ public class Tooltip implements Serializable {
      *            the text to set
      */
     public void setText(String text) {
+        if (textBound) {
+            throw new BindingActiveException(
+                    "Cannot set text value when a text signal is bound. "
+                            + "Unbind the signal first by calling bindText(null).");
+        }
+        if (markdownBound) {
+            throw new BindingActiveException(
+                    "Cannot set text value when a markdown signal is bound. "
+                            + "Unbind the signal first by calling bindMarkdown(null).");
+        }
         tooltipElement.setProperty("text", text);
         tooltipElement.setProperty("markdown", false);
     }
@@ -186,6 +201,16 @@ public class Tooltip implements Serializable {
      *            the text to set in Markdown format
      */
     public void setMarkdown(String markdown) {
+        if (textBound) {
+            throw new BindingActiveException(
+                    "Cannot set markdown value when a text signal is bound. "
+                            + "Unbind the signal first by calling bindText(null).");
+        }
+        if (markdownBound) {
+            throw new BindingActiveException(
+                    "Cannot set markdown value when a markdown signal is bound. "
+                            + "Unbind the signal first by calling bindMarkdown(null).");
+        }
         tooltipElement.setProperty("text", markdown);
         tooltipElement.setProperty("markdown", true);
     }
@@ -405,5 +430,86 @@ public class Tooltip implements Serializable {
      */
     public boolean isOpened() {
         return tooltipElement.getProperty("opened", false);
+    }
+
+    /**
+     * Binds the tooltip text to the given signal.
+     * <p>
+     * When a signal is bound, the tooltip text value is kept synchronized with
+     * the signal value while the tooltip element is attached. When the tooltip
+     * element is detached, signal value changes have no effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the text value manually
+     * (other than through the signal) throws {@code BindingActiveException}.
+     * Attempting to bind a new signal while one is already bound also throws
+     * {@code BindingActiveException}.
+     *
+     * @param textSignal
+     *            the signal to bind to, or {@code null} to unbind
+     * @see #setText(String)
+     * @since 25.1
+     */
+    public void bindText(Signal<String> textSignal) {
+        if (textSignal != null && textBound) {
+            throw new BindingActiveException(
+                    "Cannot bind a new signal when another text signal is already bound. "
+                            + "Unbind the existing signal first by calling bindText(null).");
+        }
+        if (textSignal != null && markdownBound) {
+            throw new BindingActiveException(
+                    "Cannot bind a text signal when a markdown signal is already bound. "
+                            + "Unbind the existing signal first by calling bindMarkdown(null).");
+        }
+
+        tooltipElement.bindProperty("text", textSignal);
+        if (textSignal != null) {
+            tooltipElement.setProperty("markdown", false);
+            textBound = true;
+        } else {
+            textBound = false;
+        }
+    }
+
+    /**
+     * Binds the tooltip markdown content to the given signal.
+     * <p>
+     * When a signal is bound, the tooltip markdown content value is kept
+     * synchronized with the signal value while the tooltip element is attached.
+     * When the tooltip element is detached, signal value changes have no
+     * effect.
+     * <p>
+     * Passing {@code null} as the signal unbinds the existing binding.
+     * <p>
+     * While a signal is bound, any attempt to set the markdown value manually
+     * (other than through the signal) throws {@code BindingActiveException}.
+     * Attempting to bind a new signal while one is already bound also throws
+     * {@code BindingActiveException}.
+     *
+     * @param markdownSignal
+     *            the signal to bind to, or {@code null} to unbind
+     * @see #setMarkdown(String)
+     * @since 25.1
+     */
+    public void bindMarkdown(Signal<String> markdownSignal) {
+        if (markdownSignal != null && markdownBound) {
+            throw new BindingActiveException(
+                    "Cannot bind a new signal when another markdown signal is already bound. "
+                            + "Unbind the existing signal first by calling bindMarkdown(null).");
+        }
+        if (markdownSignal != null && textBound) {
+            throw new BindingActiveException(
+                    "Cannot bind a markdown signal when a text signal is already bound. "
+                            + "Unbind the existing signal first by calling bindText(null).");
+        }
+
+        tooltipElement.bindProperty("text", markdownSignal);
+        if (markdownSignal != null) {
+            tooltipElement.setProperty("markdown", true);
+            markdownBound = true;
+        } else {
+            markdownBound = false;
+        }
     }
 }
