@@ -455,12 +455,13 @@ public class DatePicker
      * @param signal
      *            the signal to bind the minimum date to, not {@code null}
      * @see #setMin(LocalDate)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<LocalDate> signal) {
         getElement().bindProperty("min",
-                signal == null ? null : signal.map(FORMATTER::apply));
+                signal == null ? null : signal.map(FORMATTER::apply), null);
         minSupport.bind(signal);
     }
 
@@ -506,12 +507,13 @@ public class DatePicker
      * @param signal
      *            the signal to bind the maximum date to, not {@code null}
      * @see #setMax(LocalDate)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<LocalDate> signal) {
-        getElement().bindProperty("max",
-                signal == null ? null : signal.map(FORMATTER::apply));
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("max", signal.map(FORMATTER::apply), null);
         maxSupport.bind(signal);
     }
 
@@ -953,12 +955,13 @@ public class DatePicker
      * @param signal
      *            the signal to bind the initial position to, not {@code null}
      * @see #setInitialPosition(LocalDate)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindInitialPosition(Signal<LocalDate> signal) {
         getElement().bindProperty("initialPosition",
-                signal == null ? null : signal.map(FORMATTER::apply));
+                signal == null ? null : signal.map(FORMATTER::apply), null);
     }
 
     /**
