@@ -333,14 +333,12 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * value while the component is attached. When the component is detached,
      * signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the symbol manually through
      * {@link #setSymbol(String)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the symbol to, or {@code null} to unbind
+     *            the signal to bind the symbol to, not {@code null}
      * @see #setSymbol(String)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1

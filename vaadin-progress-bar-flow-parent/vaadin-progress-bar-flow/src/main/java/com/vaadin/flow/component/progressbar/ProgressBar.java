@@ -32,7 +32,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-alpha7")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {
@@ -124,14 +124,12 @@ public class ProgressBar extends Component
      * value while the component is attached. When the component is detached,
      * signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the value manually through
      * {@link #setValue(double)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the value to, or {@code null} to unbind
+     *            the signal to bind the value to, not {@code null}
      * @see #setValue(double)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
@@ -185,15 +183,12 @@ public class ProgressBar extends Component
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the minimum bound manually
      * through {@link #setMin(double)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the minimum bound to, or {@code null} to
-     *            unbind
+     *            the signal to bind the minimum bound to, not {@code null}
      * @see #setMin(double)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
@@ -209,15 +204,12 @@ public class ProgressBar extends Component
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the maximum bound manually
      * through {@link #setMax(double)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the maximum bound to, or {@code null} to
-     *            unbind
+     *            the signal to bind the maximum bound to, not {@code null}
      * @see #setMax(double)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
