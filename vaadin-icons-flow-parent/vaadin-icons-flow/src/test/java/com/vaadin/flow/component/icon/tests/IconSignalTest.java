@@ -54,10 +54,10 @@ public class IconSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals("vaadin:home", icon.getIcon());
 
-        iconSignal.value(VaadinIcon.SEARCH);
+        iconSignal.set(VaadinIcon.SEARCH);
         Assert.assertEquals("vaadin:search", icon.getIcon());
 
-        iconSignal.value(VaadinIcon.USER);
+        iconSignal.set(VaadinIcon.USER);
         Assert.assertEquals("vaadin:user", icon.getIcon());
     }
 
@@ -67,7 +67,7 @@ public class IconSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         String initialIcon = icon.getIcon();
-        iconSignal.value(VaadinIcon.SEARCH);
+        iconSignal.set(VaadinIcon.SEARCH);
         Assert.assertEquals(initialIcon, icon.getIcon());
     }
 
@@ -79,29 +79,14 @@ public class IconSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         icon.removeFromParent();
-        iconSignal.value(VaadinIcon.SEARCH);
+        iconSignal.set(VaadinIcon.SEARCH);
         Assert.assertEquals("vaadin:home", icon.getIcon());
 
         // Reattach
         UI.getCurrent().add(icon);
         Assert.assertEquals("vaadin:search", icon.getIcon());
 
-        iconSignal.value(VaadinIcon.USER);
-        Assert.assertEquals("vaadin:user", icon.getIcon());
-    }
-
-    @Test
-    public void bindIcon_nullUnbindsSignal() {
-        icon.bindIcon(iconSignal);
-        UI.getCurrent().add(icon);
-        Assert.assertEquals("vaadin:home", icon.getIcon());
-
-        icon.bindIcon(null);
-        iconSignal.value(VaadinIcon.SEARCH);
-        Assert.assertEquals("vaadin:home", icon.getIcon());
-
-        // Should be able to set manually after unbinding
-        icon.setIcon(VaadinIcon.USER);
+        iconSignal.set(VaadinIcon.USER);
         Assert.assertEquals("vaadin:user", icon.getIcon());
     }
 
@@ -130,7 +115,7 @@ public class IconSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals("vaadin:home", icon.getIcon());
 
-        iconSignal.value(VaadinIcon.SEARCH);
+        iconSignal.set(VaadinIcon.SEARCH);
         Assert.assertEquals("vaadin:search", icon.getIcon());
     }
 }

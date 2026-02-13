@@ -56,13 +56,13 @@ public class HasValidationPropertiesBindingTest
                 component.getElement().getProperty("errorMessage"));
 
         // Update to a different non-null value
-        signal.value("second error");
+        signal.set("second error");
         assertEquals("second error", component.getErrorMessage());
         assertEquals("second error",
                 component.getElement().getProperty("errorMessage"));
 
         // Update to null -> should map to empty string
-        signal.value(null);
+        signal.set(null);
         assertEquals("", component.getElement().getProperty("errorMessage"));
         // API getter returns the property value as-is
         assertEquals("", component.getErrorMessage());
@@ -76,7 +76,7 @@ public class HasValidationPropertiesBindingTest
 
         // While detached, binding should be inactive
         assertNull(component.getErrorMessage());
-        signal.value("updated");
+        signal.set("updated");
         assertNull(component.getErrorMessage());
 
         // Attach -> latest value is applied
@@ -121,12 +121,12 @@ public class HasValidationPropertiesBindingTest
         assertTrue(component.getElement().getProperty("invalid", false));
 
         // Update to a different non-null value
-        signal.value(false);
+        signal.set(false);
         assertFalse(component.isInvalid());
         assertFalse(component.getElement().getProperty("invalid", false));
 
         // Update to a different non-null value again
-        signal.value(true);
+        signal.set(true);
         assertTrue(component.isInvalid());
         assertTrue(component.getElement().getProperty("invalid", false));
     }
@@ -139,7 +139,7 @@ public class HasValidationPropertiesBindingTest
 
         // While detached, binding should be inactive
         assertFalse(component.isInvalid());
-        signal.value(false);
+        signal.set(false);
         assertFalse(component.isInvalid());
 
         // Attach -> latest value is applied
@@ -147,7 +147,7 @@ public class HasValidationPropertiesBindingTest
         assertFalse(component.isInvalid());
 
         // Update after attach -> applied
-        signal.value(true);
+        signal.set(true);
         assertTrue(component.isInvalid());
     }
 

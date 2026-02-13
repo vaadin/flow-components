@@ -128,7 +128,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.1.0-alpha7")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "4.1.0")
@@ -448,15 +448,12 @@ public class DatePicker
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the minimum date manually
      * through {@link #setMin(LocalDate)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the minimum date to, or {@code null} to
-     *            unbind
+     *            the signal to bind the minimum date to, not {@code null}
      * @see #setMin(LocalDate)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
@@ -502,15 +499,12 @@ public class DatePicker
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the maximum date manually
      * through {@link #setMax(LocalDate)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the maximum date to, or {@code null} to
-     *            unbind
+     *            the signal to bind the maximum date to, not {@code null}
      * @see #setMax(LocalDate)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
@@ -952,15 +946,12 @@ public class DatePicker
      * the signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the initial position manually
      * through {@link #setInitialPosition(LocalDate)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the initial position to, or {@code null} to
-     *            unbind
+     *            the signal to bind the initial position to, not {@code null}
      * @see #setInitialPosition(LocalDate)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1

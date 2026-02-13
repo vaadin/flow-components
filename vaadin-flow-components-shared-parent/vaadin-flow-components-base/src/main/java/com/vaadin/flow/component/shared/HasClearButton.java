@@ -56,8 +56,6 @@ public interface HasClearButton extends HasElement {
      * with the signal value while the element is in the attached state. When
      * the element is detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the visibility manually
      * through {@link #setClearButtonVisible(boolean)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
@@ -68,8 +66,8 @@ public interface HasClearButton extends HasElement {
      * Signal's value {@code null} is treated as {@code false}.
      *
      * @param signal
-     *            the signal to bind the clear button visibility to, or
-     *            {@code null} to unbind
+     *            the signal to bind the clear button visibility to, not
+     *            {@code null}
      * @see #setClearButtonVisible(boolean)
      * @since 25.1
      */
