@@ -197,7 +197,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
                         .map(error -> error == null ? Boolean.FALSE : error);
 
         errorSupport.bind(mappedSignal);
-        getElement().bindProperty(PROP_ERROR, mappedSignal);
+        getElement().bindProperty(PROP_ERROR, mappedSignal, null);
     }
 
     /**
