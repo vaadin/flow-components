@@ -78,7 +78,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha7")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -1340,8 +1340,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *             directly
      */
     @Override
-    public <T, S extends Signal<T>> Registration bindChildren(
-            Signal<List<S>> list,
+    public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,
             SerializableFunction<S, Component> childFactory) {
         throw new UnsupportedOperationException(
                 "Dialog does not support binding children directly. "
