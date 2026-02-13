@@ -17,24 +17,24 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import java.util.List;
 
-import com.vaadin.flow.component.ai.common.AiAttachment;
-import com.vaadin.flow.component.ai.component.AiMessage;
-import com.vaadin.flow.component.ai.component.AiMessageList;
+import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.ui.AIMessage;
+import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageList;
 
 /**
- * Wrapper for Flow MessageList component to implement AiMessageList interface.
+ * Wrapper for Flow MessageList component to implement AIMessageList interface.
  */
-record MessageListWrapper(MessageList messageList) implements AiMessageList {
+record MessageListWrapper(MessageList messageList) implements AIMessageList {
 
     @Override
-    public void addMessage(AiMessage message) {
+    public void addMessage(AIMessage message) {
         messageList.addItem(((MessageListItemWrapper) message).getItem());
     }
 
     @Override
-    public AiMessage createMessage(String text, String userName,
-            List<AiAttachment> attachments) {
+    public AIMessage createMessage(String text, String userName,
+            List<AIAttachment> attachments) {
         return new MessageListItemWrapper(text, userName, attachments);
     }
 }
