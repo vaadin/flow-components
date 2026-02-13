@@ -120,15 +120,12 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the character code manually
      * through {@link #setCharCode(String)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the character code to, or {@code null} to
-     *            unbind
+     *            the signal to bind the character code to, not {@code null}
      * @see #setCharCode(String)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1
@@ -167,14 +164,12 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the ligature manually through
      * {@link #setLigature(String)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the ligature to, or {@code null} to unbind
+     *            the signal to bind the ligature to, not {@code null}
      * @see #setLigature(String)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
      * @since 25.1

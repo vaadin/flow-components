@@ -53,13 +53,13 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
                 false));
 
         // Update to a different non-null value
-        signal.value(false);
+        signal.set(false);
         assertFalse(component.isClearButtonVisible());
         assertFalse(component.getElement().getProperty("clearButtonVisible",
                 false));
 
         // Update to null -> should map to false
-        signal.value(null);
+        signal.set(null);
         assertFalse(component.isClearButtonVisible());
         assertFalse(component.getElement().getProperty("clearButtonVisible",
                 false));
@@ -73,7 +73,7 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
 
         // While detached, binding should be inactive
         assertFalse(component.isClearButtonVisible());
-        signal.value(false);
+        signal.set(false);
         assertFalse(component.isClearButtonVisible());
 
         // Attach -> latest value is applied
@@ -81,7 +81,7 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
         assertFalse(component.isClearButtonVisible());
 
         // Update after attach -> applied
-        signal.value(true);
+        signal.set(true);
         assertTrue(component.isClearButtonVisible());
     }
 
@@ -107,25 +107,5 @@ public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
 
         assertThrows(BindingActiveException.class, () -> component
                 .bindClearButtonVisible(new ValueSignal<>(false)));
-    }
-
-    @Test
-    public void bindClearButtonVisible_passingNull_unbindsExistingBinding() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindClearButtonVisible(signal);
-        assertTrue(component.isClearButtonVisible());
-
-        // Unbind
-        component.bindClearButtonVisible(null);
-
-        // Manual set should work now
-        component.setClearButtonVisible(false);
-        assertFalse(component.isClearButtonVisible());
-
-        // Signal update should not affect component anymore
-        signal.value(true);
-        assertFalse(component.isClearButtonVisible());
     }
 }
