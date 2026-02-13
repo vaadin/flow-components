@@ -91,7 +91,7 @@ public class AIOrchestratorTest {
     @Test
     public void builder_withNullProvider_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
-                () -> AIOrchestrator.builder(null));
+                () -> AIOrchestrator.builder(null, null));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -145,7 +145,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -155,7 +155,7 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withInput_addsSubmitListener() {
-        AIOrchestrator.builder(mockProvider).withInput(mockInput).build();
+        AIOrchestrator.builder(mockProvider, null).withInput(mockInput).build();
 
         Mockito.verify(mockInput)
                 .addSubmitListener(Mockito.any(InputSubmitListener.class));
@@ -163,8 +163,8 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withFileReceiver_configuresUploadHandler() {
-        AIOrchestrator.builder(mockProvider).withFileReceiver(mockFileReceiver)
-                .build();
+        AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(mockFileReceiver).build();
 
         Mockito.verify(mockFileReceiver)
                 .setUploadHandler(Mockito.any(UploadHandler.class));
@@ -184,7 +184,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withTools(tool).build();
 
         orchestrator.prompt("Use tool");
@@ -197,7 +197,7 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withNullToolObjects_handlesNullGracefully() {
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withTools((Object[]) null).build();
         Assert.assertNotNull(orchestrator);
     }
@@ -384,7 +384,7 @@ public class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var tool = new SampleTool();
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withTools(tool).build();
 
         orchestrator.prompt("Get temperature");
@@ -434,7 +434,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -471,7 +471,7 @@ public class AIOrchestratorTest {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
         orchestrator.prompt("Hello");
         Mockito.verify(flowMessageList, Mockito.atLeast(1))
@@ -481,7 +481,7 @@ public class AIOrchestratorTest {
     @Test
     public void builder_withFlowMessageInput_wrapsCorrectly() {
         var flowMessageInput = Mockito.mock(MessageInput.class);
-        AIOrchestrator.builder(mockProvider).withInput(flowMessageInput)
+        AIOrchestrator.builder(mockProvider, null).withInput(flowMessageInput)
                 .build();
 
         Mockito.verify(flowMessageInput).addSubmitListener(Mockito.any());
@@ -490,7 +490,7 @@ public class AIOrchestratorTest {
     @Test
     public void builder_withFlowUpload_wrapsCorrectly() {
         var flowUploadManager = Mockito.mock(UploadManager.class);
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withFileReceiver(flowUploadManager).build();
         Assert.assertNotNull(orchestrator);
         Mockito.verify(flowUploadManager).setUploadHandler(Mockito.any());
@@ -670,7 +670,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.empty());
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
 
         orchestrator.prompt("Hello");
@@ -740,7 +740,7 @@ public class AIOrchestratorTest {
 
         var tool1 = new SampleTool();
         var tool2 = new Object();
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withTools(tool1, tool2)
                 .build();
 
@@ -827,7 +827,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -852,7 +852,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withUserName("John Doe")
                 .build();
         orchestrator.prompt("Hello");
@@ -872,7 +872,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withAssistantName("Claude")
                 .build();
         orchestrator.prompt("Hello");
@@ -895,7 +895,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withUserName("Alice")
                 .withAssistantName("Bot").build();
         orchestrator.prompt("Hello");
@@ -917,7 +917,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var builder = AIOrchestrator.builder(mockProvider)
+        var builder = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList);
         Assert.assertThrows(NullPointerException.class,
                 () -> builder.withUserName(null));
@@ -933,14 +933,14 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var builder = AIOrchestrator.builder(mockProvider)
+        var builder = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList);
         Assert.assertThrows(NullPointerException.class,
                 () -> builder.withAssistantName(null));
     }
 
     private AIOrchestrator getSimpleOrchestrator() {
-        return AIOrchestrator.builder(mockProvider)
+        return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
                 .build();
@@ -1022,7 +1022,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
 
         var largeImageData = createTestImage(initialWidth, initialHeight);
@@ -1057,7 +1057,7 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
 
         var smallImageData = createTestImage(initialWidth, initialHeight);
@@ -1085,7 +1085,7 @@ public class AIOrchestratorTest {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
-        var orchestrator = AIOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
 
         var pendingAttachments = getPendingAttachments(orchestrator);
