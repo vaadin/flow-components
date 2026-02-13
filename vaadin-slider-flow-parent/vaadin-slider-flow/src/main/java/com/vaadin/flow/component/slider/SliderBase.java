@@ -261,8 +261,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     private void schedulePropertyConsistencyCheck() {
         if (!consistencyCheckPending) {
             consistencyCheckPending = true;
-            getElement().getNode().runWhenAttached(ui -> ui
-                    .beforeClientResponse(this, context -> {
+            getElement().getNode().runWhenAttached(
+                    ui -> ui.beforeClientResponse(this, context -> {
                         consistencyCheckPending = false;
                         warnIfPropertiesInconsistent();
                     }));
@@ -285,9 +285,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         }
 
         if (min <= max && step > 0 && !hasValidValue()) {
-            logger.warn(
-                    "{}: value is not within [min, max] range "
-                            + "or is not aligned with step (min={}, max={}, step={})",
+            logger.warn("{}: value is not within [min, max] range "
+                    + "or is not aligned with step (min={}, max={}, step={})",
                     getClass().getSimpleName(), min, max, step);
         }
     }

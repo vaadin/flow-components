@@ -190,8 +190,7 @@ public class RangeSliderTest {
     public void setValueFromClient_startBelowMin_ignored() {
         RangeSlider slider = new RangeSlider();
         slider.setStep(10);
-        slider.getElement().setPropertyJson("value",
-                createValueArray(-10, 50));
+        slider.getElement().setPropertyJson("value", createValueArray(-10, 50));
         Assert.assertEquals(new RangeSliderValue(0, 100), slider.getValue());
     }
 
@@ -199,8 +198,7 @@ public class RangeSliderTest {
     public void setValueFromClient_endAboveMax_ignored() {
         RangeSlider slider = new RangeSlider();
         slider.setStep(10);
-        slider.getElement().setPropertyJson("value",
-                createValueArray(50, 110));
+        slider.getElement().setPropertyJson("value", createValueArray(50, 110));
         Assert.assertEquals(new RangeSliderValue(0, 100), slider.getValue());
     }
 
