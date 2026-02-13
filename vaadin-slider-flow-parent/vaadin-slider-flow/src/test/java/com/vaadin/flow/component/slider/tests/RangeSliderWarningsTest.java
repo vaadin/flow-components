@@ -74,9 +74,8 @@ public class RangeSliderWarningsTest {
         slider.setMin(200);
         fakeClientResponse();
 
-        Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
-                Mockito.eq("RangeSlider"), Mockito.eq(200.0),
-                Mockito.eq(100.0));
+        Mockito.verify(mockedLogger).warn(
+                Mockito.contains("min"), Mockito.eq(200.0), Mockito.eq(100.0));
     }
 
     @Test
@@ -89,8 +88,8 @@ public class RangeSliderWarningsTest {
         slider.setMax(-10);
         fakeClientResponse();
 
-        Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
-                Mockito.eq("RangeSlider"), Mockito.eq(0.0), Mockito.eq(-10.0));
+        Mockito.verify(mockedLogger).warn(
+                Mockito.contains("min"), Mockito.eq(0.0), Mockito.eq(-10.0));
     }
 
     @Test
@@ -104,8 +103,7 @@ public class RangeSliderWarningsTest {
         fakeClientResponse();
 
         Mockito.verify(mockedLogger).warn(
-                Mockito.contains("out of [min, max] range"),
-                Mockito.eq("RangeSlider"),
+                Mockito.contains("outside the configured range"),
                 Mockito.eq(new RangeSliderValue(0, 150)), Mockito.eq(0.0),
                 Mockito.eq(100.0));
     }
@@ -123,7 +121,6 @@ public class RangeSliderWarningsTest {
 
         Mockito.verify(mockedLogger).warn(
                 Mockito.contains("not aligned with step"),
-                Mockito.eq("RangeSlider"),
                 Mockito.eq(new RangeSliderValue(0, 15)), Mockito.eq(0.0),
                 Mockito.eq(100.0), Mockito.eq(10.0));
     }
