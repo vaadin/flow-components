@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.ai.ui;
 
 import java.io.Serializable;
 
@@ -24,7 +24,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  *
  * @author Vaadin Ltd
  */
-public interface AiFileReceiver extends Serializable {
+public interface AIFileReceiver extends Serializable {
 
     /**
      * Sets the upload handler for this file receiver.

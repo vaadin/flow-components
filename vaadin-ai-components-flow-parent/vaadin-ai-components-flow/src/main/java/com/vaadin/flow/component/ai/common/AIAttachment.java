@@ -34,7 +34,7 @@ import java.util.Objects;
  *            the raw file data, not {@code null}
  * @author Vaadin Ltd
  */
-public record AiAttachment(String name, String mimeType,
+public record AIAttachment(String name, String mimeType,
         byte[] data) implements Serializable {
 
     /**
@@ -49,7 +49,7 @@ public record AiAttachment(String name, String mimeType,
      * @throws NullPointerException
      *             if any parameter is null
      */
-    public AiAttachment {
+    public AIAttachment {
         Objects.requireNonNull(name, "Name cannot be null");
         Objects.requireNonNull(mimeType, "MIME type cannot be null");
         Objects.requireNonNull(data, "Data cannot be null");

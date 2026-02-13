@@ -28,14 +28,14 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.AiComponentsExperimentalFeatureException;
-import com.vaadin.flow.component.ai.AiComponentsFeatureFlagProvider;
-import com.vaadin.flow.component.ai.common.AiAttachment;
-import com.vaadin.flow.component.ai.component.AiFileReceiver;
-import com.vaadin.flow.component.ai.component.AiInput;
-import com.vaadin.flow.component.ai.component.AiMessage;
-import com.vaadin.flow.component.ai.component.AiMessageList;
+import com.vaadin.flow.component.ai.AIComponentsExperimentalFeatureException;
+import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.ui.AIFileReceiver;
+import com.vaadin.flow.component.ai.ui.AIInput;
+import com.vaadin.flow.component.ai.ui.AIMessage;
+import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
@@ -58,13 +58,13 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * </p>
  *
  * <pre>
- * AiOrchestrator orchestrator = AiOrchestrator
+ * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withInput(messageInput) // optional
  *         .withMessageList(messageList) // optional
  *         .withFileReceiver(upload) // optional
  *         .withTools(toolObj) // optional, for @Tool annotations
  *         .withUserName(userName) // optional
- *         .withAiName(aiName) // optional
+ *         .withAssistantName(assistantName) // optional
  *         .build();
  * </pre>
  * <p>
@@ -73,17 +73,17 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * its provider instance.
  * </p>
  * <p>
- * <b>Note:</b> AiOrchestrator is not serializable. If your application uses
+ * <b>Note:</b> AIOrchestrator is not serializable. If your application uses
  * session persistence, you will need to create a new orchestrator instance
  * after session restore.
  * </p>
  *
  * @author Vaadin Ltd
  */
-public class AiOrchestrator {
+public class AIOrchestrator {
 
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(AiOrchestrator.class);
+            .getLogger(AIOrchestrator.class);
 
     /**
      * Default timeout for LLM response streaming in seconds.
@@ -93,17 +93,17 @@ public class AiOrchestrator {
     /**
      * The feature flag ID for AI components.
      */
-    static final String FEATURE_FLAG_ID = AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
+    static final String FEATURE_FLAG_ID = AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
     private final LLMProvider provider;
     private final String systemPrompt;
-    private AiMessageList messageList;
-    private AiInput input;
-    private AiFileReceiver fileReceiver;
-    private final List<AiAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
+    private AIMessageList messageList;
+    private AIInput input;
+    private AIFileReceiver fileReceiver;
+    private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private Object[] tools = new Object[0];
     private String userName;
-    private String aiName;
+    private String assistantName;
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
@@ -116,14 +116,14 @@ public class AiOrchestrator {
      * @param systemPrompt
      *            the system prompt for the LLM (can be null)
      */
-    private AiOrchestrator(LLMProvider provider, String systemPrompt) {
+    private AIOrchestrator(LLMProvider provider, String systemPrompt) {
         Objects.requireNonNull(provider, "Provider cannot be null");
         this.provider = provider;
         this.systemPrompt = systemPrompt;
     }
 
     /**
-     * Creates a new builder for AiOrchestrator.
+     * Creates a new builder for AIOrchestrator.
      *
      * @param provider
      *            the LLM provider
@@ -134,7 +134,7 @@ public class AiOrchestrator {
     }
 
     /**
-     * Creates a new builder for AiOrchestrator with a system prompt.
+     * Creates a new builder for AIOrchestrator with a system prompt.
      *
      * @param provider
      *            the LLM provider
@@ -169,7 +169,7 @@ public class AiOrchestrator {
     }
 
     private void addUserMessageToList(String userMessage,
-            List<AiAttachment> attachments) {
+            List<AIAttachment> attachments) {
         if (messageList != null) {
             var userItem = messageList.createMessage(userMessage, userName,
                     attachments);
@@ -177,18 +177,18 @@ public class AiOrchestrator {
         }
     }
 
-    private AiMessage createAssistantMessagePlaceholder() {
+    private AIMessage createAssistantMessagePlaceholder() {
         if (messageList == null) {
             return null;
         }
-        var assistantMessage = messageList.createMessage("", aiName,
+        var assistantMessage = messageList.createMessage("", assistantName,
                 Collections.emptyList());
         messageList.addMessage(assistantMessage);
         return assistantMessage;
     }
 
     private void streamResponseToMessage(LLMProvider.LLMRequest request,
-            AiMessage assistantMessage, UI ui) {
+            AIMessage assistantMessage, UI ui) {
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
         responseStream.doFinally(signal -> {
@@ -245,7 +245,7 @@ public class AiOrchestrator {
             }
 
             @Override
-            public List<AiAttachment> attachments() {
+            public List<AIAttachment> attachments() {
                 return attachments;
             }
 
@@ -278,8 +278,8 @@ public class AiOrchestrator {
         FeatureFlags featureFlags = FeatureFlags
                 .get(ui.getSession().getService().getContext());
         if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
-            throw new AiComponentsExperimentalFeatureException(
-                    "AiOrchestrator");
+            throw new AIComponentsExperimentalFeatureException(
+                    "AIOrchestrator");
         }
         featureFlagChecked.set(true);
     }
@@ -295,7 +295,7 @@ public class AiOrchestrator {
                 throw new IllegalArgumentException(
                         "Duplicate file name: " + meta.fileName());
             }
-            pendingAttachments.add(new AiAttachment(meta.fileName(),
+            pendingAttachments.add(new AIAttachment(meta.fileName(),
                     meta.contentType(), data));
             LOGGER.debug("Added attachment: {}", meta.fileName());
         }));
@@ -309,17 +309,17 @@ public class AiOrchestrator {
     }
 
     /**
-     * Builder for AiOrchestrator.
+     * Builder for AIOrchestrator.
      */
     public static class Builder {
         private final LLMProvider provider;
         private final String systemPrompt;
-        private AiMessageList messageList;
-        private AiInput input;
-        private AiFileReceiver fileReceiver;
+        private AIMessageList messageList;
+        private AIInput input;
+        private AIFileReceiver fileReceiver;
         private Object[] tools = new Object[0];
         private String userName;
-        private String aiName;
+        private String assistantName;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -334,7 +334,7 @@ public class AiOrchestrator {
          *            the message list
          * @return this builder
          */
-        public Builder withMessageList(AiMessageList messageList) {
+        public Builder withMessageList(AIMessageList messageList) {
             this.messageList = messageList;
             return this;
         }
@@ -358,7 +358,7 @@ public class AiOrchestrator {
          *            the input component
          * @return this builder
          */
-        public Builder withInput(AiInput input) {
+        public Builder withInput(AIInput input) {
             this.input = input;
             return this;
         }
@@ -382,7 +382,7 @@ public class AiOrchestrator {
          *            the file receiver
          * @return this builder
          */
-        public Builder withFileReceiver(AiFileReceiver fileReceiver) {
+        public Builder withFileReceiver(AIFileReceiver fileReceiver) {
             this.fileReceiver = fileReceiver;
             return this;
         }
@@ -441,13 +441,14 @@ public class AiOrchestrator {
          * not set, defaults to "Assistant".
          * </p>
          *
-         * @param aiName
+         * @param assistantName
          *            the display name for AI messages, not {@code null}
          * @return this builder
          */
-        public Builder withAiName(String aiName) {
-            Objects.requireNonNull(aiName, "AI name cannot be null");
-            this.aiName = aiName;
+        public Builder withAssistantName(String assistantName) {
+            Objects.requireNonNull(assistantName,
+                    "Assistant name cannot be null");
+            this.assistantName = assistantName;
             return this;
         }
 
@@ -456,14 +457,15 @@ public class AiOrchestrator {
          *
          * @return the configured orchestrator
          */
-        public AiOrchestrator build() {
-            var orchestrator = new AiOrchestrator(provider, systemPrompt);
+        public AIOrchestrator build() {
+            var orchestrator = new AIOrchestrator(provider, systemPrompt);
             orchestrator.messageList = messageList;
             orchestrator.input = input;
             orchestrator.fileReceiver = fileReceiver;
             orchestrator.tools = tools == null ? new Object[0] : tools;
             orchestrator.userName = userName == null ? "You" : userName;
-            orchestrator.aiName = aiName == null ? "Assistant" : aiName;
+            orchestrator.assistantName = assistantName == null ? "Assistant"
+                    : assistantName;
             if (input != null) {
                 input.addSubmitListener(
                         e -> orchestrator.doPrompt(e.getValue()));
@@ -471,26 +473,26 @@ public class AiOrchestrator {
             if (fileReceiver != null) {
                 orchestrator.configureFileReceiver();
             }
-            LOGGER.debug("Built AiOrchestrator with messageList={}, input={}, "
-                    + "fileReceiver={}, tools={}, userName={}, aiName={}",
+            LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
+                    + "fileReceiver={}, tools={}, userName={}, assistantName={}",
                     orchestrator.messageList != null,
                     orchestrator.input != null,
                     orchestrator.fileReceiver != null,
                     orchestrator.tools.length, orchestrator.userName,
-                    orchestrator.aiName);
+                    orchestrator.assistantName);
 
             return orchestrator;
         }
 
-        private static AiMessageList wrapMessageList(MessageList messageList) {
+        private static AIMessageList wrapMessageList(MessageList messageList) {
             return new MessageListWrapper(messageList);
         }
 
-        private static AiInput wrapInput(MessageInput messageInput) {
+        private static AIInput wrapInput(MessageInput messageInput) {
             return new MessageInputWrapper(messageInput);
         }
 
-        private static AiFileReceiver wrapUploadManager(
+        private static AIFileReceiver wrapUploadManager(
                 UploadManager uploadManager) {
             return new UploadManagerWrapper(uploadManager);
         }

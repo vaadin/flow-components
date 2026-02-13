@@ -21,12 +21,12 @@ package com.vaadin.flow.component.ai;
  *
  * @author Vaadin Ltd
  */
-public class AiComponentsExperimentalFeatureException extends RuntimeException {
+public class AIComponentsExperimentalFeatureException extends RuntimeException {
 
     /**
      * Creates a new exception with a default message.
      */
-    public AiComponentsExperimentalFeatureException() {
+    public AIComponentsExperimentalFeatureException() {
         this(null, null);
     }
 
@@ -38,7 +38,7 @@ public class AiComponentsExperimentalFeatureException extends RuntimeException {
      *            the name of the component that requires the feature flag, or
      *            {@code null} for a generic message
      */
-    public AiComponentsExperimentalFeatureException(String componentName) {
+    public AIComponentsExperimentalFeatureException(String componentName) {
         this(componentName, null);
     }
 
@@ -55,7 +55,7 @@ public class AiComponentsExperimentalFeatureException extends RuntimeException {
      *            the specific feature flag ID that can enable this feature, or
      *            {@code null} to only mention the umbrella AI components flag
      */
-    public AiComponentsExperimentalFeatureException(String componentName,
+    public AIComponentsExperimentalFeatureException(String componentName,
             String specificFeatureFlagId) {
         super(buildMessage(componentName, specificFeatureFlagId));
     }
@@ -70,11 +70,11 @@ public class AiComponentsExperimentalFeatureException extends RuntimeException {
         if (specificFeatureFlagId != null) {
             flagInfo = "`com.vaadin.experimental." + specificFeatureFlagId
                     + "=true` or `com.vaadin.experimental."
-                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID
+                    + AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID
                     + "=true`";
         } else {
             flagInfo = "`com.vaadin.experimental."
-                    + AiComponentsFeatureFlagProvider.FEATURE_FLAG_ID
+                    + AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID
                     + "=true`";
         }
 
