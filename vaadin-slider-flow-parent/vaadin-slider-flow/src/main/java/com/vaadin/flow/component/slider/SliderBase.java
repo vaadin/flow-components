@@ -168,6 +168,10 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *            the step value
      */
     void setStepDouble(double step) {
+        if (step <= 0) {
+            throw new IllegalArgumentException(
+                    "The step must be greater than 0.");
+        }
         getElement().setProperty("step", step);
         schedulePropertyConsistencyCheck();
     }
@@ -275,18 +279,17 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         double step = getStepDouble();
 
         if (min > max) {
-            logger.warn("{}: min ({}) is greater than max ({})",
+            logger.warn(
+                    "{}: min ({}) is greater than max ({})."
+                            + " This can lead to unexpected behavior and a broken UI.",
                     getClass().getSimpleName(), min, max);
         }
 
-        if (step <= 0) {
-            logger.warn("{}: step ({}) must be greater than 0",
-                    getClass().getSimpleName(), step);
-        }
-
         if (min <= max && step > 0 && !hasValidValue()) {
-            logger.warn("{}: value is not within [min, max] range "
-                    + "or is not aligned with step (min={}, max={}, step={})",
+            logger.warn(
+                    "{}: value is not within [min, max] range"
+                            + " or is not aligned with step (min={}, max={}, step={})."
+                            + " This can lead to unexpected behavior and a broken UI.",
                     getClass().getSimpleName(), min, max, step);
         }
     }
