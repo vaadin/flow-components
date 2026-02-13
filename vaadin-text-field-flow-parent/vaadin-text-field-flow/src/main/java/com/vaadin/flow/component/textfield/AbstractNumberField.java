@@ -342,7 +342,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * Internal helper to bind a signal to the minimum value.
      */
     protected final void bindMinInternal(Signal<Double> signal) {
-        getElement().bindProperty("min", signal);
+        getElement().bindProperty("min", signal, null);
         minSupport.bind(signal);
     }
 
@@ -350,7 +350,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * Internal helper to bind a signal to the maximum value.
      */
     protected final void bindMaxInternal(Signal<Double> signal) {
-        getElement().bindProperty("max", signal);
+        getElement().bindProperty("max", signal, null);
         maxSupport.bind(signal);
     }
 
