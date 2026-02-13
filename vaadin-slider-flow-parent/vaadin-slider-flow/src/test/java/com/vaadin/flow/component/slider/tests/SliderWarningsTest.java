@@ -28,8 +28,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
 import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUI;
 
 public class SliderWarningsTest {
 
@@ -48,13 +47,13 @@ public class SliderWarningsTest {
                 .when(() -> LoggerFactory.getLogger(Slider.class))
                 .thenReturn(mockedLogger);
 
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
+        ui = new MockUI();
+
         VaadinContext mockContext = Mockito.mock(VaadinContext.class);
         FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
 
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
+        Mockito.when(ui.getSession().getService().getContext())
+                .thenReturn(mockContext);
         Mockito.when(mockFeatureFlags
                 .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
                 .thenReturn(true);
@@ -62,10 +61,6 @@ public class SliderWarningsTest {
         mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
         mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
                 .thenReturn(mockFeatureFlags);
-
-        ui = new UI();
-        ui.getInternals().setSession(mockSession);
-        UI.setCurrent(ui);
     }
 
     @After
