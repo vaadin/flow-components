@@ -135,7 +135,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
 
-        signal.value(false);
+        signal.set(false);
         Assert.assertTrue(component.getThemeNames().isEmpty());
     }
 
@@ -151,7 +151,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
 
         Assert.assertTrue(component.getThemeNames().isEmpty());
         Assert.assertTrue(signal.peek());
-        signal.value(true); // no effect
+        signal.set(true); // no effect
         Assert.assertTrue(component.getThemeNames().isEmpty());
     }
 
