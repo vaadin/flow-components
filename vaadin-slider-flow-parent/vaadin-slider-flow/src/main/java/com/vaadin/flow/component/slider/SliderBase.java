@@ -259,14 +259,16 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     private void schedulePropertyConsistencyCheck() {
-        if (!consistencyCheckPending) {
-            consistencyCheckPending = true;
-            getElement().getNode().runWhenAttached(
-                    ui -> ui.beforeClientResponse(this, context -> {
-                        consistencyCheckPending = false;
-                        warnIfPropertiesInconsistent();
-                    }));
+        if (consistencyCheckPending) {
+            return;
         }
+
+        consistencyCheckPending = true;
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> {
+                    consistencyCheckPending = false;
+                    warnIfPropertiesInconsistent();
+                }));
     }
 
     private void warnIfPropertiesInconsistent() {
@@ -290,7 +292,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
                     getClass().getSimpleName(), value, min, max);
         }
 
-        if (min <= max && step > 0 && !isValueAlignedWithStep(value)) {
+        if (min <= max && !isValueAlignedWithStep(value)) {
             LoggerFactory.getLogger(getClass()).warn("""
                     {}: value ({}) is not aligned with step \
                     (min={}, max={}, step={}). \
