@@ -123,17 +123,6 @@ public class AIOrchestrator {
     }
 
     /**
-     * Creates a new builder for AIOrchestrator.
-     *
-     * @param provider
-     *            the LLM provider
-     * @return a new builder
-     */
-    public static Builder builder(LLMProvider provider) {
-        return new Builder(provider, null);
-    }
-
-    /**
      * Creates a new builder for AIOrchestrator with a system prompt.
      *
      * @param provider

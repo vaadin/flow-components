@@ -40,7 +40,7 @@ public class AIOrchestratorPage extends Div {
         messageList.setId("message-list");
         var messageInput = new MessageInput();
         messageInput.setId("message-input");
-        orchestrator = AIOrchestrator.builder(new EchoLLMProvider())
+        orchestrator = AIOrchestrator.builder(new EchoLLMProvider(), null)
                 .withMessageList(messageList).withInput(messageInput).build();
 
         var promptButton = new NativeButton("Send Hello",
