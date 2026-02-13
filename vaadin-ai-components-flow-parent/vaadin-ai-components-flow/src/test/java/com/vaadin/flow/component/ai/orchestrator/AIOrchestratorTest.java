@@ -41,14 +41,14 @@ import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.common.AiAttachment;
-import com.vaadin.flow.component.ai.component.AiFileReceiver;
-import com.vaadin.flow.component.ai.component.AiInput;
-import com.vaadin.flow.component.ai.component.AiMessage;
-import com.vaadin.flow.component.ai.component.AiMessageList;
-import com.vaadin.flow.component.ai.component.InputSubmitEvent;
-import com.vaadin.flow.component.ai.component.InputSubmitListener;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.ui.AIFileReceiver;
+import com.vaadin.flow.component.ai.ui.AIInput;
+import com.vaadin.flow.component.ai.ui.AIMessage;
+import com.vaadin.flow.component.ai.ui.AIMessageList;
+import com.vaadin.flow.component.ai.ui.InputSubmitEvent;
+import com.vaadin.flow.component.ai.ui.InputSubmitListener;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
@@ -60,20 +60,22 @@ import com.vaadin.flow.server.streams.UploadHandler;
 
 import reactor.core.publisher.Flux;
 
-public class AiOrchestratorTest {
+public class AIOrchestratorTest {
 
     private LLMProvider mockProvider;
-    private AiMessageList mockMessageList;
-    private AiInput mockInput;
-    private AiFileReceiver mockFileReceiver;
+    private AIMessageList mockMessageList;
+    private AIInput mockInput;
+    private AIFileReceiver mockFileReceiver;
     private static MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
+
+    private static UI mockUI;
 
     @Before
     public void setup() {
         mockProvider = Mockito.mock(LLMProvider.class);
-        mockMessageList = Mockito.mock(AiMessageList.class);
-        mockInput = Mockito.mock(AiInput.class);
-        mockFileReceiver = Mockito.mock(AiFileReceiver.class);
+        mockMessageList = Mockito.mock(AIMessageList.class);
+        mockInput = Mockito.mock(AIInput.class);
+        mockFileReceiver = Mockito.mock(AIFileReceiver.class);
     }
 
     @After
@@ -83,12 +85,13 @@ public class AiOrchestratorTest {
             mockFeatureFlagsStatic = null;
         }
         UI.setCurrent(null);
+        mockUI = null;
     }
 
     @Test
     public void builder_withNullProvider_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
-                () -> AiOrchestrator.builder(null));
+                () -> AIOrchestrator.builder(null, null));
     }
 
     @Test
@@ -102,7 +105,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -122,7 +125,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider, systemPrompt)
+        var orchestrator = AIOrchestrator.builder(mockProvider, systemPrompt)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -142,17 +145,17 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockMessageList, Mockito.atLeast(1))
-                .addMessage(Mockito.any(AiMessage.class));
+                .addMessage(Mockito.any(AIMessage.class));
     }
 
     @Test
     public void builder_withInput_addsSubmitListener() {
-        AiOrchestrator.builder(mockProvider).withInput(mockInput).build();
+        AIOrchestrator.builder(mockProvider, null).withInput(mockInput).build();
 
         Mockito.verify(mockInput)
                 .addSubmitListener(Mockito.any(InputSubmitListener.class));
@@ -160,8 +163,8 @@ public class AiOrchestratorTest {
 
     @Test
     public void builder_withFileReceiver_configuresUploadHandler() {
-        AiOrchestrator.builder(mockProvider).withFileReceiver(mockFileReceiver)
-                .build();
+        AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(mockFileReceiver).build();
 
         Mockito.verify(mockFileReceiver)
                 .setUploadHandler(Mockito.any(UploadHandler.class));
@@ -181,7 +184,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withTools(tool).build();
 
         orchestrator.prompt("Use tool");
@@ -194,7 +197,7 @@ public class AiOrchestratorTest {
 
     @Test
     public void builder_withNullToolObjects_handlesNullGracefully() {
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withTools((Object[]) null).build();
         Assert.assertNotNull(orchestrator);
     }
@@ -243,7 +246,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider, systemPrompt)
+        var orchestrator = AIOrchestrator.builder(mockProvider, systemPrompt)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -348,7 +351,7 @@ public class AiOrchestratorTest {
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockMessageList, Mockito.times(2))
-                .addMessage(Mockito.any(AiMessage.class));
+                .addMessage(Mockito.any(AIMessage.class));
     }
 
     @Test
@@ -381,7 +384,7 @@ public class AiOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var tool = new SampleTool();
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withTools(tool).build();
 
         orchestrator.prompt("Get temperature");
@@ -431,7 +434,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -451,7 +454,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider, "   ")
+        var orchestrator = AIOrchestrator.builder(mockProvider, "   ")
                 .withMessageList(mockMessageList).build();
 
         orchestrator.prompt("Hello");
@@ -468,7 +471,7 @@ public class AiOrchestratorTest {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
         orchestrator.prompt("Hello");
         Mockito.verify(flowMessageList, Mockito.atLeast(1))
@@ -478,7 +481,7 @@ public class AiOrchestratorTest {
     @Test
     public void builder_withFlowMessageInput_wrapsCorrectly() {
         var flowMessageInput = Mockito.mock(MessageInput.class);
-        AiOrchestrator.builder(mockProvider).withInput(flowMessageInput)
+        AIOrchestrator.builder(mockProvider, null).withInput(flowMessageInput)
                 .build();
 
         Mockito.verify(flowMessageInput).addSubmitListener(Mockito.any());
@@ -487,7 +490,7 @@ public class AiOrchestratorTest {
     @Test
     public void builder_withFlowUpload_wrapsCorrectly() {
         var flowUploadManager = Mockito.mock(UploadManager.class);
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withFileReceiver(flowUploadManager).build();
         Assert.assertNotNull(orchestrator);
         Mockito.verify(flowUploadManager).setUploadHandler(Mockito.any());
@@ -610,7 +613,7 @@ public class AiOrchestratorTest {
                 Mockito.eq("Hello with attachment"), Mockito.eq("You"),
                 attachmentsCaptor.capture());
 
-        var aiAttachments = (List<AiAttachment>) attachmentsCaptor.getValue();
+        var aiAttachments = (List<AIAttachment>) attachmentsCaptor.getValue();
         Assert.assertEquals(1, aiAttachments.size());
         Assert.assertEquals("test.txt", aiAttachments.getFirst().name());
         Assert.assertEquals("text/plain", aiAttachments.getFirst().mimeType());
@@ -667,7 +670,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.empty());
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
 
         orchestrator.prompt("Hello");
@@ -687,7 +690,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator
+        var orchestrator = AIOrchestrator
                 .builder(mockProvider, "  You are helpful  ")
                 .withMessageList(mockMessageList).build();
 
@@ -737,7 +740,7 @@ public class AiOrchestratorTest {
 
         var tool1 = new SampleTool();
         var tool2 = new Object();
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withTools(tool1, tool2)
                 .build();
 
@@ -824,7 +827,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
@@ -849,7 +852,7 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withUserName("John Doe")
                 .build();
         orchestrator.prompt("Hello");
@@ -859,7 +862,7 @@ public class AiOrchestratorTest {
     }
 
     @Test
-    public void builder_withCustomAiName_usesCustomAiName() {
+    public void builder_withCustomAssistantName_usesCustomAssistantName() {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
@@ -869,8 +872,9 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
-                .withMessageList(mockMessageList).withAiName("Claude").build();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withAssistantName("Claude")
+                .build();
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockMessageList).createMessage("", "Claude",
@@ -878,7 +882,7 @@ public class AiOrchestratorTest {
     }
 
     @Test
-    public void builder_withCustomUserNameAndAiName_usesBothCustomNames() {
+    public void builder_withCustomUserNameAndAssistantName_usesBothCustomNames() {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
@@ -891,9 +895,9 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withUserName("Alice")
-                .withAiName("Bot").build();
+                .withAssistantName("Bot").build();
         orchestrator.prompt("Hello");
 
         var inOrder = Mockito.inOrder(mockMessageList);
@@ -913,14 +917,14 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var builder = AiOrchestrator.builder(mockProvider)
+        var builder = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList);
         Assert.assertThrows(NullPointerException.class,
                 () -> builder.withUserName(null));
     }
 
     @Test
-    public void builder_withNullAiName_throws() {
+    public void builder_withNullAssistantName_throws() {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
@@ -929,14 +933,14 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var builder = AiOrchestrator.builder(mockProvider)
+        var builder = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList);
         Assert.assertThrows(NullPointerException.class,
-                () -> builder.withAiName(null));
+                () -> builder.withAssistantName(null));
     }
 
-    private AiOrchestrator getSimpleOrchestrator() {
-        return AiOrchestrator.builder(mockProvider)
+    private AIOrchestrator getSimpleOrchestrator() {
+        return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
                 .build();
@@ -947,7 +951,7 @@ public class AiOrchestratorTest {
     }
 
     private static void mockUi() {
-        var mockUI = Mockito.mock(UI.class);
+        mockUI = Mockito.mock(UI.class);
         Mockito.doAnswer(invocation -> {
             Command command = invocation.getArgument(0);
             var futureTask = new FutureTask<Void>(() -> {
@@ -966,7 +970,7 @@ public class AiOrchestratorTest {
         // Mock feature flags to enable the AI components feature
         FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
         mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(AiOrchestrator.FEATURE_FLAG_ID))
+        Mockito.when(mockFeatureFlags.isEnabled(AIOrchestrator.FEATURE_FLAG_ID))
                 .thenReturn(true);
 
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
@@ -981,8 +985,8 @@ public class AiOrchestratorTest {
         UI.setCurrent(mockUI);
     }
 
-    private static AiMessage createMockMessage() {
-        var message = Mockito.mock(AiMessage.class);
+    private static AIMessage createMockMessage() {
+        var message = Mockito.mock(AIMessage.class);
         Mockito.when(message.getText()).thenReturn("");
         Mockito.when(message.getTime()).thenReturn(Instant.now());
         Mockito.when(message.getUserName()).thenReturn("Test");
@@ -996,15 +1000,15 @@ public class AiOrchestratorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<AiAttachment> getPendingAttachments(
-            AiOrchestrator orchestrator) throws Exception {
-        var field = AiOrchestrator.class.getDeclaredField("pendingAttachments");
+    private static List<AIAttachment> getPendingAttachments(
+            AIOrchestrator orchestrator) throws Exception {
+        var field = AIOrchestrator.class.getDeclaredField("pendingAttachments");
         field.setAccessible(true);
-        return (List<AiAttachment>) field.get(orchestrator);
+        return (List<AIAttachment>) field.get(orchestrator);
     }
 
-    private static AiAttachment createPendingAttachment(String fileName) {
-        return new AiAttachment(fileName, "text/plain", "test".getBytes());
+    private static AIAttachment createPendingAttachment(String fileName) {
+        return new AIAttachment(fileName, "text/plain", "test".getBytes());
     }
 
     @Test
@@ -1018,13 +1022,13 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
 
         var largeImageData = createTestImage(initialWidth, initialHeight);
         var pendingAttachments = getPendingAttachments(orchestrator);
         pendingAttachments.add(
-                new AiAttachment("large.png", "image/png", largeImageData));
+                new AIAttachment("large.png", "image/png", largeImageData));
 
         orchestrator.prompt("Check this image");
 
@@ -1053,13 +1057,13 @@ public class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
 
         var smallImageData = createTestImage(initialWidth, initialHeight);
         var pendingAttachments = getPendingAttachments(orchestrator);
         pendingAttachments.add(
-                new AiAttachment("small.png", "image/png", smallImageData));
+                new AIAttachment("small.png", "image/png", smallImageData));
 
         orchestrator.prompt("Check this small image");
 
@@ -1081,11 +1085,11 @@ public class AiOrchestratorTest {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
-        var orchestrator = AiOrchestrator.builder(mockProvider)
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList).build();
 
         var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(new AiAttachment("document.pdf",
+        pendingAttachments.add(new AIAttachment("document.pdf",
                 "application/pdf", "fake pdf content".getBytes()));
         orchestrator.prompt("Check this document");
 

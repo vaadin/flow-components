@@ -25,8 +25,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.flow.component.ai.common.AiAttachment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
+import com.vaadin.flow.shared.communication.PushMode;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -72,6 +77,9 @@ import reactor.core.publisher.FluxSink;
  * @author Vaadin Ltd
  */
 public class LangChain4JLLMProvider implements LLMProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(LangChain4JLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
 
@@ -172,6 +180,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         var messages = buildMessages(context.getRequest(),
                 context.getChatMemory());
         if (streamingChatModel != null) {
+            checkPushConfiguration();
             executeStreamingChat(messages, context);
         } else {
             executeNonStreamingChat(messages, context);
@@ -299,7 +308,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private static Optional<Content> getAttachmentContent(
-            AiAttachment attachment) {
+            AIAttachment attachment) {
         LLMProviderHelpers.validateAttachment(attachment);
         var contentType = AttachmentContentType
                 .fromMimeType(attachment.mimeType());
@@ -314,7 +323,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private static TextContent getTextAttachmentContent(
-            AiAttachment attachment) {
+            AIAttachment attachment) {
         var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
                 attachment.name(), false);
         return TextContent.from(LLMProviderHelpers
@@ -322,27 +331,37 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private static PdfFileContent getPdfAttachmentContent(
-            AiAttachment attachment) {
+            AIAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
         return PdfFileContent.from(base64, attachment.mimeType());
     }
 
     private static ImageContent getImageAttachmentContent(
-            AiAttachment attachment) {
+            AIAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
         return ImageContent.from(base64, attachment.mimeType());
     }
 
     private static AudioContent getAudioAttachmentContent(
-            AiAttachment attachment) {
+            AIAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
         return AudioContent.from(base64, attachment.mimeType());
     }
 
     private static VideoContent getVideoAttachmentContent(
-            AiAttachment attachment) {
+            AIAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
         return VideoContent.from(base64, attachment.mimeType());
+    }
+
+    private static void checkPushConfiguration() {
+        var ui = UI.getCurrent();
+        if (ui != null && PushMode.DISABLED
+                .equals(ui.getPushConfiguration().getPushMode())) {
+            LOGGER.warn("Push is not enabled. Streaming LLM responses "
+                    + "require @Push annotation or programmatic push "
+                    + "configuration to update the UI in real-time.");
+        }
     }
 
     /**

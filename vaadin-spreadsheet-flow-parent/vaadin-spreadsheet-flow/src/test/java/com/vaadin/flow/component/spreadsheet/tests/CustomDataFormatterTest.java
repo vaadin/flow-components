@@ -25,9 +25,11 @@ public class CustomDataFormatterTest {
     Cell threePartDataFormatCell;
     Cell generalFormatCell;
 
+    private UI ui;
+
     @Before
     public void init() {
-        var ui = new UI();
+        ui = new UI();
         ui.setLocale(Locale.US);
         UI.setCurrent(ui);
 
@@ -41,6 +43,7 @@ public class CustomDataFormatterTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     private Cell createFourPartDataFormatCell(Spreadsheet spreadsheet) {

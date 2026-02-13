@@ -33,11 +33,14 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
     private ValueSignal<String> textSignal;
     private Signal<String> computedSignal;
 
+    private UI ui;
+
     @Before
     public void setup() {
-        UI.setCurrent(new UI());
+        ui = new UI();
+        UI.setCurrent(ui);
         textSignal = new ValueSignal<>("foo");
-        computedSignal = Signal.computed(() -> textSignal.value() + " bar");
+        computedSignal = Signal.computed(() -> textSignal.get() + " bar");
     }
 
     @After
@@ -49,6 +52,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
             }
         }
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -103,21 +107,6 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textSignal_removeBinding() {
-        notification = new Notification(textSignal);
-        UI.getCurrent().add(notification);
-
-        notification.bindText(null);
-        assertTextSignalBindingInactive();
-
-        notification.setText("bar");
-        Assert.assertEquals("bar", getNotificationText());
-
-        notification.setText(null);
-        Assert.assertEquals("", getNotificationText());
-    }
-
-    @Test
     public void textSignal_notOpened() {
         notification = new Notification(textSignal);
         UI.getCurrent().add(notification);
@@ -140,7 +129,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         notification = new Notification(computedSignal);
         UI.getCurrent().add(notification);
         Assert.assertEquals("foo bar", getNotificationText());
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("bar bar", getNotificationText());
     }
 
@@ -151,23 +140,10 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textComputedSignalCtor_removeBindingAndBindText() {
-        notification = new Notification(computedSignal);
-        UI.getCurrent().add(notification);
-
-        notification.bindText(null);
-        notification.bindText(textSignal);
-        assertTextSignalBindingActive();
-
-        notification.bindText(null);
-        assertTextSignalBindingInactive();
-    }
-
-    @Test
     public void textSignalConstructors_usesTextSupport() {
         // Test single parameter constructor
         notification = new Notification(textSignal);
-        textSignal.value("text signal");
+        textSignal.set("text signal");
         UI.getCurrent().add(notification);
         Assert.assertEquals("text signal", notification.getTextSupport().get());
         Assert.assertThrows(BindingActiveException.class,
@@ -177,7 +153,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
 
         // Test with duration
         notification = new Notification(textSignal, 4000);
-        textSignal.value("text signal, duration");
+        textSignal.set("text signal, duration");
         UI.getCurrent().add(notification);
         Assert.assertEquals("text signal, duration",
                 notification.getTextSupport().get());
@@ -188,7 +164,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
 
         // Test with duration and position
         notification = new Notification(textSignal, 4000, Position.TOP_END);
-        textSignal.value("text signal, duration, position");
+        textSignal.set("text signal, duration, position");
         UI.getCurrent().add(notification);
         Assert.assertEquals("text signal, duration, position",
                 notification.getTextSupport().get());
@@ -200,7 +176,7 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         // Test with all parameters
         notification = new Notification(textSignal, 4000, Position.TOP_END,
                 true);
-        textSignal.value("text signal, duration, position, assertive");
+        textSignal.set("text signal, duration, position, assertive");
         UI.getCurrent().add(notification);
         Assert.assertEquals("text signal, duration, position, assertive",
                 notification.getTextSupport().get());
@@ -226,14 +202,14 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         notification = new Notification();
         UI.getCurrent().add(notification);
 
-        textSignal.value("test");
+        textSignal.set("test");
         notification.bindText(textSignal);
 
         // Verify textSupport is used by checking binding is active
         Assert.assertEquals("test", notification.getTextSupport().get());
 
         // Change the signal value and verify it propagates through textSupport
-        textSignal.value("updated");
+        textSignal.set("updated");
         Assert.assertEquals("updated", notification.getTextSupport().get());
     }
 
@@ -253,34 +229,16 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("updated", notification.getTextSupport().get());
     }
 
-    @Test
-    public void bindText_null_removesBindingFromTextSupport() {
-        notification = new Notification(textSignal);
-        UI.getCurrent().add(notification);
-
-        // Verify binding is active initially
-        assertTextSignalBindingActive();
-
-        // Remove binding
-        notification.bindText(null);
-        textSignal.value("updated");
-
-        // Verify textSupport no longer has active binding
-        Assert.assertEquals("bar", notification.getTextSupport().get());
-        textSignal.value("should not update");
-        Assert.assertEquals("bar", notification.getTextSupport().get());
-    }
-
     private void assertTextSignalBindingActive() {
-        textSignal.value("foo");
+        textSignal.set("foo");
         Assert.assertEquals("foo", getNotificationText());
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("bar", getNotificationText());
     }
 
     private void assertTextSignalBindingInactive() {
         var currentText = getNotificationText();
-        textSignal.value(currentText + " with change");
+        textSignal.set(currentText + " with change");
         Assert.assertEquals(currentText, getNotificationText());
     }
 

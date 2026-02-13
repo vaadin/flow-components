@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2025 Vaadin Ltd.
+ * Copyright 2000-2026 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -143,7 +143,7 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void controlOtherPropertyChange_doesNotMarkConfigurationAsDirty() {
+    public void controlOtherPropertyChange_marksConfigurationAsDirty() {
         TestControl control = new TestControl();
         configuration.addControl(control);
         // Clear dirty flag
@@ -153,7 +153,7 @@ public class ConfigurationTest {
         control.fireOtherPropertyChange();
 
         configuration.collectChanges(changeCollectorMock);
-        Mockito.verify(changeCollectorMock, Mockito.never())
+        Mockito.verify(changeCollectorMock, Mockito.atLeastOnce())
                 .accept(configuration);
     }
 

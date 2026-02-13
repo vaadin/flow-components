@@ -24,10 +24,10 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
- * Integration tests for AiOrchestrator.
+ * Integration tests for AIOrchestrator.
  */
 @TestPath("vaadin-ai/orchestrator")
-public class AiOrchestratorIT extends AbstractComponentIT {
+public class AIOrchestratorIT extends AbstractComponentIT {
 
     private MessageListElement messageList;
 
