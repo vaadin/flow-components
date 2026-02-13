@@ -75,7 +75,11 @@ public class UploadButton extends Button implements HasUploadManager {
      */
     public UploadButton(String text, UploadManager manager) {
         this(manager);
-        setText(text);
+        doSetText(text);
+    }
+
+    private void doSetText(String text) {
+        super.setText(text);
     }
 
     /**
