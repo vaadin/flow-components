@@ -180,10 +180,10 @@ public class UploadManagerPage extends UploadDropZone {
                                 throws java.io.IOException {
                             byte[] data = uploadEvent.getInputStream()
                                     .readAllBytes();
-                            UI.getCurrent()
-                                    .access(() -> log("Uploaded: "
-                                            + uploadEvent.getFileName() + " ("
-                                            + data.length + " bytes)"));
+
+                            getUI().ifPresent(ui -> ui.access(() -> log(
+                                    "Uploaded: " + uploadEvent.getFileName()
+                                            + " (" + data.length + " bytes)")));
                         }
 
                         @Override
