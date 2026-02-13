@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 
 public class LLMProviderHelpersTest {
 
@@ -93,7 +93,7 @@ public class LLMProviderHelpersTest {
 
     @Test
     public void validateAttachment_withValidAttachment_doesNotThrow() {
-        var attachment = new AiAttachment("file.txt", "text/plain",
+        var attachment = new AIAttachment("file.txt", "text/plain",
                 getValidUtf8Data());
         LLMProviderHelpers.validateAttachment(attachment);
     }

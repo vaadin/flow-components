@@ -33,7 +33,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.PushConfiguration;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
 
@@ -298,7 +298,7 @@ public class LangChain4JLLMProviderTest {
     @Test
     public void stream_withImageAttachment_convertsToBase64() {
         var imageData = "fake-image-data".getBytes();
-        var attachment = new AiAttachment("test.png", "image/png", imageData);
+        var attachment = new AIAttachment("test.png", "image/png", imageData);
         var request = new TestLLMRequest("Describe this image", null,
                 List.of(attachment), new Object[0]);
 
@@ -316,7 +316,7 @@ public class LangChain4JLLMProviderTest {
     @Test
     public void stream_withTextAttachment_usesUTF8Encoding() {
         var textContent = "Test UTF-8: é à ü";
-        var attachment = new AiAttachment("test.txt", "text/plain",
+        var attachment = new AIAttachment("test.txt", "text/plain",
                 textContent.getBytes(StandardCharsets.UTF_8));
         var request = new TestLLMRequest("Summarize this", null,
                 List.of(attachment), new Object[0]);
@@ -346,9 +346,9 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withNullAttachmentInList_throwsNullPointerException() {
-        var attachment = new AiAttachment("test.txt", "text/plain",
+        var attachment = new AIAttachment("test.txt", "text/plain",
                 "Test".getBytes(StandardCharsets.UTF_8));
-        var attachments = new ArrayList<AiAttachment>();
+        var attachments = new ArrayList<AIAttachment>();
         attachments.add(attachment);
         attachments.add(null);
 
@@ -364,7 +364,7 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withUnsupportedAttachmentType_ignoresAttachment() {
-        var attachment = new AiAttachment("file.bin",
+        var attachment = new AIAttachment("file.bin",
                 "application/octet-stream", "data".getBytes());
         var request = new TestLLMRequest("Process this", null,
                 List.of(attachment), new Object[0]);
@@ -377,7 +377,7 @@ public class LangChain4JLLMProviderTest {
     @Test
     public void stream_withPdfAttachment_handlesPdf() {
         var pdfData = "PDF binary content".getBytes(StandardCharsets.UTF_8);
-        var attachment = new AiAttachment("document.pdf", "application/pdf",
+        var attachment = new AIAttachment("document.pdf", "application/pdf",
                 pdfData);
         var request = new TestLLMRequest("Summarize this document", null,
                 List.of(attachment), new Object[0]);
@@ -401,7 +401,7 @@ public class LangChain4JLLMProviderTest {
         // Binary PDF data should be handled correctly with base64 encoding
         var binaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46, (byte) 0xFF,
                 (byte) 0xFE, (byte) 0x00, (byte) 0x80 };
-        var attachment = new AiAttachment("binary.pdf", "application/pdf",
+        var attachment = new AIAttachment("binary.pdf", "application/pdf",
                 binaryPdfData);
         var request = new TestLLMRequest("Summarize", null, List.of(attachment),
                 new Object[0]);
@@ -421,13 +421,13 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
-        var imageAttachment = new AiAttachment("photo.jpg", "image/jpeg",
+        var imageAttachment = new AIAttachment("photo.jpg", "image/jpeg",
                 "fake-image".getBytes());
-        var textAttachment = new AiAttachment("doc.txt", "text/plain",
+        var textAttachment = new AIAttachment("doc.txt", "text/plain",
                 "Hello world".getBytes(StandardCharsets.UTF_8));
-        var pdfAttachment = new AiAttachment("file.pdf", "application/pdf",
+        var pdfAttachment = new AIAttachment("file.pdf", "application/pdf",
                 "PDF content".getBytes(StandardCharsets.UTF_8));
-        var unsupportedBinaryAttachment = new AiAttachment("data.bin",
+        var unsupportedBinaryAttachment = new AIAttachment("data.bin",
                 "application/octet-stream", "binary".getBytes());
         var request = new TestLLMRequest("Process all", null,
                 Arrays.asList(imageAttachment, textAttachment, pdfAttachment,
@@ -686,7 +686,7 @@ public class LangChain4JLLMProviderTest {
     }
 
     private record TestLLMRequest(String userMessage, String systemPrompt,
-            List<AiAttachment> attachments,
+            List<AIAttachment> attachments,
             Object[] tools) implements LLMRequest {
     }
 

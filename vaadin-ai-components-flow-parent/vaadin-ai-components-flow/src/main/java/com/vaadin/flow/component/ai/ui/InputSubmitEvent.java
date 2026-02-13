@@ -13,26 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.ai.ui;
 
 import java.io.Serializable;
 
 /**
- * Interface for input components that are used in an AI conversation.
+ * Event fired when a user submits input.
  *
  * @author Vaadin Ltd
  * @see InputSubmitListener
- * @see InputSubmitEvent
+ * @see AIInput
  */
-public interface AiInput extends Serializable {
+public interface InputSubmitEvent extends Serializable {
 
     /**
-     * Adds a listener for submit events.
-     * <p>
-     * The listener is notified when the user submits input.
+     * Gets the submitted value.
      *
-     * @param listener
-     *            the listener to add, not {@code null}
+     * @return the submitted value
      */
-    void addSubmitListener(InputSubmitListener listener);
+    String getValue();
 }

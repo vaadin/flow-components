@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 
 /**
  * Utility methods for LLM provider implementations.
@@ -89,7 +89,7 @@ final class LLMProviderHelpers {
      * @throws NullPointerException
      *             if attachment, content type, or data is {@code null}
      */
-    public static void validateAttachment(AiAttachment attachment) {
+    public static void validateAttachment(AIAttachment attachment) {
         Objects.requireNonNull(attachment, "Attachment must not be null");
         Objects.requireNonNull(attachment.mimeType(),
                 "Attachment content type must not be null");
