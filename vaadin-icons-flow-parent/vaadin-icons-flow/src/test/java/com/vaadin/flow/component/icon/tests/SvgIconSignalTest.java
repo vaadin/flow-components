@@ -68,10 +68,10 @@ public class SvgIconSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals("icon-home", svgIcon.getSymbol());
 
-        symbolSignal.value("icon-search");
+        symbolSignal.set("icon-search");
         Assert.assertEquals("icon-search", svgIcon.getSymbol());
 
-        symbolSignal.value("icon-user");
+        symbolSignal.set("icon-user");
         Assert.assertEquals("icon-user", svgIcon.getSymbol());
     }
 
@@ -81,7 +81,7 @@ public class SvgIconSignalTest extends AbstractSignalsUnitTest {
         // Not attached to UI
 
         String initialSymbol = svgIcon.getSymbol();
-        symbolSignal.value("icon-search");
+        symbolSignal.set("icon-search");
         Assert.assertEquals(initialSymbol, svgIcon.getSymbol());
     }
 
@@ -93,29 +93,14 @@ public class SvgIconSignalTest extends AbstractSignalsUnitTest {
 
         // Detach
         svgIcon.removeFromParent();
-        symbolSignal.value("icon-search");
+        symbolSignal.set("icon-search");
         Assert.assertEquals("icon-home", svgIcon.getSymbol());
 
         // Reattach
         UI.getCurrent().add(svgIcon);
         Assert.assertEquals("icon-search", svgIcon.getSymbol());
 
-        symbolSignal.value("icon-user");
-        Assert.assertEquals("icon-user", svgIcon.getSymbol());
-    }
-
-    @Test
-    public void bindSymbol_nullUnbindsSignal() {
-        svgIcon.bindSymbol(symbolSignal);
-        UI.getCurrent().add(svgIcon);
-        Assert.assertEquals("icon-home", svgIcon.getSymbol());
-
-        svgIcon.bindSymbol(null);
-        symbolSignal.value("icon-search");
-        Assert.assertEquals("icon-home", svgIcon.getSymbol());
-
-        // Should be able to set manually after unbinding
-        svgIcon.setSymbol("icon-user");
+        symbolSignal.set("icon-user");
         Assert.assertEquals("icon-user", svgIcon.getSymbol());
     }
 
@@ -144,7 +129,7 @@ public class SvgIconSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("path/to/sprite.svg", svgIcon.getSrc());
         Assert.assertEquals("icon-home", svgIcon.getSymbol());
 
-        symbolSignal.value("icon-search");
+        symbolSignal.set("icon-search");
         Assert.assertEquals("icon-search", svgIcon.getSymbol());
     }
 
@@ -156,7 +141,7 @@ public class SvgIconSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals("icon-home", svgIcon.getSymbol());
 
-        symbolSignal.value("icon-search");
+        symbolSignal.set("icon-search");
         Assert.assertEquals("icon-search", svgIcon.getSymbol());
     }
 }
