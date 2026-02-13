@@ -57,6 +57,61 @@ public class ButtonTest {
     }
 
     @Test
+    public void emptyButton_hasNoChildren() {
+        button = new Button();
+        Assert.assertEquals("Empty button should have no children", 0,
+                button.getElement().getChildren().count());
+    }
+
+    @Test
+    public void emptyButtonWithEmptyText_hasNoChildren() {
+        button = new Button("");
+        Assert.assertEquals("Button with empty text should have no children", 0,
+                button.getElement().getChildren().count());
+    }
+
+    @Test
+    public void buttonWithText_hasChild() {
+        button = new Button("foo");
+        Assert.assertEquals("Button with text should have one child", 1,
+                button.getElement().getChildren().count());
+        Assert.assertTrue("Child should be a text node", button.getElement()
+                .getChildren().findFirst().get().isTextNode());
+    }
+
+    @Test
+    public void emptyButton_setText_addsChild() {
+        button = new Button();
+        Assert.assertEquals("Empty button should have no children", 0,
+                button.getElement().getChildren().count());
+
+        button.setText("foo");
+        Assert.assertEquals("Button with text should have one child", 1,
+                button.getElement().getChildren().count());
+        Assert.assertTrue("Child should be a text node", button.getElement()
+                .getChildren().findFirst().get().isTextNode());
+    }
+
+    @Test
+    public void buttonWithText_clearText_removesChild() {
+        button = new Button("foo");
+        Assert.assertEquals("Button with text should have one child", 1,
+                button.getElement().getChildren().count());
+
+        button.setText(null);
+        Assert.assertEquals("Button with null text should have no children", 0,
+                button.getElement().getChildren().count());
+
+        button.setText("bar");
+        Assert.assertEquals("Button with text should have one child", 1,
+                button.getElement().getChildren().count());
+
+        button.setText("");
+        Assert.assertEquals("Button with empty text should have no children", 0,
+                button.getElement().getChildren().count());
+    }
+
+    @Test
     public void textAndIconCtor() {
         Icon icon = new Icon();
         button = new Button("foo", icon);
