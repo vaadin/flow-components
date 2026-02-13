@@ -22,7 +22,9 @@ import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
@@ -118,24 +120,41 @@ public class UploadManagerPage extends UploadDropZone {
         maxFileSizeGroup.add(setMaxFileSize100, setMaxFileSizeUnlimited);
         layout.add(maxFileSizeGroup);
 
-        // --- Accepted File Types ---
-        var acceptGroup = createButtonGroup("Accept:");
+        // --- Accepted MIME Types ---
+        var mimeGroup = createButtonGroup("MIME Types:");
         var setAcceptText = new NativeButton("text/*",
-                event -> manager.setAcceptedFileTypes("text/*"));
+                event -> manager.setAcceptedMimeTypes("text/*"));
         setAcceptText.setId("set-accept-text");
         var setAcceptImage = new NativeButton("image/*",
-                event -> manager.setAcceptedFileTypes("image/*"));
+                event -> manager.setAcceptedMimeTypes("image/*"));
         setAcceptImage.setId("set-accept-image");
+        var setAcceptMimePdf = new NativeButton("application/pdf",
+                event -> manager.setAcceptedMimeTypes("application/pdf"));
+        setAcceptMimePdf.setId("set-accept-mime-pdf");
         var setAcceptMultiple = new NativeButton("text/*,application/pdf",
-                event -> manager.setAcceptedFileTypes("text/*",
+                event -> manager.setAcceptedMimeTypes("text/*",
                         "application/pdf"));
         setAcceptMultiple.setId("set-accept-multiple");
-        var clearAccept = new NativeButton("Clear",
-                event -> manager.setAcceptedFileTypes((String[]) null));
-        clearAccept.setId("clear-accept");
-        acceptGroup.add(setAcceptText, setAcceptImage, setAcceptMultiple,
-                clearAccept);
-        layout.add(acceptGroup);
+        var clearMime = new NativeButton("Clear",
+                event -> manager.setAcceptedMimeTypes((String[]) null));
+        clearMime.setId("clear-accept-mime");
+        mimeGroup.add(setAcceptText, setAcceptImage, setAcceptMimePdf,
+                setAcceptMultiple, clearMime);
+        layout.add(mimeGroup);
+
+        // --- Accepted File Extensions ---
+        var extGroup = createButtonGroup("Extensions:");
+        var setAcceptTxt = new NativeButton(".txt",
+                event -> manager.setAcceptedFileExtensions(".txt"));
+        setAcceptTxt.setId("set-accept-ext-txt");
+        var setAcceptPdf = new NativeButton(".pdf",
+                event -> manager.setAcceptedFileExtensions(".pdf"));
+        setAcceptPdf.setId("set-accept-ext-pdf");
+        var clearExt = new NativeButton("Clear",
+                event -> manager.setAcceptedFileExtensions((String[]) null));
+        clearExt.setId("clear-accept-ext");
+        extGroup.add(setAcceptTxt, setAcceptPdf, clearExt);
+        layout.add(extGroup);
 
         // --- Auto Upload ---
         var autoUploadGroup = createButtonGroup("Auto Upload:");
@@ -156,7 +175,30 @@ public class UploadManagerPage extends UploadDropZone {
         var enableManager = new NativeButton("Enable",
                 event -> manager.setEnabled(true));
         enableManager.setId("enable-manager");
-        enabledGroup.add(disableManager, enableManager);
+        var setAlwaysDisabledHandler = new NativeButton("ALWAYS disabled mode",
+                e -> {
+                    manager.setUploadHandler(new UploadHandler() {
+                        @Override
+                        public void handleUploadRequest(UploadEvent uploadEvent)
+                                throws java.io.IOException {
+                            byte[] data = uploadEvent.getInputStream()
+                                    .readAllBytes();
+
+                            getUI().ifPresent(ui -> ui.access(() -> log(
+                                    "Uploaded: " + uploadEvent.getFileName()
+                                            + " (" + data.length + " bytes)")));
+                        }
+
+                        @Override
+                        public DisabledUpdateMode getDisabledUpdateMode() {
+                            return DisabledUpdateMode.ALWAYS;
+                        }
+                    });
+                    log("Handler set: ALWAYS disabled mode");
+                });
+        setAlwaysDisabledHandler.setId("set-always-disabled-handler");
+        enabledGroup.add(disableManager, enableManager,
+                setAlwaysDisabledHandler);
         layout.add(enabledGroup);
 
         // --- Owner Lifecycle ---
@@ -213,8 +255,10 @@ public class UploadManagerPage extends UploadDropZone {
                         + ", uploading=" + manager.isUploading() + ", maxFiles="
                         + manager.getMaxFiles() + ", maxFileSize="
                         + manager.getMaxFileSize() + ", autoUpload="
-                        + manager.isAutoUpload() + ", acceptedTypes="
-                        + manager.getAcceptedFileTypes()));
+                        + manager.isAutoUpload() + ", acceptedMimeTypes="
+                        + manager.getAcceptedMimeTypes()
+                        + ", acceptedFileExtensions="
+                        + manager.getAcceptedFileExtensions()));
         statusButton.setId("status-button");
         var clearLog = new NativeButton("Clear", event -> logArea.removeAll());
         clearLog.setId("clear-log");
