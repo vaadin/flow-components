@@ -73,8 +73,8 @@ public class SliderWarningsTest {
         slider.setMin(200);
         fakeClientResponse();
 
-        Mockito.verify(mockedLogger).warn(
-                Mockito.contains("min"), Mockito.eq(200.0), Mockito.eq(100.0));
+        Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
+                Mockito.eq(200.0), Mockito.eq(100.0));
     }
 
     @Test
@@ -87,8 +87,8 @@ public class SliderWarningsTest {
         slider.setMax(-10);
         fakeClientResponse();
 
-        Mockito.verify(mockedLogger).warn(
-                Mockito.contains("min"), Mockito.eq(0.0), Mockito.eq(-10.0));
+        Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
+                Mockito.eq(0.0), Mockito.eq(-10.0));
     }
 
     @Test

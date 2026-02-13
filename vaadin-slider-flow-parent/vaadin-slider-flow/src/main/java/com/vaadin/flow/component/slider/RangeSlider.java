@@ -242,6 +242,9 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     boolean isValueWithinMinMax(RangeSliderValue value) {
         double min = getMinDouble();
         double max = getMaxDouble();
+        if (min > max) {
+            return false;
+        }
 
         return value.equals(new RangeSliderValue(
                 SliderUtil.clampToMinMax(value.start(), min, max),
@@ -253,6 +256,9 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
         double min = getMinDouble();
         double max = getMaxDouble();
         double step = getStepDouble();
+        if (min > max) {
+            return false;
+        }
 
         return value.equals(new RangeSliderValue(
                 SliderUtil.snapToStep(value.start(), min, max, step),

@@ -278,26 +278,30 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         TValue value = getValue();
 
         if (min > max) {
-            LoggerFactory.getLogger(getClass()).warn("""
-                    {}: min ({}) is greater than max ({}). \
-                    This can lead to unexpected behavior and a broken UI.""",
-                    getClass().getSimpleName(), min, max);
+            LoggerFactory.getLogger(getClass()).warn(
+                    """
+                            Invalid configuration: min ({}) is greater than max ({}). \
+                            Swap min and max, or adjust them so that min <= max to avoid a broken UI state.
+                            """,
+                    min, max);
         }
 
         if (min <= max && !isValueWithinMinMax(value)) {
-            LoggerFactory.getLogger(getClass()).warn("""
-                    {}: value ({}) is out of [min, max] range \
-                    (min={}, max={}). \
-                    This can lead to unexpected behavior and a broken UI.""",
-                    getClass().getSimpleName(), value, min, max);
+            LoggerFactory.getLogger(getClass()).warn(
+                    """
+                            Invalid configuration: value ({}) is outside the configured range (min={}, max={}). \
+                            Set only values between min and max to avoid an inconsistent UI state.
+                            """,
+                    value, min, max);
         }
 
         if (min <= max && !isValueAlignedWithStep(value)) {
-            LoggerFactory.getLogger(getClass()).warn("""
-                    {}: value ({}) is not aligned with step \
-                    (min={}, max={}, step={}). \
-                    This can lead to unexpected behavior and a broken UI.""",
-                    getClass().getSimpleName(), value, min, max, step);
+            LoggerFactory.getLogger(getClass()).warn(
+                    """
+                            Invalid configuration: value ({}) is not aligned with step (min={}, max={}, step={}). \
+                            Set only values of the form (min + N * step) to avoid an inconsistent UI state.
+                            """,
+                    value, min, max, step);
         }
     }
 

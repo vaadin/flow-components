@@ -224,13 +224,23 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
 
     @Override
     boolean isValueWithinMinMax(Double value) {
-        return value
-                .equals(SliderUtil.clampToMinMax(value, getMin(), getMax()));
+        double min = getMinDouble();
+        double max = getMaxDouble();
+        if (min > max) {
+            return false;
+        }
+
+        return value.equals(SliderUtil.clampToMinMax(value, min, max));
     }
 
     @Override
     boolean isValueAlignedWithStep(Double value) {
-        return value.equals(
-                SliderUtil.snapToStep(value, getMin(), getMax(), getStep()));
+        double min = getMinDouble();
+        double max = getMaxDouble();
+        if (min > max) {
+            return false;
+        }
+
+        return value.equals(SliderUtil.snapToStep(value, min, max, getStep()));
     }
 }
