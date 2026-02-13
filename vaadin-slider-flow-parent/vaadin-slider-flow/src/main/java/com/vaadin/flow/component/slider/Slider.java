@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.HasAriaLabel;
@@ -219,26 +218,22 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
     @Override
     protected boolean hasValidValue() {
         Double value = getElement().getProperty("value", 0.0);
-        try {
-            requireValidValue(getMin(), getMax(), getStep(), value);
-            return true;
-        } catch (IllegalArgumentException | NullPointerException e) {
-            return false;
-        }
+        return value != null && isValueWithinMinMax(value)
+                && isValueAlignedWithStep(value);
     }
 
-    private void requireValidValue(double min, double max, double step,
-            Double value) {
-        Objects.requireNonNull(value, "Value cannot be null");
+    @Override
+    boolean isValueWithinMinMax(Double value) {
+        double min = getMinDouble();
+        double max = getMaxDouble();
+        return value.equals(SliderUtil.clampToMinMax(value, min, max));
+    }
 
-        if (SliderUtil.clampToMinMax(value, min, max) != value) {
-            throw new IllegalArgumentException(
-                    "Value must be between min and max");
-        }
-
-        if (SliderUtil.snapToStep(value, min, max, step) != value) {
-            throw new IllegalArgumentException(
-                    "Value must be aligned with step");
-        }
+    @Override
+    boolean isValueAlignedWithStep(Double value) {
+        double min = getMinDouble();
+        double max = getMaxDouble();
+        double step = getStepDouble();
+        return value.equals(SliderUtil.snapToStep(value, min, max, step));
     }
 }

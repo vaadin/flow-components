@@ -277,6 +277,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         double min = getMinDouble();
         double max = getMaxDouble();
         double step = getStepDouble();
+        TValue value = getValue();
 
         if (min > max) {
             logger.warn(
@@ -285,12 +286,23 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
                     getClass().getSimpleName(), min, max);
         }
 
-        if (min <= max && step > 0 && !hasValidValue()) {
+        if (min <= max && !isValueWithinMinMax(value)) {
             logger.warn(
-                    "{}: value is not within [min, max] range"
-                            + " or is not aligned with step (min={}, max={}, step={})."
+                    "{}: value ({}) is out of [min, max] range (min={}, max={})."
                             + " This can lead to unexpected behavior and a broken UI.",
-                    getClass().getSimpleName(), min, max, step);
+                    getClass().getSimpleName(), value, min, max);
+        }
+
+        if (min <= max && step > 0 && !isValueAlignedWithStep(value)) {
+            logger.warn(
+                    "{}: value ({}) is not aligned with step"
+                            + " (min={}, max={}, step={})."
+                            + " This can lead to unexpected behavior and a broken UI.",
+                    getClass().getSimpleName(), value, min, max, step);
         }
     }
+
+    abstract boolean isValueAlignedWithStep(TValue value);
+
+    abstract boolean isValueWithinMinMax(TValue value);
 }

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.slider;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Tag;
@@ -232,39 +231,31 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
         try {
             ArrayNode arrayValue = (ArrayNode) getElement()
                     .getPropertyRaw("value");
-            requireValidValue(getMin(), getMax(), getStep(),
-                    PARSER.apply(arrayValue));
-            return true;
-        } catch (IllegalArgumentException | NullPointerException
-                | ClassCastException e) {
+            RangeSliderValue value = PARSER.apply(arrayValue);
+            return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
+        } catch (IllegalArgumentException | ClassCastException e) {
             return false;
         }
     }
 
-    private void requireValidValue(double min, double max, double step,
-            RangeSliderValue value) {
-        Objects.requireNonNull(value, "Value cannot be null");
+    @Override
+    boolean isValueWithinMinMax(RangeSliderValue value) {
+        double min = getMinDouble();
+        double max = getMaxDouble();
 
-        if (SliderUtil.clampToMinMax(value.start(), min, max) != value
-                .start()) {
-            throw new IllegalArgumentException(
-                    "Start value must be between min and max");
-        }
+        return value.equals(new RangeSliderValue(
+                SliderUtil.clampToMinMax(value.start(), min, max),
+                SliderUtil.clampToMinMax(value.end(), min, max)));
+    }
 
-        if (SliderUtil.clampToMinMax(value.end(), min, max) != value.end()) {
-            throw new IllegalArgumentException(
-                    "End value must be between min and max");
-        }
+    @Override
+    boolean isValueAlignedWithStep(RangeSliderValue value) {
+        double min = getMinDouble();
+        double max = getMaxDouble();
+        double step = getStepDouble();
 
-        if (SliderUtil.snapToStep(value.start(), min, max, step) != value
-                .start()) {
-            throw new IllegalArgumentException(
-                    "Start value must be aligned with step");
-        }
-
-        if (SliderUtil.snapToStep(value.end(), min, max, step) != value.end()) {
-            throw new IllegalArgumentException(
-                    "End value must be aligned with step");
-        }
+        return value.equals(new RangeSliderValue(
+                SliderUtil.snapToStep(value.start(), min, max, step),
+                SliderUtil.snapToStep(value.end(), min, max, step)));
     }
 }
