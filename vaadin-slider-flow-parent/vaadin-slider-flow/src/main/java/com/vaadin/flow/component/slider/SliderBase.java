@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.slider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -44,11 +47,16 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
         KeyNotifier {
 
+    private static final Logger logger = LoggerFactory
+            .getLogger(SliderBase.class);
+
     private static final double DEFAULT_STEP = 1.0;
 
     private ValueChangeMode currentMode;
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
+
+    private boolean consistencyCheckPending = false;
 
     /**
      * Constructs a slider with the given min, max, and custom converters for
@@ -139,6 +147,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     void setMinDouble(double min) {
         getElement().setProperty("min", min);
+        schedulePropertyConsistencyCheck();
     }
 
     /**
@@ -149,6 +158,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     void setMaxDouble(double max) {
         getElement().setProperty("max", max);
+        schedulePropertyConsistencyCheck();
     }
 
     /**
@@ -159,6 +169,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      */
     void setStepDouble(double step) {
         getElement().setProperty("step", step);
+        schedulePropertyConsistencyCheck();
     }
 
     /**
@@ -239,5 +250,45 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     private void applyChangeTimeout() {
         ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
                 getValueChangeTimeout(), getSynchronizationRegistration());
+    }
+
+    @Override
+    public void setValue(TValue value) {
+        super.setValue(value);
+        schedulePropertyConsistencyCheck();
+    }
+
+    private void schedulePropertyConsistencyCheck() {
+        if (!consistencyCheckPending) {
+            consistencyCheckPending = true;
+            getElement().getNode().runWhenAttached(ui -> ui
+                    .beforeClientResponse(this, context -> {
+                        consistencyCheckPending = false;
+                        warnIfPropertiesInconsistent();
+                    }));
+        }
+    }
+
+    private void warnIfPropertiesInconsistent() {
+        double min = getMinDouble();
+        double max = getMaxDouble();
+        double step = getStepDouble();
+
+        if (min > max) {
+            logger.warn("{}: min ({}) is greater than max ({})",
+                    getClass().getSimpleName(), min, max);
+        }
+
+        if (step <= 0) {
+            logger.warn("{}: step ({}) must be greater than 0",
+                    getClass().getSimpleName(), step);
+        }
+
+        if (min <= max && step > 0 && !hasValidValue()) {
+            logger.warn(
+                    "{}: value is not within [min, max] range "
+                            + "or is not aligned with step (min={}, max={}, step={})",
+                    getClass().getSimpleName(), min, max, step);
+        }
     }
 }
