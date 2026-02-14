@@ -17,7 +17,7 @@ package com.vaadin.flow.component.popover;
 
 import org.junit.Test;
 
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 
 public class PopoverVariantTest {
 

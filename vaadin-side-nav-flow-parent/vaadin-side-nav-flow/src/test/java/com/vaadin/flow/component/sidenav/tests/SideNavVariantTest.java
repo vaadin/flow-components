@@ -17,9 +17,9 @@ package com.vaadin.flow.component.sidenav.tests;
 
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class SideNavVariantTest {
 

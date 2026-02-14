@@ -17,9 +17,9 @@ package com.vaadin.flow.component.textfield.tests;
 
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class TextFieldVariantTest {
 

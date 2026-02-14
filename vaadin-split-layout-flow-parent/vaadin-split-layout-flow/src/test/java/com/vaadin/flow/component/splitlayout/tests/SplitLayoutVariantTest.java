@@ -17,9 +17,9 @@ package com.vaadin.flow.component.splitlayout.tests;
 
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class SplitLayoutVariantTest {
 

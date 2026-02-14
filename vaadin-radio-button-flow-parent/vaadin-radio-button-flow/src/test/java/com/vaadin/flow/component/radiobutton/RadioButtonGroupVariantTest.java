@@ -17,7 +17,7 @@ package com.vaadin.flow.component.radiobutton;
 
 import org.junit.Test;
 
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 
 public class RadioButtonGroupVariantTest {
 

@@ -17,9 +17,9 @@ package com.vaadin.flow.component.tabs.tests;
 
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.ThemeVariantTestHelper;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.TabSheetVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class TabSheetVariantTest {
 
