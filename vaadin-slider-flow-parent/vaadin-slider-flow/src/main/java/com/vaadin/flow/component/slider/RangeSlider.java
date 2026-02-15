@@ -239,7 +239,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     @Override
-    boolean isValueWithinMinMax(RangeSliderValue value) {
+    protected boolean isValueWithinMinMax(RangeSliderValue value) {
         double min = getMinDouble();
         double max = getMaxDouble();
         if (min > max) {
@@ -252,7 +252,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     }
 
     @Override
-    boolean isValueAlignedWithStep(RangeSliderValue value) {
+    protected boolean isValueAlignedWithStep(RangeSliderValue value) {
         double min = getMinDouble();
         double max = getMaxDouble();
         double step = getStepDouble();

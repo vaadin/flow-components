@@ -223,7 +223,7 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
     }
 
     @Override
-    boolean isValueWithinMinMax(Double value) {
+    protected boolean isValueWithinMinMax(Double value) {
         double min = getMinDouble();
         double max = getMaxDouble();
         if (min > max) {
@@ -234,7 +234,7 @@ public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
     }
 
     @Override
-    boolean isValueAlignedWithStep(Double value) {
+    protected boolean isValueAlignedWithStep(Double value) {
         double min = getMinDouble();
         double max = getMaxDouble();
         if (min > max) {

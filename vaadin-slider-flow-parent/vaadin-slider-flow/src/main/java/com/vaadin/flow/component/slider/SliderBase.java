@@ -71,7 +71,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param modelToPresentation
      *            a function to convert from model to presentation
      */
-    <TPresentation> SliderBase(double min, double max,
+    protected <TPresentation> SliderBase(double min, double max,
             Class<TPresentation> presentationType,
             SerializableFunction<TPresentation, TValue> presentationToModel,
             SerializableFunction<TValue, TPresentation> modelToPresentation) {
@@ -305,7 +305,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         }
     }
 
-    abstract boolean isValueAlignedWithStep(TValue value);
+    abstract protected boolean isValueAlignedWithStep(TValue value);
 
-    abstract boolean isValueWithinMinMax(TValue value);
+    abstract protected boolean isValueWithinMinMax(TValue value);
 }
