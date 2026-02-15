@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import com.vaadin.flow.component.ai.component.AiInput;
-import com.vaadin.flow.component.ai.component.InputSubmitListener;
+import com.vaadin.flow.component.ai.ui.AIInput;
+import com.vaadin.flow.component.ai.ui.InputSubmitListener;
 import com.vaadin.flow.component.messages.MessageInput;
 
 /**
- * Wrapper for Flow MessageInput component to implement AiInput interface.
+ * Wrapper for Flow MessageInput component to implement AIInput interface.
  */
-record MessageInputWrapper(MessageInput messageInput) implements AiInput {
+record MessageInputWrapper(MessageInput messageInput) implements AIInput {
 
     @Override
     public void addSubmitListener(InputSubmitListener listener) {

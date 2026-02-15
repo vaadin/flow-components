@@ -21,7 +21,14 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-split-layout} component.
  */
 public enum SplitLayoutVariant implements ThemeVariant {
-    LUMO_SMALL("small"), LUMO_MINIMAL("minimal"), AURA_SMALL("small");
+    LUMO_SMALL("small"),
+    LUMO_MINIMAL("minimal"),
+    /**
+     * @deprecated Use {@link #SMALL} instead.
+     */
+    @Deprecated
+    AURA_SMALL("small"),
+    SMALL("small");
 
     private final String variant;
 

@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -26,21 +26,21 @@ import com.vaadin.flow.router.Route;
 import reactor.core.publisher.Flux;
 
 /**
- * Test page for AiOrchestrator.
+ * Test page for AIOrchestrator.
  *
  * @author Vaadin Ltd
  */
 @Route("vaadin-ai/orchestrator")
-public class AiOrchestratorPage extends Div {
+public class AIOrchestratorPage extends Div {
 
-    private final AiOrchestrator orchestrator;
+    private final AIOrchestrator orchestrator;
 
-    public AiOrchestratorPage() {
+    public AIOrchestratorPage() {
         var messageList = new MessageList();
         messageList.setId("message-list");
         var messageInput = new MessageInput();
         messageInput.setId("message-input");
-        orchestrator = AiOrchestrator.builder(new EchoLLMProvider())
+        orchestrator = AIOrchestrator.builder(new EchoLLMProvider(), null)
                 .withMessageList(messageList).withInput(messageInput).build();
 
         var promptButton = new NativeButton("Send Hello",
