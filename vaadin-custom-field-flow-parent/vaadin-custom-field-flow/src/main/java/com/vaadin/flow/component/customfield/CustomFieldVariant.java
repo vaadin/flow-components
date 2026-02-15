@@ -24,7 +24,12 @@ public enum CustomFieldVariant {
     LUMO_SMALL("small"),
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
     LUMO_WHITESPACE("whitespace"),
-    AURA_HELPER_ABOVE_FIELD("helper-above-field");
+    /**
+     * @deprecated Use {@link #HELPER_ABOVE} instead.
+     */
+    @Deprecated
+    AURA_HELPER_ABOVE_FIELD("helper-above-field"),
+    HELPER_ABOVE("helper-above-field");
 
     private final String variant;
 
