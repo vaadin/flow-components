@@ -27,8 +27,11 @@ import com.vaadin.flow.router.Route;
 public class RangeSliderBasicPage extends Div {
 
     public RangeSliderBasicPage() {
-        RangeSlider rangeSlider = new RangeSlider(10, 200, 5,
-                new RangeSliderValue(25, 150));
+        RangeSlider rangeSlider = new RangeSlider();
+        rangeSlider.setMin(10);
+        rangeSlider.setMax(200);
+        rangeSlider.setStep(5);
+        rangeSlider.setValue(new RangeSliderValue(25, 150));
         rangeSlider.setWidth("200px");
 
         Span serverValue = new Span();

@@ -26,7 +26,11 @@ import com.vaadin.flow.router.Route;
 public class SliderBasicPage extends Div {
 
     public SliderBasicPage() {
-        Slider slider = new Slider(10, 200, 5, 50);
+        Slider slider = new Slider();
+        slider.setMin(10);
+        slider.setMax(200);
+        slider.setStep(5);
+        slider.setValue(50.0);
         slider.setWidth("200px");
 
         Span serverValue = new Span();
