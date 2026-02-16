@@ -378,15 +378,14 @@ public class AIOrchestrator {
         }
 
         /**
-         * Sets the file receiver component using a Flow UploadManager
-         * component. The provided component should not have an UploadHandler
-         * set beforehand.
+         * Sets the file receiver component using a Flow UploadManager. The
+         * provided manager should not have an UploadHandler set beforehand.
          *
          * @param uploadManager
-         *            the Flow UploadManager component
+         *            the Flow UploadManager
          * @return this builder
          * @throws IllegalArgumentException
-         *             if the {@link UploadManager} component already has an
+         *             if the {@link UploadManager} already has an
          *             {@link UploadHandler}
          */
         public Builder withFileReceiver(UploadManager uploadManager) {
