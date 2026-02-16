@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -39,7 +38,6 @@ import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -100,7 +98,6 @@ public class AIOrchestrator {
     private AIMessageList messageList;
     private AIInput input;
     private AIFileReceiver fileReceiver;
-    private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private Object[] tools = new Object[0];
     private String userName;
     private String assistantName;
@@ -217,9 +214,9 @@ public class AIOrchestrator {
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
-        var attachments = pendingAttachments.stream().toList();
+        var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
+                : List.<AIAttachment> of();
         addUserMessageToList(userMessage, attachments);
-        clearPendingAttachments(ui);
         var assistantMessage = createAssistantMessagePlaceholder();
         String effectiveSystemPrompt = null;
         if (systemPrompt != null && !systemPrompt.isBlank()) {
@@ -253,13 +250,6 @@ public class AIOrchestrator {
         streamResponseToMessage(request, assistantMessage, ui);
     }
 
-    private void clearPendingAttachments(UI ui) {
-        pendingAttachments.clear();
-        if (fileReceiver != null) {
-            ui.access(() -> fileReceiver.clearFileList());
-        }
-    }
-
     private void checkFeatureFlag(UI ui) {
         if (featureFlagChecked.get()) {
             return;
@@ -271,30 +261,6 @@ public class AIOrchestrator {
                     "AIOrchestrator");
         }
         featureFlagChecked.set(true);
-    }
-
-    private void configureFileReceiver() {
-        if (fileReceiver == null) {
-            return;
-        }
-        fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
-            var isDuplicate = pendingAttachments.stream()
-                    .anyMatch(a -> a.name().equals(meta.fileName()));
-            if (isDuplicate) {
-                throw new IllegalArgumentException(
-                        "Duplicate file name: " + meta.fileName());
-            }
-            pendingAttachments.add(new AIAttachment(meta.fileName(),
-                    meta.contentType(), data));
-            LOGGER.debug("Added attachment: {}", meta.fileName());
-        }));
-        fileReceiver.addFileRemovedListener(fileName -> {
-            var removed = pendingAttachments
-                    .removeIf(a -> a.name().equals(fileName));
-            if (removed) {
-                LOGGER.debug("Removed attachment: {}", fileName);
-            }
-        });
     }
 
     /**
@@ -458,9 +424,6 @@ public class AIOrchestrator {
             if (input != null) {
                 input.addSubmitListener(
                         e -> orchestrator.doPrompt(e.getValue()));
-            }
-            if (fileReceiver != null) {
-                orchestrator.configureFileReceiver();
             }
             LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
                     + "fileReceiver={}, tools={}, userName={}, assistantName={}",
