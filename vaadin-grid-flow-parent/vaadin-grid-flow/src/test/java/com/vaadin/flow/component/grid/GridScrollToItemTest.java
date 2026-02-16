@@ -24,21 +24,22 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.tests.MockUI;
 
-@NotThreadSafe
-public class GridScrollTest {
+import net.jcip.annotations.NotThreadSafe;
 
-    private UI ui;
+@NotThreadSafe
+public class GridScrollToItemTest {
+
+    private MockUI ui = new MockUI();
     private Grid<String> grid;
 
     @Before
     public void setUp() {
-        ui = new MockUI();
         grid = new Grid<>();
         grid.setPageSize(50);
     }
@@ -46,43 +47,6 @@ public class GridScrollTest {
     @After
     public void tearDown() {
         UI.setCurrent(null);
-    }
-
-    @Test
-    public void scrollToStart_preloadOnePage() {
-        grid.scrollToIndex(0);
-        Assert.assertEquals("0-50", getViewportRange(grid));
-    }
-
-    @Test
-    public void scrollToEnd_preloadOnePage() {
-        grid.scrollToIndex(950);
-        Assert.assertEquals("950-1000", getViewportRange(grid));
-    }
-
-    @Test
-    public void scrollToStartOfPage_preloadOnePage() {
-        grid.scrollToIndex(500);
-        Assert.assertEquals("500-550", getViewportRange(grid));
-    }
-
-    @Test
-    public void scrollToSecondIndexOfPage_preloadOnePage() {
-        grid.scrollToIndex(501);
-        Assert.assertEquals("500-550", getViewportRange(grid));
-    }
-
-    @Test
-    public void scrollToSecondLastIndexOfPage_preloadTwoPages() {
-        grid.scrollToIndex(499);
-        Assert.assertEquals("450-550", getViewportRange(grid));
-    }
-
-    @Test
-    public void smallPageSize_scrollToIndex_preloadMultiplePages() {
-        grid.setPageSize(5);
-        grid.scrollToIndex(499);
-        Assert.assertEquals("495-540", getViewportRange(grid));
     }
 
     @Test
@@ -132,45 +96,62 @@ public class GridScrollTest {
     }
 
     @Test
-    public void scrollToEnd_afterAttach_schedulesJsExecution() {
+    public void scrollToItem_afterAttach_schedulesJsExecution() {
+        grid.setItems("Item 0", "Item 1");
         ui.add(grid);
-
-        grid.scrollToEnd();
-
-        assertPendingScrollToEndInvocation();
+        grid.scrollToItem("Item 0");
+        grid.scrollToItem("Item 0");
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollToItemInvocation("Item 0", 0);
     }
 
     @Test
-    public void scrollToEnd_beforeAttach_thenAttach_schedulesJsExecution() {
-        grid.scrollToEnd();
+    public void scrollToItem_beforeAttach_thenAttach_schedulesJsExecution() {
+        grid.setItems("Item 0", "Item 1");
+        grid.scrollToItem("Item 0");
+        grid.scrollToItem("Item 0");
+        ui.add(grid);
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollToItemInvocation("Item 0", 0);
+    }
 
+    @Test
+    public void scrollToIndex_scrollToItem_onlyScrollToItemExecuted() {
+        grid.setItems("Item 0", "Item 1");
         ui.add(grid);
 
-        assertPendingScrollToEndInvocation();
+        grid.scrollToIndex(1);
+        grid.scrollToItem("Item 0");
+        fakeClientCommunication();
+        assertSingleJavaScriptScrollToItemInvocation("Item 0", 0);
     }
 
-    private void assertPendingScrollToEndInvocation() {
-        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
-
-        long scrollToEndCount = pendingInvocations.stream()
-                .filter(inv -> inv.getInvocation().getExpression()
-                        .contains("scrollToIndex(this._flatSize)"))
-                .count();
-
-        Assert.assertEquals(
-                "Expected one scrollToEnd JS invocation to be scheduled", 1,
-                scrollToEndCount);
-    }
-
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        fakeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void fakeClientResponse() {
+    private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
+    }
+
+    private void assertSingleJavaScriptScrollToItemInvocation(
+            String expectedItem, int expectedIndex) {
+        var expectedItemKey = grid.getDataCommunicator().getKeyMapper()
+                .key(expectedItem);
+
+        var invocations = getJavaScriptScrollInvocations();
+        Assert.assertEquals(1, invocations.size());
+
+        var invocation = invocations.get(0);
+        Assert.assertTrue(invocation.getExpression().contains("scrollToItem"));
+        Assert.assertEquals(expectedItemKey, invocation.getParameters().get(1));
+        Assert.assertEquals(expectedIndex, invocation.getParameters().get(2));
+    }
+
+    private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
+        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("scroll"))
+                .toList();
     }
 
     private String getViewportRange(Grid<String> grid) {

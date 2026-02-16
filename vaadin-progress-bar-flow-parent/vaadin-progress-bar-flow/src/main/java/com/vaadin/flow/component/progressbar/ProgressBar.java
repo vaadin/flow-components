@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -32,7 +33,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-alpha7")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {
@@ -131,11 +132,12 @@ public class ProgressBar extends Component
      * @param signal
      *            the signal to bind the value to, not {@code null}
      * @see #setValue(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindValue(Signal<Double> signal) {
-        getElement().bindProperty("value", signal);
+        getElement().bindProperty("value", signal, null);
     }
 
     /**
@@ -190,11 +192,12 @@ public class ProgressBar extends Component
      * @param signal
      *            the signal to bind the minimum bound to, not {@code null}
      * @see #setMin(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<Double> signal) {
-        getElement().bindProperty("min", signal);
+        getElement().bindProperty("min", signal, null);
     }
 
     /**
@@ -211,11 +214,12 @@ public class ProgressBar extends Component
      * @param signal
      *            the signal to bind the maximum bound to, not {@code null}
      * @see #setMax(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<Double> signal) {
-        getElement().bindProperty("max", signal);
+        getElement().bindProperty("max", signal, null);
     }
 
     /**

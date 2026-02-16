@@ -69,7 +69,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/integer-field", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/integer-field", version = "25.1.0-alpha7")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer>
         implements HasThemeVariant<TextFieldVariant> {
@@ -294,7 +294,8 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      * @param signal
      *            the signal to bind the minimum value to, not {@code null}
      * @see #setMin(int)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<Integer> signal) {
@@ -316,7 +317,8 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      * @param signal
      *            the signal to bind the maximum value to, not {@code null}
      * @see #setMax(int)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<Integer> signal) {

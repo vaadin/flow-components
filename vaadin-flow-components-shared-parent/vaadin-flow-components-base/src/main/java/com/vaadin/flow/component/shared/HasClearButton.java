@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.signals.Signal;
 
@@ -72,8 +74,10 @@ public interface HasClearButton extends HasElement {
      * @since 25.1
      */
     default void bindClearButtonVisible(Signal<Boolean> signal) {
-        getElement().bindProperty("clearButtonVisible", signal == null ? null
-                : signal.map(
-                        visible -> visible == null ? Boolean.FALSE : visible));
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("clearButtonVisible",
+                signal.map(
+                        visible -> visible == null ? Boolean.FALSE : visible),
+                null);
     }
 }
