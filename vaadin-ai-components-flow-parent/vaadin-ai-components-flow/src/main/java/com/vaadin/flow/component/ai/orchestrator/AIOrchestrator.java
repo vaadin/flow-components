@@ -456,8 +456,7 @@ public class AIOrchestrator {
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
             if (input != null) {
-                input.addSubmitListener(
-                        e -> orchestrator.doPrompt(e.getValue()));
+                input.addSubmitListener(orchestrator::doPrompt);
             }
             if (fileReceiver != null) {
                 orchestrator.configureFileReceiver();
