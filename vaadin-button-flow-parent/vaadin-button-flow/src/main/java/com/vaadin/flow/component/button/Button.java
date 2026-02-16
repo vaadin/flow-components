@@ -78,7 +78,6 @@ public class Button extends Component
      * Default constructor. Creates an empty button.
      */
     public Button() {
-        add(textNode);
     }
 
     /**
@@ -633,6 +632,14 @@ public class Button extends Component
      *            the text inside the button
      */
     private void textChangeHandler(String text) {
+        var hasText = text != null && !text.isEmpty();
+        var textNodeAttached = textNode.getParent().isPresent();
+        if (hasText && !textNodeAttached) {
+            add(textNode);
+        } else if (!hasText && textNodeAttached) {
+            remove(textNode);
+        }
+
         updateChildren();
         updateIconSlot();
         updateThemeAttribute();

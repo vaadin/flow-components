@@ -69,12 +69,6 @@ public class UploadManagerTest {
         ui = Mockito.spy(new UI());
         UI.setCurrent(ui);
 
-        // Mock feature flags to enable the upload manager component
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(UploadManager.FEATURE_FLAG_ID))
-                .thenReturn(true);
-
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
         VaadinService mockService = Mockito.mock(VaadinService.class);
         VaadinContext mockContext = Mockito.mock(VaadinContext.class);
@@ -89,8 +83,8 @@ public class UploadManagerTest {
                 });
         Mockito.when(mockSession.getService()).thenReturn(mockService);
         Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
+        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
+                .mockFeatureFlag(mockContext);
         ui.getInternals().setSession(mockSession);
 
         owner = new Div();
