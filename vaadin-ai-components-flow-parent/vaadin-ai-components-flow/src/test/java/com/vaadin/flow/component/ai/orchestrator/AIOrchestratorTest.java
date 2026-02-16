@@ -969,9 +969,8 @@ public class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var largeImageData = createTestImage(initialWidth, initialHeight);
-        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(
-                List.of(new AIAttachment("large.png", "image/png",
-                        largeImageData)));
+        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
+                new AIAttachment("large.png", "image/png", largeImageData)));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList)
@@ -1004,9 +1003,8 @@ public class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var smallImageData = createTestImage(initialWidth, initialHeight);
-        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(
-                List.of(new AIAttachment("small.png", "image/png",
-                        smallImageData)));
+        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
+                new AIAttachment("small.png", "image/png", smallImageData)));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList)
@@ -1032,8 +1030,7 @@ public class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(new AIAttachment("document.pdf",
-                        "application/pdf",
-                        "fake pdf content".getBytes())));
+                        "application/pdf", "fake pdf content".getBytes())));
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(flowMessageList)
                 .withFileReceiver(mockFileReceiver).build();
