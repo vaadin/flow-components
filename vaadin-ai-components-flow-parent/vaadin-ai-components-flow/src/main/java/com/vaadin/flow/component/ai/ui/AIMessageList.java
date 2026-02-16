@@ -13,21 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.ai.ui;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 
 /**
  * Interface for message list components that can display AI conversation
  * messages.
  *
  * @author Vaadin Ltd
- * @see AiMessage
+ * @see AIMessage
  */
-public interface AiMessageList extends Serializable {
+public interface AIMessageList extends Serializable {
 
     /**
      * Adds a message to the list.
@@ -35,7 +35,7 @@ public interface AiMessageList extends Serializable {
      * @param message
      *            the message to add, not {@code null}
      */
-    void addMessage(AiMessage message);
+    void addMessage(AIMessage message);
 
     /**
      * Creates a new message with the given parameters and attachments.
@@ -48,6 +48,6 @@ public interface AiMessageList extends Serializable {
      *            the list of attachments to include with the message
      * @return the created message instance, not {@code null}
      */
-    AiMessage createMessage(String text, String userName,
-            List<AiAttachment> attachments);
+    AIMessage createMessage(String text, String userName,
+            List<AIAttachment> attachments);
 }
