@@ -28,13 +28,10 @@ import com.vaadin.flow.component.messages.MessageList;
 record MessageListWrapper(MessageList messageList) implements AIMessageList {
 
     @Override
-    public void addMessage(AIMessage message) {
-        messageList.addItem(((MessageListItemWrapper) message).getItem());
-    }
-
-    @Override
-    public AIMessage createMessage(String text, String userName,
+    public AIMessage addMessage(String text, String userName,
             List<AIAttachment> attachments) {
-        return new MessageListItemWrapper(text, userName, attachments);
+        var message = new MessageListItemWrapper(text, userName, attachments);
+        messageList.addItem(message.getItem());
+        return message;
     }
 }
