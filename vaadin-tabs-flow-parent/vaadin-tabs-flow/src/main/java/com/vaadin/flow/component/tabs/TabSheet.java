@@ -70,10 +70,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
         SlotUtils.addToSlot(this, "tabs", tabs);
 
-        addSelectedChangeListener(e -> {
-            getElement().setProperty("selected", tabs.getSelectedIndex());
-            updateContent();
-        });
+        addSelectedChangeListener(e -> updateContent());
     }
 
     /**
