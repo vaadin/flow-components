@@ -22,7 +22,12 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum CheckboxVariant implements ThemeVariant {
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    AURA_HELPER_ABOVE_FIELD("helper-above-field");
+    /**
+     * @deprecated Use {@link #HELPER_ABOVE} instead.
+     */
+    @Deprecated
+    AURA_HELPER_ABOVE_FIELD("helper-above-field"),
+    HELPER_ABOVE("helper-above-field");
 
     private final String variant;
 

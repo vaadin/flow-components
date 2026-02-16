@@ -18,7 +18,7 @@ package com.vaadin.flow.component.ai.provider;
 import java.io.Serializable;
 import java.util.List;
 
-import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 
 import reactor.core.publisher.Flux;
 
@@ -69,7 +69,7 @@ public interface LLMProvider {
          *
          * @return the list of attachments, never {@code null} but may be empty
          */
-        List<AiAttachment> attachments();
+        List<AIAttachment> attachments();
 
         /**
          * Gets the system prompt for this specific request. The system prompt

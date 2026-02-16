@@ -17,16 +17,16 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import java.util.function.Consumer;
 
-import com.vaadin.flow.component.ai.component.AiFileReceiver;
+import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
- * Wrapper for Flow UploadManager component to implement AiFileReceiver
+ * Wrapper for Flow UploadManager component to implement AIFileReceiver
  * interface.
  */
 record UploadManagerWrapper(
-        UploadManager uploadManager) implements AiFileReceiver {
+        UploadManager uploadManager) implements AIFileReceiver {
 
     @Override
     public void setUploadHandler(UploadHandler uploadHandler) {

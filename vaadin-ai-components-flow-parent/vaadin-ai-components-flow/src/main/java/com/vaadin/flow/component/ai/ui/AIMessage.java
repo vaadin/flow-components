@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.ai.ui;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -22,9 +22,9 @@ import java.time.Instant;
  * Represents a message in an AI conversation.
  *
  * @author Vaadin Ltd
- * @see AiMessageList
+ * @see AIMessageList
  */
-public interface AiMessage extends Serializable {
+public interface AIMessage extends Serializable {
 
     /**
      * Gets the message text.

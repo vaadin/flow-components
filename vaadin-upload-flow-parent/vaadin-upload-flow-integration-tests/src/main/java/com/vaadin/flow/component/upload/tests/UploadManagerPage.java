@@ -42,6 +42,9 @@ public class UploadManagerPage extends UploadDropZone {
     private UploadFileList fileList;
 
     public UploadManagerPage() {
+        var layout = new Div();
+        setContent(layout);
+
         // Log area for events
         logArea = new Div();
         logArea.setId("log-area");
@@ -52,7 +55,7 @@ public class UploadManagerPage extends UploadDropZone {
         // depending on the case.
         owner = new Div();
         owner.setId("owner");
-        add(owner);
+        layout.add(owner);
 
         // Create the manager with an upload handler
         manager = new UploadManager(owner,
@@ -78,20 +81,20 @@ public class UploadManagerPage extends UploadDropZone {
         uploadButton = new UploadButton(manager);
         uploadButton.setId("upload-button");
         uploadButton.setText("Select Files");
-        add(uploadButton);
+        layout.add(uploadButton);
 
         // Create file list linked to the manager
         fileList = new UploadFileList(manager);
         fileList.setId("file-list");
-        add(fileList);
+        layout.add(fileList);
 
         // Add control buttons for testing various API methods
-        addControlButtons();
+        addControlButtons(layout);
 
-        add(logArea);
+        layout.add(logArea);
     }
 
-    private void addControlButtons() {
+    private void addControlButtons(Div layout) {
         // --- Max Files ---
         var maxFilesGroup = createButtonGroup("Max Files:");
         var setMaxFiles1 = new NativeButton("1",
@@ -104,7 +107,7 @@ public class UploadManagerPage extends UploadDropZone {
                 event -> manager.setMaxFiles(0));
         setMaxFilesUnlimited.setId("set-max-files-unlimited");
         maxFilesGroup.add(setMaxFiles1, setMaxFiles3, setMaxFilesUnlimited);
-        add(maxFilesGroup);
+        layout.add(maxFilesGroup);
 
         // --- Max File Size ---
         var maxFileSizeGroup = createButtonGroup("Max File Size:");
@@ -115,7 +118,7 @@ public class UploadManagerPage extends UploadDropZone {
                 event -> manager.setMaxFileSize(0));
         setMaxFileSizeUnlimited.setId("set-max-file-size-unlimited");
         maxFileSizeGroup.add(setMaxFileSize100, setMaxFileSizeUnlimited);
-        add(maxFileSizeGroup);
+        layout.add(maxFileSizeGroup);
 
         // --- Accepted MIME Types ---
         var mimeGroup = createButtonGroup("MIME Types:");
@@ -137,7 +140,7 @@ public class UploadManagerPage extends UploadDropZone {
         clearMime.setId("clear-accept-mime");
         mimeGroup.add(setAcceptText, setAcceptImage, setAcceptMimePdf,
                 setAcceptMultiple, clearMime);
-        add(mimeGroup);
+        layout.add(mimeGroup);
 
         // --- Accepted File Extensions ---
         var extGroup = createButtonGroup("Extensions:");
@@ -151,7 +154,7 @@ public class UploadManagerPage extends UploadDropZone {
                 event -> manager.setAcceptedFileExtensions((String[]) null));
         clearExt.setId("clear-accept-ext");
         extGroup.add(setAcceptTxt, setAcceptPdf, clearExt);
-        add(extGroup);
+        layout.add(extGroup);
 
         // --- Auto Upload ---
         var autoUploadGroup = createButtonGroup("Auto Upload:");
@@ -162,7 +165,7 @@ public class UploadManagerPage extends UploadDropZone {
                 event -> manager.setAutoUpload(true));
         enableAutoUpload.setId("enable-auto-upload");
         autoUploadGroup.add(disableAutoUpload, enableAutoUpload);
-        add(autoUploadGroup);
+        layout.add(autoUploadGroup);
 
         // --- Manager Enabled ---
         var enabledGroup = createButtonGroup("Manager:");
@@ -196,26 +199,26 @@ public class UploadManagerPage extends UploadDropZone {
         setAlwaysDisabledHandler.setId("set-always-disabled-handler");
         enabledGroup.add(disableManager, enableManager,
                 setAlwaysDisabledHandler);
-        add(enabledGroup);
+        layout.add(enabledGroup);
 
         // --- Owner Lifecycle ---
         var ownerGroup = createButtonGroup("Owner:");
         var detachOwner = new NativeButton("Detach", event -> {
             if (owner.getParent().isPresent()) {
-                remove(owner);
+                layout.remove(owner);
                 log("Owner detached");
             }
         });
         detachOwner.setId("detach-owner");
         var reattachOwner = new NativeButton("Reattach", event -> {
             if (owner.getParent().isEmpty()) {
-                addComponentAsFirst(owner);
+                layout.addComponentAsFirst(owner);
                 log("Owner reattached");
             }
         });
         reattachOwner.setId("reattach-owner");
         ownerGroup.add(detachOwner, reattachOwner);
-        add(ownerGroup);
+        layout.add(ownerGroup);
 
         // --- File Operations ---
         var fileOpsGroup = createButtonGroup("Files:");
@@ -223,7 +226,7 @@ public class UploadManagerPage extends UploadDropZone {
                 event -> manager.clearFileList());
         clearFileListBtn.setId("clear-file-list");
         fileOpsGroup.add(clearFileListBtn);
-        add(fileOpsGroup);
+        layout.add(fileOpsGroup);
 
         // --- Unlink Components ---
         var unlinkGroup = createButtonGroup("Unlink:");
@@ -243,7 +246,7 @@ public class UploadManagerPage extends UploadDropZone {
         });
         unlinkDropZone.setId("unlink-drop-zone");
         unlinkGroup.add(unlinkButton, unlinkFileList, unlinkDropZone);
-        add(unlinkGroup);
+        layout.add(unlinkGroup);
 
         // --- Log ---
         var logGroup = createButtonGroup("Log:");
@@ -260,7 +263,7 @@ public class UploadManagerPage extends UploadDropZone {
         var clearLog = new NativeButton("Clear", event -> logArea.removeAll());
         clearLog.setId("clear-log");
         logGroup.add(statusButton, clearLog);
-        add(logGroup);
+        layout.add(logGroup);
     }
 
     private Div createButtonGroup(String label) {
