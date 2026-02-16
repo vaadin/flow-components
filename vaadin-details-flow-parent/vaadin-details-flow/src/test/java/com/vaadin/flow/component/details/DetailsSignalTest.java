@@ -52,7 +52,7 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         var textSignal2 = new ValueSignal<>("Item 2");
         var listSignal = new ValueSignal<>(List.of(textSignal1, textSignal2));
 
-        details.bindChildren(listSignal, signal -> new Span(signal.value()));
+        details.bindChildren(listSignal, Span::new);
 
         Assert.assertEquals(2, details.getContent().count());
         Assert.assertEquals("Item 1",
@@ -66,13 +66,13 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         var textSignal1 = new ValueSignal<>("Item 1");
         var listSignal = new ValueSignal<>(List.of(textSignal1));
 
-        details.bindChildren(listSignal, signal -> new Span(signal.value()));
+        details.bindChildren(listSignal, Span::new);
 
         Assert.assertEquals(1, details.getContent().count());
 
         var textSignal2 = new ValueSignal<>("Item 2");
         var textSignal3 = new ValueSignal<>("Item 3");
-        listSignal.value(List.of(textSignal1, textSignal2, textSignal3));
+        listSignal.set(List.of(textSignal1, textSignal2, textSignal3));
 
         Assert.assertEquals(3, details.getContent().count());
     }
@@ -83,7 +83,7 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         var textSignal2 = new ValueSignal<>("Item 2");
         var listSignal = new ValueSignal<>(List.of(textSignal1, textSignal2));
 
-        details.bindChildren(listSignal, signal -> new Span(signal.value()));
+        details.bindChildren(listSignal, Span::new);
 
         Assert.assertEquals(0, details.getContent().count());
 
@@ -99,8 +99,8 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         var textSignal1 = new ValueSignal<>("Item 1");
         var listSignal = new ValueSignal<>(List.of(textSignal1));
 
-        details.bindChildren(listSignal, signal -> new Span(signal.value()));
-        details.bindChildren(listSignal, signal -> new Span(signal.value()));
+        details.bindChildren(listSignal, Span::new);
+        details.bindChildren(listSignal, Span::new);
     }
 
     @Test(expected = NullPointerException.class)
