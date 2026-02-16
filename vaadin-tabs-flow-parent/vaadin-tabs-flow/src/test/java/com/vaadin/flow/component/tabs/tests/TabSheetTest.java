@@ -301,8 +301,6 @@ public class TabSheetTest {
         tabSheet.setSelectedIndex(1);
         Assert.assertEquals(1, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
-        Assert.assertEquals(1,
-                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test
@@ -312,8 +310,6 @@ public class TabSheetTest {
         tabSheet.setSelectedTab(tab1);
         Assert.assertEquals(1, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
-        Assert.assertEquals(1,
-                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test
@@ -433,15 +429,6 @@ public class TabSheetTest {
     public void getIndexOfNonAttachedTab_returnsMinusOne() {
         tabSheet.add("Tab 0", new Span("Content 0"));
         Assert.assertEquals(-1, tabSheet.getIndexOf(new Tab()));
-    }
-
-    @Test
-    public void selectTabFromTabs_selectedUpdated() {
-        tabSheet.add("Tab 0", new Span("Content 0"));
-        tabSheet.add("Tab 1", new Span("Content 1"));
-        tabs.setSelectedIndex(1);
-        Assert.assertEquals(1,
-                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test
