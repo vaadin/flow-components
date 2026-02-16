@@ -49,6 +49,7 @@ import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.ai.ui.InputSubmitEvent;
 import com.vaadin.flow.component.ai.ui.InputSubmitListener;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadHelper;
@@ -507,30 +508,22 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withFlowUpload_withExistingHandler_throws() {
-        var flowUploadManager = Mockito.mock(UploadManager.class);
-        try (var mockUploadHelper = Mockito.mockStatic(UploadHelper.class)) {
-            mockUploadHelper
-                    .when(() -> UploadHelper
-                            .hasUploadHandler(Mockito.any(UploadManager.class)))
-                    .thenReturn(true);
-            var builder = AIOrchestrator.builder(mockProvider, null);
-            Assert.assertThrows(IllegalArgumentException.class,
-                    () -> builder.withFileReceiver(flowUploadManager));
-        }
+        mockUi();
+        var flowUploadManager = new UploadManager(new Div(),
+                UploadHandler.inMemory((x, y) -> {
+                }));
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> builder.withFileReceiver(flowUploadManager));
     }
 
     @Test
     public void builder_withFlowUpload_withoutHandler_succeeds() {
-        var flowUploadManager = Mockito.mock(UploadManager.class);
-        try (var mockUploadHelper = Mockito.mockStatic(UploadHelper.class)) {
-            mockUploadHelper
-                    .when(() -> UploadHelper
-                            .hasUploadHandler(Mockito.any(UploadManager.class)))
-                    .thenReturn(false);
-            var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                    .withFileReceiver(flowUploadManager).build();
-            Assert.assertNotNull(orchestrator);
-        }
+        mockUi();
+        var flowUploadManager = new UploadManager(new Div());
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(flowUploadManager).build();
+        Assert.assertNotNull(orchestrator);
     }
 
     @Test
