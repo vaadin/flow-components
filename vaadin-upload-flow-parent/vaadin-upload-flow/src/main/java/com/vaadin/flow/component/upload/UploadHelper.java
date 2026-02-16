@@ -27,15 +27,15 @@ import com.vaadin.flow.server.streams.UploadHandler;
 public class UploadHelper implements Serializable {
 
     /**
-     * Checks whether the given {@link UploadManager} has an
-     * {@link UploadHandler UploadHandler} configured.
+     * Checks whether the given {@link UploadManager} has an explicitly
+     * configured {@link UploadHandler UploadHandler}.
      *
      * @param uploadManager
      *            the upload manager to check, not {@code null}
-     * @return {@code true} if the upload manager has an upload handler
-     *         configured, {@code false} otherwise
+     * @return {@code true} if the upload manager has an explicitly configured
+     *         upload handler, {@code false} otherwise
      */
     public static boolean hasUploadHandler(UploadManager uploadManager) {
-        return uploadManager.getConnector().getElement().hasAttribute("target");
+        return uploadManager.isHandlerExplicitlyConfigured();
     }
 }
