@@ -70,35 +70,4 @@ class SliderUtil {
         return minBd.add(stepsFromMin.multiply(stepBd)).min(maxBd)
                 .doubleValue();
     }
-
-    /**
-     * Validates that the given min/max range is valid.
-     *
-     * @param min
-     *            the minimum value
-     * @param max
-     *            the maximum value
-     * @throws IllegalArgumentException
-     *             if min is greater than max
-     */
-    static void requireValidMinMax(double min, double max) {
-        if (min > max) {
-            throw new IllegalArgumentException(
-                    "Max must be greater than or equal to min");
-        }
-    }
-
-    /**
-     * Validates that the given step value is valid.
-     *
-     * @param step
-     *            the step value
-     * @throws IllegalArgumentException
-     *             if step is not positive
-     */
-    static void requireValidStep(double step) {
-        if (step <= 0) {
-            throw new IllegalArgumentException("Step must be positive");
-        }
-    }
 }
