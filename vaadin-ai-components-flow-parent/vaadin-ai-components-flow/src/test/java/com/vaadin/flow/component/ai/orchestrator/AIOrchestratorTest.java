@@ -51,6 +51,7 @@ import com.vaadin.flow.component.ai.ui.InputSubmitEvent;
 import com.vaadin.flow.component.ai.ui.InputSubmitListener;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinContext;
@@ -490,11 +491,46 @@ public class AIOrchestratorTest {
     @Test
     public void builder_withFlowUpload_wrapsCorrectly() {
         var flowUploadManager = Mockito.mock(UploadManager.class);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withFileReceiver(flowUploadManager).build();
-        Assert.assertNotNull(orchestrator);
-        Mockito.verify(flowUploadManager).setUploadHandler(Mockito.any());
-        Mockito.verify(flowUploadManager).addFileRemovedListener(Mockito.any());
+        try (var mockUploadHelper = Mockito.mockStatic(UploadHelper.class)) {
+            mockUploadHelper
+                    .when(() -> UploadHelper
+                            .hasUploadHandler(Mockito.any(UploadManager.class)))
+                    .thenReturn(false);
+            var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                    .withFileReceiver(flowUploadManager).build();
+            Assert.assertNotNull(orchestrator);
+            Mockito.verify(flowUploadManager).setUploadHandler(Mockito.any());
+            Mockito.verify(flowUploadManager)
+                    .addFileRemovedListener(Mockito.any());
+        }
+    }
+
+    @Test
+    public void builder_withFlowUpload_withExistingHandler_throws() {
+        var flowUploadManager = Mockito.mock(UploadManager.class);
+        try (var mockUploadHelper = Mockito.mockStatic(UploadHelper.class)) {
+            mockUploadHelper
+                    .when(() -> UploadHelper
+                            .hasUploadHandler(Mockito.any(UploadManager.class)))
+                    .thenReturn(true);
+            var builder = AIOrchestrator.builder(mockProvider, null);
+            Assert.assertThrows(IllegalArgumentException.class,
+                    () -> builder.withFileReceiver(flowUploadManager));
+        }
+    }
+
+    @Test
+    public void builder_withFlowUpload_withoutHandler_succeeds() {
+        var flowUploadManager = Mockito.mock(UploadManager.class);
+        try (var mockUploadHelper = Mockito.mockStatic(UploadHelper.class)) {
+            mockUploadHelper
+                    .when(() -> UploadHelper
+                            .hasUploadHandler(Mockito.any(UploadManager.class)))
+                    .thenReturn(false);
+            var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                    .withFileReceiver(flowUploadManager).build();
+            Assert.assertNotNull(orchestrator);
+        }
     }
 
     @Test
