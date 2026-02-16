@@ -37,7 +37,6 @@ public class TabSheetInitialSelectionIT extends AbstractComponentIT {
     @Test
     public void initialSelection_tabSelectedAndContentDisplayed() {
         Assert.assertEquals(1, tabSheet.getSelectedTabIndex());
-        Assert.assertEquals("Tab two content",
-                tabSheet.getContent().getText());
+        Assert.assertEquals("Tab two content", tabSheet.getContent().getText());
     }
 }
