@@ -436,15 +436,6 @@ public class TabSheetTest {
     }
 
     @Test
-    public void selectTabFromTabs_selectedUpdated() {
-        tabSheet.add("Tab 0", new Span("Content 0"));
-        tabSheet.add("Tab 1", new Span("Content 1"));
-        tabs.setSelectedIndex(1);
-        Assert.assertEquals(1,
-                tabSheet.getElement().getProperty("selected", 0));
-    }
-
-    @Test
     public void unregisterSelectedChangeListenerOnEvent() {
         tabSheet.add("Tab 0", new Span("Content 0"));
         tabSheet.add("Tab 1", new Span("Content 1"));

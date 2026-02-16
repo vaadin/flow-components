@@ -70,10 +70,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
         SlotUtils.addToSlot(this, "tabs", tabs);
 
-        addSelectedChangeListener(e -> {
-            getElement().setProperty("selected", tabs.getSelectedIndex());
-            updateContent();
-        });
+        addSelectedChangeListener(e -> updateContent());
     }
 
     /**
@@ -234,6 +231,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      */
     public void setSelectedIndex(int selectedIndex) {
         tabs.setSelectedIndex(selectedIndex);
+        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
@@ -255,6 +253,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
+        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
