@@ -94,10 +94,10 @@ public class UploadManager implements Serializable {
      * work.
      *
      * @param owner
-     *            the component that owns this manager. The manager's lifecycle
-     *            is tied to the owner's lifecycle - when the owner is detached
-     *            from the UI, uploads will stop working. The owner is typically
-     *            the view or layout containing the upload UI components.
+     *            The manager's lifecycle is tied to the owner's lifecycle -
+     *            when the owner is detached from the UI or disabled, uploads
+     *            will stop working. The owner is typically the view or layout
+     *            containing the upload UI components.
      */
     public UploadManager(Component owner) {
         this(owner, null);
@@ -107,10 +107,10 @@ public class UploadManager implements Serializable {
      * Creates a new upload manager with the given upload handler.
      *
      * @param owner
-     *            the component that owns this manager. The manager's lifecycle
-     *            is tied to the owner's lifecycle - when the owner is detached
-     *            from the UI, uploads will stop working. The owner is typically
-     *            the view or layout containing the upload UI components.
+     *            The manager's lifecycle is tied to the owner's lifecycle -
+     *            when the owner is detached from the UI or disabled, uploads
+     *            will stop working. The owner is typically the view or layout
+     *            containing the upload UI components.
      * @param handler
      *            the upload handler to use
      */
