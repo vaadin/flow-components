@@ -229,6 +229,12 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("updated", notification.getTextSupport().get());
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void bindChildren_throwsUnsupportedOperationException() {
+        notification = new Notification();
+        notification.bindChildren(null, null);
+    }
+
     private void assertTextSignalBindingActive() {
         textSignal.set("foo");
         Assert.assertEquals("foo", getNotificationText());
