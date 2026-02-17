@@ -65,9 +65,22 @@ import reactor.core.publisher.FluxSink;
  * <p>
  * Supports both streaming and non-streaming LangChain4j models. Tool calling is
  * supported through LangChain4j's {@link Tool} annotation.
+ * </p>
+ * <p>
+ * <b>Streaming vs. non-streaming:</b> The mode is determined by the constructor
+ * used. Pass a {@link StreamingChatModel} to
+ * {@link #LangChain4JLLMProvider(StreamingChatModel)} for streaming, or a
+ * {@link ChatModel} to {@link #LangChain4JLLMProvider(ChatModel)} for
+ * non-streaming. Streaming mode pushes partial responses to the UI as they
+ * arrive, which requires server push to be enabled. Annotate your UI class or
+ * application shell with {@code @Push}, or configure push programmatically,
+ * before using a streaming model. A warning is logged at runtime if push is not
+ * enabled.
+ * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
  * history across components, reuse the same provider instance.
+ * </p>
  * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
  * uses session persistence, you will need to create a new provider instance
