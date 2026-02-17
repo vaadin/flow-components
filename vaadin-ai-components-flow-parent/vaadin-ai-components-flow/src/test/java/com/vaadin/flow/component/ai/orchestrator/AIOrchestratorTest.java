@@ -28,6 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import javax.imageio.ImageIO;
 
 import org.junit.After;
@@ -247,15 +248,9 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withStreamingResponse_updatesMessageWithTokens()
-            throws Exception {
-        mockUi();
+    public void prompt_withStreamingResponse_updatesMessageWithTokens() {
+        mockUiSync();
         var mockMessage = createMockMessage();
-        var latch = new CountDownLatch(3);
-        Mockito.doAnswer(inv -> {
-            latch.countDown();
-            return null;
-        }).when(mockMessage).appendText(Mockito.anyString());
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
@@ -265,9 +260,6 @@ public class AIOrchestratorTest {
 
         prompt("Hi");
 
-        Assert.assertTrue("Tokens should be appended within timeout",
-                latch.await(2, TimeUnit.SECONDS));
-
         var inOrder = Mockito.inOrder(mockMessage);
         inOrder.verify(mockMessage).appendText("Hello");
         inOrder.verify(mockMessage).appendText(" ");
@@ -275,14 +267,9 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withStreamingError_setsErrorMessage() throws Exception {
-        mockUi();
+    public void prompt_withStreamingError_setsErrorMessage() {
+        mockUiSync();
         var mockMessage = createMockMessage();
-        var latch = new CountDownLatch(1);
-        Mockito.doAnswer(inv -> {
-            latch.countDown();
-            return null;
-        }).when(mockMessage).setText(Mockito.anyString());
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
@@ -292,9 +279,6 @@ public class AIOrchestratorTest {
 
         var orchestrator = getSimpleOrchestrator();
         orchestrator.prompt("Hi");
-
-        Assert.assertTrue("Error message should be set within timeout",
-                latch.await(2, TimeUnit.SECONDS));
 
         Mockito.verify(mockMessage)
                 .setText("An error occurred. Please try again.");
@@ -694,14 +678,9 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withMultipleTokens_appendsAllTokens() throws Exception {
-        mockUi();
+    public void prompt_withMultipleTokens_appendsAllTokens() {
+        mockUiSync();
         var mockMessage = createMockMessage();
-        var latch = new CountDownLatch(4);
-        Mockito.doAnswer(inv -> {
-            latch.countDown();
-            return null;
-        }).when(mockMessage).appendText(Mockito.anyString());
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
@@ -710,9 +689,6 @@ public class AIOrchestratorTest {
                 .thenReturn(Flux.just("Token1", "Token2", "Token3", "Token4"));
 
         prompt("Hello");
-
-        Assert.assertTrue("All tokens should be appended within timeout",
-                latch.await(2, TimeUnit.SECONDS));
 
         Mockito.verify(mockMessage, Mockito.times(4))
                 .appendText(Mockito.anyString());
@@ -905,6 +881,53 @@ public class AIOrchestratorTest {
                 () -> builder.withAssistantName(null));
     }
 
+    @Test
+    public void builder_withErrorHandler_usesCustomMessageOnError() {
+        mockUiSync();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withErrorHandler(
+                        error -> "Builder error: " + error.getMessage())
+                .build();
+        orchestrator.prompt("Hi");
+
+        Mockito.verify(mockMessage).setText("Builder error: API Error");
+    }
+
+    @Test
+    public void builder_withNullErrorHandler_throwsNullPointerException() {
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assert.assertThrows(NullPointerException.class,
+                () -> builder.withErrorHandler(null));
+    }
+
+    @Test
+    public void builder_withoutErrorHandler_usesDefaultHandler() {
+        mockUiSync();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hi");
+
+        Mockito.verify(mockMessage)
+                .setText("An error occurred. Please try again.");
+    }
+
     private AIOrchestrator getSimpleOrchestrator() {
         return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
@@ -917,9 +940,7 @@ public class AIOrchestratorTest {
     }
 
     private static void mockUi() {
-        mockUI = Mockito.mock(UI.class);
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
+        doMockUi(command -> {
             var futureTask = new FutureTask<Void>(() -> {
                 UI.setCurrent(mockUI);
                 try {
@@ -931,17 +952,31 @@ public class AIOrchestratorTest {
             });
             new Thread(futureTask).start();
             return futureTask;
-        }).when(mockUI).access(Mockito.any(Command.class));
+        });
+    }
 
-        // Mock feature flags to enable the AI components feature
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
+    private static void mockUiSync() {
+        doMockUi(command -> {
+            command.execute();
+            return null;
+        });
+    }
+
+    private static void doMockUi(
+            Function<Command, FutureTask<Void>> executeCommand) {
+        mockUI = Mockito.mock(UI.class);
+        Mockito.doAnswer(
+                invocation -> executeCommand.apply(invocation.getArgument(0)))
+                .when(mockUI).access(Mockito.any(Command.class));
+
+        var mockFeatureFlags = Mockito.mock(FeatureFlags.class);
         mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
         Mockito.when(mockFeatureFlags.isEnabled(AIOrchestrator.FEATURE_FLAG_ID))
                 .thenReturn(true);
 
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
+        var mockSession = Mockito.mock(VaadinSession.class);
+        var mockService = Mockito.mock(VaadinService.class);
+        var mockContext = Mockito.mock(VaadinContext.class);
         Mockito.when(mockUI.getSession()).thenReturn(mockSession);
         Mockito.when(mockSession.getService()).thenReturn(mockService);
         Mockito.when(mockService.getContext()).thenReturn(mockContext);

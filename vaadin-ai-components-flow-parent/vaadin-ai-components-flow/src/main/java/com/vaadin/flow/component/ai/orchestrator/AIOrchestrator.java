@@ -110,6 +110,7 @@ public class AIOrchestrator {
     private Object[] tools = new Object[0];
     private String userName;
     private String assistantName;
+    private ErrorHandler errorHandler = ErrorHandler.DEFAULT;
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
@@ -182,26 +183,17 @@ public class AIOrchestrator {
             AIMessage assistantMessage, UI ui) {
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
-        responseStream.doFinally(signal -> {
-            isProcessing.set(false);
-        }).subscribe(token -> {
-            if (assistantMessage != null && messageList != null) {
-                ui.access(() -> assistantMessage.appendText(token));
-            }
-        }, error -> {
-            String userMessage;
-            if (error instanceof TimeoutException) {
-                userMessage = "Request timed out. Please try again.";
-                LOGGER.warn("LLM request timed out after {} seconds",
-                        TIMEOUT_SECONDS);
-            } else {
-                userMessage = "An error occurred. Please try again.";
-                LOGGER.error("Error during LLM streaming", error);
-            }
-            if (assistantMessage != null && messageList != null) {
-                ui.access(() -> assistantMessage.setText(userMessage));
-            }
-        }, () -> LOGGER.debug("LLM streaming completed successfully"));
+        responseStream.doFinally(signal -> isProcessing.set(false))
+                .subscribe(token -> {
+                    if (assistantMessage != null && messageList != null) {
+                        ui.access(() -> assistantMessage.appendText(token));
+                    }
+                }, error -> {
+                    var userMessage = errorHandler.handleError(error);
+                    if (assistantMessage != null && messageList != null) {
+                        ui.access(() -> assistantMessage.setText(userMessage));
+                    }
+                }, () -> LOGGER.debug("LLM streaming completed successfully"));
     }
 
     private void doPrompt(String userMessage) {
@@ -269,7 +261,8 @@ public class AIOrchestrator {
     }
 
     /**
-     * Builder for configuring and creating an {@link AIOrchestrator} instance.
+     * <<<<<<< HEAD Builder for configuring and creating an
+     * {@link AIOrchestrator} instance.
      * <p>
      * The builder requires an {@link LLMProvider} and a system prompt. All
      * other settings are optional:
@@ -302,6 +295,40 @@ public class AIOrchestrator {
      * ({@link AIInput}, {@link AIMessageList}, {@link AIFileReceiver}) are
      * accepted.
      * </p>
+     * ======= Handler for errors that occur during LLM streaming. The handler
+     * receives the error and returns a user-facing message to display in the
+     * message list.
+     */
+    @FunctionalInterface
+    public interface ErrorHandler {
+
+        /**
+         * Default error handler that returns generic messages for timeouts and
+         * other errors.
+         */
+        ErrorHandler DEFAULT = error -> {
+            if (error instanceof TimeoutException) {
+                LOGGER.warn("LLM request timed out after {} seconds",
+                        TIMEOUT_SECONDS);
+                return "Request timed out. Please try again.";
+            }
+            LOGGER.error("Error during LLM streaming", error);
+            return "An error occurred. Please try again.";
+        };
+
+        /**
+         * Handles an error that occurred during LLM streaming.
+         *
+         * @param error
+         *            the error that occurred, not {@code null}
+         * @return a user-facing error message to display, not {@code null}
+         */
+        String handleError(Throwable error);
+    }
+
+    /**
+     * Builder for AIOrchestrator. >>>>>>> 8b30037dbb (feat: allow handling
+     * orchestrator exceptions)
      */
     public static class Builder {
         private final LLMProvider provider;
@@ -312,6 +339,7 @@ public class AIOrchestrator {
         private Object[] tools = new Object[0];
         private String userName;
         private String assistantName;
+        private ErrorHandler errorHandler;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -453,6 +481,20 @@ public class AIOrchestrator {
         }
 
         /**
+         * Sets a custom error handler for LLM streaming errors.
+         *
+         * @param errorHandler
+         *            the error handler, not {@code null}
+         * @return this builder
+         */
+        public Builder withErrorHandler(ErrorHandler errorHandler) {
+            Objects.requireNonNull(errorHandler,
+                    "Error handler cannot be null");
+            this.errorHandler = errorHandler;
+            return this;
+        }
+
+        /**
          * Builds the orchestrator.
          *
          * @return the configured orchestrator
@@ -466,6 +508,9 @@ public class AIOrchestrator {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
+            if (errorHandler != null) {
+                orchestrator.errorHandler = errorHandler;
+            }
             if (input != null) {
                 input.addSubmitListener(
                         e -> orchestrator.doPrompt(e.getValue()));
