@@ -307,7 +307,39 @@ public class AIOrchestrator {
     }
 
     /**
-     * Builder for AIOrchestrator.
+     * Builder for configuring and creating an {@link AIOrchestrator} instance.
+     * <p>
+     * The builder requires an {@link LLMProvider} and a system prompt. All
+     * other settings are optional:
+     * </p>
+     * <ul>
+     * <li>{@link #withInput(AIInput)} or {@link #withInput(MessageInput)} –
+     * connects a text input component so that user submissions are
+     * automatically forwarded to the LLM. If omitted, use
+     * {@link AIOrchestrator#prompt(String)} to send messages
+     * programmatically.</li>
+     * <li>{@link #withMessageList(AIMessageList)} or
+     * {@link #withMessageList(MessageList)} – connects a message list component
+     * to display the conversation. If omitted, responses are still streamed but
+     * not rendered.</li>
+     * <li>{@link #withFileReceiver(AIFileReceiver)} or
+     * {@link #withFileReceiver(UploadManager)} – enables file upload support.
+     * Uploaded files are sent to the LLM as attachments with the next
+     * prompt.</li>
+     * <li>{@link #withTools(Object...)} – registers objects containing
+     * vendor-specific tool-annotated methods (e.g. LangChain4j's {@code @Tool}
+     * or Spring AI's {@code @Tool}) that the LLM can invoke.</li>
+     * <li>{@link #withUserName(String)} – sets the display name for user
+     * messages (defaults to "You").</li>
+     * <li>{@link #withAssistantName(String)} – sets the display name for
+     * assistant messages (defaults to "Assistant").</li>
+     * </ul>
+     * <p>
+     * Both Flow components ({@link MessageInput}, {@link MessageList},
+     * {@link UploadManager}) and custom implementations of the AI interfaces
+     * ({@link AIInput}, {@link AIMessageList}, {@link AIFileReceiver}) are
+     * accepted.
+     * </p>
      */
     public static class Builder {
         private final LLMProvider provider;
