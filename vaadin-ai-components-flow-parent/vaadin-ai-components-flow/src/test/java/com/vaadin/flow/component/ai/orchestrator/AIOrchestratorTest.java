@@ -56,6 +56,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.UploadHandler;
 
 import reactor.core.publisher.Flux;
 
