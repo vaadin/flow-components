@@ -15,6 +15,8 @@
  */
 package com.vaadin.checkstyle;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,26 +25,63 @@ import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
 /**
- * Checkstyle rule that ensures UI.setCurrent() calls in test classes pass a
- * class field reference, to prevent garbage collection of the WeakReference-
- * held UI instance.
+ * Checkstyle rule that ensures UI.setCurrent() calls in test classes are used
+ * correctly. This check enforces two requirements:
  * <p>
- * The UI.setCurrent() method stores the UI in a ThreadLocal using a
- * WeakReference (via CurrentInstance). If the UI is not stored in a class
- * field, it can be garbage collected, causing UI.getCurrent() to return null
- * unexpectedly.
+ * <b>1. Field Reference Requirement:</b> The argument to UI.setCurrent() must
+ * be a class field reference, to prevent garbage collection of the
+ * WeakReference-held UI instance. The UI.setCurrent() method stores the UI in a
+ * ThreadLocal using a WeakReference (via CurrentInstance). If the UI is not
+ * stored in a class field, it can be garbage collected, causing UI.getCurrent()
+ * to return null unexpectedly.
  * <p>
- * Technically, passing a local variable that references the UI would also work
- * as long as the variable is referenced in a test case. However, this is more
- * challenging to verify, so this check enforces the simpler requirement of
- * using a class field.
+ * <b>2. Non-Static Method Requirement:</b> UI.setCurrent() must not be called
+ * from a static method because CurrentInstanceCleanerListener from
+ * flow-test-generic resets the current UI before each test. Calls should be
+ * moved to instance methods or {@code @Before}/{@code @BeforeEach} setup
+ * methods.
+ * <p>
+ * <b>Valid usage:</b>
+ *
+ * <pre>{@code
+ * public class MyTest {
+ *     private UI ui;
+ *
+ *     @Before
+ *     public void setup() {
+ *         ui = new MockUI();
+ *         UI.setCurrent(ui); // OK: instance method with field reference
+ *     }
+ * }
+ * }</pre>
+ * <p>
+ * <b>Invalid usage:</b>
+ *
+ * <pre>
+ * public class MyTest {
+ *     &#64;BeforeClass
+ *     public static void setupClass() {
+ *         UI.setCurrent(new MockUI()); // ERROR: static method
+ *     }
+ *
+ *     &#64;Before
+ *     public void setup() {
+ *         UI.setCurrent(new MockUI()); // ERROR: not a field reference
+ *     }
+ * }
+ * </pre>
  */
 public class UiSetCurrentCheck extends AbstractCheck {
 
     /**
-     * Message key for the violation.
+     * Message key for the field reference violation.
      */
     public static final String MSG_KEY = "ui.setcurrent.no.field";
+
+    /**
+     * Message key for the static method violation.
+     */
+    public static final String MSG_KEY_STATIC_METHOD = "ui.setcurrent.static.method";
 
     /**
      * Field names of type UI in the current class.
@@ -54,9 +93,16 @@ public class UiSetCurrentCheck extends AbstractCheck {
      */
     private boolean isTestFile = false;
 
+    /**
+     * Stack tracking whether we're inside a static method context. Each
+     * METHOD_DEF pushes true (static) or false (non-static), and pops on leave.
+     */
+    private final Deque<Boolean> staticContextStack = new ArrayDeque<>();
+
     @Override
     public int[] getDefaultTokens() {
-        return new int[] { TokenTypes.CLASS_DEF, TokenTypes.METHOD_CALL };
+        return new int[] { TokenTypes.CLASS_DEF, TokenTypes.METHOD_DEF,
+                TokenTypes.METHOD_CALL };
     }
 
     @Override
@@ -72,6 +118,7 @@ public class UiSetCurrentCheck extends AbstractCheck {
     @Override
     public void beginTree(DetailAST rootAST) {
         uiFieldNames.clear();
+        staticContextStack.clear();
         // Check if this is a test file based on path
         String filePath = getFilePath();
         isTestFile = filePath.contains("/src/test/");
@@ -87,11 +134,25 @@ public class UiSetCurrentCheck extends AbstractCheck {
         case TokenTypes.CLASS_DEF:
             collectUiFields(ast);
             break;
+        case TokenTypes.METHOD_DEF:
+            staticContextStack.push(hasStaticModifier(ast));
+            break;
         case TokenTypes.METHOD_CALL:
             checkUiSetCurrentCall(ast);
             break;
         default:
             break;
+        }
+    }
+
+    @Override
+    public void leaveToken(DetailAST ast) {
+        if (!isTestFile) {
+            return;
+        }
+
+        if (ast.getType() == TokenTypes.METHOD_DEF) {
+            staticContextStack.pop();
         }
     }
 
@@ -133,12 +194,18 @@ public class UiSetCurrentCheck extends AbstractCheck {
     }
 
     /**
-     * Checks if a method call is UI.setCurrent() and validates that the
-     * argument is a class field.
+     * Checks if a method call is UI.setCurrent() and validates that it is not
+     * in a static method and the argument is a class field.
      */
     private void checkUiSetCurrentCall(DetailAST methodCall) {
         if (!isUiSetCurrentCall(methodCall)) {
             return;
+        }
+
+        // Check for static method context first
+        if (isInStaticContext()) {
+            log(methodCall.getLineNo(), MSG_KEY_STATIC_METHOD);
+            return; // Don't double-report field reference issues
         }
 
         // Get the argument passed to setCurrent
@@ -207,5 +274,24 @@ public class UiSetCurrentCheck extends AbstractCheck {
                     && uiFieldNames.contains(fieldName.getText());
         }
         return false;
+    }
+
+    /**
+     * Checks if the given AST node (METHOD_DEF) has a static modifier.
+     */
+    private boolean hasStaticModifier(DetailAST methodDef) {
+        DetailAST modifiers = methodDef.findFirstToken(TokenTypes.MODIFIERS);
+        if (modifiers == null) {
+            return false;
+        }
+        return modifiers.findFirstToken(TokenTypes.LITERAL_STATIC) != null;
+    }
+
+    /**
+     * Checks if we are currently inside a static method context.
+     */
+    private boolean isInStaticContext() {
+        return !staticContextStack.isEmpty()
+                && Boolean.TRUE.equals(staticContextStack.peek());
     }
 }
