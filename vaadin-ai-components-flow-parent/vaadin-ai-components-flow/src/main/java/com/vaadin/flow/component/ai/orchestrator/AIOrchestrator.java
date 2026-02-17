@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -40,13 +39,20 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
  * <p>
- * This class is a generic coordination engine that connects UI components with
- * an LLM provider. It provides:
+ * This class is a non-visual coordination engine that connects UI components
+ * with an LLM provider. It is <b>not</b> a UI component itself and should
+ * <b>not</b> be added to a layout or the UI. Instead, add the individual UI
+ * components (e.g. {@link MessageInput}, {@link MessageList}) to your layout
+ * and pass them to the orchestrator through its {@link Builder}. The
+ * orchestrator then wires the components together and manages the LLM
+ * interaction behind the scenes.
+ * </p>
+ * <p>
+ * It provides:
  * </p>
  * <ul>
  * <li>LLM integration</li>
@@ -101,7 +107,6 @@ public class AIOrchestrator {
     private AIMessageList messageList;
     private AIInput input;
     private AIFileReceiver fileReceiver;
-    private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private Object[] tools = new Object[0];
     private String userName;
     private String assistantName;
@@ -218,9 +223,9 @@ public class AIOrchestrator {
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
-        var attachments = pendingAttachments.stream().toList();
+        var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
+                : List.<AIAttachment> of();
         addUserMessageToList(userMessage, attachments);
-        clearPendingAttachments(ui);
         var assistantMessage = createAssistantMessagePlaceholder();
         String effectiveSystemPrompt = null;
         if (systemPrompt != null && !systemPrompt.isBlank()) {
@@ -254,13 +259,6 @@ public class AIOrchestrator {
         streamResponseToMessage(request, assistantMessage, ui);
     }
 
-    private void clearPendingAttachments(UI ui) {
-        pendingAttachments.clear();
-        if (fileReceiver != null) {
-            ui.access(() -> fileReceiver.clearFileList());
-        }
-    }
-
     private void checkFeatureFlag(UI ui) {
         if (featureFlagChecked.get()) {
             return;
@@ -274,32 +272,40 @@ public class AIOrchestrator {
         featureFlagChecked.set(true);
     }
 
-    private void configureFileReceiver() {
-        if (fileReceiver == null) {
-            return;
-        }
-        fileReceiver.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
-            var isDuplicate = pendingAttachments.stream()
-                    .anyMatch(a -> a.name().equals(meta.fileName()));
-            if (isDuplicate) {
-                throw new IllegalArgumentException(
-                        "Duplicate file name: " + meta.fileName());
-            }
-            pendingAttachments.add(new AIAttachment(meta.fileName(),
-                    meta.contentType(), data));
-            LOGGER.debug("Added attachment: {}", meta.fileName());
-        }));
-        fileReceiver.addFileRemovedListener(fileName -> {
-            var removed = pendingAttachments
-                    .removeIf(a -> a.name().equals(fileName));
-            if (removed) {
-                LOGGER.debug("Removed attachment: {}", fileName);
-            }
-        });
-    }
-
     /**
-     * Builder for AIOrchestrator.
+     * Builder for configuring and creating an {@link AIOrchestrator} instance.
+     * <p>
+     * The builder requires an {@link LLMProvider} and a system prompt. All
+     * other settings are optional:
+     * </p>
+     * <ul>
+     * <li>{@link #withInput(AIInput)} or {@link #withInput(MessageInput)} –
+     * connects a text input component so that user submissions are
+     * automatically forwarded to the LLM. If omitted, use
+     * {@link AIOrchestrator#prompt(String)} to send messages
+     * programmatically.</li>
+     * <li>{@link #withMessageList(AIMessageList)} or
+     * {@link #withMessageList(MessageList)} – connects a message list component
+     * to display the conversation. If omitted, responses are still streamed but
+     * not rendered.</li>
+     * <li>{@link #withFileReceiver(AIFileReceiver)} or
+     * {@link #withFileReceiver(UploadManager)} – enables file upload support.
+     * Uploaded files are sent to the LLM as attachments with the next
+     * prompt.</li>
+     * <li>{@link #withTools(Object...)} – registers objects containing
+     * vendor-specific tool-annotated methods (e.g. LangChain4j's {@code @Tool}
+     * or Spring AI's {@code @Tool}) that the LLM can invoke.</li>
+     * <li>{@link #withUserName(String)} – sets the display name for user
+     * messages (defaults to "You").</li>
+     * <li>{@link #withAssistantName(String)} – sets the display name for
+     * assistant messages (defaults to "Assistant").</li>
+     * </ul>
+     * <p>
+     * Both Flow components ({@link MessageInput}, {@link MessageList},
+     * {@link UploadManager}) and custom implementations of the AI interfaces
+     * ({@link AIInput}, {@link AIMessageList}, {@link AIFileReceiver}) are
+     * accepted.
+     * </p>
      */
     public static class Builder {
         private final LLMProvider provider;
@@ -467,9 +473,6 @@ public class AIOrchestrator {
             if (input != null) {
                 input.addSubmitListener(
                         e -> orchestrator.doPrompt(e.getValue()));
-            }
-            if (fileReceiver != null) {
-                orchestrator.configureFileReceiver();
             }
             LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
                     + "fileReceiver={}, tools={}, userName={}, assistantName={}",
