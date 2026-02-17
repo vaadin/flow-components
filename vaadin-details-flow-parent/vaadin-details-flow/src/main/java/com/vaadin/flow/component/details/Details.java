@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
@@ -36,9 +35,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -310,14 +307,7 @@ public class Details extends Component implements HasComponents, HasSize,
         Objects.requireNonNull(list, "ListSignal cannot be null");
         Objects.requireNonNull(childFactory,
                 "Child element factory cannot be null");
-        var node = contentContainer.getElement().getNode();
-        var feature = node.getFeature(SignalBindingFeature.class);
-        if (feature.hasBinding(SignalBindingFeature.CHILDREN)) {
-            throw new BindingActiveException();
-        }
-        var binding = ComponentEffect.bindChildren(contentContainer, list,
-                childFactory);
-        feature.setBinding(SignalBindingFeature.CHILDREN, binding, list);
+        contentContainer.bindChildren(list, childFactory);
     }
 
     /**
