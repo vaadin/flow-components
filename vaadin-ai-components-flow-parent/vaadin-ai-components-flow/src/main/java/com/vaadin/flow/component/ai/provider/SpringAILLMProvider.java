@@ -41,9 +41,19 @@ import reactor.core.publisher.Flux;
  * <p>
  * Supports both streaming and non-streaming Spring AI models. Tool calling is
  * supported through Spring AI's {@link Tool} annotation.
+ * </p>
+ * <p>
+ * <b>Streaming vs. non-streaming:</b> Streaming is enabled by default. To
+ * disable it, call {@link #setStreaming(boolean) setStreaming(false)}.
+ * Streaming mode pushes partial responses to the UI as they arrive, which
+ * requires server push to be enabled. Annotate your UI class or application
+ * shell with {@code @Push}, or configure push programmatically, before using
+ * streaming mode. A warning is logged at runtime if push is not enabled.
+ * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
  * history across components, reuse the same provider instance.
+ * </p>
  * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
  * uses session persistence, you will need to create a new provider instance

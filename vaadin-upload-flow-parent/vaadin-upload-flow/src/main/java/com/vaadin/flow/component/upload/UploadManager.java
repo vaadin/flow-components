@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -87,6 +88,8 @@ public class UploadManager implements Serializable {
     // server-side validation)
     private List<String> acceptedMimeTypes = List.of();
     private List<String> acceptedFileExtensions = List.of();
+
+    private final AtomicBoolean handlerExplicitlyConfigured = new AtomicBoolean();
 
     /**
      * Creates a new upload manager without an upload handler. The handler must
@@ -200,6 +203,9 @@ public class UploadManager implements Serializable {
         if (targetName.isBlank()) {
             throw new IllegalArgumentException(
                     "The target name cannot be blank");
+        }
+        if (!(handler instanceof FailFastUploadHandler)) {
+            handlerExplicitlyConfigured.set(true);
         }
         // Wrap handler with file type validation
         UploadHandler validatingHandler = wrapWithFileTypeValidation(handler);
@@ -661,6 +667,15 @@ public class UploadManager implements Serializable {
                 throw new ModularUploadExperimentalFeatureException();
             }
         }
+    }
+
+    /**
+     * Returns whether an UploadHandler is explicitly configured.
+     * <p>
+     * Intended only for internal use.
+     */
+    boolean isHandlerExplicitlyConfigured() {
+        return handlerExplicitlyConfigured.get();
     }
 
     /**

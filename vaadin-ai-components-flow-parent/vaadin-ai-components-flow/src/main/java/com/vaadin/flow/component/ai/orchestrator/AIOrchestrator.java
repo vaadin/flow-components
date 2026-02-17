@@ -37,13 +37,22 @@ import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
  * <p>
- * This class is a generic coordination engine that connects UI components with
- * an LLM provider. It provides:
+ * This class is a non-visual coordination engine that connects UI components
+ * with an LLM provider. It is <b>not</b> a UI component itself and should
+ * <b>not</b> be added to a layout or the UI. Instead, add the individual UI
+ * components (e.g. {@link MessageInput}, {@link MessageList}) to your layout
+ * and pass them to the orchestrator through its {@link Builder}. The
+ * orchestrator then wires the components together and manages the LLM
+ * interaction behind the scenes.
+ * </p>
+ * <p>
+ * It provides:
  * </p>
  * <ul>
  * <li>LLM integration</li>
@@ -343,14 +352,22 @@ public class AIOrchestrator {
         }
 
         /**
-         * Sets the file receiver component using a Flow UploadManager
-         * component.
+         * Sets the file receiver component using a Flow UploadManager. The
+         * provided manager should not have an UploadHandler set beforehand.
          *
          * @param uploadManager
-         *            the Flow UploadManager component
+         *            the Flow UploadManager
          * @return this builder
+         * @throws IllegalArgumentException
+         *             if the {@link UploadManager} already has an
+         *             {@link UploadHandler}
          */
         public Builder withFileReceiver(UploadManager uploadManager) {
+            if (uploadManager != null
+                    && UploadHelper.hasUploadHandler(uploadManager)) {
+                throw new IllegalArgumentException(
+                        "The provided UploadManager already has an UploadHandler.");
+            }
             this.fileReceiver = wrapUploadManager(uploadManager);
             return this;
         }
