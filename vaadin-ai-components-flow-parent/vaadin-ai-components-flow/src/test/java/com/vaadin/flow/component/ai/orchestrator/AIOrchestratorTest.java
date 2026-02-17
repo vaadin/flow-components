@@ -46,12 +46,11 @@ import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
-import com.vaadin.flow.component.ai.ui.InputSubmitEvent;
-import com.vaadin.flow.component.ai.ui.InputSubmitListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
@@ -160,7 +159,7 @@ public class AIOrchestratorTest {
         AIOrchestrator.builder(mockProvider, null).withInput(mockInput).build();
 
         Mockito.verify(mockInput)
-                .addSubmitListener(Mockito.any(InputSubmitListener.class));
+                .addSubmitListener(Mockito.any(SerializableConsumer.class));
     }
 
     @Test
@@ -300,6 +299,7 @@ public class AIOrchestratorTest {
                 .setText("An error occurred. Please try again.");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_triggersPromptProcessing() {
         mockUi();
@@ -313,12 +313,11 @@ public class AIOrchestratorTest {
 
         getSimpleOrchestrator();
 
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
 
-        var event = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event.getValue()).thenReturn("User message");
-        listenerCaptor.getValue().onSubmit(event);
+        listenerCaptor.getValue().accept("User message");
 
         Mockito.verify(mockProvider)
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
@@ -498,35 +497,36 @@ public class AIOrchestratorTest {
         Assert.assertNotNull(orchestrator);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_withNullValue_doesNotProcess() {
         mockUi();
         getSimpleOrchestrator();
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
-        var event = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event.getValue()).thenReturn(null);
-        listenerCaptor.getValue().onSubmit(event);
+        listenerCaptor.getValue().accept(null);
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_withEmptyValue_doesNotProcess() {
         mockUi();
         getSimpleOrchestrator();
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
 
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
 
-        var event = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event.getValue()).thenReturn("   ");
-        listenerCaptor.getValue().onSubmit(event);
+        listenerCaptor.getValue().accept("   ");
 
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_whileProcessing_isIgnored() {
         mockUi();
@@ -540,17 +540,14 @@ public class AIOrchestratorTest {
 
         getSimpleOrchestrator();
 
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
 
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
 
-        var event1 = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event1.getValue()).thenReturn("First");
-        listenerCaptor.getValue().onSubmit(event1);
+        listenerCaptor.getValue().accept("First");
 
-        var event2 = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event2.getValue()).thenReturn("Second");
-        listenerCaptor.getValue().onSubmit(event2);
+        listenerCaptor.getValue().accept("Second");
 
         Mockito.verify(mockProvider, Mockito.times(1))
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));

@@ -531,8 +531,7 @@ public class AIOrchestrator {
             orchestrator.attachmentSubmitListener = attachmentSubmitListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
             if (input != null) {
-                input.addSubmitListener(
-                        e -> orchestrator.doPrompt(e.getValue()));
+                input.addSubmitListener(orchestrator::doPrompt);
             }
 
             if (attachmentClickListener != null && messageList != null) {
