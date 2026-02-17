@@ -38,16 +38,12 @@ class MessageListWrapper implements AIMessageList {
     }
 
     @Override
-    public void addMessage(AIMessage message) {
-        var item = ((MessageListItemWrapper) message).getItem();
-        itemToMessage.put(item, message);
-        messageList.addItem(item);
-    }
-
-    @Override
-    public AIMessage createMessage(String text, String userName,
+    public AIMessage addMessage(String text, String userName,
             List<AIAttachment> attachments) {
-        return new MessageListItemWrapper(text, userName, attachments);
+        var message = new MessageListItemWrapper(text, userName, attachments);
+        itemToMessage.put(message.getItem(), message);
+        messageList.addItem(message.getItem());
+        return message;
     }
 
     @Override

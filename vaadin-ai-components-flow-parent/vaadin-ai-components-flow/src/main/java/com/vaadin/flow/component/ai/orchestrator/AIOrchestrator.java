@@ -173,10 +173,7 @@ public class AIOrchestrator {
     private AIMessage addUserMessageToList(String userMessage,
             List<AIAttachment> attachments) {
         if (messageList != null) {
-            var userItem = messageList.createMessage(userMessage, userName,
-                    attachments);
-            messageList.addMessage(userItem);
-            return userItem;
+            return messageList.addMessage(userMessage, userName, attachments);
         }
         return null;
     }
@@ -185,10 +182,8 @@ public class AIOrchestrator {
         if (messageList == null) {
             return null;
         }
-        var assistantMessage = messageList.createMessage("", assistantName,
+        return messageList.addMessage("", assistantName,
                 Collections.emptyList());
-        messageList.addMessage(assistantMessage);
-        return assistantMessage;
     }
 
     private void streamResponseToMessage(LLMProvider.LLMRequest request,

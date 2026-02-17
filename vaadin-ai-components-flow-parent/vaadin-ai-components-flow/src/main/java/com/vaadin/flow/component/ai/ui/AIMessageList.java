@@ -47,15 +47,9 @@ public interface AIMessageList extends Serializable {
     }
 
     /**
-     * Adds a message to the list.
-     *
-     * @param message
-     *            the message to add, not {@code null}
-     */
-    void addMessage(AIMessage message);
-
-    /**
-     * Creates a new message with the given parameters and attachments.
+     * Creates a new message with the given parameters and attachments. Creates
+     * a new message with the given parameters and attachments and adds it to
+     * the list.
      *
      * @param text
      *            the initial message text
@@ -65,7 +59,7 @@ public interface AIMessageList extends Serializable {
      *            the list of attachments to include with the message
      * @return the created message instance, not {@code null}
      */
-    AIMessage createMessage(String text, String userName,
+    AIMessage addMessage(String text, String userName,
             List<AIAttachment> attachments);
 
     /**

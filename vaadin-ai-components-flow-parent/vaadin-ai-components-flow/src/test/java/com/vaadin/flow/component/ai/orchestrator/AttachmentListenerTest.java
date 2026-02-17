@@ -54,7 +54,7 @@ public class AttachmentListenerTest {
         mockFileReceiver = Mockito.mock(AIFileReceiver.class);
         mockMessage = createMockMessage();
 
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
