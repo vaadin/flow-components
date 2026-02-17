@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import org.junit.After;
@@ -44,6 +45,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import com.vaadin.flow.component.PushConfiguration;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
 
@@ -602,6 +604,122 @@ public class SpringAILLMProviderTest {
         } finally {
             System.setErr(originalErr);
         }
+    }
+
+    @Test
+    public void setHistory_restoresConversation() {
+        provider.setStreaming(false);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Previous question",
+                        null, null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Previous answer",
+                        null, null));
+
+        provider.setHistory(history);
+
+        // Verify the restored history is used in the next request by checking
+        // that the prompt contains the restored messages
+        var response = mockSimpleChatResponse("Follow-up answer");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        Assert.assertTrue(
+                messages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Previous question")));
+        Assert.assertTrue(messages.stream()
+                .anyMatch(msg -> msg instanceof AssistantMessage
+                        && Objects.equals(msg.getText(), "Previous answer")));
+    }
+
+    @Test
+    public void setHistory_clearsExistingHistory() {
+        provider.setStreaming(false);
+        var response = mockSimpleChatResponse("Old response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Old message")).blockFirst();
+
+        var newHistory = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "New question", null,
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "New answer", null,
+                        null));
+
+        provider.setHistory(newHistory);
+
+        // Verify the old history is cleared by checking the next request
+        var response2 = mockSimpleChatResponse("Response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response2);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel, Mockito.atLeast(2))
+                .call(captor.capture());
+        var lastMessages = captor.getAllValues().getLast().getInstructions();
+        Assert.assertFalse(
+                lastMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Old message")));
+        Assert.assertTrue(
+                lastMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "New question")));
+    }
+
+    @Test
+    public void setHistory_withNullHistory_throwsNullPointerException() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(null));
+    }
+
+    @Test
+    public void setHistory_exceedingMaxMessages_evictsOldest() {
+        provider.setStreaming(false);
+        var history = new ArrayList<ChatMessage>();
+        for (int i = 0; i < 20; i++) {
+            history.add(new ChatMessage(ChatMessage.Role.USER, "Question " + i,
+                    null, null));
+            history.add(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                    "Answer " + i, null, null));
+        }
+        Assert.assertEquals(40, history.size());
+
+        provider.setHistory(history);
+
+        // Verify eviction by checking the next request's messages
+        var response = mockSimpleChatResponse("Response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        // Filter to only user/assistant messages (exclude system)
+        var chatMessages = messages.stream()
+                .filter(msg -> msg instanceof UserMessage
+                        || msg instanceof AssistantMessage)
+                .toList();
+        // +1 for the "Check" message we sent to trigger the request
+        Assert.assertTrue(chatMessages.size() <= 31);
+        Assert.assertTrue(
+                chatMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Question 19")));
+        Assert.assertFalse(
+                chatMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Question 0")));
+    }
+
+    @Test
+    public void setHistory_withChatClientConstructor_throwsUnsupportedOperationException() {
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        var history = new ArrayList<ChatMessage>();
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> chatClientProvider.setHistory(history));
     }
 
     private void mockSimpleChat(String responseText) {

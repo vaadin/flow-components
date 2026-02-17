@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -23,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.content.Media;
 import org.springframework.ai.tool.annotation.Tool;
@@ -32,6 +36,7 @@ import org.springframework.util.MimeType;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
@@ -52,7 +57,11 @@ import reactor.core.publisher.Flux;
  * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance.
+ * history across components, reuse the same provider instance. History
+ * restoration (via {@link #setHistory(List)}) is only supported when using the
+ * {@link #SpringAILLMProvider(ChatModel)} constructor; the
+ * {@link #SpringAILLMProvider(ChatClient)} constructor does not provide access
+ * to the internal chat memory.
  * </p>
  * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
@@ -71,6 +80,8 @@ public class SpringAILLMProvider implements LLMProvider {
     private static final String CONVERSATION_ID = "default";
 
     private final transient ChatClient chatClient;
+    private final transient MessageWindowChatMemory chatMemory;
+    private final boolean hasManagedMemory;
     private boolean isStreaming = true;
 
     /**
@@ -83,12 +94,13 @@ public class SpringAILLMProvider implements LLMProvider {
      */
     public SpringAILLMProvider(ChatModel chatModel) {
         Objects.requireNonNull(chatModel, "ChatModel must not be null");
-        var chatMemory = MessageWindowChatMemory.builder()
-                .maxMessages(MAX_MESSAGES).build();
+        chatMemory = MessageWindowChatMemory.builder().maxMessages(MAX_MESSAGES)
+                .build();
         chatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
                         .conversationId(CONVERSATION_ID).build())
                 .build();
+        hasManagedMemory = true;
     }
 
     /**
@@ -104,6 +116,8 @@ public class SpringAILLMProvider implements LLMProvider {
     public SpringAILLMProvider(ChatClient chatClient) {
         Objects.requireNonNull(chatClient, "ChatClient must not be null");
         this.chatClient = chatClient;
+        chatMemory = null;
+        hasManagedMemory = false;
     }
 
     @Override
@@ -127,6 +141,30 @@ public class SpringAILLMProvider implements LLMProvider {
      */
     public void setStreaming(boolean streaming) {
         this.isStreaming = streaming;
+    }
+
+    @Override
+    public void setHistory(List<ChatMessage> history) {
+        Objects.requireNonNull(history, "History must not be null");
+        if (!hasManagedMemory) {
+            throw new UnsupportedOperationException(
+                    "Chat history restoration is not supported when using the ChatClient constructor. "
+                            + "Use the ChatModel constructor instead.");
+        }
+        chatMemory.clear(CONVERSATION_ID);
+        var messages = new ArrayList<org.springframework.ai.chat.messages.Message>();
+        for (var message : history) {
+            messages.add(toVendorMessage(message));
+        }
+        chatMemory.add(CONVERSATION_ID, messages);
+    }
+
+    private static org.springframework.ai.chat.messages.Message toVendorMessage(
+            ChatMessage message) {
+        if (message.role() == ChatMessage.Role.USER) {
+            return new UserMessage(message.content());
+        }
+        return new AssistantMessage(message.content());
     }
 
     private Flux<String> executeStreamingChat(LLMRequest request) {
