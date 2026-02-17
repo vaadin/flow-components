@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 
 import reactor.core.publisher.Flux;
 
@@ -49,6 +50,24 @@ public interface LLMProvider {
      *             if request is {@code null}
      */
     Flux<String> stream(LLMRequest request);
+
+    /**
+     * Restores the provider's conversation memory from a list of chat messages.
+     * Any existing memory is cleared before the new history is applied.
+     * <p>
+     * This method must not be called while a streaming response is in progress.
+     *
+     * @param history
+     *            the list of chat messages to restore, not {@code null}
+     * @throws NullPointerException
+     *             if history is {@code null}
+     * @throws UnsupportedOperationException
+     *             if this provider does not support chat history restoration
+     */
+    default void setHistory(List<ChatMessage> history) {
+        throw new UnsupportedOperationException(
+                "This LLM provider does not support chat history restoration.");
+    }
 
     /**
      * Represents a request to the LLM containing all necessary context,

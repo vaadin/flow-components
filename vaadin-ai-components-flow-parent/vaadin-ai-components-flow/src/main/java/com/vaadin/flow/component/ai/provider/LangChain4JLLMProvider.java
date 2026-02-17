@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.shared.communication.PushMode;
 
 import dev.langchain4j.agent.tool.Tool;
@@ -39,7 +40,6 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.AudioContent;
-import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.PdfFileContent;
@@ -153,6 +153,23 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }, FluxSink.OverflowStrategy.BUFFER);
     }
 
+    @Override
+    public void setHistory(List<ChatMessage> history) {
+        Objects.requireNonNull(history, "History must not be null");
+        chatMemory.clear();
+        for (var message : history) {
+            chatMemory.add(toVendorMessage(message));
+        }
+    }
+
+    private static dev.langchain4j.data.message.ChatMessage toVendorMessage(
+            ChatMessage message) {
+        if (message.role() == ChatMessage.Role.USER) {
+            return UserMessage.from(message.content());
+        }
+        return AiMessage.from(message.content());
+    }
+
     private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
         var tools = request.tools();
         if (tools == null) {
@@ -200,7 +217,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
     }
 
-    private void executeStreamingChat(List<ChatMessage> messages,
+    private void executeStreamingChat(
+            List<dev.langchain4j.data.message.ChatMessage> messages,
             ChatExecutionContext context) {
         var chatRequestBuilder = ChatRequest.builder().messages(messages);
         var specifications = context.getToolContext().specifications();
@@ -239,7 +257,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
     }
 
-    private void executeNonStreamingChat(List<ChatMessage> messages,
+    private void executeNonStreamingChat(
+            List<dev.langchain4j.data.message.ChatMessage> messages,
             ChatExecutionContext context) {
         try {
             var requestBuilder = ChatRequest.builder().messages(messages);
@@ -291,9 +310,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return ToolExecutionResultMessage.from(toolExecRequest, result);
     }
 
-    private List<ChatMessage> buildMessages(LLMRequest request,
-            ChatMemory chatMemory) {
-        var messages = new ArrayList<ChatMessage>();
+    private List<dev.langchain4j.data.message.ChatMessage> buildMessages(
+            LLMRequest request, ChatMemory chatMemory) {
+        var messages = new ArrayList<dev.langchain4j.data.message.ChatMessage>();
         if (request.systemPrompt() != null) {
             var systemPrompt = request.systemPrompt().trim();
             if (!systemPrompt.isEmpty()) {

@@ -37,8 +37,9 @@ public interface AttachmentSubmitListener extends Serializable {
     /**
      * Event fired when a message with attachments is submitted to the LLM
      * provider. Contains full attachment data and a unique message ID that can
-     * be used to identify the message later (e.g., when an attachment is
-     * clicked).
+     * be used to identify the message later, both when an attachment is clicked
+     * ({@link AttachmentClickListener}) and when restoring conversation history
+     * ({@link com.vaadin.flow.component.ai.common.ChatMessage#messageId()}).
      */
     class AttachmentSubmitEvent implements Serializable {
         private final String messageId;
@@ -52,8 +53,11 @@ public interface AttachmentSubmitListener extends Serializable {
 
         /**
          * Gets the unique identifier for the message that these attachments
-         * belong to. Use this ID to correlate with
-         * {@link AttachmentClickListener.AttachmentClickEvent#getMessageId()}.
+         * belong to. This is the same ID available via
+         * {@link com.vaadin.flow.component.ai.common.ChatMessage#messageId()}
+         * in the conversation history and via
+         * {@link AttachmentClickListener.AttachmentClickEvent#getMessageId()}
+         * on attachment click.
          *
          * @return the message ID
          */

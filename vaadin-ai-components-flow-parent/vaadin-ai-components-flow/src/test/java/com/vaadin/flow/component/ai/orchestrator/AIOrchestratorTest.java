@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.mockito.Mockito;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
@@ -900,6 +902,335 @@ public class AIOrchestratorTest {
                 .withMessageList(mockMessageList);
         Assert.assertThrows(NullPointerException.class,
                 () -> builder.withAssistantName(null));
+    }
+
+    @Test
+    public void chatMessage_withMessageId_preservesMessageId() {
+        var message = new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-123",
+                null);
+        Assert.assertEquals(ChatMessage.Role.USER, message.role());
+        Assert.assertEquals("Hello", message.content());
+        Assert.assertEquals("msg-123", message.messageId());
+    }
+
+    @Test
+    public void chatMessage_withoutMessageId_setsMessageIdToNull() {
+        var message = new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there",
+                null, null);
+        Assert.assertEquals(ChatMessage.Role.ASSISTANT, message.role());
+        Assert.assertEquals("Hi there", message.content());
+        Assert.assertNull(message.messageId());
+        Assert.assertNull(message.time());
+    }
+
+    @Test
+    public void chatMessage_withTime_preservesTime() {
+        var now = Instant.now();
+        var message = new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1",
+                now);
+        Assert.assertEquals(now, message.time());
+        Assert.assertEquals("msg-1", message.messageId());
+    }
+
+    @Test
+    public void getHistory_onFreshOrchestrator_returnsEmptyList() {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        Assert.assertTrue(orchestrator.getHistory().isEmpty());
+    }
+
+    @Test
+    public void getHistory_afterPrompt_containsUserAndAssistantMessages() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello");
+
+        var history = orchestrator.getHistory();
+        Assert.assertEquals(2, history.size());
+        Assert.assertEquals(ChatMessage.Role.USER, history.getFirst().role());
+        Assert.assertEquals("Hello", history.getFirst().content());
+        Assert.assertNotNull(history.getFirst().messageId());
+        Assert.assertEquals(ChatMessage.Role.ASSISTANT, history.get(1).role());
+        Assert.assertEquals("Response", history.get(1).content());
+        Assert.assertNull(history.get(1).messageId());
+    }
+
+    @Test
+    public void getHistory_afterPrompt_recordsTimestamps() {
+        mockUi();
+        var before = Instant.now();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello");
+        var after = Instant.now();
+
+        var history = orchestrator.getHistory();
+        Assert.assertNotNull(history.getFirst().time());
+        Assert.assertFalse(history.getFirst().time().isBefore(before));
+        Assert.assertFalse(history.getFirst().time().isAfter(after));
+        Assert.assertNotNull(history.get(1).time());
+        Assert.assertFalse(history.get(1).time().isBefore(before));
+        Assert.assertFalse(history.get(1).time().isAfter(after));
+    }
+
+    @Test
+    public void withHistory_withTimestamps_restoresTimesOnUIMessages() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var pastTime = Instant.parse("2025-06-15T10:30:00Z");
+        var history = List.of(new ChatMessage(ChatMessage.Role.USER, "Hello",
+                "msg-1", pastTime));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withHistory(history).build();
+
+        Mockito.verify(mockMessage).setTime(pastTime);
+    }
+
+    @Test
+    public void withHistory_withNullTimestamp_doesNotCallSetTime() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withHistory(history).build();
+
+        Mockito.verify(mockMessage, Mockito.never())
+                .setTime(Mockito.any(Instant.class));
+    }
+
+    @Test
+    public void getHistory_afterMultipleTokens_concatenatesAssistantResponse() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hello", " ", "World"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hi");
+
+        var history = orchestrator.getHistory();
+        Assert.assertEquals(2, history.size());
+        Assert.assertEquals("Hello World", history.get(1).content());
+    }
+
+    @Test
+    public void getHistory_afterStreamError_doesNotAddAssistantMessage() {
+        mockUi();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hi");
+
+        var history = orchestrator.getHistory();
+        Assert.assertEquals(1, history.size());
+        Assert.assertEquals(ChatMessage.Role.USER, history.getFirst().role());
+    }
+
+    @Test
+    public void getHistory_returnsUnmodifiableCopy() {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        var history = orchestrator.getHistory();
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> history.add(new ChatMessage(ChatMessage.Role.USER, "test",
+                        null, null)));
+    }
+
+    @Test
+    public void withHistory_withNull_throwsNullPointerException() {
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assert.assertThrows(NullPointerException.class,
+                () -> builder.withHistory(null));
+    }
+
+    @Test
+    public void withHistory_restoresProviderContext() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        AIOrchestrator.builder(mockProvider, null).withHistory(history).build();
+
+        Mockito.verify(mockProvider).setHistory(history);
+    }
+
+    @Test
+    public void withHistory_restoresMessageListUI() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withHistory(history).build();
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage("Hello", "You",
+                Collections.emptyList());
+        inOrder.verify(mockMessageList).addMessage("Hi there", "Assistant",
+                Collections.emptyList());
+    }
+
+    @Test
+    public void withHistory_restoresConversationHistory() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history).build();
+
+        var restored = orchestrator.getHistory();
+        Assert.assertEquals(2, restored.size());
+        Assert.assertEquals("Hello", restored.getFirst().content());
+        Assert.assertEquals("msg-1", restored.getFirst().messageId());
+        Assert.assertEquals("Hi there", restored.get(1).content());
+        Assert.assertNull(restored.get(1).messageId());
+    }
+
+    @Test
+    public void withHistory_withCustomNames_usesCustomNamesInUI() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withUserName("Alice")
+                .withAssistantName("Bot").withHistory(history).build();
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage("Hello", "Alice",
+                Collections.emptyList());
+        inOrder.verify(mockMessageList).addMessage("Hi there", "Bot",
+                Collections.emptyList());
+    }
+
+    @Test
+    public void withHistory_rebuildsMsgIdMapping_attachmentClickWorks() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var clickCaptor = ArgumentCaptor
+                .forClass(AIMessageList.AttachmentClickCallback.class);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var clickEvents = new ArrayList<AttachmentClickListener.AttachmentClickEvent>();
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withAttachmentClickListener(clickEvents::add)
+                .withHistory(history).build();
+
+        Mockito.verify(mockMessageList)
+                .addAttachmentClickListener(clickCaptor.capture());
+
+        // Simulate clicking an attachment on the restored user message
+        clickCaptor.getValue().onAttachmentClick(mockMessage, 0);
+
+        Assert.assertEquals(1, clickEvents.size());
+        Assert.assertEquals("msg-1", clickEvents.getFirst().getMessageId());
+        Assert.assertEquals(0, clickEvents.getFirst().getAttachmentIndex());
+    }
+
+    @Test
+    public void withHistory_exceedingProviderMaxMessages_preservesFullHistory() {
+        var history = new ArrayList<ChatMessage>();
+        for (int i = 0; i < 20; i++) {
+            history.add(new ChatMessage(ChatMessage.Role.USER, "Question " + i,
+                    "msg-" + i, null));
+            history.add(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                    "Answer " + i, null, null));
+        }
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history).build();
+
+        var restored = orchestrator.getHistory();
+        Assert.assertEquals(
+                "Orchestrator should preserve the full history regardless "
+                        + "of provider's max message window",
+                40, restored.size());
+        Assert.assertEquals("Question 0", restored.getFirst().content());
+        Assert.assertEquals("msg-0", restored.getFirst().messageId());
+        Assert.assertEquals("Question 19", restored.get(38).content());
+    }
+
+    @Test
+    public void withHistory_whenProviderThrows_buildThrows() {
+        Mockito.doThrow(new UnsupportedOperationException("Not supported"))
+                .when(mockProvider).setHistory(Mockito.anyList());
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null));
+
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withHistory(history).build());
+    }
+
+    @Test
+    public void withHistory_withoutMessageList_onlyRestoresProvider() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history).build();
+
+        Mockito.verify(mockProvider).setHistory(history);
+        var restored = orchestrator.getHistory();
+        Assert.assertEquals(2, restored.size());
     }
 
     private AIOrchestrator getSimpleOrchestrator() {
