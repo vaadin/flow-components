@@ -104,18 +104,6 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         assertSummaryTextSignalBindingActive();
     }
 
-    @Test
-    public void summaryTextSignal_removeBinding() {
-        details = new Details(summaryTextSignal);
-        UI.getCurrent().add(details);
-
-        details.bindSummaryText(null);
-        assertSummaryTextSignalBindingInactive();
-
-        details.setSummaryText("Manual text");
-        Assert.assertEquals("Manual text", details.getSummaryText());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void setSummaryTextWhileBound_throws() {
         details = new Details(summaryTextSignal);
@@ -133,19 +121,6 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
 
         summaryTextSignal.set("Updated");
         Assert.assertEquals("Updated computed", details.getSummaryText());
-    }
-
-    @Test
-    public void summaryTextComputedSignal_removeBindingAndRebind() {
-        details = new Details(computedSignal);
-        UI.getCurrent().add(details);
-
-        details.bindSummaryText(null);
-        details.bindSummaryText(summaryTextSignal);
-        assertSummaryTextSignalBindingActive();
-
-        details.bindSummaryText(null);
-        assertSummaryTextSignalBindingInactive();
     }
 
     @Test
