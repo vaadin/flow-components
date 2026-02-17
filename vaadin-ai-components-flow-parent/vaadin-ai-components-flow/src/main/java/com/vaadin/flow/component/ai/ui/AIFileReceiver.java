@@ -16,8 +16,9 @@
 package com.vaadin.flow.component.ai.ui;
 
 import java.io.Serializable;
+import java.util.List;
 
-import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 
 /**
  * Interface for file upload components that are used in an AI conversation.
@@ -27,36 +28,13 @@ import com.vaadin.flow.server.streams.UploadHandler;
 public interface AIFileReceiver extends Serializable {
 
     /**
-     * Sets the upload handler for this file receiver.
+     * Returns all accumulated attachments and clears the internal state.
      * <p>
-     * Default implementation does nothing.
+     * After this method returns, the receiver is ready to accept new files. The
+     * UI file list is also cleared.
      *
-     * @param uploadHandler
-     *            the upload handler to use
+     * @return an unmodifiable list of attachments, or an empty list if none are
+     *         pending
      */
-    default void setUploadHandler(UploadHandler uploadHandler) {
-        // Default implementation - no-op
-    }
-
-    /**
-     * Adds a listener for file removed events.
-     * <p>
-     * Default implementation does nothing.
-     *
-     * @param listener
-     *            the listener to add, receives the removed file name
-     */
-    default void addFileRemovedListener(
-            java.util.function.Consumer<String> listener) {
-        // Default implementation - no-op
-    }
-
-    /**
-     * Clears the list of uploaded files.
-     * <p>
-     * Default implementation does nothing.
-     */
-    default void clearFileList() {
-        // Default implementation - no-op
-    }
+    List<AIAttachment> takeAttachments();
 }
