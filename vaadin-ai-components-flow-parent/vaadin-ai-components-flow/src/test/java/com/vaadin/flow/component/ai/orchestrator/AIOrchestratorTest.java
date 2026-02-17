@@ -67,9 +67,9 @@ public class AIOrchestratorTest {
     private AIMessageList mockMessageList;
     private AIInput mockInput;
     private AIFileReceiver mockFileReceiver;
-    private static MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
+    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
-    private static UI mockUI;
+    private UI mockUI;
 
     @Before
     public void setup() {
@@ -961,7 +961,7 @@ public class AIOrchestratorTest {
         getSimpleOrchestrator().prompt(message);
     }
 
-    private static void mockUi() {
+    private void mockUi() {
         mockUI = Mockito.mock(UI.class);
         Mockito.doAnswer(invocation -> {
             Command command = invocation.getArgument(0);

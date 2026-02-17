@@ -41,12 +41,13 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class UploadHelperTest {
 
+    private UI ui;
     private Div owner;
     private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
-        var ui = Mockito.spy(new UI());
+        ui = Mockito.spy(new UI());
         UI.setCurrent(ui);
         var mockSession = Mockito.mock(VaadinSession.class);
         var mockService = Mockito.mock(VaadinService.class);
