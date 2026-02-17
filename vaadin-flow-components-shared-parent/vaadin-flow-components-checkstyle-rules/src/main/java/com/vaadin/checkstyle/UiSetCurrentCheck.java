@@ -31,6 +31,11 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
  * WeakReference (via CurrentInstance). If the UI is not stored in a class
  * field, it can be garbage collected, causing UI.getCurrent() to return null
  * unexpectedly.
+ * <p>
+ * Technically, passing a local variable that references the UI would also work
+ * as long as the variable is referenced in a test case. However, this is more
+ * challenging to verify, so this check enforces the simpler requirement of
+ * using a class field.
  */
 public class UiSetCurrentCheck extends AbstractCheck {
 
