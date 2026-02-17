@@ -76,13 +76,13 @@ public class UploadHelperTest {
     }
 
     @Test
-    public void hasUploadHandler_withDefaultConstructor_returnsTrue() {
+    public void hasUploadHandler_withDefaultConstructor_returnsFalse() {
         var manager = new UploadManager(owner);
-        Assert.assertTrue(UploadHelper.hasUploadHandler(manager));
+        Assert.assertFalse(UploadHelper.hasUploadHandler(manager));
     }
 
     @Test
-    public void hasUploadHandler_withExplicitHandler_returnsTrue() {
+    public void hasUploadHandler_withHandlerInConstructor_returnsTrue() {
         var handler = UploadHandler.inMemory((metadata, data) -> {
         });
         var manager = new UploadManager(owner, handler);
@@ -90,7 +90,7 @@ public class UploadHelperTest {
     }
 
     @Test
-    public void hasUploadHandler_afterSettingHandler_returnsTrue() {
+    public void hasUploadHandler_withDefaultConstructor_setHandler_returnsTrue() {
         var manager = new UploadManager(owner);
         var handler = UploadHandler.inMemory((metadata, data) -> {
         });
