@@ -25,6 +25,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * A handle that can be used to configure and control tooltips.
@@ -188,6 +189,27 @@ public class Tooltip implements Serializable {
     public void setMarkdown(String markdown) {
         tooltipElement.setProperty("text", markdown);
         tooltipElement.setProperty("markdown", true);
+    }
+
+    /**
+     * Binds the given signal to the tooltip text.
+     * <p>
+     * When a signal is bound, the tooltip text is kept synchronized with the
+     * signal value while the tooltip's target component is attached. When
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the text manually through
+     * {@link #setText(String)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the text to, not {@code null}
+     * @see #setText(String)
+     * @since 25.1
+     */
+    public void bindText(Signal<String> signal) {
+        tooltipElement.setProperty("markdown", false);
+        tooltipElement.bindProperty("text", signal, null);
     }
 
     /**

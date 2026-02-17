@@ -20,9 +20,11 @@ import java.util.Objects;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Markdown is a component for rendering Markdown content. It takes Markdown
@@ -37,6 +39,9 @@ public class Markdown extends Component implements HasSize {
 
     private String serverContent;
     private String clientContent;
+
+    private final SignalPropertySupport<String> contentSupport = SignalPropertySupport
+            .create(this, this::applyContent);
 
     /**
      * Default constructor. Creates an empty Markdown.
@@ -62,8 +67,27 @@ public class Markdown extends Component implements HasSize {
      *            the markdown content
      */
     public void setContent(String content) {
-        serverContent = content;
-        scheduleContentUpdate();
+        contentSupport.set(content);
+    }
+
+    /**
+     * Binds the given signal to the markdown content of this component.
+     * <p>
+     * When a signal is bound, the content is kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the content manually through
+     * {@link #setContent(String)} or {@link #appendContent(String)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the content to, not {@code null}
+     * @see #setContent(String)
+     * @since 25.1
+     */
+    public void bindContent(Signal<String> signal) {
+        contentSupport.bind(signal);
     }
 
     /**
@@ -95,6 +119,11 @@ public class Markdown extends Component implements HasSize {
             clientContent = null;
             scheduleContentUpdate();
         }
+    }
+
+    private void applyContent(String content) {
+        serverContent = content;
+        scheduleContentUpdate();
     }
 
     private void scheduleContentUpdate() {

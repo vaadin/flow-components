@@ -21,6 +21,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ModalityMode;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -31,6 +32,7 @@ import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
@@ -109,13 +111,50 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      *            it
      */
     public void setOpened(boolean opened) {
-        if (opened) {
-            setEnabled(true);
+        getOpenedSupport().set(opened);
+    }
+
+    /**
+     * Binds the given signal to the opened state of this login overlay as a
+     * one-way binding so that the property is updated when the signal's value
+     * is updated.
+     * <p>
+     * When a signal is bound, the opened state is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the opened state manually
+     * through {@link #setOpened(boolean)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     * <p>
+     * Signal's value {@code null} is treated as {@code false}.
+     *
+     * @param signal
+     *            the signal to bind the opened state to, not {@code null}
+     * @see #setOpened(boolean)
+     * @since 25.1
+     */
+    public void bindOpened(Signal<Boolean> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getOpenedSupport().bind(signal.map(v -> v == null ? Boolean.FALSE : v));
+    }
+
+    private SignalPropertySupport<Boolean> openedSupport;
+
+    private SignalPropertySupport<Boolean> getOpenedSupport() {
+        if (openedSupport == null) {
+            openedSupport = SignalPropertySupport.create(this, opened -> {
+                if (opened) {
+                    setEnabled(true);
+                }
+                if (isAttached()) {
+                    getUI().ifPresent(
+                            ui -> ui.setChildComponentModal(this, opened));
+                }
+                getElement().setProperty("opened", opened);
+            });
         }
-        if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this, opened));
-        }
-        getElement().setProperty("opened", opened);
+        return openedSupport;
     }
 
     /**
