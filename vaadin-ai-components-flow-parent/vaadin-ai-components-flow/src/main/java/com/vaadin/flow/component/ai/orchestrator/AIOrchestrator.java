@@ -45,8 +45,16 @@ import com.vaadin.flow.server.streams.UploadHandler;
 /**
  * Orchestrator for AI-powered chat interfaces.
  * <p>
- * This class is a generic coordination engine that connects UI components with
- * an LLM provider. It provides:
+ * This class is a non-visual coordination engine that connects UI components
+ * with an LLM provider. It is <b>not</b> a UI component itself and should
+ * <b>not</b> be added to a layout or the UI. Instead, add the individual UI
+ * components (e.g. {@link MessageInput}, {@link MessageList}) to your layout
+ * and pass them to the orchestrator through its {@link Builder}. The
+ * orchestrator then wires the components together and manages the LLM
+ * interaction behind the scenes.
+ * </p>
+ * <p>
+ * It provides:
  * </p>
  * <ul>
  * <li>LLM integration</li>
