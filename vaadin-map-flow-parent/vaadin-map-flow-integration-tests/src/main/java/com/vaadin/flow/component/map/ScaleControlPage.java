@@ -47,14 +47,14 @@ public class ScaleControlPage extends Div {
         });
         setTwoSteps.setId("set-two-steps");
 
-        NativeButton toggleScaleBarText = new NativeButton(
-                "Toggle scale bar text", e -> {
-                    scaleControl.setScaleBarTextVisible(
-                            !scaleControl.isScaleBarTextVisible());
+        NativeButton toggleScaleBarRatio = new NativeButton(
+                "Toggle scale bar ratio", e -> {
+                    scaleControl.setScaleBarRatioVisible(
+                            !scaleControl.isScaleBarRatioVisible());
                 });
-        toggleScaleBarText.setId("toggle-scale-bar-text");
+        toggleScaleBarRatio.setId("toggle-scale-bar-ratio");
 
         add(map, new Div(toggleDisplayMode, setImperialUnits, setTwoSteps,
-                toggleScaleBarText));
+                toggleScaleBarRatio));
     }
 }

@@ -18,7 +18,7 @@ export function synchronizeScaleLine(target, source) {
     units: convertEnumValue(source.units),
     bar: source.displayMode === 'BAR',
     steps: source.scaleBarSteps,
-    text: source.scaleBarTextVisible
+    text: source.scaleBarRatioVisible
   });
   return new ScaleLine(options);
 }
