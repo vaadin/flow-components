@@ -35,6 +35,7 @@ class ComponentFromTest {
 
     private static UI ui;
 
+    @SuppressWarnings("checkstyle:UiSetCurrent")
     static <T extends Serializable> void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
             T value, Class<? extends Component> componentClass) {
         Optional<Tag> tag = AnnotationReader.getAnnotationFor(componentClass,
