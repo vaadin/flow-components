@@ -150,9 +150,8 @@ public class AIOrchestratorTest {
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList, Mockito.atLeast(1))
-                .addMessage(Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyList());
+        Mockito.verify(mockMessageList, Mockito.atLeast(1)).addMessage(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyList());
     }
 
     @Test
@@ -352,9 +351,8 @@ public class AIOrchestratorTest {
         var orchestrator = getSimpleOrchestrator();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList, Mockito.times(2))
-                .addMessage(Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyList());
+        Mockito.verify(mockMessageList, Mockito.times(2)).addMessage(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyList());
     }
 
     @Test
