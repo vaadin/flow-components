@@ -478,10 +478,10 @@ public class AIOrchestrator {
 
         /**
          * Sets a listener that is called when a message with attachments is
-         * submitted to the LLM provider. This allows you to store
-         * attachment data in your own storage. The listener receives a unique
-         * message ID that can later be used to identify the attachments when
-         * they are clicked.
+         * submitted to the LLM provider. This allows you to store attachment
+         * data in your own storage. The listener receives a unique message ID
+         * that can later be used to identify the attachments when they are
+         * clicked.
          *
          * @param listener
          *            the listener to call on attachment submit
@@ -496,8 +496,8 @@ public class AIOrchestrator {
         /**
          * Sets a listener that is called when an attachment in the message list
          * is clicked. The listener receives the message ID and attachment
-         * index, allowing you to retrieve attachment data from your own
-         * storage using the same message ID provided in
+         * index, allowing you to retrieve attachment data from your own storage
+         * using the same message ID provided in
          * {@link AttachmentSubmitListener.AttachmentSubmitEvent#getMessageId()}.
          * <p>
          * Note: This listener requires a message list to be configured via
