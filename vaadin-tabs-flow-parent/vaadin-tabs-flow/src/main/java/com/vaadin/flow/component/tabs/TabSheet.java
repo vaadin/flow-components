@@ -34,6 +34,7 @@ import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.tabs.Tabs.SelectedChangeEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -61,6 +62,8 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     private Tabs tabs = new Tabs();
 
     private Map<Tab, Element> tabToContent = new HashMap<>();
+
+    private Registration deferredUpdateContent = null;
 
     /**
      * The default constructor.
@@ -361,9 +364,6 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
             var content = entry.getValue();
 
             if (tab.equals(tabs.getSelectedTab())) {
-                if (content.getParent() == null) {
-                    getElement().appendChild(content);
-                }
                 content.setEnabled(true);
             } else {
                 // Can't use setEnabled(false) because it would also mark the
@@ -371,6 +371,23 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
                 // would then briefly show the content as disabled.
                 content.getNode().setEnabled(false);
             }
+        }
+
+        getElement().getNode().runWhenAttached(ui -> {
+            if (deferredUpdateContent != null) {
+                deferredUpdateContent.remove();
+            }
+
+            deferredUpdateContent = ui.beforeClientResponse(this, context -> {
+                ensureSelectedTabContentAttached();
+            });
+        });
+    }
+
+    private void ensureSelectedTabContentAttached() {
+        var content = tabToContent.get(tabs.getSelectedTab());
+        if (content != null && content.getParent() == null) {
+            getElement().appendChild(content);
         }
     }
 
