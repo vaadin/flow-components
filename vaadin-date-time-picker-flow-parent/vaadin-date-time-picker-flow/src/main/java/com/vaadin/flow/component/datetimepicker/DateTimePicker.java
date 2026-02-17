@@ -48,10 +48,11 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -91,7 +92,7 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha7")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -892,25 +893,24 @@ public class DateTimePicker
      * with the signal value while the component is attached. When the component
      * is detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the minimum date and time
      * manually through {@link #setMin(LocalDateTime)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Attempting to bind a new signal while one is already bound throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the minimum date and time to, or
-     *            {@code null} to unbind
+     *            the signal to bind the minimum date and time to, not
+     *            {@code null}
      * @see #setMin(LocalDateTime)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<LocalDateTime> signal) {
         getElement().bindProperty("min",
-                signal == null ? null : signal.map(FORMATTER::apply));
+                signal == null ? null : signal.map(FORMATTER::apply), null);
         minSupport.bind(signal);
     }
 
@@ -946,25 +946,24 @@ public class DateTimePicker
      * with the signal value while the component is attached. When the component
      * is detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the maximum date and time
      * manually through {@link #setMax(LocalDateTime)} throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      * <p>
      * Attempting to bind a new signal while one is already bound throws a
-     * {@link com.vaadin.signals.BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the maximum date and time to, or
-     *            {@code null} to unbind
+     *            the signal to bind the maximum date and time to, not
+     *            {@code null}
      * @see #setMax(LocalDateTime)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<LocalDateTime> signal) {
         getElement().bindProperty("max",
-                signal == null ? null : signal.map(FORMATTER::apply));
+                signal == null ? null : signal.map(FORMATTER::apply), null);
         maxSupport.bind(signal);
     }
 

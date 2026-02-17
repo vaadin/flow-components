@@ -18,7 +18,7 @@ package com.vaadin.flow.component.shared;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasTheme;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Mixin interface that allows adding and removing typed theme variants to /
@@ -110,7 +110,7 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      * @param variant
      *            the theme variant to bind, not {@code null} or blank
      * @param signal
-     *            the boolean signal to bind to, or {@code null} to unbind
+     *            the boolean signal to bind to, not {@code null}
      * @see HasTheme#bindThemeName(String, Signal)
      */
     default void bindThemeVariant(TVariantEnum variant,

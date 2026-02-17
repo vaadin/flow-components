@@ -64,9 +64,42 @@ function formatItems(items, locale) {
 
 window.Vaadin.Flow.messageListConnector = {
   /**
+   * Initializes the connector for the given message list element.
+   * Sets up event listeners for attachment clicks.
+   */
+  initLazy(list) {
+    if (list._flowConnectorInitialized) {
+      return;
+    }
+    list._flowConnectorInitialized = true;
+
+    // Listen for attachment-click events and re-dispatch with indexes for Flow
+    list.addEventListener('attachment-click', (e) => {
+      const { item, attachment } = e.detail;
+
+      // Compute indexes from the item and attachment references
+      const itemIndex = list.items.indexOf(item);
+      const attachmentIndex = item?.attachments?.indexOf(attachment) ?? -1;
+
+      // Only dispatch if indexes are valid
+      if (itemIndex < 0 || attachmentIndex < 0) {
+        return;
+      }
+
+      // Dispatch a new event with indexes for Flow's @DomEvent handling
+      list.dispatchEvent(
+        new CustomEvent('attachment-click-flow', {
+          detail: { itemIndex, attachmentIndex }
+        })
+      );
+    });
+  },
+
+  /**
    * Fully replaces the items in the list with the given items.
    */
   setItems(list, items, locale) {
+    this.initLazy(list);
     list.items = formatItems(items, locale);
   },
 
@@ -90,6 +123,7 @@ window.Vaadin.Flow.messageListConnector = {
    * Adds the given items to the end of the list.
    */
   addItems(list, newItems, locale) {
+    this.initLazy(list);
     list.items = [...(list.items || []), ...formatItems(newItems, locale)];
   }
 };

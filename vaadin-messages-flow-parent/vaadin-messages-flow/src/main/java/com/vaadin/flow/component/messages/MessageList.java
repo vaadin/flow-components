@@ -22,7 +22,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -32,6 +37,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Message List allows you to show a list of messages, for example, a chat log.
@@ -44,9 +50,14 @@ import com.vaadin.flow.internal.JacksonUtils;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/message-list", version = "25.1.0-alpha7")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
+
+    /**
+     * The feature flag ID for MessageList attachments.
+     */
+    static final String FEATURE_FLAG_ID = MessageListAttachmentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
@@ -214,6 +225,8 @@ public class MessageList extends Component
      *            the UI the component is attached to
      */
     private void handleFullUpdate(UI ui) {
+        checkAttachmentsFeatureFlag(ui, items);
+
         // Sync clientText for items
         items.forEach(item -> item.clientText = item.getText());
 
@@ -258,6 +271,8 @@ public class MessageList extends Component
         }
 
         var newItems = items.subList(pendingAddItemsIndex, items.size());
+        checkAttachmentsFeatureFlag(ui, newItems);
+
         // Sync clientText for new items
         newItems.forEach(item -> item.clientText = item.getText());
 
@@ -265,6 +280,36 @@ public class MessageList extends Component
         // Call the connector function to add items
         getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
                 newItemsJson, ui.getLocale().toLanguageTag());
+    }
+
+    /**
+     * Checks if any of the given items have attachments and if so, verifies
+     * that the feature flag is enabled.
+     *
+     * @param ui
+     *            the UI to get the feature flags from
+     * @param itemsToCheck
+     *            the items to check for attachments
+     * @throws MessageListAttachmentsExperimentalFeatureException
+     *             if attachments are used without the feature flag enabled
+     */
+    private void checkAttachmentsFeatureFlag(UI ui,
+            List<MessageListItem> itemsToCheck) {
+        boolean hasAttachments = itemsToCheck.stream()
+                .anyMatch(item -> !item.getAttachments().isEmpty());
+        if (hasAttachments) {
+            FeatureFlags featureFlags = FeatureFlags
+                    .get(ui.getSession().getService().getContext());
+
+            // Check if either the specific messageListAttachments flag or the
+            // umbrella aiComponents flag is enabled
+            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
+                    || featureFlags.isEnabled("aiComponents");
+
+            if (!enabled) {
+                throw new MessageListAttachmentsExperimentalFeatureException();
+            }
+        }
     }
 
     @Override
@@ -313,5 +358,72 @@ public class MessageList extends Component
      */
     public boolean isAnnounceMessages() {
         return getElement().getProperty("announceMessages", false);
+    }
+
+    /**
+     * Adds a listener that is called when an attachment is clicked.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a registration that can be used to remove the listener
+     */
+    public Registration addAttachmentClickListener(
+            ComponentEventListener<AttachmentClickEvent> listener) {
+        return addListener(AttachmentClickEvent.class, listener);
+    }
+
+    /**
+     * Event fired when an attachment is clicked in the message list.
+     * <p>
+     * Note: This event listens to the {@code attachment-click-flow} event
+     * dispatched by the connector, which enriches the web component's
+     * {@code attachment-click} event with item and attachment indexes.
+     */
+    @DomEvent("attachment-click-flow")
+    public static class AttachmentClickEvent
+            extends ComponentEvent<MessageList> {
+
+        private final MessageListItem item;
+        private final MessageListItem.Attachment attachment;
+
+        /**
+         * Creates a new attachment click event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            whether the event originated from the client
+         * @param itemIndex
+         *            the index of the message item containing the clicked
+         *            attachment
+         * @param attachmentIndex
+         *            the index of the clicked attachment within the item's
+         *            attachments list
+         */
+        public AttachmentClickEvent(MessageList source, boolean fromClient,
+                @EventData("event.detail.itemIndex") int itemIndex,
+                @EventData("event.detail.attachmentIndex") int attachmentIndex) {
+            super(source, fromClient);
+            this.item = source.getItems().get(itemIndex);
+            this.attachment = item.getAttachments().get(attachmentIndex);
+        }
+
+        /**
+         * Gets the message item containing the clicked attachment.
+         *
+         * @return the message item
+         */
+        public MessageListItem getItem() {
+            return item;
+        }
+
+        /**
+         * Gets the clicked attachment.
+         *
+         * @return the clicked attachment
+         */
+        public MessageListItem.Attachment getAttachment() {
+            return attachment;
+        }
     }
 }

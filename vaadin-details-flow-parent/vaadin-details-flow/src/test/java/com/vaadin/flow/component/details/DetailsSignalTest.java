@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.details;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,14 +25,11 @@ import org.junit.Test;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.signals.BindingActiveException;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
-/**
- * Unit tests for the Details component's signal bindings.
- */
 public class DetailsSignalTest extends AbstractSignalsUnitTest {
 
     private Details details;
@@ -39,9 +38,10 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
 
     @Before
     public void setup() {
+        details = new Details();
         summaryTextSignal = new ValueSignal<>("Initial Summary");
         computedSignal = Signal
-                .computed(() -> summaryTextSignal.value() + " computed");
+                .computed(() -> summaryTextSignal.get() + " computed");
     }
 
     @After
@@ -50,8 +50,6 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
             details.removeFromParent();
         }
     }
-
-    // A. Constructor Variant Tests
 
     @Test
     public void summaryTextSignalCtor() {
@@ -88,8 +86,6 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         // Verify all components are added
         Assert.assertEquals(3, details.getContent().count());
     }
-
-    // B. Signal Binding Lifecycle Tests
 
     @Test
     public void summaryTextSignal_notAttached() {
@@ -128,8 +124,6 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         details.setSummaryText("Attempt to set text");
     }
 
-    // C. Signal Type Tests
-
     @Test
     public void summaryTextComputedSignalCtor() {
         details = new Details(computedSignal);
@@ -137,7 +131,7 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("Initial Summary computed",
                 details.getSummaryText());
 
-        summaryTextSignal.value("Updated");
+        summaryTextSignal.set("Updated");
         Assert.assertEquals("Updated computed", details.getSummaryText());
     }
 
@@ -154,8 +148,6 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         assertSummaryTextSignalBindingInactive();
     }
 
-    // D. Constructor Delegation Test
-
     @Test
     public void summaryTextSignalConstructors_useSignalSupport() {
         // Test signal constructor variant 1
@@ -164,7 +156,7 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         var summary = details.getSummary();
         Assert.assertNotNull(summary);
         Assert.assertEquals("Initial Summary", details.getSummaryText());
-        summaryTextSignal.value("Changed");
+        summaryTextSignal.set("Changed");
         Assert.assertEquals("Changed", details.getSummaryText());
         Assert.assertEquals("Changed", summary.getElement().getText());
         Assert.assertEquals("Should reuse existing summary component", summary,
@@ -176,7 +168,7 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(details);
         summary = details.getSummary();
         Assert.assertNotNull(summary);
-        summaryTextSignal.value("Changed Again");
+        summaryTextSignal.set("Changed Again");
         Assert.assertEquals("Changed Again", details.getSummaryText());
         Assert.assertEquals("Changed Again", summary.getElement().getText());
         Assert.assertEquals("Should reuse existing summary component", summary,
@@ -188,14 +180,12 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(details);
         summary = details.getSummary();
         Assert.assertNotNull(summary);
-        summaryTextSignal.value("Final Change");
+        summaryTextSignal.set("Final Change");
         Assert.assertEquals("Final Change", details.getSummaryText());
         Assert.assertEquals("Final Change", summary.getElement().getText());
         Assert.assertEquals("Should reuse existing summary component", summary,
                 details.getSummary());
     }
-
-    // E. Content Management Test
 
     @Test
     public void contentAddedWithSignalConstructor_signalStillWorks() {
@@ -216,17 +206,86 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(2, details.getContent().count());
 
         // Verify signal binding still works after adding content
-        summaryTextSignal.value("After adding content");
+        summaryTextSignal.set("After adding content");
         Assert.assertEquals("After adding content", details.getSummaryText());
     }
 
-    // Helper Methods
+    @Test
+    public void bindChildren_addsChildrenFromSignal() {
+        UI.getCurrent().add(details);
+
+        var textSignal1 = new ValueSignal<>("Item 1");
+        var textSignal2 = new ValueSignal<>("Item 2");
+        var listSignal = new ValueSignal<>(List.of(textSignal1, textSignal2));
+
+        details.bindChildren(listSignal, Span::new);
+
+        Assert.assertEquals(2, details.getContent().count());
+        Assert.assertEquals("Item 1",
+                details.getContent().findFirst().get().getElement().getText());
+    }
+
+    @Test
+    public void bindChildren_updatesChildrenWhenListSignalChanges() {
+        UI.getCurrent().add(details);
+
+        var textSignal1 = new ValueSignal<>("Item 1");
+        var listSignal = new ValueSignal<>(List.of(textSignal1));
+
+        details.bindChildren(listSignal, Span::new);
+
+        Assert.assertEquals(1, details.getContent().count());
+
+        var textSignal2 = new ValueSignal<>("Item 2");
+        var textSignal3 = new ValueSignal<>("Item 3");
+        listSignal.set(List.of(textSignal1, textSignal2, textSignal3));
+
+        Assert.assertEquals(3, details.getContent().count());
+    }
+
+    @Test
+    public void bindChildren_notAttached_bindingInactiveUntilAttach() {
+        var textSignal1 = new ValueSignal<>("Item 1");
+        var textSignal2 = new ValueSignal<>("Item 2");
+        var listSignal = new ValueSignal<>(List.of(textSignal1, textSignal2));
+
+        details.bindChildren(listSignal, Span::new);
+
+        Assert.assertEquals(0, details.getContent().count());
+
+        UI.getCurrent().add(details);
+
+        Assert.assertEquals(2, details.getContent().count());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindChildren_calledTwice_throwsException() {
+        UI.getCurrent().add(details);
+
+        var textSignal1 = new ValueSignal<>("Item 1");
+        var listSignal = new ValueSignal<>(List.of(textSignal1));
+
+        details.bindChildren(listSignal, Span::new);
+        details.bindChildren(listSignal, Span::new);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void bindChildren_nullSignal_throwsException() {
+        details.bindChildren(null, signal -> new Span("text"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void bindChildren_nullFactory_throwsException() {
+        var textSignal = new ValueSignal<>("Item");
+        var listSignal = new ValueSignal<>(List.of(textSignal));
+        details.bindChildren(listSignal, null);
+    }
 
     private void assertSummaryTextSignalBindingActive() {
-        summaryTextSignal.value("First Update");
+        summaryTextSignal.set("First Update");
         var summary = details.getSummary();
         Assert.assertEquals("First Update", details.getSummaryText());
-        summaryTextSignal.value("Second Update");
+        summaryTextSignal.set("Second Update");
         Assert.assertEquals("Second Update", details.getSummaryText());
         Assert.assertEquals("Should reuse existing summary component", summary,
                 details.getSummary());
@@ -235,7 +294,7 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
 
     private void assertSummaryTextSignalBindingInactive() {
         String currentText = details.getSummaryText();
-        summaryTextSignal.value(currentText + " changed");
+        summaryTextSignal.set(currentText + " changed");
         Assert.assertEquals(currentText, details.getSummaryText());
     }
 }

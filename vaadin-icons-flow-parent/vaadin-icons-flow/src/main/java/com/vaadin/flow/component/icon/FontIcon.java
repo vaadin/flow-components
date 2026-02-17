@@ -18,6 +18,8 @@ package com.vaadin.flow.component.icon;
 import java.util.Optional;
 
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Component for displaying an icon from a font icon collection. Note that the
@@ -113,6 +115,28 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
+     * Binds the given signal to the character code of the font icon.
+     * <p>
+     * When a signal is bound, the character code is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the character code manually
+     * through {@link #setCharCode(String)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the character code to, not {@code null}
+     * @see #setCharCode(String)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public void bindCharCode(Signal<String> signal) {
+        getElement().bindProperty("char", signal, null);
+    }
+
+    /**
      * Sets the ligature name that specifies an icon from an icon font with
      * support for ligatures.
      *
@@ -133,6 +157,28 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      */
     public String getLigature() {
         return getElement().getProperty("ligature");
+    }
+
+    /**
+     * Binds the given signal to the ligature name of the font icon.
+     * <p>
+     * When a signal is bound, the ligature name is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the ligature manually through
+     * {@link #setLigature(String)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the ligature to, not {@code null}
+     * @see #setLigature(String)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public void bindLigature(Signal<String> signal) {
+        getElement().bindProperty("ligature", signal, null);
     }
 
     @Override

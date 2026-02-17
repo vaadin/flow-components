@@ -1,0 +1,40 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.ai.orchestrator;
+
+import java.util.List;
+
+import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.ui.AIMessage;
+import com.vaadin.flow.component.ai.ui.AIMessageList;
+import com.vaadin.flow.component.messages.MessageList;
+
+/**
+ * Wrapper for Flow MessageList component to implement AIMessageList interface.
+ */
+record MessageListWrapper(MessageList messageList) implements AIMessageList {
+
+    @Override
+    public void addMessage(AIMessage message) {
+        messageList.addItem(((MessageListItemWrapper) message).getItem());
+    }
+
+    @Override
+    public AIMessage createMessage(String text, String userName,
+            List<AIAttachment> attachments) {
+        return new MessageListItemWrapper(text, userName, attachments);
+    }
+}

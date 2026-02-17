@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Mixin interface for components that provide properties for setting invalid
@@ -66,14 +68,15 @@ public interface HasValidationProperties extends HasElement, HasValidation {
      * Signal's value {@code null} clears the error message.
      *
      * @param signal
-     *            the signal to bind the error message to, or {@code null} to
-     *            clear the existing binding
+     *            the signal to bind the error message to, not {@code null}
      * @since 25.1
      */
     @Override
     default void bindErrorMessage(Signal<String> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
         getElement().bindProperty("errorMessage", signal
-                .map(errorMessage -> errorMessage == null ? "" : errorMessage));
+                .map(errorMessage -> errorMessage == null ? "" : errorMessage),
+                null);
     }
 
     /**
@@ -115,13 +118,15 @@ public interface HasValidationProperties extends HasElement, HasValidation {
      * Signal's value {@code null} is treated as {@code false}.
      *
      * @param signal
-     *            the signal to bind the invalid state to, or {@code null} to
-     *            clear the existing binding
+     *            the signal to bind the invalid state to, not {@code null}
      * @since 25.1
      */
     @Override
     default void bindInvalid(Signal<Boolean> signal) {
-        getElement().bindProperty("invalid", signal
-                .map(invalid -> invalid == null ? Boolean.FALSE : invalid));
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("invalid",
+                signal.map(
+                        invalid -> invalid == null ? Boolean.FALSE : invalid),
+                null);
     }
 }

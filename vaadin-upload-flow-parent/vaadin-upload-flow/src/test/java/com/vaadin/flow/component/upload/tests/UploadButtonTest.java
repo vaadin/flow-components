@@ -22,8 +22,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -32,6 +34,8 @@ import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -42,6 +46,7 @@ public class UploadButtonTest {
     private UI ui;
     private Div owner;
     private UploadManager manager;
+    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
@@ -49,6 +54,8 @@ public class UploadButtonTest {
         UI.setCurrent(ui);
 
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
+        VaadinService mockService = Mockito.mock(VaadinService.class);
+        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
         StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
                 mockSession);
         Mockito.when(mockSession.getResourceRegistry())
@@ -58,6 +65,10 @@ public class UploadButtonTest {
                     invocation.getArgument(0, Command.class).execute();
                     return new CompletableFuture<>();
                 });
+        Mockito.when(mockSession.getService()).thenReturn(mockService);
+        Mockito.when(mockService.getContext()).thenReturn(mockContext);
+        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
+                .mockFeatureFlag(mockContext);
         ui.getInternals().setSession(mockSession);
 
         owner = new Div();
@@ -67,6 +78,7 @@ public class UploadButtonTest {
 
     @After
     public void tearDown() {
+        mockFeatureFlagsStatic.close();
         UI.setCurrent(null);
     }
 
@@ -86,9 +98,22 @@ public class UploadButtonTest {
         Assert.assertSame(manager, button.getUploadManager());
     }
 
+    @Test
+    public void constructor_withTextAndManager_setsTextAndLinksToManager() {
+        UploadButton button = new UploadButton("Upload", manager);
+
+        Assert.assertEquals("Upload", button.getText());
+        Assert.assertSame(manager, button.getUploadManager());
+    }
+
     @Test(expected = NullPointerException.class)
     public void constructor_withNull_throws() {
         new UploadButton(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void constructor_withTextAndNullManager_throws() {
+        new UploadButton("Upload", null);
     }
 
     @Test
@@ -110,41 +135,6 @@ public class UploadButtonTest {
     @Test
     public void extendsButton() {
         Assert.assertTrue(Button.class.isAssignableFrom(UploadButton.class));
-    }
-
-    @Test
-    public void setCapture_user_propertyIsSet() {
-        UploadButton button = new UploadButton();
-
-        button.setCapture("user");
-
-        Assert.assertEquals("user", button.getCapture());
-    }
-
-    @Test
-    public void setCapture_environment_propertyIsSet() {
-        UploadButton button = new UploadButton();
-
-        button.setCapture("environment");
-
-        Assert.assertEquals("environment", button.getCapture());
-    }
-
-    @Test
-    public void getCapture_default_returnsNull() {
-        UploadButton button = new UploadButton();
-
-        Assert.assertNull(button.getCapture());
-    }
-
-    @Test
-    public void setCapture_null_removesProperty() {
-        UploadButton button = new UploadButton();
-        button.setCapture("user");
-
-        button.setCapture(null);
-
-        Assert.assertNull(button.getCapture());
     }
 
     @Test

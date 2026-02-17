@@ -24,9 +24,24 @@ public enum VirtualListVariant implements ThemeVariant {
     LUMO_OVERFLOW_INDICATORS("overflow-indicators"),
     LUMO_OVERFLOW_INDICATOR_TOP("overflow-indicator-top"),
     LUMO_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),
+    /**
+     * @deprecated Use {@link #OVERFLOW_INDICATORS} instead.
+     */
+    @Deprecated
     AURA_OVERFLOW_INDICATORS("overflow-indicators"),
+    /**
+     * @deprecated Use {@link #OVERFLOW_INDICATOR_TOP} instead.
+     */
+    @Deprecated
     AURA_OVERFLOW_INDICATOR_TOP("overflow-indicator-top"),
-    AURA_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom");
+    /**
+     * @deprecated Use {@link #OVERFLOW_INDICATOR_BOTTOM} instead.
+     */
+    @Deprecated
+    AURA_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),
+    OVERFLOW_INDICATORS("overflow-indicators"),
+    OVERFLOW_INDICATOR_TOP("overflow-indicator-top"),
+    OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom");
 
     private final String variant;
 

@@ -45,7 +45,7 @@ import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * The Button component allows users to perform actions. It comes in several
@@ -54,7 +54,7 @@ import com.vaadin.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/button", version = "25.1.0-alpha7")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -78,7 +78,6 @@ public class Button extends Component
      * Default constructor. Creates an empty button.
      */
     public Button() {
-        add(textNode);
     }
 
     /**
@@ -633,6 +632,14 @@ public class Button extends Component
      *            the text inside the button
      */
     private void textChangeHandler(String text) {
+        var hasText = text != null && !text.isEmpty();
+        var textNodeAttached = textNode.getParent().isPresent();
+        if (hasText && !textNodeAttached) {
+            add(textNode);
+        } else if (!hasText && textNodeAttached) {
+            remove(textNode);
+        }
+
         updateChildren();
         updateIconSlot();
         updateThemeAttribute();

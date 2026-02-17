@@ -61,7 +61,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha7")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
@@ -240,6 +240,16 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     public void setMaxFiles(int maxFiles) {
         getElement().setProperty("maxFiles", maxFiles);
         getElement().executeJs("this.maxFiles = $0", maxFiles);
+    }
+
+    /**
+     * Sets the upload format to use when sending files to the server.
+     *
+     * @param type
+     *            the format type
+     */
+    public void setUploadFormat(UploadFormat type) {
+        getElement().setAttribute("upload-format", type.name().toLowerCase());
     }
 
     /**

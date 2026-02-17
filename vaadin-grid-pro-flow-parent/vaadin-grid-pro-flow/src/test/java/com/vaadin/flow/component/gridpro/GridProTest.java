@@ -11,6 +11,7 @@ package com.vaadin.flow.component.gridpro;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,13 +40,15 @@ public class GridProTest {
     ArrayList<Person> items = new ArrayList<>();
     Person testItem = new Person("Foo", 1996);
 
+    private UI ui;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setup() {
         VaadinSession session = Mockito.mock(VaadinSession.class);
-        var ui = new UI();
+        ui = new UI();
         ui.getInternals().setSession(session);
 
         UI.setCurrent(ui);
@@ -66,6 +69,12 @@ public class GridProTest {
         selectedItem = JacksonUtils.createObjectNode();
         selectedItem.put("key", testItemKey);
         selectedItem.put("col0", "foo");
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+        ui = null;
     }
 
     @Test

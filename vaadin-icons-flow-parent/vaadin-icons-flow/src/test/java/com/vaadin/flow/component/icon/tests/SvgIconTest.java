@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -30,9 +31,19 @@ import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 public class SvgIconTest {
+
+    private UI ui;
+
+    @Before
+    public void setUp() {
+        ui = new UI();
+        UI.setCurrent(ui);
+    }
+
     @After
     public void tearDown() {
         UI.setCurrent(null);
+        ui = null;
     }
 
     @Test
@@ -63,7 +74,6 @@ public class SvgIconTest {
 
     @Test
     public void streamResourceConstructor_hasSrc() {
-        UI.setCurrent(new UI());
         var resource = getStreamResource();
         var icon = new SvgIcon(resource);
         Assert.assertTrue(icon.getSrc().contains("image.svg"));
@@ -73,7 +83,6 @@ public class SvgIconTest {
 
     @Test
     public void streamResourceConstructorWithSymbol_hasSrcAndSymbol() {
-        UI.setCurrent(new UI());
         var resource = getStreamResource();
         var symbol = "symbol";
         var icon = new SvgIcon(resource, symbol);
@@ -86,7 +95,6 @@ public class SvgIconTest {
 
     @Test
     public void downloadHandlerConstructor_hasSrc() {
-        UI.setCurrent(new UI());
         var resource = getDownloadHandler();
         var icon = new SvgIcon(resource);
         Assert.assertTrue(icon.getSrc().contains("image.svg"));
@@ -96,7 +104,6 @@ public class SvgIconTest {
 
     @Test
     public void downloadHandlerConstructorWithSymbol_hasSrcAndSymbol() {
-        UI.setCurrent(new UI());
         var resource = getDownloadHandler();
         var symbol = "symbol";
         var icon = new SvgIcon(resource, symbol);
@@ -131,7 +138,6 @@ public class SvgIconTest {
 
     @Test
     public void hasStreamResource_setSrcWithSymbol_hasSrcAndSymbol() {
-        UI.setCurrent(new UI());
         var resource = getStreamResource();
         var symbol = "symbol";
         var icon = new SvgIcon();
@@ -165,7 +171,6 @@ public class SvgIconTest {
 
     @Test
     public void withStreamResource_setSrc_hasSrc() {
-        UI.setCurrent(new UI());
         var icon = new SvgIcon();
         var resource = getStreamResource();
         icon.setSrc(resource);

@@ -25,11 +25,36 @@ public enum GridVariant {
     LUMO_ROW_STRIPES("row-stripes"),
     LUMO_COMPACT("compact"),
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
+    /**
+     * @deprecated Use {@link #NO_BORDER} instead.
+     */
+    @Deprecated
     AURA_NO_BORDER("no-border"),
+    /**
+     * @deprecated Use {@link #NO_ROW_BORDERS} instead.
+     */
+    @Deprecated
     AURA_NO_ROW_BORDERS("no-row-borders"),
+    /**
+     * @deprecated Use {@link #COLUMN_BORDERS} instead.
+     */
+    @Deprecated
     AURA_COLUMN_BORDERS("column-borders"),
+    /**
+     * @deprecated Use {@link #ROW_STRIPES} instead.
+     */
+    @Deprecated
     AURA_ROW_STRIPES("row-stripes"),
-    AURA_WRAP_CELL_CONTENT("wrap-cell-content");
+    /**
+     * @deprecated Use {@link #WRAP_CELL_CONTENT} instead.
+     */
+    @Deprecated
+    AURA_WRAP_CELL_CONTENT("wrap-cell-content"),
+    NO_BORDER("no-border"),
+    NO_ROW_BORDERS("no-row-borders"),
+    COLUMN_BORDERS("column-borders"),
+    ROW_STRIPES("row-stripes"),
+    WRAP_CELL_CONTENT("wrap-cell-content");
 
     private final String variant;
 

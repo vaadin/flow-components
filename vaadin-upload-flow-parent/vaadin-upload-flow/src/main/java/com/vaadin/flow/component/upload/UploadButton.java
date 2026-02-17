@@ -30,8 +30,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * <pre>
  * var manager = new UploadManager(uploadHandler);
- * var button = new UploadButton(manager);
- * button.add(new Span("Select Files"));
+ * var button = new UploadButton("Select Files", manager);
  * add(button);
  * </pre>
  *
@@ -39,7 +38,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @see UploadManager
  */
 @Tag("vaadin-upload-button")
-@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha7")
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 public class UploadButton extends Button implements HasUploadManager {
 
@@ -64,6 +63,26 @@ public class UploadButton extends Button implements HasUploadManager {
     }
 
     /**
+     * Creates a new upload button with the given text, linked to the given
+     * manager.
+     *
+     * @param text
+     *            the button text
+     * @param manager
+     *            the upload manager to link to, not {@code null}
+     * @throws NullPointerException
+     *             if manager is {@code null}
+     */
+    public UploadButton(String text, UploadManager manager) {
+        this(manager);
+        doSetText(text);
+    }
+
+    private void doSetText(String text) {
+        super.setText(text);
+    }
+
+    /**
      * Sets whether this button is enabled. When disabled, the button cannot be
      * used to select files.
      * <p>
@@ -82,29 +101,4 @@ public class UploadButton extends Button implements HasUploadManager {
         super.setEnabled(enabled);
     }
 
-    /**
-     * Sets the capture attribute for mobile file input. This controls whether
-     * to use the device's camera or microphone to capture files directly.
-     * <p>
-     * Common values are:
-     * <ul>
-     * <li>{@code "user"} - Use the front-facing camera</li>
-     * <li>{@code "environment"} - Use the back-facing camera</li>
-     * </ul>
-     *
-     * @param capture
-     *            the capture attribute value, or {@code null} to remove
-     */
-    public void setCapture(String capture) {
-        getElement().setProperty("capture", capture);
-    }
-
-    /**
-     * Gets the capture attribute for mobile file input.
-     *
-     * @return the capture attribute value, or {@code null} if not set
-     */
-    public String getCapture() {
-        return getElement().getProperty("capture");
-    }
 }

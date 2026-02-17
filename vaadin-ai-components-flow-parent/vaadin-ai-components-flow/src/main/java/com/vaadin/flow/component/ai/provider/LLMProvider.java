@@ -18,6 +18,8 @@ package com.vaadin.flow.component.ai.provider;
 import java.io.Serializable;
 import java.util.List;
 
+import com.vaadin.flow.component.ai.common.AIAttachment;
+
 import reactor.core.publisher.Flux;
 
 /**
@@ -67,7 +69,7 @@ public interface LLMProvider {
          *
          * @return the list of attachments, never {@code null} but may be empty
          */
-        List<Attachment> attachments();
+        List<AIAttachment> attachments();
 
         /**
          * Gets the system prompt for this specific request. The system prompt
@@ -87,34 +89,5 @@ public interface LLMProvider {
          * @return array of tool objects, never {@code null} but may be empty
          */
         Object[] tools();
-    }
-
-    /**
-     * Represents a file attachment that can be sent to the LLM for analysis.
-     * Attachments support various file types including images, documents, and
-     * text files. The LLM can analyze, reference, and answer questions about
-     * the attachment content.
-     */
-    interface Attachment extends Serializable {
-        /**
-         * Gets the file name.
-         *
-         * @return the file name including extension
-         */
-        String fileName();
-
-        /**
-         * Gets the MIME content type.
-         *
-         * @return the content type
-         */
-        String contentType();
-
-        /**
-         * Gets the file data.
-         *
-         * @return the file data
-         */
-        byte[] data();
     }
 }

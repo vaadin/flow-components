@@ -25,9 +25,9 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.*;
-import com.vaadin.signals.BindingActiveException;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
 public class ButtonSignalTest extends AbstractSignalsUnitTest {
@@ -46,7 +46,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     @Before
     public void setup() {
         textSignal = new ValueSignal<>("foo");
-        computedSignal = Signal.computed(() -> textSignal.value() + " bar");
+        computedSignal = Signal.computed(() -> textSignal.get() + " bar");
     }
 
     @After
@@ -112,26 +112,11 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textSignal_removeBinding() {
-        button = new Button(textSignal, new Icon());
-        UI.getCurrent().add(button);
-
-        button.bindText(null);
-        assertTextSignalBindingInactive();
-
-        button.setText("bar");
-        Assert.assertEquals("bar", button.getText());
-
-        button.setText(null);
-        Assert.assertEquals("", button.getText());
-    }
-
-    @Test
     public void setIcon_textSignalChange_slotRemoved() {
         icon = new Icon();
         button = new Button(textSignal, icon);
 
-        textSignal.value("");
+        textSignal.set("");
 
         Assert.assertFalse(icon.getElement().hasAttribute("slot"));
     }
@@ -144,7 +129,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         icon.getElement().setAttribute("slot", "prefix");
         button.setIcon(icon);
 
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
     }
 
@@ -170,7 +155,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         button = new Button(computedSignal);
         UI.getCurrent().add(button);
         Assert.assertEquals("foo bar", button.getText());
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("bar bar", button.getText());
     }
 
@@ -180,19 +165,6 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(button);
 
         button.bindText(textSignal);
-    }
-
-    @Test
-    public void textComputedSignalCtor_removeBindingAndBindText() {
-        button = new Button(computedSignal);
-        UI.getCurrent().add(button);
-
-        button.bindText(null);
-        button.bindText(textSignal);
-        assertTextSignalBindingActive();
-
-        button.bindText(null);
-        assertTextSignalBindingInactive();
     }
 
     @Test
@@ -230,15 +202,15 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     }
 
     private void assertTextSignalBindingActive() {
-        textSignal.value("foo");
+        textSignal.set("foo");
         Assert.assertEquals("foo", button.getText());
-        textSignal.value("bar");
+        textSignal.set("bar");
         Assert.assertEquals("bar", button.getText());
     }
 
     private void assertTextSignalBindingInactive() {
         var currentText = button.getText();
-        textSignal.value(currentText + " with change");
+        textSignal.set(currentText + " with change");
         Assert.assertEquals(currentText, button.getText());
     }
 

@@ -16,10 +16,11 @@
 package com.vaadin.flow.component.ai.provider;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.ai.common.AIAttachment;
 
 public class LLMProviderHelpersTest {
 
@@ -65,35 +66,6 @@ public class LLMProviderHelpersTest {
     }
 
     @Test
-    public void toBase64DataUrl_withImageData_returnsCorrectFormat() {
-        var data = getValidUtf8Data();
-        var contentType = "image/png";
-        var result = LLMProviderHelpers.toBase64DataUrl(data, contentType);
-        Assert.assertTrue(result.startsWith("data:image/png;base64,"));
-        var base64Part = result.substring("data:image/png;base64,".length());
-        var decoded = Base64.getDecoder().decode(base64Part);
-        Assert.assertArrayEquals(data, decoded);
-    }
-
-    @Test
-    public void toBase64DataUrl_withDifferentContentType_includesContentType() {
-        var data = getValidUtf8Data();
-        var pngResult = LLMProviderHelpers.toBase64DataUrl(data, "image/png");
-        var jpegResult = LLMProviderHelpers.toBase64DataUrl(data, "image/jpeg");
-        var gifResult = LLMProviderHelpers.toBase64DataUrl(data, "image/gif");
-        Assert.assertTrue(pngResult.startsWith("data:image/png;base64,"));
-        Assert.assertTrue(jpegResult.startsWith("data:image/jpeg;base64,"));
-        Assert.assertTrue(gifResult.startsWith("data:image/gif;base64,"));
-    }
-
-    @Test
-    public void toBase64DataUrl_withEmptyData_returnsValidDataUrl() {
-        var data = new byte[0];
-        var result = LLMProviderHelpers.toBase64DataUrl(data, "image/png");
-        Assert.assertEquals("data:image/png;base64,", result);
-    }
-
-    @Test
     public void formatTextAttachment_returnsCorrectFormat() {
         var result = LLMProviderHelpers.formatTextAttachment("doc.txt",
                 "Hello World");
@@ -121,8 +93,8 @@ public class LLMProviderHelpersTest {
 
     @Test
     public void validateAttachment_withValidAttachment_doesNotThrow() {
-        var attachment = new TestAttachment(getValidUtf8Data(), "text/plain",
-                "file.txt");
+        var attachment = new AIAttachment("file.txt", "text/plain",
+                getValidUtf8Data());
         LLMProviderHelpers.validateAttachment(attachment);
     }
 
@@ -134,25 +106,6 @@ public class LLMProviderHelpersTest {
                 exception.getMessage());
     }
 
-    @Test
-    public void validateAttachment_withNullContentType_throwsNullPointerException() {
-        var attachment = new TestAttachment(getValidUtf8Data(), null,
-                "file.txt");
-        var exception = Assert.assertThrows(NullPointerException.class,
-                () -> LLMProviderHelpers.validateAttachment(attachment));
-        Assert.assertEquals("Attachment content type must not be null",
-                exception.getMessage());
-    }
-
-    @Test
-    public void validateAttachment_withNullData_throwsNullPointerException() {
-        var attachment = new TestAttachment(null, "text/plain", "file.txt");
-        var exception = Assert.assertThrows(NullPointerException.class,
-                () -> LLMProviderHelpers.validateAttachment(attachment));
-        Assert.assertEquals("Attachment data must not be null",
-                exception.getMessage());
-    }
-
     private static byte[] getInvalidUtf8Data() {
         return new byte[] { 'H', 'i', (byte) 0xFF, (byte) 0xFE };
     }
@@ -160,9 +113,5 @@ public class LLMProviderHelpersTest {
     private static byte[] getValidUtf8Data() {
         return "Hello, World! UTF-8: café résumé naïve"
                 .getBytes(StandardCharsets.UTF_8);
-    }
-
-    private record TestAttachment(byte[] data, String contentType,
-            String fileName) implements LLMProvider.Attachment {
     }
 }

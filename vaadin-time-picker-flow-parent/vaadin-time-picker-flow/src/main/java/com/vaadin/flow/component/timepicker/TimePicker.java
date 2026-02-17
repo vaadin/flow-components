@@ -35,6 +35,7 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -59,6 +60,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Time Picker is an input field for entering or selecting a specific time. The
@@ -109,7 +111,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.1.0-alpha7")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -183,6 +185,11 @@ public class TimePicker
 
     private ValidationController<TimePicker, LocalTime> validationController = new ValidationController<>(
             this);
+
+    private final SignalPropertySupport<LocalTime> minSupport = SignalPropertySupport
+            .create(this, value -> this.min = value);
+    private final SignalPropertySupport<LocalTime> maxSupport = SignalPropertySupport
+            .create(this, value -> this.max = value);
 
     /**
      * Default constructor.
@@ -815,6 +822,62 @@ public class TimePicker
      */
     public LocalTime getMax() {
         return this.max;
+    }
+
+    /**
+     * Binds the given signal to the minimum time allowed to be selected for
+     * this field.
+     * <p>
+     * When a signal is bound, the minimum time is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the minimum time manually
+     * through {@link #setMin(LocalTime)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the minimum time to, not {@code null}
+     * @see #setMin(LocalTime)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public void bindMin(Signal<LocalTime> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("min",
+                signal.map(
+                        time -> Objects.requireNonNullElse(format(time), "")),
+                null);
+        minSupport.bind(signal);
+    }
+
+    /**
+     * Binds the given signal to the maximum time allowed to be selected for
+     * this field.
+     * <p>
+     * When a signal is bound, the maximum time is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the maximum time manually
+     * through {@link #setMax(LocalTime)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the maximum time to, not {@code null}
+     * @see #setMax(LocalTime)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public void bindMax(Signal<LocalTime> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("max",
+                signal.map(
+                        time -> Objects.requireNonNullElse(format(time), "")),
+                null);
+        maxSupport.bind(signal);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
