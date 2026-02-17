@@ -233,12 +233,12 @@ public class AIOrchestrator {
         var userAIMessage = addUserMessageToList(userMessage, attachments);
 
         var messageId = UUID.randomUUID().toString();
-        var attachmentsCopy = List.copyOf(attachments);
         if (userAIMessage != null) {
             itemToMessageId.put(userAIMessage, messageId);
         }
 
-        if (!attachmentsCopy.isEmpty() && attachmentSubmitListener != null) {
+        if (!attachments.isEmpty() && attachmentSubmitListener != null) {
+            var attachmentsCopy = List.copyOf(attachments);
             attachmentSubmitListener.onAttachmentSubmit(
                     new AttachmentSubmitListener.AttachmentSubmitEvent(
                             messageId, attachmentsCopy));
@@ -478,8 +478,8 @@ public class AIOrchestrator {
 
         /**
          * Sets a listener that is called when a message with attachments is
-         * submitted to the LLM provider. This allows developers to store
-         * attachment data in their own storage. The listener receives a unique
+         * submitted to the LLM provider. This allows you to store
+         * attachment data in your own storage. The listener receives a unique
          * message ID that can later be used to identify the attachments when
          * they are clicked.
          *
@@ -496,7 +496,7 @@ public class AIOrchestrator {
         /**
          * Sets a listener that is called when an attachment in the message list
          * is clicked. The listener receives the message ID and attachment
-         * index, allowing developers to retrieve attachment data from their own
+         * index, allowing you to retrieve attachment data from your own
          * storage using the same message ID provided in
          * {@link AttachmentSubmitListener.AttachmentSubmitEvent#getMessageId()}.
          * <p>
