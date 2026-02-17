@@ -25,7 +25,7 @@ public class ScaleControl extends Control {
     private Unit units = Unit.METRIC;
     private DisplayMode displayMode = DisplayMode.LINE;
     private int scaleBarSteps = 4;
-    private boolean scaleBarTextVisible = false;
+    private boolean scaleBarRatioVisible = false;
 
     @Override
     public String getType() {
@@ -146,26 +146,27 @@ public class ScaleControl extends Control {
     }
 
     /**
-     * Returns whether to show the scale as proportion below the scale bar. This
-     * is only used when {@link #getDisplayMode()} returns
-     * {@link DisplayMode#BAR}.
+     * Returns whether to show the ratio between the size of the scale and the
+     * real distance on the ground below the scale bar. This is only used when
+     * {@link #getDisplayMode()} returns {@link DisplayMode#BAR}.
      *
-     * @return {@code true} if text is shown below the scale bar
+     * @return {@code true} if the ratio is shown below the scale bar
      */
-    public boolean isScaleBarTextVisible() {
-        return scaleBarTextVisible;
+    public boolean isScaleBarRatioVisible() {
+        return scaleBarRatioVisible;
     }
 
     /**
-     * Sets whether to show the scale as proportion below. This is only used
-     * when {@link #setDisplayMode(DisplayMode)} is set to
-     * {@link DisplayMode#BAR}. Default value is {@code false}.
+     * Sets whether to show the ratio between the size of the scale and the real
+     * distance on the ground below the scale bar. This is only used when
+     * {@link #setDisplayMode(DisplayMode)} is set to {@link DisplayMode#BAR}.
+     * Default value is {@code false}.
      *
-     * @param scaleBarTextVisible
-     *            {@code true} to show text below the scale bar
+     * @param scaleBarRatioVisible
+     *            {@code true} to show the ratio below the scale bar
      */
-    public void setScaleBarTextVisible(boolean scaleBarTextVisible) {
-        this.scaleBarTextVisible = scaleBarTextVisible;
+    public void setScaleBarRatioVisible(boolean scaleBarRatioVisible) {
+        this.scaleBarRatioVisible = scaleBarRatioVisible;
         markAsDirty();
     }
 
