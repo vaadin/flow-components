@@ -28,7 +28,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 import javax.imageio.ImageIO;
 
 import org.junit.After;
@@ -77,6 +76,8 @@ public class AIOrchestratorTest {
         mockMessageList = Mockito.mock(AIMessageList.class);
         mockInput = Mockito.mock(AIInput.class);
         mockFileReceiver = Mockito.mock(AIFileReceiver.class);
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(Collections.emptyList());
     }
 
     @After
@@ -160,17 +161,6 @@ public class AIOrchestratorTest {
 
         Mockito.verify(mockInput)
                 .addSubmitListener(Mockito.any(InputSubmitListener.class));
-    }
-
-    @Test
-    public void builder_withFileReceiver_configuresUploadHandler() {
-        AIOrchestrator.builder(mockProvider, null)
-                .withFileReceiver(mockFileReceiver).build();
-
-        Mockito.verify(mockFileReceiver)
-                .setUploadHandler(Mockito.any(UploadHandler.class));
-        Mockito.verify(mockFileReceiver)
-                .addFileRemovedListener(Mockito.any(Consumer.class));
     }
 
     @Test
@@ -567,25 +557,19 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withAttachments_includesAttachmentsInRequest()
-            throws Exception {
+    public void prompt_withAttachments_includesAttachmentsInRequest() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(mockMessage);
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
+        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
+                createAttachment("test.txt"), createAttachment("image.png")));
 
         var orchestrator = getSimpleOrchestrator();
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(createPendingAttachment("test.txt"));
-        pendingAttachments.add(createPendingAttachment("image.png"));
-
         orchestrator.prompt("Hello with attachment");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -599,24 +583,20 @@ public class AIOrchestratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void prompt_withAttachments_createsMessageWithAttachments()
-            throws Exception {
+    public void prompt_withAttachments_createsMessageWithAttachments() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(mockMessage);
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
+        var attachment = createAttachment("test.txt");
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(attachment));
 
         var orchestrator = getSimpleOrchestrator();
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(createPendingAttachment("test.txt"));
-
         orchestrator.prompt("Hello with attachment");
 
         var attachmentsCaptor = ArgumentCaptor.forClass(List.class);
@@ -784,29 +764,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void fileRemoval_withNonExistentFile_doesNothing() throws Exception {
-        var orchestrator = getSimpleOrchestrator();
-
-        var listenerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        Mockito.verify(mockFileReceiver)
-                .addFileRemovedListener(listenerCaptor.capture());
-
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(createPendingAttachment("existing.txt"));
-
-        Assert.assertEquals(1, pendingAttachments.size());
-
-        @SuppressWarnings("unchecked")
-        Consumer<String> fileRemovedListener = listenerCaptor.getValue();
-        fileRemovedListener.accept("non-existent.txt");
-
-        Assert.assertEquals(1, pendingAttachments.size());
-        Assert.assertEquals("existing.txt",
-                pendingAttachments.getFirst().name());
-    }
-
-    @Test
-    public void prompt_clearsPendingAttachments() throws Exception {
+    public void prompt_callsTakeAttachments() {
         mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -817,11 +775,8 @@ public class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = getSimpleOrchestrator();
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(createPendingAttachment("test.txt"));
         orchestrator.prompt("Hello");
-        Assert.assertTrue(pendingAttachments.isEmpty());
-        Mockito.verify(mockFileReceiver).clearFileList();
+        Mockito.verify(mockFileReceiver).takeAttachments();
     }
 
     @Test
@@ -1010,15 +965,7 @@ public class AIOrchestratorTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static List<AIAttachment> getPendingAttachments(
-            AIOrchestrator orchestrator) throws Exception {
-        var field = AIOrchestrator.class.getDeclaredField("pendingAttachments");
-        field.setAccessible(true);
-        return (List<AIAttachment>) field.get(orchestrator);
-    }
-
-    private static AIAttachment createPendingAttachment(String fileName) {
+    private static AIAttachment createAttachment(String fileName) {
         return new AIAttachment(fileName, "text/plain", "test".getBytes());
     }
 
@@ -1033,14 +980,13 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(flowMessageList).build();
-
         var largeImageData = createTestImage(initialWidth, initialHeight);
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(
-                new AIAttachment("large.png", "image/png", largeImageData));
+        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
+                new AIAttachment("large.png", "image/png", largeImageData)));
 
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList)
+                .withFileReceiver(mockFileReceiver).build();
         orchestrator.prompt("Check this image");
 
         var attachment = flowMessageList.getItems().getFirst().getAttachments()
@@ -1068,14 +1014,13 @@ public class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(flowMessageList).build();
-
         var smallImageData = createTestImage(initialWidth, initialHeight);
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(
-                new AIAttachment("small.png", "image/png", smallImageData));
+        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
+                new AIAttachment("small.png", "image/png", smallImageData)));
 
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList)
+                .withFileReceiver(mockFileReceiver).build();
         orchestrator.prompt("Check this small image");
 
         var attachment = flowMessageList.getItems().getFirst().getAttachments()
@@ -1089,19 +1034,18 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl()
-            throws Exception {
+    public void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl() {
         mockUi();
         var flowMessageList = new MessageList();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(new AIAttachment("document.pdf",
+                        "application/pdf", "fake pdf content".getBytes())));
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(flowMessageList).build();
-
-        var pendingAttachments = getPendingAttachments(orchestrator);
-        pendingAttachments.add(new AIAttachment("document.pdf",
-                "application/pdf", "fake pdf content".getBytes()));
+                .withMessageList(flowMessageList)
+                .withFileReceiver(mockFileReceiver).build();
         orchestrator.prompt("Check this document");
 
         var attachment = flowMessageList.getItems().getFirst().getAttachments()
