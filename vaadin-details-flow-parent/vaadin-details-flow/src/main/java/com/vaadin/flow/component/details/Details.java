@@ -319,8 +319,8 @@ public class Details extends Component implements HasComponents, HasSize,
      * unbinds the existing binding.
      * <p>
      * While a Signal is bound, any attempt to set the summary text manually
-     * throws {@link BindingActiveException}. Same happens when trying to bind
-     * a new Signal while one is already bound.
+     * throws {@link BindingActiveException}. Same happens when trying to bind a
+     * new Signal while one is already bound.
      *
      * @param signal
      *            the signal to bind or <code>null</code> to unbind any existing
