@@ -30,6 +30,23 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 public interface AIMessageList extends Serializable {
 
     /**
+     * Callback for attachment click events in the message list.
+     */
+    @FunctionalInterface
+    interface AttachmentClickCallback extends Serializable {
+        /**
+         * Called when an attachment in the message list is clicked.
+         *
+         * @param message
+         *            the message containing the clicked attachment
+         * @param attachmentIndex
+         *            the 0-based index of the clicked attachment within the
+         *            message
+         */
+        void onAttachmentClick(AIMessage message, int attachmentIndex);
+    }
+
+    /**
      * Adds a message to the list.
      *
      * @param message
@@ -50,4 +67,13 @@ public interface AIMessageList extends Serializable {
      */
     AIMessage createMessage(String text, String userName,
             List<AIAttachment> attachments);
+
+    /**
+     * Adds a listener that is called when an attachment in the message list is
+     * clicked.
+     *
+     * @param callback
+     *            the callback to invoke on attachment click
+     */
+    void addAttachmentClickListener(AttachmentClickCallback callback);
 }

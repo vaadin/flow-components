@@ -15,26 +15,50 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListItem;
 
 /**
  * Wrapper for Flow MessageList component to implement AIMessageList interface.
  */
-record MessageListWrapper(MessageList messageList) implements AIMessageList {
+class MessageListWrapper implements AIMessageList {
+
+    private final MessageList messageList;
+    private final Map<MessageListItem, AIMessage> itemToMessage = new HashMap<>();
+
+    MessageListWrapper(MessageList messageList) {
+        this.messageList = messageList;
+    }
 
     @Override
     public void addMessage(AIMessage message) {
-        messageList.addItem(((MessageListItemWrapper) message).getItem());
+        var item = ((MessageListItemWrapper) message).getItem();
+        itemToMessage.put(item, message);
+        messageList.addItem(item);
     }
 
     @Override
     public AIMessage createMessage(String text, String userName,
             List<AIAttachment> attachments) {
         return new MessageListItemWrapper(text, userName, attachments);
+    }
+
+    @Override
+    public void addAttachmentClickListener(AttachmentClickCallback callback) {
+        messageList.addAttachmentClickListener(clickEvent -> {
+            var aiMessage = itemToMessage.get(clickEvent.getItem());
+            if (aiMessage != null) {
+                var attIndex = clickEvent.getItem().getAttachments()
+                        .indexOf(clickEvent.getAttachment());
+                callback.onAttachmentClick(aiMessage, attIndex);
+            }
+        });
     }
 }
