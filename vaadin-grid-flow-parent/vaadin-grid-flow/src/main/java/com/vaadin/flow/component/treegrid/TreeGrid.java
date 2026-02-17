@@ -960,9 +960,8 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Override
     public void scrollToIndex(int index) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0);", index)));
+        scheduleScrollExecution(
+                () -> getElement().executeJs("this.scrollToIndex($0);", index));
     }
 
     /**
@@ -1005,17 +1004,14 @@ public class TreeGrid<T> extends Grid<T>
                     "At least one index should be provided.");
         }
 
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex(...$0);", path)));
+        scheduleScrollExecution(() -> getElement()
+                .executeJs("this.scrollToIndex(...$0);", path));
     }
 
     @Override
     public void scrollToEnd() {
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        ctx -> getElement().executeJs(
-                                "this.scrollToIndex(...Array(10).fill(-1))")));
+        scheduleScrollExecution(() -> getElement()
+                .executeJs("this.scrollToIndex(...Array(10).fill(-1))"));
     }
 
     /**
@@ -1139,11 +1135,9 @@ public class TreeGrid<T> extends Grid<T>
         var itemKey = dataCommunicator.getKeyMapper().key(item);
         var itemIndexPath = dataCommunicator.resolveItem(item);
 
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        ctx -> getElement().executeJs(
-                                "this.$connector.scrollToItem($0, ...$1)",
-                                itemKey, itemIndexPath)));
+        scheduleScrollExecution(() -> getElement().executeJs(
+                "this.$connector.scrollToItem($0, ...$1)", itemKey,
+                itemIndexPath));
     }
 
     @Override

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.icon;
 
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -333,20 +334,19 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * value while the component is attached. When the component is detached,
      * signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the symbol manually through
      * {@link #setSymbol(String)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the symbol to, or {@code null} to unbind
+     *            the signal to bind the symbol to, not {@code null}
      * @see #setSymbol(String)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindSymbol(Signal<String> signal) {
-        getElement().bindProperty("symbol", signal);
+        getElement().bindProperty("symbol", signal, null);
     }
 
     @Override

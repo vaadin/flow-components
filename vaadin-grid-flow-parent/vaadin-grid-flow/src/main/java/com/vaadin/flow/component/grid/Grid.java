@@ -129,6 +129,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
@@ -212,8 +213,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.1.0-alpha6")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/grid", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-alpha7")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -1393,6 +1394,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private static final String EMPTY_STATE_SLOT = "empty-state";
     private Component emptyStateComponent;
     private String emptyStateText;
+
+    private StateTree.ExecutionRegistration pendingScrollRegistration;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -3306,6 +3309,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Schedules a scroll-related action to be executed before the next client
+     * response. Cancels any previously scheduled scroll action, ensuring that
+     * only the last scroll call takes effect.
+     *
+     * @param action
+     *            the scroll action to execute
+     */
+    protected void scheduleScrollExecution(SerializableRunnable action) {
+        getElement().getNode().runWhenAttached(ui -> {
+            if (pendingScrollRegistration != null) {
+                pendingScrollRegistration.remove();
+            }
+            pendingScrollRegistration = ui.beforeClientResponse(this, ctx -> {
+                action.run();
+                pendingScrollRegistration = null;
+            });
+        });
+    }
+
+    /**
      * Adds a selection listener to the current selection model.
      * <p>
      * This is a shorthand for
@@ -4974,8 +4997,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void scrollToIndex(int rowIndex) {
         setViewportRangeByIndex(rowIndex);
 
-        // Scroll to the requested index
-        getElement().callJsFunction("scrollToIndex", rowIndex);
+        scheduleScrollExecution(
+                () -> getElement().callJsFunction("scrollToIndex", rowIndex));
     }
 
     private void setViewportRangeByIndex(int rowIndex) {
@@ -5034,8 +5057,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         setViewportRangeByIndex(itemIndex);
 
-        getElement().callJsFunction("$connector.scrollToItem", itemKey,
-                itemIndex);
+        scheduleScrollExecution(() -> getElement()
+                .callJsFunction("$connector.scrollToItem", itemKey, itemIndex));
     }
 
     /**
@@ -5049,15 +5072,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex(this._flatSize)")));
+        scheduleScrollExecution(() -> getElement()
+                .executeJs("this.scrollToIndex(this._flatSize)"));
     }
 
     /**
      * Scrolls the grid horizontally to make the column with the given index
      * visible. The index refers to visible columns, in their visual order.
-     * 
+     *
      * @param columnIndex
      *            the index of the column to scroll to
      */
@@ -5067,7 +5089,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Scrolls the grid horizontally to make the given column visible.
-     * 
+     *
      * @param column
      *            the column to scroll to
      */

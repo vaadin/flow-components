@@ -26,12 +26,42 @@ public enum SelectVariant implements ThemeVariant {
     LUMO_ALIGN_CENTER("align-center"),
     LUMO_ALIGN_RIGHT("align-right"),
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
+    /**
+     * @deprecated Use {@link #ALIGN_LEFT} instead.
+     */
+    @Deprecated
     AURA_ALIGN_LEFT("align-left"),
+    /**
+     * @deprecated Use {@link #ALIGN_CENTER} instead.
+     */
+    @Deprecated
     AURA_ALIGN_CENTER("align-center"),
+    /**
+     * @deprecated Use {@link #ALIGN_RIGHT} instead.
+     */
+    @Deprecated
     AURA_ALIGN_RIGHT("align-right"),
+    /**
+     * @deprecated Use {@link #ALIGN_START} instead.
+     */
+    @Deprecated
     AURA_ALIGN_START("align-start"),
+    /**
+     * @deprecated Use {@link #ALIGN_END} instead.
+     */
+    @Deprecated
     AURA_ALIGN_END("align-end"),
-    AURA_HELPER_ABOVE_FIELD("helper-above-field");
+    /**
+     * @deprecated Use {@link #HELPER_ABOVE} instead.
+     */
+    @Deprecated
+    AURA_HELPER_ABOVE_FIELD("helper-above-field"),
+    ALIGN_LEFT("align-left"),
+    ALIGN_CENTER("align-center"),
+    ALIGN_RIGHT("align-right"),
+    ALIGN_START("align-start"),
+    ALIGN_END("align-end"),
+    HELPER_ABOVE("helper-above-field");
 
     private final String variant;
 

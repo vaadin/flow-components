@@ -26,6 +26,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.signals.Signal;
 
@@ -76,7 +77,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/number-field", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/number-field", version = "25.1.0-alpha7")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -292,17 +293,15 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the minimum value manually
      * through {@link #setMin(double)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the minimum value to, or {@code null} to
-     *            unbind
+     *            the signal to bind the minimum value to, not {@code null}
      * @see #setMin(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<Double> signal) {
@@ -316,17 +315,15 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * signal value while the component is attached. When the component is
      * detached, signal value changes have no effect.
      * <p>
-     * Passing {@code null} as the signal unbinds the existing binding.
-     * <p>
      * While a signal is bound, any attempt to set the maximum value manually
      * through {@link #setMax(double)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the signal to bind the maximum value to, or {@code null} to
-     *            unbind
+     *            the signal to bind the maximum value to, not {@code null}
      * @see #setMax(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<Double> signal) {

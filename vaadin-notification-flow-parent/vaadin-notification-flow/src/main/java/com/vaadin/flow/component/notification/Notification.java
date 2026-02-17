@@ -17,6 +17,7 @@ package com.vaadin.flow.component.notification;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +46,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -55,7 +57,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.1.0-alpha6")
+@NpmPackage(value = "@vaadin/notification", version = "25.1.0-alpha7")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -799,6 +801,36 @@ public class Notification extends Component implements HasComponents, HasStyle,
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "Notification does not support adding styles to card element");
+    }
+
+    /**
+     * Notification does not support binding children directly.
+     * <p>
+     * Add a container component, such as {@code Div}, to the Notification and
+     * use {@code bindChildren} on the container component instead.
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * {@code
+     * Notification notification = new Notification();
+     * Div container = new Div();
+     * notification.add(container);
+     * container.bindChildren(itemsSignal, item -> new Span(item.getText()));
+     * }
+     * </pre>
+     *
+     * @throws UnsupportedOperationException
+     *             always thrown, as Notification does not support binding
+     *             children directly
+     */
+    @Override
+    public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,
+            SerializableFunction<S, Component> childFactory) {
+        throw new UnsupportedOperationException(
+                "Notification does not support binding children directly. "
+                        + "Add a container component, such as Div, to the Notification "
+                        + "and use bindChildren on the container component instead.");
     }
 
     SignalPropertySupport<String> getTextSupport() {

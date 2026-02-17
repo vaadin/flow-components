@@ -15,10 +15,15 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
@@ -29,11 +34,13 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.server.streams.UploadResult;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -77,16 +84,23 @@ public class UploadManager implements Serializable {
     // Upload state tracking
     private final AtomicInteger activeUploads = new AtomicInteger(0);
 
+    // Accepted file type restrictions (used for both client hints and
+    // server-side validation)
+    private List<String> acceptedMimeTypes = List.of();
+    private List<String> acceptedFileExtensions = List.of();
+
+    private final AtomicBoolean handlerExplicitlyConfigured = new AtomicBoolean();
+
     /**
      * Creates a new upload manager without an upload handler. The handler must
      * be set using {@link #setUploadHandler(UploadHandler)} before uploads can
      * work.
      *
      * @param owner
-     *            the component that owns this manager. The manager's lifecycle
-     *            is tied to the owner's lifecycle - when the owner is detached
-     *            from the UI, uploads will stop working. The owner is typically
-     *            the view or layout containing the upload UI components.
+     *            The manager's lifecycle is tied to the owner's lifecycle -
+     *            when the owner is detached from the UI or disabled, uploads
+     *            will stop working. The owner is typically the view or layout
+     *            containing the upload UI components.
      */
     public UploadManager(Component owner) {
         this(owner, null);
@@ -96,10 +110,10 @@ public class UploadManager implements Serializable {
      * Creates a new upload manager with the given upload handler.
      *
      * @param owner
-     *            the component that owns this manager. The manager's lifecycle
-     *            is tied to the owner's lifecycle - when the owner is detached
-     *            from the UI, uploads will stop working. The owner is typically
-     *            the view or layout containing the upload UI components.
+     *            The manager's lifecycle is tied to the owner's lifecycle -
+     *            when the owner is detached from the UI or disabled, uploads
+     *            will stop working. The owner is typically the view or layout
+     *            containing the upload UI components.
      * @param handler
      *            the upload handler to use
      */
@@ -190,9 +204,14 @@ public class UploadManager implements Serializable {
             throw new IllegalArgumentException(
                     "The target name cannot be blank");
         }
+        if (!(handler instanceof FailFastUploadHandler)) {
+            handlerExplicitlyConfigured.set(true);
+        }
+        // Wrap handler with file type validation
+        UploadHandler validatingHandler = wrapWithFileTypeValidation(handler);
         // Wrap handler with ElementStreamResource to use custom target name
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                handler, connector.getElement()) {
+                validatingHandler, connector.getElement()) {
             @Override
             public String getName() {
                 return targetName;
@@ -249,43 +268,241 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Specify the types of files that the upload accepts. Syntax: a MIME type
-     * pattern (wildcards are allowed) or file extensions. Notice that MIME
-     * types are widely supported, while file extensions are only implemented in
-     * certain browsers, so it should be avoided.
+     * Sets the accepted MIME types for uploads. Only files matching these MIME
+     * types will be accepted. Wildcard patterns like {@code "image/*"} are
+     * supported.
      * <p>
-     * Example: <code>"video/*","image/tiff"</code> or
-     * <code>".pdf","audio/mp3"</code>
+     * MIME types are used both as a client-side hint (to filter the file
+     * picker) and for server-side validation (to reject uploads that don't
+     * match).
+     * <p>
+     * If both MIME types and file extensions are configured, a file must match
+     * at least one of each (AND logic).
      *
-     * @param acceptedFileTypes
-     *            the allowed file types to be uploaded, or {@code null} to
-     *            clear any restrictions
+     * @param mimeTypes
+     *            the accepted MIME types, e.g. {@code "image/*"},
+     *            {@code "application/pdf"}; or {@code null} to clear
+     * @throws IllegalArgumentException
+     *             if any value is null, blank, or does not contain a {@code /}
+     *             character
      */
-    public void setAcceptedFileTypes(String... acceptedFileTypes) {
-        String accept = "";
-        if (acceptedFileTypes != null) {
-            for (String fileType : acceptedFileTypes) {
-                if (fileType == null || fileType.isBlank()) {
+    public void setAcceptedMimeTypes(String... mimeTypes) {
+        if (mimeTypes == null || mimeTypes.length == 0) {
+            acceptedMimeTypes = List.of();
+        } else {
+            for (String mimeType : mimeTypes) {
+                if (mimeType == null || mimeType.isBlank()) {
                     throw new IllegalArgumentException(
-                            "Accepted file types cannot contain null or blank values");
+                            "MIME types cannot contain null or blank values");
+                }
+                if (!mimeType.contains("/")) {
+                    throw new IllegalArgumentException(
+                            "MIME type must contain a '/' character: "
+                                    + mimeType);
                 }
             }
-            accept = String.join(",", acceptedFileTypes);
+            acceptedMimeTypes = List.of(mimeTypes);
         }
-        connector.getElement().setProperty("accept", accept);
+        updateAcceptProperty();
     }
 
     /**
-     * Get the list of accepted file types for upload.
+     * Gets the list of accepted MIME types for upload.
      *
-     * @return a list of allowed file types, never {@code null}
+     * @return a list of accepted MIME types, never {@code null}
      */
-    public List<String> getAcceptedFileTypes() {
-        String accept = connector.getElement().getProperty("accept", "");
-        if (accept.isEmpty()) {
-            return List.of();
+    public List<String> getAcceptedMimeTypes() {
+        return acceptedMimeTypes;
+    }
+
+    /**
+     * Sets the accepted file extensions for uploads. Only files with matching
+     * extensions will be accepted. Extensions must start with a dot, e.g.
+     * {@code ".pdf"}, {@code ".txt"}.
+     * <p>
+     * File extensions are used both as a client-side hint and for server-side
+     * validation.
+     * <p>
+     * If both MIME types and file extensions are configured, a file must match
+     * at least one of each (AND logic).
+     *
+     * @param extensions
+     *            the accepted file extensions, each starting with a dot; or
+     *            {@code null} to clear
+     * @throws IllegalArgumentException
+     *             if any value is null, blank, or does not start with a dot
+     */
+    public void setAcceptedFileExtensions(String... extensions) {
+        if (extensions == null || extensions.length == 0) {
+            acceptedFileExtensions = List.of();
+        } else {
+            for (String ext : extensions) {
+                if (ext == null || ext.isBlank()) {
+                    throw new IllegalArgumentException(
+                            "File extensions cannot contain null or blank values");
+                }
+                if (!ext.startsWith(".")) {
+                    throw new IllegalArgumentException(
+                            "File extension must start with '.': " + ext);
+                }
+            }
+            acceptedFileExtensions = List.of(extensions);
         }
-        return List.of(accept.split(","));
+        updateAcceptProperty();
+    }
+
+    /**
+     * Gets the list of accepted file extensions for upload.
+     *
+     * @return a list of accepted file extensions, never {@code null}
+     */
+    public List<String> getAcceptedFileExtensions() {
+        return acceptedFileExtensions;
+    }
+
+    /**
+     * Wraps the given upload handler with file type validation. The wrapper
+     * reads the current {@link #acceptedMimeTypes} and
+     * {@link #acceptedFileExtensions} at the time of each upload request, so
+     * changes made after {@link #setUploadHandler} are picked up.
+     * <p>
+     * NOTE: If new methods are added to {@link UploadHandler} or
+     * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
+     * be explicitly delegated here.
+     */
+    private UploadHandler wrapWithFileTypeValidation(UploadHandler delegate) {
+        return new UploadHandler() {
+            @Override
+            public void handleUploadRequest(UploadEvent event)
+                    throws IOException {
+                List<String> mimeTypes = acceptedMimeTypes;
+                List<String> extensions = acceptedFileExtensions;
+                if ((!mimeTypes.isEmpty() || !extensions.isEmpty())
+                        && !isFileTypeAccepted(event.getFileName(),
+                                event.getContentType(), mimeTypes,
+                                extensions)) {
+                    event.reject(
+                            "File type not allowed: " + event.getFileName());
+                    return;
+                }
+                delegate.handleUploadRequest(event);
+            }
+
+            @Override
+            public void responseHandled(UploadResult result) {
+                delegate.responseHandled(result);
+            }
+
+            @Override
+            public long getRequestSizeMax() {
+                return delegate.getRequestSizeMax();
+            }
+
+            @Override
+            public long getFileSizeMax() {
+                return delegate.getFileSizeMax();
+            }
+
+            @Override
+            public long getFileCountMax() {
+                return delegate.getFileCountMax();
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return delegate.getUrlPostfix();
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return delegate.isAllowInert();
+            }
+
+            @Override
+            public DisabledUpdateMode getDisabledUpdateMode() {
+                return delegate.getDisabledUpdateMode();
+            }
+        };
+    }
+
+    /**
+     * Checks whether a file is accepted based on the configured MIME types and
+     * file extensions. Each configured source acts as an independent gate: if
+     * MIME types are configured, the file's content type must match at least
+     * one; if extensions are configured, the file name must match at least one.
+     * When both are configured, both checks must pass (AND logic).
+     */
+    private static boolean isFileTypeAccepted(String fileName,
+            String contentType, List<String> mimeTypes,
+            List<String> extensions) {
+        if (!mimeTypes.isEmpty()
+                && !matchesAnyMimeType(contentType, mimeTypes)) {
+            return false;
+        }
+        return extensions.isEmpty()
+                || matchesAnyExtension(fileName, extensions);
+    }
+
+    private static boolean matchesAnyMimeType(String contentType,
+            List<String> mimeTypes) {
+        for (String pattern : mimeTypes) {
+            if (matchesMimeType(contentType, pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean matchesAnyExtension(String fileName,
+            List<String> extensions) {
+        if (fileName == null) {
+            return false;
+        }
+        String lowerFileName = fileName.toLowerCase(Locale.ENGLISH);
+        for (String ext : extensions) {
+            if (lowerFileName.endsWith(ext.toLowerCase(Locale.ENGLISH))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether an actual MIME type matches a pattern. Supports exact
+     * match and wildcard patterns like {@code "image/*"}. Parameters in the
+     * actual MIME type (e.g. {@code "text/html; charset=utf-8"}) are stripped
+     * before comparison.
+     */
+    private static boolean matchesMimeType(String actual, String pattern) {
+        if (actual == null || pattern == null) {
+            return false;
+        }
+        // Strip MIME type parameters (e.g. "; charset=utf-8")
+        int semicolonIndex = actual.indexOf(';');
+        if (semicolonIndex >= 0) {
+            actual = actual.substring(0, semicolonIndex).trim();
+        }
+        if (actual.equalsIgnoreCase(pattern)) {
+            return true;
+        }
+        if (pattern.endsWith("/*")) {
+            String prefix = pattern.substring(0, pattern.length() - 1);
+            return actual.toLowerCase(Locale.ENGLISH)
+                    .startsWith(prefix.toLowerCase(Locale.ENGLISH));
+        }
+        return false;
+    }
+
+    /**
+     * Derives and sets the client-side {@code accept} property from the
+     * configured MIME types and file extensions.
+     */
+    private void updateAcceptProperty() {
+        String accept = Stream
+                .concat(acceptedMimeTypes.stream(),
+                        acceptedFileExtensions.stream())
+                .collect(Collectors.joining(","));
+        connector.getElement().setProperty("accept", accept);
     }
 
     /**
@@ -391,7 +608,7 @@ public class UploadManager implements Serializable {
     /**
      * Adds a listener for {@code file-reject} events fired when a file cannot
      * be added due to some constraints:
-     * {@code setMaxFileSize, setMaxFiles, setAcceptedFileTypes}
+     * {@code setMaxFileSize, setMaxFiles, setAcceptedMimeTypes, setAcceptedFileExtensions}
      *
      * @param listener
      *            the listener
@@ -429,7 +646,7 @@ public class UploadManager implements Serializable {
      */
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload-manager-connector.ts")
-    @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha6")
+    @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha7")
     static class Connector extends Component {
         @Override
         protected void onAttach(AttachEvent attachEvent) {
@@ -450,6 +667,15 @@ public class UploadManager implements Serializable {
                 throw new ModularUploadExperimentalFeatureException();
             }
         }
+    }
+
+    /**
+     * Returns whether an UploadHandler is explicitly configured.
+     * <p>
+     * Intended only for internal use.
+     */
+    boolean isHandlerExplicitlyConfigured() {
+        return handlerExplicitlyConfigured.get();
     }
 
     /**

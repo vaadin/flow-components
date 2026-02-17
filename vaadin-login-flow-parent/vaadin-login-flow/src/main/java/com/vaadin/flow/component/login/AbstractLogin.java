@@ -177,8 +177,6 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * When the error state becomes {@code true}, the component is automatically
      * enabled.
      * <p>
-     * Passing {@code null} as the errorSignal unbinds the existing binding.
-     * <p>
      * While a errorSignal is bound, any attempt to set the error state manually
      * through {@link #setError(boolean)} throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.
@@ -189,8 +187,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * Signal's value {@code null} is treated as {@code false}.
      *
      * @param errorSignal
-     *            the errorSignal to bind the error state to, or {@code null} to
-     *            unbind
+     *            the errorSignal to bind the error state to, not {@code null}
      * @see #setError(boolean)
      * @since 25.1
      */
@@ -200,7 +197,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
                         .map(error -> error == null ? Boolean.FALSE : error);
 
         errorSupport.bind(mappedSignal);
-        getElement().bindProperty(PROP_ERROR, mappedSignal);
+        getElement().bindProperty(PROP_ERROR, mappedSignal, null);
     }
 
     /**
