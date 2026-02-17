@@ -17,8 +17,11 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -39,6 +42,7 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -110,6 +114,9 @@ public class AIOrchestrator {
     private Object[] tools = new Object[0];
     private String userName;
     private String assistantName;
+    private AttachmentSubmitListener attachmentSubmitListener;
+    private AttachmentClickListener attachmentClickListener;
+    private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
@@ -163,11 +170,12 @@ public class AIOrchestrator {
         doPrompt(userMessage);
     }
 
-    private void addUserMessageToList(String userMessage,
+    private AIMessage addUserMessageToList(String userMessage,
             List<AIAttachment> attachments) {
         if (messageList != null) {
-            messageList.addMessage(userMessage, userName, attachments);
+            return messageList.addMessage(userMessage, userName, attachments);
         }
+        return null;
     }
 
     private AIMessage createAssistantMessagePlaceholder() {
@@ -219,9 +227,23 @@ public class AIOrchestrator {
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
+
         var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
                 : List.<AIAttachment> of();
-        addUserMessageToList(userMessage, attachments);
+        var userAIMessage = addUserMessageToList(userMessage, attachments);
+
+        var messageId = UUID.randomUUID().toString();
+        if (userAIMessage != null) {
+            itemToMessageId.put(userAIMessage, messageId);
+        }
+
+        if (!attachments.isEmpty() && attachmentSubmitListener != null) {
+            var attachmentsCopy = List.copyOf(attachments);
+            attachmentSubmitListener.onAttachmentSubmit(
+                    new AttachmentSubmitListener.AttachmentSubmitEvent(
+                            messageId, attachmentsCopy));
+        }
+
         var assistantMessage = createAssistantMessagePlaceholder();
         String effectiveSystemPrompt = null;
         if (systemPrompt != null && !systemPrompt.isBlank()) {
@@ -312,6 +334,8 @@ public class AIOrchestrator {
         private Object[] tools = new Object[0];
         private String userName;
         private String assistantName;
+        private AttachmentSubmitListener attachmentSubmitListener;
+        private AttachmentClickListener attachmentClickListener;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -453,6 +477,44 @@ public class AIOrchestrator {
         }
 
         /**
+         * Sets a listener that is called when a message with attachments is
+         * submitted to the LLM provider. This allows you to store attachment
+         * data in your own storage. The listener receives a unique message ID
+         * that can later be used to identify the attachments when they are
+         * clicked.
+         *
+         * @param listener
+         *            the listener to call on attachment submit
+         * @return this builder
+         */
+        public Builder withAttachmentSubmitListener(
+                AttachmentSubmitListener listener) {
+            this.attachmentSubmitListener = listener;
+            return this;
+        }
+
+        /**
+         * Sets a listener that is called when an attachment in the message list
+         * is clicked. The listener receives the message ID and attachment
+         * index, allowing you to retrieve attachment data from your own storage
+         * using the same message ID provided in
+         * {@link AttachmentSubmitListener.AttachmentSubmitEvent#getMessageId()}.
+         * <p>
+         * Note: This listener requires a message list to be configured via
+         * {@link #withMessageList(MessageList)}. If no message list is set, the
+         * listener will have no effect.
+         *
+         * @param listener
+         *            the listener to call on attachment click
+         * @return this builder
+         */
+        public Builder withAttachmentClickListener(
+                AttachmentClickListener listener) {
+            this.attachmentClickListener = listener;
+            return this;
+        }
+
+        /**
          * Builds the orchestrator.
          *
          * @return the configured orchestrator
@@ -466,9 +528,22 @@ public class AIOrchestrator {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
+            orchestrator.attachmentSubmitListener = attachmentSubmitListener;
+            orchestrator.attachmentClickListener = attachmentClickListener;
             if (input != null) {
                 input.addSubmitListener(
                         e -> orchestrator.doPrompt(e.getValue()));
+            }
+
+            if (attachmentClickListener != null && messageList != null) {
+                messageList.addAttachmentClickListener((message, attIndex) -> {
+                    var messageId = orchestrator.itemToMessageId.get(message);
+                    if (messageId != null) {
+                        orchestrator.attachmentClickListener.onAttachmentClick(
+                                new AttachmentClickListener.AttachmentClickEvent(
+                                        messageId, attIndex));
+                    }
+                });
             }
             LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
                     + "fileReceiver={}, tools={}, userName={}, assistantName={}",
