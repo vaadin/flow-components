@@ -57,7 +57,9 @@ class MessageListWrapper implements AIMessageList {
             if (aiMessage != null) {
                 var attIndex = clickEvent.getItem().getAttachments()
                         .indexOf(clickEvent.getAttachment());
-                callback.onAttachmentClick(aiMessage, attIndex);
+                if (attIndex >= 0) {
+                    callback.onAttachmentClick(aiMessage, attIndex);
+                }
             }
         });
     }

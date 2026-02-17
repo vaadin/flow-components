@@ -116,7 +116,7 @@ public class AIOrchestrator {
     private String assistantName;
     private AttachmentSubmitListener attachmentSubmitListener;
     private AttachmentClickListener attachmentClickListener;
-    private final Map<Object, String> itemToMessageId = new HashMap<>();
+    private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
@@ -504,6 +504,10 @@ public class AIOrchestrator {
          * index, allowing developers to retrieve attachment data from their own
          * storage using the same message ID provided in
          * {@link AttachmentSubmitListener.AttachmentSubmitEvent#getMessageId()}.
+         * <p>
+         * Note: This listener requires a message list to be configured via
+         * {@link #withMessageList(MessageList)}. If no message list is set, the
+         * listener will have no effect.
          *
          * @param listener
          *            the listener to call on attachment click

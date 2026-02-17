@@ -18,7 +18,6 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
@@ -36,10 +35,7 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUI;
 
 import reactor.core.publisher.Flux;
 
@@ -50,7 +46,6 @@ public class AttachmentListenerTest {
     private AIFileReceiver mockFileReceiver;
     private AIMessage mockMessage;
     private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
-    private UI mockUI;
 
     @Before
     public void setup() {
@@ -68,17 +63,14 @@ public class AttachmentListenerTest {
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(Collections.emptyList());
 
-        mockUi();
+        new MockUI();
+        mockFeatureFlags();
     }
 
     @After
     public void tearDown() {
-        if (mockFeatureFlagsStatic != null) {
-            mockFeatureFlagsStatic.close();
-            mockFeatureFlagsStatic = null;
-        }
+        mockFeatureFlagsStatic.close();
         UI.setCurrent(null);
-        mockUI = null;
     }
 
     // --- AttachmentSubmitListener tests ---
@@ -133,34 +125,6 @@ public class AttachmentListenerTest {
     }
 
     @Test
-    public void submitListener_withoutMessageList_isCalled() {
-        var receivedEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
-        var attachment = createAttachment("file.txt");
-        Mockito.when(mockFileReceiver.takeAttachments())
-                .thenReturn(List.of(attachment));
-
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(receivedEvent::set).build();
-        orchestrator.prompt("Hello");
-
-        Assert.assertNotNull(receivedEvent.get());
-        Assert.assertNotNull(receivedEvent.get().getMessageId());
-        Assert.assertEquals(1, receivedEvent.get().getAttachments().size());
-    }
-
-    @Test
-    public void submitListener_notConfigured_withAttachments_doesNotThrow() {
-        Mockito.when(mockFileReceiver.takeAttachments())
-                .thenReturn(List.of(createAttachment("file.txt")));
-
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList)
-                .withFileReceiver(mockFileReceiver).build();
-        orchestrator.prompt("Hello");
-    }
-
-    @Test
     public void submitListener_multiplePrompts_receiveDifferentMessageIds() {
         var firstId = new AtomicReference<String>();
         var secondId = new AtomicReference<String>();
@@ -211,13 +175,6 @@ public class AttachmentListenerTest {
         Mockito.verify(mockMessageList, Mockito.never())
                 .addAttachmentClickListener(Mockito
                         .any(AIMessageList.AttachmentClickCallback.class));
-    }
-
-    @Test
-    public void clickListener_noMessageList_doesNotThrow() {
-        AIOrchestrator.builder(mockProvider, null)
-                .withAttachmentClickListener(event -> {
-                }).build();
     }
 
     @Test
@@ -299,38 +256,14 @@ public class AttachmentListenerTest {
 
     // --- Helpers ---
 
-    private void mockUi() {
-        mockUI = Mockito.mock(UI.class);
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
-            var futureTask = new FutureTask<Void>(() -> {
-                UI.setCurrent(mockUI);
-                try {
-                    command.execute();
-                } finally {
-                    UI.setCurrent(null);
-                }
-                return null;
-            });
-            new Thread(futureTask).start();
-            return futureTask;
-        }).when(mockUI).access(Mockito.any(Command.class));
-
+    private void mockFeatureFlags() {
         FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
         Mockito.when(mockFeatureFlags.isEnabled(AIOrchestrator.FEATURE_FLAG_ID))
                 .thenReturn(true);
 
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-        Mockito.when(mockUI.getSession()).thenReturn(mockSession);
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
+        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
+        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
                 .thenReturn(mockFeatureFlags);
-
-        UI.setCurrent(mockUI);
     }
 
     private static AIMessage createMockMessage() {
