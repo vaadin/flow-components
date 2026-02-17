@@ -28,7 +28,7 @@ public class ScaleControlTest {
         Assert.assertEquals(ScaleControl.DisplayMode.LINE,
                 scaleControl.getDisplayMode());
         Assert.assertEquals(4, scaleControl.getScaleBarSteps());
-        Assert.assertFalse(scaleControl.isScaleBarTextVisible());
+        Assert.assertFalse(scaleControl.isScaleBarRatioVisible());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ScaleControlTest {
 
     @Test
     public void setScaleBarTextVisible() {
-        scaleControl.setScaleBarTextVisible(true);
-        Assert.assertTrue(scaleControl.isScaleBarTextVisible());
+        scaleControl.setScaleBarRatioVisible(true);
+        Assert.assertTrue(scaleControl.isScaleBarRatioVisible());
     }
 }

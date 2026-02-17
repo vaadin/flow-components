@@ -64,7 +64,7 @@ public class ScaleControlIT extends AbstractComponentIT {
     public void barMode_togglesText() {
         clickElementWithJs("toggle-display-mode");
         assertBarMode("km", 4, false);
-        clickElementWithJs("toggle-scale-bar-text");
+        clickElementWithJs("toggle-scale-bar-ratio");
         assertBarMode("km", 4, true);
     }
 
@@ -85,7 +85,7 @@ public class ScaleControlIT extends AbstractComponentIT {
     }
 
     private void assertBarMode(String expectedUnit, int expectedSteps,
-            boolean textEnabled) {
+            boolean ratioVisible) {
         TestBenchElement scaleBar = map.$(TestBenchElement.class)
                 .withClassName("ol-scale-bar").withoutClassName("ol-scale-line")
                 .first();
@@ -107,17 +107,16 @@ public class ScaleControlIT extends AbstractComponentIT {
                     "Each scale bar step should have a positive width",
                     width > 0);
         }
-        boolean hasScaleText = scaleBar.$(TestBenchElement.class)
+        boolean hasRatio = scaleBar.$(TestBenchElement.class)
                 .withClassName("ol-scale-text").exists();
-        if (textEnabled) {
-            Assert.assertTrue("Scale text should be present", hasScaleText);
+        if (ratioVisible) {
+            Assert.assertTrue("Ratio text should be present", hasRatio);
             TestBenchElement scaleText = scaleBar.$(TestBenchElement.class)
                     .withClassName("ol-scale-text").first();
-            Assert.assertFalse("Scale text should not be empty",
+            Assert.assertFalse("Ratio text should not be empty",
                     scaleText.getText().isEmpty());
         } else {
-            Assert.assertFalse("Scale text should not be present",
-                    hasScaleText);
+            Assert.assertFalse("Ratio text should not be present", hasRatio);
         }
     }
 }
