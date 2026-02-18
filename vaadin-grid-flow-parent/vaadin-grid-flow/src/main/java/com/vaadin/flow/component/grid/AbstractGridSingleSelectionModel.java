@@ -29,7 +29,12 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionEvent;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementEffect;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -142,6 +147,45 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             @Override
             public Element getElement() {
                 return getGrid().getElement();
+            }
+
+            @Override
+            public void bindValue(Signal<T> valueSignal,
+                    SerializableConsumer<T> writeCallback) {
+                Objects.requireNonNull(valueSignal, "Signal cannot be null");
+                SignalBindingFeature feature = getElement().getNode()
+                        .getFeature(SignalBindingFeature.class);
+
+                if (feature.hasBinding(SignalBindingFeature.VALUE)) {
+                    throw new BindingActiveException();
+                }
+
+                boolean[] fromSignal = { false };
+
+                Registration effectReg = ElementEffect.bind(getElement(),
+                        valueSignal, (element, value) -> {
+                            try {
+                                fromSignal[0] = true;
+                                setValue(value);
+                            } finally {
+                                fromSignal[0] = false;
+                            }
+                        });
+
+                Registration listenerReg = addValueChangeListener(event -> {
+                    if (!fromSignal[0]) {
+                        if (writeCallback != null) {
+                            writeCallback.accept(getValue());
+                        }
+                    }
+                });
+
+                Registration combined = () -> {
+                    effectReg.remove();
+                    listenerReg.remove();
+                };
+                feature.setBinding(SignalBindingFeature.VALUE, combined,
+                        valueSignal, writeCallback);
             }
         };
     }
