@@ -91,6 +91,7 @@ public class TabSheetTest {
     public void addTab_contentAdded() {
         var content = new Span("Content 0");
         tabSheet.add("Tab 0", content);
+        flushBeforeClientResponse();
         Assert.assertTrue(content.getParent().isPresent());
     }
 
@@ -99,6 +100,7 @@ public class TabSheetTest {
         // Add a tab with content
         var content0 = new Span("Content 0");
         var tab0 = tabSheet.add("Tab 0", content0);
+        flushBeforeClientResponse();
 
         // Assert that the content is attached to the parent (the tab is
         // selected)
@@ -142,6 +144,7 @@ public class TabSheetTest {
         var content1 = new Span("Content 1");
         tabSheet.add("Tab 1", content1);
         tabSheet.setSelectedIndex(1);
+        flushBeforeClientResponse();
         Assert.assertTrue(content1.getParent().isPresent());
     }
 
@@ -521,6 +524,23 @@ public class TabSheetTest {
         tabSheet.add("Tab 0", new Span("Content 0"));
 
         tabSheet.getComponent(null);
+    }
+
+    @Test
+    public void switchMultipleTabsBeforeClientResponse_onlyLastSelectedContentAttached() {
+        var content0 = new Span("Content 0");
+        var content1 = new Span("Content 1");
+        var content2 = new Span("Content 2");
+        tabSheet.add("Tab 0", content0);
+        tabSheet.add("Tab 1", content1);
+        tabSheet.add("Tab 2", content2);
+
+        tabSheet.setSelectedIndex(1);
+        tabSheet.setSelectedIndex(2);
+        flushBeforeClientResponse();
+
+        Assert.assertFalse(content1.getParent().isPresent());
+        Assert.assertTrue(content2.getParent().isPresent());
     }
 
     private void flushBeforeClientResponse() {
