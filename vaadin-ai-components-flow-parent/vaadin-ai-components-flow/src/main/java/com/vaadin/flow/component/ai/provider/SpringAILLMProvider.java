@@ -71,7 +71,7 @@ public class SpringAILLMProvider implements LLMProvider {
             .getLogger(SpringAILLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
-    private static final String CONVERSATION_ID = "default";
+    private static final String DEFAULT_CONVERSATION_ID = "default";
 
     private final transient ChatClient chatClient;
     private boolean isStreaming = true;
@@ -90,7 +90,8 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     /**
-     * Constructor with a chat model and custom chat memory.
+     * Constructor with a chat model and custom chat memory. Uses a default
+     * conversation ID.
      *
      * @param chatModel
      *            the chat model, not {@code null}
@@ -101,11 +102,39 @@ public class SpringAILLMProvider implements LLMProvider {
      *             if chatModel or chatMemory is {@code null}
      */
     public SpringAILLMProvider(ChatModel chatModel, ChatMemory chatMemory) {
+        this(chatModel, chatMemory, DEFAULT_CONVERSATION_ID);
+    }
+
+    /**
+     * Constructor with a chat model, custom chat memory, and conversation ID.
+     * <p>
+     * The conversation ID is the key used by the {@link ChatMemory} to store
+     * and retrieve conversation history. When using a persistent memory
+     * implementation (e.g., JDBC or Redis-backed), each distinct conversation
+     * must have a unique ID to keep histories separate. Without a unique ID,
+     * all provider instances sharing the same persistent memory would read and
+     * write to the same conversation history.
+     * </p>
+     *
+     * @param chatModel
+     *            the chat model, not {@code null}
+     * @param chatMemory
+     *            the chat memory to use for conversation history, not
+     *            {@code null}
+     * @param conversationId
+     *            the conversation ID for memory storage, not {@code null}
+     * @throws NullPointerException
+     *             if any argument is {@code null}
+     */
+    public SpringAILLMProvider(ChatModel chatModel, ChatMemory chatMemory,
+            String conversationId) {
         Objects.requireNonNull(chatModel, "ChatModel must not be null");
         Objects.requireNonNull(chatMemory, "ChatMemory must not be null");
+        Objects.requireNonNull(conversationId,
+                "Conversation ID must not be null");
         chatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
-                        .conversationId(CONVERSATION_ID).build())
+                        .conversationId(conversationId).build())
                 .build();
     }
 

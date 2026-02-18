@@ -102,10 +102,33 @@ public class SpringAILLMProviderTest {
     }
 
     @Test
+    public void constructor_withNullConversationId_throwsNullPointerException() {
+        var chatMemory = MessageWindowChatMemory.builder().maxMessages(10)
+                .build();
+        Assert.assertThrows(NullPointerException.class,
+                () -> new SpringAILLMProvider(mockChatModel, chatMemory, null));
+    }
+
+    @Test
     public void constructor_withChatModelAndCustomChatMemory_returnsResponse() {
         var chatMemory = MessageWindowChatMemory.builder().maxMessages(10)
                 .build();
         var customProvider = new SpringAILLMProvider(mockChatModel, chatMemory);
+        customProvider.setStreaming(false);
+        mockSimpleChat("Hello");
+
+        var result = customProvider.stream(createSimpleRequest("Hi"))
+                .blockFirst();
+
+        Assert.assertEquals("Hello", result);
+    }
+
+    @Test
+    public void constructor_withConversationId_returnsResponse() {
+        var chatMemory = MessageWindowChatMemory.builder().maxMessages(10)
+                .build();
+        var customProvider = new SpringAILLMProvider(mockChatModel, chatMemory,
+                "user-123");
         customProvider.setStreaming(false);
         mockSimpleChat("Hello");
 
