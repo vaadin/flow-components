@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -39,6 +40,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * BigDecimalField is an input field for handling decimal numbers with high
@@ -415,11 +417,41 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
      *            the locale to set, not {@code null}
      */
     public void setLocale(Locale locale) {
-        Objects.requireNonNull(locale, "Locale to set can't be null.");
-        this.locale = locale;
+        getLocaleSupport().set(locale);
+    }
 
-        setDecimalSeparator(
-                new DecimalFormatSymbols(locale).getDecimalSeparator());
+    /**
+     * Binds the given signal to the locale of this field.
+     * <p>
+     * When a signal is bound, the locale is kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the locale manually through
+     * {@link #setLocale(Locale)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the locale to, not {@code null}
+     * @see #setLocale(Locale)
+     * @since 25.1
+     */
+    public void bindLocale(Signal<Locale> signal) {
+        getLocaleSupport().bind(signal);
+    }
+
+    private SignalPropertySupport<Locale> localeSupport;
+
+    private SignalPropertySupport<Locale> getLocaleSupport() {
+        if (localeSupport == null) {
+            localeSupport = SignalPropertySupport.create(this, loc -> {
+                Objects.requireNonNull(loc, "Locale to set can't be null.");
+                this.locale = loc;
+                setDecimalSeparator(
+                        new DecimalFormatSymbols(loc).getDecimalSeparator());
+            });
+        }
+        return localeSupport;
     }
 
     /**

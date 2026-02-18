@@ -17,6 +17,7 @@ package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Mixin interface for components that have special handling for tooltips on the
@@ -68,6 +69,26 @@ public interface HasTooltip extends HasElement {
         }
         tooltip.setMarkdown(markdown);
         return tooltip;
+    }
+
+    /**
+     * Binds the given signal to the tooltip text of this component.
+     * <p>
+     * When a signal is bound, the tooltip text is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the tooltip text manually
+     * through {@link #setTooltipText(String)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the tooltip text to, not {@code null}
+     * @see #setTooltipText(String)
+     * @since 25.1
+     */
+    default void bindTooltipText(Signal<String> signal) {
+        getTooltip().bindText(signal);
     }
 
     /**

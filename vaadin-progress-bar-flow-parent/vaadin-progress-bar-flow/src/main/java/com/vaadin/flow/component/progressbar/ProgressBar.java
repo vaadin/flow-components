@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.progressbar;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -244,5 +246,34 @@ public class ProgressBar extends Component
      */
     public boolean isIndeterminate() {
         return getElement().getProperty("indeterminate", false);
+    }
+
+    /**
+     * Binds the given signal to the indeterminate state of the progressbar as a
+     * one-way binding so that the property is updated when the signal's value
+     * is updated.
+     * <p>
+     * When a signal is bound, the indeterminate state is kept synchronized with
+     * the signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the indeterminate state
+     * manually through {@link #setIndeterminate(boolean)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     * <p>
+     * Signal's value {@code null} is treated as {@code false}.
+     *
+     * @param signal
+     *            the signal to bind the indeterminate state to, not
+     *            {@code null}
+     * @see #setIndeterminate(boolean)
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public void bindIndeterminate(Signal<Boolean> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("indeterminate",
+                signal.map(v -> v == null ? Boolean.FALSE : v), null);
     }
 }
