@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.provider;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -52,19 +53,26 @@ public interface LLMProvider {
     Flux<String> stream(LLMRequest request);
 
     /**
-     * Restores the provider's conversation memory from a list of chat messages.
-     * Any existing memory is cleared before the new history is applied.
+     * Restores the provider's conversation memory from a list of chat messages
+     * with their associated attachments. Any existing memory is cleared before
+     * the new history is applied.
+     * <p>
+     * Providers that support setting chat history should override this method.
      * <p>
      * This method must not be called while a streaming response is in progress.
      *
      * @param history
      *            the list of chat messages to restore, not {@code null}
+     * @param attachmentsByMessageId
+     *            a map from {@link ChatMessage#messageId()} to the list of
+     *            attachments for that message, not {@code null}
      * @throws NullPointerException
-     *             if history is {@code null}
+     *             if any argument is {@code null}
      * @throws UnsupportedOperationException
      *             if this provider does not support chat history restoration
      */
-    default void setHistory(List<ChatMessage> history) {
+    default void setHistory(List<ChatMessage> history,
+            Map<String, List<AIAttachment>> attachmentsByMessageId) {
         throw new UnsupportedOperationException(
                 "This LLM provider does not support chat history restoration.");
     }

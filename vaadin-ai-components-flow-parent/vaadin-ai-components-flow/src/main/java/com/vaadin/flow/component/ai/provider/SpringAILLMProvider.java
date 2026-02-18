@@ -15,8 +15,9 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -58,8 +59,8 @@ import reactor.core.publisher.Flux;
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
  * history across components, reuse the same provider instance. History
- * restoration (via {@link #setHistory(List)}) is only supported when using the
- * {@link #SpringAILLMProvider(ChatModel)} constructor; the
+ * restoration (via {@link #setHistory(List, Map)}) is only supported when using
+ * the {@link #SpringAILLMProvider(ChatModel)} constructor; the
  * {@link #SpringAILLMProvider(ChatClient)} constructor does not provide access
  * to the internal chat memory.
  * </p>
@@ -111,7 +112,7 @@ public class SpringAILLMProvider implements LLMProvider {
      * @param chatClient
      *            the chat client, not {@code null}
      * @throws NullPointerException
-     *             if chatModel is {@code null}
+     *             if chatClient is {@code null}
      */
     public SpringAILLMProvider(ChatClient chatClient) {
         Objects.requireNonNull(chatClient, "ChatClient must not be null");
@@ -144,27 +145,40 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     @Override
-    public void setHistory(List<ChatMessage> history) {
+    public void setHistory(List<ChatMessage> history,
+            Map<String, List<AIAttachment>> attachmentsByMessageId) {
         Objects.requireNonNull(history, "History must not be null");
+        Objects.requireNonNull(attachmentsByMessageId,
+                "Attachments map must not be null");
         if (!hasManagedMemory) {
             throw new UnsupportedOperationException(
                     "Chat history restoration is not supported when using the ChatClient constructor. "
                             + "Use the ChatModel constructor instead.");
         }
         chatMemory.clear(CONVERSATION_ID);
-        var messages = new ArrayList<org.springframework.ai.chat.messages.Message>();
-        for (var message : history) {
-            messages.add(toVendorMessage(message));
-        }
+        var messages = history.stream().map(message -> {
+            var attachments = message.messageId() != null
+                    ? attachmentsByMessageId.getOrDefault(message.messageId(),
+                            Collections.emptyList())
+                    : Collections.<AIAttachment> emptyList();
+            return toVendorMessage(message, attachments);
+        }).toList();
         chatMemory.add(CONVERSATION_ID, messages);
     }
 
     private static org.springframework.ai.chat.messages.Message toVendorMessage(
-            ChatMessage message) {
-        if (message.role() == ChatMessage.Role.USER) {
+            ChatMessage message, List<AIAttachment> attachments) {
+        if (ChatMessage.Role.ASSISTANT.equals(message.role())) {
+            return new AssistantMessage(message.content());
+        }
+        var mediaList = attachments.stream()
+                .map(SpringAILLMProvider::getAttachmentMedia)
+                .flatMap(Optional::stream).toList();
+        if (mediaList.isEmpty()) {
             return new UserMessage(message.content());
         }
-        return new AssistantMessage(message.content());
+        return UserMessage.builder().text(message.content()).media(mediaList)
+                .build();
     }
 
     private Flux<String> executeStreamingChat(LLMRequest request) {

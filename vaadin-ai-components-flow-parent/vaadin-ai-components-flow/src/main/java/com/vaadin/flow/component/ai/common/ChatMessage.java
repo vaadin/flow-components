@@ -24,10 +24,11 @@ import java.util.Objects;
  * <p>
  * This is a text-only, framework-agnostic representation used with
  * {@code AIOrchestrator.getHistory()} and {@code Builder.withHistory()} to
- * persist and restore conversation state across sessions. The following data is
- * not preserved:
+ * persist and restore conversation state across sessions. File attachments are
+ * not stored in this record; they can be provided separately via
+ * {@code Builder.withHistory(List, Map)} using the {@link #messageId()} as the
+ * correlation key. The following data is not preserved:
  * <ul>
- * <li>File attachments and multi-modal content</li>
  * <li>Tool call requests and tool execution results</li>
  * <li>Provider-specific metadata</li>
  * <li>System messages (re-injected by the orchestrator on each request)</li>
