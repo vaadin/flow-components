@@ -28,7 +28,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * A side navigation menu with support for hierarchical and flat menus.
@@ -150,6 +152,28 @@ public class SideNav extends Component implements HasSideNavItems, HasSize,
      */
     public void setExpanded(boolean expanded) {
         getElement().setProperty("collapsed", !expanded);
+    }
+
+    /**
+     * Binds the expanded state to the given writable signal. The binding is
+     * two-way: signal changes push to the DOM property (inverted as
+     * "collapsed"), and client-side property changes push back to the signal.
+     * <p>
+     * While a signal is bound, any attempt to set the expanded state manually
+     * throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the writable signal to bind, not {@code null}
+     * @since 25.1
+     */
+    public void bindExpanded(Signal<Boolean> signal,
+            SerializableConsumer<Boolean> writeCallback) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("collapsed",
+                signal.map(v -> v == null ? Boolean.TRUE : !v),
+                writeCallback != null
+                        ? collapsed -> writeCallback.accept(!collapsed)
+                        : null);
     }
 
     /**
