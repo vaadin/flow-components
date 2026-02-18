@@ -38,6 +38,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.upload.UploadFormat;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
@@ -469,6 +470,18 @@ public class UploadManagerTest {
     @Test
     public void isAutoUpload_defaultIsTrue() {
         Assert.assertTrue(manager.isAutoUpload());
+    }
+
+    @Test
+    public void setUploadFormat_setsProperty() {
+        manager.setUploadFormat(UploadFormat.MULTIPART);
+
+        Assert.assertEquals(UploadFormat.MULTIPART, manager.getUploadFormat());
+    }
+
+    @Test
+    public void getUploadFormat_defaultIsRaw() {
+        Assert.assertEquals(UploadFormat.RAW, manager.getUploadFormat());
     }
 
     @Test
