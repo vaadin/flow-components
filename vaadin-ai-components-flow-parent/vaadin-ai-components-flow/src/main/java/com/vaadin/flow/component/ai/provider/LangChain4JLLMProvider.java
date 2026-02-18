@@ -78,8 +78,10 @@ import reactor.core.publisher.FluxSink;
  * enabled.
  * </p>
  * <p>
- * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance.
+ * Each provider instance maintains its own chat memory with a default
+ * message-window size. To customize the chat memory strategy or size, use the
+ * constructors that accept a {@link ChatMemory} parameter. To share
+ * conversation history across components, reuse the same provider instance.
  * </p>
  * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
@@ -101,7 +103,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private final transient ChatMemory chatMemory;
 
     /**
-     * Constructor with a streaming chat model.
+     * Constructor with a streaming chat model. Uses a default message-window
+     * chat memory.
      *
      * @param chatModel
      *            the streaming chat model, not {@code null}
@@ -109,12 +112,35 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *             if chatModel is {@code null}
      */
     public LangChain4JLLMProvider(StreamingChatModel chatModel) {
-        this(null, Objects.requireNonNull(chatModel,
-                "StreamingChatModel must not be null"));
+        this(null,
+                Objects.requireNonNull(chatModel,
+                        "StreamingChatModel must not be null"),
+                MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES));
     }
 
     /**
-     * Constructor with a non-streaming chat model.
+     * Constructor with a streaming chat model and custom chat memory.
+     *
+     * @param chatModel
+     *            the streaming chat model, not {@code null}
+     * @param chatMemory
+     *            the chat memory to use for conversation history, not
+     *            {@code null}
+     * @throws NullPointerException
+     *             if chatModel or chatMemory is {@code null}
+     */
+    public LangChain4JLLMProvider(StreamingChatModel chatModel,
+            ChatMemory chatMemory) {
+        this(null,
+                Objects.requireNonNull(chatModel,
+                        "StreamingChatModel must not be null"),
+                Objects.requireNonNull(chatMemory,
+                        "ChatMemory must not be null"));
+    }
+
+    /**
+     * Constructor with a non-streaming chat model. Uses a default
+     * message-window chat memory.
      *
      * @param chatModel
      *            the non-streaming chat model, not {@code null}
@@ -123,14 +149,31 @@ public class LangChain4JLLMProvider implements LLMProvider {
      */
     public LangChain4JLLMProvider(ChatModel chatModel) {
         this(Objects.requireNonNull(chatModel, "ChatModel must not be null"),
-                null);
+                null, MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES));
+    }
+
+    /**
+     * Constructor with a non-streaming chat model and custom chat memory.
+     *
+     * @param chatModel
+     *            the non-streaming chat model, not {@code null}
+     * @param chatMemory
+     *            the chat memory to use for conversation history, not
+     *            {@code null}
+     * @throws NullPointerException
+     *             if chatModel or chatMemory is {@code null}
+     */
+    public LangChain4JLLMProvider(ChatModel chatModel, ChatMemory chatMemory) {
+        this(Objects.requireNonNull(chatModel, "ChatModel must not be null"),
+                null, Objects.requireNonNull(chatMemory,
+                        "ChatMemory must not be null"));
     }
 
     private LangChain4JLLMProvider(ChatModel chatModel,
-            StreamingChatModel streamingChatModel) {
+            StreamingChatModel streamingChatModel, ChatMemory chatMemory) {
         this.streamingChatModel = streamingChatModel;
         this.nonStreamingChatModel = chatModel;
-        this.chatMemory = MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES);
+        this.chatMemory = chatMemory;
     }
 
     @Override

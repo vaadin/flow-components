@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -92,6 +93,26 @@ public class SpringAILLMProviderTest {
     public void constructor_withNullChatClient_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
                 () -> new SpringAILLMProvider((ChatClient) null));
+    }
+
+    @Test
+    public void constructor_withChatModelAndNullChatMemory_throwsNullPointerException() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> new SpringAILLMProvider(mockChatModel, null));
+    }
+
+    @Test
+    public void constructor_withChatModelAndCustomChatMemory_returnsResponse() {
+        var chatMemory = MessageWindowChatMemory.builder().maxMessages(10)
+                .build();
+        var customProvider = new SpringAILLMProvider(mockChatModel, chatMemory);
+        customProvider.setStreaming(false);
+        mockSimpleChat("Hello");
+
+        var result = customProvider.stream(createSimpleRequest("Hi"))
+                .blockFirst();
+
+        Assert.assertEquals("Hello", result);
     }
 
     @Test
@@ -453,9 +474,13 @@ public class SpringAILLMProviderTest {
     }
 
     @Test
-    public void stream_withMaxMessagesLimit_dropsOldestMessages() {
-        provider.setStreaming(false);
-        var requestCount = 20;
+    public void stream_withCustomChatMemory_dropsOldestMessages() {
+        var maxMessages = 10;
+        var chatMemory = MessageWindowChatMemory.builder()
+                .maxMessages(maxMessages).build();
+        var customProvider = new SpringAILLMProvider(mockChatModel, chatMemory);
+        customProvider.setStreaming(false);
+        var requestCount = 10;
 
         // Each request adds 2 messages: UserMessage and AssistantMessage
         IntStream.range(0, requestCount).forEach(i -> {
@@ -463,16 +488,16 @@ public class SpringAILLMProviderTest {
             var response = mockSimpleChatResponse("Response " + i);
             Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
                     .thenReturn(response);
-            provider.stream(request).blockFirst();
+            customProvider.stream(request).blockFirst();
         });
 
         var lastRequest = getPromptCaptor(requestCount).getAllValues()
                 .get(requestCount - 1);
         var messageCount = lastRequest.getInstructions().size();
-        // Spring AI's MessageWindowChatMemory with maxMessages(30) may include
-        // up to 31 messages when building the prompt (30 in memory + current)
+        // Spring AI's MessageWindowChatMemory may include up to
+        // maxMessages + 1 when building the prompt (memory + current)
         Assert.assertTrue("Message count should not exceed memory limit, got: "
-                + messageCount, messageCount <= 31);
+                + messageCount, messageCount <= maxMessages + 1);
 
         var userMessageTexts = lastRequest.getInstructions().stream()
                 .filter(UserMessage.class::isInstance)

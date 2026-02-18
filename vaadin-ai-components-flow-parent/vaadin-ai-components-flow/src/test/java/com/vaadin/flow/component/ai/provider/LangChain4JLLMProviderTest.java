@@ -47,6 +47,7 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -101,6 +102,58 @@ public class LangChain4JLLMProviderTest {
     public void constructor_withNullStreamingChatModel_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
                 () -> new LangChain4JLLMProvider((StreamingChatModel) null));
+    }
+
+    @Test
+    public void constructor_withChatModelAndNullChatMemory_throwsNullPointerException() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> new LangChain4JLLMProvider(mockChatModel, null));
+    }
+
+    @Test
+    public void constructor_withStreamingChatModelAndNullChatMemory_throwsNullPointerException() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> new LangChain4JLLMProvider(mockStreamingChatModel, null));
+    }
+
+    @Test
+    public void constructor_withChatModelAndCustomChatMemory_returnsResponse() {
+        var customMemory = MessageWindowChatMemory.withMaxMessages(10);
+        var customProvider = new LangChain4JLLMProvider(mockChatModel,
+                customMemory);
+        var response = mockSimpleResponse("Hello");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var result = customProvider.stream(createSimpleRequest("Hi"))
+                .blockFirst();
+
+        Assert.assertEquals("Hello", result);
+    }
+
+    @Test
+    public void constructor_withStreamingChatModelAndCustomChatMemory_returnsResponse() {
+        var customMemory = MessageWindowChatMemory.withMaxMessages(10);
+        var customProvider = new LangChain4JLLMProvider(mockStreamingChatModel,
+                customMemory);
+
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Hello");
+            var aiMessage = Mockito.mock(AiMessage.class);
+            Mockito.when(aiMessage.hasToolExecutionRequests())
+                    .thenReturn(false);
+            var response = Mockito.mock(ChatResponse.class);
+            Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var result = customProvider.stream(createSimpleRequest("Hi"))
+                .blockFirst();
+
+        Assert.assertEquals("Hello", result);
     }
 
     @Test
@@ -267,13 +320,20 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
-    public void stream_withMaxMessagesLimit_dropsOldestMessages() {
-        var requestCount = 20;
+    public void stream_withCustomChatMemory_dropsOldestMessages() {
+        var maxMessages = 10;
+        var customMemory = MessageWindowChatMemory.withMaxMessages(maxMessages);
+        var customProvider = new LangChain4JLLMProvider(mockChatModel,
+                customMemory);
+        var requestCount = 10;
 
         // Each request adds 2 messages: UserMessage and AiMessage
         IntStream.range(0, requestCount).forEach(i -> {
             var request = createSimpleRequest("Message " + i);
-            mockSimpleChat(request, "Response " + i);
+            var response = mockSimpleResponse("Response " + i);
+            Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                    .thenReturn(response);
+            customProvider.stream(request).blockFirst();
         });
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
@@ -283,7 +343,7 @@ public class LangChain4JLLMProviderTest {
         var lastRequest = captor.getAllValues().get(requestCount - 1);
         var messageCount = lastRequest.messages().size();
         Assert.assertTrue("Message count should not exceed memory limit, got: "
-                + messageCount, messageCount <= 30);
+                + messageCount, messageCount <= maxMessages);
 
         var userMessageTextContents = getUserMessageContents(lastRequest,
                 TextContent.class).stream().map(TextContent::text).toList();

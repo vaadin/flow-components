@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.content.Media;
@@ -51,8 +52,10 @@ import reactor.core.publisher.Flux;
  * streaming mode. A warning is logged at runtime if push is not enabled.
  * </p>
  * <p>
- * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance.
+ * Each provider instance maintains its own chat memory with a default
+ * message-window size. To customize the chat memory strategy or size, use the
+ * constructor that accepts a {@link ChatMemory} parameter. To share
+ * conversation history across components, reuse the same provider instance.
  * </p>
  * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
@@ -74,7 +77,7 @@ public class SpringAILLMProvider implements LLMProvider {
     private boolean isStreaming = true;
 
     /**
-     * Constructor with a chat model.
+     * Constructor with a chat model. Uses a default message-window chat memory.
      *
      * @param chatModel
      *            the chat model, not {@code null}
@@ -82,9 +85,24 @@ public class SpringAILLMProvider implements LLMProvider {
      *             if chatModel is {@code null}
      */
     public SpringAILLMProvider(ChatModel chatModel) {
+        this(chatModel, MessageWindowChatMemory.builder()
+                .maxMessages(MAX_MESSAGES).build());
+    }
+
+    /**
+     * Constructor with a chat model and custom chat memory.
+     *
+     * @param chatModel
+     *            the chat model, not {@code null}
+     * @param chatMemory
+     *            the chat memory to use for conversation history, not
+     *            {@code null}
+     * @throws NullPointerException
+     *             if chatModel or chatMemory is {@code null}
+     */
+    public SpringAILLMProvider(ChatModel chatModel, ChatMemory chatMemory) {
         Objects.requireNonNull(chatModel, "ChatModel must not be null");
-        var chatMemory = MessageWindowChatMemory.builder()
-                .maxMessages(MAX_MESSAGES).build();
+        Objects.requireNonNull(chatMemory, "ChatMemory must not be null");
         chatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
                         .conversationId(CONVERSATION_ID).build())
