@@ -145,10 +145,12 @@ public class UploadManager implements Serializable {
         connector.getElement().addEventListener("file-reject", event -> {
             String fileName = event.getEventData().get(eventDetailFileName)
                     .asString();
-            String errorMessage = event.getEventData()
-                    .get(eventDetailErrorMessage).asString();
+            String errorCode = event.getEventData().get(eventDetailErrorMessage)
+                    .asString();
+            FileRejectionReason reason = FileRejectionReason
+                    .fromClientCode(errorCode);
             ComponentUtil.fireEvent(owner,
-                    new FileRejectedEvent(owner, true, errorMessage, fileName));
+                    new FileRejectedEvent(owner, true, reason, fileName));
         }).addEventData(eventDetailFileName)
                 .addEventData(eventDetailErrorMessage);
 
@@ -750,6 +752,56 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Reasons why a file can be rejected by the upload manager.
+     */
+    public enum FileRejectionReason {
+
+        /**
+         * The maximum number of files has been reached.
+         */
+        TOO_MANY_FILES("tooManyFiles"),
+
+        /**
+         * The file exceeds the maximum allowed file size.
+         */
+        FILE_TOO_LARGE("fileIsTooBig"),
+
+        /**
+         * The file type does not match the accepted file types.
+         */
+        INCORRECT_FILE_TYPE("incorrectFileType"),
+
+        /**
+         * An unrecognized rejection reason from the client.
+         */
+        UNKNOWN(null);
+
+        private final String clientCode;
+
+        FileRejectionReason(String clientCode) {
+            this.clientCode = clientCode;
+        }
+
+        /**
+         * Returns the reason matching the given client-side error code, or
+         * {@link #UNKNOWN} if no match is found.
+         *
+         * @param clientCode
+         *            the error code from the client-side upload manager
+         * @return the matching reason, or {@link #UNKNOWN}
+         */
+        public static FileRejectionReason fromClientCode(String clientCode) {
+            for (FileRejectionReason reason : values()) {
+                if (reason.clientCode != null
+                        && reason.clientCode.equals(clientCode)) {
+                    return reason;
+                }
+            }
+            return UNKNOWN;
+        }
+    }
+
+    /**
      * Event fired when a file is rejected by the upload manager due to
      * constraints like max file size, max files, or accepted file types. The
      * event source is the owner component passed to the {@link UploadManager}
@@ -757,7 +809,7 @@ public class UploadManager implements Serializable {
      */
     public static class FileRejectedEvent extends ComponentEvent<Component> {
         private final String fileName;
-        private final String errorMessage;
+        private final FileRejectionReason reason;
 
         /**
          * Creates a new event.
@@ -766,15 +818,15 @@ public class UploadManager implements Serializable {
          *            the source component
          * @param fromClient
          *            whether the event originated from the client
-         * @param errorMessage
-         *            the error message
+         * @param reason
+         *            the reason why the file was rejected
          * @param fileName
          *            the name of the rejected file
          */
         public FileRejectedEvent(Component source, boolean fromClient,
-                String errorMessage, String fileName) {
+                FileRejectionReason reason, String fileName) {
             super(source, fromClient);
-            this.errorMessage = errorMessage;
+            this.reason = reason;
             this.fileName = fileName;
         }
 
@@ -788,12 +840,12 @@ public class UploadManager implements Serializable {
         }
 
         /**
-         * Gets the error message describing why the file was rejected.
+         * Gets the reason why the file was rejected.
          *
-         * @return the error message
+         * @return the rejection reason
          */
-        public String getErrorMessage() {
-            return errorMessage;
+        public FileRejectionReason getReason() {
+            return reason;
         }
     }
 
