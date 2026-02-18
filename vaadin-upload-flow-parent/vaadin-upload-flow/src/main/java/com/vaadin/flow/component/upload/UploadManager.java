@@ -379,8 +379,7 @@ public class UploadManager implements Serializable {
                     throws IOException {
                 long maxSize = getMaxFileSize();
                 if (maxSize > 0 && event.getFileSize() > maxSize) {
-                    event.reject(
-                            "File is too big: " + event.getFileName());
+                    event.reject("File is too big: " + event.getFileName());
                     return;
                 }
                 List<String> mimeTypes = acceptedMimeTypes;
