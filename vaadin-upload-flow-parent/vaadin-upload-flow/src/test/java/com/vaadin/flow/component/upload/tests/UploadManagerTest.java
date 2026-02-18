@@ -472,6 +472,64 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void serverSideValidation_fileSizeExceedsMax_rejects()
+            throws Exception {
+        var handled = new AtomicInteger(0);
+        manager.setUploadHandler(countingHandler(handled));
+        manager.setMaxFileSize(100);
+
+        var event = mockUploadEvent(200);
+        ((UploadHandler) getRegisteredHandler()).handleUploadRequest(event);
+
+        Mockito.verify(event).reject(Mockito.contains("too big"));
+        Assert.assertEquals(0, handled.get());
+    }
+
+    @Test
+    public void serverSideValidation_fileSizeWithinMax_delegates()
+            throws Exception {
+        var handled = new AtomicInteger(0);
+        manager.setUploadHandler(countingHandler(handled));
+        manager.setMaxFileSize(100);
+
+        var event = mockUploadEvent(50);
+        ((UploadHandler) getRegisteredHandler()).handleUploadRequest(event);
+
+        Mockito.verify(event, Mockito.never()).reject(Mockito.anyString());
+        Assert.assertEquals(1, handled.get());
+    }
+
+    @Test
+    public void serverSideValidation_noMaxFileSize_delegates()
+            throws Exception {
+        var handled = new AtomicInteger(0);
+        manager.setUploadHandler(countingHandler(handled));
+
+        var event = mockUploadEvent(999999);
+        ((UploadHandler) getRegisteredHandler()).handleUploadRequest(event);
+
+        Mockito.verify(event, Mockito.never()).reject(Mockito.anyString());
+        Assert.assertEquals(1, handled.get());
+    }
+
+    @Test
+    public void serverSideValidation_maxFileSizeChangedAtRuntime_usesNewValue()
+            throws Exception {
+        var handled = new AtomicInteger(0);
+        manager.setUploadHandler(countingHandler(handled));
+        manager.setMaxFileSize(100);
+
+        // Increase limit after handler was set
+        manager.setMaxFileSize(500);
+
+        var event = mockUploadEvent(200);
+        ((UploadHandler) getRegisteredHandler()).handleUploadRequest(event);
+
+        Mockito.verify(event, Mockito.never()).reject(Mockito.anyString());
+        Assert.assertEquals(1, handled.get());
+    }
+
+    @Test
     public void setEnabled_setsProperty() {
         manager.setEnabled(false);
 
@@ -854,6 +912,28 @@ public class UploadManagerTest {
                         "No ElementStreamResource found for URI: "
                                 + targetUri));
         return resource.getElementRequestHandler();
+    }
+
+    /**
+     * Creates an UploadHandler that increments the counter on each request.
+     */
+    private static UploadHandler countingHandler(AtomicInteger counter) {
+        return event -> counter.incrementAndGet();
+    }
+
+    /**
+     * Creates a mock UploadEvent with the given file size.
+     */
+    private com.vaadin.flow.server.streams.UploadEvent mockUploadEvent(
+            long fileSize) {
+        var event = Mockito
+                .mock(com.vaadin.flow.server.streams.UploadEvent.class);
+        Mockito.when(event.getFileSize()).thenReturn(fileSize);
+        Mockito.when(event.getFileName()).thenReturn("test.txt");
+        Mockito.when(event.getContentType()).thenReturn("text/plain");
+        Mockito.when(event.getInputStream())
+                .thenReturn(new java.io.ByteArrayInputStream(new byte[0]));
+        return event;
     }
 
     /**

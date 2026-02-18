@@ -207,8 +207,8 @@ public class UploadManager implements Serializable {
         if (!(handler instanceof FailFastUploadHandler)) {
             handlerExplicitlyConfigured.set(true);
         }
-        // Wrap handler with file type validation
-        UploadHandler validatingHandler = wrapWithFileTypeValidation(handler);
+        // Wrap handler with server-side validation
+        UploadHandler validatingHandler = wrapWithValidation(handler);
         // Wrap handler with ElementStreamResource to use custom target name
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 validatingHandler, connector.getElement()) {
@@ -244,9 +244,10 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Specify the maximum file size in bytes allowed to upload. Notice that it
-     * is a client-side constraint, which will be checked before sending the
-     * request.
+     * Specify the maximum file size in bytes allowed to upload. The constraint
+     * is enforced both on the client side (before sending the request) and on
+     * the server side (rejecting the upload if the file size exceeds the
+     * limit).
      *
      * @param maxFileSize
      *            the maximum file size in bytes, or 0 for unlimited
@@ -361,20 +362,27 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Wraps the given upload handler with file type validation. The wrapper
-     * reads the current {@link #acceptedMimeTypes} and
-     * {@link #acceptedFileExtensions} at the time of each upload request, so
-     * changes made after {@link #setUploadHandler} are picked up.
+     * Wraps the given upload handler with server-side validation. The wrapper
+     * reads the current {@link #acceptedMimeTypes},
+     * {@link #acceptedFileExtensions}, and max file size at the time of each
+     * upload request, so changes made after {@link #setUploadHandler} are
+     * picked up.
      * <p>
      * NOTE: If new methods are added to {@link UploadHandler} or
      * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
      * be explicitly delegated here.
      */
-    private UploadHandler wrapWithFileTypeValidation(UploadHandler delegate) {
+    private UploadHandler wrapWithValidation(UploadHandler delegate) {
         return new UploadHandler() {
             @Override
             public void handleUploadRequest(UploadEvent event)
                     throws IOException {
+                long maxSize = getMaxFileSize();
+                if (maxSize > 0 && event.getFileSize() > maxSize) {
+                    event.reject(
+                            "File is too big: " + event.getFileName());
+                    return;
+                }
                 List<String> mimeTypes = acceptedMimeTypes;
                 List<String> extensions = acceptedFileExtensions;
                 if ((!mimeTypes.isEmpty() || !extensions.isEmpty())
