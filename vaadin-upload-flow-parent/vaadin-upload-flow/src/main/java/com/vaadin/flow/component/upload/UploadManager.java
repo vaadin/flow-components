@@ -746,7 +746,12 @@ public class UploadManager implements Serializable {
         /**
          * The file type does not match the accepted file types.
          */
-        INCORRECT_FILE_TYPE("incorrectFileType");
+        INCORRECT_FILE_TYPE("incorrectFileType"),
+
+        /**
+         * An unrecognized rejection reason from the client.
+         */
+        UNKNOWN(null);
 
         private final String clientCode;
 
@@ -756,19 +761,20 @@ public class UploadManager implements Serializable {
 
         /**
          * Returns the reason matching the given client-side error code, or
-         * {@code null} if no match is found.
+         * {@link #UNKNOWN} if no match is found.
          *
          * @param clientCode
          *            the error code from the client-side upload manager
-         * @return the matching reason, or {@code null}
+         * @return the matching reason, or {@link #UNKNOWN}
          */
-        static FileRejectionReason fromClientCode(String clientCode) {
+        public static FileRejectionReason fromClientCode(String clientCode) {
             for (FileRejectionReason reason : values()) {
-                if (reason.clientCode.equals(clientCode)) {
+                if (reason.clientCode != null
+                        && reason.clientCode.equals(clientCode)) {
                     return reason;
                 }
             }
-            return null;
+            return UNKNOWN;
         }
     }
 

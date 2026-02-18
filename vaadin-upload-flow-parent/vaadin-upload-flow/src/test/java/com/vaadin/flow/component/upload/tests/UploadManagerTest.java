@@ -551,6 +551,27 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void fileRejectionReason_fromClientCode_knownCodes() {
+        Assert.assertEquals(UploadManager.FileRejectionReason.TOO_MANY_FILES,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("tooManyFiles"));
+        Assert.assertEquals(UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("fileIsTooBig"));
+        Assert.assertEquals(
+                UploadManager.FileRejectionReason.INCORRECT_FILE_TYPE,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("incorrectFileType"));
+    }
+
+    @Test
+    public void fileRejectionReason_fromClientCode_unknownCode() {
+        Assert.assertEquals(UploadManager.FileRejectionReason.UNKNOWN,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("someNewCode"));
+    }
+
+    @Test
     public void allFinishedEvent_createdCorrectly() {
         var event = new UploadManager.AllFinishedEvent(owner);
 
