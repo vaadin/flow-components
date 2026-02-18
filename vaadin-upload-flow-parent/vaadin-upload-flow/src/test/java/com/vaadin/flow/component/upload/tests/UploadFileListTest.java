@@ -325,7 +325,7 @@ public class UploadFileListTest {
     public void addThemeVariant_variantIsAdded() {
         UploadFileList fileList = new UploadFileList();
 
-        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         Assert.assertTrue(fileList.getThemeNames().contains("thumbnails"));
     }
@@ -333,9 +333,9 @@ public class UploadFileListTest {
     @Test
     public void removeThemeVariant_variantIsRemoved() {
         UploadFileList fileList = new UploadFileList();
-        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
-        fileList.removeThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.removeThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         Assert.assertFalse(fileList.getThemeNames().contains("thumbnails"));
     }
