@@ -528,6 +528,29 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Sets the upload format to use when sending files to the server.
+     *
+     * @param format
+     *            the format type
+     */
+    public void setUploadFormat(UploadFormat format) {
+        Objects.requireNonNull(format, "Upload format cannot be null");
+        connector.getElement().setProperty("uploadFormat",
+                format.name().toLowerCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Gets the upload format used when sending files to the server.
+     *
+     * @return the upload format, defaults to {@link UploadFormat#RAW}
+     */
+    public UploadFormat getUploadFormat() {
+        String value = connector.getElement().getProperty("uploadFormat",
+                "raw");
+        return UploadFormat.valueOf(value.toUpperCase(Locale.ENGLISH));
+    }
+
+    /**
      * Sets whether the upload manager is enabled. When disabled, uploads cannot
      * be started from any linked UI components (buttons, drop zones).
      * <p>
