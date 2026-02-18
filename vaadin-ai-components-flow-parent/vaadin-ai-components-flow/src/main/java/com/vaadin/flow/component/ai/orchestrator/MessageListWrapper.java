@@ -15,26 +15,48 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListItem;
 
 /**
  * Wrapper for Flow MessageList component to implement AIMessageList interface.
  */
-record MessageListWrapper(MessageList messageList) implements AIMessageList {
+class MessageListWrapper implements AIMessageList {
 
-    @Override
-    public void addMessage(AIMessage message) {
-        messageList.addItem(((MessageListItemWrapper) message).getItem());
+    private final MessageList messageList;
+    private final Map<MessageListItem, AIMessage> itemToMessage = new HashMap<>();
+
+    MessageListWrapper(MessageList messageList) {
+        this.messageList = messageList;
     }
 
     @Override
-    public AIMessage createMessage(String text, String userName,
+    public AIMessage addMessage(String text, String userName,
             List<AIAttachment> attachments) {
-        return new MessageListItemWrapper(text, userName, attachments);
+        var message = new MessageListItemWrapper(text, userName, attachments);
+        itemToMessage.put(message.getItem(), message);
+        messageList.addItem(message.getItem());
+        return message;
+    }
+
+    @Override
+    public void addAttachmentClickListener(AttachmentClickCallback callback) {
+        messageList.addAttachmentClickListener(clickEvent -> {
+            var aiMessage = itemToMessage.get(clickEvent.getItem());
+            if (aiMessage != null) {
+                var attIndex = clickEvent.getItem().getAttachments()
+                        .indexOf(clickEvent.getAttachment());
+                if (attIndex >= 0) {
+                    callback.onAttachmentClick(aiMessage, attIndex);
+                }
+            }
+        });
     }
 }

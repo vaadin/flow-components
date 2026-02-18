@@ -46,12 +46,11 @@ import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
-import com.vaadin.flow.component.ai.ui.InputSubmitEvent;
-import com.vaadin.flow.component.ai.ui.InputSubmitListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
@@ -100,7 +99,7 @@ public class AIOrchestratorTest {
     public void builder_withProvider_usesProviderForPrompts() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -120,7 +119,7 @@ public class AIOrchestratorTest {
         mockUi();
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -140,7 +139,7 @@ public class AIOrchestratorTest {
     public void builder_withMessageList_addsMessagesToList() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -151,8 +150,8 @@ public class AIOrchestratorTest {
                 .withMessageList(mockMessageList).build();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList, Mockito.atLeast(1))
-                .addMessage(Mockito.any(AIMessage.class));
+        Mockito.verify(mockMessageList, Mockito.atLeast(1)).addMessage(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyList());
     }
 
     @Test
@@ -160,7 +159,7 @@ public class AIOrchestratorTest {
         AIOrchestrator.builder(mockProvider, null).withInput(mockInput).build();
 
         Mockito.verify(mockInput)
-                .addSubmitListener(Mockito.any(InputSubmitListener.class));
+                .addSubmitListener(Mockito.any(SerializableConsumer.class));
     }
 
     @Test
@@ -168,7 +167,7 @@ public class AIOrchestratorTest {
         mockUi();
         var tool = new SampleTool();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -197,7 +196,7 @@ public class AIOrchestratorTest {
     public void prompt_withValidMessage_sendsRequestToProvider() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -230,7 +229,7 @@ public class AIOrchestratorTest {
         mockUi();
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -256,7 +255,7 @@ public class AIOrchestratorTest {
             latch.countDown();
             return null;
         }).when(mockMessage).appendText(Mockito.anyString());
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -283,7 +282,7 @@ public class AIOrchestratorTest {
             latch.countDown();
             return null;
         }).when(mockMessage).setText(Mockito.anyString());
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -300,11 +299,12 @@ public class AIOrchestratorTest {
                 .setText("An error occurred. Please try again.");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_triggersPromptProcessing() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -313,12 +313,11 @@ public class AIOrchestratorTest {
 
         getSimpleOrchestrator();
 
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
 
-        var event = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event.getValue()).thenReturn("User message");
-        listenerCaptor.getValue().onSubmit(event);
+        listenerCaptor.getValue().accept("User message");
 
         Mockito.verify(mockProvider)
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
@@ -328,10 +327,10 @@ public class AIOrchestratorTest {
     public void userMessage_isAddedToMessageList() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -341,15 +340,15 @@ public class AIOrchestratorTest {
         var orchestrator = getSimpleOrchestrator();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList, Mockito.times(2))
-                .addMessage(Mockito.any(AIMessage.class));
+        Mockito.verify(mockMessageList, Mockito.times(2)).addMessage(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyList());
     }
 
     @Test
     public void assistantPlaceholder_isCreated() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -359,7 +358,7 @@ public class AIOrchestratorTest {
         var orchestrator = getSimpleOrchestrator();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList).createMessage("", "Assistant",
+        Mockito.verify(mockMessageList).addMessage("", "Assistant",
                 Collections.emptyList());
     }
 
@@ -367,7 +366,7 @@ public class AIOrchestratorTest {
     public void prompt_withTools_includesToolsInRequest() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -398,7 +397,7 @@ public class AIOrchestratorTest {
     public void prompt_whileProcessing_isIgnored() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -418,7 +417,7 @@ public class AIOrchestratorTest {
     public void prompt_withoutSystemPrompt_sendsNullSystemPromptInRequest() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -438,7 +437,7 @@ public class AIOrchestratorTest {
     public void prompt_withWhitespaceOnlySystemPrompt_sendsNullSystemPrompt() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -498,40 +497,41 @@ public class AIOrchestratorTest {
         Assert.assertNotNull(orchestrator);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_withNullValue_doesNotProcess() {
         mockUi();
         getSimpleOrchestrator();
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
-        var event = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event.getValue()).thenReturn(null);
-        listenerCaptor.getValue().onSubmit(event);
+        listenerCaptor.getValue().accept(null);
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_withEmptyValue_doesNotProcess() {
         mockUi();
         getSimpleOrchestrator();
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
 
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
 
-        var event = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event.getValue()).thenReturn("   ");
-        listenerCaptor.getValue().onSubmit(event);
+        listenerCaptor.getValue().accept("   ");
 
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_whileProcessing_isIgnored() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -540,17 +540,14 @@ public class AIOrchestratorTest {
 
         getSimpleOrchestrator();
 
-        var listenerCaptor = ArgumentCaptor.forClass(InputSubmitListener.class);
+        var listenerCaptor = ArgumentCaptor
+                .forClass(SerializableConsumer.class);
 
         Mockito.verify(mockInput).addSubmitListener(listenerCaptor.capture());
 
-        var event1 = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event1.getValue()).thenReturn("First");
-        listenerCaptor.getValue().onSubmit(event1);
+        listenerCaptor.getValue().accept("First");
 
-        var event2 = Mockito.mock(InputSubmitEvent.class);
-        Mockito.when(event2.getValue()).thenReturn("Second");
-        listenerCaptor.getValue().onSubmit(event2);
+        listenerCaptor.getValue().accept("Second");
 
         Mockito.verify(mockProvider, Mockito.times(1))
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
@@ -560,7 +557,7 @@ public class AIOrchestratorTest {
     public void prompt_withAttachments_includesAttachmentsInRequest() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -586,7 +583,7 @@ public class AIOrchestratorTest {
     public void prompt_withAttachments_createsMessageWithAttachments() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -600,7 +597,7 @@ public class AIOrchestratorTest {
         orchestrator.prompt("Hello with attachment");
 
         var attachmentsCaptor = ArgumentCaptor.forClass(List.class);
-        Mockito.verify(mockMessageList).createMessage(
+        Mockito.verify(mockMessageList).addMessage(
                 Mockito.eq("Hello with attachment"), Mockito.eq("You"),
                 attachmentsCaptor.capture());
 
@@ -621,7 +618,7 @@ public class AIOrchestratorTest {
             latch.countDown();
             return null;
         }).when(mockMessage).setText(Mockito.anyString());
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -654,7 +651,7 @@ public class AIOrchestratorTest {
     public void prompt_withEmptyResponse_completesSuccessfully() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -674,7 +671,7 @@ public class AIOrchestratorTest {
     public void prompt_withSystemPromptWithLeadingTrailingWhitespace_trimmed() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -702,7 +699,7 @@ public class AIOrchestratorTest {
             latch.countDown();
             return null;
         }).when(mockMessage).appendText(Mockito.anyString());
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -722,7 +719,7 @@ public class AIOrchestratorTest {
     public void prompt_requestContainsCorrectTools() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -748,7 +745,7 @@ public class AIOrchestratorTest {
     public void prompt_requestContainsEmptyAttachmentsList() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -767,7 +764,7 @@ public class AIOrchestratorTest {
     public void prompt_callsTakeAttachments() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -783,10 +780,10 @@ public class AIOrchestratorTest {
     public void builder_namesNotConfigured_usesDefaultNames() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -798,9 +795,9 @@ public class AIOrchestratorTest {
         orchestrator.prompt("Hello");
 
         var inOrder = Mockito.inOrder(mockMessageList);
-        inOrder.verify(mockMessageList).createMessage(Mockito.eq("Hello"),
+        inOrder.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
                 Mockito.eq("You"), Mockito.anyList());
-        inOrder.verify(mockMessageList).createMessage("", "Assistant",
+        inOrder.verify(mockMessageList).addMessage("", "Assistant",
                 Collections.emptyList());
     }
 
@@ -808,10 +805,10 @@ public class AIOrchestratorTest {
     public void builder_withCustomUserName_usesCustomUserName() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -823,7 +820,7 @@ public class AIOrchestratorTest {
                 .build();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList).createMessage(Mockito.eq("Hello"),
+        Mockito.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
                 Mockito.eq("John Doe"), Mockito.anyList());
     }
 
@@ -831,7 +828,7 @@ public class AIOrchestratorTest {
     public void builder_withCustomAssistantName_usesCustomAssistantName() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -843,7 +840,7 @@ public class AIOrchestratorTest {
                 .build();
         orchestrator.prompt("Hello");
 
-        Mockito.verify(mockMessageList).createMessage("", "Claude",
+        Mockito.verify(mockMessageList).addMessage("", "Claude",
                 Collections.emptyList());
     }
 
@@ -851,10 +848,10 @@ public class AIOrchestratorTest {
     public void builder_withCustomUserNameAndAssistantName_usesBothCustomNames() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
@@ -867,9 +864,9 @@ public class AIOrchestratorTest {
         orchestrator.prompt("Hello");
 
         var inOrder = Mockito.inOrder(mockMessageList);
-        inOrder.verify(mockMessageList).createMessage(Mockito.eq("Hello"),
+        inOrder.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
                 Mockito.eq("Alice"), Mockito.anyList());
-        inOrder.verify(mockMessageList).createMessage("", "Bot",
+        inOrder.verify(mockMessageList).addMessage("", "Bot",
                 Collections.emptyList());
     }
 
@@ -877,7 +874,7 @@ public class AIOrchestratorTest {
     public void builder_withNullUserName_throws() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -893,7 +890,7 @@ public class AIOrchestratorTest {
     public void builder_withNullAssistantName_throws() {
         mockUi();
         var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.createMessage(Mockito.anyString(),
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
