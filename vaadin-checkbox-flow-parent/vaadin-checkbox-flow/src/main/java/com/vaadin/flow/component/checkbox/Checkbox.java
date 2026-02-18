@@ -40,6 +40,8 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Checkbox is an input field representing a binary choice.
@@ -348,6 +350,25 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      */
     public void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
+    }
+
+    /**
+     * Binds the indeterminate state to the given writable signal. The binding
+     * is two-way: signal changes push to the DOM property, and client-side
+     * property changes push back to the signal.
+     * <p>
+     * While a signal is bound, any attempt to set the indeterminate state
+     * manually throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the writable signal to bind, not {@code null}
+     * @since 25.1
+     */
+    public void bindIndeterminate(Signal<Boolean> signal,
+            SerializableConsumer<Boolean> writeCallback) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("indeterminate",
+                signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }
 
     /**
