@@ -16,8 +16,8 @@
 package com.vaadin.flow.component.ai.orchestrator;
 
 import com.vaadin.flow.component.ai.ui.AIInput;
-import com.vaadin.flow.component.ai.ui.InputSubmitListener;
 import com.vaadin.flow.component.messages.MessageInput;
+import com.vaadin.flow.function.SerializableConsumer;
 
 /**
  * Wrapper for Flow MessageInput component to implement AIInput interface.
@@ -25,8 +25,8 @@ import com.vaadin.flow.component.messages.MessageInput;
 record MessageInputWrapper(MessageInput messageInput) implements AIInput {
 
     @Override
-    public void addSubmitListener(InputSubmitListener listener) {
+    public void addSubmitListener(SerializableConsumer<String> listener) {
         messageInput
-                .addSubmitListener(event -> listener.onSubmit(event::getValue));
+                .addSubmitListener(event -> listener.accept(event.getValue()));
     }
 }

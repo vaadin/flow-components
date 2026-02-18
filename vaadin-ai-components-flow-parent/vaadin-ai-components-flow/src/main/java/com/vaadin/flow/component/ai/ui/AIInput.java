@@ -15,24 +15,23 @@
  */
 package com.vaadin.flow.component.ai.ui;
 
-import java.io.Serializable;
+import com.vaadin.flow.function.SerializableConsumer;
 
 /**
  * Interface for input components that are used in an AI conversation.
  *
  * @author Vaadin Ltd
- * @see InputSubmitListener
- * @see InputSubmitEvent
  */
-public interface AIInput extends Serializable {
+public interface AIInput {
 
     /**
      * Adds a listener for submit events.
      * <p>
-     * The listener is notified when the user submits input.
+     * The listener is notified with the submitted value when the user submits
+     * input.
      *
      * @param listener
      *            the listener to add, not {@code null}
      */
-    void addSubmitListener(InputSubmitListener listener);
+    void addSubmitListener(SerializableConsumer<String> listener);
 }
