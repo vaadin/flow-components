@@ -32,6 +32,7 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
     private ValueSignal<Double> minSignal;
     private ValueSignal<Double> maxSignal;
     private ValueSignal<Double> valueSignal;
+    private ValueSignal<Boolean> indeterminateSignal;
 
     @Before
     public void setup() {
@@ -39,6 +40,7 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
         minSignal = new ValueSignal<>(0.0);
         maxSignal = new ValueSignal<>(100.0);
         valueSignal = new ValueSignal<>(50.0);
+        indeterminateSignal = new ValueSignal<>(false);
     }
 
     @After
@@ -232,5 +234,67 @@ public class ProgressBarSignalTest extends AbstractSignalsUnitTest {
 
         ValueSignal<Double> anotherSignal = new ValueSignal<>(80.0);
         progressBar.bindValue(anotherSignal);
+    }
+
+    // ===== INDETERMINATE BINDING TESTS =====
+
+    @Test
+    public void bindIndeterminate_signalBound_indeterminateSynchronizedWhenAttached() {
+        progressBar.bindIndeterminate(indeterminateSignal);
+        UI.getCurrent().add(progressBar);
+
+        Assert.assertFalse(progressBar.isIndeterminate());
+
+        indeterminateSignal.set(true);
+        Assert.assertTrue(progressBar.isIndeterminate());
+
+        indeterminateSignal.set(false);
+        Assert.assertFalse(progressBar.isIndeterminate());
+    }
+
+    @Test
+    public void bindIndeterminate_signalBound_noEffectWhenDetached() {
+        progressBar.bindIndeterminate(indeterminateSignal);
+        // Not attached to UI
+
+        boolean initial = progressBar.isIndeterminate();
+        indeterminateSignal.set(true);
+        Assert.assertEquals(initial, progressBar.isIndeterminate());
+    }
+
+    @Test
+    public void bindIndeterminate_signalBound_detachAndReattach() {
+        progressBar.bindIndeterminate(indeterminateSignal);
+        UI.getCurrent().add(progressBar);
+        Assert.assertFalse(progressBar.isIndeterminate());
+
+        // Detach
+        progressBar.removeFromParent();
+        indeterminateSignal.set(true);
+        Assert.assertFalse(progressBar.isIndeterminate());
+
+        // Reattach
+        UI.getCurrent().add(progressBar);
+        Assert.assertTrue(progressBar.isIndeterminate());
+
+        indeterminateSignal.set(false);
+        Assert.assertFalse(progressBar.isIndeterminate());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindIndeterminate_setIndeterminateWhileBound_throwsException() {
+        progressBar.bindIndeterminate(indeterminateSignal);
+        UI.getCurrent().add(progressBar);
+
+        progressBar.setIndeterminate(true);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindIndeterminate_bindAgainWhileBound_throwsException() {
+        progressBar.bindIndeterminate(indeterminateSignal);
+        UI.getCurrent().add(progressBar);
+
+        ValueSignal<Boolean> anotherSignal = new ValueSignal<>(true);
+        progressBar.bindIndeterminate(anotherSignal);
     }
 }
