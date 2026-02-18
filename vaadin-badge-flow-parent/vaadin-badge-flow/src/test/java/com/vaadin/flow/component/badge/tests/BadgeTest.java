@@ -15,37 +15,17 @@
  */
 package com.vaadin.flow.component.badge.tests;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.component.html.Span;
 
 public class BadgeTest {
 
-    private Badge badge;
-    private UI ui;
-
-    @Before
-    public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-        badge = new Badge();
-        ui.add(badge);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
-
     @Test
     public void defaultConstructor_emptyBadge() {
+        var badge = new Badge();
         Assert.assertEquals("", badge.getText());
         Assert.assertNull(badge.getNumber());
         Assert.assertNull(badge.getIcon());
@@ -59,14 +39,14 @@ public class BadgeTest {
 
     @Test
     public void iconConstructor_setsIcon() {
-        var icon = createIcon();
+        var icon = new Span();
         var badge = new Badge(icon);
         Assert.assertEquals(icon, badge.getIcon());
     }
 
     @Test
     public void iconAndTextConstructor_setsIconAndText() {
-        var icon = createIcon();
+        var icon = new Span();
         var badge = new Badge(icon, "New");
         Assert.assertEquals(icon, badge.getIcon());
         Assert.assertEquals("New", badge.getText());
@@ -74,60 +54,56 @@ public class BadgeTest {
 
     @Test
     public void setText_getText() {
+        var badge = new Badge();
+
         badge.setText("Status");
         Assert.assertEquals("Status", badge.getText());
+        Assert.assertEquals("Status", badge.getElement().getText());
+
+        badge.setText("");
+        Assert.assertEquals("", badge.getText());
+        Assert.assertEquals("", badge.getElement().getText());
+
+        badge.setText("Status");
+        badge.setText(null);
+        Assert.assertEquals("", badge.getText());
+        Assert.assertEquals("", badge.getElement().getText());
     }
 
     @Test
     public void setNumber_getNumber() {
-        badge.setNumber(5);
-        Assert.assertEquals(Integer.valueOf(5), badge.getNumber());
-    }
+        var badge = new Badge();
 
-    @Test
-    public void setNumber_null_getNumberReturnsNull() {
         badge.setNumber(5);
+        Assert.assertEquals((Integer) 5, badge.getNumber());
+        Assert.assertEquals("5", badge.getElement().getProperty("number"));
+
         badge.setNumber(null);
         Assert.assertNull(badge.getNumber());
+        Assert.assertFalse(badge.getElement().hasProperty("number"));
     }
 
     @Test
     public void setIcon_getIcon() {
-        var icon = createIcon();
-        badge.setIcon(icon);
-        Assert.assertEquals(icon, badge.getIcon());
-    }
+        var badge = new Badge();
+        var icon0 = new Span();
+        var icon1 = new Span();
 
-    @Test
-    public void setIcon_iconHasSlotAttribute() {
-        var icon = createIcon();
-        badge.setIcon(icon);
-        Assert.assertEquals("icon", icon.getElement().getAttribute("slot"));
-    }
+        badge.setIcon(icon0);
+        Assert.assertEquals(icon0, badge.getIcon());
+        Assert.assertEquals(badge, icon0.getParent().get());
+        Assert.assertEquals("icon", icon0.getElement().getAttribute("slot"));
 
-    @Test
-    public void setIcon_replaceIcon() {
-        var icon1 = createIcon();
-        var icon2 = createIcon();
         badge.setIcon(icon1);
-        badge.setIcon(icon2);
-        Assert.assertEquals(icon2, badge.getIcon());
-        Assert.assertNull(icon1.getElement().getAttribute("slot"));
-    }
+        Assert.assertEquals(icon1, badge.getIcon());
+        Assert.assertEquals(badge, icon1.getParent().get());
+        Assert.assertEquals("icon", icon1.getElement().getAttribute("slot"));
+        Assert.assertFalse(icon0.getParent().isPresent());
+        Assert.assertFalse(icon0.getElement().hasAttribute("slot"));
 
-    @Test
-    public void setIcon_null_removesIcon() {
-        var icon = createIcon();
-        badge.setIcon(icon);
         badge.setIcon(null);
         Assert.assertNull(badge.getIcon());
-    }
-
-    @Tag("vaadin-icon")
-    private static class TestIcon extends Component {
-    }
-
-    private TestIcon createIcon() {
-        return new TestIcon();
+        Assert.assertFalse(icon1.getParent().isPresent());
+        Assert.assertFalse(icon1.getElement().hasAttribute("slot"));
     }
 }
