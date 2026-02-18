@@ -1000,7 +1000,8 @@ public class AIOrchestratorTest {
                 "msg-1", pastTime));
 
         AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withHistory(history).build();
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
 
         Mockito.verify(mockMessage).setTime(pastTime);
     }
@@ -1016,7 +1017,8 @@ public class AIOrchestratorTest {
                 new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null));
 
         AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withHistory(history).build();
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
 
         Mockito.verify(mockMessage, Mockito.never())
                 .setTime(Mockito.any(Instant.class));
@@ -1070,10 +1072,10 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void withHistory_withNull_throwsNullPointerException() {
+    public void withHistory_withNullHistory_throwsNullPointerException() {
         var builder = AIOrchestrator.builder(mockProvider, null);
         Assert.assertThrows(NullPointerException.class,
-                () -> builder.withHistory(null));
+                () -> builder.withHistory(null, Collections.emptyMap()));
     }
 
     @Test
@@ -1083,7 +1085,8 @@ public class AIOrchestratorTest {
                 new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
                         null));
 
-        AIOrchestrator.builder(mockProvider, null).withHistory(history).build();
+        AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
 
         Mockito.verify(mockProvider).setHistory(history,
                 Collections.emptyMap());
@@ -1102,7 +1105,8 @@ public class AIOrchestratorTest {
                         null));
 
         AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withHistory(history).build();
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
 
         var inOrder = Mockito.inOrder(mockMessageList);
         inOrder.verify(mockMessageList).addMessage("Hello", "You",
@@ -1119,7 +1123,7 @@ public class AIOrchestratorTest {
                         null));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withHistory(history).build();
+                .withHistory(history, Collections.emptyMap()).build();
 
         var restored = orchestrator.getHistory();
         Assert.assertEquals(2, restored.size());
@@ -1143,7 +1147,8 @@ public class AIOrchestratorTest {
 
         AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withUserName("Alice")
-                .withAssistantName("Bot").withHistory(history).build();
+                .withAssistantName("Bot")
+                .withHistory(history, Collections.emptyMap()).build();
 
         var inOrder = Mockito.inOrder(mockMessageList);
         inOrder.verify(mockMessageList).addMessage("Hello", "Alice",
@@ -1171,7 +1176,7 @@ public class AIOrchestratorTest {
         AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withAttachmentClickListener(clickEvents::add)
-                .withHistory(history).build();
+                .withHistory(history, Collections.emptyMap()).build();
 
         Mockito.verify(mockMessageList)
                 .addAttachmentClickListener(clickCaptor.capture());
@@ -1195,7 +1200,7 @@ public class AIOrchestratorTest {
         }
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withHistory(history).build();
+                .withHistory(history, Collections.emptyMap()).build();
 
         var restored = orchestrator.getHistory();
         Assert.assertEquals(
@@ -1218,7 +1223,7 @@ public class AIOrchestratorTest {
 
         Assert.assertThrows(UnsupportedOperationException.class,
                 () -> AIOrchestrator.builder(mockProvider, null)
-                        .withHistory(history).build());
+                        .withHistory(history, Collections.emptyMap()).build());
     }
 
     @Test
@@ -1229,7 +1234,7 @@ public class AIOrchestratorTest {
                         null));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withHistory(history).build();
+                .withHistory(history, Collections.emptyMap()).build();
 
         Mockito.verify(mockProvider).setHistory(history,
                 Collections.emptyMap());
@@ -1312,7 +1317,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void withHistory_withoutAttachmentMap_usesEmptyAttachments() {
+    public void withHistory_withEmptyAttachmentMap_usesEmptyAttachments() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1322,7 +1327,8 @@ public class AIOrchestratorTest {
                 new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null));
 
         AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withHistory(history).build();
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
 
         Mockito.verify(mockMessageList).addMessage("Hello", "You",
                 Collections.emptyList());
@@ -1502,7 +1508,7 @@ public class AIOrchestratorTest {
         AIOrchestrator.builder(mockProvider, null)
                 .withResponseCompleteListener(
                         event -> captured.add(event.getResponse()))
-                .withHistory(history).build();
+                .withHistory(history, Collections.emptyMap()).build();
 
         Assert.assertTrue(
                 "Listener should not fire when history is restored via withHistory()",

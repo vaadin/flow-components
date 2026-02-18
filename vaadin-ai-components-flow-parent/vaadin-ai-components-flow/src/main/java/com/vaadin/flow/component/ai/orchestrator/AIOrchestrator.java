@@ -642,25 +642,6 @@ public class AIOrchestrator {
         }
 
         /**
-         * Sets the conversation history to restore when the orchestrator is
-         * built. This restores the LLM provider's conversation context, the
-         * message list UI (if configured), and the internal message ID mappings
-         * for attachment click handling.
-         * <p>
-         * Attachment data is not included in the restored messages. To also
-         * restore attachments, use {@link #withHistory(List, Map)} instead.
-         *
-         * @param history
-         *            the conversation history to restore, not {@code null}
-         * @return this builder
-         */
-        public Builder withHistory(List<ChatMessage> history) {
-            Objects.requireNonNull(history, "History must not be null");
-            this.history = history;
-            return this;
-        }
-
-        /**
          * Sets the conversation history and associated attachments to restore
          * when the orchestrator is built. This restores the LLM provider's
          * conversation context (including multimodal content), the message list
@@ -671,7 +652,8 @@ public class AIOrchestrator {
          * contains the list of {@link AIAttachment} objects for each message.
          * Messages whose IDs are not in the map are restored as text-only. The
          * attachments are used once during initialization and are not retained
-         * by the orchestrator.
+         * by the orchestrator. Pass {@link Collections#emptyMap()} if there are
+         * no attachments to restore.
          *
          * @param history
          *            the conversation history to restore, not {@code null}
@@ -721,9 +703,7 @@ public class AIOrchestrator {
                 });
             }
             if (history != null) {
-                orchestrator.restoreHistory(history,
-                        historyAttachments != null ? historyAttachments
-                                : Collections.emptyMap());
+                orchestrator.restoreHistory(history, historyAttachments);
             }
 
             LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
