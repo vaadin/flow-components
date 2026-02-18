@@ -259,7 +259,7 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * Get the maximum allowed file size in the client-side, in bytes.
+     * Get the maximum allowed file size in bytes.
      *
      * @return the maximum file size in bytes, or 0 if unlimited
      */
