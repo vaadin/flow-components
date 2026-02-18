@@ -202,13 +202,14 @@ public class UploadFileListTest {
 
         uploadError.setServerUnavailable("Server unavailable")
                 .setUnexpectedServerError("Unexpected server error")
-                .setForbidden("Forbidden");
+                .setForbidden("Forbidden").setFileTooLarge("File too large");
 
         Assert.assertEquals("Server unavailable",
                 uploadError.getServerUnavailable());
         Assert.assertEquals("Unexpected server error",
                 uploadError.getUnexpectedServerError());
         Assert.assertEquals("Forbidden", uploadError.getForbidden());
+        Assert.assertEquals("File too large", uploadError.getFileTooLarge());
     }
 
     @Test
