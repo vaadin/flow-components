@@ -66,7 +66,7 @@ public class AIOrchestratorPage extends UploadDropZone {
         var uploadButton = new UploadButton(uploadManager);
         uploadButton.setIcon(VaadinIcon.UPLOAD.create());
         var fileList = new UploadFileList(uploadManager);
-        fileList.addThemeVariants(UploadFileListVariant.AURA_THUMBNAILS);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         var messageInput = new MessageInput();
         messageInput.setId("message-input");
