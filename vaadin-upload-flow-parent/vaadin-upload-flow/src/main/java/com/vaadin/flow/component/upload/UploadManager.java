@@ -245,9 +245,14 @@ public class UploadManager implements Serializable {
 
     /**
      * Specify the maximum file size in bytes allowed to upload. The constraint
-     * is enforced both on the client side (before sending the request) and on
-     * the server side (rejecting the upload if the file size exceeds the
-     * limit).
+     * is enforced on three levels:
+     * <ul>
+     * <li>Client-side: prevents upload before sending the request</li>
+     * <li>Framework-level: for multipart uploads, the framework validates the
+     * actual received bytes via {@link UploadHandler#getFileSizeMax()}</li>
+     * <li>Handler-level: fast-path rejection based on the client-reported
+     * Content-Length header</li>
+     * </ul>
      *
      * @param maxFileSize
      *            the maximum file size in bytes, or 0 for unlimited
@@ -368,6 +373,15 @@ public class UploadManager implements Serializable {
      * upload request, so changes made after {@link #setUploadHandler} are
      * picked up.
      * <p>
+     * File size enforcement uses two layers:
+     * <ul>
+     * <li>{@link #getFileSizeMax()} — enforced by the framework on actual
+     * received bytes for multipart uploads, before the handler is invoked</li>
+     * <li>Header-based check in {@link #handleUploadRequest} — a fast-path
+     * rejection using the client-reported Content-Length; not a security
+     * boundary since the header can be spoofed</li>
+     * </ul>
+     * <p>
      * NOTE: If new methods are added to {@link UploadHandler} or
      * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
      * be explicitly delegated here.
@@ -377,6 +391,10 @@ public class UploadManager implements Serializable {
             @Override
             public void handleUploadRequest(UploadEvent event)
                     throws IOException {
+                // Fast-path rejection based on client-reported size. This
+                // uses the Content-Length header and is not a security
+                // boundary. The actual byte-level limit for multipart
+                // uploads is enforced by the framework via getFileSizeMax().
                 long maxSize = getMaxFileSize();
                 if (maxSize > 0 && event.getFileSize() > maxSize) {
                     event.reject("File is too big: " + event.getFileName());
@@ -407,7 +425,15 @@ public class UploadManager implements Serializable {
 
             @Override
             public long getFileSizeMax() {
-                return delegate.getFileSizeMax();
+                long delegateMax = delegate.getFileSizeMax();
+                long managerMax = getMaxFileSize();
+                if (managerMax <= 0) {
+                    return delegateMax;
+                }
+                if (delegateMax <= 0) {
+                    return managerMax;
+                }
+                return Math.min(delegateMax, managerMax);
             }
 
             @Override

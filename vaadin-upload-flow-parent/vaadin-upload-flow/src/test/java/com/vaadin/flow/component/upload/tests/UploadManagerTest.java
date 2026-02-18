@@ -772,6 +772,96 @@ public class UploadManagerTest {
                 finishedCount.get());
     }
 
+    // --- getFileSizeMax delegation ---
+
+    @Test
+    public void getFileSizeMax_usesManagerMax_whenDelegateUnlimited() {
+        manager.setUploadHandler(countingHandler(new AtomicInteger(0)));
+        manager.setMaxFileSize(1024);
+
+        Assert.assertEquals(1024,
+                ((UploadHandler) getRegisteredHandler()).getFileSizeMax());
+    }
+
+    @Test
+    public void getFileSizeMax_usesDelegateMax_whenManagerUnlimited() {
+        UploadHandler handler = new UploadHandler() {
+            @Override
+            public void handleUploadRequest(
+                    com.vaadin.flow.server.streams.UploadEvent event) {
+            }
+
+            @Override
+            public long getFileSizeMax() {
+                return 2048;
+            }
+        };
+        manager.setUploadHandler(handler);
+
+        Assert.assertEquals(2048,
+                ((UploadHandler) getRegisteredHandler()).getFileSizeMax());
+    }
+
+    @Test
+    public void getFileSizeMax_usesMoreRestrictive_whenBothSet() {
+        UploadHandler handler = new UploadHandler() {
+            @Override
+            public void handleUploadRequest(
+                    com.vaadin.flow.server.streams.UploadEvent event) {
+            }
+
+            @Override
+            public long getFileSizeMax() {
+                return 2048;
+            }
+        };
+        manager.setUploadHandler(handler);
+        manager.setMaxFileSize(512);
+
+        Assert.assertEquals(512,
+                ((UploadHandler) getRegisteredHandler()).getFileSizeMax());
+    }
+
+    @Test
+    public void getFileSizeMax_usesMoreRestrictive_whenDelegateIsSmaller() {
+        UploadHandler handler = new UploadHandler() {
+            @Override
+            public void handleUploadRequest(
+                    com.vaadin.flow.server.streams.UploadEvent event) {
+            }
+
+            @Override
+            public long getFileSizeMax() {
+                return 256;
+            }
+        };
+        manager.setUploadHandler(handler);
+        manager.setMaxFileSize(1024);
+
+        Assert.assertEquals(256,
+                ((UploadHandler) getRegisteredHandler()).getFileSizeMax());
+    }
+
+    @Test
+    public void getFileSizeMax_unlimitedByDefault() {
+        manager.setUploadHandler(countingHandler(new AtomicInteger(0)));
+
+        Assert.assertEquals(-1,
+                ((UploadHandler) getRegisteredHandler()).getFileSizeMax());
+    }
+
+    @Test
+    public void getFileSizeMax_reactsToRuntimeChanges() {
+        manager.setUploadHandler(countingHandler(new AtomicInteger(0)));
+        manager.setMaxFileSize(1024);
+
+        UploadHandler wrapper = (UploadHandler) getRegisteredHandler();
+        Assert.assertEquals(1024, wrapper.getFileSizeMax());
+
+        manager.setMaxFileSize(0);
+        Assert.assertEquals(-1, wrapper.getFileSizeMax());
+    }
+
     // --- Wrapper delegation of ElementRequestHandler defaults ---
     //
     // These tests verify that the file-type-validation wrapper created
