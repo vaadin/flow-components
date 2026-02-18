@@ -154,11 +154,18 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     @Override
-    public void setHistory(List<ChatMessage> history) {
+    public void setHistory(List<ChatMessage> history,
+            Map<String, List<AIAttachment>> attachmentsByMessageId) {
         Objects.requireNonNull(history, "History must not be null");
+        Objects.requireNonNull(attachmentsByMessageId,
+                "Attachments map must not be null");
         chatMemory.clear();
         for (var message : history) {
-            chatMemory.add(toVendorMessage(message));
+            var attachments = message.messageId() != null
+                    ? attachmentsByMessageId.getOrDefault(message.messageId(),
+                            Collections.emptyList())
+                    : Collections.<AIAttachment> emptyList();
+            chatMemory.add(toVendorMessage(message, attachments));
         }
     }
 
@@ -168,6 +175,18 @@ public class LangChain4JLLMProvider implements LLMProvider {
             return UserMessage.from(message.content());
         }
         return AiMessage.from(message.content());
+    }
+
+    private static dev.langchain4j.data.message.ChatMessage toVendorMessage(
+            ChatMessage message, List<AIAttachment> attachments) {
+        if (message.role() != ChatMessage.Role.USER || attachments.isEmpty()) {
+            return toVendorMessage(message);
+        }
+        var contents = new ArrayList<Content>();
+        contents.add(TextContent.from(message.content()));
+        attachments.stream().map(LangChain4JLLMProvider::getAttachmentContent)
+                .flatMap(Optional::stream).forEach(contents::add);
+        return UserMessage.from(contents);
     }
 
     private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
