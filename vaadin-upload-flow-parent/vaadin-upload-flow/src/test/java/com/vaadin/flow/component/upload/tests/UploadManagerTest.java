@@ -539,12 +539,14 @@ public class UploadManagerTest {
     }
 
     @Test
-    public void fileRejectedEvent_hasFileNameAndErrorMessage() {
+    public void fileRejectedEvent_hasFileNameAndReason() {
         var event = new UploadManager.FileRejectedEvent(new Div(), true,
-                "File too large", "large-file.zip");
+                UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                "large-file.zip");
 
         Assert.assertEquals("large-file.zip", event.getFileName());
-        Assert.assertEquals("File too large", event.getErrorMessage());
+        Assert.assertEquals(UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                event.getReason());
         Assert.assertTrue(event.isFromClient());
     }
 

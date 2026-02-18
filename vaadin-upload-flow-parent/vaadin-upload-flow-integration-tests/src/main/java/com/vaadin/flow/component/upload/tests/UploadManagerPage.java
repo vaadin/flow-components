@@ -74,7 +74,7 @@ public class UploadManagerPage extends UploadDropZone {
         manager.addFileRemovedListener(
                 event -> log("Removed: " + event.getFileName()));
         manager.addFileRejectedListener(event -> log("Rejected: "
-                + event.getFileName() + " - " + event.getErrorMessage()));
+                + event.getFileName() + " - " + event.getReason()));
         manager.addAllFinishedListener(event -> log("All uploads finished"));
 
         // Create upload button linked to the manager
