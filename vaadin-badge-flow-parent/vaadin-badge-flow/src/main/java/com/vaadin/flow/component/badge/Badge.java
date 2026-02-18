@@ -1,0 +1,172 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.badge;
+
+import java.util.Optional;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.SlotUtils;
+
+/**
+ * Badge is a component for displaying small pieces of information, such as
+ * statuses, counts, or labels. It supports text content, a number value, an
+ * icon, and several theme variants.
+ *
+ * @author Vaadin Ltd
+ */
+@Tag("vaadin-badge")
+@NpmPackage(value = "@vaadin/badge", version = "25.1.0-alpha8")
+@JsModule("@vaadin/badge/src/vaadin-badge.js")
+public class Badge extends Component
+        implements HasSize, HasText, HasThemeVariant<BadgeVariant> {
+
+    private static final String ICON_SLOT = "icon";
+
+    private final Text textNode = new Text("");
+
+    /**
+     * Default constructor. Creates an empty badge.
+     */
+    public Badge() {
+    }
+
+    /**
+     * Creates a badge with a text inside.
+     *
+     * @param text
+     *            the text inside the badge
+     * @see #setText(String)
+     */
+    public Badge(String text) {
+        setText(text);
+    }
+
+    /**
+     * Creates a badge with an icon inside.
+     *
+     * @param icon
+     *            the icon inside the badge
+     * @see #setIcon(Component)
+     */
+    public Badge(Component icon) {
+        setIcon(icon);
+    }
+
+    /**
+     * Creates a badge with an icon and a text inside.
+     *
+     * @param icon
+     *            the icon inside the badge
+     * @param text
+     *            the text inside the badge
+     * @see #setIcon(Component)
+     * @see #setText(String)
+     */
+    public Badge(Component icon, String text) {
+        setIcon(icon);
+        setText(text);
+    }
+
+    /**
+     * Sets the given string as the text content of this component.
+     * <p>
+     * This method removes any existing text-content and replaces it with the
+     * given text. Other slotted children (such as icons) are preserved.
+     *
+     * @param text
+     *            the text content to set, or {@code null} to remove existing
+     *            text
+     */
+    @Override
+    public void setText(String text) {
+        textNode.setText(text);
+
+        if (text == null || text.isEmpty()) {
+            getElement().removeChild(textNode.getElement());
+            return;
+        }
+
+        if (textNode.getParent().isEmpty()) {
+            getElement().appendChild(textNode.getElement());
+        }
+    }
+
+    /**
+     * Gets the text content of this component.
+     *
+     * @return the text content, or an empty string if not set
+     */
+    @Override
+    public String getText() {
+        return textNode.getText();
+    }
+
+    /**
+     * Sets the number to display in the badge.
+     *
+     * @param number
+     *            the number to display, or {@code null} to clear it
+     */
+    public void setNumber(Integer number) {
+        if (number == null) {
+            getElement().removeProperty("number");
+        } else {
+            getElement().setProperty("number", number.intValue());
+        }
+    }
+
+    /**
+     * Gets the number displayed in the badge.
+     *
+     * @return the number, or {@code null} if not set
+     */
+    public Integer getNumber() {
+        return Optional.ofNullable(getElement().getProperty("number"))
+                .map(Integer::valueOf).orElse(null);
+    }
+
+    /**
+     * Sets the given component as the icon of this badge.
+     * <p>
+     * The icon is placed in the {@code icon} slot of the badge.
+     *
+     * @param icon
+     *            component to be used as an icon, or {@code null} to remove it
+     */
+    public void setIcon(Component icon) {
+        if (icon == null) {
+            SlotUtils.clearSlot(this, ICON_SLOT);
+        } else {
+            SlotUtils.setSlot(this, ICON_SLOT, icon);
+        }
+    }
+
+    /**
+     * Gets the component that is defined as the icon of this badge.
+     *
+     * @return the icon of this badge, or {@code null} if the icon is not set
+     */
+    public Component getIcon() {
+        return SlotUtils.getChildInSlot(this, ICON_SLOT);
+    }
+}
