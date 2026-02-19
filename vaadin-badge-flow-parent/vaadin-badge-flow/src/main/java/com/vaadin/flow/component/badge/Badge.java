@@ -73,18 +73,52 @@ public class Badge extends Component
     }
 
     /**
-     * Creates a badge with an icon and a text inside.
+     * Creates a badge with a text and an icon inside.
      *
-     * @param icon
-     *            the icon inside the badge
      * @param text
      *            the text inside the badge
-     * @see #setIcon(Component)
+     * @param icon
+     *            the icon inside the badge
      * @see #setText(String)
+     * @see #setIcon(Component)
      */
-    public Badge(Component icon, String text) {
-        setIcon(icon);
+    public Badge(String text, Component icon) {
         setText(text);
+        setIcon(icon);
+    }
+
+    /**
+     * Creates a badge with a text and a number inside.
+     *
+     * @param text
+     *            the text inside the badge
+     * @param number
+     *            the number to display in the badge
+     * @see #setText(String)
+     * @see #setNumber(Integer)
+     */
+    public Badge(String text, int number) {
+        setText(text);
+        setNumber(number);
+    }
+
+    /**
+     * Creates a badge with a text, a number, and an icon inside.
+     *
+     * @param text
+     *            the text inside the badge
+     * @param number
+     *            the number to display in the badge
+     * @param icon
+     *            the icon inside the badge
+     * @see #setText(String)
+     * @see #setNumber(Integer)
+     * @see #setIcon(Component)
+     */
+    public Badge(String text, int number, Component icon) {
+        setText(text);
+        setNumber(number);
+        setIcon(icon);
     }
 
     /**
