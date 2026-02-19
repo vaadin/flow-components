@@ -43,6 +43,7 @@ import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
@@ -396,10 +397,11 @@ public class AIOrchestrator {
      * {@link #withMessageList(MessageList)} – connects a message list component
      * to display the conversation. If omitted, responses are still streamed but
      * not rendered.</li>
-     * <li>{@link #withFileReceiver(AIFileReceiver)} or
-     * {@link #withFileReceiver(UploadManager)} – enables file upload support.
-     * Uploaded files are sent to the LLM as attachments with the next
-     * prompt.</li>
+     * <li>{@link #withFileReceiver(AIFileReceiver)},
+     * {@link #withFileReceiver(UploadManager)}, or
+     * {@link #withFileReceiver(Upload) withFileReceiver(Upload)} – enables file
+     * upload support. Uploaded files are sent to the LLM as attachments with
+     * the next prompt.</li>
      * <li>{@link #withTools(Object...)} – registers objects containing
      * vendor-specific tool-annotated methods (e.g. LangChain4j's {@code @Tool}
      * or Spring AI's {@code @Tool}) that the LLM can invoke.</li>
@@ -417,9 +419,9 @@ public class AIOrchestrator {
      * </ul>
      * <p>
      * Both Flow components ({@link MessageInput}, {@link MessageList},
-     * {@link UploadManager}) and custom implementations of the AI interfaces
-     * ({@link AIInput}, {@link AIMessageList}, {@link AIFileReceiver}) are
-     * accepted.
+     * {@link UploadManager}, {@link Upload}) and custom implementations of the
+     * AI interfaces ({@link AIInput}, {@link AIMessageList},
+     * {@link AIFileReceiver}) are accepted.
      * </p>
      */
     public static class Builder {
@@ -521,6 +523,26 @@ public class AIOrchestrator {
                         "The provided UploadManager already has an UploadHandler.");
             }
             this.fileReceiver = wrapUploadManager(uploadManager);
+            return this;
+        }
+
+        /**
+         * Sets the file receiver component using a Flow Upload component. The
+         * provided upload should not have an UploadHandler set beforehand.
+         *
+         * @param upload
+         *            the Flow Upload component
+         * @return this builder
+         * @throws IllegalArgumentException
+         *             if the {@link Upload} already has an
+         *             {@link UploadHandler}
+         */
+        public Builder withFileReceiver(Upload upload) {
+            if (upload != null && UploadHelper.hasUploadHandler(upload)) {
+                throw new IllegalArgumentException(
+                        "The provided Upload already has an UploadHandler.");
+            }
+            this.fileReceiver = wrapUpload(upload);
             return this;
         }
 
@@ -728,6 +750,10 @@ public class AIOrchestrator {
         private static AIFileReceiver wrapUploadManager(
                 UploadManager uploadManager) {
             return new UploadManagerWrapper(uploadManager);
+        }
+
+        private static AIFileReceiver wrapUpload(Upload upload) {
+            return new UploadWrapper(upload);
         }
     }
 }
