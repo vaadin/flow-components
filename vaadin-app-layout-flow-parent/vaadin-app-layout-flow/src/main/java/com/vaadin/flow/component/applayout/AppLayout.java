@@ -148,15 +148,18 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     }
 
     /**
-     * Binds the drawer opened state to the given writable signal. The binding
-     * is two-way: signal changes push to the DOM property, and client-side
-     * property changes push back to the signal.
+     * Binds the drawer opened state to the given signal. The binding is
+     * two-way: signal changes push to the DOM property, and client-side
+     * property changes invoke the write callback.
      * <p>
      * While a signal is bound, any attempt to set the drawer opened state
      * manually throws {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the writable signal to bind, not {@code null}
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate value changes back, or {@code null}
+     *            for one-way binding
      * @since 25.1
      */
     public void bindDrawerOpened(Signal<Boolean> signal,
