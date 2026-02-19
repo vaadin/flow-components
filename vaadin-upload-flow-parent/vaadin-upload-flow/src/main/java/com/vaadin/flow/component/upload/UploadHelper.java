@@ -38,4 +38,17 @@ public class UploadHelper implements Serializable {
     public static boolean hasUploadHandler(UploadManager uploadManager) {
         return uploadManager.isHandlerExplicitlyConfigured();
     }
+
+    /**
+     * Checks whether the given {@link Upload} has an explicitly configured
+     * {@link UploadHandler UploadHandler}.
+     *
+     * @param upload
+     *            the upload component to check, not {@code null}
+     * @return {@code true} if the upload has an explicitly configured upload
+     *         handler, {@code false} otherwise
+     */
+    public static boolean hasUploadHandler(Upload upload) {
+        return upload.isHandlerExplicitlyConfigured();
+    }
 }

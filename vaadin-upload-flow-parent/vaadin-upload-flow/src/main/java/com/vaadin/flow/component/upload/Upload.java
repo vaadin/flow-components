@@ -98,6 +98,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     private Receiver receiver;
 
+    private boolean handlerExplicitlyConfigured;
+
     /**
      * Create a new instance of Upload.
      * <p>
@@ -778,6 +780,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             throw new IllegalArgumentException(
                     "The target name cannot be blank");
         }
+        if (!(handler instanceof FailFastUploadHandler)) {
+            handlerExplicitlyConfigured = true;
+        }
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 handler, this.getElement()) {
             @Override
@@ -918,6 +923,15 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
                         event.getMimeType(), event.getContentLength());
             }
         }
+    }
+
+    /**
+     * Returns whether an UploadHandler is explicitly configured.
+     * <p>
+     * Intended only for internal use.
+     */
+    boolean isHandlerExplicitlyConfigured() {
+        return handlerExplicitlyConfigured;
     }
 
     /**
