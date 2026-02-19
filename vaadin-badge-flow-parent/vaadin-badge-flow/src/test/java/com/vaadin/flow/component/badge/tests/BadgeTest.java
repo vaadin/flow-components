@@ -45,11 +45,27 @@ public class BadgeTest {
     }
 
     @Test
-    public void iconAndTextConstructor_setsIconAndText() {
+    public void textAndIconConstructor_setsTextAndIcon() {
         var icon = new Span();
-        var badge = new Badge(icon, "New");
-        Assert.assertEquals(icon, badge.getIcon());
+        var badge = new Badge("New", icon);
         Assert.assertEquals("New", badge.getText());
+        Assert.assertEquals(icon, badge.getIcon());
+    }
+
+    @Test
+    public void textAndNumberConstructor_setsTextAndNumber() {
+        var badge = new Badge("Messages", 5);
+        Assert.assertEquals("Messages", badge.getText());
+        Assert.assertEquals((Integer) 5, badge.getNumber());
+    }
+
+    @Test
+    public void textNumberAndIconConstructor_setsAll() {
+        var icon = new Span();
+        var badge = new Badge("Messages", 5, icon);
+        Assert.assertEquals("Messages", badge.getText());
+        Assert.assertEquals((Integer) 5, badge.getNumber());
+        Assert.assertEquals(icon, badge.getIcon());
     }
 
     @Test
