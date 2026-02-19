@@ -36,10 +36,19 @@ import com.vaadin.flow.component.shared.SlotUtils;
  * customizing the badge's appearance, such as {@link BadgeVariant#SUCCESS
  * success}, {@link BadgeVariant#ERROR error}, and {@link BadgeVariant other
  * variants}.
+ * <p>
+ * Example 1:
  *
  * <pre>
  * Badge badge = new Badge("Completed", LumoIcon.CHECKMARK.create());
  * badge.addThemeVariants(BadgeVariant.SUCCESS);
+ * </pre>
+ *
+ * Example 2:
+ *
+ * <pre>
+ * Badge badge = new Badge();
+ * badge.addThemeVariants(BadgeVariant.DOT);
  * </pre>
  *
  * <h4>Accessibility</h4>
@@ -55,8 +64,8 @@ import com.vaadin.flow.component.shared.SlotUtils;
  * badge.addThemeVariants(BadgeVariant.NUMBER_ONLY);
  * </pre>
  *
- * In the above example, only the number is visible, but screen readers will
- * read the full badge as "5 new messages".
+ * In the above example, only the number is visible, but screen readers read the
+ * full badge as "5 new messages".
  *
  * @author Vaadin Ltd
  */
