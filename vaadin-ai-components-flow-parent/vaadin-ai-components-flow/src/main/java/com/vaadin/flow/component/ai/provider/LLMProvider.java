@@ -30,10 +30,96 @@ import reactor.core.publisher.Flux;
  * being tied to a specific implementation. Implementations are responsible for
  * managing conversation memory, handling streaming responses, processing
  * vendor-specific tool annotations, and handling file attachments.
+ * <p>
+ * Use the {@code from(...)} factory methods to create a provider from a
+ * vendor-specific model or client object:
+ *
+ * <pre>
+ * // Spring AI
+ * LLMProvider provider = LLMProvider.from(chatModel);
+ *
+ * // LangChain4j
+ * LLMProvider provider = LLMProvider.from(streamingChatModel);
+ * </pre>
  *
  * @author Vaadin Ltd.
  */
 public interface LLMProvider {
+
+    /**
+     * Creates an {@link LLMProvider} from a Spring AI
+     * {@link org.springframework.ai.chat.model.ChatModel ChatModel}.
+     * <p>
+     * The provider manages conversation memory internally. Streaming is enabled
+     * by default and can be toggled via
+     * {@link SpringAILLMProvider#setStreaming(boolean)}.
+     *
+     * @param chatModel
+     *            the Spring AI chat model, not {@code null}
+     * @return a new provider instance, never {@code null}
+     * @throws NullPointerException
+     *             if chatModel is {@code null}
+     */
+    static SpringAILLMProvider from(
+            org.springframework.ai.chat.model.ChatModel chatModel) {
+        return new SpringAILLMProvider(chatModel);
+    }
+
+    /**
+     * Creates an {@link LLMProvider} from a Spring AI
+     * {@link org.springframework.ai.chat.client.ChatClient ChatClient}.
+     * <p>
+     * Use this when the {@code ChatClient} is pre-configured with custom
+     * advisors or externally managed memory. Note that providers created from a
+     * {@code ChatClient} do <b>not</b> support history restoration via
+     * {@link #setHistory(List, Map)} because the memory is managed externally.
+     *
+     * @param chatClient
+     *            the Spring AI chat client, not {@code null}
+     * @return a new provider instance, never {@code null}
+     * @throws NullPointerException
+     *             if chatClient is {@code null}
+     */
+    static SpringAILLMProvider from(
+            org.springframework.ai.chat.client.ChatClient chatClient) {
+        return new SpringAILLMProvider(chatClient);
+    }
+
+    /**
+     * Creates an {@link LLMProvider} from a LangChain4j
+     * {@link dev.langchain4j.model.chat.StreamingChatModel StreamingChatModel}.
+     * <p>
+     * The provider manages conversation memory internally. Responses are
+     * streamed token-by-token.
+     *
+     * @param streamingChatModel
+     *            the LangChain4j streaming chat model, not {@code null}
+     * @return a new provider instance, never {@code null}
+     * @throws NullPointerException
+     *             if streamingChatModel is {@code null}
+     */
+    static LangChain4JLLMProvider from(
+            dev.langchain4j.model.chat.StreamingChatModel streamingChatModel) {
+        return new LangChain4JLLMProvider(streamingChatModel);
+    }
+
+    /**
+     * Creates an {@link LLMProvider} from a LangChain4j
+     * {@link dev.langchain4j.model.chat.ChatModel ChatModel}.
+     * <p>
+     * The provider manages conversation memory internally. Responses are
+     * returned as a single block (non-streaming).
+     *
+     * @param chatModel
+     *            the LangChain4j chat model, not {@code null}
+     * @return a new provider instance, never {@code null}
+     * @throws NullPointerException
+     *             if chatModel is {@code null}
+     */
+    static LangChain4JLLMProvider from(
+            dev.langchain4j.model.chat.ChatModel chatModel) {
+        return new LangChain4JLLMProvider(chatModel);
+    }
 
     /**
      * Streams a response from the LLM based on the provided request. This
