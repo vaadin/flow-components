@@ -191,8 +191,8 @@ public class AIOrchestrator {
      * <p>
      * <b>Note:</b> This method returns a point-in-time snapshot. If a streaming
      * response is in progress, the snapshot may contain the user message
-     * without its corresponding assistant response. For automatic persistence
-     * at the right time, use
+     * without its corresponding assistant response. For automatic persistence,
+     * use
      * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)} to
      * be notified at the right time, then call {@code getHistory()} from that
      * callback.
