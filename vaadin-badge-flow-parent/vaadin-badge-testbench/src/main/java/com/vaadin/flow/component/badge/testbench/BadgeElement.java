@@ -38,9 +38,18 @@ public class BadgeElement extends TestBenchElement {
      *
      * @return the number, or {@code null} if not set
      */
-    public Long getNumber() {
+    public Integer getNumber() {
         return getPropertyDouble("number") != null
-                ? getPropertyDouble("number").longValue()
+                ? getPropertyDouble("number").intValue()
                 : null;
+    }
+
+    /**
+     * Gets the icon element of the badge.
+     *
+     * @return the icon element, or {@code null} if not set
+     */
+    public TestBenchElement getIcon() {
+        return $("*").withAttribute("slot", "icon").first();
     }
 }
