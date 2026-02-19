@@ -52,6 +52,7 @@ import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.Command;
@@ -495,6 +496,25 @@ public class AIOrchestratorTest {
         var flowUploadManager = new UploadManager(new Div());
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withFileReceiver(flowUploadManager).build();
+        Assert.assertNotNull(orchestrator);
+    }
+
+    @Test
+    public void builder_withUploadComponent_withExistingHandler_throws() {
+        mockUi();
+        var upload = new Upload(UploadHandler.inMemory((x, y) -> {
+        }));
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> builder.withFileReceiver(upload));
+    }
+
+    @Test
+    public void builder_withUploadComponent_withoutHandler_succeeds() {
+        mockUi();
+        var upload = new Upload();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(upload).build();
         Assert.assertNotNull(orchestrator);
     }
 
