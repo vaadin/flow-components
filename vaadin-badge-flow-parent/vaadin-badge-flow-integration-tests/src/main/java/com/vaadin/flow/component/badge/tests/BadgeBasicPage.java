@@ -25,8 +25,7 @@ import com.vaadin.flow.router.Route;
 public class BadgeBasicPage extends Div {
 
     public BadgeBasicPage() {
-        var badge = new Badge("Messages", 5,
-                new Icon(VaadinIcon.ENVELOPE));
+        var badge = new Badge("Messages", 5, new Icon(VaadinIcon.ENVELOPE));
         badge.setId("badge");
 
         add(badge);
