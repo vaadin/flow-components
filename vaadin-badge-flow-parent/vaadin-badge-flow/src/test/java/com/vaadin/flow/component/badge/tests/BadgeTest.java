@@ -100,6 +100,49 @@ public class BadgeTest {
     }
 
     @Test
+    public void setContent_getContent() {
+        var badge = new Badge();
+        var content0 = new Span();
+        var content1 = new Span();
+
+        badge.setContent(content0);
+        Assert.assertEquals(content0, badge.getContent());
+        Assert.assertEquals(badge, content0.getParent().get());
+
+        badge.setContent(content1);
+        Assert.assertEquals(content1, badge.getContent());
+        Assert.assertEquals(badge, content1.getParent().get());
+        Assert.assertFalse(content0.getParent().isPresent());
+
+        badge.setContent(null);
+        Assert.assertNull(badge.getContent());
+        Assert.assertFalse(content1.getParent().isPresent());
+    }
+
+    @Test
+    public void setContent_doesNotAffectTextOrIcon() {
+        var badge = new Badge("Text");
+        var icon = new Span();
+        badge.setIcon(icon);
+
+        var content = new Span();
+        badge.setContent(content);
+
+        Assert.assertEquals("Text", badge.getText());
+        Assert.assertEquals(icon, badge.getIcon());
+        Assert.assertEquals(content, badge.getContent());
+    }
+
+    @Test
+    public void getContent_doesNotReturnTextOrIcon() {
+        var badge = new Badge("Text");
+        var icon = new Span();
+        badge.setIcon(icon);
+
+        Assert.assertNull(badge.getContent());
+    }
+
+    @Test
     public void setIcon_getIcon() {
         var badge = new Badge();
         var icon0 = new Span();
