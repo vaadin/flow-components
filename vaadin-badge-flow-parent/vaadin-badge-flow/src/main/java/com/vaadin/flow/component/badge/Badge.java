@@ -180,6 +180,39 @@ public class Badge extends Component
     }
 
     /**
+     * Sets the given component as the content of this badge.
+     * <p>
+     * The content is placed in the default slot of the badge.
+     *
+     * @param content
+     *            the content component, or {@code null} to remove it
+     */
+    public void setContent(Component content) {
+        var oldContent = getContent();
+        if (oldContent == content) {
+            return;
+        }
+        if (oldContent != null) {
+            getElement().removeChild(oldContent.getElement());
+        }
+        if (content != null) {
+            getElement().appendChild(content.getElement());
+        }
+    }
+
+    /**
+     * Gets the component in the default slot of this badge.
+     *
+     * @return the content component, or {@code null} if not set
+     */
+    public Component getContent() {
+        return getChildren()
+                .filter(component -> !component.equals(textNode)
+                        && !component.getElement().hasAttribute("slot"))
+                .findAny().orElse(null);
+    }
+
+    /**
      * Sets the given component as the icon of this badge.
      * <p>
      * The icon is placed in the {@code icon} slot of the badge.
