@@ -353,15 +353,18 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     }
 
     /**
-     * Binds the indeterminate state to the given writable signal. The binding
-     * is two-way: signal changes push to the DOM property, and client-side
-     * property changes push back to the signal.
+     * Binds the indeterminate state to the given signal. The binding is
+     * two-way: signal changes push to the DOM property, and client-side
+     * property changes invoke the write callback.
      * <p>
      * While a signal is bound, any attempt to set the indeterminate state
      * manually throws {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param signal
-     *            the writable signal to bind, not {@code null}
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate value changes back, or {@code null}
+     *            for one-way binding
      * @since 25.1
      */
     public void bindIndeterminate(Signal<Boolean> signal,
