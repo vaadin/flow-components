@@ -29,8 +29,34 @@ import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * Badge is a component for displaying small pieces of information, such as
- * statuses, counts, or labels. It supports text content, a number value, an
- * icon, and several theme variants.
+ * statuses, counts, or labels. It supports {@link #setText(String) plain text}
+ * or a {@link #setContent(Component) custom component} as content, and can also
+ * display a {@link #setNumber(Integer) number} and an
+ * {@link #setIcon(Component) icon}. Several theme variants are available for
+ * customizing the badge's appearance, such as {@link BadgeVariant#SUCCESS
+ * success}, {@link BadgeVariant#ERROR error}, and {@link BadgeVariant other
+ * variants}.
+ *
+ * <pre>
+ * Badge badge = new Badge("Completed", LumoIcon.CHECKMARK.create());
+ * badge.addThemeVariants(BadgeVariant.SUCCESS);
+ * </pre>
+ *
+ * <h4>Accessibility</h4>
+ * <p>
+ * When a Badge displays only an icon or a number, it may not provide enough
+ * context for screen reader users. To address this, you can add descriptive
+ * text via {@link #setText(String)} and use the {@link BadgeVariant#ICON_ONLY
+ * icon-only} or {@link BadgeVariant#NUMBER_ONLY number-only} theme variant to
+ * hide the text visually while keeping it accessible to screen readers:
+ *
+ * <pre>
+ * Badge badge = new Badge("new messages", 5);
+ * badge.addThemeVariants(BadgeVariant.NUMBER_ONLY);
+ * </pre>
+ *
+ * In the above example, only the number is visible, but screen readers will
+ * read the full badge as "5 new messages".
  *
  * @author Vaadin Ltd
  */

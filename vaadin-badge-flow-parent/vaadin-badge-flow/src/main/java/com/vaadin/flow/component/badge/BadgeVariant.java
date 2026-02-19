@@ -21,12 +21,16 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-badge} component.
  */
 public enum BadgeVariant implements ThemeVariant {
-    PRIMARY("primary"),
-    SUCCESS("success"),
-    ERROR("error"),
-    WARNING("warning"),
     CONTRAST("contrast"),
-    SMALL("small");
+    DOT("dot"),
+    ERROR("error"),
+    FILLED("filled"),
+    ICON_ONLY("icon-only"),
+    NUMBER_ONLY("number-only"),
+    PRIMARY("primary"),
+    SMALL("small"),
+    SUCCESS("success"),
+    WARNING("warning");
 
     private final String variant;
 
