@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -32,14 +33,15 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 public class AbstractGridMultiSelectionModelTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private Set<String> selected;
     private Set<String> deselected;
     private Grid<String> grid;
-    private MockUI ui;
 
     @Before
     public void setup() {
@@ -63,7 +65,6 @@ public class AbstractGridMultiSelectionModelTest {
             }
         };
 
-        ui = new MockUI();
         ui.add(grid);
     }
 
@@ -739,7 +740,7 @@ public class AbstractGridMultiSelectionModelTest {
         DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
                 inMemory, unknownItemCount, visibility, true);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Mockito.reset(dataProvider);
 
@@ -807,12 +808,6 @@ public class AbstractGridMultiSelectionModelTest {
 
     private DataProvider<String, ?> getInMemoryDataProvider() {
         return DataProvider.ofItems("foo", "bar");
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private <T> GridSelectionColumn getGridSelectionColumn(Grid<T> grid) {

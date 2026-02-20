@@ -23,23 +23,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 import reactor.core.publisher.Flux;
 
 public class AttachmentListenerTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private LLMProvider mockProvider;
     private AIMessageList mockMessageList;
@@ -63,14 +65,12 @@ public class AttachmentListenerTest {
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(Collections.emptyList());
 
-        new MockUI();
         mockFeatureFlags();
     }
 
     @After
     public void tearDown() {
         mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
     }
 
     // --- AttachmentSubmitListener tests ---
