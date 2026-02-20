@@ -27,6 +27,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -515,6 +516,12 @@ public class TabSheetTest {
 
         Assert.assertFalse(content1.getParent().isPresent());
         Assert.assertTrue(content2.getParent().isPresent());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(TabSheet.class));
     }
 
     private void flushBeforeClientResponse() {

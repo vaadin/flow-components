@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 public class AvatarGroupTest {
 
@@ -142,5 +143,11 @@ public class AvatarGroupTest {
 
         avatarGroup.setI18n(i18n);
         Assert.assertEquals(i18n, avatarGroup.getI18n());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(AvatarGroup.class));
     }
 }

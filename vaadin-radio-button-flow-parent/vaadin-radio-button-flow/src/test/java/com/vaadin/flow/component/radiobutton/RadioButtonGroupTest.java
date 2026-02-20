@@ -38,6 +38,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
@@ -632,5 +633,11 @@ public class RadioButtonGroupTest {
 
         Assert.assertEquals("updated", selectedItem.get().getName());
         Assert.assertEquals("updated", group.getValue().getName());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(RadioButtonGroup.class));
     }
 }

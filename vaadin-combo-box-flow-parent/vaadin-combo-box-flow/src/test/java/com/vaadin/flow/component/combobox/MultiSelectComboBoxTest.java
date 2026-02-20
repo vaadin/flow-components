@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -368,5 +369,11 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals(750, comboBox.getFilterTimeout());
         Assert.assertEquals(750,
                 comboBox.getElement().getProperty("_filterTimeout", 0));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class
+                .isAssignableFrom(MultiSelectComboBox.class));
     }
 }

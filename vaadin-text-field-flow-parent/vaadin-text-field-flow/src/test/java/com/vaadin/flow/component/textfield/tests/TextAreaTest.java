@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -260,5 +261,11 @@ public class TextAreaTest {
 
         Assert.assertNull(field.getMaxRows());
         Assert.assertNull(field.getElement().getProperty("maxRows"));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(TextArea.class));
     }
 }

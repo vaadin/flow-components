@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
@@ -48,5 +49,10 @@ public class UploadTest {
 
         upload.setReceiver(new MemoryBuffer());
         Assert.assertEquals(1, upload.getElement().getProperty("maxFiles", 0));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Upload.class));
     }
 }

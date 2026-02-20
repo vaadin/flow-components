@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.server.VaadinService;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -336,6 +337,12 @@ public class PopoverTest {
     @Test
     public void testSetDefaultHideDelay_threadSafety() {
         testStaticSettersThreadsSafety(() -> Popover.setDefaultHideDelay(1000));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Popover.class));
     }
 
     private void testStaticSettersThreadsSafety(Runnable tester) {

@@ -16,6 +16,7 @@ import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 public class MapTest {
     @Test
@@ -105,5 +106,10 @@ public class MapTest {
         map.setZoom(15);
 
         Assert.assertEquals(15, map.getView().getZoom(), 0);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Map.class));
     }
 }
