@@ -4286,7 +4286,8 @@ public class Spreadsheet extends Component
             overlayComponents.add(overlay.getComponent(true));
         }
 
-        if (overlay.getId() != null && overlay.getResourceHandler() != null) {
+        if (overlay.getId() != null && overlay.getResourceHandler() != null
+                && !resources.containsKey(overlay.getId())) {
             setResource(overlay.getId(), overlay.getResourceHandler());
         }
 
