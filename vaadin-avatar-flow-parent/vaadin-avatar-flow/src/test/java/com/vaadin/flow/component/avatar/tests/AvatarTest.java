@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 public class AvatarTest {
 
@@ -90,5 +91,10 @@ public class AvatarTest {
         Assert.assertEquals(avatar.isTooltipEnabled(), false);
         Assert.assertFalse(
                 avatar.getElement().getProperty("withTooltip", false));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Avatar.class));
     }
 }

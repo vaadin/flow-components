@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 /**
  * @author Vaadin Ltd.
@@ -171,5 +172,11 @@ public class ProgressBarTest {
         Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
         Assert.assertEquals("updated value is wrong", max,
                 progressBar.getValue(), 0.0);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(ProgressBar.class));
     }
 }

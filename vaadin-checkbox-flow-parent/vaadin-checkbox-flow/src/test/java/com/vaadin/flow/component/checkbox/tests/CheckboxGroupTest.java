@@ -43,6 +43,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
@@ -645,6 +646,12 @@ public class CheckboxGroupTest {
         CheckboxGroup<String> field = new CheckboxGroup<String>();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<String>, Set<String>>, Set<String>>);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(CheckboxGroup.class));
     }
 
     @Test

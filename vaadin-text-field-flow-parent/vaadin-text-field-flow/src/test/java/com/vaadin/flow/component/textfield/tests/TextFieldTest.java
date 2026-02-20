@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -225,5 +226,11 @@ public class TextFieldTest {
                 .setPatternErrorMessage("Pattern error");
         textField.setI18n(i18n);
         Assert.assertEquals(i18n, textField.getI18n());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(TextField.class));
     }
 }

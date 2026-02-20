@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
@@ -391,6 +392,12 @@ public class MasterDetailLayoutTest {
         ComponentUtil.fireEvent(layout, detailEscapePressEvent);
 
         Mockito.verify(listener).onComponentEvent(detailEscapePressEvent);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class
+                .isAssignableFrom(MasterDetailLayout.class));
     }
 
     private void assertMasterContent(Component component) {

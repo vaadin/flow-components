@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
@@ -302,5 +303,10 @@ public class TabsTest {
         tabs.setSelectedIndex(0);
 
         Assert.assertEquals(null, tabs.getSelectedTab());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Tabs.class));
     }
 }

@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
@@ -227,6 +228,12 @@ public class ComboBoxTest extends ComboBoxBaseTest {
         ComboBox<String> comboBox = new ComboBox<>();
         Assert.assertTrue(
                 comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<ComboBox<String>, String>, String>);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(ComboBox.class));
     }
 
     @Test

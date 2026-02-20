@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 public class DashboardTest extends DashboardTestBase {
     private Dashboard dashboard;
@@ -1339,6 +1340,12 @@ public class DashboardTest extends DashboardTestBase {
         dashboard.setRootHeadingLevel(null);
         Assert.assertFalse(
                 dashboard.getElement().hasProperty("rootHeadingLevel"));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Dashboard.class));
     }
 
     private void assertItemSelectedChangedEventCorrectlyFired(Component item,
