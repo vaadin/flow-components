@@ -35,6 +35,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -439,6 +440,28 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public void setOpened(boolean opened) {
         doSetOpened(opened);
+    }
+
+    /**
+     * Binds the opened state to the given signal. The binding is two-way:
+     * signal changes push to the DOM property, and client-side property changes
+     * invoke the write callback.
+     * <p>
+     * While a signal is bound, any attempt to set the opened state manually
+     * throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate value changes back, or {@code null}
+     *            for a read-only binding
+     * @since 25.1
+     */
+    public void bindOpened(Signal<Boolean> signal,
+            SerializableConsumer<Boolean> writeCallback) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("opened",
+                signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }
 
     public static class OpenedChangeEvent extends ComponentEvent<Details> {
