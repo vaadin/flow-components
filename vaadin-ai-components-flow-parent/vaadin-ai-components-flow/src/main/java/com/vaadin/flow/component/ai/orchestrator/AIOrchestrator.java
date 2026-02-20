@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -94,14 +98,23 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)}.
  * </p>
  * <p>
- * <b>Note:</b> AIOrchestrator is not serializable. If your application uses
- * session persistence, you will need to create a new orchestrator instance and
- * pass the previously saved history via {@link Builder#withHistory(List, Map)}.
+ * <b>Serialization:</b> The LLM provider and tool objects are not serialized
+ * (they are transient). After deserialization, call
+ * {@link #reconnect(LLMProvider)} to restore transient dependencies:
+ *
+ * <pre>
+ * orchestrator.reconnect(provider).withTools(toolObj).apply();
+ * </pre>
+ *
+ * The conversation history, UI component bindings, and listeners are preserved
+ * across serialization.
  * </p>
  *
  * @author Vaadin Ltd
  */
-public class AIOrchestrator {
+public class AIOrchestrator implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AIOrchestrator.class);
@@ -116,12 +129,12 @@ public class AIOrchestrator {
      */
     static final String FEATURE_FLAG_ID = AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
-    private final LLMProvider provider;
+    private transient LLMProvider provider;
     private final String systemPrompt;
     private AIMessageList messageList;
     private AIInput input;
     private AIFileReceiver fileReceiver;
-    private Object[] tools = new Object[0];
+    private transient Object[] tools = new Object[0];
     private String userName;
     private String assistantName;
     private AttachmentSubmitListener attachmentSubmitListener;
@@ -176,10 +189,47 @@ public class AIOrchestrator {
      * @param userMessage
      *            the prompt to send to the AI
      * @throws IllegalStateException
-     *             if no UI context is available
+     *             if no UI context is available, or if the orchestrator needs
+     *             to be reconnected after deserialization (see
+     *             {@link #reconnect(LLMProvider)})
      */
     public void prompt(String userMessage) {
         doPrompt(userMessage);
+    }
+
+    /**
+     * Returns a {@link Reconnector} to restore transient dependencies after
+     * deserialization. The provider is required; other dependencies (tools) are
+     * optional.
+     * <p>
+     * Example usage:
+     * </p>
+     *
+     * <pre>
+     * orchestrator.reconnect(provider).withTools(toolObj).apply();
+     * </pre>
+     * <p>
+     * This method should only be called on a deserialized instance where the
+     * provider is {@code null}.
+     * </p>
+     *
+     * @param provider
+     *            the LLM provider to use, not {@code null}
+     * @return a reconnector for restoring additional transient dependencies
+     * @throws NullPointerException
+     *             if provider is {@code null}
+     * @throws IllegalStateException
+     *             if the orchestrator is already connected (provider is not
+     *             {@code null})
+     */
+    public Reconnector reconnect(LLMProvider provider) {
+        Objects.requireNonNull(provider, "Provider cannot be null");
+        if (this.provider != null) {
+            throw new IllegalStateException(
+                    "AIOrchestrator is already connected. "
+                            + "reconnect() should only be called after deserialization.");
+        }
+        return new Reconnector(this, provider);
     }
 
     /**
@@ -294,6 +344,11 @@ public class AIOrchestrator {
         if (userMessage == null || userMessage.isBlank()) {
             return;
         }
+        if (provider == null) {
+            throw new IllegalStateException(
+                    "AIOrchestrator needs to be reconnected after "
+                            + "deserialization. Call reconnect(provider) first.");
+        }
         if (!isProcessing.compareAndSet(false, true)) {
             LOGGER.warn(
                     "Ignoring prompt: another request is already in progress");
@@ -308,7 +363,8 @@ public class AIOrchestrator {
 
         var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
                 : List.<AIAttachment> of();
-        var userAIMessage = addUserMessageToList(userMessage, attachments);
+        var userAIMessage = messageList == null ? null
+                : messageList.addMessage(userMessage, userName, attachments);
 
         var messageId = UUID.randomUUID().toString();
         conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
@@ -380,6 +436,66 @@ public class AIOrchestrator {
                     "AIOrchestrator");
         }
         featureFlagChecked.set(true);
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        // Initialize tools to empty array
+        tools = new Object[0];
+    }
+
+    /**
+     * Fluent API for restoring transient dependencies on an
+     * {@link AIOrchestrator} after deserialization. Obtain an instance via
+     * {@link AIOrchestrator#reconnect(LLMProvider)}.
+     * <p>
+     * The provider is specified when the reconnector is created and applied to
+     * the orchestrator when {@link #apply()} is called. Optional transient
+     * dependencies (such as tools) can be restored via chained methods before
+     * calling {@link #apply()}.
+     * </p>
+     */
+    public static class Reconnector {
+        private final AIOrchestrator orchestrator;
+        private final LLMProvider provider;
+        private Object[] tools;
+
+        private Reconnector(AIOrchestrator orchestrator, LLMProvider provider) {
+            this.orchestrator = orchestrator;
+            this.provider = provider;
+        }
+
+        /**
+         * Sets the objects containing vendor-specific tool-annotated methods
+         * that will be available to the LLM.
+         *
+         * @param tools
+         *            the objects containing tool methods
+         * @return this reconnector
+         */
+        public Reconnector withTools(Object... tools) {
+            this.tools = tools;
+            return this;
+        }
+
+        /**
+         * Applies the reconnection, restoring the provider and any other
+         * transient dependencies. Also reapplies the existing conversation
+         * history on the new provider.
+         */
+        public void apply() {
+            orchestrator.provider = provider;
+            if (tools != null) {
+                orchestrator.tools = tools;
+            }
+            if (!orchestrator.conversationHistory.isEmpty()) {
+                provider.setHistory(
+                        List.copyOf(orchestrator.conversationHistory),
+                        Collections.emptyMap());
+            }
+        }
     }
 
     /**

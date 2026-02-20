@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.ui;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.function.SerializableConsumer;
 
 /**
@@ -22,7 +24,7 @@ import com.vaadin.flow.function.SerializableConsumer;
  *
  * @author Vaadin Ltd
  */
-public interface AIInput {
+public interface AIInput extends Serializable {
 
     /**
      * Adds a listener for submit events.
