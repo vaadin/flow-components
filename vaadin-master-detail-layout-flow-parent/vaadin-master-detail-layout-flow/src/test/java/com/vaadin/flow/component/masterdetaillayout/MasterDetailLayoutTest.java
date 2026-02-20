@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
@@ -31,41 +30,27 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.EnableFeatureFlagRule;
 
 public class MasterDetailLayoutTest {
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
+
     private final UI ui = new UI();
     private final MasterDetailLayout layout = new MasterDetailLayout();
-
-    private final FeatureFlags mockFeatureFlags = Mockito
-            .mock(FeatureFlags.class);
-    private final MockedStatic<FeatureFlags> mockFeatureFlagsStatic = Mockito
-            .mockStatic(FeatureFlags.class);
 
     @Before
     public void setup() {
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
         VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
 
         Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
-
-        Mockito.when(mockFeatureFlags
-                .isEnabled(FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT))
-                .thenReturn(true);
 
         ui.getInternals().setSession(mockSession);
         ui.add(layout);
-    }
-
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
     }
 
     @Test

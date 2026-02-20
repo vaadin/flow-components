@@ -33,13 +33,13 @@ import javax.imageio.ImageIO;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
@@ -52,20 +52,22 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.tests.EnableFeatureFlagRule;
 
 import reactor.core.publisher.Flux;
 
 public class AIOrchestratorTest {
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
 
     private LLMProvider mockProvider;
     private AIMessageList mockMessageList;
     private AIInput mockInput;
     private AIFileReceiver mockFileReceiver;
-    private static MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     private static UI mockUI;
 
@@ -81,10 +83,6 @@ public class AIOrchestratorTest {
 
     @After
     public void tearDown() {
-        if (mockFeatureFlagsStatic != null) {
-            mockFeatureFlagsStatic.close();
-            mockFeatureFlagsStatic = null;
-        }
         UI.setCurrent(null);
         mockUI = null;
     }
@@ -930,20 +928,10 @@ public class AIOrchestratorTest {
             return futureTask;
         }).when(mockUI).access(Mockito.any(Command.class));
 
-        // Mock feature flags to enable the AI components feature
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(AIOrchestrator.FEATURE_FLAG_ID))
-                .thenReturn(true);
-
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
         VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
         Mockito.when(mockUI.getSession()).thenReturn(mockSession);
         Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
 
         UI.setCurrent(mockUI);
     }

@@ -23,29 +23,32 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
+import com.vaadin.tests.EnableFeatureFlagRule;
 import com.vaadin.tests.MockUI;
 
 import reactor.core.publisher.Flux;
 
 public class AttachmentListenerTest {
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
 
     private LLMProvider mockProvider;
     private AIMessageList mockMessageList;
     private AIFileReceiver mockFileReceiver;
     private AIMessage mockMessage;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
@@ -64,12 +67,10 @@ public class AttachmentListenerTest {
                 .thenReturn(Collections.emptyList());
 
         new MockUI();
-        mockFeatureFlags();
     }
 
     @After
     public void tearDown() {
-        mockFeatureFlagsStatic.close();
         UI.setCurrent(null);
     }
 
@@ -255,16 +256,6 @@ public class AttachmentListenerTest {
     }
 
     // --- Helpers ---
-
-    private void mockFeatureFlags() {
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(AIOrchestrator.FEATURE_FLAG_ID))
-                .thenReturn(true);
-
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
-                .thenReturn(mockFeatureFlags);
-    }
 
     private static AIMessage createMockMessage() {
         var message = Mockito.mock(AIMessage.class);
