@@ -26,7 +26,7 @@ import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
-public class CheckboxIndeterminateSignalTest extends AbstractSignalsUnitTest {
+public class CheckboxSignalTest extends AbstractSignalsUnitTest {
 
     private Checkbox checkbox;
     private ValueSignal<Boolean> signal;
