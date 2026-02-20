@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,8 +27,11 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
@@ -54,6 +58,9 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
     private boolean checkable = false;
 
+    private SignalPropertySupport<Boolean> checkedSupport;
+    private SerializableConsumer<Boolean> boundCheckedWriteCallback;
+
     private Set<String> themeNames = new LinkedHashSet<>();
 
     private final DisableOnClickController<MenuItemBase<C, I, S>> disableOnClickController = new DisableOnClickController<>(
@@ -69,7 +76,11 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         this.contextMenu = contextMenu;
         getElement().addEventListener("click", e -> {
             if (checkable) {
-                setChecked(!isChecked());
+                if (boundCheckedWriteCallback != null) {
+                    boundCheckedWriteCallback.accept(!isChecked());
+                } else {
+                    setChecked(!isChecked());
+                }
             }
         });
 
@@ -166,11 +177,42 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
                             + "Use setCheckable() to make the item checkable first.");
         }
 
-        getElement().setProperty("_checked", checked);
+        getCheckedSupport().set(checked);
+    }
 
-        executeJsWhenAttached(
-                "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
-                getElement(), checked);
+    /**
+     * Binds the checked state to the given signal. The binding is two-way:
+     * signal changes push to the DOM property, and client-side click events
+     * invoke the write callback.
+     * <p>
+     * While a signal is bound, any attempt to set the checked state manually
+     * throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate value changes back, or {@code null}
+     *            for one-way binding
+     * @since 25.1
+     */
+    public void bindChecked(Signal<Boolean> signal,
+            SerializableConsumer<Boolean> writeCallback) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        boundCheckedWriteCallback = writeCallback;
+        getCheckedSupport()
+                .bind(signal.map(v -> v == null ? Boolean.FALSE : v));
+    }
+
+    private SignalPropertySupport<Boolean> getCheckedSupport() {
+        if (checkedSupport == null) {
+            checkedSupport = SignalPropertySupport.create(this, checked -> {
+                getElement().setProperty("_checked", checked);
+                executeJsWhenAttached(
+                        "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
+                        getElement(), checked);
+            });
+        }
+        return checkedSupport;
     }
 
     /**
