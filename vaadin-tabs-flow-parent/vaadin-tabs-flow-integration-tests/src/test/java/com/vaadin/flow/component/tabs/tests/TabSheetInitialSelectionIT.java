@@ -13,39 +13,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.tests;
+package com.vaadin.flow.component.tabs.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.messages.testbench.MessageListElement;
+import com.vaadin.flow.component.tabs.testbench.TabSheetElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-/**
- * Integration tests for AiOrchestrator.
- */
-@TestPath("vaadin-ai/orchestrator")
-public class AiOrchestratorIT extends AbstractComponentIT {
+@TestPath("vaadin-tabs/tabsheet-initial-selection")
+public class TabSheetInitialSelectionIT extends AbstractComponentIT {
 
-    private MessageListElement messageList;
+    private TabSheetElement tabSheet;
 
     @Before
     public void init() {
         open();
-        messageList = $(MessageListElement.class).waitForFirst();
+        tabSheet = $(TabSheetElement.class).first();
     }
 
     @Test
-    public void promptButton_sendsMessage_responseIsDisplayed() {
-        clickElementWithJs("prompt-button");
-        waitUntil(driver -> getMessageCount() >= 2, 5);
-        Assert.assertTrue("Should have at least 2 messages (user + assistant)",
-                getMessageCount() >= 2);
-    }
-
-    private int getMessageCount() {
-        return messageList.getMessageElements().size();
+    public void initialSelection_tabSelectedAndContentDisplayed() {
+        Assert.assertEquals(1, tabSheet.getSelectedTabIndex());
+        Assert.assertEquals("Tab two content", tabSheet.getContent().getText());
     }
 }

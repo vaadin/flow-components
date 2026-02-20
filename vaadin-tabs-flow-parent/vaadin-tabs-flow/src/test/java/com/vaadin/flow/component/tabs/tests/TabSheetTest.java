@@ -90,6 +90,7 @@ public class TabSheetTest {
     public void addTab_contentAdded() {
         var content = new Span("Content 0");
         tabSheet.add("Tab 0", content);
+        flushBeforeClientResponse();
         Assert.assertTrue(content.getParent().isPresent());
     }
 
@@ -98,6 +99,7 @@ public class TabSheetTest {
         // Add a tab with content
         var content0 = new Span("Content 0");
         var tab0 = tabSheet.add("Tab 0", content0);
+        flushBeforeClientResponse();
 
         // Assert that the content is attached to the parent (the tab is
         // selected)
@@ -141,6 +143,7 @@ public class TabSheetTest {
         var content1 = new Span("Content 1");
         tabSheet.add("Tab 1", content1);
         tabSheet.setSelectedIndex(1);
+        flushBeforeClientResponse();
         Assert.assertTrue(content1.getParent().isPresent());
     }
 
@@ -301,8 +304,6 @@ public class TabSheetTest {
         tabSheet.setSelectedIndex(1);
         Assert.assertEquals(1, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
-        Assert.assertEquals(1,
-                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test
@@ -312,8 +313,6 @@ public class TabSheetTest {
         tabSheet.setSelectedTab(tab1);
         Assert.assertEquals(1, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
-        Assert.assertEquals(1,
-                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test
@@ -436,15 +435,6 @@ public class TabSheetTest {
     }
 
     @Test
-    public void selectTabFromTabs_selectedUpdated() {
-        tabSheet.add("Tab 0", new Span("Content 0"));
-        tabSheet.add("Tab 1", new Span("Content 1"));
-        tabs.setSelectedIndex(1);
-        Assert.assertEquals(1,
-                tabSheet.getElement().getProperty("selected", 0));
-    }
-
-    @Test
     public void unregisterSelectedChangeListenerOnEvent() {
         tabSheet.add("Tab 0", new Span("Content 0"));
         tabSheet.add("Tab 1", new Span("Content 1"));
@@ -508,6 +498,23 @@ public class TabSheetTest {
         tabSheet.add("Tab 0", new Span("Content 0"));
 
         tabSheet.getComponent(null);
+    }
+
+    @Test
+    public void switchMultipleTabsBeforeClientResponse_onlyLastSelectedContentAttached() {
+        var content0 = new Span("Content 0");
+        var content1 = new Span("Content 1");
+        var content2 = new Span("Content 2");
+        tabSheet.add("Tab 0", content0);
+        tabSheet.add("Tab 1", content1);
+        tabSheet.add("Tab 2", content2);
+
+        tabSheet.setSelectedIndex(1);
+        tabSheet.setSelectedIndex(2);
+        flushBeforeClientResponse();
+
+        Assert.assertFalse(content1.getParent().isPresent());
+        Assert.assertTrue(content2.getParent().isPresent());
     }
 
     private void flushBeforeClientResponse() {

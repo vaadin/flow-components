@@ -12,6 +12,8 @@ import { UploadManager } from '@vaadin/upload/vaadin-upload-manager.js';
  * - maxFileSize: Maximum file size in bytes (optional)
  * - accept: Accepted file types (optional)
  * - noAuto: Disable auto-upload (optional)
+ * - uploadFormat: Upload format ('raw' or 'multipart', optional)
+ * - disabled: Whether the manager is disabled (from attribute)
  *
  * Events dispatched to the connector element for server-side handling:
  * - file-remove: When a file is removed
@@ -23,11 +25,13 @@ class UploadManagerConnector extends HTMLElement {
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     if (name === 'target' && oldValue !== newValue) {
       this.manager.target = newValue;
+    } else if (name === 'disabled' && oldValue !== newValue) {
+      this.manager.disabled = newValue !== null;
     }
   }
 
   static get observedAttributes() {
-    return ['target'];
+    return ['target', 'disabled'];
   }
 
   set maxFiles(value: number) {
@@ -44,6 +48,10 @@ class UploadManagerConnector extends HTMLElement {
 
   set noAuto(value: boolean) {
     this.manager.noAuto = value;
+  }
+
+  set uploadFormat(value: string) {
+    this.manager.uploadFormat = value;
   }
 
   clearFileList() {

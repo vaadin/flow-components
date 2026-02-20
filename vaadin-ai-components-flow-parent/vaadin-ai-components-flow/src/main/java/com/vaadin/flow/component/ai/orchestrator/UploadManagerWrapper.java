@@ -15,32 +15,45 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.vaadin.flow.component.ai.component.AiFileReceiver;
+import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
- * Wrapper for Flow UploadManager component to implement AiFileReceiver
- * interface.
+ * Wrapper for Flow UploadManager component to implement AIFileReceiver
+ * interface. Caches uploaded files in memory until they are consumed via
+ * {@link #takeAttachments()}.
  */
-record UploadManagerWrapper(
-        UploadManager uploadManager) implements AiFileReceiver {
+class UploadManagerWrapper implements AIFileReceiver {
 
-    @Override
-    public void setUploadHandler(UploadHandler uploadHandler) {
-        uploadManager.setUploadHandler(uploadHandler);
+    private final UploadManager uploadManager;
+    private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
+
+    UploadManagerWrapper(UploadManager uploadManager) {
+        this.uploadManager = uploadManager;
+        uploadManager.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
+            var isDuplicate = pendingAttachments.stream()
+                    .anyMatch(a -> a.name().equals(meta.fileName()));
+            if (isDuplicate) {
+                throw new IllegalArgumentException(
+                        "Duplicate file name: " + meta.fileName());
+            }
+            pendingAttachments.add(new AIAttachment(meta.fileName(),
+                    meta.contentType(), data));
+        }));
+        uploadManager.addFileRemovedListener(event -> pendingAttachments
+                .removeIf(a -> a.name().equals(event.getFileName())));
     }
 
     @Override
-    public void addFileRemovedListener(Consumer<String> listener) {
-        uploadManager.addFileRemovedListener(
-                event -> listener.accept(event.getFileName()));
-    }
-
-    @Override
-    public void clearFileList() {
+    public List<AIAttachment> takeAttachments() {
+        var result = List.copyOf(pendingAttachments);
+        pendingAttachments.clear();
         uploadManager.clearFileList();
+        return result;
     }
 }

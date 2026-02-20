@@ -53,7 +53,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/tabsheet", version = "25.1.0-alpha8")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -61,6 +61,8 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     private Tabs tabs = new Tabs();
 
     private Map<Tab, Element> tabToContent = new HashMap<>();
+
+    private Registration deferredUpdateContent = null;
 
     /**
      * The default constructor.
@@ -70,10 +72,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
         SlotUtils.addToSlot(this, "tabs", tabs);
 
-        addSelectedChangeListener(e -> {
-            getElement().setProperty("selected", tabs.getSelectedIndex());
-            updateContent();
-        });
+        addSelectedChangeListener(e -> updateContent());
     }
 
     /**
@@ -364,9 +363,6 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
             var content = entry.getValue();
 
             if (tab.equals(tabs.getSelectedTab())) {
-                if (content.getParent() == null) {
-                    getElement().appendChild(content);
-                }
                 content.setEnabled(true);
             } else {
                 // Can't use setEnabled(false) because it would also mark the
@@ -374,6 +370,23 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
                 // would then briefly show the content as disabled.
                 content.getNode().setEnabled(false);
             }
+        }
+
+        getElement().getNode().runWhenAttached(ui -> {
+            if (deferredUpdateContent != null) {
+                deferredUpdateContent.remove();
+            }
+
+            deferredUpdateContent = ui.beforeClientResponse(this, context -> {
+                ensureSelectedTabContentAttached();
+            });
+        });
+    }
+
+    private void ensureSelectedTabContentAttached() {
+        var content = tabToContent.get(tabs.getSelectedTab());
+        if (content != null && content.getParent() == null) {
+            getElement().appendChild(content);
         }
     }
 

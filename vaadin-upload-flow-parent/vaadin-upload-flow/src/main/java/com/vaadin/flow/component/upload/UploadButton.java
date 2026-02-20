@@ -30,8 +30,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * <pre>
  * var manager = new UploadManager(uploadHandler);
- * var button = new UploadButton(manager);
- * button.add(new Span("Select Files"));
+ * var button = new UploadButton("Select Files", manager);
  * add(button);
  * </pre>
  *
@@ -39,7 +38,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @see UploadManager
  */
 @Tag("vaadin-upload-button")
-@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha8")
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 public class UploadButton extends Button implements HasUploadManager {
 
@@ -61,6 +60,26 @@ public class UploadButton extends Button implements HasUploadManager {
     public UploadButton(UploadManager manager) {
         setUploadManager(Objects.requireNonNull(manager,
                 "manager cannot be null, use the default constructor instead"));
+    }
+
+    /**
+     * Creates a new upload button with the given text, linked to the given
+     * manager.
+     *
+     * @param text
+     *            the button text
+     * @param manager
+     *            the upload manager to link to, not {@code null}
+     * @throws NullPointerException
+     *             if manager is {@code null}
+     */
+    public UploadButton(String text, UploadManager manager) {
+        this(manager);
+        doSetText(text);
+    }
+
+    private void doSetText(String text) {
+        super.setText(text);
     }
 
     /**

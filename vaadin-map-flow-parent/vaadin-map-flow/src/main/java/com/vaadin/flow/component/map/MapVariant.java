@@ -15,13 +15,17 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum MapVariant implements ThemeVariant {
     /**
-     * @deprecated Use {@link #LUMO_NO_BORDER} or {@link #AURA_NO_BORDER}
-     *             instead.
+     * @deprecated Use {@link #NO_BORDER} instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
     BORDERLESS("no-border"),
     LUMO_NO_BORDER("no-border"),
-    AURA_NO_BORDER("no-border");
+    /**
+     * @deprecated Use {@link #NO_BORDER} instead.
+     */
+    @Deprecated
+    AURA_NO_BORDER("no-border"),
+    NO_BORDER("no-border");
 
     private final String variant;
 

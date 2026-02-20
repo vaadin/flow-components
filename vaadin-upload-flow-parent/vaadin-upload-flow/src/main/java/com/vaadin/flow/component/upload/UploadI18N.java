@@ -369,6 +369,7 @@ public class UploadI18N implements Serializable {
             private String serverUnavailable;
             private String unexpectedServerError;
             private String forbidden;
+            private String fileTooLarge;
 
             /**
              * @return translation string
@@ -419,6 +420,29 @@ public class UploadI18N implements Serializable {
              */
             public Error setForbidden(String forbidden) {
                 this.forbidden = forbidden;
+                return this;
+            }
+
+            /**
+             * Gets the file too large error message shown when the server
+             * returns HTTP 413 (Payload Too Large).
+             *
+             * @return translation string
+             */
+            public String getFileTooLarge() {
+                return fileTooLarge;
+            }
+
+            /**
+             * Sets the file too large error message shown when the server
+             * returns HTTP 413 (Payload Too Large).
+             *
+             * @param fileTooLarge
+             *            translation string
+             * @return this instance for chaining
+             */
+            public Error setFileTooLarge(String fileTooLarge) {
+                this.fileTooLarge = fileTooLarge;
                 return this;
             }
         }

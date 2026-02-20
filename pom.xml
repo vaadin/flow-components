@@ -72,14 +72,14 @@
     </scm>
     <properties>
         <flow.version>25.1-SNAPSHOT</flow.version>
-        <testbench.version>10.1.0-alpha2</testbench.version>
+        <testbench.version>10.1.0-alpha3</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <jetty.version>12.1.2</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
-        <karaf-maven-plugin.version>4.4.9</karaf-maven-plugin.version>
+        <karaf-maven-plugin.version>4.4.10</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
@@ -97,7 +97,7 @@
         <cvdlName/>
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>4.0.2</spring-data-commons.version>
+        <spring-data-commons.version>4.0.3</spring-data-commons.version>
         <reactor-core.version>3.8.3</reactor-core.version>
         <langchain4j.version>1.11.0</langchain4j.version>
         <spring-ai.version>2.0.0-M2</spring-ai.version>
@@ -364,6 +364,15 @@
                         </excludes>
                         <skip>${skipUnitTests}</skip>
                     </configuration>
+                    <dependencies>
+                        <!-- Configure JUnit 4 provider explicitly to not depend on Surefire's auto-resolution when JUnit 6 is on the class path. -->
+                        <!-- JUnit 6 is pulled in transitively by modules that use Flow test dependencies -->
+                        <dependency>
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-junit4</artifactId>
+                            <version>${maven.surefire.plugin.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -382,6 +391,15 @@
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
                     </configuration>
+                    <dependencies>
+                        <!-- Configure JUnit 4 provider explicitly to not depend on Surefire's auto-resolution when JUnit 6 is on the class path. -->
+                        <!-- JUnit 6 is pulled in transitively by modules that use Flow test dependencies -->
+                        <dependency>
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-junit4</artifactId>
+                            <version>${maven.surefire.plugin.version}</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <goals>

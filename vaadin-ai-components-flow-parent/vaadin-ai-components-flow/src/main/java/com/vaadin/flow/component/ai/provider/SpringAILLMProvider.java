@@ -30,7 +30,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
 import com.vaadin.flow.shared.communication.PushMode;
 
@@ -41,21 +41,31 @@ import reactor.core.publisher.Flux;
  * <p>
  * Supports both streaming and non-streaming Spring AI models. Tool calling is
  * supported through Spring AI's {@link Tool} annotation.
+ * </p>
+ * <p>
+ * <b>Streaming vs. non-streaming:</b> Streaming is enabled by default. To
+ * disable it, call {@link #setStreaming(boolean) setStreaming(false)}.
+ * Streaming mode pushes partial responses to the UI as they arrive, which
+ * requires server push to be enabled. Annotate your UI class or application
+ * shell with {@code @Push}, or configure push programmatically, before using
+ * streaming mode. A warning is logged at runtime if push is not enabled.
+ * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
  * history across components, reuse the same provider instance.
+ * </p>
  * <p>
- * <b>Note:</b> SpringAiLLMProvider is not serializable. If your application
+ * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
  * uses session persistence, you will need to create a new provider instance
  * after session restore.
  * </p>
  *
  * @author Vaadin Ltd
  */
-public class SpringAiLLMProvider implements LLMProvider {
+public class SpringAILLMProvider implements LLMProvider {
 
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(SpringAiLLMProvider.class);
+            .getLogger(SpringAILLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
     private static final String CONVERSATION_ID = "default";
@@ -71,7 +81,7 @@ public class SpringAiLLMProvider implements LLMProvider {
      * @throws NullPointerException
      *             if chatModel is {@code null}
      */
-    public SpringAiLLMProvider(ChatModel chatModel) {
+    public SpringAILLMProvider(ChatModel chatModel) {
         Objects.requireNonNull(chatModel, "ChatModel must not be null");
         var chatMemory = MessageWindowChatMemory.builder()
                 .maxMessages(MAX_MESSAGES).build();
@@ -91,7 +101,7 @@ public class SpringAiLLMProvider implements LLMProvider {
      * @throws NullPointerException
      *             if chatModel is {@code null}
      */
-    public SpringAiLLMProvider(ChatClient chatClient) {
+    public SpringAILLMProvider(ChatClient chatClient) {
         Objects.requireNonNull(chatClient, "ChatClient must not be null");
         this.chatClient = chatClient;
     }
@@ -167,12 +177,12 @@ public class SpringAiLLMProvider implements LLMProvider {
         if (attachments == null) {
             return new Media[0];
         }
-        return attachments.stream().map(SpringAiLLMProvider::getAttachmentMedia)
+        return attachments.stream().map(SpringAILLMProvider::getAttachmentMedia)
                 .filter(Optional::isPresent).map(Optional::get)
                 .toArray(Media[]::new);
     }
 
-    private static Optional<Media> getAttachmentMedia(AiAttachment attachment) {
+    private static Optional<Media> getAttachmentMedia(AIAttachment attachment) {
         LLMProviderHelpers.validateAttachment(attachment);
         var contentType = AttachmentContentType
                 .fromMimeType(attachment.mimeType());
@@ -183,13 +193,13 @@ public class SpringAiLLMProvider implements LLMProvider {
         };
     }
 
-    private static Media getMedia(AiAttachment attachment) {
+    private static Media getMedia(AIAttachment attachment) {
         var mimeType = MimeType.valueOf(attachment.mimeType());
         var resource = new ByteArrayResource(attachment.data());
         return Media.builder().mimeType(mimeType).data(resource).build();
     }
 
-    private static Media getTextMedia(AiAttachment attachment) {
+    private static Media getTextMedia(AIAttachment attachment) {
         var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
                 attachment.name(), false);
         var formattedText = LLMProviderHelpers

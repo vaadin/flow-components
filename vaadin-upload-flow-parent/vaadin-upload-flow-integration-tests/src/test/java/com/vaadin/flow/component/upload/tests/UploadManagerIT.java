@@ -536,6 +536,54 @@ public class UploadManagerIT extends AbstractUploadIT {
         waitUntil(driver -> getLogText().contains("All uploads finished"), 10);
     }
 
+    @Test
+    public void disableManager_buttonIsDisabled() {
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        Assert.assertFalse("Button should be enabled initially",
+                uploadButton.hasAttribute("disabled"));
+
+        clickButton("disable-manager");
+
+        Assert.assertTrue("Button should be disabled when manager is disabled",
+                uploadButton.hasAttribute("disabled"));
+    }
+
+    @Test
+    public void unlinkButton_buttonIsDisabled() {
+        UploadButtonElement uploadButton = $(UploadButtonElement.class)
+                .id("upload-button");
+        Assert.assertFalse("Button should be enabled initially",
+                uploadButton.hasAttribute("disabled"));
+
+        clickButton("unlink-button");
+
+        Assert.assertTrue(
+                "Button should be disabled when unlinked from manager",
+                uploadButton.hasAttribute("disabled"));
+    }
+
+    @Test
+    public void uploadFile_defaultFormat_rawRequestReceived() throws Exception {
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+        assertLogContains("Uploaded: " + tempFile.getName() + " (");
+        Assert.assertTrue("Default format should be raw",
+                getLogText().contains(", raw)"));
+    }
+
+    @Test
+    public void setUploadFormat_multipart_multipartRequestReceived()
+            throws Exception {
+        clickButton("set-format-multipart");
+
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+        assertLogContains("Uploaded: " + tempFile.getName() + " (");
+        Assert.assertTrue("Format should be multipart after setting it",
+                getLogText().contains(", multipart)"));
+    }
+
     private UploadManagerTester getUploadManagerTester() {
         return $(UploadButtonElement.class).id("upload-button")
                 .getUploadManager();

@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,16 +89,18 @@ public class UploadManager implements Serializable {
     private List<String> acceptedMimeTypes = List.of();
     private List<String> acceptedFileExtensions = List.of();
 
+    private final AtomicBoolean handlerExplicitlyConfigured = new AtomicBoolean();
+
     /**
      * Creates a new upload manager without an upload handler. The handler must
      * be set using {@link #setUploadHandler(UploadHandler)} before uploads can
      * work.
      *
      * @param owner
-     *            the component that owns this manager. The manager's lifecycle
-     *            is tied to the owner's lifecycle - when the owner is detached
-     *            from the UI, uploads will stop working. The owner is typically
-     *            the view or layout containing the upload UI components.
+     *            The manager's lifecycle is tied to the owner's lifecycle -
+     *            when the owner is detached from the UI or disabled, uploads
+     *            will stop working. The owner is typically the view or layout
+     *            containing the upload UI components.
      */
     public UploadManager(Component owner) {
         this(owner, null);
@@ -107,10 +110,10 @@ public class UploadManager implements Serializable {
      * Creates a new upload manager with the given upload handler.
      *
      * @param owner
-     *            the component that owns this manager. The manager's lifecycle
-     *            is tied to the owner's lifecycle - when the owner is detached
-     *            from the UI, uploads will stop working. The owner is typically
-     *            the view or layout containing the upload UI components.
+     *            The manager's lifecycle is tied to the owner's lifecycle -
+     *            when the owner is detached from the UI or disabled, uploads
+     *            will stop working. The owner is typically the view or layout
+     *            containing the upload UI components.
      * @param handler
      *            the upload handler to use
      */
@@ -142,10 +145,12 @@ public class UploadManager implements Serializable {
         connector.getElement().addEventListener("file-reject", event -> {
             String fileName = event.getEventData().get(eventDetailFileName)
                     .asString();
-            String errorMessage = event.getEventData()
-                    .get(eventDetailErrorMessage).asString();
+            String errorCode = event.getEventData().get(eventDetailErrorMessage)
+                    .asString();
+            FileRejectionReason reason = FileRejectionReason
+                    .fromClientCode(errorCode);
             ComponentUtil.fireEvent(owner,
-                    new FileRejectedEvent(owner, true, errorMessage, fileName));
+                    new FileRejectedEvent(owner, true, reason, fileName));
         }).addEventData(eventDetailFileName)
                 .addEventData(eventDetailErrorMessage);
 
@@ -200,6 +205,9 @@ public class UploadManager implements Serializable {
         if (targetName.isBlank()) {
             throw new IllegalArgumentException(
                     "The target name cannot be blank");
+        }
+        if (!(handler instanceof FailFastUploadHandler)) {
+            handlerExplicitlyConfigured.set(true);
         }
         // Wrap handler with file type validation
         UploadHandler validatingHandler = wrapWithFileTypeValidation(handler);
@@ -522,6 +530,29 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Sets the upload format to use when sending files to the server.
+     *
+     * @param format
+     *            the format type
+     */
+    public void setUploadFormat(UploadFormat format) {
+        Objects.requireNonNull(format, "Upload format cannot be null");
+        connector.getElement().setProperty("uploadFormat",
+                format.name().toLowerCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Gets the upload format used when sending files to the server.
+     *
+     * @return the upload format, defaults to {@link UploadFormat#RAW}
+     */
+    public UploadFormat getUploadFormat() {
+        String value = connector.getElement().getProperty("uploadFormat",
+                "raw");
+        return UploadFormat.valueOf(value.toUpperCase(Locale.ENGLISH));
+    }
+
+    /**
      * Sets whether the upload manager is enabled. When disabled, uploads cannot
      * be started from any linked UI components (buttons, drop zones).
      * <p>
@@ -640,7 +671,7 @@ public class UploadManager implements Serializable {
      */
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload-manager-connector.ts")
-    @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha7")
+    @NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha8")
     static class Connector extends Component {
         @Override
         protected void onAttach(AttachEvent attachEvent) {
@@ -661,6 +692,15 @@ public class UploadManager implements Serializable {
                 throw new ModularUploadExperimentalFeatureException();
             }
         }
+    }
+
+    /**
+     * Returns whether an UploadHandler is explicitly configured.
+     * <p>
+     * Intended only for internal use.
+     */
+    boolean isHandlerExplicitlyConfigured() {
+        return handlerExplicitlyConfigured.get();
     }
 
     /**
@@ -712,6 +752,56 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Reasons why a file can be rejected by the upload manager.
+     */
+    public enum FileRejectionReason {
+
+        /**
+         * The maximum number of files has been reached.
+         */
+        TOO_MANY_FILES("tooManyFiles"),
+
+        /**
+         * The file exceeds the maximum allowed file size.
+         */
+        FILE_TOO_LARGE("fileIsTooBig"),
+
+        /**
+         * The file type does not match the accepted file types.
+         */
+        INCORRECT_FILE_TYPE("incorrectFileType"),
+
+        /**
+         * An unrecognized rejection reason from the client.
+         */
+        UNKNOWN(null);
+
+        private final String clientCode;
+
+        FileRejectionReason(String clientCode) {
+            this.clientCode = clientCode;
+        }
+
+        /**
+         * Returns the reason matching the given client-side error code, or
+         * {@link #UNKNOWN} if no match is found.
+         *
+         * @param clientCode
+         *            the error code from the client-side upload manager
+         * @return the matching reason, or {@link #UNKNOWN}
+         */
+        public static FileRejectionReason fromClientCode(String clientCode) {
+            for (FileRejectionReason reason : values()) {
+                if (reason.clientCode != null
+                        && reason.clientCode.equals(clientCode)) {
+                    return reason;
+                }
+            }
+            return UNKNOWN;
+        }
+    }
+
+    /**
      * Event fired when a file is rejected by the upload manager due to
      * constraints like max file size, max files, or accepted file types. The
      * event source is the owner component passed to the {@link UploadManager}
@@ -719,7 +809,7 @@ public class UploadManager implements Serializable {
      */
     public static class FileRejectedEvent extends ComponentEvent<Component> {
         private final String fileName;
-        private final String errorMessage;
+        private final FileRejectionReason reason;
 
         /**
          * Creates a new event.
@@ -728,15 +818,15 @@ public class UploadManager implements Serializable {
          *            the source component
          * @param fromClient
          *            whether the event originated from the client
-         * @param errorMessage
-         *            the error message
+         * @param reason
+         *            the reason why the file was rejected
          * @param fileName
          *            the name of the rejected file
          */
         public FileRejectedEvent(Component source, boolean fromClient,
-                String errorMessage, String fileName) {
+                FileRejectionReason reason, String fileName) {
             super(source, fromClient);
-            this.errorMessage = errorMessage;
+            this.reason = reason;
             this.fileName = fileName;
         }
 
@@ -750,12 +840,12 @@ public class UploadManager implements Serializable {
         }
 
         /**
-         * Gets the error message describing why the file was rejected.
+         * Gets the reason why the file was rejected.
          *
-         * @return the error message
+         * @return the rejection reason
          */
-        public String getErrorMessage() {
-            return errorMessage;
+        public FileRejectionReason getReason() {
+            return reason;
         }
     }
 

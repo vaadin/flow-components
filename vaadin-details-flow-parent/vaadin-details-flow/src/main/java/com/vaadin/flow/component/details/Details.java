@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.details;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -23,6 +25,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -32,7 +35,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Details is an expandable panel for showing and hiding content from the user
@@ -52,7 +57,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/details", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/details", version = "25.1.0-alpha8")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component implements HasComponents, HasSize,
         HasThemeVariant<DetailsVariant>, HasTooltip {
@@ -60,6 +65,10 @@ public class Details extends Component implements HasComponents, HasSize,
     private Component summary;
     private final Component summaryContainer;
     private final Div contentContainer;
+
+    /** Signal support for the summary text property. */
+    private final SignalPropertySupport<String> summaryTextSupport = SignalPropertySupport
+            .create(this, this::updateSummaryText);
 
     /**
      * Server-side component for the {@code <vaadin-details-summary>} element.
@@ -81,7 +90,7 @@ public class Details extends Component implements HasComponents, HasSize,
         SlotUtils.addToSlot(this, "summary", summaryContainer);
 
         if (getElement().getPropertyRaw("opened") == null) {
-            setOpened(false);
+            doSetOpened(false);
         }
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
@@ -97,7 +106,7 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary) {
         this();
-        setSummaryText(summary);
+        updateSummaryText(summary);
     }
 
     /**
@@ -109,7 +118,19 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(Component summary) {
         this();
-        setSummary(summary);
+        updateSummary(summary);
+    }
+
+    /**
+     * Initializes a new Details component with a summary text provided by a
+     * signal.
+     *
+     * @param summaryTextSignal
+     *            the signal that provides the summary text
+     */
+    public Details(Signal<String> summaryTextSignal) {
+        this();
+        summaryTextSupport.bind(summaryTextSignal);
     }
 
     /**
@@ -125,8 +146,8 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary, Component content) {
         this();
-        setSummaryText(summary);
-        add(content);
+        updateSummaryText(summary);
+        contentContainer.add(content);
     }
 
     /**
@@ -142,8 +163,23 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(Component summary, Component content) {
         this();
-        setSummary(summary);
-        add(content);
+        updateSummary(summary);
+        contentContainer.add(content);
+    }
+
+    /**
+     * Initializes a new Details component with a summary text provided by a
+     * signal and content.
+     *
+     * @param summaryTextSignal
+     *            the signal that provides the summary text.
+     * @param content
+     *            the content component to add.
+     */
+    public Details(Signal<String> summaryTextSignal, Component content) {
+        this();
+        summaryTextSupport.bind(summaryTextSignal);
+        contentContainer.add(content);
     }
 
     /**
@@ -160,7 +196,7 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(String summary, Component... components) {
         this(summary);
-        add(components);
+        contentContainer.add(components);
     }
 
     /**
@@ -177,7 +213,22 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public Details(Component summary, Component... components) {
         this(summary);
-        add(components);
+        contentContainer.add(components);
+    }
+
+    /**
+     * Initializes a new Details component with a summary text provided by a
+     * signal and optional content components.
+     *
+     * @param summaryTextSignal
+     *            the signal that provides the summary text.
+     * @param components
+     *            the content components to add.
+     */
+    public Details(Signal<String> summaryTextSignal, Component... components) {
+        this();
+        summaryTextSupport.bind(summaryTextSignal);
+        contentContainer.add(components);
     }
 
     /**
@@ -198,13 +249,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *            any previously set summary
      */
     public void setSummary(Component summary) {
-        summaryContainer.getElement().removeAllChildren();
-        if (summary == null) {
-            return;
-        }
-
-        this.summary = summary;
-        summaryContainer.getElement().appendChild(summary.getElement());
+        updateSummary(summary);
     }
 
     /**
@@ -218,14 +263,16 @@ public class Details extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Creates a text wrapper and sets a summary via
-     * {@link #setSummary(Component)}
+     * Sets the summary text of the details component.
+     *
+     * @param summary
+     *            the summary text to set, or {@code null} for empty text
+     * @throws BindingActiveException
+     *             if the summary text is currently bound to a signal
+     * @see #bindSummaryText(Signal)
      */
     public void setSummaryText(String summary) {
-        if (summary == null) {
-            summary = "";
-        }
-        setSummary(new Span(summary));
+        summaryTextSupport.set(summary);
     }
 
     /**
@@ -234,6 +281,62 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public String getSummaryText() {
         return summary == null ? "" : summary.getElement().getText();
+    }
+
+    /**
+     * Updates the summary component. For internal use during initialization and
+     * signal updates.
+     */
+    private void updateSummary(Component summary) {
+        summaryContainer.getElement().removeAllChildren();
+        if (summary == null) {
+            return;
+        }
+
+        this.summary = summary;
+        summaryContainer.getElement().appendChild(summary.getElement());
+    }
+
+    /**
+     * Updates the summary text when bound to a signal.
+     */
+    private void updateSummaryText(String newText) {
+        if (summary == null || !(summary instanceof Span)) {
+            updateSummary(new Span(newText));
+        } else {
+            summary.getElement().setText(newText);
+        }
+    }
+
+    /**
+     * Binds a {@link Signal}'s value to the summary text content of this
+     * component and keeps the summary text synchronized with the signal value
+     * while the element is in attached state. When the element is in detached
+     * state, signal value changes have no effect. <code>null</code> signal
+     * unbinds the existing binding.
+     * <p>
+     * While a Signal is bound, any attempt to set the summary text manually
+     * throws {@link BindingActiveException}. Same happens when trying to bind a
+     * new Signal while one is already bound.
+     *
+     * @param signal
+     *            the signal to bind or <code>null</code> to unbind any existing
+     *            binding
+     * @throws BindingActiveException
+     *             thrown when there is already an existing binding
+     * @see #setSummaryText(String)
+     */
+    public void bindSummaryText(Signal<String> signal) {
+        summaryTextSupport.bind(signal);
+    }
+
+    /**
+     * Gets the summary text signal support instance for testing purposes.
+     *
+     * @return the summary text signal support
+     */
+    SignalPropertySupport<String> getSummaryTextSupport() {
+        return summaryTextSupport;
     }
 
     /**
@@ -297,6 +400,15 @@ public class Details extends Component implements HasComponents, HasSize,
         contentContainer.addComponentAtIndex(index, component);
     }
 
+    @Override
+    public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,
+            SerializableFunction<S, Component> childFactory) {
+        Objects.requireNonNull(list, "ListSignal cannot be null");
+        Objects.requireNonNull(childFactory,
+                "Child element factory cannot be null");
+        contentContainer.bindChildren(list, childFactory);
+    }
+
     /**
      * Returns the content components which were added via
      * {@link #add(Component...)}
@@ -326,7 +438,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *            the boolean value to set
      */
     public void setOpened(boolean opened) {
-        getElement().setProperty("opened", opened);
+        doSetOpened(opened);
     }
 
     public static class OpenedChangeEvent extends ComponentEvent<Details> {
@@ -353,5 +465,9 @@ public class Details extends Component implements HasComponents, HasSize,
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
         return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    private void doSetOpened(boolean opened) {
+        getElement().setProperty("opened", opened);
     }
 }

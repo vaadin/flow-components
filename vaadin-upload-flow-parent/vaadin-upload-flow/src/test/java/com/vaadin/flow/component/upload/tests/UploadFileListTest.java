@@ -55,12 +55,6 @@ public class UploadFileListTest {
         ui = Mockito.spy(new UI());
         UI.setCurrent(ui);
 
-        // Mock feature flags to enable the upload manager component
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(UploadManager.FEATURE_FLAG_ID))
-                .thenReturn(true);
-
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
         VaadinService mockService = Mockito.mock(VaadinService.class);
         VaadinContext mockContext = Mockito.mock(VaadinContext.class);
@@ -75,8 +69,8 @@ public class UploadFileListTest {
                 });
         Mockito.when(mockSession.getService()).thenReturn(mockService);
         Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
+        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
+                .mockFeatureFlag(mockContext);
         ui.getInternals().setSession(mockSession);
 
         owner = new Div();
@@ -208,13 +202,14 @@ public class UploadFileListTest {
 
         uploadError.setServerUnavailable("Server unavailable")
                 .setUnexpectedServerError("Unexpected server error")
-                .setForbidden("Forbidden");
+                .setForbidden("Forbidden").setFileTooLarge("File too large");
 
         Assert.assertEquals("Server unavailable",
                 uploadError.getServerUnavailable());
         Assert.assertEquals("Unexpected server error",
                 uploadError.getUnexpectedServerError());
         Assert.assertEquals("Forbidden", uploadError.getForbidden());
+        Assert.assertEquals("File too large", uploadError.getFileTooLarge());
     }
 
     @Test
@@ -330,7 +325,7 @@ public class UploadFileListTest {
     public void addThemeVariant_variantIsAdded() {
         UploadFileList fileList = new UploadFileList();
 
-        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         Assert.assertTrue(fileList.getThemeNames().contains("thumbnails"));
     }
@@ -338,9 +333,9 @@ public class UploadFileListTest {
     @Test
     public void removeThemeVariant_variantIsRemoved() {
         UploadFileList fileList = new UploadFileList();
-        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
-        fileList.removeThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.removeThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         Assert.assertFalse(fileList.getThemeNames().contains("thumbnails"));
     }

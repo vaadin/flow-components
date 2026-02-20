@@ -27,9 +27,14 @@ public enum TabsVariant implements ThemeVariant {
     LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
     LUMO_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
+    /**
+     * @deprecated Use {@link #HIDE_SCROLL_BUTTONS} instead.
+     */
+    @Deprecated
     AURA_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     AURA_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
-    AURA_FILLED("filled");
+    AURA_FILLED("filled"),
+    HIDE_SCROLL_BUTTONS("hide-scroll-buttons");
 
     private final String variant;
 

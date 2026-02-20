@@ -38,6 +38,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.upload.UploadFormat;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
@@ -69,12 +70,6 @@ public class UploadManagerTest {
         ui = Mockito.spy(new UI());
         UI.setCurrent(ui);
 
-        // Mock feature flags to enable the upload manager component
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(UploadManager.FEATURE_FLAG_ID))
-                .thenReturn(true);
-
         VaadinSession mockSession = Mockito.mock(VaadinSession.class);
         VaadinService mockService = Mockito.mock(VaadinService.class);
         VaadinContext mockContext = Mockito.mock(VaadinContext.class);
@@ -89,8 +84,8 @@ public class UploadManagerTest {
                 });
         Mockito.when(mockSession.getService()).thenReturn(mockService);
         Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
+        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
+                .mockFeatureFlag(mockContext);
         ui.getInternals().setSession(mockSession);
 
         owner = new Div();
@@ -478,6 +473,18 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void setUploadFormat_setsProperty() {
+        manager.setUploadFormat(UploadFormat.MULTIPART);
+
+        Assert.assertEquals(UploadFormat.MULTIPART, manager.getUploadFormat());
+    }
+
+    @Test
+    public void getUploadFormat_defaultIsRaw() {
+        Assert.assertEquals(UploadFormat.RAW, manager.getUploadFormat());
+    }
+
+    @Test
     public void setEnabled_setsProperty() {
         manager.setEnabled(false);
 
@@ -545,13 +552,36 @@ public class UploadManagerTest {
     }
 
     @Test
-    public void fileRejectedEvent_hasFileNameAndErrorMessage() {
+    public void fileRejectedEvent_hasFileNameAndReason() {
         var event = new UploadManager.FileRejectedEvent(new Div(), true,
-                "File too large", "large-file.zip");
+                UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                "large-file.zip");
 
         Assert.assertEquals("large-file.zip", event.getFileName());
-        Assert.assertEquals("File too large", event.getErrorMessage());
+        Assert.assertEquals(UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                event.getReason());
         Assert.assertTrue(event.isFromClient());
+    }
+
+    @Test
+    public void fileRejectionReason_fromClientCode_knownCodes() {
+        Assert.assertEquals(UploadManager.FileRejectionReason.TOO_MANY_FILES,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("tooManyFiles"));
+        Assert.assertEquals(UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("fileIsTooBig"));
+        Assert.assertEquals(
+                UploadManager.FileRejectionReason.INCORRECT_FILE_TYPE,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("incorrectFileType"));
+    }
+
+    @Test
+    public void fileRejectionReason_fromClientCode_unknownCode() {
+        Assert.assertEquals(UploadManager.FileRejectionReason.UNKNOWN,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("someNewCode"));
     }
 
     @Test

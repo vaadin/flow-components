@@ -18,7 +18,7 @@ package com.vaadin.flow.component.upload;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -36,8 +36,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * <pre>
  * var manager = new UploadManager(uploadHandler);
- * var dropZone = new UploadDropZone(manager);
- * dropZone.add(new Span("Drop files here"));
+ * var dropZone = new UploadDropZone(new Span("Drop files here"), manager);
  * add(dropZone);
  * </pre>
  *
@@ -45,10 +44,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @see UploadManager
  */
 @Tag("vaadin-upload-drop-zone")
-@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha8")
 @JsModule("@vaadin/upload/src/vaadin-upload-drop-zone.js")
 public class UploadDropZone extends Component
-        implements HasComponents, HasUploadManager, HasSize {
+        implements HasEnabled, HasUploadManager, HasSize {
 
     /**
      * Creates a new empty drop zone without a manager. The manager must be set
@@ -71,6 +70,52 @@ public class UploadDropZone extends Component
     }
 
     /**
+     * Creates a new drop zone with the given content, linked to the given
+     * manager.
+     *
+     * @param content
+     *            the content to set
+     * @param manager
+     *            the upload manager to link to, not {@code null}
+     * @throws NullPointerException
+     *             if manager is {@code null}
+     */
+    public UploadDropZone(Component content, UploadManager manager) {
+        this(manager);
+        setContent(content);
+    }
+
+    /**
+     * Returns the content of the drop zone. Returns {@code null} if the drop
+     * zone has no content.
+     *
+     * @return the content of the drop zone
+     */
+    public Component getContent() {
+        return getChildren().findFirst().orElse(null);
+    }
+
+    /**
+     * Sets the content of the drop zone. Set {@code null} to remove the current
+     * content.
+     *
+     * @param content
+     *            the content to set
+     */
+    public void setContent(Component content) {
+        Component currentContent = getContent();
+        if (currentContent == content) {
+            return;
+        }
+        if (currentContent != null) {
+            getElement().removeChild(currentContent.getElement());
+        }
+        if (content != null) {
+            getElement().appendChild(content.getElement());
+        }
+    }
+
+    /**
      * Sets whether this drop zone is enabled. When disabled, the drop zone will
      * not accept dropped files.
      * <p>
@@ -86,6 +131,6 @@ public class UploadDropZone extends Component
                                     // specific Javadoc
     @Override
     public void setEnabled(boolean enabled) {
-        HasComponents.super.setEnabled(enabled);
+        HasEnabled.super.setEnabled(enabled);
     }
 }

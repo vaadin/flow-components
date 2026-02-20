@@ -13,25 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.ai.component;
+package com.vaadin.flow.component.ai.ui;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.vaadin.flow.component.ai.common.AIAttachment;
 
 /**
- * Listener for input submit events.
+ * Interface for file upload components that are used in an AI conversation.
  *
  * @author Vaadin Ltd
- * @see AiInput
- * @see InputSubmitEvent
  */
-@FunctionalInterface
-public interface InputSubmitListener extends Serializable {
+public interface AIFileReceiver extends Serializable {
 
     /**
-     * Called when the user submits input.
+     * Returns all accumulated attachments and clears the internal state.
+     * <p>
+     * After this method returns, the receiver is ready to accept new files. The
+     * UI file list is also cleared.
      *
-     * @param event
-     *            the submit event, not {@code null}
+     * @return an unmodifiable list of attachments, or an empty list if none are
+     *         pending
      */
-    void onSubmit(InputSubmitEvent event);
+    List<AIAttachment> takeAttachments();
 }
