@@ -28,11 +28,7 @@ import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
-/**
- * Unit tests for
- * {@link HasClearButton#bindClearButtonVisible(com.vaadin.flow.signals.Signal)}.
- */
-public class HasClearButtonBindingTest extends AbstractSignalsUnitTest {
+public class HasClearButtonSignalTest extends AbstractSignalsUnitTest {
 
     @Tag("test")
     private static class TestComponent extends Component
