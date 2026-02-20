@@ -25,6 +25,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 
 public class MessageInputTest {
@@ -79,5 +80,11 @@ public class MessageInputTest {
     public void implementsFocusable() {
         Assert.assertTrue("MessageInput should be focusable",
                 Focusable.class.isAssignableFrom(messageInput.getClass()));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(MessageInput.class));
     }
 }

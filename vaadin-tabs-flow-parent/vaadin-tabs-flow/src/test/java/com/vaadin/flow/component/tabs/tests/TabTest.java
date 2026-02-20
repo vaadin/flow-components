@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.tabs.Tab;
 
@@ -85,5 +86,10 @@ public class TabTest {
 
         tab.setAriaLabelledBy(null);
         Assert.assertTrue(tab.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Tab.class));
     }
 }

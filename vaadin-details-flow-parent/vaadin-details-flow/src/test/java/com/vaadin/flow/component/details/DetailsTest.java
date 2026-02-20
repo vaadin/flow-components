@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 
 public class DetailsTest {
@@ -99,5 +100,11 @@ public class DetailsTest {
         details.setOpened(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Details.class));
     }
 }
