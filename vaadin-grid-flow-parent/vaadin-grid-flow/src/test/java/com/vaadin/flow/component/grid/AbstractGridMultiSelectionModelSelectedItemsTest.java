@@ -22,16 +22,18 @@ import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 public class AbstractGridMultiSelectionModelSelectedItemsTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private MockUI ui;
     private Grid<String> grid;
     private String item1;
     private String item2;
@@ -65,7 +67,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
         selectionModel = ((AbstractGridMultiSelectionModel<String>) grid
                 .getSelectionModel());
 
-        ui = new MockUI();
         ui.add(grid);
     }
 

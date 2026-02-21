@@ -21,23 +21,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.JsonNode;
 
 public class TreeGridSetViewportRangeByIndexPathTest {
-    private MockUI ui;
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private GridArrayUpdater arrayUpdater = Mockito
             .mock(GridArrayUpdater.class);
@@ -69,16 +69,10 @@ public class TreeGridSetViewportRangeByIndexPathTest {
                 (item, jsonObject) -> jsonObject.put("name", item));
         treeGrid.setPageSize(5);
 
-        ui = new MockUI();
         ui.add(treeGrid);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Mockito.reset(arrayUpdate);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -158,19 +152,19 @@ public class TreeGridSetViewportRangeByIndexPathTest {
         treeGrid.expandRecursively(treeGrid.getTreeData().getRootItems(), 1);
 
         treeGrid.setViewportRangeByIndexPath(new int[] { 0 }, 5);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertViewportRange(10, "Item 0", "Item 0-2");
 
         treeGrid.getDataCommunicator().reset();
 
         treeGrid.setViewportRangeByIndexPath(new int[] { 50, 0, 0 }, 5);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertViewportRange(15, "Item 49-2", "Item 50-2-0");
 
         treeGrid.getDataCommunicator().reset();
 
         treeGrid.setViewportRangeByIndexPath(new int[] { -1, -1, -1 }, 5);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertViewportRange(7, "Item 99-1-0", "Item 99-2-2");
     }
 
@@ -216,12 +210,6 @@ public class TreeGridSetViewportRangeByIndexPathTest {
         Assert.assertEquals(firstItem, viewportRange.getFirst());
         Assert.assertEquals(lastItem, viewportRange.getLast());
         Mockito.reset(arrayUpdate);
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private List<String> generateItems(String parentItem, int count) {

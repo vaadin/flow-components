@@ -20,18 +20,14 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 public class MultiSelectComboBoxFilteringTest {
-    private MockUI ui;
-
-    @Before
-    public void setUp() {
-        ui = new MockUI();
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void filter_addAndRefreshItems_doesNotToggleClientSideFiltering() {
@@ -43,21 +39,15 @@ public class MultiSelectComboBoxFilteringTest {
         comboBox.setItems(items);
 
         comboBox.getDataController().setViewportRange(0, 50, "foo");
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Assert.assertFalse((Boolean) comboBox.getElement()
                 .getPropertyRaw("_clientSideFilter"));
 
         items.add("foo");
         comboBox.getDataProvider().refreshAll();
         comboBox.getDataController().setViewportRange(0, 50, "");
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Assert.assertFalse((Boolean) comboBox.getElement()
                 .getPropertyRaw("_clientSideFilter"));
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }
