@@ -43,6 +43,7 @@ import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
@@ -528,19 +529,24 @@ public class AIOrchestrator {
 
         /**
          * Sets the file receiver component using a Flow Upload component. The
-         * provided upload should not have an UploadHandler set beforehand.
+         * provided upload should not have an UploadHandler or a Receiver set
+         * beforehand.
          *
          * @param upload
          *            the Flow Upload component
          * @return this builder
          * @throws IllegalArgumentException
          *             if the {@link Upload} already has an
-         *             {@link UploadHandler}
+         *             {@link UploadHandler} or a {@link Receiver}
          */
         public Builder withFileReceiver(Upload upload) {
-            if (upload != null && UploadHelper.hasUploadHandler(upload)) {
+            if (UploadHelper.hasUploadHandler(upload)) {
                 throw new IllegalArgumentException(
                         "The provided Upload already has an UploadHandler.");
+            }
+            if (upload.getReceiver() != null) {
+                throw new IllegalArgumentException(
+                        "The provided Upload already has a Receiver.");
             }
             this.fileReceiver = wrapUpload(upload);
             return this;
