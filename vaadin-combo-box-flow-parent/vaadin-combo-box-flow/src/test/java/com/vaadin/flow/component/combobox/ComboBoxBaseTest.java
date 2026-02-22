@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -27,7 +28,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasPlaceholder;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -38,7 +38,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
 /**
@@ -47,6 +47,8 @@ import com.vaadin.tests.dataprovider.DataProviderListenersTest;
  * both components
  */
 public abstract class ComboBoxBaseTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     protected abstract <TItem> ComboBoxBase<?, TItem, ?> createComboBox(
             Class<TItem> itemClass);
@@ -263,7 +265,6 @@ public abstract class ComboBoxBaseTest {
     @Test
     public void setDataProvider_inMemoryDataProvider_fetchesEagerly() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        MockUI ui = new MockUI();
         ui.add(comboBox);
 
         DataProvider<String, String> dataProvider = Mockito
@@ -293,14 +294,13 @@ public abstract class ComboBoxBaseTest {
                         + "within setDataProvider()",
                 comboBox.getDataProvider());
 
-        fakeClientCommunication(ui);
+        ui.fakeClientCommunication();
         Mockito.verify(dataProvider).size(Mockito.any());
     }
 
     @Test
     public void setDataProvider_backendDataProvider_fetchesOnOpened() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        MockUI ui = new MockUI();
         ui.add(comboBox);
 
         DataProvider<String, String> dataProvider = Mockito.spy(DataProvider
@@ -313,13 +313,13 @@ public abstract class ComboBoxBaseTest {
                         + "within setDataProvider()",
                 comboBox.getDataProvider());
 
-        fakeClientCommunication(ui);
+        ui.fakeClientCommunication();
         Mockito.verify(dataProvider, Mockito.times(0)).size(Mockito.any());
 
         // Simulate open event and reset
         comboBox.setOpened(true);
         comboBox.setPageSize(42);
-        fakeClientCommunication(ui);
+        ui.fakeClientCommunication();
 
         Mockito.verify(dataProvider).size(Mockito.any());
     }
@@ -341,7 +341,7 @@ public abstract class ComboBoxBaseTest {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         createComboBox(Object.class), 2, 2, new int[] { 1, 3 },
-                        new MockUI());
+                        ui.getUI());
     }
 
     @Test
@@ -367,11 +367,5 @@ public abstract class ComboBoxBaseTest {
 
         comboBox.setAriaLabelledBy(null);
         Assert.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
-    }
-
-    private void fakeClientCommunication(UI ui) {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

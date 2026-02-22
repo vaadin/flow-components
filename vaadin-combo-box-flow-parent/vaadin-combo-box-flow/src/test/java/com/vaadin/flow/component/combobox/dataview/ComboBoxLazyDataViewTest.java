@@ -35,11 +35,13 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.JsonNode;
 
 public class ComboBoxLazyDataViewTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private static final String TYPE_ERROR_MESSAGE = "ComboBoxLazyDataView "
             + "only supports 'BackEndDataProvider' or it's subclasses, "
@@ -50,7 +52,6 @@ public class ComboBoxLazyDataViewTest {
     private String[] items = { "foo", "bar", "baz" };
     private ComboBoxLazyDataView<String> dataView;
     private ComboBox<String> comboBox;
-    private MockUI ui;
     private DataCommunicator<String> dataCommunicator;
     private ArrayUpdater arrayUpdater;
 
@@ -67,7 +68,6 @@ public class ComboBoxLazyDataViewTest {
                 }, query -> 3);
 
         comboBox = new ComboBox<>();
-        ui = new MockUI();
         ui.add(comboBox);
 
         ArrayUpdater.Update update = new ArrayUpdater.Update() {
@@ -118,14 +118,14 @@ public class ComboBoxLazyDataViewTest {
                 event -> itemCount.set(event.getItemCount()));
         dataCommunicator.setViewportRange(0, 50);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals("Expected 3 items before setItemCountCallback()", 3,
                 itemCount.getAndSet(0));
 
         dataView.setItemCountCallback(query -> 2);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals("Expected 2 items after setItemCountCallback()", 2,
                 itemCount.get());
@@ -214,12 +214,6 @@ public class ComboBoxLazyDataViewTest {
 
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.getLazyDataView().getItemCountEstimateIncrease();
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     @Test

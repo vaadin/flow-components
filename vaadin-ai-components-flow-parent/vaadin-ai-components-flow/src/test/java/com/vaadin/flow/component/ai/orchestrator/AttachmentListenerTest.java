@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,7 +27,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -36,11 +34,13 @@ import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.tests.EnableFeatureFlagRule;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 import reactor.core.publisher.Flux;
 
 public class AttachmentListenerTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
     @Rule
     public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
             AIComponentsFeatureFlagProvider.AI_COMPONENTS);
@@ -65,13 +65,6 @@ public class AttachmentListenerTest {
                 .thenReturn(Flux.just("Response"));
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(Collections.emptyList());
-
-        new MockUI();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     // --- AttachmentSubmitListener tests ---

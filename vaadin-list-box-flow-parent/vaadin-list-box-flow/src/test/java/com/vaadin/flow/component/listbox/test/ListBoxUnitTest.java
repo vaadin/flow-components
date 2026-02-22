@@ -29,10 +29,12 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
 public class ListBoxUnitTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private static final String ITEM1 = "1";
     private static final String ITEM2 = "2";
@@ -186,8 +188,7 @@ public class ListBoxUnitTest {
     public void dataProviderListeners_listBoxAttachedAndDetached_oldDataProviderListenerRemoved() {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
-                        new ListBox<>(), 1, 1, new int[] { 0, 1 },
-                        new MockUI());
+                        new ListBox<>(), 1, 1, new int[] { 0, 1 }, ui.getUI());
     }
 
     @Test

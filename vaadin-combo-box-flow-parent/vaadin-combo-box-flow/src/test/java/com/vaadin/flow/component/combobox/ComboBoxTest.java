@@ -36,14 +36,10 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 
 import tools.jackson.databind.node.ObjectNode;
 
 public class ComboBoxTest extends ComboBoxBaseTest {
-
-    private UI ui;
 
     private enum Category {
         CATEGORY_1, CATEGORY_2, CATEGORY_3;
@@ -190,16 +186,10 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-combo-box");
         element.setProperty("value", "foo");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
-
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(ComboBox.class))
                 .thenAnswer(invocation -> new ComboBox());
