@@ -17,17 +17,19 @@ package com.vaadin.flow.component.grid;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 public class TreeGridTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private MockUI ui;
     private TreeGrid<Item> treeGrid;
 
     @Before
@@ -42,13 +44,12 @@ public class TreeGridTest {
                 treeData);
         treeGrid.setDataProvider(treeDataProvider);
 
-        ui = new MockUI();
         ui.add(treeGrid);
     }
 
     @Test
     public void uniqueKeyProviderNotSet_usesKeyMapper() {
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Assert.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("1"));
@@ -61,7 +62,7 @@ public class TreeGridTest {
     @Test
     public void uniqueKeyProviderSet_usesUniqueKeyProvider() {
         treeGrid.setUniqueKeyProvider(Item::toString);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Assert.assertNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("1"));
@@ -71,12 +72,6 @@ public class TreeGridTest {
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 1"));
         Assert.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 2"));
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private static class Item {

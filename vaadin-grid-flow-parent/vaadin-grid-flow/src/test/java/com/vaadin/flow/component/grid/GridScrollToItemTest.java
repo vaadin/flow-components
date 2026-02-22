@@ -19,34 +19,29 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class GridScrollToItemTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private MockUI ui = new MockUI();
     private Grid<String> grid;
 
     @Before
     public void setUp() {
         grid = new Grid<>();
         grid.setPageSize(50);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -101,7 +96,7 @@ public class GridScrollToItemTest {
         ui.add(grid);
         grid.scrollToItem("Item 0");
         grid.scrollToItem("Item 0");
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation("Item 0", 0);
     }
 
@@ -111,7 +106,7 @@ public class GridScrollToItemTest {
         grid.scrollToItem("Item 0");
         grid.scrollToItem("Item 0");
         ui.add(grid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation("Item 0", 0);
     }
 
@@ -122,14 +117,8 @@ public class GridScrollToItemTest {
 
         grid.scrollToIndex(1);
         grid.scrollToItem("Item 0");
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation("Item 0", 0);
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private void assertSingleJavaScriptScrollToItemInvocation(
@@ -147,7 +136,7 @@ public class GridScrollToItemTest {
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
+        return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
                 .filter(invocation -> invocation.getExpression()
                         .contains("scroll"))
