@@ -24,18 +24,20 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
+import com.vaadin.tests.EnableFeatureFlagRule;
 import com.vaadin.tests.MockUIRule;
 
 public class RangeSliderWarningsTest {
     @Rule
     public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
     private Logger mockedLogger;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
     private MockedStatic<LoggerFactory> mockLoggerFactoryStatic;
 
     @Before
@@ -47,21 +49,11 @@ public class RangeSliderWarningsTest {
         mockLoggerFactoryStatic
                 .when(() -> LoggerFactory.getLogger(RangeSlider.class))
                 .thenReturn(mockedLogger);
-
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags
-                .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
-                .thenReturn(true);
-
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
-                .thenReturn(mockFeatureFlags);
     }
 
     @After
     public void tearDown() {
         mockLoggerFactoryStatic.close();
-        mockFeatureFlagsStatic.close();
     }
 
     @Test
