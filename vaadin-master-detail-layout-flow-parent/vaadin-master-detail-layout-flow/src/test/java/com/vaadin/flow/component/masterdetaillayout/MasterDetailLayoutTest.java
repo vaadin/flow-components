@@ -26,30 +26,23 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class MasterDetailLayoutTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
     @Rule
     public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
             FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
 
-    private final UI ui = new UI();
     private final MasterDetailLayout layout = new MasterDetailLayout();
 
     @Before
     public void setup() {
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-
-        ui.getInternals().setSession(mockSession);
         ui.add(layout);
     }
 
@@ -399,8 +392,8 @@ public class MasterDetailLayoutTest {
 
     private void assertSetDetailCall(Component component,
             boolean skipTransition) {
-        fakeClientCommunication();
-        var pendingJavaScriptInvocations = ui.getInternals()
+        ui.fakeClientCommunication();
+        var pendingJavaScriptInvocations = ui
                 .dumpPendingJavaScriptInvocations();
 
         Assert.assertEquals(1, pendingJavaScriptInvocations.size());
@@ -415,11 +408,5 @@ public class MasterDetailLayoutTest {
                 pendingJavaScriptInvocation.getInvocation().getExpression());
         Assert.assertEquals(element, parameters.get(0));
         Assert.assertEquals(skipTransition, parameters.get(1));
-    }
-
-    protected void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

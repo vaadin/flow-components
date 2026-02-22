@@ -15,33 +15,19 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class FeatureFlagTest {
     @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
     public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
             FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
-
-    private final UI ui = new UI();
-
-    @Before
-    public void setup() {
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-
-        ui.getInternals().setSession(mockSession);
-    }
 
     @Test
     public void featureEnabled_attachLayout_doesNotThrow() {

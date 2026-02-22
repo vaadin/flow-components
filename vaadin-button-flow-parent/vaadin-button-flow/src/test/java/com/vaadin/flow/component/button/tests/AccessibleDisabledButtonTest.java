@@ -33,11 +33,12 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class AccessibleDisabledButtonTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
     @Rule
     public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
             FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS);
@@ -52,18 +53,8 @@ public class AccessibleDisabledButtonTest {
     private ComponentEventListener mockBlurListener = Mockito
             .mock(ComponentEventListener.class);
 
-    private UI ui = new UI();
-
     @Before
     public void setUp() {
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-
-        ui.getInternals().setSession(mockSession);
-        UI.setCurrent(ui);
-
         button.setEnabled(false);
     }
 
@@ -126,7 +117,7 @@ public class AccessibleDisabledButtonTest {
 
         button.addFocusShortcut(Key.KEY_A);
         ui.add(button);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         var keydownEvent = new KeyDownEvent(button, "A"); // actual key of the
                                                           // event doesn't
@@ -134,7 +125,7 @@ public class AccessibleDisabledButtonTest {
                                                           // test setup, as the
                                                           // filtering happens
                                                           // on the client side
-        ComponentUtil.fireEvent(ui, keydownEvent);
+        ComponentUtil.fireEvent(ui.getUI(), keydownEvent);
 
         Mockito.verify(button, Mockito.never()).focus();
     }
@@ -143,7 +134,7 @@ public class AccessibleDisabledButtonTest {
     public void accessibleButtonsEnabled_focusShortcutEnabled() {
         button.addFocusShortcut(Key.KEY_A);
         ui.add(button);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         var keydownEvent = new KeyDownEvent(button, "A"); // actual key of the
                                                           // event doesn't
@@ -151,7 +142,7 @@ public class AccessibleDisabledButtonTest {
                                                           // test setup, as the
                                                           // filtering happens
                                                           // on the client side
-        ComponentUtil.fireEvent(ui, keydownEvent);
+        ComponentUtil.fireEvent(ui.getUI(), keydownEvent);
 
         Mockito.verify(button, Mockito.times(1)).focus();
     }
