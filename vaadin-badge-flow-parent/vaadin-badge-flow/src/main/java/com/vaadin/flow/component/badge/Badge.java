@@ -238,7 +238,11 @@ public class Badge extends Component
      *            the number to display, or {@code null} to clear it
      */
     public void setNumber(Integer number) {
-        getElement().setProperty("number", number);
+        if (number == null) {
+            getElement().removeProperty("number");
+        } else {
+            getElement().setProperty("number", number.intValue());
+        }
     }
 
     /**
