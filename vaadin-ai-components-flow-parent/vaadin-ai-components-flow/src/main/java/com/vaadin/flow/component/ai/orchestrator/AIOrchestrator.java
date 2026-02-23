@@ -75,7 +75,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withInput(messageInput) // optional
  *         .withMessageList(messageList) // optional
- *         .withFileReceiver(upload) // optional
+ *         .withFileReceiver(uploadManager) // optional
  *         .withTools(toolObj) // optional, for @Tool annotations
  *         .withUserName(userName) // optional
  *         .withAssistantName(assistantName) // optional
