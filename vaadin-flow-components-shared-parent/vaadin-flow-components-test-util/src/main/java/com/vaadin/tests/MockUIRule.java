@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -41,10 +42,18 @@ public class MockUIRule extends ExternalResource {
 
     @Override
     protected void before() {
-        ui = new UI();
         service = Mockito.mock(VaadinService.class);
+        DeploymentConfiguration deploymentConfig = Mockito
+                .mock(DeploymentConfiguration.class);
+        Mockito.when(deploymentConfig.isProductionMode()).thenReturn(false);
+        Mockito.when(service.getDeploymentConfiguration())
+                .thenReturn(deploymentConfig);
+
         session = new AlwaysLockedVaadinSession(service);
+
+        ui = new UI();
         ui.getInternals().setSession(session);
+
         UI.setCurrent(ui);
         VaadinSession.setCurrent(session);
     }
