@@ -25,16 +25,6 @@ import com.vaadin.testbench.elementsbase.Element;
 public class BadgeElement extends TestBenchElement {
 
     /**
-     * Gets the text content of the badge.
-     *
-     * @return the text content
-     */
-    @Override
-    public String getText() {
-        return getPropertyString("textContent");
-    }
-
-    /**
      * Gets the number displayed in the badge.
      *
      * @return the number, or {@code null} if not set
