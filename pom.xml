@@ -444,13 +444,6 @@
                         <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
                         <frontendDirectory>./frontend</frontendDirectory>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>prepare-frontend</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
