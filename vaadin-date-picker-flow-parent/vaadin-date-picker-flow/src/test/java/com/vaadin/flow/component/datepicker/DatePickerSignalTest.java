@@ -48,23 +48,6 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindMin_internalFieldSynchronizedImmediately()
-            throws Exception {
-        datePicker.bindMin(signal);
-        UI.getCurrent().add(datePicker);
-
-        signal.set(LocalDate.of(2023, 2, 1));
-
-        // Use reflection to check the private field 'min'
-        java.lang.reflect.Field minField = DatePicker.class
-                .getDeclaredField("min");
-        minField.setAccessible(true);
-        LocalDate internalMin = (LocalDate) minField.get(datePicker);
-
-        Assert.assertEquals(LocalDate.of(2023, 2, 1), internalMin);
-    }
-
-    @Test
     public void bindMin_noEffectWhenDetached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindMin(signal);
@@ -99,23 +82,6 @@ public class DatePickerSignalTest extends AbstractSignalsUnitTest {
 
         signal.set(LocalDate.of(2023, 2, 1));
         Assert.assertEquals(signal.get(), datePicker.getMax());
-    }
-
-    @Test
-    public void bindMax_internalFieldSynchronizedImmediately()
-            throws Exception {
-        datePicker.bindMax(signal);
-        UI.getCurrent().add(datePicker);
-
-        signal.set(LocalDate.of(2023, 2, 1));
-
-        // Use reflection to check the private field 'max'
-        java.lang.reflect.Field maxField = DatePicker.class
-                .getDeclaredField("max");
-        maxField.setAccessible(true);
-        LocalDate internalMax = (LocalDate) maxField.get(datePicker);
-
-        Assert.assertEquals(LocalDate.of(2023, 2, 1), internalMax);
     }
 
     @Test
