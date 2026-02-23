@@ -32,23 +32,17 @@ import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * Badge is a component for displaying small pieces of information, such as
- * statuses, counts, or labels. It can display {@link #setText(String) plain
- * text}, a {@link #setNumber(Integer) number}, an {@link #setIcon(Component)
- * icon}, or a {@link #setContent(Component) custom component}, as well as
- * combinations of these. Use theme variants to customize the badge's
- * appearance, such as {@link BadgeVariant#SUCCESS success},
- * {@link BadgeVariant#ERROR error}, and {@link BadgeVariant others}.
- *
- * <h3>Usage</h3>
- *
- * Badge with text, icon, and a theme variant:
+ * statuses, counts, or labels. It can display plain text, a number, an icon,
+ * or a custom component, as well as combinations of these. Use theme variants
+ * to customize the badge's appearance.
  *
  * <pre>
  * Badge badge = new Badge("Completed", LumoIcon.CHECKMARK.create());
  * badge.addThemeVariants(BadgeVariant.SUCCESS);
  * </pre>
  *
- * Badge as a dot indicator (no content):
+ * The {@link BadgeVariant#DOT dot} variant renders the badge as a small dot
+ * indicator, visually hiding all content:
  *
  * <pre>
  * Badge badge = new Badge();
