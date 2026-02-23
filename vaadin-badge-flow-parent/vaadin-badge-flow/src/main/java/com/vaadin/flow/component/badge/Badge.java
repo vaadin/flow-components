@@ -65,7 +65,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-badge")
-@NpmPackage(value = "@vaadin/badge", version = "25.1.0-alpha8")
+@NpmPackage(value = "@vaadin/badge", version = "25.1.0-alpha9")
 @JsModule("@vaadin/badge/src/vaadin-badge.js")
 public class Badge extends Component
         implements HasSize, HasText, HasThemeVariant<BadgeVariant> {
