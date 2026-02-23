@@ -82,7 +82,7 @@
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.10</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>3.5.5</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
         <spotless.plugin.version>3.2.1</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
