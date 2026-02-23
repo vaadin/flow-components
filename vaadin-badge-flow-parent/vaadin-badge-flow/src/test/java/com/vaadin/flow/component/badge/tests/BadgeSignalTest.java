@@ -68,12 +68,15 @@ public class BadgeSignalTest extends AbstractSignalsUnitTest {
         badge.bindText(textSignal);
         ui.add(badge);
         Assert.assertEquals("foo", badge.getText());
+        Assert.assertEquals("foo", badge.getElement().getText());
 
         textSignal.set(null);
         Assert.assertNull(badge.getText());
+        Assert.assertEquals("", badge.getElement().getText());
 
         textSignal.set("bar");
         Assert.assertEquals("bar", badge.getText());
+        Assert.assertEquals("bar", badge.getElement().getText());
     }
 
     @Test(expected = BindingActiveException.class)
@@ -94,7 +97,7 @@ public class BadgeSignalTest extends AbstractSignalsUnitTest {
         Assert.assertNull(badge.getNumber());
 
         numberSignal.set(50);
-        Assert.assertEquals((Integer) 50, badge.getNumber())
+        Assert.assertEquals((Integer) 50, badge.getNumber());
     }
 
     @Test(expected = BindingActiveException.class)
