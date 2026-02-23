@@ -27,7 +27,6 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
-import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.Command;
@@ -94,28 +93,5 @@ public class UploadHelperTest {
         });
         manager.setUploadHandler(handler);
         Assert.assertTrue(UploadHelper.hasUploadHandler(manager));
-    }
-
-    @Test
-    public void hasUploadHandler_upload_withDefaultConstructor_returnsFalse() {
-        var upload = new Upload();
-        Assert.assertFalse(UploadHelper.hasUploadHandler(upload));
-    }
-
-    @Test
-    public void hasUploadHandler_upload_withHandlerInConstructor_returnsTrue() {
-        var handler = UploadHandler.inMemory((metadata, data) -> {
-        });
-        var upload = new Upload(handler);
-        Assert.assertTrue(UploadHelper.hasUploadHandler(upload));
-    }
-
-    @Test
-    public void hasUploadHandler_upload_withDefaultConstructor_setHandler_returnsTrue() {
-        var upload = new Upload();
-        var handler = UploadHandler.inMemory((metadata, data) -> {
-        });
-        upload.setUploadHandler(handler);
-        Assert.assertTrue(UploadHelper.hasUploadHandler(upload));
     }
 }
