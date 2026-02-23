@@ -100,10 +100,13 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * <p>
  * <b>Serialization:</b> The LLM provider and tool objects are not serialized
  * (they are transient). After deserialization, call
- * {@link #reconnect(LLMProvider)} to restore transient dependencies:
+ * {@link #reconnect(LLMProvider)} to restore transient dependencies and replay
+ * the conversation history onto the new provider:
  *
  * <pre>
- * orchestrator.reconnect(provider).withTools(toolObj).apply();
+ * orchestrator.reconnect(provider).withTools(toolObj) // optional
+ *         .withAttachments(attachmentsByMsgId) // optional
+ *         .apply();
  * </pre>
  *
  * The conversation history, UI component bindings, and listeners are preserved
@@ -199,15 +202,22 @@ public class AIOrchestrator implements Serializable {
 
     /**
      * Returns a {@link Reconnector} to restore transient dependencies after
-     * deserialization. The provider is required; other dependencies (tools) are
+     * deserialization. The provider is required; tools and attachments are
      * optional.
      * <p>
      * Example usage:
      * </p>
      *
      * <pre>
-     * orchestrator.reconnect(provider).withTools(toolObj).apply();
+     * orchestrator.reconnect(provider).withTools(toolObj)
+     *         .withAttachments(attachmentsByMsgId).apply();
      * </pre>
+     * <p>
+     * Calling {@link Reconnector#apply()} replays the existing conversation
+     * history onto the new provider so it has full context for subsequent
+     * prompts. The UI is not modified -- message list, input, and file receiver
+     * components retain their state across serialization.
+     * </p>
      * <p>
      * This method should only be called on a deserialized instance where the
      * provider is {@code null}.
@@ -451,16 +461,24 @@ public class AIOrchestrator implements Serializable {
      * {@link AIOrchestrator} after deserialization. Obtain an instance via
      * {@link AIOrchestrator#reconnect(LLMProvider)}.
      * <p>
-     * The provider is specified when the reconnector is created and applied to
-     * the orchestrator when {@link #apply()} is called. Optional transient
-     * dependencies (such as tools) can be restored via chained methods before
-     * calling {@link #apply()}.
+     * The provider is specified when the reconnector is created. Optional
+     * transient dependencies (tools and file attachments) can be restored via
+     * chained methods before calling {@link #apply()}. The {@code apply()} call
+     * replays the existing conversation history onto the new provider but does
+     * not modify the UI.
      * </p>
+     *
+     * <pre>
+     * orchestrator.reconnect(provider).withTools(toolObj) // optional
+     *         .withAttachments(attachmentsByMsgId) // optional
+     *         .apply();
+     * </pre>
      */
     public static class Reconnector {
         private final AIOrchestrator orchestrator;
         private final LLMProvider provider;
         private Object[] tools;
+        private Map<String, List<AIAttachment>> attachmentsByMessageId;
 
         private Reconnector(AIOrchestrator orchestrator, LLMProvider provider) {
             this.orchestrator = orchestrator;
@@ -481,9 +499,40 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
-         * Applies the reconnection, restoring the provider and any other
-         * transient dependencies. Also reapplies the existing conversation
-         * history on the new provider.
+         * Sets the file attachments to restore on the new provider's
+         * conversation memory. The map is keyed by
+         * {@link ChatMessage#messageId()} and contains the list of
+         * {@link AIAttachment} objects for each message.
+         * <p>
+         * Attachments are not stored in the orchestrator's conversation
+         * history. If the application persisted attachment data via
+         * {@link AttachmentSubmitListener} before serialization, pass it here
+         * so the new provider can reconstruct multimodal context. Pass
+         * {@link Collections#emptyMap()} (the default) if there are no
+         * attachments to restore.
+         * <p>
+         * The UI is not affected by this method; attachment thumbnails in the
+         * message list are preserved across serialization automatically.
+         *
+         * @param attachmentsByMessageId
+         *            a map from message ID to attachment list
+         * @return this reconnector
+         */
+        public Reconnector withAttachments(
+                Map<String, List<AIAttachment>> attachmentsByMessageId) {
+            this.attachmentsByMessageId = attachmentsByMessageId;
+            return this;
+        }
+
+        /**
+         * Applies the reconnection, restoring the provider, tools, and
+         * conversation history on the new provider. The existing conversation
+         * history is replayed onto the new provider's memory so that it has
+         * full context for subsequent prompts.
+         * <p>
+         * The UI (message list, input, file receiver) is not modified -- those
+         * components survive serialization and retain their state
+         * automatically.
          */
         public void apply() {
             orchestrator.provider = provider;
@@ -493,7 +542,8 @@ public class AIOrchestrator implements Serializable {
             if (!orchestrator.conversationHistory.isEmpty()) {
                 provider.setHistory(
                         List.copyOf(orchestrator.conversationHistory),
-                        Collections.emptyMap());
+                        attachmentsByMessageId == null ? Collections.emptyMap()
+                                : attachmentsByMessageId);
             }
         }
     }

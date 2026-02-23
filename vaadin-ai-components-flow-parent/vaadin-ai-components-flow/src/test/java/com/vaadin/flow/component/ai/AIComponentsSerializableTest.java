@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.FutureTask;
 import java.util.stream.Stream;
 
@@ -31,6 +32,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -51,6 +53,8 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
+                "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory\\$LazyHolder",
+                "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\..*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.AIComponentsFeatureFlagProvider",
                 // AIOrchestrator — private constructor, requires LLMProvider
@@ -112,6 +116,7 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
         Assert.assertEquals("Hi there", restored.get(1).content());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void serialization_roundTrip_reconnectRestoresHistoryOnProvider()
             throws Throwable {
@@ -127,8 +132,17 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
         var newProvider = Mockito.mock(LLMProvider.class);
         deserialized.reconnect(newProvider).apply();
 
-        Mockito.verify(newProvider).setHistory(Mockito.anyList(),
-                Mockito.anyMap());
+        var historyCaptor = ArgumentCaptor.forClass(List.class);
+        var attachmentsCaptor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(newProvider).setHistory(historyCaptor.capture(),
+                attachmentsCaptor.capture());
+
+        var restoredHistory = (List<ChatMessage>) historyCaptor.getValue();
+        Assert.assertEquals(2, restoredHistory.size());
+        Assert.assertEquals("Hello", restoredHistory.get(0).content());
+        Assert.assertEquals("msg-1", restoredHistory.get(0).messageId());
+        Assert.assertEquals("Hi there", restoredHistory.get(1).content());
+        Assert.assertTrue(attachmentsCaptor.getValue().isEmpty());
     }
 
     @Test
@@ -201,6 +215,95 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
         Mockito.verify(newProvider).stream(captor.capture());
         Assert.assertEquals(1, captor.getValue().tools().length);
         Assert.assertSame(newTool, captor.getValue().tools()[0]);
+    }
+
+    @Test
+    public void reconnect_preservesHistoryAfterApply() throws Throwable {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        deserialized.reconnect(newProvider).apply();
+
+        var restored = deserialized.getHistory();
+        Assert.assertEquals(2, restored.size());
+        Assert.assertEquals("Hello", restored.get(0).content());
+        Assert.assertEquals("msg-1", restored.get(0).messageId());
+        Assert.assertEquals("Hi there", restored.get(1).content());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void reconnect_withAttachments_passesAttachmentsToProvider()
+            throws Throwable {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "See image", "msg-1",
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Nice photo", null,
+                        null));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        var attachment = new AIAttachment("photo.png", "image/png",
+                new byte[] { 1, 2, 3 });
+        var attachments = Map.of("msg-1", List.of(attachment));
+
+        deserialized.reconnect(newProvider).withAttachments(attachments)
+                .apply();
+
+        var attachmentsCaptor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(newProvider).setHistory(Mockito.anyList(),
+                attachmentsCaptor.capture());
+
+        var restoredAttachments = (Map<String, List<AIAttachment>>) attachmentsCaptor
+                .getValue();
+        Assert.assertEquals(1, restoredAttachments.size());
+        Assert.assertTrue(restoredAttachments.containsKey("msg-1"));
+        Assert.assertEquals("photo.png",
+                restoredAttachments.get("msg-1").getFirst().name());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void reconnect_withoutAttachments_passesEmptyMapToProvider()
+            throws Throwable {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi", null, null));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        deserialized.reconnect(newProvider).apply();
+
+        var attachmentsCaptor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(newProvider).setHistory(Mockito.anyList(),
+                attachmentsCaptor.capture());
+        Assert.assertTrue(attachmentsCaptor.getValue().isEmpty());
+    }
+
+    @Test
+    public void reconnect_withEmptyHistory_doesNotCallSetHistory()
+            throws Throwable {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        deserialized.reconnect(newProvider).apply();
+
+        Mockito.verify(newProvider, Mockito.never())
+                .setHistory(Mockito.anyList(), Mockito.anyMap());
     }
 
     private void mockUi() {
