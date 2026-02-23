@@ -22,6 +22,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -29,6 +30,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Badge is a component for displaying small pieces of information, such as
@@ -90,6 +92,9 @@ public class Badge extends Component
     }
 
     private final Text textNode = new Text("");
+
+    private final SignalPropertySupport<String> textSignalSupport = SignalPropertySupport
+            .<String> create(this, this::updateText);
 
     /**
      * Default constructor. Creates an empty badge.
@@ -169,6 +174,34 @@ public class Badge extends Component
     }
 
     /**
+     * Creates a badge with a text signal bound to it.
+     *
+     * @param textSignal
+     *            the signal providing the text content
+     * @see #bindText(Signal)
+     */
+    public Badge(Signal<String> textSignal) {
+        this();
+        bindText(textSignal);
+    }
+
+    /**
+     * Creates a badge with a text signal and an icon inside.
+     *
+     * @param textSignal
+     *            the signal providing the text content
+     * @param icon
+     *            the icon inside the badge
+     * @see #bindText(Signal)
+     * @see #setIcon(Component)
+     */
+    public Badge(Signal<String> textSignal, Component icon) {
+        this();
+        setIcon(icon);
+        bindText(textSignal);
+    }
+
+    /**
      * Sets the given string as the text content of this component.
      * <p>
      * This method removes any existing text-content and replaces it with the
@@ -180,16 +213,7 @@ public class Badge extends Component
      */
     @Override
     public void setText(String text) {
-        textNode.setText(text);
-
-        if (text == null || text.isEmpty()) {
-            getElement().removeChild(textNode.getElement());
-            return;
-        }
-
-        if (textNode.getParent().isEmpty()) {
-            getElement().appendChild(textNode.getElement());
-        }
+        textSignalSupport.set(text);
     }
 
     /**
@@ -199,7 +223,12 @@ public class Badge extends Component
      */
     @Override
     public String getText() {
-        return textNode.getText();
+        return textSignalSupport.get();
+    }
+
+    @Override
+    public void bindText(Signal<String> textSignal) {
+        textSignalSupport.bind(textSignal);
     }
 
     /**
@@ -209,11 +238,17 @@ public class Badge extends Component
      *            the number to display, or {@code null} to clear it
      */
     public void setNumber(Integer number) {
-        if (number == null) {
-            getElement().removeProperty("number");
-        } else {
-            getElement().setProperty("number", number.intValue());
-        }
+        getElement().setProperty("number", number);
+    }
+
+    /**
+     * Binds the number property to the given signal.
+     *
+     * @param numberSignal
+     *            the signal providing the number value
+     */
+    public void bindNumber(Signal<Integer> numberSignal) {
+        getElement().bindProperty("number", numberSignal, null);
     }
 
     /**
@@ -282,5 +317,18 @@ public class Badge extends Component
      */
     public Component getIcon() {
         return SlotUtils.getChildInSlot(this, ICON_SLOT);
+    }
+
+    private void updateText(String text) {
+        textNode.setText(text);
+
+        if (text == null || text.isEmpty()) {
+            getElement().removeChild(textNode.getElement());
+            return;
+        }
+
+        if (textNode.getParent().isEmpty()) {
+            getElement().appendChild(textNode.getElement());
+        }
     }
 }
