@@ -776,8 +776,7 @@ public class TimePicker
      * @see TimePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalTime min) {
-        getElement().setProperty("min",
-                min == null ? "" : FORMATTER.apply(min));
+        getElement().setProperty("min", FORMATTER.apply(min));
     }
 
     /**
@@ -802,8 +801,7 @@ public class TimePicker
      * @see TimePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalTime max) {
-        getElement().setProperty("max",
-                max == null ? "" : FORMATTER.apply(max));
+        getElement().setProperty("max", FORMATTER.apply(max));
     }
 
     /**
@@ -837,9 +835,7 @@ public class TimePicker
      */
     public void bindMin(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("min", signal.map(
-                time -> Objects.requireNonNullElse(FORMATTER.apply(time), "")),
-                null);
+        getElement().bindProperty("min", signal.map(FORMATTER::apply), null);
     }
 
     /**
@@ -863,9 +859,7 @@ public class TimePicker
      */
     public void bindMax(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("max", signal.map(
-                time -> Objects.requireNonNullElse(FORMATTER.apply(time), "")),
-                null);
+        getElement().bindProperty("max", signal.map(FORMATTER::apply), null);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {

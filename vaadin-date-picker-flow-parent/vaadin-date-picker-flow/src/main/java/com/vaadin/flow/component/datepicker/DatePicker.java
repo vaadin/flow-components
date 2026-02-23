@@ -416,8 +416,7 @@ public class DatePicker
      * @see DatePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalDate min) {
-        String minAsString = FORMATTER.apply(min);
-        getElement().setProperty("min", minAsString == null ? "" : minAsString);
+        getElement().setProperty("min", FORMATTER.apply(min));
     }
 
     /**
@@ -466,8 +465,7 @@ public class DatePicker
      * @see DatePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalDate max) {
-        String maxAsString = FORMATTER.apply(max);
-        getElement().setProperty("max", maxAsString == null ? "" : maxAsString);
+        getElement().setProperty("max", FORMATTER.apply(max));
     }
 
     /**
