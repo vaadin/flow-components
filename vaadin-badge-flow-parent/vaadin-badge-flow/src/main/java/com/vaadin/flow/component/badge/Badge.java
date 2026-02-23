@@ -32,43 +32,41 @@ import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * Badge is a component for displaying small pieces of information, such as
- * statuses, counts, or labels. It supports {@link #setText(String) plain text}
- * or a {@link #setContent(Component) custom component} as content, and can also
- * display a {@link #setNumber(Integer) number} and an
- * {@link #setIcon(Component) icon}. Several theme variants are available for
- * customizing the badge's appearance, such as {@link BadgeVariant#SUCCESS
- * success}, {@link BadgeVariant#ERROR error}, and {@link BadgeVariant other
- * variants}.
- * <p>
- * Example 1:
+ * statuses, counts, or labels. It can display {@link #setText(String) plain
+ * text}, a {@link #setNumber(Integer) number}, an {@link #setIcon(Component)
+ * icon}, or a {@link #setContent(Component) custom component}, as well as
+ * combinations of these. Use theme variants to customize the badge's
+ * appearance, such as {@link BadgeVariant#SUCCESS success},
+ * {@link BadgeVariant#ERROR error}, and {@link BadgeVariant others}.
+ *
+ * <h3>Usage</h3>
+ *
+ * Badge with text, icon, and a theme variant:
  *
  * <pre>
  * Badge badge = new Badge("Completed", LumoIcon.CHECKMARK.create());
  * badge.addThemeVariants(BadgeVariant.SUCCESS);
  * </pre>
  *
- * Example 2:
+ * Badge as a dot indicator (no content):
  *
  * <pre>
  * Badge badge = new Badge();
  * badge.addThemeVariants(BadgeVariant.DOT);
  * </pre>
  *
- * <h4>Accessibility</h4>
- * <p>
+ * <h3>Accessibility</h3>
+ *
  * When a Badge displays only an icon or a number, it may not provide enough
  * context for screen reader users. To address this, you can add descriptive
  * text via {@link #setText(String)} and use the {@link BadgeVariant#ICON_ONLY
  * icon-only} or {@link BadgeVariant#NUMBER_ONLY number-only} theme variant to
- * hide the text visually while keeping it accessible to screen readers:
+ * hide the text visually while keeping it available to screen readers:
  *
  * <pre>
- * Badge badge = new Badge("new messages", 5);
+ * Badge badge = new Badge("new messages", 5); // announced as "5 new messages"
  * badge.addThemeVariants(BadgeVariant.NUMBER_ONLY);
  * </pre>
- *
- * In the above example, only the number is visible, but screen readers read the
- * full badge as "5 new messages".
  *
  * @author Vaadin Ltd
  */
