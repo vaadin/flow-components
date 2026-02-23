@@ -41,7 +41,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -152,14 +151,6 @@ public class DatePicker
 
     private Locale locale;
 
-    private LocalDate max;
-    private LocalDate min;
-
-    private final SignalPropertySupport<LocalDate> minSupport = SignalPropertySupport
-            .create(this, value -> this.min = value);
-    private final SignalPropertySupport<LocalDate> maxSupport = SignalPropertySupport
-            .create(this, value -> this.max = value);
-
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
     private String unparsableValue;
@@ -197,14 +188,14 @@ public class DatePicker
 
         ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
                 getI18nErrorMessage(DatePickerI18n::getMaxErrorMessage), value,
-                max);
+                getMax());
         if (maxResult.isError()) {
             return maxResult;
         }
 
         ValidationResult minResult = ValidationUtil.validateMinConstraint(
                 getI18nErrorMessage(DatePickerI18n::getMinErrorMessage), value,
-                min);
+                getMin());
         if (minResult.isError()) {
             return minResult;
         }
@@ -425,9 +416,7 @@ public class DatePicker
      * @see DatePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalDate min) {
-        String minAsString = FORMATTER.apply(min);
-        getElement().setProperty("min", minAsString == null ? "" : minAsString);
-        this.min = min;
+        getElement().setProperty("min", FORMATTER.apply(min));
     }
 
     /**
@@ -462,7 +451,6 @@ public class DatePicker
     public void bindMin(Signal<LocalDate> signal) {
         getElement().bindProperty("min",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
-        minSupport.bind(signal);
     }
 
     /**
@@ -477,9 +465,7 @@ public class DatePicker
      * @see DatePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalDate max) {
-        String maxAsString = FORMATTER.apply(max);
-        getElement().setProperty("max", maxAsString == null ? "" : maxAsString);
-        this.max = max;
+        getElement().setProperty("max", FORMATTER.apply(max));
     }
 
     /**
@@ -514,7 +500,6 @@ public class DatePicker
     public void bindMax(Signal<LocalDate> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
         getElement().bindProperty("max", signal.map(FORMATTER::apply), null);
-        maxSupport.bind(signal);
     }
 
     /**

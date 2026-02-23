@@ -35,7 +35,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -135,8 +134,6 @@ public class TimePicker
 
     private Locale locale;
 
-    private LocalTime max;
-    private LocalTime min;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
     private String unparsableValue;
@@ -145,6 +142,8 @@ public class TimePicker
 
     private Validator<LocalTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
+        var min = getMin();
+        var max = getMax();
 
         if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
@@ -185,11 +184,6 @@ public class TimePicker
 
     private ValidationController<TimePicker, LocalTime> validationController = new ValidationController<>(
             this);
-
-    private final SignalPropertySupport<LocalTime> minSupport = SignalPropertySupport
-            .create(this, value -> this.min = value);
-    private final SignalPropertySupport<LocalTime> maxSupport = SignalPropertySupport
-            .create(this, value -> this.max = value);
 
     /**
      * Default constructor.
@@ -782,9 +776,7 @@ public class TimePicker
      * @see TimePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalTime min) {
-        this.min = min;
-        String minString = format(min);
-        getElement().setProperty("min", minString == null ? "" : minString);
+        getElement().setProperty("min", FORMATTER.apply(min));
     }
 
     /**
@@ -794,7 +786,7 @@ public class TimePicker
      * @see #setMax(LocalTime)
      */
     public LocalTime getMin() {
-        return this.min;
+        return PARSER.apply(getElement().getProperty("min"));
     }
 
     /**
@@ -809,9 +801,7 @@ public class TimePicker
      * @see TimePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalTime max) {
-        this.max = max;
-        String maxString = format(max);
-        getElement().setProperty("max", maxString == null ? "" : maxString);
+        getElement().setProperty("max", FORMATTER.apply(max));
     }
 
     /**
@@ -821,7 +811,7 @@ public class TimePicker
      * @see #setMin(LocalTime)
      */
     public LocalTime getMax() {
-        return this.max;
+        return PARSER.apply(getElement().getProperty("max"));
     }
 
     /**
@@ -845,11 +835,7 @@ public class TimePicker
      */
     public void bindMin(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("min",
-                signal.map(
-                        time -> Objects.requireNonNullElse(format(time), "")),
-                null);
-        minSupport.bind(signal);
+        getElement().bindProperty("min", signal.map(FORMATTER::apply), null);
     }
 
     /**
@@ -873,11 +859,7 @@ public class TimePicker
      */
     public void bindMax(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("max",
-                signal.map(
-                        time -> Objects.requireNonNullElse(format(time), "")),
-                null);
-        maxSupport.bind(signal);
+        getElement().bindProperty("max", signal.map(FORMATTER::apply), null);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -902,10 +884,6 @@ public class TimePicker
     public static Stream<Locale> getSupportedAvailableLocales() {
         return Stream.of(Locale.getAvailableLocales())
                 .filter(locale -> !locale.getLanguage().isEmpty());
-    }
-
-    private static String format(LocalTime time) {
-        return time != null ? time.toString() : null;
     }
 
     /**
