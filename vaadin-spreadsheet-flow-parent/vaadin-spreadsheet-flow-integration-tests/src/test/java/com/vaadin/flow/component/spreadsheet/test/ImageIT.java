@@ -105,6 +105,18 @@ public class ImageIT extends AbstractSpreadsheetIT {
                 originalSrc, newSrc);
     }
 
+    @Test
+    public void shouldLoadImageOnLockedCell() {
+        loadFile("image-locked-cell.xlsx");
+        // Wait for image to appear in the spreadsheet
+        var image = waitUntil(
+                e -> findElementInShadowRoot(By.cssSelector("img")));
+        Assert.assertNotNull("Image should be present", image);
+        // Verify no 404 errors in browser console (would indicate broken
+        // stream resource)
+        checkLogsForErrors();
+    }
+
     private double imageWidth(String cell) {
         return findElementInShadowRoot(By.cssSelector(cellToCSS(cell) + " img"))
                 .getSize().width;
