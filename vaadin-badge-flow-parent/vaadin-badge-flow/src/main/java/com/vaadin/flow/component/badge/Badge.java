@@ -32,9 +32,9 @@ import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * Badge is a component for displaying small pieces of information, such as
- * statuses, counts, or labels. It can display plain text, a number, an icon,
- * or a custom component, as well as combinations of these. Use theme variants
- * to customize the badge's appearance.
+ * statuses, counts, or labels. It can display plain text, a number, an icon, or
+ * a custom component, as well as combinations of these. Use theme variants to
+ * customize the badge's appearance.
  *
  * <pre>
  * Badge badge = new Badge("Completed", LumoIcon.CHECKMARK.create());
