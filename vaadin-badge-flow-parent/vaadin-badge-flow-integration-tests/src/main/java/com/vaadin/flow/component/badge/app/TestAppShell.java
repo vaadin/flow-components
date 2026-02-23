@@ -13,19 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.badge.tests;
+package com.vaadin.flow.component.badge.app;
 
-import com.vaadin.flow.component.badge.Badge;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route("vaadin-badge/basic")
-public class BadgeBasicPage extends Div {
-
-    public BadgeBasicPage() {
-        var badge = new Badge("Messages", 5, VaadinIcon.ENVELOPE.create());
-        badge.setId("badge");
-        add(badge);
-    }
+@StyleSheet(Lumo.STYLESHEET)
+public class TestAppShell implements AppShellConfigurator {
 }

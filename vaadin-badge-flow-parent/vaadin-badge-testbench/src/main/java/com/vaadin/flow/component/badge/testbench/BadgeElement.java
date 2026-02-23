@@ -29,6 +29,7 @@ public class BadgeElement extends TestBenchElement {
      *
      * @return the text content
      */
+    @Override
     public String getText() {
         return getPropertyString("textContent");
     }
@@ -50,6 +51,6 @@ public class BadgeElement extends TestBenchElement {
      * @return the icon element, or {@code null} if not set
      */
     public TestBenchElement getIcon() {
-        return $("*").withAttribute("slot", "icon").first();
+        return $("*").withAttribute("slot", "icon").single();
     }
 }
