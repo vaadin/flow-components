@@ -26,7 +26,7 @@ public class BadgeTest {
     @Test
     public void defaultConstructor_emptyBadge() {
         var badge = new Badge();
-        Assert.assertEquals("", badge.getText());
+        Assert.assertNull(badge.getText());
         Assert.assertNull(badge.getNumber());
         Assert.assertNull(badge.getIcon());
     }
@@ -82,7 +82,7 @@ public class BadgeTest {
 
         badge.setText("Status");
         badge.setText(null);
-        Assert.assertEquals("", badge.getText());
+        Assert.assertNull(badge.getText());
         Assert.assertEquals("", badge.getElement().getText());
     }
 
