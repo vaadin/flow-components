@@ -34,6 +34,7 @@ import tools.jackson.databind.node.ObjectNode;
 
 public class GridProTest {
 
+    private UI ui;
     GridPro<Person> grid;
     ObjectNode selectedItem;
     ArrayList<Person> items = new ArrayList<>();
@@ -45,7 +46,7 @@ public class GridProTest {
     @Before
     public void setup() {
         VaadinSession session = Mockito.mock(VaadinSession.class);
-        var ui = new UI();
+        ui = new UI();
         ui.getInternals().setSession(session);
 
         UI.setCurrent(ui);

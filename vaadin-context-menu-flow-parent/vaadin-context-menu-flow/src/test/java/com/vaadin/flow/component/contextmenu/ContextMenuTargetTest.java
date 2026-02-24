@@ -45,7 +45,10 @@ public class ContextMenuTargetTest {
         Mockito.when(mockSession.getService()).thenReturn(mockService);
         Mockito.when(mockSession.getConfiguration())
                 .thenReturn(mockConfiguration);
+        Mockito.when(mockService.getDeploymentConfiguration())
+                .thenReturn(mockConfiguration);
         Mockito.when(mockService.getContext()).thenReturn(mockContext);
+        Mockito.when(mockConfiguration.isProductionMode()).thenReturn(false);
 
         ui.getInternals().setSession(mockSession);
     }
