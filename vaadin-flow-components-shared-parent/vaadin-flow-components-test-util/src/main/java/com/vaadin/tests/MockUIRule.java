@@ -136,6 +136,7 @@ public class MockUIRule extends ExternalResource {
      * @return a list of pending JavaScript invocations
      */
     public List<PendingJavaScriptInvocation> dumpPendingJavaScriptInvocations() {
+        this.fakeClientCommunication();
         return ui.getInternals().dumpPendingJavaScriptInvocations();
     }
 

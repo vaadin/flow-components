@@ -27,8 +27,6 @@ public enum BadgeVariant implements ThemeVariant {
     FILLED("filled"),
     ICON_ONLY("icon-only"),
     NUMBER_ONLY("number-only"),
-    PRIMARY("primary"),
-    SMALL("small"),
     SUCCESS("success"),
     WARNING("warning");
 

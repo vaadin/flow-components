@@ -26,7 +26,7 @@ public class BadgeTest {
     @Test
     public void defaultConstructor_emptyBadge() {
         var badge = new Badge();
-        Assert.assertEquals("", badge.getText());
+        Assert.assertNull(badge.getText());
         Assert.assertNull(badge.getNumber());
         Assert.assertNull(badge.getIcon());
     }
@@ -82,7 +82,7 @@ public class BadgeTest {
 
         badge.setText("Status");
         badge.setText(null);
-        Assert.assertEquals("", badge.getText());
+        Assert.assertNull(badge.getText());
         Assert.assertEquals("", badge.getElement().getText());
     }
 
@@ -140,6 +140,18 @@ public class BadgeTest {
         badge.setIcon(icon);
 
         Assert.assertNull(badge.getContent());
+    }
+
+    @Test
+    public void setRole_getRole() {
+        var badge = new Badge();
+        Assert.assertNull(badge.getRole());
+
+        badge.setRole("status");
+        Assert.assertEquals("status", badge.getRole());
+
+        badge.setRole(null);
+        Assert.assertNull(badge.getRole());
     }
 
     @Test
