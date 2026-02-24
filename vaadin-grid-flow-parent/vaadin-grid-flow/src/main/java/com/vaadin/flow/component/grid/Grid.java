@@ -133,6 +133,7 @@ import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tools.jackson.databind.JsonNode;
@@ -3281,6 +3282,65 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     + "being able to use multi selection features.");
         }
         return ((GridMultiSelectionModel<T>) model).asMultiSelect();
+    }
+
+    /**
+     * Returns a {@link ValueSignal} representing the currently selected item.
+     * <p>
+     * The returned signal is kept synchronized with the grid's selection: reads
+     * reflect the current selection, and writes update it. The signal is
+     * created lazily and cached — subsequent calls return the same instance.
+     * <p>
+     * Throws {@link IllegalStateException} if the grid is not using a
+     * {@link GridSingleSelectionModel}.
+     *
+     * @return a value signal representing the selected item
+     * @throws IllegalStateException
+     *             if not using a single selection model
+     * @throws com.vaadin.flow.signals.BindingActiveException
+     *             if a signal has already been bound via {@code bindValue()}
+     * @see GridSingleSelectionModel#getSelectedItemSignal()
+     * @since 25.1
+     */
+    public ValueSignal<T> getSelectedItemSignal() {
+        GridSelectionModel<T> model = getSelectionModel();
+        if (!(model instanceof GridSingleSelectionModel)) {
+            throw new IllegalStateException(
+                    "Grid is not in single select mode, "
+                            + "it needs to be explicitly set to such with "
+                            + "setSelectionMode(SelectionMode.SINGLE) before "
+                            + "being able to use single selection features.");
+        }
+        return ((GridSingleSelectionModel<T>) model).getSelectedItemSignal();
+    }
+
+    /**
+     * Returns a {@link ValueSignal} representing the currently selected items.
+     * <p>
+     * The returned signal is kept synchronized with the grid's selection: reads
+     * reflect the current selection set, and writes update it. The signal is
+     * created lazily and cached — subsequent calls return the same instance.
+     * <p>
+     * Throws {@link IllegalStateException} if the grid is not using a
+     * {@link GridMultiSelectionModel}.
+     *
+     * @return a value signal representing the selected items
+     * @throws IllegalStateException
+     *             if not using a multiselection model
+     * @throws com.vaadin.flow.signals.BindingActiveException
+     *             if a signal has already been bound via {@code bindValue()}
+     * @see GridMultiSelectionModel#getSelectedItemsSignal()
+     * @since 25.1
+     */
+    public ValueSignal<Set<T>> getSelectedItemsSignal() {
+        GridSelectionModel<T> model = getSelectionModel();
+        if (!(model instanceof GridMultiSelectionModel)) {
+            throw new IllegalStateException("Grid is not in multi select mode, "
+                    + "it needs to be explicitly set to such with "
+                    + "setSelectionMode(SelectionMode.MULTI) before "
+                    + "being able to use multi selection features.");
+        }
+        return ((GridMultiSelectionModel<T>) model).getSelectedItemsSignal();
     }
 
     /**

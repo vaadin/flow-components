@@ -20,6 +20,7 @@ import com.vaadin.flow.data.selection.SelectionModel;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Single selection model interface for Grid.
@@ -50,4 +51,23 @@ public interface GridSingleSelectionModel<T>
      */
     Registration addSingleSelectionListener(
             SingleSelectionListener<Grid<T>, T> listener);
+
+    /**
+     * Returns a {@link ValueSignal} representing the currently selected item.
+     * <p>
+     * The returned signal is kept synchronized with the grid's selection: reads
+     * reflect the current selection, and writes update it. The signal is
+     * created lazily and cached — subsequent calls return the same instance.
+     * <p>
+     * This method cannot be used if a signal has already been bound to the
+     * selection value via
+     * {@link SingleSelect#bindValue(com.vaadin.flow.signals.Signal, com.vaadin.flow.function.SerializableConsumer)
+     * asSingleSelect().bindValue(...)}.
+     *
+     * @return a value signal representing the selected item
+     * @throws com.vaadin.flow.signals.BindingActiveException
+     *             if a signal has already been bound via {@code bindValue()}
+     * @since 25.1
+     */
+    ValueSignal<T> getSelectedItemSignal();
 }
