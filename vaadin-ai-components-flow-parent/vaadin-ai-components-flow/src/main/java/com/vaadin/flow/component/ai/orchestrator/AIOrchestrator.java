@@ -533,6 +533,7 @@ public class AIOrchestrator implements Serializable {
          * automatically.
          */
         public void apply() {
+            orchestrator.isProcessing.set(false);
             orchestrator.provider = provider;
             if (tools != null) {
                 orchestrator.tools = tools;
