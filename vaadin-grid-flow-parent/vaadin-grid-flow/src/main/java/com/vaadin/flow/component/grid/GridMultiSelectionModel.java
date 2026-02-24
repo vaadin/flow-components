@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Set;
-
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -25,7 +23,6 @@ import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionModel;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Multiselection model interface for Grid.
@@ -190,23 +187,4 @@ public interface GridMultiSelectionModel<T>
      *         <code>false</code> otherwise
      */
     boolean isDragSelect();
-
-    /**
-     * Returns a {@link ValueSignal} representing the currently selected items.
-     * <p>
-     * The returned signal is kept synchronized with the grid's selection: reads
-     * reflect the current selection set, and writes update it. The signal is
-     * created lazily and cached — subsequent calls return the same instance.
-     * <p>
-     * This method cannot be used if a signal has already been bound to the
-     * selection value via
-     * {@link MultiSelect#bindValue(com.vaadin.flow.signals.Signal, com.vaadin.flow.function.SerializableConsumer)
-     * asMultiSelect().bindValue(...)}.
-     *
-     * @return a value signal representing the selected items
-     * @throws com.vaadin.flow.signals.BindingActiveException
-     *             if a signal has already been bound via {@code bindValue()}
-     * @since 25.1
-     */
-    ValueSignal<Set<T>> getSelectedItemsSignal();
 }

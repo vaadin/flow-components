@@ -47,7 +47,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -64,7 +63,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private final Map<Object, T> selected;
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
-    private ValueSignal<Set<T>> selectedItemsSignal;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -104,20 +102,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     @Override
-    public ValueSignal<Set<T>> getSelectedItemsSignal() {
-        if (selectedItemsSignal != null) {
-            return selectedItemsSignal;
-        }
-        selectedItemsSignal = new ValueSignal<>(getSelectedItems());
-        asMultiSelect().bindValue(selectedItemsSignal,
-                selectedItemsSignal::set);
-        return selectedItemsSignal;
-    }
-
-    @Override
     protected void remove() {
         super.remove();
-        selectedItemsSignal = null;
         getGrid().getElement().getNode().getFeature(SignalBindingFeature.class)
                 .removeBinding(SignalBindingFeature.VALUE);
         deselectAll();

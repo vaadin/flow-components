@@ -33,7 +33,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -50,7 +49,6 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     private T selectedItem;
     private boolean deselectAllowed = true;
-    private ValueSignal<T> selectedItemSignal;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -186,19 +184,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     }
 
     @Override
-    public ValueSignal<T> getSelectedItemSignal() {
-        if (selectedItemSignal != null) {
-            return selectedItemSignal;
-        }
-        selectedItemSignal = new ValueSignal<>(getSelectedItem().orElse(null));
-        asSingleSelect().bindValue(selectedItemSignal, selectedItemSignal::set);
-        return selectedItemSignal;
-    }
-
-    @Override
     protected void remove() {
         super.remove();
-        selectedItemSignal = null;
         getGrid().getElement().getNode().getFeature(SignalBindingFeature.class)
                 .removeBinding(SignalBindingFeature.VALUE);
         deselectAll();
