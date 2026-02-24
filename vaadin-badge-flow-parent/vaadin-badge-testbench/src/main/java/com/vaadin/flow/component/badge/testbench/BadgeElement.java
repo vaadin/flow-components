@@ -23,14 +23,18 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-badge")
 public class BadgeElement extends TestBenchElement {
-
     /**
      * Gets the text content of the badge.
      *
      * @return the text content
      */
     public String getText() {
-        return getPropertyString("textContent");
+        return (String) executeScript("""
+                return [...arguments[0].childNodes]
+                    .filter((node) => node.nodeType === Node.TEXT_NODE)
+                    .map((node) => node.textContent)
+                    .join('');
+                """, this);
     }
 
     /**
@@ -50,6 +54,6 @@ public class BadgeElement extends TestBenchElement {
      * @return the icon element, or {@code null} if not set
      */
     public TestBenchElement getIcon() {
-        return $("*").withAttribute("slot", "icon").first();
+        return $("*").withAttribute("slot", "icon").single();
     }
 }
