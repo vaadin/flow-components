@@ -17,24 +17,27 @@ package com.vaadin.flow.component.slider.tests;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class RangeSliderWarningsTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
-    private UI ui = new MockUI();
     private Logger mockedLogger;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
     private MockedStatic<LoggerFactory> mockLoggerFactoryStatic;
 
     @Before
@@ -46,33 +49,22 @@ public class RangeSliderWarningsTest {
         mockLoggerFactoryStatic
                 .when(() -> LoggerFactory.getLogger(RangeSlider.class))
                 .thenReturn(mockedLogger);
-
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags
-                .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
-                .thenReturn(true);
-
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
-                .thenReturn(mockFeatureFlags);
     }
 
     @After
     public void tearDown() {
         mockLoggerFactoryStatic.close();
-        mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
     }
 
     @Test
     public void setMinGreaterThanMax_warnsMinGreaterThanMax() {
         RangeSlider slider = new RangeSlider();
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setMin(200);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
                 Mockito.eq(200.0), Mockito.eq(100.0));
@@ -82,11 +74,11 @@ public class RangeSliderWarningsTest {
     public void setMaxLessThanMin_warnsMinGreaterThanMax() {
         RangeSlider slider = new RangeSlider();
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setMax(-10);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
                 Mockito.eq(0.0), Mockito.eq(-10.0));
@@ -96,11 +88,11 @@ public class RangeSliderWarningsTest {
     public void setValueOutOfRange_warnsValueOutOfRange() {
         RangeSlider slider = new RangeSlider(0, 100);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setValue(new RangeSliderValue(0, 150));
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(
                 Mockito.contains("outside the configured range"),
@@ -113,11 +105,11 @@ public class RangeSliderWarningsTest {
         RangeSlider slider = new RangeSlider(0, 100);
         slider.setStep(10);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setValue(new RangeSliderValue(0, 15));
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(
                 Mockito.contains("not aligned with step"),
@@ -130,11 +122,11 @@ public class RangeSliderWarningsTest {
         RangeSlider slider = new RangeSlider(0, 100);
         slider.setStep(10);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setValue(new RangeSliderValue(20, 80));
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any());
@@ -144,22 +136,16 @@ public class RangeSliderWarningsTest {
     public void setMultipleProperties_onlyOneCheckPerResponseCycle() {
         RangeSlider slider = new RangeSlider(0, 100);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setMin(10);
         slider.setMax(50);
         slider.setStep(5);
         slider.setValue(new RangeSliderValue(15, 45));
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any());
-    }
-
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

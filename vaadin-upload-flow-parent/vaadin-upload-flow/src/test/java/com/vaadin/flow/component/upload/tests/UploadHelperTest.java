@@ -15,64 +15,36 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import java.util.concurrent.CompletableFuture;
-
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadHelperTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
     private Div owner;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
-        var ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-        var mockSession = Mockito.mock(VaadinSession.class);
-        var mockService = Mockito.mock(VaadinService.class);
-        var mockContext = Mockito.mock(VaadinContext.class);
-        var streamResourceRegistry = new StreamResourceRegistry(mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
-                .mockFeatureFlag(mockContext);
-        ui.getInternals().setSession(mockSession);
-
         owner = new Div();
         ui.add(owner);
-    }
-
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
     }
 
     @Test
@@ -96,5 +68,28 @@ public class UploadHelperTest {
         });
         manager.setUploadHandler(handler);
         Assert.assertTrue(UploadHelper.hasUploadHandler(manager));
+    }
+
+    @Test
+    public void hasUploadHandler_upload_withDefaultConstructor_returnsFalse() {
+        var upload = new Upload();
+        Assert.assertFalse(UploadHelper.hasUploadHandler(upload));
+    }
+
+    @Test
+    public void hasUploadHandler_upload_withHandlerInConstructor_returnsTrue() {
+        var handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        var upload = new Upload(handler);
+        Assert.assertTrue(UploadHelper.hasUploadHandler(upload));
+    }
+
+    @Test
+    public void hasUploadHandler_upload_withDefaultConstructor_setHandler_returnsTrue() {
+        var upload = new Upload();
+        var handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        upload.setUploadHandler(handler);
+        Assert.assertTrue(UploadHelper.hasUploadHandler(upload));
     }
 }

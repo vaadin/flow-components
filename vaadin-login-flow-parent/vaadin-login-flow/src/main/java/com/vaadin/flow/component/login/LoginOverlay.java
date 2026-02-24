@@ -47,7 +47,7 @@ import com.vaadin.flow.dom.Style;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/login", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/login", version = "25.1.0-alpha9")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 @ModalRoot(slot = "footer")
 public class LoginOverlay extends AbstractLogin implements HasStyle {

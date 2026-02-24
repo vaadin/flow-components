@@ -23,21 +23,18 @@ import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
+import com.vaadin.flow.component.upload.UploadFormat;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
@@ -46,56 +43,30 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadManagerTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
-    private UI ui;
     private Div owner;
     private UploadManager manager;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-        StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
-                mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
-                .mockFeatureFlag(mockContext);
-        ui.getInternals().setSession(mockSession);
-
         owner = new Div();
         ui.add(owner);
         manager = new UploadManager(owner);
-    }
-
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
     }
 
     @Test
@@ -472,6 +443,18 @@ public class UploadManagerTest {
     }
 
     @Test
+    public void setUploadFormat_setsProperty() {
+        manager.setUploadFormat(UploadFormat.MULTIPART);
+
+        Assert.assertEquals(UploadFormat.MULTIPART, manager.getUploadFormat());
+    }
+
+    @Test
+    public void getUploadFormat_defaultIsRaw() {
+        Assert.assertEquals(UploadFormat.RAW, manager.getUploadFormat());
+    }
+
+    @Test
     public void setEnabled_setsProperty() {
         manager.setEnabled(false);
 
@@ -539,13 +522,36 @@ public class UploadManagerTest {
     }
 
     @Test
-    public void fileRejectedEvent_hasFileNameAndErrorMessage() {
+    public void fileRejectedEvent_hasFileNameAndReason() {
         var event = new UploadManager.FileRejectedEvent(new Div(), true,
-                "File too large", "large-file.zip");
+                UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                "large-file.zip");
 
         Assert.assertEquals("large-file.zip", event.getFileName());
-        Assert.assertEquals("File too large", event.getErrorMessage());
+        Assert.assertEquals(UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                event.getReason());
         Assert.assertTrue(event.isFromClient());
+    }
+
+    @Test
+    public void fileRejectionReason_fromClientCode_knownCodes() {
+        Assert.assertEquals(UploadManager.FileRejectionReason.TOO_MANY_FILES,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("tooManyFiles"));
+        Assert.assertEquals(UploadManager.FileRejectionReason.FILE_TOO_LARGE,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("fileIsTooBig"));
+        Assert.assertEquals(
+                UploadManager.FileRejectionReason.INCORRECT_FILE_TYPE,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("incorrectFileType"));
+    }
+
+    @Test
+    public void fileRejectionReason_fromClientCode_unknownCode() {
+        Assert.assertEquals(UploadManager.FileRejectionReason.UNKNOWN,
+                UploadManager.FileRejectionReason
+                        .fromClientCode("someNewCode"));
     }
 
     @Test

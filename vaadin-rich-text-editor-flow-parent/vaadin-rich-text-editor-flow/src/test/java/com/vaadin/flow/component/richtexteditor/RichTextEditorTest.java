@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -269,5 +270,11 @@ public class RichTextEditorTest {
         Assert.assertEquals("#0066cc", options.get(1));
         Assert.assertEquals("#008a00", options.get(2));
         Assert.assertEquals("#e60000", options.get(3));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(RichTextEditor.class));
     }
 }

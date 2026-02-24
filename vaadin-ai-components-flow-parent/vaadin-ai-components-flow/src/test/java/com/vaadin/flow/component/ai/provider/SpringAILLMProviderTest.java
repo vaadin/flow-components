@@ -22,11 +22,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -41,31 +43,25 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.annotation.Tool;
 
-import com.vaadin.flow.component.PushConfiguration;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.tests.MockUIRule;
 
 import reactor.core.publisher.Flux;
 
 public class SpringAILLMProviderTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private ChatModel mockChatModel;
     private SpringAILLMProvider provider;
-
-    private UI ui;
 
     @Before
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         provider = new SpringAILLMProvider(mockChatModel);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test
@@ -554,11 +550,7 @@ public class SpringAILLMProviderTest {
 
     @Test
     public void stream_withStreamingAndPushDisabled_logsWarning() {
-        ui = Mockito.mock(UI.class);
-        var pushConfig = Mockito.mock(PushConfiguration.class);
-        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
-        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
-        UI.setCurrent(ui);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
         var errStream = new ByteArrayOutputStream();
@@ -582,11 +574,7 @@ public class SpringAILLMProviderTest {
     @Test
     public void stream_withNonStreamingAndPushDisabled_doesNotLogWarning() {
         provider.setStreaming(false);
-        ui = Mockito.mock(UI.class);
-        var pushConfig = Mockito.mock(PushConfiguration.class);
-        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
-        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
-        UI.setCurrent(ui);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
         var errStream = new ByteArrayOutputStream();
@@ -602,6 +590,218 @@ public class SpringAILLMProviderTest {
         } finally {
             System.setErr(originalErr);
         }
+    }
+
+    @Test
+    public void setHistory_restoresConversation() {
+        provider.setStreaming(false);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Previous question",
+                        null, null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Previous answer",
+                        null, null));
+
+        provider.setHistory(history, Collections.emptyMap());
+
+        // Verify the restored history is used in the next request by checking
+        // that the prompt contains the restored messages
+        var response = mockSimpleChatResponse("Follow-up answer");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        Assert.assertTrue(
+                messages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Previous question")));
+        Assert.assertTrue(messages.stream()
+                .anyMatch(msg -> msg instanceof AssistantMessage
+                        && Objects.equals(msg.getText(), "Previous answer")));
+    }
+
+    @Test
+    public void setHistory_clearsExistingHistory() {
+        provider.setStreaming(false);
+        var response = mockSimpleChatResponse("Old response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Old message")).blockFirst();
+
+        var newHistory = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "New question", null,
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "New answer", null,
+                        null));
+
+        provider.setHistory(newHistory, Collections.emptyMap());
+
+        // Verify the old history is cleared by checking the next request
+        var response2 = mockSimpleChatResponse("Response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response2);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel, Mockito.atLeast(2))
+                .call(captor.capture());
+        var lastMessages = captor.getAllValues().getLast().getInstructions();
+        Assert.assertFalse(
+                lastMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Old message")));
+        Assert.assertTrue(
+                lastMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "New question")));
+    }
+
+    @Test
+    public void setHistory_withNullHistory_throwsNullPointerException() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(null, Collections.emptyMap()));
+    }
+
+    @Test
+    public void setHistory_exceedingMaxMessages_evictsOldest() {
+        provider.setStreaming(false);
+        var history = new ArrayList<ChatMessage>();
+        for (int i = 0; i < 20; i++) {
+            history.add(new ChatMessage(ChatMessage.Role.USER, "Question " + i,
+                    null, null));
+            history.add(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                    "Answer " + i, null, null));
+        }
+        Assert.assertEquals(40, history.size());
+
+        provider.setHistory(history, Collections.emptyMap());
+
+        // Verify eviction by checking the next request's messages
+        var response = mockSimpleChatResponse("Response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        // Filter to only user/assistant messages (exclude system)
+        var chatMessages = messages.stream()
+                .filter(msg -> msg instanceof UserMessage
+                        || msg instanceof AssistantMessage)
+                .toList();
+        // +1 for the "Check" message we sent to trigger the request
+        Assert.assertTrue(chatMessages.size() <= 31);
+        Assert.assertTrue(
+                chatMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Question 19")));
+        Assert.assertFalse(
+                chatMessages.stream().anyMatch(msg -> msg instanceof UserMessage
+                        && Objects.equals(msg.getText(), "Question 0")));
+    }
+
+    @Test
+    public void setHistory_withChatClientConstructor_throwsUnsupportedOperationException() {
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        var history = new ArrayList<ChatMessage>();
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> chatClientProvider.setHistory(history,
+                        Collections.emptyMap()));
+    }
+
+    @Test
+    public void setHistory_withAttachments_restoresUserMessageWithMedia() {
+        provider.setStreaming(false);
+        var imageData = "fake-image-data".getBytes();
+        var attachment = new AIAttachment("photo.png", "image/png", imageData);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Look at this", "msg-1",
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Nice photo!", null,
+                        null));
+        var attachments = Map.of("msg-1", List.of(attachment));
+
+        provider.setHistory(history, attachments);
+
+        var response = mockSimpleChatResponse("Follow-up answer");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+
+        // Find the restored user message with media
+        var restoredUserMsg = messages.stream()
+                .filter(UserMessage.class::isInstance)
+                .map(UserMessage.class::cast)
+                .filter(msg -> Objects.equals(msg.getText(), "Look at this"))
+                .findFirst().orElseThrow();
+
+        // Should have media attached
+        Assert.assertEquals(1, restoredUserMsg.getMedia().size());
+        Assert.assertEquals("image/png",
+                restoredUserMsg.getMedia().getFirst().getMimeType().toString());
+    }
+
+    @Test
+    public void setHistory_withAttachments_assistantMessageIgnoresAttachments() {
+        provider.setStreaming(false);
+        var attachment = new AIAttachment("file.txt", "text/plain",
+                "content".getBytes());
+        var history = List.of(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                "Hello", "msg-1", null));
+        var attachments = Map.of("msg-1", List.of(attachment));
+
+        provider.setHistory(history, attachments);
+
+        var response = mockSimpleChatResponse("Response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+
+        Assert.assertTrue(messages.stream()
+                .anyMatch(msg -> msg instanceof AssistantMessage
+                        && Objects.equals(msg.getText(), "Hello")));
+    }
+
+    @Test
+    public void setHistory_withAttachments_nullAttachmentMapThrows() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", null, null));
+        Assert.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(history, null));
+    }
+
+    @Test
+    public void setHistory_withEmptyAttachmentMap_behavesLikeTextOnly() {
+        provider.setStreaming(false);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi", null, null));
+
+        provider.setHistory(history, Collections.emptyMap());
+
+        var response = mockSimpleChatResponse("Response");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+
+        // User message should have no media
+        var userMsg = messages.stream().filter(UserMessage.class::isInstance)
+                .map(UserMessage.class::cast)
+                .filter(msg -> Objects.equals(msg.getText(), "Hello"))
+                .findFirst().orElseThrow();
+        Assert.assertTrue(userMsg.getMedia().isEmpty());
     }
 
     private void mockSimpleChat(String responseText) {

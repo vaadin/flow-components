@@ -17,8 +17,8 @@ package com.vaadin.flow.component.button.tests;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
@@ -33,16 +33,15 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class AccessibleDisabledButtonTest {
-
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic = Mockito
-            .mockStatic(FeatureFlags.class);
-
-    private FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS);
 
     private Button button = Mockito.spy(Button.class);
 
@@ -54,34 +53,21 @@ public class AccessibleDisabledButtonTest {
     private ComponentEventListener mockBlurListener = Mockito
             .mock(ComponentEventListener.class);
 
-    private UI ui = new UI();
-
     @Before
     public void setUp() {
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
-
-        ui.getInternals().setSession(mockSession);
-        UI.setCurrent(ui);
-
         button.setEnabled(false);
     }
 
     @After
     public void tearDown() {
-        mockFeatureFlagsStatic.close();
         UI.setCurrent(null);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void accessibleButtonsDisabled_focusListenerDisabled() {
+        featureFlagRule.disableFeature();
+
         button.addFocusListener(mockFocusListener);
 
         fakeClientDomEvent(button, "focus");
@@ -93,10 +79,6 @@ public class AccessibleDisabledButtonTest {
     @SuppressWarnings("unchecked")
     @Test
     public void accessibleButtonsEnabled_focusListenerEnabled() {
-        Mockito.when(mockFeatureFlags
-                .isEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS))
-                .thenReturn(true);
-
         button.addFocusListener(mockFocusListener);
 
         fakeClientDomEvent(button, "focus");
@@ -108,6 +90,8 @@ public class AccessibleDisabledButtonTest {
     @SuppressWarnings("unchecked")
     @Test
     public void accessibleButtonsDisabled_blurListenerDisabled() {
+        featureFlagRule.disableFeature();
+
         button.addBlurListener(mockBlurListener);
 
         fakeClientDomEvent(button, "blur");
@@ -119,10 +103,6 @@ public class AccessibleDisabledButtonTest {
     @SuppressWarnings("unchecked")
     @Test
     public void accessibleButtonsEnabled_blurListenerEnabled() {
-        Mockito.when(mockFeatureFlags
-                .isEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS))
-                .thenReturn(true);
-
         button.addBlurListener(mockBlurListener);
 
         fakeClientDomEvent(button, "blur");
@@ -133,9 +113,11 @@ public class AccessibleDisabledButtonTest {
 
     @Test
     public void accessibleButtonsDisabled_focusShortcutDisabled() {
+        featureFlagRule.disableFeature();
+
         button.addFocusShortcut(Key.KEY_A);
         ui.add(button);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         var keydownEvent = new KeyDownEvent(button, "A"); // actual key of the
                                                           // event doesn't
@@ -143,20 +125,16 @@ public class AccessibleDisabledButtonTest {
                                                           // test setup, as the
                                                           // filtering happens
                                                           // on the client side
-        ComponentUtil.fireEvent(ui, keydownEvent);
+        ComponentUtil.fireEvent(ui.getUI(), keydownEvent);
 
         Mockito.verify(button, Mockito.never()).focus();
     }
 
     @Test
     public void accessibleButtonsEnabled_focusShortcutEnabled() {
-        Mockito.when(mockFeatureFlags
-                .isEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS))
-                .thenReturn(true);
-
         button.addFocusShortcut(Key.KEY_A);
         ui.add(button);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         var keydownEvent = new KeyDownEvent(button, "A"); // actual key of the
                                                           // event doesn't
@@ -164,7 +142,7 @@ public class AccessibleDisabledButtonTest {
                                                           // test setup, as the
                                                           // filtering happens
                                                           // on the client side
-        ComponentUtil.fireEvent(ui, keydownEvent);
+        ComponentUtil.fireEvent(ui.getUI(), keydownEvent);
 
         Mockito.verify(button, Mockito.times(1)).focus();
     }

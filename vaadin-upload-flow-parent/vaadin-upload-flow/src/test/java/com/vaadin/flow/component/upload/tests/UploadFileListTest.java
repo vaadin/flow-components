@@ -16,72 +16,41 @@
 package com.vaadin.flow.component.upload.tests;
 
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.UploadFileListI18N;
 import com.vaadin.flow.component.upload.UploadFileListVariant;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadFileListTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
-    private UI ui;
     private Div owner;
     private UploadManager manager;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
     @Before
     public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-        StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
-                mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
-                .mockFeatureFlag(mockContext);
-        ui.getInternals().setSession(mockSession);
-
         owner = new Div();
         ui.add(owner);
         manager = new UploadManager(owner);
-    }
-
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
     }
 
     @Test
@@ -325,7 +294,7 @@ public class UploadFileListTest {
     public void addThemeVariant_variantIsAdded() {
         UploadFileList fileList = new UploadFileList();
 
-        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         Assert.assertTrue(fileList.getThemeNames().contains("thumbnails"));
     }
@@ -333,9 +302,9 @@ public class UploadFileListTest {
     @Test
     public void removeThemeVariant_variantIsRemoved() {
         UploadFileList fileList = new UploadFileList();
-        fileList.addThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
-        fileList.removeThemeVariants(UploadFileListVariant.LUMO_THUMBNAILS);
+        fileList.removeThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         Assert.assertFalse(fileList.getThemeNames().contains("thumbnails"));
     }

@@ -30,7 +30,6 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -92,7 +91,7 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha9")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -119,19 +118,13 @@ public class DateTimePicker
         return d == null ? "" : d.truncatedTo(ChronoUnit.MILLIS).toString();
     };
 
-    private LocalDateTime max;
-    private LocalDateTime min;
-
-    private final SignalPropertySupport<LocalDateTime> minSupport = SignalPropertySupport
-            .create(this, value -> this.min = value);
-    private final SignalPropertySupport<LocalDateTime> maxSupport = SignalPropertySupport
-            .create(this, value -> this.max = value);
-
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private final Validator<LocalDateTime> defaultValidator = (value,
             context) -> {
         var fromComponent = context == null;
+        var min = getMin();
+        var max = getMax();
 
         // Report error if any of the pickers has bad input
         if (isInputUnparsable()) {
@@ -871,7 +864,6 @@ public class DateTimePicker
      */
     public void setMin(LocalDateTime min) {
         getElement().setProperty("min", FORMATTER.apply(min));
-        this.min = min;
     }
 
     /**
@@ -911,7 +903,6 @@ public class DateTimePicker
     public void bindMin(Signal<LocalDateTime> signal) {
         getElement().bindProperty("min",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
-        minSupport.bind(signal);
     }
 
     /**
@@ -924,7 +915,6 @@ public class DateTimePicker
      */
     public void setMax(LocalDateTime max) {
         getElement().setProperty("max", FORMATTER.apply(max));
-        this.max = max;
     }
 
     /**
@@ -964,7 +954,6 @@ public class DateTimePicker
     public void bindMax(Signal<LocalDateTime> signal) {
         getElement().bindProperty("max",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
-        maxSupport.bind(signal);
     }
 
     /**

@@ -17,34 +17,29 @@ package com.vaadin.flow.component.grid;
 
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class GridScrollToIndexTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private MockUI ui = new MockUI();
     private Grid<String> grid;
 
     @Before
     public void setUp() {
         grid = new Grid<>();
         grid.setPageSize(50);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -89,7 +84,7 @@ public class GridScrollToIndexTest {
         ui.add(grid);
         grid.scrollToIndex(5);
         grid.scrollToIndex(5);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
@@ -98,7 +93,7 @@ public class GridScrollToIndexTest {
         grid.scrollToIndex(5);
         grid.scrollToIndex(5);
         ui.add(grid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
@@ -107,7 +102,7 @@ public class GridScrollToIndexTest {
         ui.add(grid);
         grid.scrollToStart();
         grid.scrollToStart();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex", 0);
     }
 
@@ -116,7 +111,7 @@ public class GridScrollToIndexTest {
         grid.scrollToStart();
         grid.scrollToStart();
         ui.add(grid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex", 0);
     }
 
@@ -125,7 +120,7 @@ public class GridScrollToIndexTest {
         ui.add(grid);
         grid.scrollToEnd();
         grid.scrollToEnd();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
     }
 
@@ -134,7 +129,7 @@ public class GridScrollToIndexTest {
         grid.scrollToEnd();
         grid.scrollToEnd();
         ui.add(grid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
     }
 
@@ -147,14 +142,8 @@ public class GridScrollToIndexTest {
         grid.scrollToIndex(1);
         grid.scrollToStart();
         grid.scrollToEnd();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private void assertSingleJavaScriptScrollInvocation(
@@ -173,7 +162,7 @@ public class GridScrollToIndexTest {
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
+        return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
                 .filter(invocation -> invocation.getExpression()
                         .contains("scroll"))

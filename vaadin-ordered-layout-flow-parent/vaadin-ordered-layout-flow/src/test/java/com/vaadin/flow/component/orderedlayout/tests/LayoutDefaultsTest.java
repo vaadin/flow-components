@@ -28,6 +28,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 public class LayoutDefaultsTest {
 
@@ -138,6 +139,18 @@ public class LayoutDefaultsTest {
         verticalLayout.addAndExpand(new Span("Foo"), new Span("bar"));
         testExpandableComponent(verticalLayout.getHeight(),
                 verticalLayout.getChildren());
+    }
+
+    @Test
+    public void horizontalLayoutImplementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(HorizontalLayout.class));
+    }
+
+    @Test
+    public void verticalLayoutImplementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(VerticalLayout.class));
     }
 
     private void testExpandableComponent(String size,

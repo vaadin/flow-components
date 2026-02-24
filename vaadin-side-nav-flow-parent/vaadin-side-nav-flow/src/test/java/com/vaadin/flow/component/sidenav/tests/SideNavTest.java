@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
@@ -412,6 +413,12 @@ public class SideNavTest {
         Assert.assertEquals(sideNav.getItems(), sideNavItems);
     }
 
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(SideNav.class));
+    }
+
     enum SetLabelOption {
         SET_NO_LABEL,
         SET_LABEL_BEFORE_ITEMS_CREATION,
@@ -449,5 +456,4 @@ public class SideNavTest {
         items.add(item);
         sideNav.addItem(item);
     }
-
 }

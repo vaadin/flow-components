@@ -20,12 +20,11 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
@@ -36,16 +35,17 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class TreeGridScrollToItemTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private TreeGrid<HierarchicalTestBean> treeGrid;
     private TreeData<HierarchicalTestBean> treeData;
-    private MockUI ui = new MockUI();
 
     @Before
     public void init() {
@@ -55,11 +55,6 @@ public class TreeGridScrollToItemTest {
         treeGrid.setPageSize(50);
         treeData = getTreeData();
         ui.add(treeGrid);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -77,7 +72,7 @@ public class TreeGridScrollToItemTest {
         var item = treeData.getRootItems().get(30);
         treeGrid.scrollToItem(item);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 30 });
     }
 
@@ -89,7 +84,7 @@ public class TreeGridScrollToItemTest {
         var item = treeData.getRootItems().get(30);
         treeGrid.scrollToItem(item);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 30 });
     }
 
@@ -103,7 +98,7 @@ public class TreeGridScrollToItemTest {
         var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(firstChild,
                 new int[] { 11 });
     }
@@ -118,7 +113,7 @@ public class TreeGridScrollToItemTest {
         var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(firstChild,
                 new int[] { 10, 0 });
     }
@@ -132,7 +127,7 @@ public class TreeGridScrollToItemTest {
         var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(firstChild,
                 new int[] { 11 });
     }
@@ -146,7 +141,7 @@ public class TreeGridScrollToItemTest {
         var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(firstChild,
                 new int[] { 10, 0 });
     }
@@ -184,7 +179,7 @@ public class TreeGridScrollToItemTest {
         Assert.assertThrows(NoSuchElementException.class,
                 this::scrollToMissingItem);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertNoJavaScriptScrollToItemInvocation();
     }
 
@@ -196,7 +191,7 @@ public class TreeGridScrollToItemTest {
         Assert.assertThrows(NoSuchElementException.class,
                 this::scrollToMissingItem);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertNoJavaScriptScrollToItemInvocation();
     }
 
@@ -208,7 +203,7 @@ public class TreeGridScrollToItemTest {
 
         var item = treeData.getRootItems().getLast();
         treeGrid.scrollToItem(item);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 0 });
     }
@@ -222,7 +217,7 @@ public class TreeGridScrollToItemTest {
         var item = treeData.getRootItems().getLast();
         treeGrid.scrollToItem(item);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 0 });
     }
 
@@ -249,7 +244,7 @@ public class TreeGridScrollToItemTest {
 
         treeGrid.scrollToItem(item);
         treeGrid.scrollToItem(item);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 10 });
     }
 
@@ -262,7 +257,7 @@ public class TreeGridScrollToItemTest {
         treeGrid.scrollToItem(item);
         treeGrid.scrollToItem(item);
         ui.add(treeGrid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 10 });
     }
 
@@ -274,18 +269,12 @@ public class TreeGridScrollToItemTest {
 
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToItem(item);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollToItemInvocation(item, new int[] { 10 });
     }
 
     private void scrollToMissingItem() {
         treeGrid.scrollToItem(new HierarchicalTestBean("NOT PRESENT", -2, -2));
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private void assertNoJavaScriptScrollToItemInvocation() {
@@ -309,7 +298,7 @@ public class TreeGridScrollToItemTest {
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
+        return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
                 .filter(invocation -> invocation.getExpression()
                         .contains("scroll"))

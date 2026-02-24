@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 /**
  * Unit tests for the {@link Card} component.
@@ -450,6 +451,11 @@ public class CardTest {
         card.setAriaRole("custom-role");
         card.setAriaRole(null);
         Assert.assertTrue(card.getAriaRole().isEmpty());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Card.class));
     }
 
     private void setSlotContent_slotAttributeIsSet(

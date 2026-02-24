@@ -27,10 +27,12 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
 public class GridTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
@@ -88,7 +90,7 @@ public class GridTest {
     public void dataProviderListeners_gridAttachedAndDetached_oldDataProviderListenerRemoved() {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
-                        new Grid<>(), 2, 2, new int[] { 0, 2 }, new MockUI());
+                        new Grid<>(), 2, 2, new int[] { 0, 2 }, ui.getUI());
     }
 
     @Test

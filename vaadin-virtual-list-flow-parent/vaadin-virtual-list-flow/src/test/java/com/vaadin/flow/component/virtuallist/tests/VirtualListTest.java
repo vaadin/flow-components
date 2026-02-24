@@ -20,6 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.function.SerializableFunction;
 
@@ -65,5 +66,11 @@ public class VirtualListTest {
     public void setItemAccessibleNameGenerator_nullThrows() {
         VirtualList<String> virtualList = new VirtualList<>();
         virtualList.setItemAccessibleNameGenerator(null);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(VirtualList.class));
     }
 }
