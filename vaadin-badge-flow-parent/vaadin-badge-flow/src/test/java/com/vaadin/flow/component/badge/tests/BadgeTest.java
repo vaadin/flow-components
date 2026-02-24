@@ -143,6 +143,18 @@ public class BadgeTest {
     }
 
     @Test
+    public void setRole_getRole() {
+        var badge = new Badge();
+        Assert.assertNull(badge.getRole());
+
+        badge.setRole("status");
+        Assert.assertEquals("status", badge.getRole());
+
+        badge.setRole(null);
+        Assert.assertNull(badge.getRole());
+    }
+
+    @Test
     public void setIcon_getIcon() {
         var badge = new Badge();
         var icon0 = new Span();
