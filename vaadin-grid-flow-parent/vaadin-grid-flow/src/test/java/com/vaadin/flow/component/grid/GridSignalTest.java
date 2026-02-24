@@ -353,4 +353,77 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         grid.asMultiSelect().bindValue(new ValueSignal<>(Set.of("foo")), v -> {
         });
     }
+
+    // ===== SELECTION MODEL SWITCH CLEANUP TESTS =====
+
+    @Test
+    public void singleSelect_bindValue_switchToMulti_bindingCleanedUp() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, signal::set);
+        UI.getCurrent().add(grid);
+
+        Assert.assertEquals("foo", grid.asSingleSelect().getValue());
+
+        // Switch to multi-select; the old binding should be cleaned up
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        // Signal changes should not affect the grid anymore
+        signal.set("bar");
+        Assert.assertTrue(grid.asMultiSelect().getValue().isEmpty());
+    }
+
+    @Test
+    public void singleSelect_bindValue_switchToMulti_canBindNewSignal() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, signal::set);
+        UI.getCurrent().add(grid);
+
+        // Switch to multi-select
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        // Should be able to bind a new signal without BindingActiveException
+        var multiSignal = new ValueSignal<>(Set.of("bar"));
+        grid.asMultiSelect().bindValue(multiSignal, multiSignal::set);
+
+        Assert.assertEquals(Set.of("bar"), grid.asMultiSelect().getValue());
+    }
+
+    @Test
+    public void multiSelect_bindValue_switchToSingle_bindingCleanedUp() {
+        grid.setItems("foo", "bar", "baz");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var signal = new ValueSignal<>(Set.of("foo", "bar"));
+        grid.asMultiSelect().bindValue(signal, signal::set);
+        UI.getCurrent().add(grid);
+
+        Assert.assertEquals(Set.of("foo", "bar"),
+                grid.asMultiSelect().getValue());
+
+        // Switch to single-select; the old binding should be cleaned up
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+
+        // Signal changes should not affect the grid anymore
+        signal.set(Set.of("baz"));
+        Assert.assertNull(grid.asSingleSelect().getValue());
+    }
+
+    @Test
+    public void multiSelect_bindValue_switchToSingle_canBindNewSignal() {
+        grid.setItems("foo", "bar", "baz");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var signal = new ValueSignal<>(Set.of("foo"));
+        grid.asMultiSelect().bindValue(signal, signal::set);
+        UI.getCurrent().add(grid);
+
+        // Switch to single-select
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+
+        // Should be able to bind a new signal without BindingActiveException
+        var singleSignal = new ValueSignal<>("bar");
+        grid.asSingleSelect().bindValue(singleSignal, singleSignal::set);
+
+        Assert.assertEquals("bar", grid.asSingleSelect().getValue());
+    }
 }
