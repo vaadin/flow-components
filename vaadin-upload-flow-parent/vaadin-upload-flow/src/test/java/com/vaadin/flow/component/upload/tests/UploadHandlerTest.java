@@ -20,19 +20,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
@@ -43,38 +40,20 @@ import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
 import com.vaadin.flow.server.streams.UploadResult;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadHandlerTest {
-    private UI ui;
-    private StreamResourceRegistry streamResourceRegistry;
+    @Rule
+    public MockUIRule ui = new MockUIRule();
     private Upload upload;
 
     @Before
     public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        streamResourceRegistry = new StreamResourceRegistry(mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        ui.getInternals().setSession(mockSession);
-
         upload = new Upload();
         ui.add(upload);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -84,7 +63,7 @@ public class UploadHandlerTest {
                 (metadata, data) -> {
                 });
         upload.setUploadHandler(handler);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         UploadHandler targetHandler = getUploadHandler();
         Assert.assertEquals(handler, targetHandler);
@@ -94,7 +73,7 @@ public class UploadHandlerTest {
     public void setUploadHandler_generatedUrlEndsWithUpload() {
         upload.setUploadHandler(event -> {
         });
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         String targetUploadUrl = upload.getElement().getAttribute("target");
         Assert.assertTrue("Upload url should end with 'upload'",
@@ -106,7 +85,7 @@ public class UploadHandlerTest {
         String targetName = "custom-target";
         upload.setUploadHandler(event -> {
         }, targetName);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         String targetUploadUrl = upload.getElement().getAttribute("target");
         Assert.assertTrue(
@@ -148,7 +127,7 @@ public class UploadHandlerTest {
                 });
         InMemoryUploadHandler handler = new InMemoryUploadHandler(callback);
         upload.setUploadHandler(handler);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         simulateUpload();
 
         // Verify flag is reset after upload completes
@@ -206,7 +185,7 @@ public class UploadHandlerTest {
             }
         });
         upload.setUploadHandler(customHandler);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         simulateUpload();
 
         // Verify flag is reset after upload completes
@@ -229,7 +208,7 @@ public class UploadHandlerTest {
     @Test
     public void uploadWithoutHandler_throwsWhenUploadStarts()
             throws URISyntaxException {
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         UploadHandler uploadHandler = getUploadHandler();
 
         Assert.assertThrows(
@@ -262,7 +241,7 @@ public class UploadHandlerTest {
                 .thenReturn(new ByteArrayInputStream("test data".getBytes()));
 
         UploadHandler uploadHandler = getUploadHandler();
-        uploadHandler.handleRequest(request, response, session,
+        uploadHandler.handleRequest(request, response, ui.getSession(),
                 upload.getElement());
     }
 
@@ -270,8 +249,8 @@ public class UploadHandlerTest {
         String target = upload.getElement().getAttribute("target");
         Assert.assertNotNull("Target attribute is not set", target);
 
-        Optional<AbstractStreamResource> maybeResource = streamResourceRegistry
-                .getResource(new URI(target));
+        Optional<AbstractStreamResource> maybeResource = ui.getSession()
+                .getResourceRegistry().getResource(new URI(target));
         Assert.assertTrue("No resource found for target: " + target,
                 maybeResource.isPresent());
 
@@ -279,11 +258,5 @@ public class UploadHandlerTest {
                 .get();
 
         return (UploadHandler) elementStreamResource.getElementRequestHandler();
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

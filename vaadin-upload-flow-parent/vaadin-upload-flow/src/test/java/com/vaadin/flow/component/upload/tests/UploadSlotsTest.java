@@ -17,39 +17,17 @@ package com.vaadin.flow.component.upload.tests;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.server.VaadinSession;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadSlotsTest {
-
-    private UI ui = new UI();
-
-    @Before
-    public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
-
     @Test
     public void getUploadButton_defaultButtonExists() {
         Upload upload = new Upload();
