@@ -23,6 +23,19 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-badge")
 public class BadgeElement extends TestBenchElement {
+    /**
+     * Gets the text content of the badge.
+     *
+     * @return the text content
+     */
+    public String getText() {
+        return (String) executeScript("""
+                return [...arguments[0].childNodes]
+                    .filter((node) => node.nodeType === Node.TEXT_NODE)
+                    .map((node) => node.textContent)
+                    .join('');
+                """, this);
+    }
 
     /**
      * Gets the number displayed in the badge.

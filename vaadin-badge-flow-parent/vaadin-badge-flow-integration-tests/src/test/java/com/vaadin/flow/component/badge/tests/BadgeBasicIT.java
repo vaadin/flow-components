@@ -34,7 +34,7 @@ public class BadgeBasicIT extends AbstractComponentIT {
     @Test
     public void badgeDisplayed() {
         var badge = $(BadgeElement.class).id("badge");
-        Assert.assertEquals("5 messages", badge.getText());
+        Assert.assertEquals("messages", badge.getText());
         Assert.assertEquals((Integer) 5, badge.getNumber());
         Assert.assertNotNull(badge.getIcon());
     }
