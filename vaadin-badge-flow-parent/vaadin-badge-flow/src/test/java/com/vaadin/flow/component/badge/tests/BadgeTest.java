@@ -1,0 +1,168 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.badge.tests;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.component.html.Span;
+
+public class BadgeTest {
+
+    @Test
+    public void defaultConstructor_emptyBadge() {
+        var badge = new Badge();
+        Assert.assertNull(badge.getText());
+        Assert.assertNull(badge.getNumber());
+        Assert.assertNull(badge.getIcon());
+    }
+
+    @Test
+    public void textConstructor_setsText() {
+        var badge = new Badge("New");
+        Assert.assertEquals("New", badge.getText());
+    }
+
+    @Test
+    public void iconConstructor_setsIcon() {
+        var icon = new Span();
+        var badge = new Badge(icon);
+        Assert.assertEquals(icon, badge.getIcon());
+    }
+
+    @Test
+    public void textAndIconConstructor_setsTextAndIcon() {
+        var icon = new Span();
+        var badge = new Badge("New", icon);
+        Assert.assertEquals("New", badge.getText());
+        Assert.assertEquals(icon, badge.getIcon());
+    }
+
+    @Test
+    public void textAndNumberConstructor_setsTextAndNumber() {
+        var badge = new Badge("Messages", 5);
+        Assert.assertEquals("Messages", badge.getText());
+        Assert.assertEquals((Integer) 5, badge.getNumber());
+    }
+
+    @Test
+    public void textNumberAndIconConstructor_setsAll() {
+        var icon = new Span();
+        var badge = new Badge("Messages", 5, icon);
+        Assert.assertEquals("Messages", badge.getText());
+        Assert.assertEquals((Integer) 5, badge.getNumber());
+        Assert.assertEquals(icon, badge.getIcon());
+    }
+
+    @Test
+    public void setText_getText() {
+        var badge = new Badge();
+
+        badge.setText("Status");
+        Assert.assertEquals("Status", badge.getText());
+        Assert.assertEquals("Status", badge.getElement().getText());
+
+        badge.setText("");
+        Assert.assertEquals("", badge.getText());
+        Assert.assertEquals("", badge.getElement().getText());
+
+        badge.setText("Status");
+        badge.setText(null);
+        Assert.assertNull(badge.getText());
+        Assert.assertEquals("", badge.getElement().getText());
+    }
+
+    @Test
+    public void setNumber_getNumber() {
+        var badge = new Badge();
+
+        badge.setNumber(5);
+        Assert.assertEquals((Integer) 5, badge.getNumber());
+        Assert.assertEquals("5", badge.getElement().getProperty("number"));
+
+        badge.setNumber(null);
+        Assert.assertNull(badge.getNumber());
+        Assert.assertFalse(badge.getElement().hasProperty("number"));
+    }
+
+    @Test
+    public void setContent_getContent() {
+        var badge = new Badge();
+        var content0 = new Span();
+        var content1 = new Span();
+
+        badge.setContent(content0);
+        Assert.assertEquals(content0, badge.getContent());
+        Assert.assertEquals(badge, content0.getParent().get());
+
+        badge.setContent(content1);
+        Assert.assertEquals(content1, badge.getContent());
+        Assert.assertEquals(badge, content1.getParent().get());
+        Assert.assertFalse(content0.getParent().isPresent());
+
+        badge.setContent(null);
+        Assert.assertNull(badge.getContent());
+        Assert.assertFalse(content1.getParent().isPresent());
+    }
+
+    @Test
+    public void setContent_doesNotAffectTextOrIcon() {
+        var badge = new Badge("Text");
+        var icon = new Span();
+        badge.setIcon(icon);
+
+        var content = new Span();
+        badge.setContent(content);
+
+        Assert.assertEquals("Text", badge.getText());
+        Assert.assertEquals(icon, badge.getIcon());
+        Assert.assertEquals(content, badge.getContent());
+    }
+
+    @Test
+    public void getContent_doesNotReturnTextOrIcon() {
+        var badge = new Badge("Text");
+        var icon = new Span();
+        badge.setIcon(icon);
+
+        Assert.assertNull(badge.getContent());
+    }
+
+    @Test
+    public void setIcon_getIcon() {
+        var badge = new Badge();
+        var icon0 = new Span();
+        var icon1 = new Span();
+
+        badge.setIcon(icon0);
+        Assert.assertEquals(icon0, badge.getIcon());
+        Assert.assertEquals(badge, icon0.getParent().get());
+        Assert.assertEquals("icon", icon0.getElement().getAttribute("slot"));
+
+        badge.setIcon(icon1);
+        Assert.assertEquals(icon1, badge.getIcon());
+        Assert.assertEquals(badge, icon1.getParent().get());
+        Assert.assertEquals("icon", icon1.getElement().getAttribute("slot"));
+        Assert.assertFalse(icon0.getParent().isPresent());
+        Assert.assertFalse(icon0.getElement().hasAttribute("slot"));
+
+        badge.setIcon(null);
+        Assert.assertNull(badge.getIcon());
+        Assert.assertFalse(icon1.getParent().isPresent());
+        Assert.assertFalse(icon1.getElement().hasAttribute("slot"));
+    }
+}

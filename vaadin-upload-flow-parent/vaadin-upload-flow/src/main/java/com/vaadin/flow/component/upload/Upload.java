@@ -61,7 +61,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha8")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-alpha9")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
@@ -97,6 +97,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * The output of the upload is redirected to this receiver.
      */
     private Receiver receiver;
+
+    private boolean handlerExplicitlyConfigured;
 
     /**
      * Create a new instance of Upload.
@@ -778,6 +780,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             throw new IllegalArgumentException(
                     "The target name cannot be blank");
         }
+        if (!(handler instanceof FailFastUploadHandler)) {
+            handlerExplicitlyConfigured = true;
+        }
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 handler, this.getElement()) {
             @Override
@@ -918,6 +923,15 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
                         event.getMimeType(), event.getContentLength());
             }
         }
+    }
+
+    /**
+     * Returns whether an UploadHandler is explicitly configured.
+     * <p>
+     * Intended only for internal use.
+     */
+    boolean isHandlerExplicitlyConfigured() {
+        return handlerExplicitlyConfigured;
     }
 
     /**
