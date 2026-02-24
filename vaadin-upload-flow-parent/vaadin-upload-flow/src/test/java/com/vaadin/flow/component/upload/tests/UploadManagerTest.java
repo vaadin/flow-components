@@ -23,19 +23,15 @@ import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadFormat;
@@ -47,53 +43,30 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadManagerTest {
     @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
     public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
             ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
-    private UI ui;
     private Div owner;
     private UploadManager manager;
 
     @Before
     public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
-                mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        ui.getInternals().setSession(mockSession);
-
         owner = new Div();
         ui.add(owner);
         manager = new UploadManager(owner);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test

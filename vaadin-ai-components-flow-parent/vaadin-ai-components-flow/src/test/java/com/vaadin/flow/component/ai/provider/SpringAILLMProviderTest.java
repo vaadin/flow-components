@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -43,32 +43,25 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.annotation.Tool;
 
-import com.vaadin.flow.component.PushConfiguration;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.tests.MockUIRule;
 
 import reactor.core.publisher.Flux;
 
 public class SpringAILLMProviderTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private ChatModel mockChatModel;
     private SpringAILLMProvider provider;
-
-    private UI ui;
 
     @Before
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         provider = new SpringAILLMProvider(mockChatModel);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test
@@ -557,11 +550,7 @@ public class SpringAILLMProviderTest {
 
     @Test
     public void stream_withStreamingAndPushDisabled_logsWarning() {
-        ui = Mockito.mock(UI.class);
-        var pushConfig = Mockito.mock(PushConfiguration.class);
-        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
-        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
-        UI.setCurrent(ui);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
         var errStream = new ByteArrayOutputStream();
@@ -585,11 +574,7 @@ public class SpringAILLMProviderTest {
     @Test
     public void stream_withNonStreamingAndPushDisabled_doesNotLogWarning() {
         provider.setStreaming(false);
-        ui = Mockito.mock(UI.class);
-        var pushConfig = Mockito.mock(PushConfiguration.class);
-        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
-        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
-        UI.setCurrent(ui);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
         var errStream = new ByteArrayOutputStream();

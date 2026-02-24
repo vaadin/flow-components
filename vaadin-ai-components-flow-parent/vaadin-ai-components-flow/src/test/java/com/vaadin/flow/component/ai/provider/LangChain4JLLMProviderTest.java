@@ -25,19 +25,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.PushConfiguration;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.tests.MockUIRule;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -56,6 +55,8 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 
 public class LangChain4JLLMProviderTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private ChatModel mockChatModel;
     private StreamingChatModel mockStreamingChatModel;
@@ -63,20 +64,12 @@ public class LangChain4JLLMProviderTest {
     private LangChain4JLLMProvider provider;
     private LangChain4JLLMProvider streamingProvider;
 
-    private UI ui;
-
     @Before
     public void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         mockStreamingChatModel = Mockito.mock(StreamingChatModel.class);
         provider = new LangChain4JLLMProvider(mockChatModel);
         streamingProvider = new LangChain4JLLMProvider(mockStreamingChatModel);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test
@@ -577,11 +570,7 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withStreamingModelAndPushDisabled_logsWarning() {
-        ui = Mockito.mock(UI.class);
-        var pushConfig = Mockito.mock(PushConfiguration.class);
-        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
-        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
-        UI.setCurrent(ui);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
         var errStream = new ByteArrayOutputStream();
@@ -613,11 +602,7 @@ public class LangChain4JLLMProviderTest {
 
     @Test
     public void stream_withNonStreamingModelAndPushDisabled_doesNotLogWarning() {
-        ui = Mockito.mock(UI.class);
-        var pushConfig = Mockito.mock(PushConfiguration.class);
-        Mockito.when(pushConfig.getPushMode()).thenReturn(PushMode.DISABLED);
-        Mockito.when(ui.getPushConfiguration()).thenReturn(pushConfig);
-        UI.setCurrent(ui);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
         var errStream = new ByteArrayOutputStream();
