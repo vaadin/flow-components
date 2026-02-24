@@ -577,6 +577,8 @@
                         </includes>
                         <excludes>
                             <exclude>src/**/SpreadsheetSingleScriptTemplate.js</exclude>
+                            <exclude>src/main/resources/META-INF/frontend/generated/**</exclude>
+                            <exclude>frontend/generated/**</exclude>
                         </excludes>
                         <prettier>
                             <npmExecutable>${spotless.npmExecutable}</npmExecutable>
