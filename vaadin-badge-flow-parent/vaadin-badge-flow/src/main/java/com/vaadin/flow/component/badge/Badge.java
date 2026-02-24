@@ -323,6 +323,29 @@ public class Badge extends Component
         return SlotUtils.getChildInSlot(this, ICON_SLOT);
     }
 
+    /**
+     * Sets the ARIA role attribute on the badge.
+     *
+     * @param role
+     *            the ARIA role, or {@code null} to clear
+     */
+    public void setRole(String role) {
+        if (role == null) {
+            getElement().removeAttribute("role");
+        } else {
+            getElement().setAttribute("role", role);
+        }
+    }
+
+    /**
+     * Gets the ARIA role attribute of the badge.
+     *
+     * @return the ARIA role, or {@code null} if not set
+     */
+    public String getRole() {
+        return getElement().getAttribute("role");
+    }
+
     private void updateText(String text) {
         textNode.setText(text);
 
