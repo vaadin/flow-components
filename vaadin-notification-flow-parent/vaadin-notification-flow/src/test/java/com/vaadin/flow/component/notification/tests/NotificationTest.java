@@ -15,37 +15,24 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class NotificationTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private Notification notification;
-
-    private UI ui;
-
-    @Before
-    public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
 
     @Test
     public void stringAndDurationCtor() {

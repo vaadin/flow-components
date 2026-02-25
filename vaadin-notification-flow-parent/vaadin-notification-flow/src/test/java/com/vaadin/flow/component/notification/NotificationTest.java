@@ -22,21 +22,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -45,22 +42,8 @@ import net.jcip.annotations.NotThreadSafe;
  */
 @NotThreadSafe
 public class NotificationTest {
-
-    private UI ui;
-
-    @Before
-    public void setup() {
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui = new UI();
-        ui.getInternals().setSession(session);
-
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void createNotificationWithComponents_componentsArePartOfGetChildren() {
@@ -251,7 +234,7 @@ public class NotificationTest {
         // Remove the parent container from the UI
         ui.remove(parent);
         // Auto-close happens in before client response
-        flushBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         // The notification should have been closed on detach, even if it was
         // the parent that was removed
@@ -265,13 +248,13 @@ public class NotificationTest {
         // Create a modal parent container and add it to the UI
         Div parent = new Div();
         ui.add(parent);
-        ui.setChildComponentModal(parent, true);
+        ui.getUI().setChildComponentModal(parent, true);
 
         // Use Notification.show() helper to create a notification.
         // It will be automatically added to the modal parent container (before
         // client response)
         Notification notification = Notification.show("foo");
-        flushBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         // Check that the notification is opened and attached to the parent
         // container
@@ -282,7 +265,7 @@ public class NotificationTest {
         // Remove the modal parent container from the UI
         ui.remove(parent);
         // Auto-close happens in before client response
-        flushBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         // The notification should have been closed on detach, even if it was
         // the parent that was removed
@@ -302,7 +285,7 @@ public class NotificationTest {
         Div parent = new Div(notification);
         ui.add(parent);
         // Flush
-        flushBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         // Check that the notification is attached to the parent container
         Assert.assertEquals(notification.getParent().get(), parent);
@@ -310,17 +293,12 @@ public class NotificationTest {
         // Remove the modal parent container from the UI
         ui.remove(parent);
         // Auto-removal happens in before client response
-        flushBeforeClientResponse();
+        ui.fakeClientCommunication();
 
         // Even though the notification was created using Notification.show(),
         // it got was manually added to the parent container so it should not
         // have been automatically removed from it.
         Assert.assertEquals(notification.getParent().get(), parent);
-    }
-
-    private void flushBeforeClientResponse() {
-        UIInternals internals = ui.getInternals();
-        internals.getStateTree().runExecutionsBeforeClientResponse();
     }
 
     @Test
