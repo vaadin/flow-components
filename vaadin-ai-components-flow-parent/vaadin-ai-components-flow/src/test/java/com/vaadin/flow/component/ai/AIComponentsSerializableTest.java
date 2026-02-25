@@ -19,36 +19,34 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.FutureTask;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 import reactor.core.publisher.Flux;
 
 public class AIComponentsSerializableTest extends ClassesSerializableTest {
 
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+
     private LLMProvider mockProvider;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
-    private UI mockUI;
 
     @Override
     protected Stream<String> getExcludedPatterns() {
@@ -68,16 +66,6 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
         mockProvider = Mockito.mock(LLMProvider.class);
     }
 
-    @After
-    public void tearDown() {
-        if (mockFeatureFlagsStatic != null) {
-            mockFeatureFlagsStatic.close();
-            mockFeatureFlagsStatic = null;
-        }
-        UI.setCurrent(null);
-        mockUI = null;
-    }
-
     @Test
     public void serialization_roundTrip_reconnectRestoresProvider()
             throws Throwable {
@@ -90,7 +78,6 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
                 .thenReturn(Flux.just("Response"));
         deserialized.reconnect(newProvider).apply();
 
-        mockUi();
         deserialized.prompt("Hello");
         Mockito.verify(newProvider)
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
@@ -174,7 +161,6 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
                 .thenReturn(Flux.just("Response"));
         deserialized.reconnect(newProvider).apply();
 
-        mockUi();
         deserialized.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -188,7 +174,6 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
         var deserialized = serializeAndDeserialize(orchestrator);
 
-        mockUi();
         Assert.assertThrows(IllegalStateException.class,
                 () -> deserialized.prompt("Hello"));
     }
@@ -208,7 +193,6 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
                 .thenReturn(Flux.just("Response"));
         deserialized.reconnect(newProvider).withTools(newTool).apply();
 
-        mockUi();
         deserialized.prompt("Use tool");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -304,41 +288,6 @@ public class AIComponentsSerializableTest extends ClassesSerializableTest {
 
         Mockito.verify(newProvider, Mockito.never())
                 .setHistory(Mockito.anyList(), Mockito.anyMap());
-    }
-
-    private void mockUi() {
-        mockUI = Mockito.mock(UI.class);
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
-            var futureTask = new FutureTask<Void>(() -> {
-                UI.setCurrent(mockUI);
-                try {
-                    command.execute();
-                } finally {
-                    UI.setCurrent(null);
-                }
-                return null;
-            });
-            new Thread(futureTask).start();
-            return futureTask;
-        }).when(mockUI).access(Mockito.any(Command.class));
-
-        var mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags
-                .isEnabled(AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID))
-                .thenReturn(true);
-
-        var mockSession = Mockito.mock(VaadinSession.class);
-        var mockService = Mockito.mock(VaadinService.class);
-        var mockContext = Mockito.mock(VaadinContext.class);
-        Mockito.when(mockUI.getSession()).thenReturn(mockSession);
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
-
-        UI.setCurrent(mockUI);
     }
 
     private static class SampleTool {
