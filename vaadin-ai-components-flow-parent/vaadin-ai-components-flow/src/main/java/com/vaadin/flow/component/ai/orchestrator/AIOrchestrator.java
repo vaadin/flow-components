@@ -295,14 +295,6 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
-    private AIMessage addUserMessageToList(String userMessage,
-            List<AIAttachment> attachments) {
-        if (messageList != null) {
-            return messageList.addMessage(userMessage, userName, attachments);
-        }
-        return null;
-    }
-
     private AIMessage createAssistantMessagePlaceholder() {
         if (messageList == null) {
             return null;
