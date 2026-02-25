@@ -44,6 +44,7 @@ public class AvatarGroupSignalPage extends Div {
             itemSignals.add(new ValueSignal<>(new AvatarGroupItem(name)));
             listSignal.set(List.copyOf(itemSignals));
         });
+        addButton.setId("addPerson");
 
         var removeLastButton = new NativeButton("Remove last", e -> {
             if (!itemSignals.isEmpty()) {
@@ -51,6 +52,7 @@ public class AvatarGroupSignalPage extends Div {
                 listSignal.set(List.copyOf(itemSignals));
             }
         });
+        removeLastButton.setId("removeLast");
 
         var renameFirstButton = new NativeButton("Rename first", e -> {
             if (!itemSignals.isEmpty()) {
@@ -59,6 +61,7 @@ public class AvatarGroupSignalPage extends Div {
                         .set(new AvatarGroupItem(current.getName() + " *"));
             }
         });
+        renameFirstButton.setId("renameFirst");
 
         add(group, new Div(addButton, removeLastButton, renameFirstButton));
     }
