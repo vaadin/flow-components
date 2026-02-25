@@ -16,6 +16,7 @@
 package com.vaadin.tests;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
@@ -118,6 +119,17 @@ public class MockUIRule extends ExternalResource {
      */
     public void remove(Component component) {
         ui.remove(component);
+    }
+
+    /**
+     * Set the locale of the UI. Delegates to {@link UI#setLocale(Locale)} for
+     * convenience.
+     * 
+     * @param locale
+     *            the locale to set
+     */
+    public void setLocale(Locale locale) {
+        ui.setLocale(locale);
     }
 
     /**
