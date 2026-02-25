@@ -44,6 +44,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
@@ -52,6 +53,8 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -549,6 +552,8 @@ public class AvatarGroup extends Component
         }
     }
 
+    private static final String ITEMS_BINDING = "items";
+
     private List<AvatarGroupItem> items = Collections.emptyList();
     private boolean pendingUpdate = false;
 
@@ -583,17 +588,32 @@ public class AvatarGroup extends Component
     }
 
     /**
+     * Creates an avatar group with the provided signal bound to the items.
+     * <p>
+     * The rendered avatars are updated when the signal's value or any
+     * individual item signal changes.
+     *
+     * @param <S>
+     *            the type of signal holding individual items
+     * @param itemsSignal
+     *            the signal to bind the items to, not {@code null}
+     * @see #bindItems(Signal)
+     * @since 25.1
+     */
+    public <S extends Signal<AvatarGroupItem>> AvatarGroup(
+            Signal<List<S>> itemsSignal) {
+        bindItems(itemsSignal);
+    }
+
+    /**
      * Sets the items that will be displayed as avatars.
      *
      * @param items
      *            the items to set
      */
     public void setItems(Collection<AvatarGroupItem> items) {
-        this.items.forEach(item -> item.setHost(null));
-
-        this.items = new ArrayList<>(items);
-        items.stream().forEach(item -> item.setHost(this));
-        setClientItems();
+        throwIfItemsBindingActive();
+        updateItems(items);
     }
 
     /**
@@ -604,6 +624,13 @@ public class AvatarGroup extends Component
      */
     public void setItems(AvatarGroupItem... items) {
         setItems(Arrays.asList(items));
+    }
+
+    private void updateItems(Collection<AvatarGroupItem> items) {
+        this.items.forEach(item -> item.setHost(null));
+        this.items = new ArrayList<>(items);
+        this.items.forEach(item -> item.setHost(this));
+        setClientItems();
     }
 
     private void setClientItems() {
@@ -627,6 +654,7 @@ public class AvatarGroup extends Component
      *            the items to add
      */
     public void add(AvatarGroupItem... items) {
+        throwIfItemsBindingActive();
         setItems(Stream.concat(this.items.stream(), Arrays.stream(items))
                 .collect(Collectors.toList()));
     }
@@ -638,6 +666,7 @@ public class AvatarGroup extends Component
      *            the items to remove
      */
     public void remove(AvatarGroupItem... items) {
+        throwIfItemsBindingActive();
         List<AvatarGroupItem> itemsToRemove = Arrays.asList(items);
 
         setItems(this.items.stream()
@@ -653,6 +682,52 @@ public class AvatarGroup extends Component
      */
     public List<AvatarGroupItem> getItems() {
         return Collections.unmodifiableList(items);
+    }
+
+    /**
+     * Binds the given signal to the items of the avatar group as a one-way
+     * binding so that the rendered avatars are updated when the signal's value
+     * or any individual item signal changes.
+     * <p>
+     * When a signal is bound, the items are kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to modify items manually through
+     * {@link #setItems(Collection)}, {@link #add(AvatarGroupItem...)}, or
+     * {@link #remove(AvatarGroupItem...)} throws a
+     * {@link BindingActiveException}.
+     *
+     * @param <S>
+     *            the type of signal holding individual items
+     * @param itemsSignal
+     *            the signal to bind the items to, not {@code null}
+     * @since 25.1
+     */
+    public <S extends Signal<AvatarGroupItem>> void bindItems(
+            Signal<List<S>> itemsSignal) {
+        Objects.requireNonNull(itemsSignal, "Signal cannot be null");
+        var node = getElement().getNode();
+        var feature = node.getFeature(SignalBindingFeature.class);
+        if (feature.hasBinding(ITEMS_BINDING)) {
+            throw new BindingActiveException();
+        }
+        Registration registration = Signal.effect(this, () -> {
+            List<? extends Signal<AvatarGroupItem>> signals = itemsSignal.get();
+            updateItems(signals.stream().map(Signal::get)
+                    .collect(Collectors.toCollection(ArrayList::new)));
+        });
+        feature.setBinding(ITEMS_BINDING, registration, itemsSignal);
+    }
+
+    private void throwIfItemsBindingActive() {
+        getElement().getNode()
+                .getFeatureIfInitialized(SignalBindingFeature.class)
+                .ifPresent(feature -> {
+                    if (feature.hasBinding(ITEMS_BINDING)) {
+                        throw new BindingActiveException();
+                    }
+                });
     }
 
     /**
