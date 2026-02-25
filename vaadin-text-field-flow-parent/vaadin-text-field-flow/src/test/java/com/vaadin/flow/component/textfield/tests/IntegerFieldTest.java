@@ -19,16 +19,15 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -36,24 +35,17 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class IntegerFieldTest extends TextFieldTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private IntegerField field;
-
-    private UI ui;
 
     @Before
     public void setup() {
         field = new IntegerField();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Override
@@ -91,16 +83,11 @@ public class IntegerFieldTest extends TextFieldTest {
     public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-integer-field");
         element.setProperty("value", "1");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(IntegerField.class))
                 .thenAnswer(invocation -> new IntegerField());
@@ -189,7 +176,7 @@ public class IntegerFieldTest extends TextFieldTest {
     public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(1,
-                        IntegerField.class);
+                        IntegerField.class, ui);
     }
 
     @Test

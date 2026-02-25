@@ -18,7 +18,6 @@ package com.vaadin.flow.component.textfield.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,7 +27,6 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -38,24 +36,17 @@ import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 /**
  * Tests for the {@link TextArea}.
  */
 public class TextAreaTest {
-
-    private UI ui;
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
 
     @Test
     public void setValueNull() {
@@ -87,16 +78,11 @@ public class TextAreaTest {
     public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-text-area");
         element.setProperty("value", "test");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(TextArea.class))
                 .thenAnswer(invocation -> new TextArea());
@@ -133,7 +119,7 @@ public class TextAreaTest {
     public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
-                        "foo", TextArea.class);
+                        "foo", TextArea.class, ui);
     }
 
     @Test

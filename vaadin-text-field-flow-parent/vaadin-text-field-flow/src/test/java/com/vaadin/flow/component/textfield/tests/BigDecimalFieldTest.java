@@ -20,16 +20,15 @@ import static org.junit.Assert.assertNull;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.BigDecimalField;
@@ -37,25 +36,18 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class BigDecimalFieldTest extends TextFieldTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private BigDecimalField field;
-
-    private UI ui;
 
     @Before
     public void setup() {
         field = new BigDecimalField();
         field.setLocale(Locale.US);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Override
@@ -85,16 +77,11 @@ public class BigDecimalFieldTest extends TextFieldTest {
     public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-big-decimal-field");
         element.setProperty("value", "1");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(BigDecimalField.class))
                 .thenAnswer(invocation -> new BigDecimalField());
@@ -140,7 +127,7 @@ public class BigDecimalFieldTest extends TextFieldTest {
     public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
-                        BigDecimal.TEN.toString(), BigDecimalField.class);
+                        BigDecimal.TEN.toString(), BigDecimalField.class, ui);
     }
 
     @Test
