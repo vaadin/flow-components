@@ -36,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -44,7 +45,6 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
@@ -53,7 +53,6 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -552,7 +551,8 @@ public class AvatarGroup extends Component
         }
     }
 
-    private static final String ITEMS_BINDING = "items";
+    private final SignalPropertySupport<Collection<AvatarGroupItem>> itemsSupport = SignalPropertySupport
+            .create(this, this::updateItems);
 
     private List<AvatarGroupItem> items = Collections.emptyList();
     private boolean pendingUpdate = false;
@@ -612,8 +612,7 @@ public class AvatarGroup extends Component
      *            the items to set
      */
     public void setItems(Collection<AvatarGroupItem> items) {
-        throwIfItemsBindingActive();
-        updateItems(items);
+        itemsSupport.set(items);
     }
 
     /**
@@ -654,7 +653,6 @@ public class AvatarGroup extends Component
      *            the items to add
      */
     public void add(AvatarGroupItem... items) {
-        throwIfItemsBindingActive();
         setItems(Stream.concat(this.items.stream(), Arrays.stream(items))
                 .collect(Collectors.toList()));
     }
@@ -666,7 +664,6 @@ public class AvatarGroup extends Component
      *            the items to remove
      */
     public void remove(AvatarGroupItem... items) {
-        throwIfItemsBindingActive();
         List<AvatarGroupItem> itemsToRemove = Arrays.asList(items);
 
         setItems(this.items.stream()
@@ -696,7 +693,7 @@ public class AvatarGroup extends Component
      * While a signal is bound, any attempt to modify items manually through
      * {@link #setItems(Collection)}, {@link #add(AvatarGroupItem...)}, or
      * {@link #remove(AvatarGroupItem...)} throws a
-     * {@link BindingActiveException}.
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
      *
      * @param <S>
      *            the type of signal holding individual items
@@ -707,27 +704,8 @@ public class AvatarGroup extends Component
     public <S extends Signal<AvatarGroupItem>> void bindItems(
             Signal<List<S>> itemsSignal) {
         Objects.requireNonNull(itemsSignal, "Signal cannot be null");
-        var node = getElement().getNode();
-        var feature = node.getFeature(SignalBindingFeature.class);
-        if (feature.hasBinding(ITEMS_BINDING)) {
-            throw new BindingActiveException();
-        }
-        Registration registration = Signal.effect(this, () -> {
-            List<? extends Signal<AvatarGroupItem>> signals = itemsSignal.get();
-            updateItems(signals.stream().map(Signal::get)
-                    .collect(Collectors.toCollection(ArrayList::new)));
-        });
-        feature.setBinding(ITEMS_BINDING, registration, itemsSignal);
-    }
-
-    private void throwIfItemsBindingActive() {
-        getElement().getNode()
-                .getFeatureIfInitialized(SignalBindingFeature.class)
-                .ifPresent(feature -> {
-                    if (feature.hasBinding(ITEMS_BINDING)) {
-                        throw new BindingActiveException();
-                    }
-                });
+        itemsSupport.bind(() -> itemsSignal.get().stream().map(Signal::get)
+                .collect(Collectors.toList()));
     }
 
     /**
