@@ -1,5 +1,4 @@
-// @ts-expect-error
-import { UploadManager } from '@vaadin/upload/vaadin-upload-manager.js';
+import { UploadManager, type UploadFormat } from '@vaadin/upload/vaadin-upload-manager.js';
 
 /**
  * Connector element for UploadManager. This element is added as a virtual child
@@ -50,7 +49,7 @@ class UploadManagerConnector extends HTMLElement {
     this.manager.noAuto = value;
   }
 
-  set uploadFormat(value: string) {
+  set uploadFormat(value: UploadFormat) {
     this.manager.uploadFormat = value;
   }
 
