@@ -319,9 +319,19 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         // Switch to multi-select; the old binding should be cleaned up
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
 
-        // Signal changes should not affect the grid anymore
+        // Switch back to single-select so SingleSelectionEvent is active again
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+
+        // Track whether a spurious selection event fires from the old effect
+        boolean[] eventFired = { false };
+        grid.asSingleSelect().addValueChangeListener(e -> eventFired[0] = true);
+
+        // Changing the old signal should not trigger the old effect
         signal.set("bar");
-        Assert.assertTrue(grid.asMultiSelect().getValue().isEmpty());
+        Assert.assertFalse(
+                "Old signal effect should not fire after model switch",
+                eventFired[0]);
+        Assert.assertNull(grid.asSingleSelect().getValue());
     }
 
     @Test
@@ -355,9 +365,19 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         // Switch to single-select; the old binding should be cleaned up
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 
-        // Signal changes should not affect the grid anymore
+        // Switch back to multi-select so MultiSelectionEvent is active again
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        // Track whether a spurious selection event fires from the old effect
+        boolean[] eventFired = { false };
+        grid.asMultiSelect().addValueChangeListener(e -> eventFired[0] = true);
+
+        // Changing the old signal should not trigger the old effect
         signal.set(Set.of("baz"));
-        Assert.assertNull(grid.asSingleSelect().getValue());
+        Assert.assertFalse(
+                "Old signal effect should not fire after model switch",
+                eventFired[0]);
+        Assert.assertTrue(grid.asMultiSelect().getValue().isEmpty());
     }
 
     @Test
