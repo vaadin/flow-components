@@ -18,32 +18,20 @@ package com.vaadin.flow.component.shared;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.MockUIRule;
 
 public class HasTooltipTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private TestComponent component;
-    private UI ui;
-
-    @Before
-    public void setup() {
-        component = new TestComponent();
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
+    private final TestComponent component = new TestComponent();
 
     @Test
     public void default_doesNotHaveTooltipElement() {
