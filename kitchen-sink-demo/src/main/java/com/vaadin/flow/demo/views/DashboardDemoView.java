@@ -46,19 +46,19 @@ public class DashboardDemoView extends VerticalLayout {
 
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
-        widget1.add(createWidgetContent("Content for widget 1"));
+        widget1.setContent(createWidgetContent("Content for widget 1"));
 
         DashboardWidget widget2 = new DashboardWidget();
         widget2.setTitle("Widget 2");
-        widget2.add(createWidgetContent("Content for widget 2"));
+        widget2.setContent(createWidgetContent("Content for widget 2"));
 
         DashboardWidget widget3 = new DashboardWidget();
         widget3.setTitle("Widget 3");
-        widget3.add(createWidgetContent("Content for widget 3"));
+        widget3.setContent(createWidgetContent("Content for widget 3"));
 
         DashboardWidget widget4 = new DashboardWidget();
         widget4.setTitle("Widget 4");
-        widget4.add(createWidgetContent("Content for widget 4"));
+        widget4.setContent(createWidgetContent("Content for widget 4"));
 
         basicDashboard.add(widget1, widget2, widget3, widget4);
         basicDashboard.setWidthFull();
@@ -72,20 +72,20 @@ public class DashboardDemoView extends VerticalLayout {
         largeWidget.setTitle("Large Widget");
         largeWidget.setColspan(2);
         largeWidget.setRowspan(2);
-        largeWidget.add(createWidgetContent("This is a larger widget spanning 2 columns and 2 rows"));
+        largeWidget.setContent(createWidgetContent("This is a larger widget spanning 2 columns and 2 rows"));
 
         DashboardWidget smallWidget1 = new DashboardWidget();
         smallWidget1.setTitle("Small 1");
-        smallWidget1.add(createWidgetContent("Small widget"));
+        smallWidget1.setContent(createWidgetContent("Small widget"));
 
         DashboardWidget smallWidget2 = new DashboardWidget();
         smallWidget2.setTitle("Small 2");
-        smallWidget2.add(createWidgetContent("Small widget"));
+        smallWidget2.setContent(createWidgetContent("Small widget"));
 
         DashboardWidget wideWidget = new DashboardWidget();
         wideWidget.setTitle("Wide Widget");
         wideWidget.setColspan(2);
-        wideWidget.add(createWidgetContent("Wide widget spanning 2 columns"));
+        wideWidget.setContent(createWidgetContent("Wide widget spanning 2 columns"));
 
         sizedDashboard.add(largeWidget, smallWidget1, smallWidget2, wideWidget);
         sizedDashboard.setWidthFull();
@@ -98,15 +98,15 @@ public class DashboardDemoView extends VerticalLayout {
 
         DashboardWidget editWidget1 = new DashboardWidget();
         editWidget1.setTitle("Editable Widget 1");
-        editWidget1.add(createWidgetContent("Try moving or resizing this widget"));
+        editWidget1.setContent(createWidgetContent("Try moving or resizing this widget"));
 
         DashboardWidget editWidget2 = new DashboardWidget();
         editWidget2.setTitle("Editable Widget 2");
-        editWidget2.add(createWidgetContent("Dashboard is in edit mode"));
+        editWidget2.setContent(createWidgetContent("Dashboard is in edit mode"));
 
         DashboardWidget editWidget3 = new DashboardWidget();
         editWidget3.setTitle("Editable Widget 3");
-        editWidget3.add(createWidgetContent("Widgets can be rearranged"));
+        editWidget3.setContent(createWidgetContent("Widgets can be rearranged"));
 
         editableDashboard.add(editWidget1, editWidget2, editWidget3);
         editableDashboard.setWidthFull();
@@ -125,12 +125,12 @@ public class DashboardDemoView extends VerticalLayout {
         chartWidget.setTitle("Sales Overview");
         chartWidget.setColspan(2);
         chartWidget.setRowspan(2);
-        chartWidget.add(createWidgetContent("Chart visualization would go here"));
+        chartWidget.setContent(createWidgetContent("Chart visualization would go here"));
 
         DashboardWidget tableWidget = new DashboardWidget();
         tableWidget.setTitle("Recent Orders");
         tableWidget.setColspan(2);
-        tableWidget.add(createWidgetContent("Order table would go here"));
+        tableWidget.setContent(createWidgetContent("Order table would go here"));
 
         statsDashboard.add(usersWidget, revenueWidget, ordersWidget, conversionWidget,
                 chartWidget, tableWidget);
@@ -165,7 +165,7 @@ public class DashboardDemoView extends VerticalLayout {
                 change.startsWith("+") ? LumoUtility.TextColor.SUCCESS : LumoUtility.TextColor.ERROR);
 
         content.add(valueSpan, changeSpan);
-        widget.add(content);
+        widget.setContent(content);
         return widget;
     }
 

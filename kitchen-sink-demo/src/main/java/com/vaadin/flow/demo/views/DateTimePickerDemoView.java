@@ -83,8 +83,9 @@ public class DateTimePickerDemoView extends VerticalLayout {
 
         // Custom labels
         DateTimePicker customLabels = new DateTimePicker("Custom field labels");
-        customLabels.setDateLabel("Start date");
-        customLabels.setTimeLabel("Start time");
+        customLabels.setI18n(new DateTimePicker.DateTimePickerI18n()
+                .setDateLabel("Start date")
+                .setTimeLabel("Start time"));
         addSection("Custom Field Labels", customLabels);
 
         // Auto-open disabled

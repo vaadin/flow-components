@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.demo.views;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -60,11 +61,11 @@ public class SideNavDemoView extends VerticalLayout {
         // With icons
         Div iconContainer = createNavContainer("With Icons");
         SideNav withIcons = new SideNav();
-        withIcons.addItem(new SideNavItem("Home", VaadinIcon.HOME.create()));
-        withIcons.addItem(new SideNavItem("Users", VaadinIcon.USERS.create()));
-        withIcons.addItem(new SideNavItem("Messages", VaadinIcon.ENVELOPE.create()));
-        withIcons.addItem(new SideNavItem("Calendar", VaadinIcon.CALENDAR.create()));
-        withIcons.addItem(new SideNavItem("Settings", VaadinIcon.COG.create()));
+        withIcons.addItem(createNavItem("Home", VaadinIcon.HOME));
+        withIcons.addItem(createNavItem("Users", VaadinIcon.USERS));
+        withIcons.addItem(createNavItem("Messages", VaadinIcon.ENVELOPE));
+        withIcons.addItem(createNavItem("Calendar", VaadinIcon.CALENDAR));
+        withIcons.addItem(createNavItem("Settings", VaadinIcon.COG));
         iconContainer.add(withIcons);
         examples.add(iconContainer);
 
@@ -75,34 +76,34 @@ public class SideNavDemoView extends VerticalLayout {
         hierarchicalContainer.setWidth("300px");
         SideNav hierarchical = new SideNav();
 
-        SideNavItem dashboard = new SideNavItem("Dashboard", VaadinIcon.DASHBOARD.create());
+        SideNavItem dashboard = createNavItem("Dashboard", VaadinIcon.DASHBOARD);
         hierarchical.addItem(dashboard);
 
-        SideNavItem products = new SideNavItem("Products", VaadinIcon.PACKAGE.create());
+        SideNavItem products = createNavItem("Products", VaadinIcon.PACKAGE);
         products.addItem(new SideNavItem("All Products"));
         products.addItem(new SideNavItem("Categories"));
         products.addItem(new SideNavItem("Inventory"));
         hierarchical.addItem(products);
 
-        SideNavItem orders = new SideNavItem("Orders", VaadinIcon.CART.create());
+        SideNavItem orders = createNavItem("Orders", VaadinIcon.CART);
         orders.addItem(new SideNavItem("All Orders"));
         orders.addItem(new SideNavItem("Pending"));
         orders.addItem(new SideNavItem("Completed"));
         orders.addItem(new SideNavItem("Returns"));
         hierarchical.addItem(orders);
 
-        SideNavItem customers = new SideNavItem("Customers", VaadinIcon.USERS.create());
+        SideNavItem customers = createNavItem("Customers", VaadinIcon.USERS);
         customers.addItem(new SideNavItem("All Customers"));
         customers.addItem(new SideNavItem("VIP"));
         hierarchical.addItem(customers);
 
-        SideNavItem reports = new SideNavItem("Reports", VaadinIcon.CHART.create());
+        SideNavItem reports = createNavItem("Reports", VaadinIcon.CHART);
         reports.addItem(new SideNavItem("Sales"));
         reports.addItem(new SideNavItem("Revenue"));
         reports.addItem(new SideNavItem("Traffic"));
         hierarchical.addItem(reports);
 
-        SideNavItem settings = new SideNavItem("Settings", VaadinIcon.COG.create());
+        SideNavItem settings = createNavItem("Settings", VaadinIcon.COG);
         hierarchical.addItem(settings);
 
         hierarchicalContainer.add(hierarchical);
@@ -138,6 +139,12 @@ public class SideNavDemoView extends VerticalLayout {
 
         collapsibleContainer.add(collapsible);
         addSection("Collapsible Sections", collapsibleContainer);
+    }
+
+    private SideNavItem createNavItem(String label, VaadinIcon icon) {
+        SideNavItem item = new SideNavItem(label);
+        item.setPrefixComponent(icon.create());
+        return item;
     }
 
     private Div createNavContainer(String title) {

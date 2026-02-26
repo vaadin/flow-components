@@ -76,8 +76,7 @@ public class GridProDemoView extends VerticalLayout {
             .text((item, value) -> item.setStock(Integer.parseInt(value)))
             .setHeader("Stock");
         withListener.addItemPropertyChangedListener(event -> {
-            Notification.show("Changed " + event.getItem().getName() +
-                " - new value: " + event.getValue());
+            Notification.show("Changed " + event.getItem().getName());
         });
         withListener.setItems(getSampleProducts());
         withListener.setHeight("350px");

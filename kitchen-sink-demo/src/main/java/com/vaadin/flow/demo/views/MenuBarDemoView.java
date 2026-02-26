@@ -20,6 +20,7 @@ import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
@@ -59,7 +60,7 @@ public class MenuBarDemoView extends VerticalLayout {
         fileMenu.addItem("New", e -> Notification.show("New"));
         fileMenu.addItem("Open", e -> Notification.show("Open"));
         fileMenu.addItem("Save", e -> Notification.show("Save"));
-        fileMenu.add(new com.vaadin.flow.component.html.Hr());
+        fileMenu.addSeparator();
         fileMenu.addItem("Exit", e -> Notification.show("Exit"));
 
         MenuItem edit = withSubmenus.addItem("Edit");
@@ -81,15 +82,15 @@ public class MenuBarDemoView extends VerticalLayout {
 
         MenuItem fileIcon = withIcons.addItem(VaadinIcon.FILE.create());
         SubMenu fileIconMenu = fileIcon.getSubMenu();
-        fileIconMenu.addItem(VaadinIcon.FILE_ADD.create(), "New", e -> Notification.show("New"));
-        fileIconMenu.addItem(VaadinIcon.FOLDER_OPEN.create(), "Open", e -> Notification.show("Open"));
-        fileIconMenu.addItem(VaadinIcon.DOWNLOAD.create(), "Save", e -> Notification.show("Save"));
+        fileIconMenu.addItem(new Span(VaadinIcon.FILE_ADD.create(), new Span("New")), e -> Notification.show("New"));
+        fileIconMenu.addItem(new Span(VaadinIcon.FOLDER_OPEN.create(), new Span("Open")), e -> Notification.show("Open"));
+        fileIconMenu.addItem(new Span(VaadinIcon.DOWNLOAD.create(), new Span("Save")), e -> Notification.show("Save"));
 
         MenuItem editIcon = withIcons.addItem(VaadinIcon.EDIT.create());
         SubMenu editIconMenu = editIcon.getSubMenu();
-        editIconMenu.addItem(VaadinIcon.CUT.create(), "Cut", e -> Notification.show("Cut"));
-        editIconMenu.addItem(VaadinIcon.COPY.create(), "Copy", e -> Notification.show("Copy"));
-        editIconMenu.addItem(VaadinIcon.PASTE.create(), "Paste", e -> Notification.show("Paste"));
+        editIconMenu.addItem(new Span(VaadinIcon.SCISSORS.create(), new Span("Cut")), e -> Notification.show("Cut"));
+        editIconMenu.addItem(new Span(VaadinIcon.COPY.create(), new Span("Copy")), e -> Notification.show("Copy"));
+        editIconMenu.addItem(new Span(VaadinIcon.PASTE.create(), new Span("Paste")), e -> Notification.show("Paste"));
 
         withIcons.addItem(VaadinIcon.COG.create(), e -> Notification.show("Settings"));
 

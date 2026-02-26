@@ -21,6 +21,7 @@ import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -54,9 +55,9 @@ public class ContextMenuDemoView extends VerticalLayout {
         // With icons
         Div iconTarget = createTarget("Right-click me for menu with icons");
         ContextMenu iconMenu = new ContextMenu(iconTarget);
-        iconMenu.addItem(VaadinIcon.EDIT.create(), "Edit", e -> Notification.show("Edit"));
-        iconMenu.addItem(VaadinIcon.COPY.create(), "Copy", e -> Notification.show("Copy"));
-        iconMenu.addItem(VaadinIcon.TRASH.create(), "Delete", e -> Notification.show("Delete"));
+        iconMenu.addItem(new Span(VaadinIcon.EDIT.create(), new Span("Edit")), e -> Notification.show("Edit"));
+        iconMenu.addItem(new Span(VaadinIcon.COPY.create(), new Span("Copy")), e -> Notification.show("Copy"));
+        iconMenu.addItem(new Span(VaadinIcon.TRASH.create(), new Span("Delete")), e -> Notification.show("Delete"));
         addSection("With Icons", iconTarget);
 
         // With separator
@@ -65,7 +66,7 @@ public class ContextMenuDemoView extends VerticalLayout {
         sepMenu.addItem("Cut", e -> Notification.show("Cut"));
         sepMenu.addItem("Copy", e -> Notification.show("Copy"));
         sepMenu.addItem("Paste", e -> Notification.show("Paste"));
-        sepMenu.add(new com.vaadin.flow.component.html.Hr());
+        sepMenu.addSeparator();
         sepMenu.addItem("Select All", e -> Notification.show("Select All"));
         addSection("With Separator", sepTarget);
 
@@ -81,7 +82,7 @@ public class ContextMenuDemoView extends VerticalLayout {
         exportSubMenu.addItem("Excel", e -> Notification.show("Export Excel"));
         exportSubMenu.addItem("CSV", e -> Notification.show("Export CSV"));
 
-        subMenu.add(new com.vaadin.flow.component.html.Hr());
+        subMenu.addSeparator();
         subMenu.addItem("Close", e -> Notification.show("Close"));
         addSection("With Submenu", subTarget);
 
@@ -117,17 +118,17 @@ public class ContextMenuDemoView extends VerticalLayout {
         // File browser example
         Div fileTarget = createTarget("Right-click me (File Browser style)");
         ContextMenu fileMenu = new ContextMenu(fileTarget);
-        fileMenu.addItem(VaadinIcon.FILE_ADD.create(), "New File", e -> Notification.show("New File"));
-        fileMenu.addItem(VaadinIcon.FOLDER_ADD.create(), "New Folder", e -> Notification.show("New Folder"));
-        fileMenu.add(new com.vaadin.flow.component.html.Hr());
-        fileMenu.addItem(VaadinIcon.CUT.create(), "Cut", e -> Notification.show("Cut"));
-        fileMenu.addItem(VaadinIcon.COPY.create(), "Copy", e -> Notification.show("Copy"));
-        fileMenu.addItem(VaadinIcon.PASTE.create(), "Paste", e -> Notification.show("Paste"));
-        fileMenu.add(new com.vaadin.flow.component.html.Hr());
-        fileMenu.addItem(VaadinIcon.TRASH.create(), "Delete", e -> Notification.show("Delete"));
-        fileMenu.addItem(VaadinIcon.EDIT.create(), "Rename", e -> Notification.show("Rename"));
-        fileMenu.add(new com.vaadin.flow.component.html.Hr());
-        fileMenu.addItem(VaadinIcon.INFO_CIRCLE.create(), "Properties", e -> Notification.show("Properties"));
+        fileMenu.addItem(new Span(VaadinIcon.FILE_ADD.create(), new Span("New File")), e -> Notification.show("New File"));
+        fileMenu.addItem(new Span(VaadinIcon.FOLDER_ADD.create(), new Span("New Folder")), e -> Notification.show("New Folder"));
+        fileMenu.addSeparator();
+        fileMenu.addItem(new Span(VaadinIcon.SCISSORS.create(), new Span("Cut")), e -> Notification.show("Cut"));
+        fileMenu.addItem(new Span(VaadinIcon.COPY.create(), new Span("Copy")), e -> Notification.show("Copy"));
+        fileMenu.addItem(new Span(VaadinIcon.PASTE.create(), new Span("Paste")), e -> Notification.show("Paste"));
+        fileMenu.addSeparator();
+        fileMenu.addItem(new Span(VaadinIcon.TRASH.create(), new Span("Delete")), e -> Notification.show("Delete"));
+        fileMenu.addItem(new Span(VaadinIcon.EDIT.create(), new Span("Rename")), e -> Notification.show("Rename"));
+        fileMenu.addSeparator();
+        fileMenu.addItem(new Span(VaadinIcon.INFO_CIRCLE.create(), new Span("Properties")), e -> Notification.show("Properties"));
         addSection("File Browser Example", fileTarget);
     }
 
