@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -207,54 +206,6 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(grid);
 
         grid.bindEmptyStateText(new ValueSignal<>("Other"));
-    }
-
-    // ===== GRID BIND COLUMNS TESTS =====
-
-    @Test
-    public void bindColumns_signalBound_columnsSynchronizedWhenAttached() {
-        var beanGrid = new Grid<>(Person.class);
-        var columnsSignal = new ValueSignal<>(List.of("name"));
-        beanGrid.bindColumns(columnsSignal);
-        UI.getCurrent().add(beanGrid);
-
-        Assert.assertEquals(1, beanGrid.getColumns().size());
-
-        columnsSignal.set(List.of("name", "born"));
-        Assert.assertEquals(2, beanGrid.getColumns().size());
-    }
-
-    @Test
-    public void bindColumns_signalBound_noEffectWhenDetached() {
-        var beanGrid = new Grid<>(Person.class);
-        var columnsSignal = new ValueSignal<>(List.of("name"));
-        beanGrid.bindColumns(columnsSignal);
-        UI.getCurrent().add(beanGrid);
-        Assert.assertEquals(1, beanGrid.getColumns().size());
-
-        beanGrid.removeFromParent();
-        columnsSignal.set(List.of("name", "born"));
-        Assert.assertEquals(1, beanGrid.getColumns().size());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindColumns_setColumnsWhileBound_throwsException() {
-        var beanGrid = new Grid<>(Person.class);
-        var columnsSignal = new ValueSignal<>(List.of("name"));
-        beanGrid.bindColumns(columnsSignal);
-        UI.getCurrent().add(beanGrid);
-
-        beanGrid.setColumns("name", "born");
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindColumns_bindAgainWhileBound_throwsException() {
-        var beanGrid = new Grid<>(Person.class);
-        var columnsSignal = new ValueSignal<>(List.of("name"));
-        beanGrid.bindColumns(columnsSignal);
-        UI.getCurrent().add(beanGrid);
-
-        beanGrid.bindColumns(new ValueSignal<>(List.of("born")));
     }
 
     // ===== SINGLE SELECT BIND VALUE TESTS =====

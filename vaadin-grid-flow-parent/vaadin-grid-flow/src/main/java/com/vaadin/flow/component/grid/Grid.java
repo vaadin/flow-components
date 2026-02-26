@@ -2285,46 +2285,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the properties to create columns for
      */
     public void setColumns(String... propertyNames) {
-        getColumnsSupport().set(Arrays.asList(propertyNames));
-    }
-
-    /**
-     * Binds the given signal to the displayed columns of this grid.
-     * <p>
-     * When the signal value changes, all existing columns are removed and new
-     * columns are created for the given bean property names.
-     * <p>
-     * <strong>Note:</strong> This method can only be used for a Grid created
-     * from a bean type with {@link #Grid(Class)}.
-     * <p>
-     * While a signal is bound, any attempt to set the columns manually through
-     * {@link #setColumns(String...)} throws a
-     * {@link com.vaadin.flow.signals.BindingActiveException}.
-     *
-     * @param signal
-     *            the signal providing the list of property names to create
-     *            columns for, not {@code null}
-     * @see #setColumns(String...)
-     * @since 25.1
-     */
-    public void bindColumns(Signal<List<String>> signal) {
-        getColumnsSupport().bind(signal);
-    }
-
-    private SignalPropertySupport<List<String>> columnsSupport;
-
-    private SignalPropertySupport<List<String>> getColumnsSupport() {
-        if (columnsSupport == null) {
-            columnsSupport = SignalPropertySupport.create(this,
-                    propertyNames -> {
-                        checkForBeanGrid();
-                        getColumns().forEach(this::removeColumn);
-                        if (propertyNames != null) {
-                            propertyNames.forEach(this::addColumn);
-                        }
-                    });
-        }
-        return columnsSupport;
+        checkForBeanGrid();
+        getColumns().forEach(this::removeColumn);
+        Stream.of(propertyNames).forEach(this::addColumn);
     }
 
     /**
