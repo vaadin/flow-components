@@ -15,40 +15,30 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class ConfirmDialogOpenedChangeListenerTest {
-    private final UI ui = new UI();
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+
     private ConfirmDialog dialog;
     private ComponentEventListener<ConfirmDialog.OpenedChangeEvent> mockListener;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-
         dialog = new ConfirmDialog();
 
         mockListener = Mockito.mock(ComponentEventListener.class);
         dialog.addOpenedChangeListener(mockListener);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
