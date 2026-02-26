@@ -24,14 +24,12 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasEnabled;
-import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.BaseJsonNode;
@@ -68,8 +66,6 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     private static final String PROP_ERROR = "error";
     private static final String PROP_NO_FORGOT_PASSWORD = "noForgotPassword";
 
-    private final SignalPropertySupport<Boolean> errorSupport = SignalPropertySupport
-            .create(this, this::setEnabledIfError);
     private static final PropertyChangeListener NO_OP = event -> {
     };
     private Registration registration;
@@ -153,7 +149,9 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @see #isError()
      */
     public void setError(boolean error) {
-        setEnabledIfError(error);
+        if (error) {
+            setEnabled(true);
+        }
         getElement().setProperty(PROP_ERROR, error);
     }
 
@@ -165,39 +163,6 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     @Synchronize(property = PROP_ERROR, value = "error-changed")
     public boolean isError() {
         return getElement().getProperty(PROP_ERROR, false);
-    }
-
-    /**
-     * Binds a given errorSignal to the error state.
-     * <p>
-     * When a errorSignal is bound, the error state is kept synchronized with
-     * the errorSignal value while the element is in the attached state. When
-     * the element is detached, errorSignal value changes have no effect.
-     * <p>
-     * When the error state becomes {@code true}, the component is automatically
-     * enabled.
-     * <p>
-     * While a errorSignal is bound, any attempt to set the error state manually
-     * through {@link #setError(boolean)} throws a
-     * {@link com.vaadin.flow.signals.BindingActiveException}.
-     * <p>
-     * Attempting to bind a new errorSignal while one is already bound throws a
-     * {@link com.vaadin.flow.signals.BindingActiveException}.
-     * <p>
-     * Signal's value {@code null} is treated as {@code false}.
-     *
-     * @param errorSignal
-     *            the errorSignal to bind the error state to, not {@code null}
-     * @see #setError(boolean)
-     * @since 25.1
-     */
-    public void bindError(Signal<Boolean> errorSignal) {
-        Signal<Boolean> mappedSignal = errorSignal == null ? null
-                : errorSignal
-                        .map(error -> error == null ? Boolean.FALSE : error);
-
-        errorSupport.bind(mappedSignal);
-        getElement().bindProperty(PROP_ERROR, mappedSignal, null);
     }
 
     /**
@@ -354,12 +319,6 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
                 && !getListeners(LoginEvent.class).isEmpty()) {
             LoggerFactory.getLogger(getClass()).warn(
                     "Using the action attribute together with login listeners is discouraged. See the AbstractLogin JavaDoc for more information. This may throw an exception in the future.");
-        }
-    }
-
-    private void setEnabledIfError(boolean error) {
-        if (error) {
-            setEnabled(true);
         }
     }
 }
