@@ -260,6 +260,25 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         Assert.assertNull(grid.asSingleSelect().getValue());
     }
 
+    @Test
+    public void singleSelect_bindValue_signalChangeDoesNotInvokeWriteCallback() {
+        grid.setItems("foo", "bar", "baz");
+        int[] callCount = { 0 };
+        var signal = new ValueSignal<String>(null);
+        grid.asSingleSelect().bindValue(signal, v -> callCount[0]++);
+        UI.getCurrent().add(grid);
+
+        // Signal-originated change should not trigger the write callback
+        signal.set("bar");
+        Assert.assertEquals("bar", grid.asSingleSelect().getValue());
+        Assert.assertEquals(0, callCount[0]);
+
+        // Client-originated change should trigger the write callback
+        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
+                .selectFromClient("baz");
+        Assert.assertEquals(1, callCount[0]);
+    }
+
     // ===== MULTI SELECT BIND VALUE TESTS =====
 
     @Test
@@ -303,6 +322,27 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
 
         grid.asMultiSelect().bindValue(new ValueSignal<>(Set.of("foo")), v -> {
         });
+    }
+
+    @Test
+    public void multiSelect_bindValue_signalChangeDoesNotInvokeWriteCallback() {
+        grid.setItems("foo", "bar", "baz");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        int[] callCount = { 0 };
+        var signal = new ValueSignal<Set<String>>(Set.of());
+        grid.asMultiSelect().bindValue(signal, v -> callCount[0]++);
+        UI.getCurrent().add(grid);
+
+        // Signal-originated change should not trigger the write callback
+        signal.set(Set.of("foo", "bar"));
+        Assert.assertEquals(Set.of("foo", "bar"),
+                grid.asMultiSelect().getValue());
+        Assert.assertEquals(0, callCount[0]);
+
+        // Client-originated change should trigger the write callback
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectFromClient("baz");
+        Assert.assertEquals(1, callCount[0]);
     }
 
     // ===== SELECTION MODEL SWITCH CLEANUP TESTS =====
