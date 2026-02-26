@@ -65,6 +65,7 @@
         <module>vaadin-slider-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
         <module>vaadin-ai-components-flow-parent</module>
+        <module>kitchen-sink-demo</module>
     </modules>
     <scm>
         <connection>scm:https:https://github.com/vaadin/flow-components.git</connection>
