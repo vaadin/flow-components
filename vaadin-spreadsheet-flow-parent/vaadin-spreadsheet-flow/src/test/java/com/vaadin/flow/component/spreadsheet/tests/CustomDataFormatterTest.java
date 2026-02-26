@@ -11,39 +11,32 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.tests.MockUIRule;
 
 public class CustomDataFormatterTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+
     Spreadsheet spreadsheet;
     Cell fourPartDataFormatCell;
     Cell threePartDataFormatCell;
     Cell generalFormatCell;
 
-    private UI ui;
-
     @Before
     public void init() {
-        ui = new UI();
         ui.setLocale(Locale.US);
-        UI.setCurrent(ui);
 
         spreadsheet = new Spreadsheet();
         this.fourPartDataFormatCell = createFourPartDataFormatCell(spreadsheet);
         this.threePartDataFormatCell = createThreePartDataFormatCell(
                 spreadsheet);
         this.generalFormatCell = createGeneralFormatCell(spreadsheet);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     private Cell createFourPartDataFormatCell(Spreadsheet spreadsheet) {
