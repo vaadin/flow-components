@@ -17,22 +17,18 @@ package com.vaadin.flow.component.popover;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.flow.server.VaadinSession;
 
 public class PopoverOpenedChangeListenerTest {
-    private final UI ui = new UI();
     private Popover popover;
     private AtomicReference<Popover.OpenedChangeEvent> event;
     private ComponentEventListener<Popover.OpenedChangeEvent> mockListener;
@@ -40,25 +36,13 @@ public class PopoverOpenedChangeListenerTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-
         popover = new Popover();
-        ui.add(popover);
 
         event = new AtomicReference<>();
         popover.addOpenedChangeListener(event::set);
 
         mockListener = Mockito.mock(ComponentEventListener.class);
         popover.addOpenedChangeListener(mockListener);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
