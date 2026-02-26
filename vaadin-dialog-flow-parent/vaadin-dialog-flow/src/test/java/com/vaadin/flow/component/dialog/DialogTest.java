@@ -19,9 +19,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -29,35 +28,20 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 /**
  * Unit tests for the Dialog.
  */
 public class DialogTest {
-
-    private UI ui = new UI();
-
-    @Before
-    public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void createDialogWithComponents_componentsArePartOfGetChildren() {
@@ -103,7 +87,7 @@ public class DialogTest {
 
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUi() {
-        UI.setCurrent(null);
+        ui.clearUI();
         Dialog dialog = new Dialog();
         dialog.setOpened(true);
     }
@@ -423,7 +407,7 @@ public class DialogTest {
         Dialog dialog = new Dialog();
         dialog.open();
 
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertNotNull(dialog.getElement().getParent());
     }
 
@@ -433,7 +417,7 @@ public class DialogTest {
         dialog.open();
         dialog.close();
 
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertNull(dialog.getElement().getParent());
     }
 
@@ -468,11 +452,5 @@ public class DialogTest {
     public void bindChildren_throwsUnsupportedOperationException() {
         Dialog dialog = new Dialog();
         dialog.bindChildren(null, null);
-    }
-
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }
