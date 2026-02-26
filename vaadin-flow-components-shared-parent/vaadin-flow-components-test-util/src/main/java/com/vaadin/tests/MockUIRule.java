@@ -16,6 +16,9 @@
 package com.vaadin.tests;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,6 +29,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -118,6 +122,17 @@ public class MockUIRule extends ExternalResource {
     }
 
     /**
+     * Set the locale of the UI. Delegates to {@link UI#setLocale(Locale)} for
+     * convenience.
+     * 
+     * @param locale
+     *            the locale to set
+     */
+    public void setLocale(Locale locale) {
+        ui.setLocale(locale);
+    }
+
+    /**
      * Simulate client communication by running pending executions and
      * collecting changes.
      */
@@ -133,6 +148,7 @@ public class MockUIRule extends ExternalResource {
      * @return a list of pending JavaScript invocations
      */
     public List<PendingJavaScriptInvocation> dumpPendingJavaScriptInvocations() {
+        this.fakeClientCommunication();
         return ui.getInternals().dumpPendingJavaScriptInvocations();
     }
 
@@ -147,6 +163,12 @@ public class MockUIRule extends ExternalResource {
         @Override
         public Lock getLockInstance() {
             return lock;
+        }
+
+        @Override
+        public Future<Void> access(Command command) {
+            command.execute();
+            return CompletableFuture.completedFuture(null);
         }
     }
 }

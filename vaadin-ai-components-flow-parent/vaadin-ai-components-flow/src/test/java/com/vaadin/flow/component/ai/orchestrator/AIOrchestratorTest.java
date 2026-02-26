@@ -27,12 +27,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.imageio.ImageIO;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,15 +53,15 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 import reactor.core.publisher.Flux;
 
 public class AIOrchestratorTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
     @Rule
     public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
             AIComponentsFeatureFlagProvider.AI_COMPONENTS);
@@ -72,8 +70,6 @@ public class AIOrchestratorTest {
     private AIMessageList mockMessageList;
     private AIInput mockInput;
     private AIFileReceiver mockFileReceiver;
-
-    private static UI mockUI;
 
     @Before
     public void setup() {
@@ -85,12 +81,6 @@ public class AIOrchestratorTest {
                 .thenReturn(Collections.emptyList());
     }
 
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        mockUI = null;
-    }
-
     @Test
     public void builder_withNullProvider_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
@@ -99,7 +89,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withProvider_usesProviderForPrompts() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -118,7 +107,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withSystemPrompt_includesSystemPromptInRequest() {
-        mockUi();
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -139,7 +127,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withMessageList_addsMessagesToList() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -166,7 +153,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withToolObjects_setsTools() {
-        mockUi();
         var tool = new SampleTool();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -196,7 +182,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withValidMessage_sendsRequestToProvider() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -228,7 +213,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withSystemPrompt_includesSystemPromptInRequest() {
-        mockUi();
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -250,7 +234,6 @@ public class AIOrchestratorTest {
     @Test
     public void prompt_withStreamingResponse_updatesMessageWithTokens()
             throws Exception {
-        mockUi();
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(3);
         Mockito.doAnswer(inv -> {
@@ -277,7 +260,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withStreamingError_setsErrorMessage() throws Exception {
-        mockUi();
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(1);
         Mockito.doAnswer(inv -> {
@@ -304,7 +286,6 @@ public class AIOrchestratorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_triggersPromptProcessing() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -327,7 +308,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void userMessage_isAddedToMessageList() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -348,7 +328,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void assistantPlaceholder_isCreated() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -366,7 +345,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withTools_includesToolsInRequest() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -397,7 +375,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_whileProcessing_isIgnored() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -417,7 +394,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withoutSystemPrompt_sendsNullSystemPromptInRequest() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -437,7 +413,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withWhitespaceOnlySystemPrompt_sendsNullSystemPrompt() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -458,7 +433,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withFlowMessageList_wrapsCorrectly() {
-        mockUi();
         var flowMessageList = Mockito.mock(MessageList.class);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -481,7 +455,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withFlowUpload_withExistingHandler_throws() {
-        mockUi();
         var flowUploadManager = new UploadManager(new Div(),
                 UploadHandler.inMemory((x, y) -> {
                 }));
@@ -492,7 +465,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withFlowUpload_withoutHandler_succeeds() {
-        mockUi();
         var flowUploadManager = new UploadManager(new Div());
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withFileReceiver(flowUploadManager).build();
@@ -501,7 +473,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withUploadComponent_withExistingHandler_throws() {
-        mockUi();
         var upload = new Upload(UploadHandler.inMemory((x, y) -> {
         }));
         var builder = AIOrchestrator.builder(mockProvider, null);
@@ -511,7 +482,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withUploadComponent_withoutHandler_succeeds() {
-        mockUi();
         var upload = new Upload();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withFileReceiver(upload).build();
@@ -521,7 +491,6 @@ public class AIOrchestratorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_withNullValue_doesNotProcess() {
-        mockUi();
         getSimpleOrchestrator();
         var listenerCaptor = ArgumentCaptor
                 .forClass(SerializableConsumer.class);
@@ -534,7 +503,6 @@ public class AIOrchestratorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_withEmptyValue_doesNotProcess() {
-        mockUi();
         getSimpleOrchestrator();
         var listenerCaptor = ArgumentCaptor
                 .forClass(SerializableConsumer.class);
@@ -550,7 +518,6 @@ public class AIOrchestratorTest {
     @SuppressWarnings("unchecked")
     @Test
     public void inputSubmit_whileProcessing_isIgnored() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -576,7 +543,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withAttachments_includesAttachmentsInRequest() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -602,7 +568,6 @@ public class AIOrchestratorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void prompt_withAttachments_createsMessageWithAttachments() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -632,7 +597,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withTimeout_setsTimeoutErrorMessage() throws Exception {
-        mockUi();
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(1);
         Mockito.doAnswer(inv -> {
@@ -657,7 +621,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withoutMessageList_stillSendsToProvider() {
-        mockUi();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -670,7 +633,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withEmptyResponse_completesSuccessfully() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -690,7 +652,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withSystemPromptWithLeadingTrailingWhitespace_trimmed() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -713,7 +674,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withMultipleTokens_appendsAllTokens() throws Exception {
-        mockUi();
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(4);
         Mockito.doAnswer(inv -> {
@@ -738,7 +698,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_requestContainsCorrectTools() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -764,7 +723,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_requestContainsEmptyAttachmentsList() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -783,7 +741,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_callsTakeAttachments() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -799,7 +756,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_namesNotConfigured_usesDefaultNames() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -824,7 +780,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withCustomUserName_usesCustomUserName() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -847,7 +802,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withCustomAssistantName_usesCustomAssistantName() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -867,7 +821,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withCustomUserNameAndAssistantName_usesBothCustomNames() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -893,7 +846,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withNullUserName_throws() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
@@ -909,7 +861,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void builder_withNullAssistantName_throws() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
@@ -959,7 +910,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void getHistory_afterPrompt_containsUserAndAssistantMessages() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -983,7 +933,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void getHistory_afterPrompt_recordsTimestamps() {
-        mockUi();
         var before = Instant.now();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -1044,7 +993,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void getHistory_afterMultipleTokens_concatenatesAssistantResponse() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1063,7 +1011,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void getHistory_afterStreamError_doesNotAddAssistantMessage() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1394,7 +1341,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void responseCompleteListener_afterSuccessfulExchange_firesWithResponse() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1418,7 +1364,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void responseCompleteListener_afterStreamError_doesNotFire() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1442,7 +1387,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void responseCompleteListener_afterEmptyResponse_doesNotFire() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1466,7 +1410,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void responseCompleteListener_receivesResponseText() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1490,7 +1433,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void responseCompleteListener_afterMultipleExchanges_firesEachTime() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1535,7 +1477,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void responseCompleteListener_listenerThrows_doesNotBreakStreaming() {
-        mockUi();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1570,31 +1511,6 @@ public class AIOrchestratorTest {
         getSimpleOrchestrator().prompt(message);
     }
 
-    private static void mockUi() {
-        mockUI = Mockito.mock(UI.class);
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
-            var futureTask = new FutureTask<Void>(() -> {
-                UI.setCurrent(mockUI);
-                try {
-                    command.execute();
-                } finally {
-                    UI.setCurrent(null);
-                }
-                return null;
-            });
-            new Thread(futureTask).start();
-            return futureTask;
-        }).when(mockUI).access(Mockito.any(Command.class));
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        Mockito.when(mockUI.getSession()).thenReturn(mockSession);
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-
-        UI.setCurrent(mockUI);
-    }
-
     private static AIMessage createMockMessage() {
         var message = Mockito.mock(AIMessage.class);
         Mockito.when(message.getText()).thenReturn("");
@@ -1618,7 +1534,6 @@ public class AIOrchestratorTest {
             throws Exception {
         var initialWidth = 500;
         var initialHeight = 400;
-        mockUi();
         var flowMessageList = new MessageList();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -1652,7 +1567,6 @@ public class AIOrchestratorTest {
             throws Exception {
         var initialWidth = 100;
         var initialHeight = 80;
-        mockUi();
         var flowMessageList = new MessageList();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -1679,7 +1593,6 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl() {
-        mockUi();
         var flowMessageList = new MessageList();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))

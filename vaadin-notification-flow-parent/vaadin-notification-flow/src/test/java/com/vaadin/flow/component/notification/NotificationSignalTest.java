@@ -15,9 +15,7 @@
  */
 package com.vaadin.flow.component.notification;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -30,30 +28,9 @@ import com.vaadin.tests.AbstractSignalsUnitTest;
 public class NotificationSignalTest extends AbstractSignalsUnitTest {
 
     private Notification notification;
-    private ValueSignal<String> textSignal;
-    private Signal<String> computedSignal;
-
-    private UI ui;
-
-    @Before
-    public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-        textSignal = new ValueSignal<>("foo");
-        computedSignal = Signal.computed(() -> textSignal.get() + " bar");
-    }
-
-    @After
-    public void tearDown() {
-        if (notification != null) {
-            notification.close();
-            if (notification.isAttached()) {
-                notification.removeFromParent();
-            }
-        }
-        UI.setCurrent(null);
-        ui = null;
-    }
+    private final ValueSignal<String> textSignal = new ValueSignal<>("foo");
+    private final Signal<String> computedSignal = Signal
+            .computed(() -> textSignal.get() + " bar");
 
     @Test
     public void textSignalCtor() {
@@ -240,12 +217,6 @@ public class NotificationSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("foo", getNotificationText());
         textSignal.set("bar");
         Assert.assertEquals("bar", getNotificationText());
-    }
-
-    private void assertTextSignalBindingInactive() {
-        var currentText = getNotificationText();
-        textSignal.set(currentText + " with change");
-        Assert.assertEquals(currentText, getNotificationText());
     }
 
     private String getNotificationText() {

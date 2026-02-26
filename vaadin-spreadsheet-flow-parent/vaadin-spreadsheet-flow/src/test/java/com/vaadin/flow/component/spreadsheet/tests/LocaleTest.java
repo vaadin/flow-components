@@ -11,21 +11,21 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.tests.MockUIRule;
 
 public class LocaleTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private Spreadsheet spreadsheet;
 
     private Locale testLocale;
-
-    private UI ui;
 
     @Before
     public void init() {
@@ -36,17 +36,9 @@ public class LocaleTest {
         testLocale = systemLocale.equals(Locale.GERMANY) ? Locale.FRANCE
                 : Locale.GERMANY;
 
-        ui = new UI();
         ui.setLocale(testLocale);
-        UI.setCurrent(ui);
 
         spreadsheet = new Spreadsheet();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test

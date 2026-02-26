@@ -15,37 +15,13 @@
  */
 package com.vaadin.flow.component.notification;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.server.VaadinSession;
 
 public class NotificationHasStyleTest {
-
-    private UI ui = new UI();
-    private Notification notification;
-
-    @Before
-    public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-
-        notification = new Notification();
-        ui.add(notification);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
+    private final Notification notification = new Notification();
 
     @Test
     public void addClassName_notificationHasOverlayClass() {

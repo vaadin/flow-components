@@ -16,67 +16,39 @@
 package com.vaadin.flow.component.upload.tests;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadButtonTest {
     @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
     public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
             ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
-    private UI ui;
     private Div owner;
     private UploadManager manager;
 
     @Before
     public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
-                mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        ui.getInternals().setSession(mockSession);
-
         owner = new Div();
         ui.add(owner);
         manager = new UploadManager(owner);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -144,21 +116,22 @@ public class UploadButtonTest {
         // Create button with first manager
         UploadButton button = new UploadButton(manager);
         ui.add(button);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Change to second manager
         button.setUploadManager(manager2);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Drain pending JS invocations
-        ui.getInternals().dumpPendingJavaScriptInvocations();
+        ui.dumpPendingJavaScriptInvocations();
 
         // Detach and reattach the button
         ui.remove(button);
         ui.add(button);
 
         // Get pending JS invocations after reattach
-        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
+        List<PendingJavaScriptInvocation> pendingInvocations = ui
+                .dumpPendingJavaScriptInvocations();
 
         // Count how many "this.manager = " JS invocations are pending
         long managerLinkCount = pendingInvocations.stream().filter(inv -> inv
@@ -172,16 +145,5 @@ public class UploadButtonTest {
 
         // Verify that the button is linked to manager2
         Assert.assertSame(manager2, button.getUploadManager());
-    }
-
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        fakeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }
