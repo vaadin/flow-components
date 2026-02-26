@@ -27,6 +27,8 @@ import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
+import tools.jackson.databind.node.ArrayNode;
+
 public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
 
     private AvatarGroup avatarGroup;
@@ -62,6 +64,11 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
         listSignal.set(List.of(item1Signal, item2Signal));
 
         Assert.assertEquals(2, avatarGroup.getItems().size());
+
+        ui.fakeClientCommunication();
+        ArrayNode clientItems = (ArrayNode) avatarGroup.getElement()
+                .getPropertyRaw("items");
+        Assert.assertEquals(2, clientItems.size());
     }
 
     @Test(expected = BindingActiveException.class)
@@ -105,6 +112,11 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals(3, avatarGroup.getItems().size());
         Assert.assertEquals("Charlie", avatarGroup.getItems().get(2).getName());
+
+        ui.fakeClientCommunication();
+        ArrayNode clientItems = (ArrayNode) avatarGroup.getElement()
+                .getPropertyRaw("items");
+        Assert.assertEquals(3, clientItems.size());
     }
 
     @Test
@@ -121,6 +133,13 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals("Updated Alice",
                 avatarGroup.getItems().get(0).getName());
+
+        ui.fakeClientCommunication();
+        ArrayNode clientItems = (ArrayNode) avatarGroup.getElement()
+                .getPropertyRaw("items");
+        Assert.assertEquals(1, clientItems.size());
+        Assert.assertEquals("Updated Alice",
+                clientItems.get(0).get("name").asString());
     }
 
     @Test
