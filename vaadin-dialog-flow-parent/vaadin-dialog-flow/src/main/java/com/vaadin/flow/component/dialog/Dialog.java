@@ -657,28 +657,26 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Sets whether dragging the dialog outside the viewport is prevented.
-     * <p>
-     * When enabled, all four edges of the dialog will remain visible during
-     * dragging. The dialog may still become partially hidden when the viewport
-     * is resized.
-     * <p>
-     * Note: This property only has an effect when the dialog is
-     * {@link #setDraggable(boolean) draggable}.
+     * Set to true to prevent the dialog from moving outside the viewport
+     * bounds. When enabled, all four edges of the dialog will remain visible,
+     * for example when dragging the dialog or when the viewport is resized.
+     * Note that the dialog will also adjust any programmatically configured
+     * size and position so that it stays within the viewport.
      *
      * @param keepInViewport
-     *            {@code true} to prevent dragging outside the viewport,
-     *            {@code false} otherwise
+     *            {@code true} to prevent the dialog from moving outside the
+     *            viewport bounds, {@code false} otherwise
      */
     public void setKeepInViewport(boolean keepInViewport) {
         getElement().setProperty("keepInViewport", keepInViewport);
     }
 
     /**
-     * Gets whether dragging the dialog outside the viewport is prevented.
+     * Gets whether the dialog is prevented from moving outside the viewport
+     * bounds or not.
      *
-     * @return {@code true} if dragging outside the viewport is prevented,
-     *         {@code false} otherwise (default).
+     * @return {@code true} if the dialog is prevented from moving outside the
+     *         viewport bounds, {@code false} otherwise
      */
     public boolean isKeepInViewport() {
         return getElement().getProperty("keepInViewport", false);
