@@ -25,6 +25,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -35,6 +36,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -68,6 +70,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     private E gridActiveItem;
     private boolean toolbarVisible = true;
     private boolean saveBtnDisabledOverridden;
+
+    private SignalPropertySupport<Boolean> dirtySupport;
 
     final private Button saveButton;
 
@@ -314,7 +318,32 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #getSaveButton()
      */
     public void setDirty(boolean dirty) {
-        getElement().executeJs("this.__isDirty = $0", dirty);
+        getDirtySupport().set(dirty);
+    }
+
+    /**
+     * Binds the dirty state to the given signal. Signal changes push the dirty
+     * state to the client.
+     * <p>
+     * While a signal is bound, any attempt to set the dirty state manually
+     * throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind, not {@code null}
+     * @since 25.1
+     */
+    public void bindDirty(Signal<Boolean> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getDirtySupport().bind(signal.map(v -> v == null ? Boolean.FALSE : v));
+    }
+
+    private SignalPropertySupport<Boolean> getDirtySupport() {
+        if (dirtySupport == null) {
+            dirtySupport = SignalPropertySupport.create(this,
+                    dirty -> getElement().executeJs("this.__isDirty = $0",
+                            dirty));
+        }
+        return dirtySupport;
     }
 
     /**
