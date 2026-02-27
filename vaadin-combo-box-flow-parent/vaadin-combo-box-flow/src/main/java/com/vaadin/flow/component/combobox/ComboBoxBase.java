@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.data.provider.DataViewUtils;
+import com.vaadin.flow.signals.Signal;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -1468,5 +1470,72 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     private String getI18nErrorMessage(
             Function<ComboBoxBaseI18n, String> getter) {
         return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The method is not supported for the combo box component, use another
+     * overloaded method with filter converter
+     * {@link #bindItems(com.vaadin.flow.signals.Signal, SerializableFunction)}
+     * <p>
+     * Always throws an {@link UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException
+     *             when using this method without a filter converter
+     * @see #bindItems(com.vaadin.flow.signals.Signal, SerializableFunction)
+     */
+    @Override
+    public ComboBoxDataView<TItem> bindItems(
+            com.vaadin.flow.signals.Signal<? extends List<? extends com.vaadin.flow.signals.Signal<TItem>>> itemsSignal) {
+        throw new UnsupportedOperationException(String.format(
+                "ComboBox does not support "
+                        + "binding items from a signal without "
+                        + "knowledge of the rules on how to convert internal text filter "
+                        + "into a predicate applied to the data provider. Please use%n"
+                        + "bindItems(Signal<? extends List<? extends Signal<T>>>, SerializableFunction<String, "
+                        + "SerializablePredicate<T>>)"
+                        + "%noverloaded method instead"));
+    }
+
+    /**
+     * Binds the given signal to the items of the combo box as a one-way
+     * binding so that the items are updated when the signal's value or any
+     * individual item signal changes, using the provided filter converter.
+     * <p>
+     * When a signal is bound, the items are kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * Text filter is transformed into a predicate filter through the given
+     * filter converter. Example of filter converter which produces the Person's
+     * name predicate:
+     * {@code (String nameFilter) -> person -> person.getName().equalsIgnoreCase(nameFilter);}
+     * <p>
+     * While a signal is bound, any attempt to modify items manually through
+     * other setItems methods throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param itemsSignal
+     *            the signal to bind the items to, not {@code null}
+     * @param filterConverter
+     *            a function which converts the combo box's filter-string typed
+     *            by the user into a predicate filter applied to items
+     * @return the data view providing access to the data bound to the combo box
+     */
+    public ComboBoxDataView<TItem> bindItems(
+            Signal<? extends List<? extends Signal<TItem>>> itemsSignal,
+            SerializableFunction<String, SerializablePredicate<TItem>> filterConverter) {
+        Objects.requireNonNull(itemsSignal, "Signal cannot be null");
+        Objects.requireNonNull(filterConverter,
+                "Filter converter cannot be null");
+
+        // Use DataViewUtils.bindItems with a custom setter that applies the filter converter
+        // This delegates to the utility method from Flow (see https://github.com/vaadin/flow/pull/23700)
+        return DataViewUtils.bindItems(this,
+                itemsSignal, backingList -> {
+                    // Create a data provider from the backing list and apply the filter converter
+                    ListDataProvider<TItem> dataProvider = DataProvider
+                            .ofCollection(backingList);
+                    return setItems(dataProvider, filterConverter);
+                });
     }
 }
