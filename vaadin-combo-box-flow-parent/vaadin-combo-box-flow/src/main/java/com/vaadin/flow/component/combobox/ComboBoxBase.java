@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.data.provider.DataViewUtils;
-import com.vaadin.flow.signals.Signal;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -64,6 +62,7 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
@@ -78,6 +77,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 /**
@@ -1486,8 +1486,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Override
     public ComboBoxDataView<TItem> bindItems(
             com.vaadin.flow.signals.Signal<? extends List<? extends com.vaadin.flow.signals.Signal<TItem>>> itemsSignal) {
-        throw new UnsupportedOperationException(String.format(
-                "ComboBox does not support "
+        throw new UnsupportedOperationException(
+                String.format("ComboBox does not support "
                         + "binding items from a signal without "
                         + "knowledge of the rules on how to convert internal text filter "
                         + "into a predicate applied to the data provider. Please use%n"
@@ -1497,9 +1497,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Binds the given signal to the items of the combo box as a one-way
-     * binding so that the items are updated when the signal's value or any
-     * individual item signal changes, using the provided filter converter.
+     * Binds the given signal to the items of the combo box as a one-way binding
+     * so that the items are updated when the signal's value or any individual
+     * item signal changes, using the provided filter converter.
      * <p>
      * When a signal is bound, the items are kept synchronized with the signal
      * value while the component is attached. When the component is detached,
@@ -1528,14 +1528,12 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         Objects.requireNonNull(filterConverter,
                 "Filter converter cannot be null");
 
-        // Use DataViewUtils.bindItems with a custom setter that applies the filter converter
-        // This delegates to the utility method from Flow (see https://github.com/vaadin/flow/pull/23700)
-        return DataViewUtils.bindItems(this,
-                itemsSignal, backingList -> {
-                    // Create a data provider from the backing list and apply the filter converter
-                    ListDataProvider<TItem> dataProvider = DataProvider
-                            .ofCollection(backingList);
-                    return setItems(dataProvider, filterConverter);
-                });
+        // Use DataViewUtils.bindItems with a custom setter that applies the
+        // filter converter
+        return DataViewUtils.bindItems(this, itemsSignal, backingList -> {
+            ListDataProvider<TItem> dataProvider = DataProvider
+                    .ofCollection(backingList);
+            return setItems(dataProvider, filterConverter);
+        });
     }
 }
