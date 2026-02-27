@@ -83,7 +83,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/text-field", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/text-field", version = "25.1.0-beta1")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
