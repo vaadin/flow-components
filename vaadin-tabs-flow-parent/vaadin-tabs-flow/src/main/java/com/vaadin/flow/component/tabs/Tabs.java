@@ -67,7 +67,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-tabs")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "25.0.4")
+@NpmPackage(value = "@vaadin/tabs", version = "25.0.5")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
