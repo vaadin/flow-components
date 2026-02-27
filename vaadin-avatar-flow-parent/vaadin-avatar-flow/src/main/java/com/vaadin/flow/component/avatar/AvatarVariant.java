@@ -25,7 +25,11 @@ public enum AvatarVariant implements ThemeVariant {
     LUMO_LARGE("large"),
     LUMO_SMALL("small"),
     LUMO_XSMALL("xsmall"),
-    AURA_FILLED("filled");
+    AURA_FILLED("filled"),
+    XLARGE("xlarge"),
+    LARGE("large"),
+    SMALL("small"),
+    XSMALL("xsmall");
 
     private final String variant;
 
