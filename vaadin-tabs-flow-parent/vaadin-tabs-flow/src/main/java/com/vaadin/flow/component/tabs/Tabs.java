@@ -41,6 +41,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.WritableSignal;
 
 /**
  * Tabs are used to organize and group content into sections that the user can
@@ -552,6 +553,24 @@ public class Tabs extends Component
      */
     public void setSelectedIndex(int selectedIndex) {
         getElement().setProperty(SELECTED, selectedIndex);
+    }
+
+    /**
+     * Binds the selected index to the given writable signal. The binding is
+     * two-way: signal changes push to the DOM property, and client-side
+     * property changes push back to the signal.
+     * <p>
+     * While a signal is bound, any attempt to set the selected index manually
+     * throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the writable signal to bind, not {@code null}
+     * @since 25.1
+     */
+    public void bindSelectedIndex(WritableSignal<Integer> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("selected",
+                signal.map(v -> v == null ? 0 : v), signal::set);
     }
 
     /**

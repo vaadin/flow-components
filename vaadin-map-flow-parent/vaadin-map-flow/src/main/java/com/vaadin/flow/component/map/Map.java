@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.signals.WritableSignal;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -91,6 +93,8 @@ public class Map extends MapBase {
     private Layer backgroundLayer;
     private final FeatureLayer featureLayer;
     private final Controls controls = new Controls();
+    private WritableSignal<Coordinate> boundCenterSignal;
+    private WritableSignal<Double> boundZoomSignal;
 
     /**
      * Sets the projection (or coordinate system) to use for all coordinates.
@@ -185,6 +189,18 @@ public class Map extends MapBase {
         getConfiguration().addControl(controls.attributionControl);
         getConfiguration().addControl(controls.scaleControl);
         getConfiguration().addControl(controls.zoomControl);
+
+        // Write back to bound signals when the user pans or zooms
+        addViewMoveEndListener(event -> {
+            if (event.isFromClient()) {
+                if (boundCenterSignal != null) {
+                    boundCenterSignal.set(event.getCenter());
+                }
+                if (boundZoomSignal != null) {
+                    boundZoomSignal.set(event.getZoom());
+                }
+            }
+        });
     }
 
     public Configuration getRawConfiguration() {
@@ -294,7 +310,40 @@ public class Map extends MapBase {
      *            new center of the viewport
      */
     public void setCenter(Coordinate center) {
-        getView().setCenter(center);
+        getCenterSupport().set(center);
+    }
+
+    /**
+     * Binds the given writable signal to the center of the map's viewport for
+     * two-way synchronization. Signal value changes are pushed to the map, and
+     * user pan interactions update the signal.
+     * <p>
+     * When a signal is bound, the center is kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the center manually through
+     * {@link #setCenter(Coordinate)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the writable signal to bind the center to, not {@code null}
+     * @see #setCenter(Coordinate)
+     * @since 25.1
+     */
+    public void bindCenter(WritableSignal<Coordinate> signal) {
+        boundCenterSignal = signal;
+        getCenterSupport().bind(signal);
+    }
+
+    private SignalPropertySupport<Coordinate> centerSupport;
+
+    private SignalPropertySupport<Coordinate> getCenterSupport() {
+        if (centerSupport == null) {
+            centerSupport = SignalPropertySupport.create(this,
+                    center -> getView().setCenter(center));
+        }
+        return centerSupport;
     }
 
     /**
@@ -326,7 +375,41 @@ public class Map extends MapBase {
      *            new zoom level
      */
     public void setZoom(double zoom) {
-        getView().setZoom(zoom);
+        getZoomSupport().set(zoom);
+    }
+
+    /**
+     * Binds the given writable signal to the zoom level of the map's viewport
+     * for two-way synchronization. Signal value changes are pushed to the map,
+     * and user zoom interactions update the signal.
+     * <p>
+     * When a signal is bound, the zoom level is kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the zoom level manually
+     * through {@link #setZoom(double)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the writable signal to bind the zoom level to, not
+     *            {@code null}
+     * @see #setZoom(double)
+     * @since 25.1
+     */
+    public void bindZoom(WritableSignal<Double> signal) {
+        boundZoomSignal = signal;
+        getZoomSupport().bind(signal);
+    }
+
+    private SignalPropertySupport<Double> zoomSupport;
+
+    private SignalPropertySupport<Double> getZoomSupport() {
+        if (zoomSupport == null) {
+            zoomSupport = SignalPropertySupport.create(this,
+                    zoom -> getView().setZoom(zoom));
+        }
+        return zoomSupport;
     }
 
     /**
