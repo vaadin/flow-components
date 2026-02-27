@@ -19,30 +19,26 @@ import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.MockUIRule;
 
 public class TooltipTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private TestComponent component;
-    private UI ui;
-
-    @Before
-    public void setup() {
-        component = new TestComponent();
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
+    private final TestComponent component = new TestComponent();
 
     @After
     public void tearDown() {
-        UI.setCurrent(null);
+        // UI.removeAll breaks when tooltip is removed in detach listener of the
+        // component, so remove manually beforehand
+        getTooltipElement().ifPresent(Element::removeFromTree);
     }
 
     @Test
@@ -79,9 +75,8 @@ public class TooltipTest {
         Tooltip.forComponent(component);
 
         // Create a new UI and move the component to it (@PreserveOnRefresh)
-        ui = new UI();
-        UI.setCurrent(ui);
         component.getElement().removeFromTree(false);
+        ui.replaceUI();
         ui.add(component);
 
         Assert.assertTrue(getTooltipElement().isPresent());
@@ -244,7 +239,7 @@ public class TooltipTest {
     }
 
     private Optional<Element> getTooltipElement() {
-        return ui.getElement().getChildren()
+        return ui.getUI().getElement().getChildren()
                 .filter(child -> child.getTag().equals("vaadin-tooltip"))
                 .findFirst();
     }

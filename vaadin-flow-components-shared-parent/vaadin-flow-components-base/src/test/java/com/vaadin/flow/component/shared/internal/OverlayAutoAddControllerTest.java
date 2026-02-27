@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.shared.internal;
 
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -24,7 +24,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementUtil;
@@ -33,27 +32,18 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.internal.BeforeLeaveHandler;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class OverlayAutoAddControllerTest {
-    private UI ui;
-
-    @Before
-    public void setUp() {
-        ui = Mockito.spy(new TestUI());
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void open_withoutUI_throws() {
-        UI.setCurrent(null);
+        ui.clearUI();
 
         TestComponent component = new TestComponent();
 
@@ -66,9 +56,9 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getElement(),
+        Assert.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -79,7 +69,7 @@ public class OverlayAutoAddControllerTest {
         parent.add(component);
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals(parent.getElement(),
                 component.getElement().getParent());
@@ -92,7 +82,7 @@ public class OverlayAutoAddControllerTest {
 
         component.setOpened(true);
         parent.add(component);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals(parent.getElement(),
                 component.getElement().getParent());
@@ -104,7 +94,7 @@ public class OverlayAutoAddControllerTest {
 
         component.setOpened(true);
         component.setOpened(false);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertNull(component.getElement().getParent());
     }
@@ -116,11 +106,11 @@ public class OverlayAutoAddControllerTest {
 
         BeforeLeaveEvent beforeLeaveEvent = Mockito
                 .mock(BeforeLeaveEvent.class);
-        ui.getInternals().getListeners(BeforeLeaveHandler.class)
+        ui.getUI().getInternals().getListeners(BeforeLeaveHandler.class)
                 .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getElement(),
+        Assert.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -132,9 +122,9 @@ public class OverlayAutoAddControllerTest {
 
         BeforeLeaveEvent beforeLeaveEvent = Mockito
                 .mock(BeforeLeaveEvent.class);
-        ui.getInternals().getListeners(BeforeLeaveHandler.class)
+        ui.getUI().getInternals().getListeners(BeforeLeaveHandler.class)
                 .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertNull(component.getElement().getParent());
     }
@@ -144,13 +134,13 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Just setting the property should not yet remove the component,
         // instead it should wait for the closed event
         component.setOpened(false);
 
-        Assert.assertEquals(ui.getElement(),
+        Assert.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -159,13 +149,13 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Just receiving the closed event should not remove the component,
         // as the component also needs to be closed on the server side
         fireClosedEvent(component);
 
-        Assert.assertEquals(ui.getElement(),
+        Assert.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -174,7 +164,7 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Setting the property and receiving a closed event should remove the
         // component
@@ -189,11 +179,11 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Mark the component as inert
         ElementUtil.setInert(component.getElement(), true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertTrue(component.getElement().getNode().isInert());
 
         // Inert components should still receive the closed event
@@ -209,7 +199,7 @@ public class OverlayAutoAddControllerTest {
         parent.add(component);
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         component.setOpened(false);
         fireClosedEvent(component);
@@ -223,7 +213,7 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         component.setOpened(false);
         fireClosedEvent(component);
@@ -231,9 +221,9 @@ public class OverlayAutoAddControllerTest {
         Assert.assertNull(component.getElement().getParent());
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getElement(),
+        Assert.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -242,10 +232,9 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                ModalityMode.MODELESS);
+        Assert.assertNull(ui.getUI().getInternals().getActiveModalComponent());
     }
 
     @Test
@@ -253,10 +242,10 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent(() -> ModalityMode.STRICT);
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                ModalityMode.STRICT);
+        Assert.assertEquals(component,
+                ui.getUI().getInternals().getActiveModalComponent());
     }
 
     @Test
@@ -265,10 +254,9 @@ public class OverlayAutoAddControllerTest {
                 () -> ModalityMode.MODELESS);
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                ModalityMode.MODELESS);
+        Assert.assertNull(ui.getUI().getInternals().getActiveModalComponent());
     }
 
     @Test
@@ -276,7 +264,7 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
         component.controller.add();
 
-        Assert.assertEquals(ui.getElement(),
+        Assert.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -305,7 +293,7 @@ public class OverlayAutoAddControllerTest {
         component.controller.add();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         component.setOpened(false);
         fireClosedEvent(component);
 
@@ -317,9 +305,9 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getElement(),
+        Assert.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
 
         component.controller.remove();
@@ -334,7 +322,7 @@ public class OverlayAutoAddControllerTest {
         parent.add(component);
 
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals(parent.getElement(),
                 component.getElement().getParent());
@@ -350,12 +338,12 @@ public class OverlayAutoAddControllerTest {
         // Open a modal component first
         TestComponent modal = new TestComponent(() -> ModalityMode.STRICT);
         modal.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Open another component inside the modal
         TestComponent innerComponent = new TestComponent();
         innerComponent.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Verify the inner component has data-slot-ignore attribute
         Assert.assertTrue(
@@ -367,7 +355,7 @@ public class OverlayAutoAddControllerTest {
         // Open a component without a modal parent
         TestComponent component = new TestComponent();
         component.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Verify the component does not have data-slot-ignore attribute
         Assert.assertFalse(
@@ -379,12 +367,12 @@ public class OverlayAutoAddControllerTest {
         // Open a modal component first
         TestComponent modal = new TestComponent(() -> ModalityMode.STRICT);
         modal.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Open another component inside the modal
         TestComponent innerComponent = new TestComponent();
         innerComponent.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Verify the attribute is set
         Assert.assertTrue(
@@ -404,7 +392,7 @@ public class OverlayAutoAddControllerTest {
         // Open a modal component first
         TestComponent modal = new TestComponent(() -> ModalityMode.STRICT);
         modal.setOpened(true);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Add another component using controller.add()
         TestComponent innerComponent = new TestComponent();
@@ -413,12 +401,6 @@ public class OverlayAutoAddControllerTest {
         // Verify the inner component has data-slot-ignore attribute
         Assert.assertTrue(
                 innerComponent.getElement().hasAttribute("data-slot-ignore"));
-    }
-
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     private void fireClosedEvent(Component component) {
@@ -450,13 +432,5 @@ public class OverlayAutoAddControllerTest {
     @Tag("parent")
     private static class ParentComponent extends Component
             implements HasComponents {
-    }
-
-    private static class TestUI extends UI {
-        @Override
-        public boolean equals(Object obj) {
-            // Needed for check in UI.setChildComponentModal to pass
-            return true;
-        }
     }
 }

@@ -15,33 +15,18 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ModalityMode;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class DialogModalityTest {
-    private final UI ui = new UI();
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+
     private final Dialog dialog = new Dialog();
-
-    @Before
-    public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-    }
-
-    @After
-    public void teardown() {
-        UI.setCurrent(null);
-    }
 
     @Test
     public void defaults() {
@@ -86,12 +71,12 @@ public class DialogModalityTest {
         // Auto added
         dialog.setModality(ModalityMode.STRICT);
         dialog.open();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertTrue(isServerSideModal());
 
         // Manually added
         dialog.close();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse(isServerSideModal());
 
         ui.add(dialog);
@@ -184,7 +169,7 @@ public class DialogModalityTest {
         // Auto-added dialog should be added to current modal
         Dialog secondDialog = new Dialog();
         secondDialog.open();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals(dialog, secondDialog.getParent().orElse(null));
     }
@@ -194,12 +179,12 @@ public class DialogModalityTest {
         // Auto added
         dialog.setModality(ModalityMode.VISUAL);
         dialog.open();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse(isServerSideModal());
 
         // Manually added
         dialog.close();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse(isServerSideModal());
 
         ui.add(dialog);
@@ -215,9 +200,9 @@ public class DialogModalityTest {
 
         Dialog secondDialog = new Dialog();
         secondDialog.open();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui, secondDialog.getParent().orElse(null));
+        Assert.assertEquals(ui.getUI(), secondDialog.getParent().orElse(null));
     }
 
     @Test
@@ -225,12 +210,12 @@ public class DialogModalityTest {
         // Auto added
         dialog.setModality(ModalityMode.MODELESS);
         dialog.open();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse(isServerSideModal());
 
         // Manually added
         dialog.close();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse(isServerSideModal());
 
         ui.add(dialog);
@@ -239,12 +224,7 @@ public class DialogModalityTest {
     }
 
     private boolean isServerSideModal() {
-        return dialog == ui.getInternals().getActiveModalComponent();
+        return dialog == ui.getUI().getInternals().getActiveModalComponent();
     }
 
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
-    }
 }

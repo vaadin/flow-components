@@ -64,7 +64,7 @@ public class MockUIRule extends ExternalResource {
 
     @Override
     protected void after() {
-        ui.removeAll();
+        removeAll();
         UI.setCurrent(null);
         VaadinSession.setCurrent(null);
     }
@@ -76,6 +76,21 @@ public class MockUIRule extends ExternalResource {
      */
     public UI getUI() {
         return ui;
+    }
+
+    /**
+     * Clears the current the UI.
+     */
+    public void clearUI() {
+        after();
+    }
+
+    /**
+     * Replaces the current UI with a new instance.
+     */
+    public void replaceUI() {
+        after();
+        before();
     }
 
     /**
@@ -119,6 +134,14 @@ public class MockUIRule extends ExternalResource {
      */
     public void remove(Component component) {
         ui.remove(component);
+    }
+
+    /**
+     * Remove all components from the UI. Delegates to {@link UI#removeAll()}
+     * for convenience.
+     */
+    public void removeAll() {
+        ui.removeAll();
     }
 
     /**

@@ -28,7 +28,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -136,7 +135,7 @@ public class NotificationTest {
 
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUiInstance() {
-        UI.setCurrent(null);
+        ui.clearUI();
         Notification notification = new Notification();
         notification.setOpened(true);
     }
