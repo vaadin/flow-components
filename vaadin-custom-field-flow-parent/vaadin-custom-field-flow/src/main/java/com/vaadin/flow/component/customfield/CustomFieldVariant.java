@@ -29,7 +29,8 @@ public enum CustomFieldVariant {
      */
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),
-    HELPER_ABOVE("helper-above-field");
+    HELPER_ABOVE("helper-above-field"),
+    SMALL("small");
 
     private final String variant;
 
