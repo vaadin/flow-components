@@ -30,7 +30,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-slider")
-@NpmPackage(value = "@vaadin/slider", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/slider", version = "25.1.0-beta1")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class Slider extends SliderBase<Slider, Double> implements HasAriaLabel {
 
