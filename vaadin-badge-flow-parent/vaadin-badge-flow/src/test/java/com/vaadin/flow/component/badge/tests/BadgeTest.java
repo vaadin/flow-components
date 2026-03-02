@@ -120,17 +120,57 @@ public class BadgeTest {
     }
 
     @Test
-    public void setContent_doesNotAffectTextOrIcon() {
-        var badge = new Badge("Text");
+    public void setContent_doesNotAffectIcon() {
+        var badge = new Badge();
         var icon = new Span();
         badge.setIcon(icon);
 
         var content = new Span();
         badge.setContent(content);
 
-        Assert.assertEquals("Text", badge.getText());
         Assert.assertEquals(icon, badge.getIcon());
         Assert.assertEquals(content, badge.getContent());
+    }
+
+    @Test
+    public void setContent_replacesText() {
+        var badge = new Badge("Text");
+        var content = new Span();
+        badge.setContent(content);
+
+        Assert.assertNull(badge.getText());
+        Assert.assertEquals(content, badge.getContent());
+    }
+
+    @Test
+    public void setText_replacesContent() {
+        var badge = new Badge();
+        var content = new Span();
+        badge.setContent(content);
+
+        badge.setText("Text");
+
+        Assert.assertEquals("Text", badge.getText());
+        Assert.assertNull(badge.getContent());
+        Assert.assertFalse(content.getParent().isPresent());
+    }
+
+    @Test
+    public void setText_thenSetContent_thenSetText() {
+        var badge = new Badge();
+
+        badge.setText("foo");
+        Assert.assertEquals("foo", badge.getText());
+
+        var bar = new Span("bar");
+        badge.setContent(bar);
+        Assert.assertNull(badge.getText());
+        Assert.assertEquals(bar, badge.getContent());
+
+        badge.setText("baz");
+        Assert.assertEquals("baz", badge.getText());
+        Assert.assertNull(badge.getContent());
+        Assert.assertFalse(bar.getParent().isPresent());
     }
 
     @Test
