@@ -51,7 +51,8 @@ public enum ButtonVariant implements ThemeVariant {
     SUCCESS("success"),
     WARNING("warning"),
     ERROR("error"),
-    SMALL("small");
+    SMALL("small"),
+    LARGE("large");
 
     private final String variant;
 
