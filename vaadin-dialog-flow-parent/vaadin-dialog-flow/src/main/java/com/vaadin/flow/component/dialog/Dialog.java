@@ -318,10 +318,24 @@ public class Dialog extends Component implements HasComponents, HasSize,
         getElement().setProperty("width", value);
     }
 
+    /**
+     * Dialog does not support one-way binding of the width as the width may be
+     * modified for resizable dialogs.
+     * <p>
+     * This method is inherited from {@link HasSize} and is marked as deprecated
+     * to indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException} when called.
+     * 
+     * @param widthSignal
+     *            the signal to bind, not <code>null</code>
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
     @Override
     public void bindWidth(Signal<String> widthSignal) {
         throw new UnsupportedOperationException(
-                "One-way binding of width is not supported as the width may be modified for resizable dialogs.");
+                "One-way binding of the width is not supported as the width may be modified for resizable dialogs.");
     }
 
     @Override
@@ -341,10 +355,24 @@ public class Dialog extends Component implements HasComponents, HasSize,
         getElement().setProperty("height", value);
     }
 
+    /**
+     * Dialog does not support one-way binding of the height as the height may
+     * be modified for resizable dialogs.
+     * <p>
+     * This method is inherited from {@link HasSize} and is marked as deprecated
+     * to indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException} when called.
+     *
+     * @param heightSignal
+     *            the signal to bind, not <code>null</code>
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
     @Override
     public void bindHeight(Signal<String> heightSignal) {
         throw new UnsupportedOperationException(
-                "One-way binding of height is not supported as the width may be modified for resizable dialogs.");
+                "One-way binding of the height is not supported as the height may be modified for resizable dialogs.");
     }
 
     @Override
