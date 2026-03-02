@@ -50,7 +50,9 @@ public enum ButtonVariant implements ThemeVariant {
     TERTIARY("tertiary"),
     SUCCESS("success"),
     WARNING("warning"),
-    ERROR("error");
+    ERROR("error"),
+    SMALL("small"),
+    LARGE("large");
 
     private final String variant;
 
