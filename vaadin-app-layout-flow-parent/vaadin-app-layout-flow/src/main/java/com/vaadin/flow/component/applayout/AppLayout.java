@@ -47,7 +47,7 @@ import com.vaadin.flow.router.RouterLayout;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/app-layout", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/app-layout", version = "25.1.0-beta1")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors

@@ -73,7 +73,7 @@
     </scm>
     <properties>
         <flow.version>25.1-SNAPSHOT</flow.version>
-        <testbench.version>10.1.0-alpha3</testbench.version>
+        <testbench.version>10.1.0-beta1</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
