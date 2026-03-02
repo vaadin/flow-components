@@ -61,7 +61,8 @@ public enum TextFieldVariant implements ThemeVariant {
     ALIGN_RIGHT("align-right"),
     ALIGN_START("align-start"),
     ALIGN_END("align-end"),
-    HELPER_ABOVE("helper-above-field");
+    HELPER_ABOVE("helper-above-field"),
+    SMALL("small");
 
     private final String variant;
 
