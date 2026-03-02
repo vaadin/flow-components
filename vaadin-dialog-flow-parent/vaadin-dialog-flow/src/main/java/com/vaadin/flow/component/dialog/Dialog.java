@@ -319,6 +319,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     @Override
+    public void bindWidth(Signal<String> widthSignal) {
+        throw new UnsupportedOperationException(
+                "One-way binding of width is not supported as the width may be modified for resizable dialogs.");
+    }
+
+    @Override
     public void setMinWidth(String value) {
         minWidth = value;
         setDimension(ElementConstants.STYLE_MIN_WIDTH, value);
@@ -333,6 +339,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Override
     public void setHeight(String value) {
         getElement().setProperty("height", value);
+    }
+
+    @Override
+    public void bindHeight(Signal<String> heightSignal) {
+        throw new UnsupportedOperationException(
+                "One-way binding of height is not supported as the width may be modified for resizable dialogs.");
     }
 
     @Override
