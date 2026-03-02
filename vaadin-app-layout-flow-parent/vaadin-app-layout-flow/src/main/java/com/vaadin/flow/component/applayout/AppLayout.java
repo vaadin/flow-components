@@ -30,8 +30,10 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * App Layout is a component for building common application layouts.
@@ -143,6 +145,28 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      */
     public void setDrawerOpened(boolean drawerOpened) {
         getElement().setProperty("drawerOpened", drawerOpened);
+    }
+
+    /**
+     * Binds the drawer opened state to the given signal. The binding is
+     * two-way: signal changes push to the DOM property, and client-side
+     * property changes invoke the write callback.
+     * <p>
+     * While a signal is bound, any attempt to set the drawer opened state
+     * manually throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate value changes back, or {@code null}
+     *            for one-way binding
+     * @since 25.1
+     */
+    public void bindDrawerOpened(Signal<Boolean> signal,
+            SerializableConsumer<Boolean> writeCallback) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("drawerOpened",
+                signal.map(v -> v == null ? Boolean.TRUE : v), writeCallback);
     }
 
     /**
