@@ -204,8 +204,9 @@ public class Badge extends Component
     /**
      * Sets the given string as the text content of this component.
      * <p>
-     * This method removes any existing text-content and replaces it with the
-     * given text. Other slotted children (such as icons) are preserved.
+     * This method removes any existing content in the default slot and replaces
+     * it with the given text. Other slotted children (such as icons) are
+     * preserved.
      *
      * @param text
      *            the text content to set, or {@code null} to remove existing
@@ -213,6 +214,7 @@ public class Badge extends Component
      */
     @Override
     public void setText(String text) {
+        updateContent(null);
         textSignalSupport.set(text);
     }
 
@@ -228,6 +230,7 @@ public class Badge extends Component
 
     @Override
     public void bindText(Signal<String> textSignal) {
+        updateContent(null);
         textSignalSupport.bind(textSignal);
     }
 
@@ -268,22 +271,16 @@ public class Badge extends Component
     /**
      * Sets the given component as the content of this badge.
      * <p>
-     * The content is placed in the default slot of the badge.
+     * This method removes any existing content in the default slot and replaces
+     * it with the given component. Other slotted children (such as icons) are
+     * preserved.
      *
      * @param content
      *            the content component, or {@code null} to remove it
      */
     public void setContent(Component content) {
-        var oldContent = getContent();
-        if (oldContent == content) {
-            return;
-        }
-        if (oldContent != null) {
-            getElement().removeChild(oldContent.getElement());
-        }
-        if (content != null) {
-            getElement().appendChild(content.getElement());
-        }
+        textSignalSupport.set(null);
+        updateContent(content);
     }
 
     /**
@@ -350,12 +347,25 @@ public class Badge extends Component
         textNode.setText(text);
 
         if (text == null || text.isEmpty()) {
-            getElement().removeChild(textNode.getElement());
+            textNode.removeFromParent();
             return;
         }
 
         if (textNode.getParent().isEmpty()) {
             getElement().appendChild(textNode.getElement());
+        }
+    }
+
+    private void updateContent(Component content) {
+        var oldContent = getContent();
+        if (oldContent == content) {
+            return;
+        }
+        if (oldContent != null) {
+            getElement().removeChild(oldContent.getElement());
+        }
+        if (content != null) {
+            getElement().appendChild(content.getElement());
         }
     }
 }
