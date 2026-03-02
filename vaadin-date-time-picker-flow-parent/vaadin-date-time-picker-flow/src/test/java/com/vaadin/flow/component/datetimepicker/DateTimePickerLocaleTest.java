@@ -18,30 +18,18 @@ package com.vaadin.flow.component.datetimepicker;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class DateTimePickerLocaleTest {
-
-    private UI ui;
-
-    @Before
-    public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void newDateTimePicker_returnsUiLocale() {
