@@ -36,6 +36,7 @@ import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Confirm Dialog is a modal Dialog used to confirm user actions.
@@ -173,6 +174,11 @@ public class ConfirmDialog extends Component
     }
 
     @Override
+    public void bindWidth(Signal<String> widthSignal) {
+        getElement().bindProperty("width", widthSignal, null);
+    }
+
+    @Override
     public String getHeight() {
         return getElement().getProperty("height");
     }
@@ -193,6 +199,11 @@ public class ConfirmDialog extends Component
     @Override
     public void setHeight(String height) {
         getElement().setProperty("height", height);
+    }
+
+    @Override
+    public void bindHeight(Signal<String> heightSignal) {
+        getElement().bindProperty("height", heightSignal, null);
     }
 
     /**
