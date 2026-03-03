@@ -106,7 +106,7 @@ public class ComboBoxBindItemsIT extends AbstractComboBoxIT {
     public void bindItems_updateItem_comboBoxUpdated() {
         comboBox.openPopup();
         Assert.assertEquals("First item before update", "Alice Smith",
-                comboBox.getOptions().get(0));
+                comboBox.getOptions().getFirst());
 
         comboBox.closePopup();
         waitForElementPresent(By.id(UPDATE_FIRST_ITEM_BUTTON));
@@ -145,7 +145,7 @@ public class ComboBoxBindItemsIT extends AbstractComboBoxIT {
         Assert.assertEquals("Only Bob should be shown", 1,
                 comboBox.getOptions().size());
         Assert.assertEquals("Bob Johnson should match filter", "Bob Johnson",
-                comboBox.getOptions().get(0));
+                comboBox.getOptions().getFirst());
     }
 
     @Test

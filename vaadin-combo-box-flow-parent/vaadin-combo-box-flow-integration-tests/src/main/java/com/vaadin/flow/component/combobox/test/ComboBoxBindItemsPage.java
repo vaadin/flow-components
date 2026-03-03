@@ -38,7 +38,14 @@ public class ComboBoxBindItemsPage extends Div {
     public static final String ITEM_COUNT_SPAN = "item-count";
     public static final String SELECTED_VALUE_SPAN = "selected-value";
 
-    private final ListSignal<Person> itemsSignal = new ListSignal<>();
+    private final ListSignal<Person> itemsSignal = new ListSignal<>(
+            (p1, p2) -> {
+                if (p1 == p2)
+                    return true;
+                // component updates items by ID, signals trigger effects only
+                // upon value changes
+                return p1.toString().equals(p2.toString());
+            });
 
     public ComboBoxBindItemsPage() {
         // Create a list signal with explicitly created ValueSignals for each
