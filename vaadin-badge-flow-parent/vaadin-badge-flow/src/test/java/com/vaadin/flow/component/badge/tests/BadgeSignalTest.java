@@ -79,11 +79,31 @@ public class BadgeSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("bar", badge.getElement().getText());
     }
 
+    @Test
+    public void bindText_replacesContent() {
+        Badge badge = new Badge();
+        Span content = new Span();
+        badge.setContent(content);
+
+        badge.bindText(textSignal);
+        ui.add(badge);
+
+        Assert.assertNull(badge.getContent());
+        Assert.assertFalse(content.getParent().isPresent());
+    }
+
     @Test(expected = BindingActiveException.class)
     public void bindTextSignal_setText_throws() {
         Badge badge = new Badge();
         badge.bindText(textSignal);
         badge.setText("bar");
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindTextSignal_setContent_throws() {
+        Badge badge = new Badge();
+        badge.bindText(textSignal);
+        badge.setContent(new Span());
     }
 
     @Test
