@@ -29,7 +29,10 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionEvent;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -143,6 +146,13 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             public Element getElement() {
                 return getGrid().getElement();
             }
+
+            @Override
+            public void bindValue(Signal<T> valueSignal,
+                    SerializableConsumer<T> writeCallback) {
+                GridSelectionSignalHelper.bindValue(this, valueSignal,
+                        writeCallback);
+            }
         };
     }
 
@@ -176,6 +186,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     @Override
     protected void remove() {
         super.remove();
+        getGrid().getElement().getNode().getFeature(SignalBindingFeature.class)
+                .removeBinding(SignalBindingFeature.VALUE);
         deselectAll();
     }
 
