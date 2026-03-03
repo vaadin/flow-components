@@ -38,6 +38,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
 
 /**
  * Details is an expandable panel for showing and hiding content from the user
@@ -439,6 +440,24 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public void setOpened(boolean opened) {
         doSetOpened(opened);
+    }
+
+    /**
+     * Binds the opened state to the given writable signal. The binding is
+     * two-way: signal changes push to the DOM property, and client-side
+     * property changes push back to the signal.
+     * <p>
+     * While a signal is bound, any attempt to set the opened state manually
+     * throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the writable signal to bind, not {@code null}
+     * @since 25.1
+     */
+    public void bindOpened(WritableSignal<Boolean> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        getElement().bindProperty("opened",
+                signal.map(v -> v == null ? Boolean.FALSE : v), signal::set);
     }
 
     public static class OpenedChangeEvent extends ComponentEvent<Details> {

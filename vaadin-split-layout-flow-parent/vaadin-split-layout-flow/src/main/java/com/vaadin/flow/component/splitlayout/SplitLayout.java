@@ -26,6 +26,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.WritableSignal;
 
 /**
  * Split Layout is a component with two content areas and a draggable split
@@ -53,6 +55,9 @@ public class SplitLayout extends Component
     private Component secondaryComponent;
     private StateTree.ExecutionRegistration updateStylesRegistration;
     private Double splitterPosition;
+
+    private SignalPropertySupport<Double> splitterPositionSupport;
+    private WritableSignal<Double> boundSplitterSignal;
 
     /**
      * numeration of all available orientation for VaadinSplitLayout component
@@ -79,8 +84,14 @@ public class SplitLayout extends Component
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragEndListener(e -> {
-            splitterPosition = calcNewSplitterPosition(
+            Double newPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
+
+            if (boundSplitterSignal != null) {
+                boundSplitterSignal.set(newPosition);
+            } else {
+                splitterPosition = newPosition;
+            }
 
             setPrimaryStyle("flex",
                     String.format("1 1 %s", e.primaryComponentFlexBasis));
@@ -234,8 +245,37 @@ public class SplitLayout extends Component
      *            the relative position of the splitter, in percentages
      */
     public void setSplitterPosition(double position) {
-        this.splitterPosition = position;
-        getUI().ifPresent(this::requestStylesUpdatesForSplitterPosition);
+        getSplitterPositionSupport().set(position);
+    }
+
+    /**
+     * Binds the splitter position to the given writable signal. The binding is
+     * two-way: signal changes push the position to the client, and client-side
+     * splitter drag events push back to the signal.
+     * <p>
+     * While a signal is bound, any attempt to set the splitter position
+     * manually throws {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the writable signal to bind, not {@code null}
+     * @since 25.1
+     */
+    public void bindSplitterPosition(WritableSignal<Double> signal) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        boundSplitterSignal = signal;
+        getSplitterPositionSupport().bind(signal);
+    }
+
+    private SignalPropertySupport<Double> getSplitterPositionSupport() {
+        if (splitterPositionSupport == null) {
+            splitterPositionSupport = SignalPropertySupport.create(this,
+                    position -> {
+                        this.splitterPosition = position;
+                        getUI().ifPresent(
+                                this::requestStylesUpdatesForSplitterPosition);
+                    });
+        }
+        return splitterPositionSupport;
     }
 
     private void requestStylesUpdatesForSplitterPosition(UI ui) {
