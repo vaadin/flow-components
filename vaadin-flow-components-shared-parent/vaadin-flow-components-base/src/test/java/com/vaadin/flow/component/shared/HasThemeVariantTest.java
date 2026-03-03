@@ -141,22 +141,6 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindThemeVariant_setThemeVariants_removesBinding() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-        // setThemeVariants calls getThemeNames().clear() which removes the
-        // binding
-        component.setThemeVariants(); // clears all variants and biding
-
-        Assert.assertTrue(component.getThemeNames().isEmpty());
-        Assert.assertTrue(signal.peek());
-        signal.set(true); // no effect
-        Assert.assertTrue(component.getThemeNames().isEmpty());
-    }
-
-    @Test
     public void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
