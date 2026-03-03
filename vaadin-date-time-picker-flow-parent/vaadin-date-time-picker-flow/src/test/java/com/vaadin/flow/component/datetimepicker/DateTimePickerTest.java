@@ -23,40 +23,26 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class DateTimePickerTest {
-
-    private UI ui;
-
-    @Before
-    public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
@@ -194,16 +180,11 @@ public class DateTimePickerTest {
 
         String value = LocalDateTime.now().toString();
         element.setProperty("value", value);
-        UI ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(DateTimePicker.class))
                 .thenAnswer(invocation -> new DateTimePicker());
