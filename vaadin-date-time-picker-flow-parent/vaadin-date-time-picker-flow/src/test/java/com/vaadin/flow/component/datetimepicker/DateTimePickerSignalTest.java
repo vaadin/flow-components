@@ -30,11 +30,13 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
 
     private DateTimePicker dateTimePicker;
     private ValueSignal<LocalDateTime> signal;
+    private ValueSignal<Boolean> readonlySignal;
 
     @Before
     public void setup() {
         dateTimePicker = new DateTimePicker();
         signal = new ValueSignal<>(LocalDateTime.of(2023, 10, 1, 10, 0));
+        readonlySignal = new ValueSignal<>(false);
     }
 
     @Test
@@ -116,4 +118,72 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
         dateTimePicker.bindMax(signal);
         dateTimePicker.bindMax(new ValueSignal<>(LocalDateTime.now()));
     }
+
+    @Test
+    public void bindReadOnly_elementAttached_updatesWithSignal() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindReadOnly(readonlySignal);
+
+        Assert.assertFalse(dateTimePicker.isReadOnly());
+
+        readonlySignal.set(true);
+        Assert.assertTrue(dateTimePicker.isReadOnly());
+    }
+
+    @Test
+    public void bindReadOnly_elementNotAttached_bindingInactive_untilAttach() {
+        readonlySignal.set(true);
+        dateTimePicker.bindReadOnly(readonlySignal);
+
+        Assert.assertFalse(dateTimePicker.isReadOnly());
+
+        UI.getCurrent().add(dateTimePicker);
+        Assert.assertTrue(dateTimePicker.isReadOnly());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void setReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindReadOnly(readonlySignal);
+        dateTimePicker.setReadOnly(true);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindReadOnly(readonlySignal);
+        dateTimePicker.bindReadOnly(new ValueSignal<>(true));
+    }
+
+    @Test
+    public void bindReadOnly_synchronizesChildComponents() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindReadOnly(readonlySignal);
+
+        Assert.assertFalse(dateTimePicker.isReadOnly());
+        Assert.assertFalse(getDatePicker().isReadOnly());
+        Assert.assertFalse(getTimePicker().isReadOnly());
+
+        readonlySignal.set(true);
+        Assert.assertTrue(dateTimePicker.isReadOnly());
+        Assert.assertTrue(getDatePicker().isReadOnly());
+        Assert.assertTrue(getTimePicker().isReadOnly());
+    }
+
+    private DateTimePickerDatePicker getDatePicker() {
+        return dateTimePicker.getChildren()
+                .filter(child -> child instanceof DateTimePickerDatePicker)
+                .map(child -> (DateTimePickerDatePicker) child).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "DateTimePickerDatePicker not found"));
+    }
+
+    private DateTimePickerTimePicker getTimePicker() {
+        return dateTimePicker.getChildren()
+                .filter(child -> child instanceof DateTimePickerTimePicker)
+                .map(child -> (DateTimePickerTimePicker) child).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "DateTimePickerTimePicker not found"));
+    }
+
 }

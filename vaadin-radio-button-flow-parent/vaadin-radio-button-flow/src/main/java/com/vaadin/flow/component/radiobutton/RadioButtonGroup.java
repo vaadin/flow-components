@@ -32,6 +32,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -66,6 +67,7 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Radio Button Group allows the user to select exactly one value from a list of
@@ -149,6 +151,12 @@ public class RadioButtonGroup<T>
             this);
 
     private SelectionPreservationHandler<T> selectionPreservationHandler;
+
+    private final SignalPropertySupport<Boolean> readonlySupport = SignalPropertySupport
+            .create(this, (value) -> {
+                super.setReadOnly(value);
+                refreshButtons();
+            });
 
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
@@ -521,13 +529,12 @@ public class RadioButtonGroup<T>
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        getElement().setProperty("readonly", readOnly);
-        refreshButtons();
+        readonlySupport.set(readOnly);
     }
 
     @Override
-    public boolean isReadOnly() {
-        return getElement().getProperty("readonly", false);
+    public void bindReadOnly(Signal<Boolean> readOnlySignal) {
+        readonlySupport.bind(readOnlySignal);
     }
 
     /**
