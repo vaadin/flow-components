@@ -1,0 +1,94 @@
+---
+name: migrate-junit5
+description: Migrate JUnit 4 tests to JUnit 5 in this project. Use when asked to convert, migrate, or update tests from JUnit 4 to JUnit 5.
+argument-hint: "[file or module path]"
+---
+
+Migrate the specified JUnit 4 test file(s) or module to JUnit 5. Read each file first, apply all rules below, and edit it. Do NOT change anything else (no reformatting, no logic changes).
+
+## Import replacements
+
+| JUnit 4 | JUnit 5 |
+|---|---|
+| `org.junit.Test` | `org.junit.jupiter.api.Test` |
+| `org.junit.Assert` | `org.junit.jupiter.api.Assertions` |
+| `org.junit.Before` | `org.junit.jupiter.api.BeforeEach` |
+| `org.junit.After` | `org.junit.jupiter.api.AfterEach` |
+| `org.junit.BeforeClass` | `org.junit.jupiter.api.BeforeAll` |
+| `org.junit.AfterClass` | `org.junit.jupiter.api.AfterAll` |
+| `org.junit.Ignore` | `org.junit.jupiter.api.Disabled` |
+| `org.junit.Rule` | `org.junit.jupiter.api.extension.RegisterExtension` |
+
+Also handle **static imports**: `static org.junit.Assert.*` becomes `static org.junit.jupiter.api.Assertions.*`.
+
+## MockUIRule -> MockUIExtension
+
+```java
+// Before
+@Rule
+public MockUIRule ui = new MockUIRule();
+
+// After
+@RegisterExtension
+MockUIExtension ui = new MockUIExtension();
+```
+
+Import: `com.vaadin.tests.MockUIRule` -> `com.vaadin.tests.MockUIExtension`
+
+## Assertions
+
+Replace all `Assert.` with `Assertions.`. Method signatures are the same, except for **message-carrying overloads** where the message moves to the **last** parameter:
+
+```java
+// Before
+Assert.assertEquals("message", expected, actual);
+
+// After
+Assertions.assertEquals(expected, actual, "message");
+```
+
+Check every assertion call for a String message as the first argument and move it to the last position.
+
+## Expected exceptions
+
+Replace `@Test(expected = ...)` with `Assertions.assertThrows`:
+
+```java
+// Before
+@Test(expected = IllegalStateException.class)
+public void throwsException() {
+    doSomething();
+}
+
+// After
+@Test
+public void throwsException() {
+    Assertions.assertThrows(IllegalStateException.class, () -> doSomething());
+}
+```
+
+## @Ignore -> @Disabled
+
+```java
+// Before
+@Ignore("reason")
+
+// After
+@Disabled("reason")
+```
+
+## Base classes
+
+JUnit 5 does **not** process JUnit 4 `@Rule` annotations from parent classes. Tests will compile but fail at runtime (e.g. `UI.getCurrent()` returns null). Switch to the JUnit 5 base class:
+
+| JUnit 4 | JUnit 5 |
+|---|---|
+| `AbstractSignalsUnitTest` | `AbstractSignalsJUnit5Test` |
+
+## After editing
+
+After converting all files, run the unit tests for the affected module to verify the conversion:
+
+```
+mvn test -pl <module-path>
+```
