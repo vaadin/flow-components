@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,7 +30,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
@@ -39,8 +37,11 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.MockUIRule;
 
 public class HeaderFooterTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     private static final Predicate<Element> isColumn = element -> "vaadin-grid-column"
             .equals(element.getTag());
@@ -52,8 +53,6 @@ public class HeaderFooterTest {
     Column<String> secondColumn;
     Column<String> thirdColumn;
 
-    private UI ui;
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -61,15 +60,6 @@ public class HeaderFooterTest {
     public void setup() {
         grid = new Grid<>();
         addColumns();
-
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     private void addColumns() {
