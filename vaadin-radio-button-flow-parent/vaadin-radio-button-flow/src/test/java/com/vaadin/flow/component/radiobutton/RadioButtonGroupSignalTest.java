@@ -22,22 +22,59 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
 public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
     private final RadioButtonGroup<String> group = new RadioButtonGroup<>();
+    private final ValueSignal<Boolean> readonlySignal = new ValueSignal<>(
+            false);
+
+    @Test
+    public void bindReadOnly_elementAttached_updatesWithSignal() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+
+        Assert.assertFalse(group.isReadOnly());
+
+        readonlySignal.set(true);
+        Assert.assertTrue(group.isReadOnly());
+    }
+
+    @Test
+    public void bindReadOnly_elementNotAttached_bindingInactive_untilAttach() {
+        readonlySignal.set(true);
+        group.bindReadOnly(readonlySignal);
+
+        Assert.assertFalse(group.isReadOnly());
+
+        UI.getCurrent().add(group);
+        Assert.assertTrue(group.isReadOnly());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void setReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+        group.setReadOnly(true);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+        group.bindReadOnly(new ValueSignal<>(true));
+    }
 
     @Test
     public void bindReadOnly_disablesUncheckedButtons() {
-        ValueSignal<Boolean> readOnlySignal = new ValueSignal<>(false);
-
         group.setItems("One", "Two", "Three");
         group.setValue("One");
-        group.bindReadOnly(readOnlySignal);
+        group.bindReadOnly(readonlySignal);
         UI.getCurrent().add(group);
 
-        readOnlySignal.set(true);
+        readonlySignal.set(true);
 
         List<RadioButton<String>> buttons = getRadioButtons();
         Assert.assertTrue("Selected button should remain enabled",

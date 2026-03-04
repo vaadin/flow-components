@@ -18,7 +18,6 @@ package com.vaadin.flow.component.datetimepicker;
 import java.time.LocalDateTime;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -28,16 +27,11 @@ import com.vaadin.tests.AbstractSignalsUnitTest;
 
 public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
 
-    private DateTimePicker dateTimePicker;
-    private ValueSignal<LocalDateTime> signal;
-    private ValueSignal<Boolean> readonlySignal;
-
-    @Before
-    public void setup() {
-        dateTimePicker = new DateTimePicker();
-        signal = new ValueSignal<>(LocalDateTime.of(2023, 10, 1, 10, 0));
-        readonlySignal = new ValueSignal<>(false);
-    }
+    private final DateTimePicker dateTimePicker = new DateTimePicker();
+    private final ValueSignal<LocalDateTime> signal = new ValueSignal<>(
+            LocalDateTime.of(2023, 10, 1, 10, 0));
+    private final ValueSignal<Boolean> readonlySignal = new ValueSignal<>(
+            false);
 
     @Test
     public void bindMin_elementAttached_updatesWithSignal() {
