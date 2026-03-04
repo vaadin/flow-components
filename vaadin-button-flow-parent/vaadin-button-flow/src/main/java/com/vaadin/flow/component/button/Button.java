@@ -62,18 +62,14 @@ public class Button extends Component
         HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
         HasThemeVariant<ButtonVariant>, HasTooltip {
 
+    private final Text textNode = new Text("");
     private Component iconComponent;
     private boolean iconAfterText;
     private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
 
-    // Explicit text node is used to manage the text content and text signal
-    // bindings of the button separatly from its icon. All `HasText` methods
-    // delegate to this node.
-    private final Text textNode = new Text("");
-
     private final SignalPropertySupport<String> textSupport = SignalPropertySupport
-            .<String> create(this, this::textChangeHandler);
+            .create(this, this::textChangeHandler);
 
     /**
      * Default constructor. Creates an empty button.
@@ -255,8 +251,7 @@ public class Button extends Component
      */
     @Override
     public void setText(String text) {
-        textNode.setText(text);
-        textChangeHandler(text);
+        textSupport.set(text);
     }
 
     @Override
@@ -266,7 +261,6 @@ public class Button extends Component
 
     @Override
     public void bindText(Signal<String> textSignal) {
-        textNode.bindText(textSignal);
         textSupport.bind(textSignal);
     }
 
@@ -671,6 +665,8 @@ public class Button extends Component
      *            the text inside the button
      */
     private void textChangeHandler(String text) {
+        textNode.setText(text);
+
         var hasText = text != null && !text.isEmpty();
         var textNodeAttached = textNode.getParent().isPresent();
         if (hasText && !textNodeAttached) {
