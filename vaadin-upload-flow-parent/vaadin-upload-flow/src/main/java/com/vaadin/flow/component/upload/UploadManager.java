@@ -206,14 +206,8 @@ public class UploadManager implements Serializable {
         if (!(handler instanceof FailFastUploadHandler)) {
             handlerExplicitlyConfigured.set(true);
         }
-        /*
-         * Wraps the given upload handler with file type validation. The wrapper
-         * reads the current {@link #acceptedMimeTypes} and {@link
-         * #acceptedFileExtensions} at the time of each upload request, so
-         * changes made after {@link #setUploadHandler} are picked up.
-         */
         var validatingHandler = UploadHelper.wrapHandlerWithFileTypeValidation(
-                handler, acceptedMimeTypes, acceptedFileExtensions);
+                handler, () -> acceptedMimeTypes, () -> acceptedFileExtensions);
         // Wrap handler with ElementStreamResource to use custom target name
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 validatingHandler, connector.getElement()) {

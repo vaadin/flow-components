@@ -911,14 +911,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         if (!(handler instanceof FailFastUploadHandler)) {
             handlerExplicitlyConfigured = true;
         }
-        /*
-         * Wraps the given upload handler with file type validation. The wrapper
-         * reads the current {@link #acceptedMimeTypes} and {@link
-         * #acceptedFileExtensions} at the time of each upload request, so
-         * changes made after {@link #setUploadHandler} are picked up.
-         */
         var validatingHandler = UploadHelper.wrapHandlerWithFileTypeValidation(
-                handler, acceptedMimeTypes, acceptedFileExtensions);
+                handler, () -> acceptedMimeTypes, () -> acceptedFileExtensions);
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 validatingHandler, this.getElement()) {
             @Override
