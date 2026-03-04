@@ -30,6 +30,7 @@ import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.BaseJsonNode;
@@ -218,6 +219,28 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
             return null;
         }
         return JacksonUtils.readToObject(json, LoginI18n.class);
+    }
+
+    /**
+     * LoginForm / LoginOverlay do not support binding the enabled state to a
+     * signal. The component needs to modify the enabled state itself, however
+     * changes to that state can not be synchronized back to the signal due to
+     * {@link HasEnabled#bindEnabled(Signal)} only supporting one-way bindings.
+     * <p>
+     * This method is inherited from {@link HasEnabled} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
+     *
+     * @param enabledSignal
+     *            the signal to bind, not <code>null</code>
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
+    @Override
+    public void bindEnabled(Signal<Boolean> enabledSignal) {
+        throw new UnsupportedOperationException(
+                "One-way binding of the enabled state is not supported.");
     }
 
     /**
