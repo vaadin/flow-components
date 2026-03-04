@@ -35,7 +35,7 @@ public class UploadInterruptView extends Div {
 
         MultiFileMemoryBuffer buffer = new SlowMultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
-        upload.setAcceptedFileTypes(".txt");
+        upload.setAcceptedFileExtensions(".txt");
         upload.addStartedListener(event -> {
             if (isInterruptableFile(event.getFileName())) {
                 event.getUpload().interruptUpload();
