@@ -49,48 +49,48 @@ public class DashboardWidgetTest extends DashboardTestBase {
     @Test
     public void addWidgetToLayout_widgetIsAdded() {
         Div layout = new Div();
-        getUi().add(layout);
+        ui.add(layout);
         DashboardWidget widget = getNewWidget();
         layout.add(widget);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Assert.assertTrue(layout.getChildren().anyMatch(widget::equals));
     }
 
     @Test
     public void removeWidgetFromLayout_widgetIsRemoved() {
         Div layout = new Div();
-        getUi().add(layout);
+        ui.add(layout);
         DashboardWidget widget = getNewWidget();
         layout.add(widget);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         layout.remove(widget);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Assert.assertTrue(layout.getChildren().noneMatch(widget::equals));
     }
 
     @Test
     public void addWidgetToLayout_removeFromParent_widgetIsRemoved() {
         Div layout = new Div();
-        getUi().add(layout);
+        ui.add(layout);
         DashboardWidget widget = getNewWidget();
         layout.add(widget);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         widget.removeFromParent();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Assert.assertTrue(layout.getChildren().noneMatch(widget::equals));
     }
 
     @Test
     public void addWidgetFromLayoutToAnotherLayout_widgetIsMoved() {
         Div parent = new Div();
-        getUi().add(parent);
+        ui.add(parent);
         DashboardWidget widget = getNewWidget();
         parent.add(widget);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Div newParent = new Div();
-        getUi().add(newParent);
+        ui.add(newParent);
         newParent.add(widget);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
         Assert.assertTrue(newParent.getChildren().anyMatch(widget::equals));
     }
