@@ -30,8 +30,8 @@ public class DashboardItemResizeTest extends DashboardTestBase {
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
         section.add(getNewWidget());
-        getUi().add(dashboard);
-        fakeClientCommunication();
+        ui.add(dashboard);
+        ui.fakeClientCommunication();
     }
 
     @Test
@@ -76,14 +76,13 @@ public class DashboardItemResizeTest extends DashboardTestBase {
 
     @Test
     public void resizeWidget_noClientUpdate() {
-        getUi().getInternals().dumpPendingJavaScriptInvocations();
+        ui.dumpPendingJavaScriptInvocations();
 
         assertWidgetResized(0, 2, 1);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
-        Assert.assertTrue(getUi().getInternals()
-                .dumpPendingJavaScriptInvocations().isEmpty());
+        Assert.assertTrue(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test

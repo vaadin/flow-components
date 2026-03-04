@@ -41,8 +41,8 @@ public class DashboardItemMoveTest extends DashboardTestBase {
         DashboardSection section = dashboard.addSection();
 
         section.add(getNewWidget(), getNewWidget());
-        getUi().add(dashboard);
-        fakeClientCommunication();
+        ui.add(dashboard);
+        ui.fakeClientCommunication();
         itemsArray = getItemsArray(dashboard.getChildren().toList());
     }
 
@@ -85,14 +85,13 @@ public class DashboardItemMoveTest extends DashboardTestBase {
 
     @Test
     public void moveWidget_noClientUpdate() {
-        getUi().getInternals().dumpPendingJavaScriptInvocations();
+        ui.dumpPendingJavaScriptInvocations();
 
         assertRootLevelItemMoved(0, 1);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
-        Assert.assertTrue(getUi().getInternals()
-                .dumpPendingJavaScriptInvocations().isEmpty());
+        Assert.assertTrue(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test

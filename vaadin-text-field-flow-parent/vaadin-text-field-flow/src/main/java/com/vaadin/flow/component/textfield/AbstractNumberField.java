@@ -50,8 +50,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * types, which can't be used as generic type parameters. Changing to Double
      * and Integer classes would be API-breaking change.
      */
-    private double min;
-    private double max;
     private double step;
 
     private boolean stepSetByUser;
@@ -62,6 +60,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private String unparsableValue;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    private final SignalPropertySupport<Double> minSupport = SignalPropertySupport
+            .create(this, value -> {
+                getElement().setProperty("min", value);
+                minSetByUser = true;
+            });
+    private final SignalPropertySupport<Double> maxSupport = SignalPropertySupport
+            .create(this, value -> getElement().setProperty("max", value));
 
     private Validator<T> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
@@ -90,7 +96,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
                 getI18nErrorMessage(
                         AbstractNumberFieldI18n::getMaxErrorMessage),
-                doubleValue, max);
+                doubleValue, maxSupport.get());
         if (maxResult.isError()) {
             return maxResult;
         }
@@ -98,7 +104,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         ValidationResult minResult = ValidationUtil.validateMinConstraint(
                 getI18nErrorMessage(
                         AbstractNumberFieldI18n::getMinErrorMessage),
-                doubleValue, min);
+                doubleValue, minSupport.get());
         if (minResult.isError()) {
             return minResult;
         }
@@ -113,11 +119,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private ValidationController<AbstractNumberField<C, T>, T> validationController = new ValidationController<>(
             this);
-
-    private final SignalPropertySupport<Double> minSupport = SignalPropertySupport
-            .create(this, value -> this.min = value);
-    private final SignalPropertySupport<Double> maxSupport = SignalPropertySupport
-            .create(this, value -> this.max = value);
 
     /**
      * Sets up the common logic for number fields.
@@ -145,11 +146,17 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        // Not setting these defaults to the web component, so it will have
-        // undefined as min and max
-        this.min = absoluteMin;
-        this.max = absoluteMax;
+        // Initialize constraint values
+        this.minSupport.set(absoluteMin);
+        this.maxSupport.set(absoluteMax);
         this.step = 1.0;
+        // Absolute min / max only represent the possible value range of the
+        // concrete number type, not actual constraints set by a developer. As
+        // such, we do not apply them to the web component and reset
+        // minSetByUser to not consider min in step validation.
+        this.getElement().removeProperty("min");
+        this.getElement().removeProperty("max");
+        this.minSetByUser = false;
 
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
@@ -308,16 +315,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *            the double value to set
      */
     protected void setMin(double min) {
-        getElement().setProperty("min", min);
-        this.min = min;
-        minSetByUser = true;
+        minSupport.set(min);
     }
 
     /**
      * Gets the minimum value for this field.
      */
     protected double getMinDouble() {
-        return min;
+        return minSupport.get();
     }
 
     /**
@@ -327,22 +332,20 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *            the double value to set
      */
     protected void setMax(double max) {
-        getElement().setProperty("max", max);
-        this.max = max;
+        maxSupport.set(max);
     }
 
     /**
      * Gets the maximum value for this field.
      */
     protected double getMaxDouble() {
-        return max;
+        return maxSupport.get();
     }
 
     /**
      * Internal helper to bind a signal to the minimum value.
      */
     protected final void bindMinInternal(Signal<Double> signal) {
-        getElement().bindProperty("min", signal, null);
         minSupport.bind(signal);
     }
 
@@ -350,7 +353,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * Internal helper to bind a signal to the maximum value.
      */
     protected final void bindMaxInternal(Signal<Double> signal) {
-        getElement().bindProperty("max", signal, null);
         maxSupport.bind(signal);
     }
 
