@@ -7,7 +7,7 @@
         <version>3.0.0</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>25.1-SNAPSHOT</version>
+    <version>25.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
@@ -72,7 +72,7 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>25.1-SNAPSHOT</flow.version>
+        <flow.version>25.2-SNAPSHOT</flow.version>
         <testbench.version>10.1.0-beta1</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
