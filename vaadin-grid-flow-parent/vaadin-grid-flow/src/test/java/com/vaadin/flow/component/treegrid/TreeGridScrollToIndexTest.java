@@ -17,36 +17,31 @@ package com.vaadin.flow.component.treegrid;
 
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.grid.editor.EditorBeanTest.MockUI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class TreeGridScrollToIndexTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
-    private MockUI ui = new MockUI();
     private TreeGrid<String> treeGrid;
     private TreeData<String> treeData = new TreeData<>();
 
     @Before
     public void setup() {
         treeGrid = new TreeGrid<>();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -69,7 +64,7 @@ public class TreeGridScrollToIndexTest {
         ui.add(treeGrid);
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToIndex(5);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
@@ -78,7 +73,7 @@ public class TreeGridScrollToIndexTest {
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToIndex(5);
         ui.add(treeGrid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
     }
 
@@ -87,7 +82,7 @@ public class TreeGridScrollToIndexTest {
         ui.add(treeGrid);
         treeGrid.scrollToIndex(1, 2);
         treeGrid.scrollToIndex(1, 2);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex",
                 new int[] { 1, 2 });
     }
@@ -97,7 +92,7 @@ public class TreeGridScrollToIndexTest {
         treeGrid.scrollToIndex(1, 2);
         treeGrid.scrollToIndex(1, 2);
         ui.add(treeGrid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex",
                 new int[] { 1, 2 });
     }
@@ -107,7 +102,7 @@ public class TreeGridScrollToIndexTest {
         ui.add(treeGrid);
         treeGrid.scrollToEnd();
         treeGrid.scrollToEnd();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation(
                 "scrollToIndex(...Array(10).fill(-1))");
     }
@@ -117,7 +112,7 @@ public class TreeGridScrollToIndexTest {
         treeGrid.scrollToEnd();
         treeGrid.scrollToEnd();
         ui.add(treeGrid);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation(
                 "scrollToIndex(...Array(10).fill(-1))");
     }
@@ -133,7 +128,7 @@ public class TreeGridScrollToIndexTest {
         treeGrid.scrollToIndex(5, 2);
         treeGrid.scrollToStart();
         treeGrid.scrollToEnd();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation(
                 "scrollToIndex(...Array(10).fill(-1))");
     }
@@ -154,16 +149,10 @@ public class TreeGridScrollToIndexTest {
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
+        return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
                 .filter(invocation -> invocation.getExpression()
                         .contains("scroll"))
                 .toList();
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }
