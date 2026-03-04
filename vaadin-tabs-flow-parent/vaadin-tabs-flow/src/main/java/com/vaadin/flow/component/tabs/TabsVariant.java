@@ -34,7 +34,8 @@ public enum TabsVariant implements ThemeVariant {
     AURA_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     AURA_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
     AURA_FILLED("filled"),
-    HIDE_SCROLL_BUTTONS("hide-scroll-buttons");
+    HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    SMALL("small");
 
     private final String variant;
 
