@@ -28,7 +28,8 @@ public enum BadgeVariant implements ThemeVariant {
     ICON_ONLY("icon-only"),
     NUMBER_ONLY("number-only"),
     SUCCESS("success"),
-    WARNING("warning");
+    WARNING("warning"),
+    SMALL("small");
 
     private final String variant;
 
