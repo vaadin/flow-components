@@ -45,6 +45,7 @@ public class MockUIRule extends ExternalResource {
     private VaadinService service;
 
     @Override
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     protected void before() {
         service = Mockito.mock(VaadinService.class);
         DeploymentConfiguration deploymentConfig = Mockito
@@ -63,6 +64,7 @@ public class MockUIRule extends ExternalResource {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     protected void after() {
         removeAll();
         UI.setCurrent(null);
