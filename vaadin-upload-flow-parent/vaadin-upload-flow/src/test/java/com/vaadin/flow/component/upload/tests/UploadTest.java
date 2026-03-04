@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,5 +56,198 @@ public class UploadTest {
     @Test
     public void implementsHasThemeVariant() {
         Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Upload.class));
+    }
+
+    // --- Accepted MIME Types ---
+
+    @Test
+    public void setAcceptedMimeTypes_setsValues() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*", "application/pdf");
+
+        var accepted = upload.getAcceptedMimeTypes();
+        Assert.assertEquals(2, accepted.size());
+        Assert.assertTrue(accepted.contains("image/*"));
+        Assert.assertTrue(accepted.contains("application/pdf"));
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_withNull_clears() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedMimeTypes((String[]) null);
+
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_withEmptyArray_clears() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedMimeTypes();
+
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_withNullValue_throws() {
+        var upload = new Upload();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> upload.setAcceptedMimeTypes("image/*", null));
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_withBlankValue_throws() {
+        var upload = new Upload();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> upload.setAcceptedMimeTypes("image/*", "   "));
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_withoutSlash_throws() {
+        var upload = new Upload();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> upload.setAcceptedMimeTypes("imagepng"));
+    }
+
+    @Test
+    public void getAcceptedMimeTypes_defaultIsEmpty() {
+        var upload = new Upload();
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+    }
+
+    // --- Accepted File Extensions ---
+
+    @Test
+    public void setAcceptedFileExtensions_setsValues() {
+        var upload = new Upload();
+        upload.setAcceptedFileExtensions(".pdf", ".txt");
+
+        var accepted = upload.getAcceptedFileExtensions();
+        Assert.assertEquals(2, accepted.size());
+        Assert.assertTrue(accepted.contains(".pdf"));
+        Assert.assertTrue(accepted.contains(".txt"));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withNull_clears() {
+        var upload = new Upload();
+        upload.setAcceptedFileExtensions(".pdf");
+        upload.setAcceptedFileExtensions((String[]) null);
+
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withEmptyArray_clears() {
+        var upload = new Upload();
+        upload.setAcceptedFileExtensions(".pdf");
+        upload.setAcceptedFileExtensions(new String[0]);
+
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withNullValue_throws() {
+        var upload = new Upload();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> upload.setAcceptedFileExtensions(".pdf", null));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withBlankValue_throws() {
+        var upload = new Upload();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> upload.setAcceptedFileExtensions(".pdf", "   "));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withoutDot_throws() {
+        var upload = new Upload();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> upload.setAcceptedFileExtensions("pdf"));
+    }
+
+    @Test
+    public void getAcceptedFileExtensions_defaultIsEmpty() {
+        var upload = new Upload();
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+    }
+
+    // --- Accept property derivation ---
+
+    @Test
+    public void setAcceptedMimeTypes_setsAcceptProperty() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*", "application/pdf");
+
+        var accept = upload.getElement().getProperty("accept");
+        Assert.assertEquals("image/*,application/pdf", accept);
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_setsAcceptProperty() {
+        var upload = new Upload();
+        upload.setAcceptedFileExtensions(".pdf", ".txt");
+
+        var accept = upload.getElement().getProperty("accept");
+        Assert.assertEquals(".pdf,.txt", accept);
+    }
+
+    @Test
+    public void setBothMimeAndExtensions_combinesInAcceptProperty() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedFileExtensions(".pdf");
+
+        var accept = upload.getElement().getProperty("accept");
+        Assert.assertEquals("image/*,.pdf", accept);
+    }
+
+    // --- setAcceptedFileTypes ---
+
+    @Test
+    public void setAcceptedFileTypes_classifiesInputs() {
+        var upload = new Upload();
+        upload.setAcceptedFileTypes("image/*", ".pdf", "application/json",
+                ".txt");
+
+        Assert.assertEquals(List.of("image/*", "application/json"),
+                upload.getAcceptedMimeTypes());
+        Assert.assertEquals(List.of(".pdf", ".txt"),
+                upload.getAcceptedFileExtensions());
+    }
+
+    @Test
+    public void setAcceptedFileTypes_withNull_clearsBoth() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedFileExtensions(".pdf");
+
+        upload.setAcceptedFileTypes((String[]) null);
+
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void getAcceptedFileTypes_combinesBothLists() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedFileExtensions(".pdf");
+
+        var types = upload.getAcceptedFileTypes();
+        Assert.assertEquals(2, types.size());
+        Assert.assertTrue(types.contains("image/*"));
+        Assert.assertTrue(types.contains(".pdf"));
+    }
+
+    @Test
+    public void setAcceptedFileTypes_setsAcceptProperty() {
+        var upload = new Upload();
+        upload.setAcceptedFileTypes("image/*", ".pdf");
+
+        var accept = upload.getElement().getProperty("accept");
+        Assert.assertEquals("image/*,.pdf", accept);
     }
 }

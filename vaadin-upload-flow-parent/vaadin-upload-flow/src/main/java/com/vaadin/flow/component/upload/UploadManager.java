@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.upload;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
@@ -34,13 +33,11 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
-import com.vaadin.flow.server.streams.UploadResult;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -209,8 +206,14 @@ public class UploadManager implements Serializable {
         if (!(handler instanceof FailFastUploadHandler)) {
             handlerExplicitlyConfigured.set(true);
         }
-        // Wrap handler with file type validation
-        UploadHandler validatingHandler = wrapWithFileTypeValidation(handler);
+        /*
+         * Wraps the given upload handler with file type validation. The wrapper
+         * reads the current {@link #acceptedMimeTypes} and {@link
+         * #acceptedFileExtensions} at the time of each upload request, so
+         * changes made after {@link #setUploadHandler} are picked up.
+         */
+        var validatingHandler = UploadHelper.wrapHandlerWithFileTypeValidation(
+                handler, acceptedMimeTypes, acceptedFileExtensions);
         // Wrap handler with ElementStreamResource to use custom target name
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 validatingHandler, connector.getElement()) {
@@ -360,139 +363,6 @@ public class UploadManager implements Serializable {
      */
     public List<String> getAcceptedFileExtensions() {
         return acceptedFileExtensions;
-    }
-
-    /**
-     * Wraps the given upload handler with file type validation. The wrapper
-     * reads the current {@link #acceptedMimeTypes} and
-     * {@link #acceptedFileExtensions} at the time of each upload request, so
-     * changes made after {@link #setUploadHandler} are picked up.
-     * <p>
-     * NOTE: If new methods are added to {@link UploadHandler} or
-     * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
-     * be explicitly delegated here.
-     */
-    private UploadHandler wrapWithFileTypeValidation(UploadHandler delegate) {
-        return new UploadHandler() {
-            @Override
-            public void handleUploadRequest(UploadEvent event)
-                    throws IOException {
-                List<String> mimeTypes = acceptedMimeTypes;
-                List<String> extensions = acceptedFileExtensions;
-                if ((!mimeTypes.isEmpty() || !extensions.isEmpty())
-                        && !isFileTypeAccepted(event.getFileName(),
-                                event.getContentType(), mimeTypes,
-                                extensions)) {
-                    event.reject(
-                            "File type not allowed: " + event.getFileName());
-                    return;
-                }
-                delegate.handleUploadRequest(event);
-            }
-
-            @Override
-            public void responseHandled(UploadResult result) {
-                delegate.responseHandled(result);
-            }
-
-            @Override
-            public long getRequestSizeMax() {
-                return delegate.getRequestSizeMax();
-            }
-
-            @Override
-            public long getFileSizeMax() {
-                return delegate.getFileSizeMax();
-            }
-
-            @Override
-            public long getFileCountMax() {
-                return delegate.getFileCountMax();
-            }
-
-            @Override
-            public String getUrlPostfix() {
-                return delegate.getUrlPostfix();
-            }
-
-            @Override
-            public boolean isAllowInert() {
-                return delegate.isAllowInert();
-            }
-
-            @Override
-            public DisabledUpdateMode getDisabledUpdateMode() {
-                return delegate.getDisabledUpdateMode();
-            }
-        };
-    }
-
-    /**
-     * Checks whether a file is accepted based on the configured MIME types and
-     * file extensions. Each configured source acts as an independent gate: if
-     * MIME types are configured, the file's content type must match at least
-     * one; if extensions are configured, the file name must match at least one.
-     * When both are configured, both checks must pass (AND logic).
-     */
-    private static boolean isFileTypeAccepted(String fileName,
-            String contentType, List<String> mimeTypes,
-            List<String> extensions) {
-        if (!mimeTypes.isEmpty()
-                && !matchesAnyMimeType(contentType, mimeTypes)) {
-            return false;
-        }
-        return extensions.isEmpty()
-                || matchesAnyExtension(fileName, extensions);
-    }
-
-    private static boolean matchesAnyMimeType(String contentType,
-            List<String> mimeTypes) {
-        for (String pattern : mimeTypes) {
-            if (matchesMimeType(contentType, pattern)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean matchesAnyExtension(String fileName,
-            List<String> extensions) {
-        if (fileName == null) {
-            return false;
-        }
-        String lowerFileName = fileName.toLowerCase(Locale.ENGLISH);
-        for (String ext : extensions) {
-            if (lowerFileName.endsWith(ext.toLowerCase(Locale.ENGLISH))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks whether an actual MIME type matches a pattern. Supports exact
-     * match and wildcard patterns like {@code "image/*"}. Parameters in the
-     * actual MIME type (e.g. {@code "text/html; charset=utf-8"}) are stripped
-     * before comparison.
-     */
-    private static boolean matchesMimeType(String actual, String pattern) {
-        if (actual == null || pattern == null) {
-            return false;
-        }
-        // Strip MIME type parameters (e.g. "; charset=utf-8")
-        int semicolonIndex = actual.indexOf(';');
-        if (semicolonIndex >= 0) {
-            actual = actual.substring(0, semicolonIndex).trim();
-        }
-        if (actual.equalsIgnoreCase(pattern)) {
-            return true;
-        }
-        if (pattern.endsWith("/*")) {
-            String prefix = pattern.substring(0, pattern.length() - 1);
-            return actual.toLowerCase(Locale.ENGLISH)
-                    .startsWith(prefix.toLowerCase(Locale.ENGLISH));
-        }
-        return false;
     }
 
     /**
