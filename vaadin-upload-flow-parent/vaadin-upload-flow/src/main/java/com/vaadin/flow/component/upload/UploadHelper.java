@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.server.streams.UploadEvent;
@@ -132,10 +133,14 @@ public class UploadHelper implements Serializable {
 
     /**
      * Wraps the given upload handler with file type validation. The returned
-     * handler checks each upload against the provided MIME types and file
+     * handler checks each upload against the current MIME types and file
      * extensions (using AND logic when both are set) and rejects non-matching
      * files via {@link UploadEvent#reject(String)}. All other
      * {@link UploadHandler} methods are delegated to the original handler.
+     * <p>
+     * The MIME type and extension lists are retrieved at request time via the
+     * provided suppliers, so changes made after wrapping are reflected
+     * immediately.
      * <p>
      * NOTE: If new methods are added to {@link UploadHandler} or
      * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
@@ -143,22 +148,24 @@ public class UploadHelper implements Serializable {
      *
      * @param delegate
      *            the original upload handler to delegate to, not {@code null}
-     * @param mimeTypes
-     *            the list of accepted MIME type patterns (e.g.
-     *            {@code "image/*"}, {@code "text/plain"}), not {@code null}
-     * @param extensions
-     *            the list of accepted file extensions including the leading dot
-     *            (e.g. {@code ".txt"}, {@code ".pdf"}), not {@code null}
+     * @param mimeTypesSupplier
+     *            supplier for the current list of accepted MIME type patterns,
+     *            not {@code null}
+     * @param extensionsSupplier
+     *            supplier for the current list of accepted file extensions
+     *            (including the leading dot), not {@code null}
      * @return a new {@link UploadHandler} that validates file types before
      *         delegating to the original handler
      */
     static UploadHandler wrapHandlerWithFileTypeValidation(
-            UploadHandler delegate, List<String> mimeTypes,
-            List<String> extensions) {
+            UploadHandler delegate, Supplier<List<String>> mimeTypesSupplier,
+            Supplier<List<String>> extensionsSupplier) {
         return new UploadHandler() {
             @Override
             public void handleUploadRequest(UploadEvent event)
                     throws IOException {
+                var mimeTypes = mimeTypesSupplier.get();
+                var extensions = extensionsSupplier.get();
                 if ((!mimeTypes.isEmpty() || !extensions.isEmpty())
                         && !UploadHelper.isFileTypeAccepted(event.getFileName(),
                                 event.getContentType(), mimeTypes,
