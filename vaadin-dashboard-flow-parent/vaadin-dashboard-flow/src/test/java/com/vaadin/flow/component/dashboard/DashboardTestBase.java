@@ -12,48 +12,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.mockito.Mockito;
+import org.junit.Rule;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 public class DashboardTestBase {
-
-    private final UI ui = new UI();
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Before
     public void setup() {
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
-        fakeClientCommunication();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
-
-    protected UI getUi() {
-        return ui;
-    }
-
-    protected void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
+        ui.fakeClientCommunication();
     }
 
     protected static ArrayNode getItemsArray(
