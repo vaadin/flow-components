@@ -1473,27 +1473,38 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * The method is not supported for the combo box component, use another
-     * overloaded method with filter converter
-     * {@link #bindItems(com.vaadin.flow.signals.Signal, SerializableFunction)}
+     * Binds the given signal to the items of the combo box as a one-way binding
+     * so that the items are updated when the signal's value or any individual
+     * item signal changes.
      * <p>
-     * Always throws an {@link UnsupportedOperationException}.
+     * When a signal is bound, the items are kept synchronized with the signal
+     * value while the component is attached. When the component is detached,
+     * signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to modify items manually through
+     * other setItems methods throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     * <p>
+     * Uses the component's default items filter and filter converter.
      *
-     * @throws UnsupportedOperationException
-     *             when using this method without a filter converter
+     * @param itemsSignal
+     *            the signal to bind the items to, not {@code null}
+     * @return the data view providing access to the data bound to the combo box
      * @see #bindItems(com.vaadin.flow.signals.Signal, SerializableFunction)
      */
     @Override
     public ComboBoxDataView<TItem> bindItems(
-            com.vaadin.flow.signals.Signal<? extends List<? extends com.vaadin.flow.signals.Signal<TItem>>> itemsSignal) {
-        throw new UnsupportedOperationException(
-                String.format("ComboBox does not support "
-                        + "binding items from a signal without "
-                        + "knowledge of the rules on how to convert internal text filter "
-                        + "into a predicate applied to the data provider. Please use%n"
-                        + "bindItems(Signal<? extends List<? extends Signal<T>>>, SerializableFunction<String, "
-                        + "SerializablePredicate<T>>)"
-                        + "%noverloaded method instead"));
+            Signal<? extends List<? extends Signal<TItem>>> itemsSignal) {
+        Objects.requireNonNull(itemsSignal, "Signal cannot be null");
+        return DataViewUtils.bindItems(this, itemsSignal, backingList -> {
+            ListDataProvider<TItem> dataProvider = DataProvider
+                    .ofCollection(backingList);
+            setItems(dataProvider);
+            // return generic data view, not list data view
+            // because this method belongs to the generic has data view
+            // interface
+            return getGenericDataView();
+        });
     }
 
     /**
