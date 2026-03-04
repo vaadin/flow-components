@@ -53,7 +53,7 @@ public class MockUIRule extends ExternalResource {
         Mockito.when(service.getDeploymentConfiguration())
                 .thenReturn(deploymentConfig);
 
-        session = new AlwaysLockedVaadinSession(service);
+        session = Mockito.spy(new AlwaysLockedVaadinSession(service));
 
         ui = new UI();
         ui.getInternals().setSession(session);
@@ -95,6 +95,9 @@ public class MockUIRule extends ExternalResource {
 
     /**
      * Get the VaadinSession instance that is set up by this rule.
+     * <p>
+     * Note that this returns a Mockito spy, so it supports stubbing and
+     * verification.
      * 
      * @return the VaadinSession instance
      */
