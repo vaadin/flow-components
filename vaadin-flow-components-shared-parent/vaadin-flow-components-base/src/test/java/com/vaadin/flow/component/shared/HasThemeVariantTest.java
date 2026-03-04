@@ -17,24 +17,24 @@ package com.vaadin.flow.component.shared;
 
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit5Test;
 
-public class HasThemeVariantTest extends AbstractSignalsUnitTest {
+public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
                 component.getThemeNames());
     }
@@ -45,7 +45,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.removeThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
@@ -53,7 +53,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         TestComponent component = new TestComponent();
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, true);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
                 component.getThemeNames());
     }
@@ -64,7 +64,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, false);
 
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.setThemeVariants(TestComponentVariant.TEST_VARIANT_2,
                 TestComponentVariant.TEST_VARIANT_3);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT_2.getVariantName(),
                         TestComponentVariant.TEST_VARIANT_3.getVariantName()),
                 component.getThemeNames());
@@ -86,7 +86,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariants();
 
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.setThemeVariants(true, TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName(),
                         TestComponentVariant.TEST_VARIANT_2.getVariantName(),
                         TestComponentVariant.TEST_VARIANT_3.getVariantName()),
@@ -112,7 +112,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.setThemeVariants(false, TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT_3.getVariantName()),
                 component.getThemeNames());
     }
@@ -124,7 +124,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
                 component.getThemeNames());
     }
@@ -137,7 +137,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
 
         signal.set(false);
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
@@ -146,17 +146,17 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-        Assert.assertFalse(component.getThemeNames().isEmpty());
+        Assertions.assertFalse(component.getThemeNames().isEmpty());
 
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .removeThemeVariants(TestComponentVariant.TEST_VARIANT));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .addThemeVariants(TestComponentVariant.TEST_VARIANT));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariant(TestComponentVariant.TEST_VARIANT, false));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariant(TestComponentVariant.TEST_VARIANT, true));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariants(false, TestComponentVariant.TEST_VARIANT));
     }
 

@@ -18,9 +18,9 @@ package com.vaadin.flow.component.shared.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
@@ -30,7 +30,7 @@ public class OverlayClassListProxyTest {
     private TestComponent component;
     private OverlayClassListProxy proxy;
 
-    @Before
+    @BeforeEach
     public void setup() {
         component = new TestComponent();
         proxy = new OverlayClassListProxy(component);
@@ -126,37 +126,37 @@ public class OverlayClassListProxyTest {
     public void contains() {
         proxy.add("foo");
 
-        Assert.assertTrue(proxy.contains("foo"));
+        Assertions.assertTrue(proxy.contains("foo"));
 
         proxy.remove("foo");
 
-        Assert.assertFalse(proxy.contains("foo"));
+        Assertions.assertFalse(proxy.contains("foo"));
     }
 
     @Test
     public void containsAll() {
         proxy.addAll(List.of("foo", "bar"));
 
-        Assert.assertTrue(proxy.containsAll(List.of("foo", "bar")));
+        Assertions.assertTrue(proxy.containsAll(List.of("foo", "bar")));
 
         proxy.remove("foo");
 
-        Assert.assertFalse(proxy.containsAll(List.of("foo", "bar")));
+        Assertions.assertFalse(proxy.containsAll(List.of("foo", "bar")));
     }
 
     @Test
     public void isEmpty() {
-        Assert.assertTrue(proxy.isEmpty());
+        Assertions.assertTrue(proxy.isEmpty());
 
         proxy.add("foo");
 
-        Assert.assertFalse(proxy.isEmpty());
+        Assertions.assertFalse(proxy.isEmpty());
     }
 
     private void verifyClassNames(String expected) {
-        Assert.assertEquals(expected,
+        Assertions.assertEquals(expected,
                 component.getElement().getProperty("overlayClass"));
-        Assert.assertEquals(expected, component.getClassName());
+        Assertions.assertEquals(expected, component.getClassName());
     }
 
     @Tag("test-component")

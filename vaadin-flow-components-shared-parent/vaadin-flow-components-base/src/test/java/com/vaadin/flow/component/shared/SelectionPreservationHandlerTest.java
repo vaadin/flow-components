@@ -17,9 +17,9 @@ package com.vaadin.flow.component.shared;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -33,7 +33,7 @@ public class SelectionPreservationHandlerTest {
 
     private SelectionPreservationHandler<String> selectionPreservationHandler;
 
-    @Before
+    @BeforeEach
     public void setup() {
         selectionPreservationHandler = new SelectionPreservationHandler<>(
                 SelectionPreservationMode.DISCARD) {
@@ -59,7 +59,7 @@ public class SelectionPreservationHandlerTest {
     public void runHandler_handlerUsesDefaultMode() {
         selectionPreservationHandler.handleDataChange(
                 new DataChangeEvent<>(DataProvider.ofItems()));
-        Assert.assertEquals(SelectionPreservationMode.DISCARD,
+        Assertions.assertEquals(SelectionPreservationMode.DISCARD,
                 selectionPreservationMode);
     }
 
@@ -72,13 +72,14 @@ public class SelectionPreservationHandlerTest {
                             .setSelectionPreservationMode(modeToSet);
                     selectionPreservationHandler.handleDataChange(
                             new DataChangeEvent<>(DataProvider.ofItems()));
-                    Assert.assertEquals(modeToSet, selectionPreservationMode);
+                    Assertions.assertEquals(modeToSet,
+                            selectionPreservationMode);
                 });
     }
 
     @Test
     public void setModeNull_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> selectionPreservationHandler
                         .setSelectionPreservationMode(null));
     }

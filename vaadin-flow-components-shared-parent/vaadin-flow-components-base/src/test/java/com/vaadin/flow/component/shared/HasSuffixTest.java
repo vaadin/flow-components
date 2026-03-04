@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.shared;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
@@ -30,14 +30,14 @@ public class HasSuffixTest {
 
     private TestComponent component;
 
-    @Before
+    @BeforeEach
     public void setup() {
         component = new TestComponent();
     }
 
     @Test
     public void getSuffix_noComponentByDefault() {
-        Assert.assertNull(component.getSuffixComponent());
+        Assertions.assertNull(component.getSuffixComponent());
     }
 
     @Test
@@ -45,16 +45,16 @@ public class HasSuffixTest {
         TestComponent foo = new TestComponent();
         component.setSuffixComponent(foo);
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(component, "suffix").count());
-        Assert.assertEquals(foo, component.getSuffixComponent());
+        Assertions.assertEquals(foo, component.getSuffixComponent());
 
         TestComponent bar = new TestComponent();
         component.setSuffixComponent(bar);
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(component, "suffix").count());
-        Assert.assertEquals(bar, component.getSuffixComponent());
+        Assertions.assertEquals(bar, component.getSuffixComponent());
     }
 
     @Test
@@ -62,8 +62,8 @@ public class HasSuffixTest {
         component.setSuffixComponent(new TestComponent());
         component.setSuffixComponent(null);
 
-        Assert.assertNull(component.getSuffixComponent());
-        Assert.assertEquals(0,
+        Assertions.assertNull(component.getSuffixComponent());
+        Assertions.assertEquals(0,
                 SlotUtils.getElementsInSlot(component, "suffix").count());
     }
 }

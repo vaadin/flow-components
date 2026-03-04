@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.shared.internal;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -32,14 +32,14 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.internal.BeforeLeaveHandler;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class OverlayAutoAddControllerTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
     public void open_withoutUI_throws() {
@@ -47,7 +47,7 @@ public class OverlayAutoAddControllerTest {
 
         TestComponent component = new TestComponent();
 
-        Assert.assertThrows(IllegalStateException.class,
+        Assertions.assertThrows(IllegalStateException.class,
                 () -> component.setOpened(true));
     }
 
@@ -58,7 +58,7 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getUI().getElement(),
+        Assertions.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -71,7 +71,7 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(parent.getElement(),
+        Assertions.assertEquals(parent.getElement(),
                 component.getElement().getParent());
     }
 
@@ -84,7 +84,7 @@ public class OverlayAutoAddControllerTest {
         parent.add(component);
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(parent.getElement(),
+        Assertions.assertEquals(parent.getElement(),
                 component.getElement().getParent());
     }
 
@@ -96,7 +96,7 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(false);
         ui.fakeClientCommunication();
 
-        Assert.assertNull(component.getElement().getParent());
+        Assertions.assertNull(component.getElement().getParent());
     }
 
     @Test
@@ -110,7 +110,7 @@ public class OverlayAutoAddControllerTest {
                 .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getUI().getElement(),
+        Assertions.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -126,7 +126,7 @@ public class OverlayAutoAddControllerTest {
                 .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
         ui.fakeClientCommunication();
 
-        Assert.assertNull(component.getElement().getParent());
+        Assertions.assertNull(component.getElement().getParent());
     }
 
     @Test
@@ -140,7 +140,7 @@ public class OverlayAutoAddControllerTest {
         // instead it should wait for the closed event
         component.setOpened(false);
 
-        Assert.assertEquals(ui.getUI().getElement(),
+        Assertions.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -155,7 +155,7 @@ public class OverlayAutoAddControllerTest {
         // as the component also needs to be closed on the server side
         fireClosedEvent(component);
 
-        Assert.assertEquals(ui.getUI().getElement(),
+        Assertions.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -171,7 +171,7 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(false);
         fireClosedEvent(component);
 
-        Assert.assertNull(component.getElement().getParent());
+        Assertions.assertNull(component.getElement().getParent());
     }
 
     @Test
@@ -184,12 +184,12 @@ public class OverlayAutoAddControllerTest {
         // Mark the component as inert
         ElementUtil.setInert(component.getElement(), true);
         ui.fakeClientCommunication();
-        Assert.assertTrue(component.getElement().getNode().isInert());
+        Assertions.assertTrue(component.getElement().getNode().isInert());
 
         // Inert components should still receive the closed event
         component.setOpened(false);
         fireClosedEvent(component);
-        Assert.assertNull(component.getElement().getParent());
+        Assertions.assertNull(component.getElement().getParent());
     }
 
     @Test
@@ -204,7 +204,7 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(false);
         fireClosedEvent(component);
 
-        Assert.assertEquals(parent.getElement(),
+        Assertions.assertEquals(parent.getElement(),
                 component.getElement().getParent());
     }
 
@@ -218,12 +218,12 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(false);
         fireClosedEvent(component);
 
-        Assert.assertNull(component.getElement().getParent());
+        Assertions.assertNull(component.getElement().getParent());
 
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getUI().getElement(),
+        Assertions.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -234,7 +234,8 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertNull(ui.getUI().getInternals().getActiveModalComponent());
+        Assertions.assertNull(
+                ui.getUI().getInternals().getActiveModalComponent());
     }
 
     @Test
@@ -244,7 +245,7 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(component,
+        Assertions.assertEquals(component,
                 ui.getUI().getInternals().getActiveModalComponent());
     }
 
@@ -256,7 +257,8 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertNull(ui.getUI().getInternals().getActiveModalComponent());
+        Assertions.assertNull(
+                ui.getUI().getInternals().getActiveModalComponent());
     }
 
     @Test
@@ -264,7 +266,7 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
         component.controller.add();
 
-        Assert.assertEquals(ui.getUI().getElement(),
+        Assertions.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
     }
 
@@ -273,7 +275,8 @@ public class OverlayAutoAddControllerTest {
         TestComponent component = new TestComponent();
         component.controller.add();
 
-        Assert.assertFalse(component.getElement().getProperty("opened", false));
+        Assertions.assertFalse(
+                component.getElement().getProperty("opened", false));
     }
 
     @Test
@@ -283,7 +286,7 @@ public class OverlayAutoAddControllerTest {
         parent.add(component);
         component.controller.add();
 
-        Assert.assertEquals(parent.getElement(),
+        Assertions.assertEquals(parent.getElement(),
                 component.getElement().getParent());
     }
 
@@ -297,7 +300,7 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(false);
         fireClosedEvent(component);
 
-        Assert.assertNull(component.getElement().getParent());
+        Assertions.assertNull(component.getElement().getParent());
     }
 
     @Test
@@ -307,12 +310,12 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getUI().getElement(),
+        Assertions.assertEquals(ui.getUI().getElement(),
                 component.getElement().getParent());
 
         component.controller.remove();
 
-        Assert.assertNull(component.getElement().getParent());
+        Assertions.assertNull(component.getElement().getParent());
     }
 
     @Test
@@ -324,12 +327,12 @@ public class OverlayAutoAddControllerTest {
         component.setOpened(true);
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(parent.getElement(),
+        Assertions.assertEquals(parent.getElement(),
                 component.getElement().getParent());
 
         component.controller.remove();
 
-        Assert.assertEquals(parent.getElement(),
+        Assertions.assertEquals(parent.getElement(),
                 component.getElement().getParent());
     }
 
@@ -346,7 +349,7 @@ public class OverlayAutoAddControllerTest {
         ui.fakeClientCommunication();
 
         // Verify the inner component has data-slot-ignore attribute
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 innerComponent.getElement().hasAttribute("data-slot-ignore"));
     }
 
@@ -358,7 +361,7 @@ public class OverlayAutoAddControllerTest {
         ui.fakeClientCommunication();
 
         // Verify the component does not have data-slot-ignore attribute
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 component.getElement().hasAttribute("data-slot-ignore"));
     }
 
@@ -375,7 +378,7 @@ public class OverlayAutoAddControllerTest {
         ui.fakeClientCommunication();
 
         // Verify the attribute is set
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 innerComponent.getElement().hasAttribute("data-slot-ignore"));
 
         // Close the component
@@ -383,7 +386,7 @@ public class OverlayAutoAddControllerTest {
         fireClosedEvent(innerComponent);
 
         // Verify the attribute is removed
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 innerComponent.getElement().hasAttribute("data-slot-ignore"));
     }
 
@@ -399,7 +402,7 @@ public class OverlayAutoAddControllerTest {
         innerComponent.controller.add();
 
         // Verify the inner component has data-slot-ignore attribute
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 innerComponent.getElement().hasAttribute("data-slot-ignore"));
     }
 

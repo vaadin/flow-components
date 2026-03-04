@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.shared;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -40,7 +40,7 @@ public class SlotUtilsTest {
 
     private TestComponent parent;
 
-    @Before
+    @BeforeEach
     public void setup() {
         parent = new TestComponent();
     }
@@ -49,7 +49,7 @@ public class SlotUtilsTest {
     public void addToSlot_componentIsAdded() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent());
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
     }
 
@@ -57,7 +57,7 @@ public class SlotUtilsTest {
     public void addToSlot_elementIsAdded() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new Element("div"));
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
     }
 
@@ -65,7 +65,7 @@ public class SlotUtilsTest {
     public void setSlot_componentIsAdded() {
         SlotUtils.setSlot(parent, TEST_SLOT, new TestComponent());
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
     }
 
@@ -73,7 +73,7 @@ public class SlotUtilsTest {
     public void setSlot_elementIsAdded() {
         SlotUtils.setSlot(parent, TEST_SLOT, new Element("div"));
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
     }
 
@@ -81,12 +81,12 @@ public class SlotUtilsTest {
     public void addToSlot_oldComponentIsNotRemoved() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent());
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
 
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent());
 
-        Assert.assertEquals(2,
+        Assertions.assertEquals(2,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
     }
 
@@ -94,12 +94,12 @@ public class SlotUtilsTest {
     public void setSlot_oldComponentIsRemoved() {
         SlotUtils.setSlot(parent, TEST_SLOT, new TestComponent());
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
 
         SlotUtils.setSlot(parent, TEST_SLOT, new TestComponent());
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
     }
 
@@ -108,29 +108,31 @@ public class SlotUtilsTest {
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent());
         SlotUtils.addToSlot(parent, OTHER_SLOT, new TestComponent());
 
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, OTHER_SLOT).count());
 
         SlotUtils.clearSlot(parent, TEST_SLOT);
 
-        Assert.assertEquals(0,
+        Assertions.assertEquals(0,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, OTHER_SLOT).count());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void addToSlot_textNodeAsComponent_throws() {
         Text textNode = new Text("Text");
-        SlotUtils.addToSlot(parent, TEST_SLOT, textNode);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> SlotUtils.addToSlot(parent, TEST_SLOT, textNode));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void setSlot_textNodeAsComponent_throws() {
         Text textNode = new Text("Text");
-        SlotUtils.setSlot(parent, TEST_SLOT, textNode);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> SlotUtils.setSlot(parent, TEST_SLOT, textNode));
     }
 
     @Test
@@ -157,7 +159,7 @@ public class SlotUtilsTest {
     public void addToSlot_slotAttributeAddedInChild() {
         var slotComponent = new TestComponent();
         SlotUtils.addToSlot(parent, TEST_SLOT, slotComponent);
-        Assert.assertEquals(TEST_SLOT,
+        Assertions.assertEquals(TEST_SLOT,
                 slotComponent.getElement().getAttribute("slot"));
     }
 
@@ -166,6 +168,6 @@ public class SlotUtilsTest {
         var slotComponent = new TestComponent();
         SlotUtils.addToSlot(parent, TEST_SLOT, slotComponent);
         SlotUtils.clearSlot(parent, TEST_SLOT);
-        Assert.assertNull(slotComponent.getElement().getAttribute("slot"));
+        Assertions.assertNull(slotComponent.getElement().getAttribute("slot"));
     }
 }

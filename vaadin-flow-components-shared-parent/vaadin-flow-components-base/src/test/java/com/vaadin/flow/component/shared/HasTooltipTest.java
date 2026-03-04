@@ -18,104 +18,104 @@ package com.vaadin.flow.component.shared;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 public class HasTooltipTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private final TestComponent component = new TestComponent();
 
     @Test
     public void default_doesNotHaveTooltipElement() {
-        Assert.assertFalse(getTooltipElement(component).isPresent());
+        Assertions.assertFalse(getTooltipElement(component).isPresent());
     }
 
     @Test
     public void getTooltip_hasTooltipElement() {
         var tooltip = component.getTooltip();
-        Assert.assertNotNull(tooltip);
-        Assert.assertTrue(getTooltipElement(component).isPresent());
+        Assertions.assertNotNull(tooltip);
+        Assertions.assertTrue(getTooltipElement(component).isPresent());
     }
 
     @Test
     public void getTooltip_hasNoText() {
         var tooltip = component.getTooltip();
-        Assert.assertNull(tooltip.getText());
+        Assertions.assertNull(tooltip.getText());
     }
 
     @Test
     public void setTooltipText_hasTooltipElement() {
         component.setTooltipText("foo");
-        Assert.assertTrue(getTooltipElement(component).isPresent());
+        Assertions.assertTrue(getTooltipElement(component).isPresent());
     }
 
     @Test
     public void setTooltipText_hasTooltip() {
         var tooltip = component.setTooltipText("foo");
-        Assert.assertEquals(tooltip, component.getTooltip());
+        Assertions.assertEquals(tooltip, component.getTooltip());
     }
 
     @Test
     public void setTooltipTextAgain_hasTooltip() {
         var tooltip = component.setTooltipText("foo");
         var tooltip2 = component.setTooltipText("bar");
-        Assert.assertEquals(tooltip, tooltip2);
-        Assert.assertEquals(component.getTooltip().getText(), "bar");
+        Assertions.assertEquals(tooltip, tooltip2);
+        Assertions.assertEquals(component.getTooltip().getText(), "bar");
     }
 
     @Test
     public void setTooltipTextNull_hasTooltip() {
         var tooltip = component.setTooltipText("foo");
         var tooltip2 = component.setTooltipText(null);
-        Assert.assertEquals(tooltip, tooltip2);
-        Assert.assertEquals(component.getTooltip().getText(), null);
+        Assertions.assertEquals(tooltip, tooltip2);
+        Assertions.assertEquals(component.getTooltip().getText(), null);
     }
 
     @Test
     public void setTooltipText_tooltipHasText() {
         component.setTooltipText("foo");
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo",
                 getTooltipElement(component).get().getProperty("text"));
-        Assert.assertFalse(getTooltipElement(component).get()
+        Assertions.assertFalse(getTooltipElement(component).get()
                 .getProperty("markdown", false));
     }
 
     @Test
     public void setTooltipMarkdown_tooltipHasMarkdown() {
         component.setTooltipMarkdown("**Markdown** _foo_");
-        Assert.assertEquals("**Markdown** _foo_",
+        Assertions.assertEquals("**Markdown** _foo_",
                 getTooltipElement(component).get().getProperty("text"));
-        Assert.assertTrue(getTooltipElement(component).get()
+        Assertions.assertTrue(getTooltipElement(component).get()
                 .getProperty("markdown", false));
     }
 
     @Test
     public void switchContentTypes() {
         component.setTooltipText("foo");
-        Assert.assertFalse(getTooltipElement(component).get()
+        Assertions.assertFalse(getTooltipElement(component).get()
                 .getProperty("markdown", false));
 
         component.setTooltipMarkdown("**Markdown** _foo_");
-        Assert.assertTrue(getTooltipElement(component).get()
+        Assertions.assertTrue(getTooltipElement(component).get()
                 .getProperty("markdown", false));
 
         component.setTooltipText("foo");
-        Assert.assertFalse(getTooltipElement(component).get()
+        Assertions.assertFalse(getTooltipElement(component).get()
                 .getProperty("markdown", false));
     }
 
     @Test
     public void setTooltipText_tooltipHasSlot() {
         component.setTooltipText("foo");
-        Assert.assertEquals("tooltip",
+        Assertions.assertEquals("tooltip",
                 getTooltipElement(component).get().getAttribute("slot"));
     }
 
@@ -123,7 +123,7 @@ public class HasTooltipTest {
     public void setTooltipTextAgain_hasOneTooltipElement() {
         component.setTooltipText("foo");
         component.setTooltipText("bar");
-        Assert.assertEquals(1, getTooltipElements(component).count());
+        Assertions.assertEquals(1, getTooltipElements(component).count());
     }
 
     private Optional<Element> getTooltipElement(HasTooltip component) {
