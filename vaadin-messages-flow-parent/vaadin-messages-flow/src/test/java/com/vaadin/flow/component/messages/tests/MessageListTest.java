@@ -19,43 +19,36 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
 import tools.jackson.databind.JsonNode;
 
 @NotThreadSafe
 public class MessageListTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     private MessageList messageList;
     private MessageListItem item1;
     private MessageListItem item2;
-    private UI ui;
 
     @Before
     public void setup() {
         messageList = new MessageList();
         item1 = new MessageListItem();
-        ui = new UI();
-        UI.setCurrent(ui);
         item2 = new MessageListItem();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test(expected = UnsupportedOperationException.class)
