@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ModalityMode;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -95,6 +96,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
     private ModalityMode modality = ModalityMode.VISUAL;
+
+    private final SignalPropertySupport<Boolean> visibleSupport = SignalPropertySupport
+            .create(this, value -> {
+                Dialog.super.setVisible(value);
+                applyModality();
+            });
 
     /**
      * Creates an empty dialog.
@@ -1029,8 +1036,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        applyModality();
+        visibleSupport.set(visible);
+    }
+
+    @Override
+    public void bindVisible(Signal<Boolean> visibleSignal) {
+        visibleSupport.bind(visibleSignal);
     }
 
     /**
