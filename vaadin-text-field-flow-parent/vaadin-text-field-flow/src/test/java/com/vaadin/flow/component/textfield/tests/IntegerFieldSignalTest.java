@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
@@ -89,6 +90,31 @@ public class IntegerFieldSignalTest extends AbstractSignalsUnitTest {
 
         minSignal.set(15);
         Assert.assertEquals(15, integerField.getMin());
+    }
+
+    @Test
+    public void bindMin_thenSetStep_stepValidationUsesMin() {
+        minSignal.set(1);
+        integerField.bindMin(minSignal);
+        UI.getCurrent().add(integerField);
+
+        integerField.setStep(3);
+
+        // With min=1 and step=3: valid values are 1, 4, 7, 10, ...
+        // Value 4 = 1 + 1*3, should be valid
+        integerField.setValue(4);
+        ValidationResult result = integerField.getDefaultValidator()
+                .apply(integerField.getValue(), null);
+        Assert.assertFalse("Value 4 should be valid (1 + 1*3)",
+                result.isError());
+
+        // Value 3 = not aligned with step from min=1, should be invalid.
+        integerField.setValue(3);
+        result = integerField.getDefaultValidator()
+                .apply(integerField.getValue(), null);
+        Assert.assertTrue(
+                "Value 3 should be invalid (not aligned with step 3 from min 1).",
+                result.isError());
     }
 
     @Test(expected = BindingActiveException.class)
