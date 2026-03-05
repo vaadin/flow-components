@@ -27,14 +27,14 @@ import com.vaadin.flow.data.provider.DataProvider;
 /**
  * Tests for {@link SelectionPreservationHandler}.
  */
-public class SelectionPreservationHandlerTest {
+class SelectionPreservationHandlerTest {
 
     private SelectionPreservationMode selectionPreservationMode;
 
     private SelectionPreservationHandler<String> selectionPreservationHandler;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         selectionPreservationHandler = new SelectionPreservationHandler<>(
                 SelectionPreservationMode.DISCARD) {
             @Override
@@ -56,7 +56,7 @@ public class SelectionPreservationHandlerTest {
     }
 
     @Test
-    public void runHandler_handlerUsesDefaultMode() {
+    void runHandler_handlerUsesDefaultMode() {
         selectionPreservationHandler.handleDataChange(
                 new DataChangeEvent<>(DataProvider.ofItems()));
         Assertions.assertEquals(SelectionPreservationMode.DISCARD,
@@ -64,7 +64,7 @@ public class SelectionPreservationHandlerTest {
     }
 
     @Test
-    public void updateMode_runHandler_handlerUsesCorrectMode() {
+    void updateMode_runHandler_handlerUsesCorrectMode() {
         List.of(SelectionPreservationMode.PRESERVE_ALL,
                 SelectionPreservationMode.PRESERVE_EXISTING)
                 .forEach(modeToSet -> {
@@ -78,7 +78,7 @@ public class SelectionPreservationHandlerTest {
     }
 
     @Test
-    public void setModeNull_throwsNullPointerException() {
+    void setModeNull_throwsNullPointerException() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> selectionPreservationHandler
                         .setSelectionPreservationMode(null));

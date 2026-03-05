@@ -30,17 +30,17 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.function.SerializableFunction;
 
-public class InputFieldTest {
+class InputFieldTest {
 
     private TestComponent component;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void checkExtendedInterfaces() {
+    void checkExtendedInterfaces() {
         Assertions.assertTrue(component instanceof HasEnabled);
         Assertions.assertTrue(component instanceof HasLabel);
         Assertions.assertTrue(component instanceof HasSize);

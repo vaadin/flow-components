@@ -22,22 +22,22 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
-public class HasValidationPropertiesTest {
+class HasValidationPropertiesTest {
 
     private TestComponent component;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void initialErrorMessage() {
+    void initialErrorMessage() {
         Assertions.assertEquals(component.getErrorMessage(), null);
     }
 
     @Test
-    public void changeErrorMessage() {
+    void changeErrorMessage() {
         component.setErrorMessage("This field is required");
         Assertions.assertEquals(
                 component.getElement().getProperty("errorMessage"),
@@ -49,12 +49,12 @@ public class HasValidationPropertiesTest {
     }
 
     @Test
-    public void initialInvalid() {
+    void initialInvalid() {
         Assertions.assertFalse(component.isInvalid());
     }
 
     @Test
-    public void changeInvalid() {
+    void changeInvalid() {
         component.setInvalid(true);
         Assertions.assertTrue(component.isInvalid());
         Assertions.assertTrue(

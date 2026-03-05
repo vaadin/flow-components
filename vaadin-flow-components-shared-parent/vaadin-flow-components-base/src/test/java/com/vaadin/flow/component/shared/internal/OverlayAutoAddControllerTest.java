@@ -37,12 +37,12 @@ import com.vaadin.tests.MockUIExtension;
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class OverlayAutoAddControllerTest {
+class OverlayAutoAddControllerTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void open_withoutUI_throws() {
+    void open_withoutUI_throws() {
         ui.clearUI();
 
         TestComponent component = new TestComponent();
@@ -52,7 +52,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_withoutParent_autoAdded() {
+    void open_withoutParent_autoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -63,7 +63,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_withParent_notAutoAdded() {
+    void open_withParent_notAutoAdded() {
         ParentComponent parent = new ParentComponent();
         TestComponent component = new TestComponent();
         parent.add(component);
@@ -76,7 +76,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_addParentBeforeClientResponse_notAutoAdded() {
+    void open_addParentBeforeClientResponse_notAutoAdded() {
         ParentComponent parent = new ParentComponent();
         TestComponent component = new TestComponent();
 
@@ -89,7 +89,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_closeBeforeClientResponse_notAutoAdded() {
+    void open_closeBeforeClientResponse_notAutoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -100,7 +100,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_beforeLeaveEventFiresBeforeClientResponse_autoAdded() {
+    void open_beforeLeaveEventFiresBeforeClientResponse_autoAdded() {
         TestComponent component = new TestComponent();
         component.setOpened(true);
 
@@ -115,7 +115,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void setSkipOnNavigation_open_beforeLeaveEventFiresBeforeClientResponse_notAutoAdded() {
+    void setSkipOnNavigation_open_beforeLeaveEventFiresBeforeClientResponse_notAutoAdded() {
         TestComponent component = new TestComponent();
         component.controller.setSkipOnNavigation(true);
         component.setOpened(true);
@@ -130,7 +130,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void autoAdded_closeWithoutEvent_notAutoRemoved() {
+    void autoAdded_closeWithoutEvent_notAutoRemoved() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -145,7 +145,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void autoAdded_closeWithEventOnly_notAutoRemoved() {
+    void autoAdded_closeWithEventOnly_notAutoRemoved() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -160,7 +160,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void autoAdded_close_autoRemoved() {
+    void autoAdded_close_autoRemoved() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -175,7 +175,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void autoAdded_inert_close_autoRemoved() {
+    void autoAdded_inert_close_autoRemoved() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -193,7 +193,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void notAutoAdded_close_notAutoRemoved() {
+    void notAutoAdded_close_notAutoRemoved() {
         ParentComponent parent = new ParentComponent();
         TestComponent component = new TestComponent();
         parent.add(component);
@@ -209,7 +209,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void autoAdded_close_reopenBeforeClientResponse_autoRemovedAndAutoAdded() {
+    void autoAdded_close_reopenBeforeClientResponse_autoRemovedAndAutoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -228,7 +228,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_withoutModalSupplier_notModal() {
+    void open_withoutModalSupplier_notModal() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -239,7 +239,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_withModalSupplierReturningStrict_isModal() {
+    void open_withModalSupplierReturningStrict_isModal() {
         TestComponent component = new TestComponent(() -> ModalityMode.STRICT);
 
         component.setOpened(true);
@@ -250,7 +250,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_withModalSupplierReturningModeless_notModal() {
+    void open_withModalSupplierReturningModeless_notModal() {
         TestComponent component = new TestComponent(
                 () -> ModalityMode.MODELESS);
 
@@ -262,7 +262,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void add_autoAdded() {
+    void add_autoAdded() {
         TestComponent component = new TestComponent();
         component.controller.add();
 
@@ -271,7 +271,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void add_doesNotOpen() {
+    void add_doesNotOpen() {
         TestComponent component = new TestComponent();
         component.controller.add();
 
@@ -280,7 +280,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void add_withParent_notAutoAdded() {
+    void add_withParent_notAutoAdded() {
         ParentComponent parent = new ParentComponent();
         TestComponent component = new TestComponent();
         parent.add(component);
@@ -291,7 +291,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void add_close_autoRemoved() {
+    void add_close_autoRemoved() {
         TestComponent component = new TestComponent();
         component.controller.add();
 
@@ -304,7 +304,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void autoAdded_remove_forceRemovesComponent() {
+    void autoAdded_remove_forceRemovesComponent() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -319,7 +319,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void notAutoAdded_remove_doesNothing() {
+    void notAutoAdded_remove_doesNothing() {
         ParentComponent parent = new ParentComponent();
         TestComponent component = new TestComponent();
         parent.add(component);
@@ -337,7 +337,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_insideModalComponent_dataSlotIgnoreAttributeSet() {
+    void open_insideModalComponent_dataSlotIgnoreAttributeSet() {
         // Open a modal component first
         TestComponent modal = new TestComponent(() -> ModalityMode.STRICT);
         modal.setOpened(true);
@@ -354,7 +354,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_notInsideModalComponent_dataSlotIgnoreAttributeNotSet() {
+    void open_notInsideModalComponent_dataSlotIgnoreAttributeNotSet() {
         // Open a component without a modal parent
         TestComponent component = new TestComponent();
         component.setOpened(true);
@@ -366,7 +366,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_insideModalComponent_close_dataSlotIgnoreAttributeRemoved() {
+    void open_insideModalComponent_close_dataSlotIgnoreAttributeRemoved() {
         // Open a modal component first
         TestComponent modal = new TestComponent(() -> ModalityMode.STRICT);
         modal.setOpened(true);
@@ -391,7 +391,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void add_insideModalComponent_dataSlotIgnoreAttributeSet() {
+    void add_insideModalComponent_dataSlotIgnoreAttributeSet() {
         // Open a modal component first
         TestComponent modal = new TestComponent(() -> ModalityMode.STRICT);
         modal.setOpened(true);

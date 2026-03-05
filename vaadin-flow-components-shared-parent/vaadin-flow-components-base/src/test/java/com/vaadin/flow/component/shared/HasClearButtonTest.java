@@ -22,22 +22,22 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
-public class HasClearButtonTest {
+class HasClearButtonTest {
 
     private TestComponent component;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void initialValue() {
+    void initialValue() {
         Assertions.assertFalse(component.isClearButtonVisible());
     }
 
     @Test
-    public void changeValue() {
+    void changeValue() {
         component.setClearButtonVisible(true);
         Assertions.assertTrue(component.isClearButtonVisible());
         Assertions.assertTrue(component.getElement()

@@ -22,22 +22,22 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
-public class HasAllowedCharPatternTest {
+class HasAllowedCharPatternTest {
 
     private TestComponent component;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void initialValue() {
+    void initialValue() {
         Assertions.assertEquals(component.getAllowedCharPattern(), "");
     }
 
     @Test
-    public void changeValue() {
+    void changeValue() {
         component.setAllowedCharPattern("[-+\\d]");
         Assertions.assertEquals(
                 component.getElement().getProperty("allowedCharPattern"),

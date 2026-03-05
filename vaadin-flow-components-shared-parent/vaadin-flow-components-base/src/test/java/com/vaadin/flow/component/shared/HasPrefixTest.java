@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
-public class HasPrefixTest {
+class HasPrefixTest {
 
     @Tag("test")
     private static class TestComponent extends Component implements HasPrefix {
@@ -31,17 +31,17 @@ public class HasPrefixTest {
     private TestComponent component;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void getPrefix_noComponentByDefault() {
+    void getPrefix_noComponentByDefault() {
         Assertions.assertNull(component.getPrefixComponent());
     }
 
     @Test
-    public void setPrefix_replacesPrefix() {
+    void setPrefix_replacesPrefix() {
         TestComponent foo = new TestComponent();
         component.setPrefixComponent(foo);
 
@@ -58,7 +58,7 @@ public class HasPrefixTest {
     }
 
     @Test
-    public void setPrefix_setPrefixNull_prefixRemoved() {
+    void setPrefix_setPrefixNull_prefixRemoved() {
         component.setPrefixComponent(new TestComponent());
         component.setPrefixComponent(null);
 

@@ -28,7 +28,7 @@ import com.vaadin.flow.dom.Element;
 /**
  * Tests for the {@link SlotUtils}.
  */
-public class SlotUtilsTest {
+class SlotUtilsTest {
 
     @Tag("div")
     private static class TestComponent extends Component
@@ -41,12 +41,12 @@ public class SlotUtilsTest {
     private TestComponent parent;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         parent = new TestComponent();
     }
 
     @Test
-    public void addToSlot_componentIsAdded() {
+    void addToSlot_componentIsAdded() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent());
 
         Assertions.assertEquals(1,
@@ -54,7 +54,7 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void addToSlot_elementIsAdded() {
+    void addToSlot_elementIsAdded() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new Element("div"));
 
         Assertions.assertEquals(1,
@@ -62,7 +62,7 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void setSlot_componentIsAdded() {
+    void setSlot_componentIsAdded() {
         SlotUtils.setSlot(parent, TEST_SLOT, new TestComponent());
 
         Assertions.assertEquals(1,
@@ -70,7 +70,7 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void setSlot_elementIsAdded() {
+    void setSlot_elementIsAdded() {
         SlotUtils.setSlot(parent, TEST_SLOT, new Element("div"));
 
         Assertions.assertEquals(1,
@@ -78,7 +78,7 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void addToSlot_oldComponentIsNotRemoved() {
+    void addToSlot_oldComponentIsNotRemoved() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent());
 
         Assertions.assertEquals(1,
@@ -91,7 +91,7 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void setSlot_oldComponentIsRemoved() {
+    void setSlot_oldComponentIsRemoved() {
         SlotUtils.setSlot(parent, TEST_SLOT, new TestComponent());
 
         Assertions.assertEquals(1,
@@ -104,7 +104,7 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void clearSlot_onlyMatchingSlotChildIsRemoved() {
+    void clearSlot_onlyMatchingSlotChildIsRemoved() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent());
         SlotUtils.addToSlot(parent, OTHER_SLOT, new TestComponent());
 
@@ -122,41 +122,41 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void addToSlot_textNodeAsComponent_throws() {
+    void addToSlot_textNodeAsComponent_throws() {
         Text textNode = new Text("Text");
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> SlotUtils.addToSlot(parent, TEST_SLOT, textNode));
     }
 
     @Test
-    public void setSlot_textNodeAsComponent_throws() {
+    void setSlot_textNodeAsComponent_throws() {
         Text textNode = new Text("Text");
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> SlotUtils.setSlot(parent, TEST_SLOT, textNode));
     }
 
     @Test
-    public void addToSlot_nullAsComponent_doesNotThrow() {
+    void addToSlot_nullAsComponent_doesNotThrow() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new TestComponent(), null);
     }
 
     @Test
-    public void setSlot_nullAsComponent_doesNotThrow() {
+    void setSlot_nullAsComponent_doesNotThrow() {
         SlotUtils.setSlot(parent, TEST_SLOT, new TestComponent(), null);
     }
 
     @Test
-    public void addToSlot_nullAsElement_doesNotThrow() {
+    void addToSlot_nullAsElement_doesNotThrow() {
         SlotUtils.addToSlot(parent, TEST_SLOT, new Element("div"), null);
     }
 
     @Test
-    public void setSlot_nullAsElement_doesNotThrow() {
+    void setSlot_nullAsElement_doesNotThrow() {
         SlotUtils.setSlot(parent, TEST_SLOT, new Element("div"), null);
     }
 
     @Test
-    public void addToSlot_slotAttributeAddedInChild() {
+    void addToSlot_slotAttributeAddedInChild() {
         var slotComponent = new TestComponent();
         SlotUtils.addToSlot(parent, TEST_SLOT, slotComponent);
         Assertions.assertEquals(TEST_SLOT,
@@ -164,7 +164,7 @@ public class SlotUtilsTest {
     }
 
     @Test
-    public void clearSlot_slotAttributeRemovedFromChild() {
+    void clearSlot_slotAttributeRemovedFromChild() {
         var slotComponent = new TestComponent();
         SlotUtils.addToSlot(parent, TEST_SLOT, slotComponent);
         SlotUtils.clearSlot(parent, TEST_SLOT);

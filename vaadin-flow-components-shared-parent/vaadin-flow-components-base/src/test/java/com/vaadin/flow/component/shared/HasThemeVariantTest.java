@@ -27,10 +27,10 @@ import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsJUnit5Test;
 
-public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
+class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
 
     @Test
-    public void addThemeVariant_themeNamesContainsThemeVariant() {
+    void addThemeVariant_themeNamesContainsThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
 
@@ -40,7 +40,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.removeThemeVariants(TestComponentVariant.TEST_VARIANT);
@@ -49,7 +49,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void setThemeVariant_setTrue_addsThemeVariant() {
+    void setThemeVariant_setTrue_addsThemeVariant() {
         TestComponent component = new TestComponent();
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, true);
 
@@ -59,7 +59,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void setThemeVariant_setFalse_removesThemeVariant() {
+    void setThemeVariant_setFalse_removesThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, false);
@@ -68,7 +68,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void setThemeVariants_overridesExisting() {
+    void setThemeVariants_overridesExisting() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariants(TestComponentVariant.TEST_VARIANT_2,
@@ -81,7 +81,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void setThemeVariants_withoutArgs_clearsThemeVariants() {
+    void setThemeVariants_withoutArgs_clearsThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariants();
@@ -90,7 +90,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void setThemeVariants_setTrue_addsThemeVariants() {
+    void setThemeVariants_setTrue_addsThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT_3);
         component.setThemeVariants(true, TestComponentVariant.TEST_VARIANT,
@@ -104,7 +104,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void setThemeVariants_setFalse_removesThemeVariants() {
+    void setThemeVariants_setFalse_removesThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2,
@@ -118,7 +118,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void bindThemeVariant_setSignalValueTrue_themeNamesContainsThemeVariant() {
+    void bindThemeVariant_setSignalValueTrue_themeNamesContainsThemeVariant() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
@@ -130,7 +130,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void bindThemeVariant_setSignalValueFalse_themeNamesDoesNotContainThemeVariant() {
+    void bindThemeVariant_setSignalValueFalse_themeNamesDoesNotContainThemeVariant() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
@@ -141,7 +141,7 @@ public class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
+    void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);

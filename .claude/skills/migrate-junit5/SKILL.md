@@ -77,6 +77,26 @@ public void throwsException() {
 @Disabled("reason")
 ```
 
+## Visibility
+
+JUnit 5 test classes and methods should use default (package) visibility, not `public`. Remove `public` from:
+- The test class declaration
+- All `@Test`, `@BeforeEach`, `@AfterEach`, `@BeforeAll`, `@AfterAll` methods
+
+Do NOT change visibility of helper methods, inner classes, or fields.
+
+```java
+// Before
+public class FooTest {
+    @Test
+    public void someTest() {
+
+// After
+class FooTest {
+    @Test
+    void someTest() {
+```
+
 ## Base classes
 
 JUnit 5 does **not** process JUnit 4 `@Rule` annotations from parent classes. Tests will compile but fail at runtime (e.g. `UI.getCurrent()` returns null). Switch to the JUnit 5 base class:

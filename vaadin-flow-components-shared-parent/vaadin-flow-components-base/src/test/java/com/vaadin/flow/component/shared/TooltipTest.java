@@ -28,41 +28,41 @@ import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.tests.MockUIExtension;
 
-public class TooltipTest {
+class TooltipTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
     private final TestComponent component = new TestComponent();
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         // UI.removeAll breaks when tooltip is removed in detach listener of the
         // component, so remove manually beforehand
         getTooltipElement().ifPresent(Element::removeFromTree);
     }
 
     @Test
-    public void createTooltip_tooltipNotAttached() {
+    void createTooltip_tooltipNotAttached() {
         Tooltip.forComponent(component);
         Assertions.assertFalse(getTooltipElement().isPresent());
     }
 
     @Test
-    public void createTooltip_addComponent_tooltipAttached() {
+    void createTooltip_addComponent_tooltipAttached() {
         Tooltip.forComponent(component);
         ui.add(component);
         Assertions.assertTrue(getTooltipElement().isPresent());
     }
 
     @Test
-    public void addComponent_createTooltip_tooltipAttached() {
+    void addComponent_createTooltip_tooltipAttached() {
         ui.add(component);
         Tooltip.forComponent(component);
         Assertions.assertTrue(getTooltipElement().isPresent());
     }
 
     @Test
-    public void createTooltip_removeComponent_tooltipNotAttached() {
+    void createTooltip_removeComponent_tooltipNotAttached() {
         Tooltip.forComponent(component);
         ui.add(component);
         ui.remove(component);
@@ -70,7 +70,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void addComponent_createTooltip_changeUI_tooltipAttached() {
+    void addComponent_createTooltip_changeUI_tooltipAttached() {
         ui.add(component);
         Tooltip.forComponent(component);
 
@@ -83,7 +83,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setText() {
+    void createTooltip_setText() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setText("foo");
         ui.add(component);
@@ -95,7 +95,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setMarkdown() {
+    void createTooltip_setMarkdown() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setMarkdown("**Markdown** _foo_");
         ui.add(component);
@@ -107,7 +107,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_switchContentType() {
+    void createTooltip_switchContentType() {
         var tooltip = Tooltip.forComponent(component);
         ui.add(component);
 
@@ -125,7 +125,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setFocusDelay() {
+    void createTooltip_setFocusDelay() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setFocusDelay(1000);
         ui.add(component);
@@ -135,7 +135,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setHideDelay() {
+    void createTooltip_setHideDelay() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setHideDelay(1000);
         ui.add(component);
@@ -145,7 +145,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setHoverDelay() {
+    void createTooltip_setHoverDelay() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setHoverDelay(1000);
         ui.add(component);
@@ -155,7 +155,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setPosition() {
+    void createTooltip_setPosition() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setPosition(TooltipPosition.END);
         ui.add(component);
@@ -165,13 +165,13 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_defaultPosition() {
+    void createTooltip_defaultPosition() {
         var tooltip = Tooltip.forComponent(component);
         Assertions.assertEquals(null, tooltip.getPosition());
     }
 
     @Test
-    public void createTooltip_setManual() {
+    void createTooltip_setManual() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setManual(true);
         ui.add(component);
@@ -181,7 +181,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setOpened() {
+    void createTooltip_setOpened() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setOpened(true);
         ui.add(component);
@@ -191,14 +191,14 @@ public class TooltipTest {
     }
 
     @Test
-    public void tooltipForCompopnentTwice_sameReference() {
+    void tooltipForCompopnentTwice_sameReference() {
         var tooltip = Tooltip.forComponent(component);
         var tooltip2 = Tooltip.forComponent(component);
         Assertions.assertSame(tooltip, tooltip2);
     }
 
     @Test
-    public void createTooltip_fluentAPI() {
+    void createTooltip_fluentAPI() {
         ui.add(component);
 
         var tooltip = Tooltip.forComponent(component).withText("foo")
@@ -224,7 +224,7 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_fluentAPI_withMarkdown() {
+    void createTooltip_fluentAPI_withMarkdown() {
         ui.add(component);
 
         var tooltip = Tooltip.forComponent(component)

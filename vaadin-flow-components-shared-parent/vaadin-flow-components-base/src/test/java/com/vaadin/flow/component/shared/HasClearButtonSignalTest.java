@@ -28,7 +28,7 @@ import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsJUnit5Test;
 
-public class HasClearButtonSignalTest extends AbstractSignalsJUnit5Test {
+class HasClearButtonSignalTest extends AbstractSignalsJUnit5Test {
 
     @Tag("test")
     private static class TestComponent extends Component
@@ -36,7 +36,7 @@ public class HasClearButtonSignalTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void bindClearButtonVisible_elementAttached_updatesWithSignal_andNullMapsToFalse() {
+    void bindClearButtonVisible_elementAttached_updatesWithSignal_andNullMapsToFalse() {
         TestComponent component = new TestComponent();
         // Attach component so that Element.bindProperty becomes active
         UI.getCurrent().add(component);
@@ -62,7 +62,7 @@ public class HasClearButtonSignalTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void bindClearButtonVisible_elementNotAttached_bindingInactive_untilAttach() {
+    void bindClearButtonVisible_elementNotAttached_bindingInactive_untilAttach() {
         TestComponent component = new TestComponent();
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindClearButtonVisible(signal);
@@ -82,7 +82,7 @@ public class HasClearButtonSignalTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void setClearButtonVisible_whileBindingActive_throwsBindingActiveException() {
+    void setClearButtonVisible_whileBindingActive_throwsBindingActiveException() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
@@ -94,7 +94,7 @@ public class HasClearButtonSignalTest extends AbstractSignalsJUnit5Test {
     }
 
     @Test
-    public void bindClearButtonVisible_againWhileActive_throwsBindingActiveException() {
+    void bindClearButtonVisible_againWhileActive_throwsBindingActiveException() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);

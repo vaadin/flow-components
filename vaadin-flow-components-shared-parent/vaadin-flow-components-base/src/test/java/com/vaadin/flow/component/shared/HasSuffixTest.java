@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
-public class HasSuffixTest {
+class HasSuffixTest {
 
     @Tag("test")
     private static class TestComponent extends Component implements HasSuffix {
@@ -31,17 +31,17 @@ public class HasSuffixTest {
     private TestComponent component;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void getSuffix_noComponentByDefault() {
+    void getSuffix_noComponentByDefault() {
         Assertions.assertNull(component.getSuffixComponent());
     }
 
     @Test
-    public void setSuffix_replacesSuffix() {
+    void setSuffix_replacesSuffix() {
         TestComponent foo = new TestComponent();
         component.setSuffixComponent(foo);
 
@@ -58,7 +58,7 @@ public class HasSuffixTest {
     }
 
     @Test
-    public void setSuffix_setSuffixNull_suffixRemoved() {
+    void setSuffix_setSuffixNull_suffixRemoved() {
         component.setSuffixComponent(new TestComponent());
         component.setSuffixComponent(null);
 

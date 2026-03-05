@@ -28,22 +28,22 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 
-public class DisableOnClickControllerTest {
+class DisableOnClickControllerTest {
 
     private TestComponent component;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void disableOnClickFalseByDefault() {
+    void disableOnClickFalseByDefault() {
         Assertions.assertFalse(component.isDisableOnClick());
     }
 
     @Test
-    public void setDisableOnClick_disableOnClickUpdated() {
+    void setDisableOnClick_disableOnClickUpdated() {
         component.setDisableOnClick(true);
         Assertions.assertTrue(component.isDisableOnClick());
         component.setDisableOnClick(false);
@@ -51,7 +51,7 @@ public class DisableOnClickControllerTest {
     }
 
     @Test
-    public void setDisableOnClick_updatesAttribute() {
+    void setDisableOnClick_updatesAttribute() {
         component.setDisableOnClick(true);
         Assertions.assertTrue(
                 component.getElement().hasAttribute("disableonclick"));
@@ -62,7 +62,7 @@ public class DisableOnClickControllerTest {
     }
 
     @Test
-    public void disableOnClickNotSetUp_click_componentIsStillEnabled() {
+    void disableOnClickNotSetUp_click_componentIsStillEnabled() {
         var componentIsEnabled = new AtomicBoolean(true);
         component.addClickListener(
                 event -> componentIsEnabled.set(event.getSource().isEnabled()));
@@ -71,7 +71,7 @@ public class DisableOnClickControllerTest {
     }
 
     @Test
-    public void setDisableOnClick_click_componentIsDisabled() {
+    void setDisableOnClick_click_componentIsDisabled() {
         var componentIsEnabled = new AtomicBoolean(true);
         component.addClickListener(
                 event -> componentIsEnabled.set(event.getSource().isEnabled()));
@@ -81,7 +81,7 @@ public class DisableOnClickControllerTest {
     }
 
     @Test
-    public void setDisableOnClick_clickRevertsDisabled_componentIsEnabled() {
+    void setDisableOnClick_clickRevertsDisabled_componentIsEnabled() {
         component.addClickListener(event -> event.getSource().setEnabled(true));
         component.setDisableOnClick(true);
         component.click();
