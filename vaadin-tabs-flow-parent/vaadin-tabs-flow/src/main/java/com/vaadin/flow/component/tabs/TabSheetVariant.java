@@ -36,6 +36,10 @@ public enum TabSheetVariant implements ThemeVariant {
     @Deprecated
     AURA_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    /**
+     * @deprecated Use {@link #TABS_SHOW_SCROLL_BUTTONS} instead.
+     */
+    @Deprecated
     AURA_TABS_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
     /**
      * @deprecated Use {@link #NO_PADDING} instead.
@@ -44,7 +48,8 @@ public enum TabSheetVariant implements ThemeVariant {
     AURA_NO_PADDING("no-padding"),
     NO_PADDING("no-padding"),
     AURA_NO_BORDER("no-border"),
-    AURA_TABS_FILLED("filled");
+    AURA_TABS_FILLED("filled"),
+    TABS_SHOW_SCROLL_BUTTONS("show-scroll-buttons");
 
     private final String variant;
 
