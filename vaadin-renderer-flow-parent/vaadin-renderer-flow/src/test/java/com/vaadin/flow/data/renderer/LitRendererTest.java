@@ -15,28 +15,15 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
+import com.vaadin.tests.MockUIRule;
 
 public class LitRendererTest {
-
-    private UI ui;
-
-    @Before
-    public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Test(expected = IllegalArgumentException.class)
     public void doNotAllowFunctionNamesWithFunctions() {

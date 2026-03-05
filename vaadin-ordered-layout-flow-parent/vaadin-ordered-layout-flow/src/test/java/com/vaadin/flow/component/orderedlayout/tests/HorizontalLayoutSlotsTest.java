@@ -17,23 +17,24 @@ package com.vaadin.flow.component.orderedlayout.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.tests.MockUIRule;
 
 public class HorizontalLayoutSlotsTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
+
     private HorizontalLayout layout;
-    private UI ui;
 
     @Before
     public void setup() {
         layout = new HorizontalLayout();
-        ui = new UI();
-        UI.setCurrent(ui);
         ui.add(layout);
     }
 
