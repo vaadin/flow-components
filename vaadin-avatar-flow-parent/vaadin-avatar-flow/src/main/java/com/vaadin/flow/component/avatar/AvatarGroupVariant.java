@@ -21,9 +21,25 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-avatar-group} component.
  */
 public enum AvatarGroupVariant implements ThemeVariant {
+    /**
+     * @deprecated Use {@link #XLARGE} instead.
+     */
+    @Deprecated
     LUMO_XLARGE("xlarge"),
+    /**
+     * @deprecated Use {@link #LARGE} instead.
+     */
+    @Deprecated
     LUMO_LARGE("large"),
+    /**
+     * @deprecated Use {@link #SMALL} instead.
+     */
+    @Deprecated
     LUMO_SMALL("small"),
+    /**
+     * @deprecated Use {@link #XSMALL} instead.
+     */
+    @Deprecated
     LUMO_XSMALL("xsmall"),
     LUMO_REVERSE("reverse"),
     AURA_FILLED("filled"),
