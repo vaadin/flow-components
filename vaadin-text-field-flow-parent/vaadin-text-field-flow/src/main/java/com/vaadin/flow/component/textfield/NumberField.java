@@ -26,7 +26,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.signals.Signal;
 
@@ -300,8 +299,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * @param signal
      *            the signal to bind the minimum value to, not {@code null}
      * @see #setMin(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
-     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMin(Signal<Double> signal) {
@@ -322,8 +319,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * @param signal
      *            the signal to bind the maximum value to, not {@code null}
      * @see #setMax(double)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
-     *      SerializableConsumer)
      * @since 25.1
      */
     public void bindMax(Signal<Double> signal) {
