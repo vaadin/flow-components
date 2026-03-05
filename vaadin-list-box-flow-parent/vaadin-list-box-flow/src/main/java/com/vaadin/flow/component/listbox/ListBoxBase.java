@@ -31,6 +31,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -60,6 +61,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Base class for the {@link ListBox} and {@link MultiSelectListBox}.
@@ -237,19 +239,41 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     /**
-     * <b>Not supported!</b>
+     * ListBox does not support showing a required indicator.
      * <p>
-     * Not supported by the client-side web-component, see
-     * <a href= "https://github.com/vaadin/vaadin-list-box/issues/19">issue in
-     * GitHub</a>.
+     * This method is inherited from {@link HasValueAndElement} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
      *
-     * @throws UnsupportedOperationException
+     * @param requiredIndicatorVisible
+     *            the required indicator visibility value
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
      */
+    @Deprecated
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         throw new UnsupportedOperationException(
-                "Not supported by the client-side web-component: "
-                        + "https://github.com/vaadin/vaadin-list-box/issues/19");
+                "ListBox does not support showing a required indicator");
+    }
+
+    /**
+     * ListBox does not support showing a required indicator.
+     * <p>
+     * This method is inherited from {@link HasValueAndElement} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
+     *
+     * @param requiredSignal
+     *            the signal to bind, not <code>null</code>
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
+    @Override
+    public void bindRequiredIndicatorVisible(Signal<Boolean> requiredSignal) {
+        throw new UnsupportedOperationException(
+                "ListBox does not support showing a required indicator");
     }
 
     @SuppressWarnings("unchecked")

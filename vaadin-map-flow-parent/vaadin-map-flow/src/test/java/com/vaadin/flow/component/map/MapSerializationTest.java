@@ -12,14 +12,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
@@ -30,29 +28,24 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 public class MapSerializationTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     private Map map;
-    private UI ui;
     private StreamResourceRegistry streamResourceRegistryMock;
     private StreamRegistration streamRegistrationMock;
 
     @Before
     public void setup() throws URISyntaxException {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(mockSession);
-
         streamResourceRegistryMock = Mockito.mock(StreamResourceRegistry.class);
-        Mockito.when(mockSession.getResourceRegistry())
+        Mockito.when(ui.getSession().getResourceRegistry())
                 .thenReturn(streamResourceRegistryMock);
 
         streamRegistrationMock = Mockito.mock(StreamRegistration.class);
@@ -74,11 +67,6 @@ public class MapSerializationTest {
         ui.add(map);
     }
 
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
-
     @Test
     public void serializationSmokeTest() {
         // Configure view
@@ -97,7 +85,7 @@ public class MapSerializationTest {
         layer.setSource(source);
         map.setBackgroundLayer(layer);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         ArrayNode syncedItems = getSynchronizedItems();
 
         // Verify view
@@ -126,7 +114,7 @@ public class MapSerializationTest {
     public void serializeIcon_registerStreamResourceExactlyOnce() {
         // Initial sync of a marker with an icon to register stream resource
         MarkerFeature marker = setupMarker();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
                 .registerResource(Assets.PIN.getHandler());
@@ -134,14 +122,14 @@ public class MapSerializationTest {
 
         // Force another sync of the same icon
         marker.getIcon().setScale(42);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
                 .registerResource(Assets.PIN.getHandler());
 
         // Sync a different icon with the same resource
         setupMarker();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
                 .registerResource(Assets.PIN.getHandler());
@@ -151,7 +139,7 @@ public class MapSerializationTest {
     public void detachMap_unregisterStreamResources() {
         // Sync a marker with an icon to register the stream resource
         setupMarker();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         // Detach map
         ui.remove(map);
@@ -163,13 +151,13 @@ public class MapSerializationTest {
     public void detachMap_reattachMap_streamResourceRegisteredAgain() {
         // Sync a marker with an icon to register the stream resource
         setupMarker();
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         // Detach and reattach map
         ui.remove(map);
         Mockito.clearInvocations(streamResourceRegistryMock);
         ui.add(map);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
                 .registerResource(Assets.PIN.getHandler());
@@ -188,7 +176,7 @@ public class MapSerializationTest {
     }
 
     private ArrayNode getSynchronizedItems() {
-        var syncInvocation = getPendingJavaScriptInvocations().stream()
+        var syncInvocation = ui.dumpPendingJavaScriptInvocations().stream()
                 .filter(invocation -> invocation.getInvocation().getExpression()
                         .contains("$connector.synchronize"))
                 .findFirst().orElseThrow(() -> new AssertionError(
@@ -203,15 +191,5 @@ public class MapSerializationTest {
                 .filter(node -> node.get("id").asString().equals(id))
                 .findFirst().orElseThrow(() -> new AssertionError(
                         "No synced item with id " + id + " found"));
-    }
-
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }
