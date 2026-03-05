@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,7 +37,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
@@ -54,23 +52,16 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.node.ArrayNode;
 
 public class CheckboxGroupTest {
-
-    private UI ui;
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
 
     @Test
     public void hasEmptySetAsDefaultValue() {
@@ -378,7 +369,6 @@ public class CheckboxGroupTest {
 
         Div parent = new Div(checkboxGroup);
 
-        ui = new UI();
         ui.add(parent);
 
         parent.setEnabled(false);
@@ -392,16 +382,11 @@ public class CheckboxGroupTest {
         ArrayNode array = JacksonUtils.createArrayNode();
         array.add("foo");
         element.setPropertyJson("value", array);
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(CheckboxGroup.class))
                 .thenAnswer(invocation -> new CheckboxGroup());

@@ -18,7 +18,6 @@ package com.vaadin.flow.component.combobox;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,7 +28,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
@@ -61,12 +59,6 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     protected <TItem> ComboBoxBase<?, TItem, ?> createComboBox(
             Class<TItem> itemClass) {
         return new ComboBox<>();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test
