@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,7 +37,6 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.data.SelectListDataView;
@@ -50,10 +48,11 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class SelectTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
@@ -61,17 +60,9 @@ public class SelectTest {
     private Select<String> select;
     private Supplier<Select> selectSupplier = () -> select;
 
-    private UI ui;
-
     @Before
     public void setup() {
         select = new Select<>();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test
@@ -695,16 +686,11 @@ public class SelectTest {
     public void elementHasValue_wrapIntoField_doesNotThrow() {
         Element element = new Element("vaadin-select");
         element.setProperty("value", "foo");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(Select.class))
                 .thenAnswer(invocation -> new Select());

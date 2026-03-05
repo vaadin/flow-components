@@ -19,32 +19,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.tests.MockUIRule;
 
 public class SvgIconTest {
-
-    private UI ui;
-
-    @Before
-    public void setUp() {
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Test
     public void emptyConstructor_hasNoSrc() {
