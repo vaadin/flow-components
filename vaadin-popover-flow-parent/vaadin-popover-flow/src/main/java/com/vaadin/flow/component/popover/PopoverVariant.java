@@ -21,7 +21,15 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for the {@link Popover} component.
  */
 public enum PopoverVariant implements ThemeVariant {
+    /**
+     * @deprecated Use {@link #NO_PADDING} instead.
+     */
+    @Deprecated
     LUMO_NO_PADDING("no-padding"),
+    /**
+     * @deprecated Use {@link #ARROW} instead.
+     */
+    @Deprecated
     LUMO_ARROW("arrow"),
     /**
      * @deprecated Use {@link #NO_PADDING} instead.

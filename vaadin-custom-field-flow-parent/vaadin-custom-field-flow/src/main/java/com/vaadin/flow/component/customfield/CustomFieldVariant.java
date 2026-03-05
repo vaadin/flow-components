@@ -20,8 +20,15 @@ package com.vaadin.flow.component.customfield;
  * component.
  */
 public enum CustomFieldVariant {
-
+    /**
+     * @deprecated Use {@link #SMALL} instead.
+     */
+    @Deprecated
     LUMO_SMALL("small"),
+    /**
+     * @deprecated Use {@link #HELPER_ABOVE} instead.
+     */
+    @Deprecated
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
     LUMO_WHITESPACE("whitespace"),
     /**

@@ -22,13 +22,29 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * component.
  */
 public enum HorizontalLayoutVariant implements ThemeVariant {
+    /**
+     * @deprecated Use {@link #MARGIN} instead.
+     */
+    @Deprecated
     LUMO_MARGIN("margin"),
+    /**
+     * @deprecated Use {@link #PADDING} instead.
+     */
+    @Deprecated
     LUMO_PADDING("padding"),
     LUMO_SPACING_XS("spacing-xs"),
     LUMO_SPACING_S("spacing-s"),
+    /**
+     * @deprecated Use {@link #SPACING} instead.
+     */
+    @Deprecated
     LUMO_SPACING("spacing"),
     LUMO_SPACING_L("spacing-l"),
     LUMO_SPACING_XL("spacing-xl"),
+    /**
+     * @deprecated Use {@link #WRAP} instead.
+     */
+    @Deprecated
     LUMO_WRAP("wrap"),
     /**
      * @deprecated Use {@link #MARGIN} instead.
