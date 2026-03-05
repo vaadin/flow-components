@@ -38,7 +38,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -367,7 +366,7 @@ public class AIOrchestratorTest {
 
     @Test
     public void prompt_withoutUIContext_throwsIllegalStateException() {
-        UI.setCurrent(null);
+        ui.clearUI();
         var orchestrator = getSimpleOrchestrator();
         Assert.assertThrows(IllegalStateException.class,
                 () -> orchestrator.prompt("Hello"));
