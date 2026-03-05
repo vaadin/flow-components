@@ -26,5 +26,5 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  */
 public class AbstractSignalsJUnit5Test {
     @RegisterExtension
-    public MockUIExtension ui = new MockUIExtension();
+    protected MockUIExtension ui = new MockUIExtension();
 }
