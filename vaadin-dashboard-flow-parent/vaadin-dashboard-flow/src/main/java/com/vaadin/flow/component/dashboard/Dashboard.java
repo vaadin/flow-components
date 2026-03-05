@@ -35,6 +35,7 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
@@ -572,11 +573,39 @@ public class Dashboard extends Component
     }
 
     /**
-     * @throws UnsupportedOperationException
-     *             Dashboard does not support setting visibility
+     * Dashboard does not support setting visibility.
+     * <p>
+     * This method is inherited from {@link Component} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
+     *
+     * @param visible
+     *            the visibility value
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
      */
+    @Deprecated
     @Override
     public void setVisible(boolean visible) {
+        throw new UnsupportedOperationException(
+                "Dashboard does not support setting visibility");
+    }
+
+    /**
+     * Dashboard does not support binding the visible state to a signal.
+     * <p>
+     * This method is inherited from {@link Component} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
+     *
+     * @param visibleSignal
+     *            the signal to bind, not <code>null</code>
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
+    @Override
+    public void bindVisible(Signal<Boolean> visibleSignal) {
         throw new UnsupportedOperationException(
                 "Dashboard does not support setting visibility");
     }
