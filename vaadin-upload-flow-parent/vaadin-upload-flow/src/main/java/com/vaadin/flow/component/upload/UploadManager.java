@@ -271,9 +271,12 @@ public class UploadManager implements Serializable {
      * types will be accepted. Wildcard patterns like {@code "image/*"} are
      * supported.
      * <p>
-     * MIME types are used both as a client-side hint (to filter the file
-     * picker) and for server-side validation (to reject uploads that don't
-     * match).
+     * MIME types are used as a client-side hint (to filter the file picker) and
+     * are also validated server-side. Note that server-side MIME type
+     * validation only checks the content type reported by the client, which can
+     * be spoofed. For stronger protection, also use
+     * {@link #setAcceptedFileExtensions(String...)} in combination with MIME
+     * types.
      * <p>
      * If both MIME types and file extensions are configured, a file must match
      * at least one of each (AND logic).
@@ -319,8 +322,8 @@ public class UploadManager implements Serializable {
      * extensions will be accepted. Extensions must start with a dot, e.g.
      * {@code ".pdf"}, {@code ".txt"}.
      * <p>
-     * File extensions are used both as a client-side hint and for server-side
-     * validation.
+     * File extensions are used as a client-side hint and are also validated
+     * server-side.
      * <p>
      * If both MIME types and file extensions are configured, a file must match
      * at least one of each (AND logic).
