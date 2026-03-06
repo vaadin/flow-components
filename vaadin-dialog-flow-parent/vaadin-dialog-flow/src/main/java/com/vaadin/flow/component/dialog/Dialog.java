@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ModalityMode;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -45,6 +46,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
@@ -78,7 +80,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-beta1")
+@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-beta2")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -95,6 +97,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
     private ModalityMode modality = ModalityMode.VISUAL;
+
+    private final SignalPropertySupport<Boolean> visibleSupport = SignalPropertySupport
+            .create(this, value -> {
+                Dialog.super.setVisible(value);
+                applyModality();
+            });
 
     /**
      * Creates an empty dialog.
@@ -328,12 +336,15 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * 
      * @param widthSignal
      *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
      */
     @Deprecated
     @Override
-    public void bindWidth(Signal<String> widthSignal) {
+    public SignalBinding<String> bindWidth(Signal<String> widthSignal) {
         throw new UnsupportedOperationException(
                 "One-way binding of the width is not supported as the width may be modified for resizable dialogs.");
     }
@@ -365,12 +376,15 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param heightSignal
      *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
      */
     @Deprecated
     @Override
-    public void bindHeight(Signal<String> heightSignal) {
+    public SignalBinding<String> bindHeight(Signal<String> heightSignal) {
         throw new UnsupportedOperationException(
                 "One-way binding of the height is not supported as the height may be modified for resizable dialogs.");
     }
@@ -1029,8 +1043,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        applyModality();
+        visibleSupport.set(visible);
+    }
+
+    @Override
+    public SignalBinding<Boolean> bindVisible(Signal<Boolean> visibleSignal) {
+        return visibleSupport.bind(visibleSignal);
     }
 
     /**

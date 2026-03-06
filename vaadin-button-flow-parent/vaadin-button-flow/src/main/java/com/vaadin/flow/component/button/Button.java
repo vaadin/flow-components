@@ -44,6 +44,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -55,7 +56,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.1.0-beta1")
+@NpmPackage(value = "@vaadin/button", version = "25.1.0-beta2")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -260,8 +261,8 @@ public class Button extends Component
     }
 
     @Override
-    public void bindText(Signal<String> textSignal) {
-        textSupport.bind(textSignal);
+    public SignalBinding<String> bindText(Signal<String> textSignal) {
+        return textSupport.bind(textSignal);
     }
 
     /**
@@ -476,16 +477,19 @@ public class Button extends Component
      * not be synchronized back to the signal due to
      * {@link #bindEnabled(Signal)} only supporting one-way bindings.
      *
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @throws IllegalStateException
      *             if disable-on-click is active
      */
     @Override
-    public void bindEnabled(Signal<Boolean> enabledSignal) {
+    public SignalBinding<Boolean> bindEnabled(Signal<Boolean> enabledSignal) {
         if (isDisableOnClick()) {
             throw new IllegalStateException(
                     "Binding the enabled state to a signal is not supported when disable on click is active. ");
         }
-        Focusable.super.bindEnabled(enabledSignal);
+        return Focusable.super.bindEnabled(enabledSignal);
     }
 
     /**
