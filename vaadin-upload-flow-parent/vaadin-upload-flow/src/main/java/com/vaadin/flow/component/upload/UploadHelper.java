@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Supplier;
 
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 
@@ -158,8 +158,9 @@ public class UploadHelper implements Serializable {
      *         delegating to the original handler
      */
     static UploadHandler wrapHandlerWithFileTypeValidation(
-            UploadHandler delegate, Supplier<List<String>> mimeTypesSupplier,
-            Supplier<List<String>> extensionsSupplier) {
+            UploadHandler delegate,
+            SerializableSupplier<List<String>> mimeTypesSupplier,
+            SerializableSupplier<List<String>> extensionsSupplier) {
         return new UploadHandler() {
             @Override
             public void handleUploadRequest(UploadEvent event)
