@@ -21,25 +21,9 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-time-picker} component.
  */
 public enum TimePickerVariant implements ThemeVariant {
-    /**
-     * @deprecated Use {@link #SMALL} instead.
-     */
-    @Deprecated
     LUMO_SMALL("small"),
-    /**
-     * @deprecated Use {@link #ALIGN_LEFT} instead.
-     */
-    @Deprecated
     LUMO_ALIGN_LEFT("align-left"),
-    /**
-     * @deprecated Use {@link #ALIGN_CENTER} instead.
-     */
-    @Deprecated
     LUMO_ALIGN_CENTER("align-center"),
-    /**
-     * @deprecated Use {@link #ALIGN_RIGHT} instead.
-     */
-    @Deprecated
     LUMO_ALIGN_RIGHT("align-right"),
     /**
      * @deprecated Use {@link #ALIGN_LEFT} instead.
@@ -66,10 +50,6 @@ public enum TimePickerVariant implements ThemeVariant {
      */
     @Deprecated
     AURA_ALIGN_END("align-end"),
-    /**
-     * @deprecated Use {@link #HELPER_ABOVE} instead.
-     */
-    @Deprecated
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
     /**
      * @deprecated Use {@link #HELPER_ABOVE} instead.

@@ -23,20 +23,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum NotificationVariant implements ThemeVariant {
     LUMO_PRIMARY("primary"),
     LUMO_CONTRAST("contrast"),
-    /**
-     * @deprecated Use {@link #SUCCESS} instead.
-     */
-    @Deprecated
     LUMO_SUCCESS("success"),
-    /**
-     * @deprecated Use {@link #ERROR} instead.
-     */
-    @Deprecated
     LUMO_ERROR("error"),
-    /**
-     * @deprecated Use {@link #WARNING} instead.
-     */
-    @Deprecated
     LUMO_WARNING("warning"),
     INFO("info"),
     SUCCESS("success"),

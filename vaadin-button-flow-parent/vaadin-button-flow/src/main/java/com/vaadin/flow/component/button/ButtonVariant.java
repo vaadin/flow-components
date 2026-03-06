@@ -21,15 +21,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-button} component.
  */
 public enum ButtonVariant implements ThemeVariant {
-    /**
-     * @deprecated Use {@link #SMALL} instead.
-     */
-    @Deprecated
     LUMO_SMALL("small"),
-    /**
-     * @deprecated Use {@link #LARGE} instead.
-     */
-    @Deprecated
     LUMO_LARGE("large"),
     LUMO_TERTIARY("tertiary"),
     LUMO_TERTIARY_INLINE("tertiary-inline"),

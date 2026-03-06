@@ -21,20 +21,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-virtual-list} component.
  */
 public enum VirtualListVariant implements ThemeVariant {
-    /**
-     * @deprecated Use {@link #OVERFLOW_INDICATORS} instead.
-     */
-    @Deprecated
     LUMO_OVERFLOW_INDICATORS("overflow-indicators"),
-    /**
-     * @deprecated Use {@link #OVERFLOW_INDICATOR_TOP} instead.
-     */
-    @Deprecated
     LUMO_OVERFLOW_INDICATOR_TOP("overflow-indicator-top"),
-    /**
-     * @deprecated Use {@link #OVERFLOW_INDICATOR_BOTTOM} instead.
-     */
-    @Deprecated
     LUMO_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),
     /**
      * @deprecated Use {@link #OVERFLOW_INDICATORS} instead.

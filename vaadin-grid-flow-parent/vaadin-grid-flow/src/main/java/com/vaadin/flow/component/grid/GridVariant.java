@@ -19,31 +19,11 @@ package com.vaadin.flow.component.grid;
  * Set of theme variants applicable for {@code vaadin-grid} component.
  */
 public enum GridVariant {
-    /**
-     * @deprecated Use {@link #NO_BORDER} instead.
-     */
-    @Deprecated
     LUMO_NO_BORDER("no-border"),
-    /**
-     * @deprecated Use {@link #NO_ROW_BORDERS} instead.
-     */
-    @Deprecated
     LUMO_NO_ROW_BORDERS("no-row-borders"),
-    /**
-     * @deprecated Use {@link #COLUMN_BORDERS} instead.
-     */
-    @Deprecated
     LUMO_COLUMN_BORDERS("column-borders"),
-    /**
-     * @deprecated Use {@link #ROW_STRIPES} instead.
-     */
-    @Deprecated
     LUMO_ROW_STRIPES("row-stripes"),
     LUMO_COMPACT("compact"),
-    /**
-     * @deprecated Use {@link #WRAP_CELL_CONTENT} instead.
-     */
-    @Deprecated
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
     /**
      * @deprecated Use {@link #NO_BORDER} instead.

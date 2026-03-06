@@ -22,16 +22,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum TabsVariant implements ThemeVariant {
     LUMO_CENTERED("centered"),
-    /**
-     * @deprecated Use {@link #SMALL} instead.
-     */
-    @Deprecated
     LUMO_SMALL("small"),
     LUMO_MINIMAL("minimal"),
-    /**
-     * @deprecated Use {@link #HIDE_SCROLL_BUTTONS} instead.
-     */
-    @Deprecated
     LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
     LUMO_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),

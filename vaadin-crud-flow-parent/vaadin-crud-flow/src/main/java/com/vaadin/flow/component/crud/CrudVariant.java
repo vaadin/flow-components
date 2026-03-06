@@ -13,10 +13,6 @@ package com.vaadin.flow.component.crud;
  */
 public enum CrudVariant {
     NO_BORDER("no-border"),
-    /**
-     * @deprecated Use {@link #NO_BORDER} instead.
-     */
-    @Deprecated
     LUMO_NO_BORDER("no-border"),
     /**
      * @deprecated Use {@link #NO_BORDER} instead.

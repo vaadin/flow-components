@@ -19,10 +19,6 @@ public enum MapVariant implements ThemeVariant {
      */
     @Deprecated(since = "25.0", forRemoval = true)
     BORDERLESS("no-border"),
-    /**
-     * @deprecated Use {@link #NO_BORDER} instead.
-     */
-    @Deprecated
     LUMO_NO_BORDER("no-border"),
     /**
      * @deprecated Use {@link #NO_BORDER} instead.
