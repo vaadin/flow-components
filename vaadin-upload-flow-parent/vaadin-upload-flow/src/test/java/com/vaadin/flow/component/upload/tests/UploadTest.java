@@ -207,15 +207,19 @@ public class UploadTest {
     // --- setAcceptedFileTypes ---
 
     @Test
-    public void setAcceptedFileTypes_classifiesInputs() {
+    public void setAcceptedFileTypes_doesNotPopulateServerSideFields() {
         var upload = new Upload();
         upload.setAcceptedFileTypes("image/*", ".pdf", "application/json",
                 ".txt");
 
-        Assert.assertEquals(List.of("image/*", "application/json"),
-                upload.getAcceptedMimeTypes());
-        Assert.assertEquals(List.of(".pdf", ".txt"),
-                upload.getAcceptedFileExtensions());
+        Assert.assertTrue(
+                "setAcceptedFileTypes should not populate server-side "
+                        + "MIME type field",
+                upload.getAcceptedMimeTypes().isEmpty());
+        Assert.assertTrue(
+                "setAcceptedFileTypes should not populate server-side "
+                        + "extension field",
+                upload.getAcceptedFileExtensions().isEmpty());
     }
 
     @Test
@@ -231,7 +235,18 @@ public class UploadTest {
     }
 
     @Test
-    public void getAcceptedFileTypes_combinesBothLists() {
+    public void getAcceptedFileTypes_fromDeprecatedSetter() {
+        var upload = new Upload();
+        upload.setAcceptedFileTypes("image/*", ".pdf");
+
+        var types = upload.getAcceptedFileTypes();
+        Assert.assertEquals(2, types.size());
+        Assert.assertTrue(types.contains("image/*"));
+        Assert.assertTrue(types.contains(".pdf"));
+    }
+
+    @Test
+    public void getAcceptedFileTypes_fromNewSetters() {
         var upload = new Upload();
         upload.setAcceptedMimeTypes("image/*");
         upload.setAcceptedFileExtensions(".pdf");
@@ -249,5 +264,35 @@ public class UploadTest {
 
         var accept = upload.getElement().getProperty("accept");
         Assert.assertEquals("image/*,.pdf", accept);
+    }
+
+    @Test
+    public void setAcceptedFileTypes_thenNewSetter_serverSideFieldsPopulated() {
+        var upload = new Upload();
+        // Deprecated setter: client-side only, no server-side fields
+        upload.setAcceptedFileTypes(".txt", "image/*");
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+
+        // New setter takes over and populates server-side fields
+        upload.setAcceptedMimeTypes("image/*");
+        Assert.assertEquals(List.of("image/*"), upload.getAcceptedMimeTypes());
+        // accept property is updated by the new setter
+        Assert.assertEquals("image/*",
+                upload.getElement().getProperty("accept"));
+    }
+
+    @Test
+    public void newSetters_thenSetAcceptedFileTypes_clearsServerSideFields() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedFileExtensions(".pdf");
+
+        // Deprecated setter clears server-side fields
+        upload.setAcceptedFileTypes(".txt");
+
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+        Assert.assertEquals(".txt", upload.getElement().getProperty("accept"));
     }
 }
