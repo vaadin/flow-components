@@ -239,6 +239,7 @@ public class UploadIT extends AbstractUploadIT {
     public void setAcceptedFileExtensions_correctExtension_fileIsUploaded()
             throws Exception {
         clickElementWithJs("use-upload-handler");
+        clickElementWithJs("set-accept-ext-txt");
 
         var textFile = createTempFile("txt");
 
