@@ -349,12 +349,21 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * types will be accepted. Wildcard patterns like {@code "image/*"} are
      * supported.
      * <p>
-     * MIME types are used both as a client-side hint (to filter the file
-     * picker) and for server-side validation (to reject uploads that don’t
-     * match).
+     * MIME types are used as a client-side hint (to filter the file picker).
+     * When an {@link com.vaadin.flow.server.streams.UploadHandler
+     * UploadHandler} is used (set via {@link #setUploadHandler}), they are also
+     * validated server-side. Note that server-side MIME type validation only
+     * checks the content type reported by the client, which can be spoofed. For
+     * stronger protection, also use
+     * {@link #setAcceptedFileExtensions(String...)} in combination with MIME
+     * types.
      * <p>
      * If both MIME types and file extensions are configured, a file must match
      * at least one of each (AND logic).
+     * <p>
+     * Note: Server-side validation is only performed when using
+     * {@link #setUploadHandler}. When using the deprecated
+     * {@link #setReceiver(Receiver)}, only client-side hints are applied.
      *
      * @param mimeTypes
      *            the accepted MIME types, e.g. {@code "image/*"},
@@ -397,11 +406,17 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * extensions will be accepted. Extensions must start with a dot, e.g.
      * {@code ".pdf"}, {@code ".txt"}.
      * <p>
-     * File extensions are used both as a client-side hint and for server-side
-     * validation.
+     * File extensions are used as a client-side hint. When an
+     * {@link com.vaadin.flow.server.streams.UploadHandler UploadHandler} is
+     * used (set via {@link #setUploadHandler}), they are also validated
+     * server-side.
      * <p>
      * If both MIME types and file extensions are configured, a file must match
      * at least one of each (AND logic).
+     * <p>
+     * Note: Server-side validation is only performed when using
+     * {@link #setUploadHandler}. When using the deprecated
+     * {@link #setReceiver(Receiver)}, only client-side hints are applied.
      *
      * @param extensions
      *            the accepted file extensions, each starting with a dot; or
@@ -450,7 +465,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * when this method is used. They indicate the hints for users as to what
      * file types to upload. If server-side validation is required, use
      * {@link #setAcceptedMimeTypes(String...)} and
-     * {@link #setAcceptedFileExtensions(String...)} instead.
+     * {@link #setAcceptedFileExtensions(String...)} instead. Using this method
+     * clears any previously configured server-side validation.
      *
      * @param acceptedFileTypes
      *            the allowed file types to be uploaded, or <code>null</code> to
