@@ -42,6 +42,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
@@ -699,13 +700,16 @@ public class AvatarGroup extends Component
      *            the type of signal holding individual items
      * @param itemsSignal
      *            the signal to bind the items to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @since 25.1
      */
-    public <S extends Signal<AvatarGroupItem>> void bindItems(
+    public <S extends Signal<AvatarGroupItem>> SignalBinding<Collection<AvatarGroupItem>> bindItems(
             Signal<List<S>> itemsSignal) {
         Objects.requireNonNull(itemsSignal, "Signal cannot be null");
-        itemsSupport.bind(() -> itemsSignal.get().stream().map(Signal::get)
-                .collect(Collectors.toList()));
+        return itemsSupport.bind(() -> itemsSignal.get().stream()
+                .map(Signal::get).collect(Collectors.toList()));
     }
 
     /**
