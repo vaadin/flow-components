@@ -464,23 +464,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     @Deprecated(since = "25.2")
     public void setAcceptedFileTypes(String... acceptedFileTypes) {
+        acceptedMimeTypes = List.of();
+        acceptedFileExtensions = List.of();
         if (acceptedFileTypes == null || acceptedFileTypes.length == 0) {
-            acceptedMimeTypes = List.of();
-            acceptedFileExtensions = List.of();
+            getElement().setProperty("accept", "");
         } else {
-            var mimeTypes = new ArrayList<String>();
-            var extensions = new ArrayList<String>();
-            for (var type : acceptedFileTypes) {
-                if (type != null && type.startsWith(".")) {
-                    extensions.add(type);
-                } else if (type != null) {
-                    mimeTypes.add(type);
-                }
-            }
-            acceptedMimeTypes = List.copyOf(mimeTypes);
-            acceptedFileExtensions = List.copyOf(extensions);
+            getElement().setProperty("accept", Stream.of(acceptedFileTypes)
+                    .filter(Objects::nonNull).collect(Collectors.joining(",")));
         }
-        updateAcceptProperty();
     }
 
     /**
@@ -492,8 +483,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     @Deprecated(since = "25.2")
     public List<String> getAcceptedFileTypes() {
-        return Stream.concat(acceptedMimeTypes.stream(),
-                acceptedFileExtensions.stream()).toList();
+        String accept = getElement().getProperty("accept", "");
+        if (accept.isEmpty()) {
+            return List.of();
+        }
+        return List.of(accept.split(","));
     }
 
     /**
