@@ -413,7 +413,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public void setAcceptedFileExtensions(String... extensions) {
         if (extensions == null || extensions.length == 0) {
-            acceptedFileExtensions = Collections.emptyList();
+            acceptedFileExtensions = List.of();
         } else {
             for (var ext : extensions) {
                 if (ext == null || ext.isBlank()) {
