@@ -450,7 +450,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * <p>
      * File format restrictions are checked only on the client side (browser)
      * when this method is used. They indicate the hints for users as to what
-     * file types to upload. If served-side validation is required, use
+     * file types to upload. If server-side validation is required, use
      * {@link #setAcceptedMimeTypes(String...)} and
      * {@link #setAcceptedFileExtensions(String...)} instead.
      *
