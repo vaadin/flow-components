@@ -210,6 +210,7 @@ public class UploadIT extends AbstractUploadIT {
     @Test
     public void setAcceptedMimeTypes_wrongType_fileIsRejected()
             throws Exception {
+        clickElementWithJs("use-upload-handler");
         clickElementWithJs("clear-accept-ext");
         clickElementWithJs("set-accept-image");
 
@@ -250,6 +251,7 @@ public class UploadIT extends AbstractUploadIT {
     @Test
     public void setAcceptedFileExtensions_wrongExtension_fileIsRejected()
             throws Exception {
+        clickElementWithJs("use-upload-handler");
         clickElementWithJs("clear-accept-ext");
         clickElementWithJs("set-accept-ext-pdf");
 

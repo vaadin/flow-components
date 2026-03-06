@@ -351,19 +351,22 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * <p>
      * MIME types are used as a client-side hint (to filter the file picker).
      * When an {@link com.vaadin.flow.server.streams.UploadHandler
-     * UploadHandler} is used (set via {@link #setUploadHandler}), they are also
-     * validated server-side. Note that server-side MIME type validation only
-     * checks the content type reported by the client, which can be spoofed. For
-     * stronger protection, also use
-     * {@link #setAcceptedFileExtensions(String...)} in combination with MIME
-     * types.
+     * UploadHandler} is used (set via
+     * {@link #setUploadHandler(UploadHandler)}), they are also validated
+     * server-side. Note that server-side MIME type validation only checks the
+     * content type reported by the client, which can be spoofed. For stronger
+     * protection, also use {@link #setAcceptedFileExtensions(String...)} in
+     * combination with MIME types.
      * <p>
      * If both MIME types and file extensions are configured, a file must match
      * at least one of each (AND logic).
      * <p>
-     * Note: Server-side validation is only performed when using
-     * {@link #setUploadHandler}. When using the deprecated
-     * {@link #setReceiver(Receiver)}, only client-side hints are applied.
+     * This method requires an
+     * {@link com.vaadin.flow.server.streams.UploadHandler UploadHandler} to be
+     * used for server-side validation. It cannot be used with the deprecated
+     * {@link #setReceiver(Receiver)} API. Use
+     * {@link #setAcceptedFileTypes(String...)} for client-side-only hints with
+     * a Receiver.
      *
      * @param mimeTypes
      *            the accepted MIME types, e.g. {@code "image/*"},
@@ -371,8 +374,13 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @throws IllegalArgumentException
      *             if any value is null, blank, or does not contain a {@code /}
      *             character
+     * @throws IllegalStateException
+     *             if a {@link Receiver} is currently set
      */
     public void setAcceptedMimeTypes(String... mimeTypes) {
+        if (mimeTypes != null && mimeTypes.length > 0) {
+            checkNoReceiverSet("setAcceptedMimeTypes");
+        }
         if (mimeTypes == null || mimeTypes.length == 0) {
             acceptedMimeTypes = List.of();
         } else {
@@ -408,23 +416,31 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * <p>
      * File extensions are used as a client-side hint. When an
      * {@link com.vaadin.flow.server.streams.UploadHandler UploadHandler} is
-     * used (set via {@link #setUploadHandler}), they are also validated
-     * server-side.
+     * used (set via {@link #setUploadHandler(UploadHandler)}), they are also
+     * validated server-side.
      * <p>
      * If both MIME types and file extensions are configured, a file must match
      * at least one of each (AND logic).
      * <p>
-     * Note: Server-side validation is only performed when using
-     * {@link #setUploadHandler}. When using the deprecated
-     * {@link #setReceiver(Receiver)}, only client-side hints are applied.
+     * This method requires an
+     * {@link com.vaadin.flow.server.streams.UploadHandler UploadHandler} to be
+     * used for server-side validation. It cannot be used with the deprecated
+     * {@link #setReceiver(Receiver)} API. Use
+     * {@link #setAcceptedFileTypes(String...)} for client-side-only hints with
+     * a Receiver.
      *
      * @param extensions
      *            the accepted file extensions, each starting with a dot; or
      *            {@code null} to clear
      * @throws IllegalArgumentException
      *             if any value is null, blank, or does not start with a dot
+     * @throws IllegalStateException
+     *             if a {@link Receiver} is currently set
      */
     public void setAcceptedFileExtensions(String... extensions) {
+        if (extensions != null && extensions.length > 0) {
+            checkNoReceiverSet("setAcceptedFileExtensions");
+        }
         if (extensions == null || extensions.length == 0) {
             acceptedFileExtensions = List.of();
         } else {
@@ -855,14 +871,34 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * <p>
      * Note! If the receiver doesn't implement {@link MultiFileReceiver} then
      * the upload will be automatically set to only accept one file.
+     * <p>
+     * A Receiver cannot be used together with the server-side file type
+     * validation provided by {@link #setAcceptedMimeTypes(String...)} and
+     * {@link #setAcceptedFileExtensions(String...)}. If those are configured,
+     * this method throws. Use {@link #setAcceptedFileTypes(String...)} for
+     * client-side-only hints with a Receiver.
      *
      * @param receiver
      *            receiver to use for file reception
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedMimeTypes(String...)} or
+     *             {@link #setAcceptedFileExtensions(String...)} have been
+     *             configured with non-empty values
      * @see #setUploadHandler(UploadHandler)
      * @deprecated use {@link #setUploadHandler(UploadHandler)} instead
      */
     @Deprecated(since = "24.8", forRemoval = true)
     public void setReceiver(Receiver receiver) {
+        if (!acceptedMimeTypes.isEmpty() || !acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot set a Receiver when setAcceptedMimeTypes or "
+                            + "setAcceptedFileExtensions are configured. "
+                            + "These APIs require an UploadHandler for "
+                            + "server-side validation. Use "
+                            + "setAcceptedFileTypes for client-side-only "
+                            + "hints with a Receiver, or switch to "
+                            + "setUploadHandler.");
+        }
         Receiver oldReceiver = this.receiver;
         this.receiver = receiver;
 
@@ -940,6 +976,22 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
     private boolean isMultiFileReceiver(Receiver receiver) {
         return receiver instanceof MultiFileReceiver;
+    }
+
+    /**
+     * Throws if a {@link Receiver} is currently active. Called by the new
+     * server-side validation setters to prevent use with the deprecated
+     * Receiver API.
+     */
+    private void checkNoReceiverSet(String methodName) {
+        if (receiver != null) {
+            throw new IllegalStateException(
+                    methodName + " cannot be used when a Receiver is set. "
+                            + "Server-side file type validation requires an "
+                            + "UploadHandler. Use setAcceptedFileTypes for "
+                            + "client-side-only hints with a Receiver, or "
+                            + "switch to setUploadHandler.");
+        }
     }
 
     /**
