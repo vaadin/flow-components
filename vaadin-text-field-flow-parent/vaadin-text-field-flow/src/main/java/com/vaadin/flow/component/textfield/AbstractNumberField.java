@@ -30,6 +30,7 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.DomListenerRegistration;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -344,16 +345,26 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     /**
      * Internal helper to bind a signal to the minimum value.
+     *
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      */
-    protected final void bindMinInternal(Signal<Double> signal) {
-        minSupport.bind(signal);
+    protected final SignalBinding<Double> bindMinInternal(
+            Signal<Double> signal) {
+        return minSupport.bind(signal);
     }
 
     /**
      * Internal helper to bind a signal to the maximum value.
+     *
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      */
-    protected final void bindMaxInternal(Signal<Double> signal) {
-        maxSupport.bind(signal);
+    protected final SignalBinding<Double> bindMaxInternal(
+            Signal<Double> signal) {
+        return maxSupport.bind(signal);
     }
 
     /**
