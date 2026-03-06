@@ -367,7 +367,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public void setAcceptedMimeTypes(String... mimeTypes) {
         if (mimeTypes == null || mimeTypes.length == 0) {
-            acceptedMimeTypes = Collections.emptyList();
+            acceptedMimeTypes = List.of();
         } else {
             for (var mimeType : mimeTypes) {
                 if (mimeType == null || mimeType.isBlank()) {
