@@ -30,6 +30,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -229,9 +230,9 @@ public class Badge extends Component
     }
 
     @Override
-    public void bindText(Signal<String> textSignal) {
+    public SignalBinding<String> bindText(Signal<String> textSignal) {
         updateContent(null);
-        textSignalSupport.bind(textSignal);
+        return textSignalSupport.bind(textSignal);
     }
 
     /**
@@ -253,9 +254,12 @@ public class Badge extends Component
      *
      * @param numberSignal
      *            the signal providing the number value
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      */
-    public void bindNumber(Signal<Integer> numberSignal) {
-        getElement().bindProperty("number", numberSignal, null);
+    public SignalBinding<Integer> bindNumber(Signal<Integer> numberSignal) {
+        return getElement().bindProperty("number", numberSignal, null);
     }
 
     /**
