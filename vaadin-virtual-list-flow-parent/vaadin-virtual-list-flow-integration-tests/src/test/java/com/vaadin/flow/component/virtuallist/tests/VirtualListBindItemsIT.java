@@ -25,10 +25,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.nimbusds.jose.shaded.jcip.NotThreadSafe;
 import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
+@NotThreadSafe
 @TestPath("vaadin-virtual-list/virtual-list-bind-items")
 public class VirtualListBindItemsIT extends AbstractComponentIT {
 
@@ -49,12 +51,12 @@ public class VirtualListBindItemsIT extends AbstractComponentIT {
         Assert.assertEquals("Virtual list should have 3 items", 3,
                 virtualList.getRowCount());
 
-        Assert.assertEquals("First item should be 'Item 1'", "Item 1",
-                VirtualListHelpers.getItemText(virtualList, 0));
-        Assert.assertEquals("Second item should be 'Item 2'", "Item 2",
-                VirtualListHelpers.getItemText(virtualList, 1));
-        Assert.assertEquals("Third item should be 'Item 3'", "Item 3",
-                VirtualListHelpers.getItemText(virtualList, 2));
+        waitUntil(driver -> "Item 1"
+                .equals(VirtualListHelpers.getItemText(virtualList, 0)));
+        waitUntil(driver -> "Item 2"
+                .equals(VirtualListHelpers.getItemText(virtualList, 1)));
+        waitUntil(driver -> "Item 3"
+                .equals(VirtualListHelpers.getItemText(virtualList, 2)));
     }
 
     @Test
@@ -71,8 +73,8 @@ public class VirtualListBindItemsIT extends AbstractComponentIT {
         Assert.assertEquals("Virtual list should have 4 items", 4,
                 virtualList.getRowCount());
 
-        Assert.assertEquals("New item should be 'Item 4'", "Item 4",
-                VirtualListHelpers.getItemText(virtualList, 3));
+        waitUntil(driver -> "Item 4"
+                .equals(VirtualListHelpers.getItemText(virtualList, 3)));
     }
 
     @Test
@@ -89,10 +91,10 @@ public class VirtualListBindItemsIT extends AbstractComponentIT {
         Assert.assertEquals("Virtual list should have 2 items", 2,
                 virtualList.getRowCount());
 
-        Assert.assertEquals("First item still 'Item 1'", "Item 1",
-                VirtualListHelpers.getItemText(virtualList, 0));
-        Assert.assertEquals("Second item still 'Item 2'", "Item 2",
-                VirtualListHelpers.getItemText(virtualList, 1));
+        waitUntil(driver -> "Item 1"
+                .equals(VirtualListHelpers.getItemText(virtualList, 0)));
+        waitUntil(driver -> "Item 2"
+                .equals(VirtualListHelpers.getItemText(virtualList, 1)));
     }
 
     @Test
@@ -108,10 +110,10 @@ public class VirtualListBindItemsIT extends AbstractComponentIT {
         Assert.assertEquals("Virtual list should have 5 items", 5,
                 virtualList.getRowCount());
 
-        Assert.assertEquals("Fourth item should be 'Item 4'", "Item 4",
-                VirtualListHelpers.getItemText(virtualList, 3));
-        Assert.assertEquals("Fifth item should be 'Item 5'", "Item 5",
-                VirtualListHelpers.getItemText(virtualList, 4));
+        waitUntil(driver -> "Item 4"
+                .equals(VirtualListHelpers.getItemText(virtualList, 3)));
+        waitUntil(driver -> "Item 5"
+                .equals(VirtualListHelpers.getItemText(virtualList, 4)));
     }
 
     @Test
@@ -128,16 +130,19 @@ public class VirtualListBindItemsIT extends AbstractComponentIT {
                 virtualList.getRowCount());
 
         // Verify original items are still there
-        Assert.assertEquals("Item 1", VirtualListHelpers.getItemText(virtualList, 0));
-        Assert.assertEquals("Item 2", VirtualListHelpers.getItemText(virtualList, 1));
-        Assert.assertEquals("Item 3", VirtualListHelpers.getItemText(virtualList, 2));
+        waitUntil(driver -> "Item 1"
+                .equals(VirtualListHelpers.getItemText(virtualList, 0)));
+        waitUntil(driver -> "Item 2"
+                .equals(VirtualListHelpers.getItemText(virtualList, 1)));
+        waitUntil(driver -> "Item 3"
+                .equals(VirtualListHelpers.getItemText(virtualList, 2)));
     }
 
     @Test
     public void bindItems_updateItem_virtualListUpdated() {
         waitUntil(driver -> virtualList.getRowCount() > 0);
-        Assert.assertEquals("Initial first item", "Item 1",
-                VirtualListHelpers.getItemText(virtualList, 0));
+        waitUntil(driver -> "Item 1"
+                .equals(VirtualListHelpers.getItemText(virtualList, 0)));
 
         clickElementWithJs(UPDATE_ITEM_BUTTON);
 
@@ -145,6 +150,8 @@ public class VirtualListBindItemsIT extends AbstractComponentIT {
                 .equals(VirtualListHelpers.getItemText(virtualList, 0)));
         Assert.assertEquals("Updated first item", "Item 1 Updated",
                 VirtualListHelpers.getItemText(virtualList, 0));
+        waitUntil(driver -> "Item 1 Updated"
+                .equals(VirtualListHelpers.getItemText(virtualList, 0)));
 
         // Item count should remain the same
         Assert.assertEquals("Item count should still be 3", "3",
@@ -153,9 +160,9 @@ public class VirtualListBindItemsIT extends AbstractComponentIT {
                 virtualList.getRowCount());
 
         // Other items should remain unchanged
-        Assert.assertEquals("Second item unchanged", "Item 2",
-                VirtualListHelpers.getItemText(virtualList, 1));
-        Assert.assertEquals("Third item unchanged", "Item 3",
-                VirtualListHelpers.getItemText(virtualList, 2));
+        waitUntil(driver -> "Item 2"
+                .equals(VirtualListHelpers.getItemText(virtualList, 1)));
+        waitUntil(driver -> "Item 3"
+                .equals(VirtualListHelpers.getItemText(virtualList, 2)));
     }
 }

@@ -56,9 +56,9 @@ public class VirtualListHelpers {
         JavascriptExecutor js = (JavascriptExecutor) ((org.openqa.selenium.WrapsDriver) virtualListElement)
                 .getWrappedDriver();
         Object result = js.executeScript(
-                "const children = arguments[0].children;" +
-                "if (arguments[1] >= children.length) return null;" +
-                "return children[arguments[1]].textContent;",
+                "const children = arguments[0].children;"
+                        + "if (arguments[1] >= children.length) return null;"
+                        + "return children[arguments[1]].textContent;",
                 virtualListElement, index);
         return result != null ? result.toString() : null;
     }
