@@ -36,9 +36,9 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
- * JUnit 5 extension to set up a UI and VaadinSession for testing.
+ * JUnit 6 extension to set up a UI and VaadinSession for testing.
  * <p>
- * This is the JUnit 5 equivalent of {@link MockUIRule}. Usage:
+ * This is the JUnit 6 equivalent of {@link MockUIRule}. Usage:
  *
  * <pre>
  * &#64;RegisterExtension

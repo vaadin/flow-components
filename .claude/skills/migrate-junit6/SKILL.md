@@ -1,14 +1,14 @@
 ---
-name: migrate-junit5
-description: Migrate JUnit 4 tests to JUnit 5 in this project. Use when asked to convert, migrate, or update tests from JUnit 4 to JUnit 5.
+name: migrate-junit6
+description: Migrate JUnit 4 tests to JUnit 6 in this project. Use when asked to convert, migrate, or update tests from JUnit 4 to JUnit 6.
 argument-hint: "[file or module path]"
 ---
 
-Migrate the specified JUnit 4 test file(s) or module to JUnit 5. Read each file first, apply all rules below, and edit it. Do NOT change anything else (no reformatting, no logic changes).
+Migrate the specified JUnit 4 test file(s) or module to JUnit 6. Read each file first, apply all rules below, and edit it. Do NOT change anything else (no reformatting, no logic changes).
 
 ## Import replacements
 
-| JUnit 4 | JUnit 5 |
+| JUnit 4 | JUnit 6 |
 |---|---|
 | `org.junit.Test` | `org.junit.jupiter.api.Test` |
 | `org.junit.Assert` | `org.junit.jupiter.api.Assertions` |
@@ -79,7 +79,7 @@ public void throwsException() {
 
 ## Visibility
 
-JUnit 5 test classes and methods should use default (package) visibility, not `public`. Remove `public` from:
+JUnit 6 test classes and methods should use default (package) visibility, not `public`. Remove `public` from:
 - The test class declaration
 - All `@Test`, `@BeforeEach`, `@AfterEach`, `@BeforeAll`, `@AfterAll` methods
 
@@ -99,11 +99,11 @@ class FooTest {
 
 ## Base classes
 
-JUnit 5 does **not** process JUnit 4 `@Rule` annotations from parent classes. Tests will compile but fail at runtime (e.g. `UI.getCurrent()` returns null). Switch to the JUnit 5 base class:
+JUnit 6 does **not** process JUnit 4 `@Rule` annotations from parent classes. Tests will compile but fail at runtime (e.g. `UI.getCurrent()` returns null). Switch to the JUnit 6 base class:
 
-| JUnit 4 | JUnit 5 |
+| JUnit 4 | JUnit 6 |
 |---|---|
-| `AbstractSignalsUnitTest` | `AbstractSignalsJUnit5Test` |
+| `AbstractSignalsUnitTest` | `AbstractSignalsJUnit6Test` |
 
 ## After editing
 

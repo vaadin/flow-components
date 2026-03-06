@@ -25,9 +25,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit5Test;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-class HasThemeVariantTest extends AbstractSignalsJUnit5Test {
+class HasThemeVariantTest extends AbstractSignalsJUnit6Test {
 
     @Test
     void addThemeVariant_themeNamesContainsThemeVariant() {

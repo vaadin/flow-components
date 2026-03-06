@@ -372,8 +372,8 @@
                         <skip>${skipUnitTests}</skip>
                     </configuration>
                     <dependencies>
-                        <!-- Use JUnit Platform provider to run both JUnit 4 and JUnit 5 tests, -->
-                        <!-- allowing a gradual migration to JUnit 5 -->
+                        <!-- Use JUnit Platform provider to run both JUnit 4 and JUnit 6 tests, -->
+                        <!-- allowing a gradual migration to JUnit 6 -->
                         <dependency>
                             <groupId>org.junit.jupiter</groupId>
                             <artifactId>junit-jupiter-engine</artifactId>

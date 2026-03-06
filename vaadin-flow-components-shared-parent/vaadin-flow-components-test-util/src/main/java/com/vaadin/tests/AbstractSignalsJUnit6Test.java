@@ -18,13 +18,13 @@ package com.vaadin.tests;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * JUnit 5 base class for testing components with full-stack signals. Since
+ * JUnit 6 base class for testing components with full-stack signals. Since
  * signal bindings are only active when components are attached, this class sets
  * up a mock UI instance for attaching components under test.
  * <p>
- * This is the JUnit 5 equivalent of {@link AbstractSignalsUnitTest}.
+ * This is the JUnit 6 equivalent of {@link AbstractSignalsUnitTest}.
  */
-public class AbstractSignalsJUnit5Test {
+public class AbstractSignalsJUnit6Test {
     @RegisterExtension
     protected MockUIExtension ui = new MockUIExtension();
 }
