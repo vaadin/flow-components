@@ -33,6 +33,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -60,7 +61,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-beta1")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-beta2")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -600,12 +601,15 @@ public class Dashboard extends Component
      *
      * @param visibleSignal
      *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
      */
     @Deprecated
     @Override
-    public void bindVisible(Signal<Boolean> visibleSignal) {
+    public SignalBinding<Boolean> bindVisible(Signal<Boolean> visibleSignal) {
         throw new UnsupportedOperationException(
                 "Dashboard does not support setting visibility");
     }
