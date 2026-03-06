@@ -53,7 +53,7 @@ public class UploadView extends Div {
 
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         upload = new Upload(buffer);
-        upload.setAcceptedFileExtensions(".txt");
+        upload.setAcceptedFileTypes(".txt");
 
         upload.addSucceededListener(event -> {
             try {
