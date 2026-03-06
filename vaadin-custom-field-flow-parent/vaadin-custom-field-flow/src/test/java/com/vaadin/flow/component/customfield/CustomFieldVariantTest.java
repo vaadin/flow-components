@@ -41,17 +41,16 @@ public class CustomFieldVariantTest {
     }
 
     @Test
-    public void addLumoSmall_themeAttributeUpdated() {
+    public void addSmall_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
+        customField.addThemeVariants(CustomFieldVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addLumoHelperAboveField_themeAttributeUpdated() {
+    public void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField
-                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
@@ -65,22 +64,19 @@ public class CustomFieldVariantTest {
     @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
-        customField
-                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.addThemeVariants(CustomFieldVariant.SMALL);
+        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        customField.removeThemeVariants(
-                CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.removeThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         assertThemeAttribute("small");
     }
 
     @Test
     public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
-        customField
-                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.addThemeVariants(CustomFieldVariant.SMALL);
+        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         customField.getThemeNames().clear();
         assertThemeAttribute(null);
     }
