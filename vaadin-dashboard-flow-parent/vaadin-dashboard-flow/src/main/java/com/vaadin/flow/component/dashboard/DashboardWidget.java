@@ -13,6 +13,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -233,12 +234,15 @@ public class DashboardWidget extends Component {
      *
      * @param visibleSignal
      *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
      */
     @Deprecated
     @Override
-    public void bindVisible(Signal<Boolean> visibleSignal) {
+    public SignalBinding<Boolean> bindVisible(Signal<Boolean> visibleSignal) {
         throw new UnsupportedOperationException(
                 "Dashboard widget does not support setting visibility");
     }
