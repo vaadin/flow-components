@@ -57,6 +57,7 @@ import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -266,12 +267,16 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *
      * @param requiredSignal
      *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
      */
     @Deprecated
     @Override
-    public void bindRequiredIndicatorVisible(Signal<Boolean> requiredSignal) {
+    public SignalBinding<Boolean> bindRequiredIndicatorVisible(
+            Signal<Boolean> requiredSignal) {
         throw new UnsupportedOperationException(
                 "ListBox does not support showing a required indicator");
     }

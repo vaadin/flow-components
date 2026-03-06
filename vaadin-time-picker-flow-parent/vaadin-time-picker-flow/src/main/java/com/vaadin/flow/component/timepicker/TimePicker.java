@@ -55,6 +55,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -828,14 +829,18 @@ public class TimePicker
      *
      * @param signal
      *            the signal to bind the minimum time to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMin(LocalTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<LocalTime> signal) {
+    public SignalBinding<String> bindMin(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("min", signal.map(FORMATTER::apply), null);
+        return getElement().bindProperty("min", signal.map(FORMATTER::apply),
+                null);
     }
 
     /**
@@ -852,14 +857,18 @@ public class TimePicker
      *
      * @param signal
      *            the signal to bind the maximum time to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMax(LocalTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<LocalTime> signal) {
+    public SignalBinding<String> bindMax(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("max", signal.map(FORMATTER::apply), null);
+        return getElement().bindProperty("max", signal.map(FORMATTER::apply),
+                null);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {

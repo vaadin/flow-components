@@ -64,6 +64,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -533,8 +534,8 @@ public class RadioButtonGroup<T>
     }
 
     @Override
-    public void bindReadOnly(Signal<Boolean> readOnlySignal) {
-        readonlySupport.bind(readOnlySignal);
+    public SignalBinding<Boolean> bindReadOnly(Signal<Boolean> readOnlySignal) {
+        return readonlySupport.bind(readOnlySignal);
     }
 
     /**
