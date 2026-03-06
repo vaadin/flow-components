@@ -88,4 +88,7 @@ mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am 
 ```sh
 # Format code
 mvn spotless:apply
+
+# Run checkstyle validation
+mvn checkstyle:check
 ```
