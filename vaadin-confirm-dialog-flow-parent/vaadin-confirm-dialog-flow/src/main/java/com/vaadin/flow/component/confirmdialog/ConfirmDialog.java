@@ -34,6 +34,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -174,8 +175,8 @@ public class ConfirmDialog extends Component
     }
 
     @Override
-    public void bindWidth(Signal<String> widthSignal) {
-        getElement().bindProperty("width", widthSignal, null);
+    public SignalBinding<String> bindWidth(Signal<String> widthSignal) {
+        return getElement().bindProperty("width", widthSignal, null);
     }
 
     @Override
@@ -202,8 +203,8 @@ public class ConfirmDialog extends Component
     }
 
     @Override
-    public void bindHeight(Signal<String> heightSignal) {
-        getElement().bindProperty("height", heightSignal, null);
+    public SignalBinding<String> bindHeight(Signal<String> heightSignal) {
+        return getElement().bindProperty("height", heightSignal, null);
     }
 
     /**

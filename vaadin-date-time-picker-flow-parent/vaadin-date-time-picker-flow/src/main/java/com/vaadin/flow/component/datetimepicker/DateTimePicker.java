@@ -48,6 +48,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -452,8 +453,8 @@ public class DateTimePicker
     }
 
     @Override
-    public void bindReadOnly(Signal<Boolean> readOnlySignal) {
-        readonlySupport.bind(readOnlySignal);
+    public SignalBinding<Boolean> bindReadOnly(Signal<Boolean> readOnlySignal) {
+        return readonlySupport.bind(readOnlySignal);
     }
 
     @Override
@@ -904,13 +905,16 @@ public class DateTimePicker
      * @param signal
      *            the signal to bind the minimum date and time to, not
      *            {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMin(LocalDateTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<LocalDateTime> signal) {
-        getElement().bindProperty("min",
+    public SignalBinding<String> bindMin(Signal<LocalDateTime> signal) {
+        return getElement().bindProperty("min",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
     }
 
@@ -955,13 +959,16 @@ public class DateTimePicker
      * @param signal
      *            the signal to bind the maximum date and time to, not
      *            {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMax(LocalDateTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<LocalDateTime> signal) {
-        getElement().bindProperty("max",
+    public SignalBinding<String> bindMax(Signal<LocalDateTime> signal) {
+        return getElement().bindProperty("max",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
     }
 
