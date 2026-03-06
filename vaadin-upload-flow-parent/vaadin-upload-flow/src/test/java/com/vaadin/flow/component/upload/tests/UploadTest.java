@@ -295,4 +295,119 @@ public class UploadTest {
         Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
         Assert.assertEquals(".txt", upload.getElement().getProperty("accept"));
     }
+
+    // --- Receiver guard ---
+
+    @Test
+    public void setAcceptedMimeTypes_withReceiver_throws() {
+        var upload = new Upload();
+        upload.setReceiver(new MemoryBuffer());
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedMimeTypes("image/*"));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_withReceiver_throws() {
+        var upload = new Upload();
+        upload.setReceiver(new MemoryBuffer());
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedFileExtensions(".pdf"));
+    }
+
+    @Test
+    public void setReceiver_withAcceptedMimeTypes_throws() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setReceiver(new MemoryBuffer()));
+    }
+
+    @Test
+    public void setReceiver_withAcceptedFileExtensions_throws() {
+        var upload = new Upload();
+        upload.setAcceptedFileExtensions(".pdf");
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setReceiver(new MemoryBuffer()));
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_clearWithNull_withReceiver_doesNotThrow() {
+        var upload = new Upload();
+        upload.setReceiver(new MemoryBuffer());
+
+        upload.setAcceptedMimeTypes((String[]) null);
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_clearWithEmpty_withReceiver_doesNotThrow() {
+        var upload = new Upload();
+        upload.setReceiver(new MemoryBuffer());
+
+        upload.setAcceptedMimeTypes();
+        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_clearWithNull_withReceiver_doesNotThrow() {
+        var upload = new Upload();
+        upload.setReceiver(new MemoryBuffer());
+
+        upload.setAcceptedFileExtensions((String[]) null);
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_clearWithEmpty_withReceiver_doesNotThrow() {
+        var upload = new Upload();
+        upload.setReceiver(new MemoryBuffer());
+
+        upload.setAcceptedFileExtensions(new String[0]);
+        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+    }
+
+    @Test
+    public void setReceiver_afterClearingNewApiFields_doesNotThrow() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedFileExtensions(".pdf");
+
+        // Clear both fields
+        upload.setAcceptedMimeTypes((String[]) null);
+        upload.setAcceptedFileExtensions((String[]) null);
+
+        // Should not throw now
+        upload.setReceiver(new MemoryBuffer());
+    }
+
+    @Test
+    public void setAcceptedFileTypes_withReceiver_doesNotThrow() {
+        var upload = new Upload();
+        upload.setReceiver(new MemoryBuffer());
+
+        // Deprecated setter should still work with Receiver (client-side only)
+        upload.setAcceptedFileTypes("image/*", ".pdf");
+        Assert.assertEquals("image/*,.pdf",
+                upload.getElement().getProperty("accept"));
+    }
+
+    @Test
+    public void constructorWithReceiver_setAcceptedMimeTypes_throws() {
+        var upload = new Upload(new MemoryBuffer());
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedMimeTypes("image/*"));
+    }
+
+    @Test
+    public void constructorWithReceiver_setAcceptedFileExtensions_throws() {
+        var upload = new Upload(new MemoryBuffer());
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedFileExtensions(".pdf"));
+    }
 }
