@@ -24,30 +24,18 @@ public enum DetailsVariant implements ThemeVariant {
     FILLED("filled"),
     REVERSE("reverse"),
     SMALL("small"),
-    /**
-     * @deprecated Use {@link #FILLED} instead.
-     */
-    @Deprecated(since = "25.1", forRemoval = true)
     LUMO_FILLED("filled"),
     /**
      * @deprecated Use {@link #FILLED} instead.
      */
     @Deprecated(since = "25.1", forRemoval = true)
     AURA_FILLED("filled"),
-    /**
-     * @deprecated Use {@link #REVERSE} instead.
-     */
-    @Deprecated(since = "25.1", forRemoval = true)
     LUMO_REVERSE("reverse"),
     /**
      * @deprecated Use {@link #REVERSE} instead.
      */
     @Deprecated(since = "25.1", forRemoval = true)
     AURA_REVERSE("reverse"),
-    /**
-     * @deprecated Use {@link #SMALL} instead.
-     */
-    @Deprecated(since = "25.1", forRemoval = true)
     LUMO_SMALL("small"),
     /**
      * @deprecated Use {@link #SMALL} instead.
