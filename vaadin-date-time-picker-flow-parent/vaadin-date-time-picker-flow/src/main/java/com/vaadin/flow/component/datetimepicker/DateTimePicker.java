@@ -30,6 +30,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -192,6 +193,14 @@ public class DateTimePicker
 
     private ValidationController<DateTimePicker, LocalDateTime> validationController = new ValidationController<>(
             this);
+
+    private final SignalPropertySupport<Boolean> readonlySupport = SignalPropertySupport
+            .create(this, (value) -> {
+                super.setReadOnly(value);
+                datePicker.setReadOnly(value);
+                timePicker.setReadOnly(value);
+
+            });
 
     /**
      * Default constructor.
@@ -439,12 +448,12 @@ public class DateTimePicker
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        super.setReadOnly(readOnly);
-        // fixme(haprog) This override can probably be removed after we use a
-        // version which includes this fix:
-        // https://github.com/vaadin/vaadin-date-time-picker/pull/30
-        datePicker.setReadOnly(readOnly);
-        timePicker.setReadOnly(readOnly);
+        readonlySupport.set(readOnly);
+    }
+
+    @Override
+    public void bindReadOnly(Signal<Boolean> readOnlySignal) {
+        readonlySupport.bind(readOnlySignal);
     }
 
     @Override
