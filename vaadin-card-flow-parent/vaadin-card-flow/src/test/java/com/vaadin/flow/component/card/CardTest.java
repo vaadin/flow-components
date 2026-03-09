@@ -19,38 +19,30 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.tests.MockUIRule;
 
 /**
  * Unit tests for the {@link Card} component.
  */
 public class CardTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     private Card card;
 
-    private UI ui;
-
     @Before
     public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
         card = new Card();
         ui.add(card);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test

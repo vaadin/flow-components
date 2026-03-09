@@ -25,6 +25,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -185,9 +186,9 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
             }
 
             @Override
-            public void bindText(Signal<String> value) {
+            public SignalBinding<String> bindText(Signal<String> value) {
                 mockButton.bindText(value);
-                super.bindText(value);
+                return super.bindText(value);
             }
         }
         ;
@@ -201,6 +202,40 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         Mockito.clearInvocations(mockButton);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void bindEnabled_disableOnClickActive_throws() {
+        button = new Button("foo");
+        button.setDisableOnClick(true);
+
+        button.bindEnabled(new ValueSignal<>(true));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void setDisableOnClick_enabledBindingActive_throws() {
+        button = new Button("foo");
+        UI.getCurrent().add(button);
+        button.bindEnabled(new ValueSignal<>(true));
+
+        button.setDisableOnClick(true);
+    }
+
+    @Test
+    public void setDisableOnClickFalse_enabledBindingActive_doesNotThrow() {
+        button = new Button("foo");
+        UI.getCurrent().add(button);
+        button.bindEnabled(new ValueSignal<>(true));
+
+        button.setDisableOnClick(false);
+    }
+
+    @Test
+    public void bindEnabled_disableOnClickNotActive_doesNotThrow() {
+        button = new Button("foo");
+        UI.getCurrent().add(button);
+
+        button.bindEnabled(new ValueSignal<>(true));
+    }
+
     private void assertTextSignalBindingActive() {
         textSignal.set("foo");
         Assert.assertEquals("foo", button.getText());
@@ -212,21 +247,5 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         var currentText = button.getText();
         textSignal.set(currentText + " with change");
         Assert.assertEquals(currentText, button.getText());
-    }
-
-    private void assertIconBeforeText() {
-        Assert.assertTrue("Icon should be child of button",
-                button.getElement().getChildren()
-                        .anyMatch(child -> child.equals(icon.getElement())));
-        Assert.assertFalse(button.isIconAfterText());
-        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
-    }
-
-    private void assertIconAfterText() {
-        Assert.assertTrue("Icon should be child of button",
-                button.getElement().getChildren()
-                        .anyMatch(child -> child.equals(icon.getElement())));
-        Assert.assertTrue(button.isIconAfterText());
-        Assert.assertEquals("suffix", icon.getElement().getAttribute("slot"));
     }
 }

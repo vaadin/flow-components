@@ -32,10 +32,15 @@ public enum TabsVariant implements ThemeVariant {
      */
     @Deprecated
     AURA_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    /**
+     * @deprecated Use {@link #SHOW_SCROLL_BUTTONS} instead.
+     */
+    @Deprecated
     AURA_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
     AURA_FILLED("filled"),
     HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    SMALL("small");
+    SMALL("small"),
+    SHOW_SCROLL_BUTTONS("show-scroll-buttons");
 
     private final String variant;
 
