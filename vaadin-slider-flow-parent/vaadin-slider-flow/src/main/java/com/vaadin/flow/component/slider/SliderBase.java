@@ -28,6 +28,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.signals.Signal;
@@ -189,12 +190,15 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *
      * @param signal
      *            the signal to bind the minimum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<Double> signal) {
-        getElement().bindProperty("min", signal, null);
+    public SignalBinding<Double> bindMin(Signal<Double> signal) {
+        return getElement().bindProperty("min", signal, null);
     }
 
     /**
@@ -212,12 +216,15 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *
      * @param signal
      *            the signal to bind the maximum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<Double> signal) {
-        getElement().bindProperty("max", signal, null);
+    public SignalBinding<Double> bindMax(Signal<Double> signal) {
+        return getElement().bindProperty("max", signal, null);
     }
 
     /**
@@ -235,12 +242,15 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *
      * @param signal
      *            the signal to bind the step value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindStep(Signal<Double> signal) {
-        getElement().bindProperty("step", signal, null);
+    public SignalBinding<Double> bindStep(Signal<Double> signal) {
+        return getElement().bindProperty("step", signal, null);
     }
 
     /**

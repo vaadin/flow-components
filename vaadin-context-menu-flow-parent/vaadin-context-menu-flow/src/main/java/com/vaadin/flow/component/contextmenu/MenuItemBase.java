@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.signals.Signal;
 
@@ -274,16 +275,19 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * not be synchronized back to the signal due to
      * {@link #bindEnabled(Signal)} only supporting one-way bindings.
      *
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @throws IllegalStateException
      *             if disable-on-click is active
      */
     @Override
-    public void bindEnabled(Signal<Boolean> enabledSignal) {
+    public SignalBinding<Boolean> bindEnabled(Signal<Boolean> enabledSignal) {
         if (isDisableOnClick()) {
             throw new IllegalStateException(
                     "Binding the enabled state to a signal is not supported when disable on click is active. ");
         }
-        HasComponents.super.bindEnabled(enabledSignal);
+        return HasComponents.super.bindEnabled(enabledSignal);
     }
 
     /**

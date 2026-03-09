@@ -26,6 +26,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.signals.Signal;
 
@@ -76,7 +77,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/number-field", version = "25.1.0-beta1")
+@NpmPackage(value = "@vaadin/number-field", version = "25.1.0-beta2")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -298,11 +299,14 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      *
      * @param signal
      *            the signal to bind the minimum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMin(double)
      * @since 25.1
      */
-    public void bindMin(Signal<Double> signal) {
-        bindMinInternal(signal);
+    public SignalBinding<Double> bindMin(Signal<Double> signal) {
+        return bindMinInternal(signal);
     }
 
     /**
@@ -318,11 +322,14 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      *
      * @param signal
      *            the signal to bind the maximum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMax(double)
      * @since 25.1
      */
-    public void bindMax(Signal<Double> signal) {
-        bindMaxInternal(signal);
+    public SignalBinding<Double> bindMax(Signal<Double> signal) {
+        return bindMaxInternal(signal);
     }
 
     /**

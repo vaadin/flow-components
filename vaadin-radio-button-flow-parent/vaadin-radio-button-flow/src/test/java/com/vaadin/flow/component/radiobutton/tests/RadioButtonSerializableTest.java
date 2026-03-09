@@ -15,22 +15,16 @@
  */
 package com.vaadin.flow.component.radiobutton.tests;
 
-import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
+import com.vaadin.tests.MockUIRule;
 
 public class RadioButtonSerializableTest extends ClassesSerializableTest {
-
-    private UI ui;
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Test
     public void setItems_addToUI_radioButtonGroupIsSerializable()
@@ -38,10 +32,10 @@ public class RadioButtonSerializableTest extends ClassesSerializableTest {
         var group = new RadioButtonGroup<>();
         group.setItems("Item 1", "Item 2");
 
-        ui = new UI();
-        UI.setCurrent(ui);
+        // Serializing session requires more setup, not necessary for this test
+        ui.getUI().getInternals().setSession(null);
         ui.add(group);
 
-        serializeAndDeserialize(ui);
+        serializeAndDeserialize(ui.getUI());
     }
 }
