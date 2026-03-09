@@ -265,29 +265,84 @@ public class UploadTest {
     }
 
     @Test
-    public void setAcceptedFileTypes_setMimeType_serverSideFieldsPopulated() {
+    public void setAcceptedFileTypes_setAcceptedMimeTypes_throws() {
         var upload = new Upload();
-        // Deprecated setter: client-side only, no server-side fields
         upload.setAcceptedFileTypes(".txt", "image/*");
-        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
-        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
 
-        // New setter takes over and populates server-side fields
-        upload.setAcceptedMimeTypes("image/*");
-        Assert.assertEquals(List.of("image/*"), upload.getAcceptedMimeTypes());
-        // accept property is updated by the new setter
-        Assert.assertEquals("image/*",
-                upload.getElement().getProperty("accept"));
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedMimeTypes("image/*"));
     }
 
     @Test
-    public void useSeparateSetters_thenSetAcceptedFileTypes_throws() {
+    public void setAcceptedFileTypes_setAcceptedFileExtensions_throws() {
+        var upload = new Upload();
+        upload.setAcceptedFileTypes(".txt");
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedFileExtensions(".pdf"));
+    }
+
+    @Test
+    public void setAcceptedFileTypes_clear_setAcceptedFileExtensions_works() {
+        var upload = new Upload();
+        upload.setAcceptedFileTypes(".txt", "image/*");
+        upload.setAcceptedFileTypes((String[]) null);
+
+        upload.setAcceptedMimeTypes("image/*");
+        Assert.assertEquals(List.of("image/*"), upload.getAcceptedMimeTypes());
+    }
+
+    @Test
+    public void setAcceptedFileTypes_clear_setAcceptedMimeTypes_works() {
+        var upload = new Upload();
+        upload.setAcceptedFileTypes(".txt", "image/*");
+        upload.setAcceptedFileTypes((String[]) null);
+
+        upload.setAcceptedFileExtensions(".pdf");
+        Assert.assertEquals(List.of(".pdf"),
+                upload.getAcceptedFileExtensions());
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_setAcceptedFileTypes_throws() {
         var upload = new Upload();
         upload.setAcceptedMimeTypes("image/*");
+
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedFileTypes(".txt"));
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_setAcceptedFileTypes_throws() {
+        var upload = new Upload();
         upload.setAcceptedFileExtensions(".pdf");
 
         Assert.assertThrows(IllegalStateException.class,
                 () -> upload.setAcceptedFileTypes(".txt"));
+    }
+
+    @Test
+    public void setAcceptedMimeTypes_clear_setAcceptedFileTypes_works() {
+        var upload = new Upload();
+        upload.setAcceptedMimeTypes("image/*");
+        upload.setAcceptedMimeTypes();
+
+        upload.setAcceptedFileTypes("image/*", ".pdf");
+
+        var accept = upload.getElement().getProperty("accept");
+        Assert.assertEquals("image/*,.pdf", accept);
+    }
+
+    @Test
+    public void setAcceptedFileExtensions_clear_setAcceptedFileTypes_works() {
+        var upload = new Upload();
+        upload.setAcceptedFileExtensions(".pdf");
+        upload.setAcceptedFileExtensions();
+
+        upload.setAcceptedFileTypes("image/*", ".pdf");
+
+        var accept = upload.getElement().getProperty("accept");
+        Assert.assertEquals("image/*,.pdf", accept);
     }
 
     // --- Receiver guard ---

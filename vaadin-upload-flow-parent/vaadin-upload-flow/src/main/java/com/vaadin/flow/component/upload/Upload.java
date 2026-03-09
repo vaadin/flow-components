@@ -375,11 +375,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *             if any value is null, blank, or does not contain a {@code /}
      *             character
      * @throws IllegalStateException
-     *             if a {@link Receiver} is currently set
+     *             if a {@link Receiver} is currently set, or if
+     *             {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
      */
     public void setAcceptedMimeTypes(String... mimeTypes) {
         if (mimeTypes != null && mimeTypes.length > 0) {
             checkNoReceiverSet("setAcceptedMimeTypes");
+            checkNoDeprecatedFileTypes("setAcceptedMimeTypes");
         }
         if (mimeTypes == null || mimeTypes.length == 0) {
             acceptedMimeTypes = List.of();
@@ -435,11 +438,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @throws IllegalArgumentException
      *             if any value is null, blank, or does not start with a dot
      * @throws IllegalStateException
-     *             if a {@link Receiver} is currently set
+     *             if a {@link Receiver} is currently set, or if
+     *             {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
      */
     public void setAcceptedFileExtensions(String... extensions) {
         if (extensions != null && extensions.length > 0) {
             checkNoReceiverSet("setAcceptedFileExtensions");
+            checkNoDeprecatedFileTypes("setAcceptedFileExtensions");
         }
         if (extensions == null || extensions.length == 0) {
             acceptedFileExtensions = List.of();
@@ -489,7 +495,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @throws IllegalStateException
      *             if {@link #setAcceptedMimeTypes(String...)} or
      *             {@link #setAcceptedFileExtensions(String...)} are configured,
-     *             as this method would silently disable server-side validation
+     *             as mixing the deprecated and new APIs is not supported
      * @deprecated Use {@link #setAcceptedMimeTypes(String...)} and
      *             {@link #setAcceptedFileExtensions(String...)} instead for
      *             separate control of MIME types and file extensions with
@@ -501,15 +507,13 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             throw new IllegalStateException(
                     "Cannot use setAcceptedFileTypes when "
                             + "setAcceptedMimeTypes or "
-                            + "setAcceptedFileExtensions are configured, as "
-                            + "it would silently disable server-side "
-                            + "validation. Clear them first by calling "
+                            + "setAcceptedFileExtensions are configured. "
+                            + "Mixing the deprecated and new APIs is not "
+                            + "supported. Clear them first by calling "
                             + "setAcceptedMimeTypes(null) and "
                             + "setAcceptedFileExtensions(null), or use the "
-                            + "separate restriction APIs exclusively.");
+                            + "new API exclusively.");
         }
-        acceptedMimeTypes = List.of();
-        acceptedFileExtensions = List.of();
         if (acceptedFileTypes == null || acceptedFileTypes.length == 0) {
             getElement().setProperty("accept", "");
         } else {
@@ -992,11 +996,19 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         return receiver instanceof MultiFileReceiver;
     }
 
-    /**
-     * Throws if a {@link Receiver} is currently active. Called by the new
-     * server-side validation setters to prevent use with the deprecated
-     * Receiver API.
-     */
+    private void checkNoDeprecatedFileTypes(String methodName) {
+        var accept = getElement().getProperty("accept", "");
+        if (!accept.isEmpty() && acceptedMimeTypes.isEmpty()
+                && acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException("Cannot use " + methodName
+                    + " when setAcceptedFileTypes is configured. "
+                    + "Mixing the deprecated and new APIs is not "
+                    + "supported. Clear the deprecated configuration "
+                    + "first by calling " + methodName + "(), "
+                    + "or use the deprecated API exclusively.");
+        }
+    }
+
     private void checkNoReceiverSet(String methodName) {
         if (receiver != null) {
             throw new IllegalStateException(
