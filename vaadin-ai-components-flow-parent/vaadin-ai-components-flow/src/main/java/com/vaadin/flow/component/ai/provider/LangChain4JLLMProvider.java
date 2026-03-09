@@ -207,6 +207,15 @@ public class LangChain4JLLMProvider implements LLMProvider {
                         toolExecutors.put(toolExecutorKey, toolExecutor);
                     });
         }
+        // Add explicit tools from controllers
+        var explicitTools = request.explicitTools();
+        if (explicitTools != null) {
+            for (var tool : explicitTools) {
+                toolExecutors.put(tool.getName(),
+                        (toolExecRequest, memoryId) -> tool
+                                .execute(toolExecRequest.arguments()));
+            }
+        }
         return toolExecutors;
     }
 
@@ -217,12 +226,75 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private List<ToolSpecification> prepareToolSpecifications(
             LLMRequest request) {
-        if (request.tools() == null) {
-            return Collections.emptyList();
+        var specs = new ArrayList<ToolSpecification>();
+        if (request.tools() != null) {
+            Arrays.stream(request.tools())
+                    .map(ToolSpecifications::toolSpecificationsFrom)
+                    .flatMap(List::stream).forEach(specs::add);
         }
-        return Arrays.stream(request.tools())
-                .map(ToolSpecifications::toolSpecificationsFrom)
-                .flatMap(List::stream).toList();
+        // Add explicit tools from controllers
+        var explicitTools = request.explicitTools();
+        if (explicitTools != null) {
+            for (var tool : explicitTools) {
+                specs.add(convertToToolSpecification(tool));
+            }
+        }
+        return specs;
+    }
+
+    private static ToolSpecification convertToToolSpecification(
+            LLMProvider.ToolDefinition tool) {
+        var builder = ToolSpecification.builder().name(tool.getName())
+                .description(tool.getDescription());
+        var schema = tool.getParametersSchema();
+        if (schema != null && !schema.isBlank()) {
+            try {
+                var schemaNode = new tools.jackson.databind.json.JsonMapper()
+                        .readTree(schema);
+                var propertiesNode = schemaNode.get("properties");
+                var requiredNode = schemaNode.get("required");
+                if (propertiesNode != null && propertiesNode.isObject()) {
+                    var propertiesMap = new HashMap<String, dev.langchain4j.model.chat.request.json.JsonSchemaElement>();
+                    var requiredList = new ArrayList<String>();
+                    var properties = propertiesNode.properties().iterator();
+                    while (properties.hasNext()) {
+                        var entry = properties.next();
+                        var paramName = entry.getKey();
+                        var paramNode = entry.getValue();
+                        var description = paramNode.has("description")
+                                ? paramNode.get("description").asString()
+                                : "";
+                        propertiesMap.put(paramName,
+                                dev.langchain4j.model.chat.request.json.JsonStringSchema
+                                        .builder()
+                                        .description(description).build());
+                        if (requiredNode != null && requiredNode.isArray()
+                                && containsValue(requiredNode, paramName)) {
+                            requiredList.add(paramName);
+                        }
+                    }
+                    builder.parameters(
+                            dev.langchain4j.model.chat.request.json.JsonObjectSchema
+                                    .builder()
+                                    .addProperties(propertiesMap)
+                                    .required(requiredList).build());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Failed to parse tool parameter schema for {}: {}",
+                        tool.getName(), e.getMessage());
+            }
+        }
+        return builder.build();
+    }
+
+    private static boolean containsValue(
+            tools.jackson.databind.JsonNode arrayNode, String value) {
+        for (var element : arrayNode) {
+            if (value.equals(element.asString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void executeChat(ChatExecutionContext context) {

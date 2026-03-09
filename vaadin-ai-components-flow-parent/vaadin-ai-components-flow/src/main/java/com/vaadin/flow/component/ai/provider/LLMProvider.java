@@ -164,6 +164,49 @@ public interface LLMProvider {
     }
 
     /**
+     * Represents a tool that can be called by the LLM. This is a
+     * framework-agnostic tool definition that providers convert to their native
+     * tool format.
+     * <p>
+     * Use this interface to define tools programmatically (e.g., from
+     * controllers) without depending on vendor-specific annotations.
+     * </p>
+     */
+    interface ToolDefinition extends Serializable {
+        /**
+         * Gets the name of the tool.
+         *
+         * @return the tool name, never {@code null}
+         */
+        String getName();
+
+        /**
+         * Gets the description of what the tool does. This should clearly
+         * explain the tool's purpose and parameters.
+         *
+         * @return the tool description, never {@code null}
+         */
+        String getDescription();
+
+        /**
+         * Gets the JSON schema for the tool's parameters. Can be null if the
+         * tool has no parameters.
+         *
+         * @return the parameters schema as a JSON string, or {@code null}
+         */
+        String getParametersSchema();
+
+        /**
+         * Executes the tool with the given arguments.
+         *
+         * @param arguments
+         *            the tool arguments as a JSON string
+         * @return the tool execution result as a string
+         */
+        String execute(String arguments);
+    }
+
+    /**
      * Represents a request to the LLM containing all necessary context,
      * configuration, and tools. Requests are immutable.
      */
@@ -202,5 +245,16 @@ public interface LLMProvider {
          * @return array of tool objects, never {@code null} but may be empty
          */
         Object[] tools();
+
+        /**
+         * Gets the explicit tool definitions for this request. These are
+         * framework-agnostic tools defined programmatically (e.g., from
+         * controllers) that the provider converts to its native tool format.
+         *
+         * @return array of explicit tools, never {@code null} but may be empty
+         */
+        default ToolDefinition[] explicitTools() {
+            return new ToolDefinition[0];
+        }
     }
 }

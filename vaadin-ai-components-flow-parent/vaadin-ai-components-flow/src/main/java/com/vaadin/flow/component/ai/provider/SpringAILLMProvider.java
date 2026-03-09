@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -206,6 +207,13 @@ public class SpringAILLMProvider implements LLMProvider {
         if (tools != null && tools.length > 0) {
             promptSpec = promptSpec.tools(tools);
         }
+        var explicitTools = request.explicitTools();
+        if (explicitTools != null && explicitTools.length > 0) {
+            var callbacks = Arrays.stream(explicitTools)
+                    .map(SpringAILLMProvider::toToolCallback)
+                    .toArray(org.springframework.ai.tool.ToolCallback[]::new);
+            promptSpec = promptSpec.tools((Object[]) callbacks);
+        }
         return promptSpec;
     }
 
@@ -258,6 +266,28 @@ public class SpringAILLMProvider implements LLMProvider {
                 .formatTextAttachment(attachment.name(), textContent);
         return Media.builder().mimeType(MimeType.valueOf("text/plain"))
                 .data(formattedText).build();
+    }
+
+    private static org.springframework.ai.tool.ToolCallback toToolCallback(
+            LLMProvider.ToolDefinition tool) {
+        var inputSchema = tool.getParametersSchema();
+        var toolDef = org.springframework.ai.tool.definition.ToolDefinition
+                .builder().name(tool.getName())
+                .description(tool.getDescription())
+                .inputSchema(inputSchema != null ? inputSchema
+                        : "{\"type\":\"object\",\"properties\":{}}")
+                .build();
+        return new org.springframework.ai.tool.ToolCallback() {
+            @Override
+            public org.springframework.ai.tool.definition.ToolDefinition getToolDefinition() {
+                return toolDef;
+            }
+
+            @Override
+            public String call(String arguments) {
+                return tool.execute(arguments);
+            }
+        };
     }
 
     private static void checkPushConfiguration() {

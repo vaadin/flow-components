@@ -21,6 +21,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -136,6 +137,7 @@ public class AIOrchestrator implements Serializable {
     private AIInput input;
     private AIFileReceiver fileReceiver;
     private transient Object[] tools = new Object[0];
+    private final List<AIController> controllers = new ArrayList<>();
     private String userName;
     private String assistantName;
     private AttachmentSubmitListener attachmentSubmitListener;
@@ -334,6 +336,7 @@ public class AIOrchestrator implements Serializable {
                 conversationHistory
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
+                notifyControllersRequestCompleted();
                 fireResponseCompleteListener(responseText);
             }
             LOGGER.debug("LLM streaming completed successfully");
@@ -386,6 +389,7 @@ public class AIOrchestrator implements Serializable {
             effectiveSystemPrompt = systemPrompt.trim();
         }
         final var finalSystemPrompt = effectiveSystemPrompt;
+        var controllerTools = collectControllerTools();
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -407,10 +411,39 @@ public class AIOrchestrator implements Serializable {
             public Object[] tools() {
                 return tools;
             }
+
+            @Override
+            public LLMProvider.ToolDefinition[] explicitTools() {
+                return controllerTools;
+            }
         };
         LOGGER.debug("Processing prompt with {} attachments",
                 attachments.size());
         streamResponseToMessage(request, assistantMessage, ui);
+    }
+
+    private LLMProvider.ToolDefinition[] collectControllerTools() {
+        if (controllers.isEmpty()) {
+            return new LLMProvider.ToolDefinition[0];
+        }
+        var allTools = new ArrayList<LLMProvider.ToolDefinition>();
+        for (var controller : controllers) {
+            var controllerTools = controller.getTools();
+            if (controllerTools != null) {
+                allTools.addAll(controllerTools);
+            }
+        }
+        return allTools.toArray(new LLMProvider.ToolDefinition[0]);
+    }
+
+    private void notifyControllersRequestCompleted() {
+        for (var controller : controllers) {
+            try {
+                controller.onRequestCompleted();
+            } catch (Exception e) {
+                LOGGER.error("Error in controller onRequestCompleted", e);
+            }
+        }
     }
 
     private void fireResponseCompleteListener(String responseText) {
@@ -589,6 +622,7 @@ public class AIOrchestrator implements Serializable {
         private AIInput input;
         private AIFileReceiver fileReceiver;
         private Object[] tools = new Object[0];
+        private final List<AIController> controllers = new ArrayList<>();
         private String userName;
         private String assistantName;
         private AttachmentSubmitListener attachmentSubmitListener;
@@ -723,6 +757,25 @@ public class AIOrchestrator implements Serializable {
          */
         public Builder withTools(Object... tools) {
             this.tools = tools != null ? tools : new Object[0];
+            return this;
+        }
+
+        /**
+         * Adds a controller to extend the orchestrator with additional
+         * capabilities.
+         * <p>
+         * Controllers provide framework-agnostic tools and can perform
+         * deferred operations after LLM request completion. Multiple
+         * controllers can be added and they will all be active simultaneously.
+         * </p>
+         *
+         * @param controller
+         *            the controller to add, not {@code null}
+         * @return this builder
+         */
+        public Builder withController(AIController controller) {
+            Objects.requireNonNull(controller, "Controller cannot be null");
+            this.controllers.add(controller);
             return this;
         }
 
@@ -870,6 +923,7 @@ public class AIOrchestrator implements Serializable {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
+            orchestrator.controllers.addAll(controllers);
             orchestrator.attachmentSubmitListener = attachmentSubmitListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
             orchestrator.responseCompleteListener = responseCompleteListener;
