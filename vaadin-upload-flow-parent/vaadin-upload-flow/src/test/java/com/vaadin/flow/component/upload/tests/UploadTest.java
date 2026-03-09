@@ -223,15 +223,13 @@ public class UploadTest {
     }
 
     @Test
-    public void setAcceptedFileTypes_withNull_clearsBoth() {
+    public void configureFileRestrictionsSeparately_setAcceptedFileTypes_throws() {
         var upload = new Upload();
         upload.setAcceptedMimeTypes("image/*");
         upload.setAcceptedFileExtensions(".pdf");
 
-        upload.setAcceptedFileTypes((String[]) null);
-
-        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
-        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedFileTypes((String[]) null));
     }
 
     @Test
@@ -246,7 +244,7 @@ public class UploadTest {
     }
 
     @Test
-    public void getAcceptedFileTypes_fromNewSetters() {
+    public void getAcceptedFileTypes_fromSeparateSetters() {
         var upload = new Upload();
         upload.setAcceptedMimeTypes("image/*");
         upload.setAcceptedFileExtensions(".pdf");
@@ -267,7 +265,7 @@ public class UploadTest {
     }
 
     @Test
-    public void setAcceptedFileTypes_thenNewSetter_serverSideFieldsPopulated() {
+    public void setAcceptedFileTypes_setMimeType_serverSideFieldsPopulated() {
         var upload = new Upload();
         // Deprecated setter: client-side only, no server-side fields
         upload.setAcceptedFileTypes(".txt", "image/*");
@@ -283,17 +281,13 @@ public class UploadTest {
     }
 
     @Test
-    public void newSetters_thenSetAcceptedFileTypes_clearsServerSideFields() {
+    public void useSeparateSetters_thenSetAcceptedFileTypes_throws() {
         var upload = new Upload();
         upload.setAcceptedMimeTypes("image/*");
         upload.setAcceptedFileExtensions(".pdf");
 
-        // Deprecated setter clears server-side fields
-        upload.setAcceptedFileTypes(".txt");
-
-        Assert.assertTrue(upload.getAcceptedMimeTypes().isEmpty());
-        Assert.assertTrue(upload.getAcceptedFileExtensions().isEmpty());
-        Assert.assertEquals(".txt", upload.getElement().getProperty("accept"));
+        Assert.assertThrows(IllegalStateException.class,
+                () -> upload.setAcceptedFileTypes(".txt"));
     }
 
     // --- Receiver guard ---
@@ -371,7 +365,7 @@ public class UploadTest {
     }
 
     @Test
-    public void setReceiver_afterClearingNewApiFields_doesNotThrow() {
+    public void setFileRestrictionsSeparately_clear_setReceiver_doesNotThrow() {
         var upload = new Upload();
         upload.setAcceptedMimeTypes("image/*");
         upload.setAcceptedFileExtensions(".pdf");

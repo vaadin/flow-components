@@ -481,12 +481,15 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * when this method is used. They indicate the hints for users as to what
      * file types to upload. If server-side validation is required, use
      * {@link #setAcceptedMimeTypes(String...)} and
-     * {@link #setAcceptedFileExtensions(String...)} instead. Using this method
-     * clears any previously configured server-side validation.
+     * {@link #setAcceptedFileExtensions(String...)} instead.
      *
      * @param acceptedFileTypes
      *            the allowed file types to be uploaded, or <code>null</code> to
      *            clear any restrictions
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedMimeTypes(String...)} or
+     *             {@link #setAcceptedFileExtensions(String...)} are configured,
+     *             as this method would silently disable server-side validation
      * @deprecated Use {@link #setAcceptedMimeTypes(String...)} and
      *             {@link #setAcceptedFileExtensions(String...)} instead for
      *             separate control of MIME types and file extensions with
@@ -494,6 +497,17 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     @Deprecated(since = "25.2")
     public void setAcceptedFileTypes(String... acceptedFileTypes) {
+        if (!acceptedMimeTypes.isEmpty() || !acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot use setAcceptedFileTypes when "
+                            + "setAcceptedMimeTypes or "
+                            + "setAcceptedFileExtensions are configured, as "
+                            + "it would silently disable server-side "
+                            + "validation. Clear them first by calling "
+                            + "setAcceptedMimeTypes(null) and "
+                            + "setAcceptedFileExtensions(null), or use the "
+                            + "separate restriction APIs exclusively.");
+        }
         acceptedMimeTypes = List.of();
         acceptedFileExtensions = List.of();
         if (acceptedFileTypes == null || acceptedFileTypes.length == 0) {
