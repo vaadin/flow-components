@@ -18,6 +18,7 @@ package com.vaadin.flow.component.shared;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -111,10 +112,13 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      *            the theme variant to bind, not {@code null} or blank
      * @param signal
      *            the boolean signal to bind to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see HasTheme#bindThemeName(String, Signal)
      */
-    default void bindThemeVariant(TVariantEnum variant,
+    default SignalBinding<Boolean> bindThemeVariant(TVariantEnum variant,
             Signal<Boolean> signal) {
-        bindThemeName(variant.getVariantName(), signal);
+        return bindThemeName(variant.getVariantName(), signal);
     }
 }

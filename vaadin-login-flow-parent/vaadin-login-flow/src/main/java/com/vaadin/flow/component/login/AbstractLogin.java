@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -233,12 +234,15 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *
      * @param enabledSignal
      *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
      */
     @Deprecated
     @Override
-    public void bindEnabled(Signal<Boolean> enabledSignal) {
+    public SignalBinding<Boolean> bindEnabled(Signal<Boolean> enabledSignal) {
         throw new UnsupportedOperationException(
                 "One-way binding of the enabled state is not supported.");
     }
