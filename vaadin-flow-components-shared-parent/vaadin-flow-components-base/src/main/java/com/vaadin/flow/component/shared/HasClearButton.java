@@ -18,6 +18,7 @@ package com.vaadin.flow.component.shared;
 import java.util.Objects;
 
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -70,12 +71,16 @@ public interface HasClearButton extends HasElement {
      * @param signal
      *            the signal to bind the clear button visibility to, not
      *            {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setClearButtonVisible(boolean)
      * @since 25.1
      */
-    default void bindClearButtonVisible(Signal<Boolean> signal) {
+    default SignalBinding<Boolean> bindClearButtonVisible(
+            Signal<Boolean> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("clearButtonVisible",
+        return getElement().bindProperty("clearButtonVisible",
                 signal.map(
                         visible -> visible == null ? Boolean.FALSE : visible),
                 null);

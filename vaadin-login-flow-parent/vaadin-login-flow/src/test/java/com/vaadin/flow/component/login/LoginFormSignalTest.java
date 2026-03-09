@@ -13,38 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.datetimepicker;
+package com.vaadin.flow.component.login;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.tests.AbstractSignalsUnitTest;
 
-import net.jcip.annotations.NotThreadSafe;
-
-@NotThreadSafe
-public class HasLabelTest {
-
-    private UI ui;
-
-    @Before
-    public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
+public class LoginFormSignalTest extends AbstractSignalsUnitTest {
+    @Test(expected = UnsupportedOperationException.class)
+    public void bindEnabled_throwsException() {
+        var login = new LoginForm();
+        login.bindEnabled(new ValueSignal<>(false));
     }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
-
-    @Test
-    public void dateTimePicker() {
-        DateTimePicker c = new DateTimePicker();
-        Assert.assertTrue(c instanceof HasLabel);
-    }
-
 }

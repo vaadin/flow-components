@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -28,7 +29,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  * @see VaadinIcon
  */
-@NpmPackage(value = "@vaadin/icons", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/icons", version = "25.1.0-beta2")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 public class Icon extends AbstractIcon<Icon> {
 
@@ -150,12 +151,15 @@ public class Icon extends AbstractIcon<Icon> {
      *
      * @param signal
      *            the signal to bind the icon to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setIcon(VaadinIcon)
      * @see com.vaadin.flow.dom.Element#bindAttribute(String, Signal)
      * @since 25.1
      */
-    public void bindIcon(Signal<VaadinIcon> signal) {
-        getElement().bindAttribute(ICON_ATTRIBUTE_NAME,
+    public SignalBinding<String> bindIcon(Signal<VaadinIcon> signal) {
+        return getElement().bindAttribute(ICON_ATTRIBUTE_NAME,
                 signal == null ? null
                         : signal.map(icon -> VAADIN_ICON_COLLECTION_NAME + ":"
                                 + normalizeIcon(icon)));

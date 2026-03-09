@@ -20,6 +20,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.signals.Signal;
 
@@ -69,7 +70,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/integer-field", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/integer-field", version = "25.1.0-beta2")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer>
         implements HasThemeVariant<TextFieldVariant> {
@@ -293,13 +294,14 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      *
      * @param signal
      *            the signal to bind the minimum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMin(int)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
-     *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<Integer> signal) {
-        bindMinInternal(
+    public SignalBinding<Double> bindMin(Signal<Integer> signal) {
+        return bindMinInternal(
                 signal == null ? null : signal.map(Integer::doubleValue));
     }
 
@@ -316,13 +318,14 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      *
      * @param signal
      *            the signal to bind the maximum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMax(int)
-     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
-     *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<Integer> signal) {
-        bindMaxInternal(
+    public SignalBinding<Double> bindMax(Signal<Integer> signal) {
+        return bindMaxInternal(
                 signal == null ? null : signal.map(Integer::doubleValue));
     }
 

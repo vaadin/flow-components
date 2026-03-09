@@ -34,8 +34,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Confirm Dialog is a modal Dialog used to confirm user actions.
@@ -61,7 +63,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.1.0-beta2")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @ModalRoot
 public class ConfirmDialog extends Component
@@ -173,6 +175,11 @@ public class ConfirmDialog extends Component
     }
 
     @Override
+    public SignalBinding<String> bindWidth(Signal<String> widthSignal) {
+        return getElement().bindProperty("width", widthSignal, null);
+    }
+
+    @Override
     public String getHeight() {
         return getElement().getProperty("height");
     }
@@ -193,6 +200,11 @@ public class ConfirmDialog extends Component
     @Override
     public void setHeight(String height) {
         getElement().setProperty("height", height);
+    }
+
+    @Override
+    public SignalBinding<String> bindHeight(Signal<String> heightSignal) {
+        return getElement().bindProperty("height", heightSignal, null);
     }
 
     /**
