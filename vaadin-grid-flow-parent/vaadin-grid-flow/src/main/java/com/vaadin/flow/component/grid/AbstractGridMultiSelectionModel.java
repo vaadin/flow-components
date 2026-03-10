@@ -43,7 +43,10 @@ import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -101,6 +104,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     protected void remove() {
         super.remove();
+        getGrid().getElement().getNode().getFeature(SignalBindingFeature.class)
+                .removeBinding(SignalBindingFeature.VALUE);
         deselectAll();
         if (selectionColumn.getParent().map(getGrid()::equals).orElse(false)) {
             getGrid().getElement().removeChild(selectionColumn.getElement());
@@ -293,6 +298,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
             @Override
             public Set<T> getSelectedItems() {
                 return AbstractGridMultiSelectionModel.this.getSelectedItems();
+            }
+
+            @Override
+            public void bindValue(Signal<Set<T>> valueSignal,
+                    SerializableConsumer<Set<T>> writeCallback) {
+                GridSelectionSignalHelper.bindValue(this, valueSignal,
+                        writeCallback);
             }
         };
     }

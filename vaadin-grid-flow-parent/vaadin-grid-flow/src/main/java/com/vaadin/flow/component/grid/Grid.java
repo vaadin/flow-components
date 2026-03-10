@@ -51,6 +51,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -131,6 +132,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tools.jackson.databind.JsonNode;
@@ -892,13 +894,45 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @return this column, for method chaining
          */
         public Column<T> setHeader(String labelText) {
-            HeaderRow defaultHeaderRow = getGrid().getDefaultHeaderRow();
-            if (defaultHeaderRow == null) {
-                defaultHeaderRow = getGrid().addFirstHeaderRow();
-            }
-            defaultHeaderRow.getCell(this).setText(labelText);
-            grid.updateClientSideSorterIndicators();
+            getHeaderTextSupport().set(labelText);
             return this;
+        }
+
+        /**
+         * Binds the given signal to the header text of this column.
+         * <p>
+         * When a signal is bound, the header text is kept synchronized with the
+         * signal value while the column is attached. When detached, signal
+         * value changes have no effect.
+         * <p>
+         * While a signal is bound, any attempt to set the header text manually
+         * through {@link #setHeader(String)} throws a
+         * {@link com.vaadin.flow.signals.BindingActiveException}.
+         *
+         * @param signal
+         *            the signal to bind the header text to, not {@code null}
+         * @see #setHeader(String)
+         * @since 25.1
+         */
+        public void bindHeader(Signal<String> signal) {
+            getHeaderTextSupport().bind(signal);
+        }
+
+        private SignalPropertySupport<String> headerTextSupport;
+
+        private SignalPropertySupport<String> getHeaderTextSupport() {
+            if (headerTextSupport == null) {
+                headerTextSupport = SignalPropertySupport.create(this, text -> {
+                    HeaderRow defaultHeaderRow = getGrid()
+                            .getDefaultHeaderRow();
+                    if (defaultHeaderRow == null) {
+                        defaultHeaderRow = getGrid().addFirstHeaderRow();
+                    }
+                    defaultHeaderRow.getCell(Column.this).setText(text);
+                    grid.updateClientSideSorterIndicators();
+                });
+            }
+            return headerTextSupport;
         }
 
         /**
@@ -914,9 +948,39 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @return this column, for method chaining
          */
         public Column<T> setFooter(String labelText) {
-            getGrid().getColumnLayers().get(0).asFooterRow().getCell(this)
-                    .setText(labelText);
+            getFooterTextSupport().set(labelText);
             return this;
+        }
+
+        /**
+         * Binds the given signal to the footer text of this column.
+         * <p>
+         * When a signal is bound, the footer text is kept synchronized with the
+         * signal value while the column is attached. When detached, signal
+         * value changes have no effect.
+         * <p>
+         * While a signal is bound, any attempt to set the footer text manually
+         * through {@link #setFooter(String)} throws a
+         * {@link com.vaadin.flow.signals.BindingActiveException}.
+         *
+         * @param signal
+         *            the signal to bind the footer text to, not {@code null}
+         * @see #setFooter(String)
+         * @since 25.1
+         */
+        public void bindFooter(Signal<String> signal) {
+            getFooterTextSupport().bind(signal);
+        }
+
+        private SignalPropertySupport<String> footerTextSupport;
+
+        private SignalPropertySupport<String> getFooterTextSupport() {
+            if (footerTextSupport == null) {
+                footerTextSupport = SignalPropertySupport.create(this,
+                        text -> getGrid().getColumnLayers().get(0).asFooterRow()
+                                .getCell(Column.this).setText(text));
+            }
+            return footerTextSupport;
         }
 
         /**
@@ -5287,9 +5351,40 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            clear the empty state content
      */
     public void setEmptyStateText(String emptyStateText) {
-        this.emptyStateComponent = null;
-        this.emptyStateText = emptyStateText;
-        updateEmptyStateContent();
+        getEmptyStateTextSupport().set(emptyStateText);
+    }
+
+    /**
+     * Binds the given signal to the empty state text of this grid.
+     * <p>
+     * When a signal is bound, the empty state text is kept synchronized with
+     * the signal value while the grid is attached. When detached, signal value
+     * changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the empty state text manually
+     * through {@link #setEmptyStateText(String)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the empty state text to, not {@code null}
+     * @see #setEmptyStateText(String)
+     * @since 25.1
+     */
+    public void bindEmptyStateText(Signal<String> signal) {
+        getEmptyStateTextSupport().bind(signal);
+    }
+
+    private SignalPropertySupport<String> emptyStateTextSupport;
+
+    private SignalPropertySupport<String> getEmptyStateTextSupport() {
+        if (emptyStateTextSupport == null) {
+            emptyStateTextSupport = SignalPropertySupport.create(this, text -> {
+                this.emptyStateComponent = null;
+                this.emptyStateText = text;
+                updateEmptyStateContent();
+            });
+        }
+        return emptyStateTextSupport;
     }
 
     /**
