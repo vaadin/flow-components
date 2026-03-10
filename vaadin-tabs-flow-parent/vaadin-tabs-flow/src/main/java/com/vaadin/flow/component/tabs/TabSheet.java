@@ -380,7 +380,9 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
     private void ensureSelectedTabContentAttached() {
         var content = tabToContent.get(tabs.getSelectedTab());
-        if (content != null && content.getParent() == null) {
+        if (content != null
+                && !Objects.equals(content.getParent(), getElement())) {
+            content.removeFromTree(false);
             getElement().appendChild(content);
         }
     }
