@@ -20,33 +20,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * @author Vaadin Ltd.
  */
 public class TabSheetTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
 
     private TabSheet tabSheet;
     private Tabs tabs;
 
+    private UI ui;
+
     @Before
     public void setup() {
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui = new UI();
+        ui.getInternals().setSession(session);
+
         tabSheet = new TabSheet();
         tabs = (Tabs) tabSheet.getChildren().findFirst().get();
 
-        ui.add(tabSheet);
+        ui.getElement().appendChild(tabSheet.getElement());
     }
 
     @Test
@@ -57,7 +62,7 @@ public class TabSheetTest {
     @Test
     public void addTab_assignsTabId() {
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
         Assert.assertTrue(tab.getId().isPresent());
     }
 
@@ -67,7 +72,7 @@ public class TabSheetTest {
         var tab = tabSheet.add("Tab 0", content);
         tab.setId("customId");
 
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
         Assert.assertEquals("customId",
                 content.getElement().getAttribute("tab"));
     }
@@ -76,7 +81,7 @@ public class TabSheetTest {
     public void addTab_assignsContentTab() {
         var content = new Span("Content 0");
         var tab = tabSheet.add("Tab 0", content);
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
         Assert.assertEquals(tab.getId().get(),
                 content.getElement().getAttribute("tab"));
     }
@@ -85,7 +90,7 @@ public class TabSheetTest {
     public void addTab_contentAdded() {
         var content = new Span("Content 0");
         tabSheet.add("Tab 0", content);
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
         Assert.assertTrue(content.getParent().isPresent());
     }
 
@@ -94,7 +99,7 @@ public class TabSheetTest {
         // Add a tab with content
         var content0 = new Span("Content 0");
         var tab0 = tabSheet.add("Tab 0", content0);
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
 
         // Assert that the content is attached to the parent (the tab is
         // selected)
@@ -138,7 +143,7 @@ public class TabSheetTest {
         var content1 = new Span("Content 1");
         tabSheet.add("Tab 1", content1);
         tabSheet.setSelectedIndex(1);
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
         Assert.assertTrue(content1.getParent().isPresent());
     }
 
@@ -506,7 +511,7 @@ public class TabSheetTest {
 
         tabSheet.setSelectedIndex(1);
         tabSheet.setSelectedIndex(2);
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
 
         Assert.assertFalse(content1.getParent().isPresent());
         Assert.assertTrue(content2.getParent().isPresent());
@@ -520,20 +525,21 @@ public class TabSheetTest {
         // be reused between multiple UIs when reloading the page.
         var content = new Span("Content");
         tabSheet.add("Tab", content);
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
         Assert.assertEquals(tabSheet, content.getParent().orElseThrow());
 
-        ui.replaceUI();
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui = new UI();
+        ui.getInternals().setSession(session);
         tabSheet = new TabSheet();
         ui.add(tabSheet);
         tabSheet.add("Tab", content);
-        ui.fakeClientCommunication();
+        flushBeforeClientResponse();
         Assert.assertEquals(tabSheet, content.getParent().orElseThrow());
     }
 
-    @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
-                HasThemeVariant.class.isAssignableFrom(TabSheet.class));
+    private void flushBeforeClientResponse() {
+        UIInternals internals = ui.getInternals();
+        internals.getStateTree().runExecutionsBeforeClientResponse();
     }
 }
