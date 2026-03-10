@@ -17,18 +17,18 @@ package com.vaadin.flow.component.ai.common;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class AIAttachmentTest {
+class AIAttachmentTest {
 
     @Test
-    public void nullParameter_throws() {
-        Assert.assertThrows(NullPointerException.class,
+    void nullParameter_throws() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new AIAttachment(null, getMimeType(), getData()));
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new AIAttachment(getFileName(), null, getData()));
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new AIAttachment(getFileName(), getMimeType(), null));
     }
 
