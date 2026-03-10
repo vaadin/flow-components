@@ -517,6 +517,27 @@ public class TabSheetTest {
         Assert.assertTrue(content2.getParent().isPresent());
     }
 
+    @Test
+    public void reuseTabContentInNewTabSheetInNewUI_contentAdded() {
+        // Regression test for
+        // https://github.com/vaadin/flow-components/issues/8875.
+        // Tab contents are injected as beans, using a scope that allows them to
+        // be reused between multiple UIs when reloading the page.
+        var content = new Span("Content");
+        tabSheet.add("Tab", content);
+        flushBeforeClientResponse();
+        Assert.assertEquals(tabSheet, content.getParent().orElseThrow());
+
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui = new UI();
+        ui.getInternals().setSession(session);
+        tabSheet = new TabSheet();
+        ui.add(tabSheet);
+        tabSheet.add("Tab", content);
+        flushBeforeClientResponse();
+        Assert.assertEquals(tabSheet, content.getParent().orElseThrow());
+    }
+
     private void flushBeforeClientResponse() {
         UIInternals internals = ui.getInternals();
         internals.getStateTree().runExecutionsBeforeClientResponse();
