@@ -15,8 +15,11 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.ModalityMode;
+import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
@@ -33,5 +36,50 @@ public class DialogSignalTest extends AbstractSignalsUnitTest {
     public void bindHeight_unsupported() {
         var signal = new ValueSignal<>("600px");
         dialog.bindHeight(signal);
+    }
+
+    @Test
+    public void bindVisible_visibilitySynchronized() {
+        var visibleSignal = new ValueSignal<>(false);
+        dialog.bindVisible(visibleSignal);
+        ui.add(dialog);
+
+        Assert.assertFalse(dialog.isVisible());
+
+        visibleSignal.set(true);
+        Assert.assertTrue(dialog.isVisible());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindVisible_setVisibleWhileBound_throws() {
+        var visibleSignal = new ValueSignal<>(false);
+        dialog.bindVisible(visibleSignal);
+        ui.add(dialog);
+
+        dialog.setVisible(true);
+    }
+
+    @Test
+    public void bindVisible_strictModal_updatesModality() {
+        var visibleSignal = new ValueSignal<>(false);
+        dialog.setModality(ModalityMode.STRICT);
+        dialog.bindVisible(visibleSignal);
+        ui.add(dialog);
+        dialog.open();
+
+        Assert.assertFalse("Dialog should not be modal when invisible",
+                isServerSideModal());
+
+        visibleSignal.set(true);
+        Assert.assertTrue("Dialog should be modal when visible",
+                isServerSideModal());
+
+        visibleSignal.set(false);
+        Assert.assertFalse("Dialog should not be modal when invisible",
+                isServerSideModal());
+    }
+
+    private boolean isServerSideModal() {
+        return dialog == ui.getUI().getInternals().getActiveModalComponent();
     }
 }

@@ -25,6 +25,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -185,9 +186,9 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
             }
 
             @Override
-            public void bindText(Signal<String> value) {
+            public SignalBinding<String> bindText(Signal<String> value) {
                 mockButton.bindText(value);
-                super.bindText(value);
+                return super.bindText(value);
             }
         }
         ;
