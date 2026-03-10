@@ -54,6 +54,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
     private VaadinService service;
 
     @Override
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     public void beforeEach(ExtensionContext context) {
         service = Mockito.mock(VaadinService.class);
         DeploymentConfiguration deploymentConfig = Mockito
@@ -76,6 +77,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         cleanup();
     }
 
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     private void cleanup() {
         removeAll();
         UI.setCurrent(null);
