@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Shared Parent</name>
     <modules>
+        <module>vaadin-flow-components-checkstyle-rules</module>
         <module>vaadin-flow-components-base</module>
         <module>vaadin-flow-components-test-util</module>
     </modules>
