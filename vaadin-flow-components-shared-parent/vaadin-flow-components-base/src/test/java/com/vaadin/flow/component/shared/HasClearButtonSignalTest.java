@@ -62,17 +62,19 @@ class HasClearButtonSignalTest extends AbstractSignalsJUnit6Test {
     }
 
     @Test
-    void bindClearButtonVisible_elementNotAttached_bindingInactive_untilAttach() {
+    void bindClearButtonVisible_elementNotAttached_initialValueApplied_changesDeferred_untilAttach() {
         TestComponent component = new TestComponent();
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindClearButtonVisible(signal);
 
-        // While detached, binding should be inactive
-        assertFalse(component.isClearButtonVisible());
-        signal.set(false);
-        assertFalse(component.isClearButtonVisible());
+        // Initial value is applied immediately (effect runs on creation)
+        assertTrue(component.isClearButtonVisible());
 
-        // Attach -> latest value is applied
+        // While detached, subsequent changes are deferred
+        signal.set(false);
+        assertTrue(component.isClearButtonVisible());
+
+        // Attach -> latest deferred value is applied
         UI.getCurrent().add(component);
         assertFalse(component.isClearButtonVisible());
 

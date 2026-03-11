@@ -55,9 +55,11 @@ public interface HasClearButton extends HasElement {
     /**
      * Binds a given signal to the visibility of the clear button.
      * <p>
-     * When a signal is bound, the clear button visibility is kept synchronized
-     * with the signal value while the element is in the attached state. When
-     * the element is detached, signal value changes have no effect.
+     * The clear button visibility is set immediately with the current signal
+     * value when the binding is created, and is kept synchronized with any
+     * subsequent signal value changes while the element is in attached state.
+     * When the element is in detached state, signal value changes have no
+     * effect.
      * <p>
      * While a signal is bound, any attempt to set the visibility manually
      * through {@link #setClearButtonVisible(boolean)} throws a

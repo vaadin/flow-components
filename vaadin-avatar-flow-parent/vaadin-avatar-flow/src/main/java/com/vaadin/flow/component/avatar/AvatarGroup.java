@@ -687,9 +687,10 @@ public class AvatarGroup extends Component
      * binding so that the rendered avatars are updated when the signal's value
      * or any individual item signal changes.
      * <p>
-     * When a signal is bound, the items are kept synchronized with the signal
-     * value while the component is attached. When the component is detached,
-     * signal value changes have no effect.
+     * The items are set immediately with the current signal value when the
+     * binding is created, and are kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to modify items manually through
      * {@link #setItems(Collection)}, {@link #add(AvatarGroupItem...)}, or

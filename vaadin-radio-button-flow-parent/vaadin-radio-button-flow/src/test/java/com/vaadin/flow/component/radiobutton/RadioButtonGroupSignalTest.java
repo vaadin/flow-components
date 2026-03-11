@@ -43,11 +43,12 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindReadOnly_elementNotAttached_bindingInactive_untilAttach() {
+    public void bindReadOnly_elementNotAttached_initialValueApplied() {
         readonlySignal.set(true);
         group.bindReadOnly(readonlySignal);
 
-        Assert.assertFalse(group.isReadOnly());
+        // Initial value is applied immediately (effect runs on creation)
+        Assert.assertTrue(group.isReadOnly());
 
         UI.getCurrent().add(group);
         Assert.assertTrue(group.isReadOnly());
