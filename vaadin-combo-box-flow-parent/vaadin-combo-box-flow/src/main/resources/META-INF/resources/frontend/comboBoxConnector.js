@@ -277,6 +277,16 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     callback(filteredItems, filteredItems.length);
   };
 
+  comboBox.$connector.setupPasteHandler = function () {
+    comboBox.pasteHandler = function (pastedText) {
+      comboBox.$server.handlePaste(pastedText);
+    };
+  };
+
+  comboBox.$connector.clearPasteHandler = function () {
+    comboBox.pasteHandler = undefined;
+  };
+
   // Prevent setting the custom value as the 'value'-prop automatically
   comboBox.addEventListener('custom-value-set', (e) => e.preventDefault());
 

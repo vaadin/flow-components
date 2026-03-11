@@ -376,4 +376,17 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertTrue(HasThemeVariant.class
                 .isAssignableFrom(MultiSelectComboBox.class));
     }
+
+    @Test
+    public void setPasteHandler_doesNotThrow() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setPasteHandler(pastedText -> {
+        });
+    }
+
+    @Test
+    public void setPasteHandler_null_doesNotThrow() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setPasteHandler(null);
+    }
 }

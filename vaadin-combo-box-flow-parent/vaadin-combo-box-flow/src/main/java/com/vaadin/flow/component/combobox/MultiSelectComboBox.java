@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
@@ -37,6 +38,7 @@ import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -108,6 +110,7 @@ public class MultiSelectComboBox<TItem>
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
     private AutoExpandMode autoExpand;
+    private SerializableConsumer<String> pasteHandler;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -619,5 +622,45 @@ public class MultiSelectComboBox<TItem>
     public void setOverlayWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit can not be null");
         setOverlayWidth(HasSize.getCssSize(width, unit));
+    }
+
+    /**
+     * Sets a server-side handler for processing pasted text. When set, paste
+     * events in the input field are intercepted on the client side and the
+     * raw pasted text is sent to the server for processing by the handler.
+     * <p>
+     * The handler receives the raw pasted text as a string. It is the
+     * handler's responsibility to parse the text and update the component's
+     * value accordingly.
+     * <p>
+     * Passing {@code null} clears the handler and restores the default paste
+     * behavior.
+     *
+     * @param handler
+     *            the paste handler, or {@code null} to clear
+     */
+    public void setPasteHandler(SerializableConsumer<String> handler) {
+        pasteHandler = handler;
+        if (handler != null) {
+            getElement().executeJs(
+                    "this.$connector && this.$connector.setupPasteHandler()");
+        } else {
+            getElement().executeJs(
+                    "this.$connector && this.$connector.clearPasteHandler()");
+        }
+    }
+
+    /**
+     * Called by the client-side connector when text is pasted into the
+     * input field and a paste handler is set.
+     *
+     * @param pastedText
+     *            the raw pasted text
+     */
+    @ClientCallable
+    private void handlePaste(String pastedText) {
+        if (pasteHandler != null) {
+            pasteHandler.accept(pastedText);
+        }
     }
 }
