@@ -2735,6 +2735,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        DataViewUtils.checkNoActiveItemsBinding(this);
         if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
                 getSelectionPreservationMode()) && !dataProvider.isInMemory()) {
             throw new UnsupportedOperationException(
