@@ -17,64 +17,63 @@ package com.vaadin.flow.component.checkbox;
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ListSignal;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.AbstractSignalsUnitTest;
 
-public class CheckboxGroupBindItemsTest {
-
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
-
-    private CheckboxGroup<String> checkboxGroup;
-
-    @Before
-    public void setup() {
-        checkboxGroup = new CheckboxGroup<>();
-        var itemsSignal = new ListSignal<String>();
-        itemsSignal.insertLast("Item 1");
-        itemsSignal.insertLast("Item 2");
-        checkboxGroup.bindItems(itemsSignal);
-        ui.getUI().add(checkboxGroup);
-    }
+public class CheckboxGroupSignalTest extends AbstractSignalsUnitTest {
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetDataProvider_throws() {
+        var checkboxGroup = createCheckboxGroupWithBoundItems();
         checkboxGroup.setDataProvider(
                 DataProvider.ofItems("New Item 1", "New Item 2"));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithDataProvider_throws() {
+        var checkboxGroup = createCheckboxGroupWithBoundItems();
         checkboxGroup
                 .setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithInMemoryDataProvider_throws() {
+        var checkboxGroup = createCheckboxGroupWithBoundItems();
         checkboxGroup.setItems(DataProvider
                 .ofCollection(Arrays.asList("New Item 1", "New Item 2")));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithListDataProvider_throws() {
+        var checkboxGroup = createCheckboxGroupWithBoundItems();
         checkboxGroup.setItems(new ListDataProvider<>(
                 Arrays.asList("New Item 1", "New Item 2")));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithCollection_throws() {
+        var checkboxGroup = createCheckboxGroupWithBoundItems();
         checkboxGroup.setItems(Arrays.asList("New Item 1", "New Item 2"));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithVarargs_throws() {
+        var checkboxGroup = createCheckboxGroupWithBoundItems();
         checkboxGroup.setItems("New Item 1", "New Item 2");
+    }
+
+    private CheckboxGroup<String> createCheckboxGroupWithBoundItems() {
+        var checkboxGroup = new CheckboxGroup<String>();
+        var itemsSignal = new ListSignal<String>();
+        itemsSignal.insertLast("Item 1");
+        itemsSignal.insertLast("Item 2");
+        checkboxGroup.bindItems(itemsSignal);
+        ui.add(checkboxGroup);
+        return checkboxGroup;
     }
 }
