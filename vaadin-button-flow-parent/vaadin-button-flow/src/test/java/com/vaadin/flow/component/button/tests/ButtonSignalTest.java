@@ -116,6 +116,7 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     public void setIcon_textSignalChange_slotRemoved() {
         icon = new Icon();
         button = new Button(textSignal, icon);
+        UI.getCurrent().add(button);
 
         textSignal.set("");
 
