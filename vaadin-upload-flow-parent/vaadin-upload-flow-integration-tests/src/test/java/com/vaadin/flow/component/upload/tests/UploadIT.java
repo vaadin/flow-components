@@ -122,6 +122,8 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void uploadInvalidFile_fileIsRejected() throws Exception {
+        clickElementWithJs("set-accept-file-type-txt");
+
         File invalidFile = createTempFile("pdf");
 
         getUpload().upload(invalidFile);
@@ -211,7 +213,6 @@ public class UploadIT extends AbstractUploadIT {
     public void setAcceptedMimeTypes_wrongType_fileIsRejected()
             throws Exception {
         clickElementWithJs("use-upload-handler");
-        clickElementWithJs("clear-accept-ext");
         clickElementWithJs("set-accept-image");
 
         var textFile = createTempFile("txt");
@@ -227,7 +228,6 @@ public class UploadIT extends AbstractUploadIT {
     public void setAcceptedMimeTypes_correctType_fileIsUploaded()
             throws Exception {
         clickElementWithJs("use-upload-handler");
-        clickElementWithJs("clear-accept-ext");
         clickElementWithJs("set-accept-text");
 
         var textFile = createTempFile("txt");
@@ -252,7 +252,6 @@ public class UploadIT extends AbstractUploadIT {
     public void setAcceptedFileExtensions_wrongExtension_fileIsRejected()
             throws Exception {
         clickElementWithJs("use-upload-handler");
-        clickElementWithJs("clear-accept-ext");
         clickElementWithJs("set-accept-ext-pdf");
 
         var textFile = createTempFile("txt");
@@ -270,7 +269,6 @@ public class UploadIT extends AbstractUploadIT {
         // Client-side accept="text/*,.pdf" allows .html (text/html matches
         // text/*), but server-side AND logic rejects because .html != .pdf
         clickElementWithJs("use-upload-handler");
-        clickElementWithJs("clear-accept-ext");
         clickElementWithJs("set-accept-text");
         clickElementWithJs("set-accept-ext-pdf");
 
@@ -293,7 +291,6 @@ public class UploadIT extends AbstractUploadIT {
         // matched. With the new split API + AND logic, the extension check
         // catches it.
         clickElementWithJs("use-upload-handler");
-        clickElementWithJs("clear-accept-ext");
         clickElementWithJs("set-accept-mime-pdf");
         clickElementWithJs("set-accept-ext-pdf");
 

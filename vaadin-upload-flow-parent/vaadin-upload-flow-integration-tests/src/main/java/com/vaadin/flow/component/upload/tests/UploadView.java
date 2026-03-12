@@ -53,7 +53,6 @@ public class UploadView extends Div {
 
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         upload = new Upload(buffer);
-        upload.setAcceptedFileTypes(".txt");
 
         upload.addSucceededListener(event -> {
             try {
@@ -134,6 +133,14 @@ public class UploadView extends Div {
         clearExt.setId("clear-accept-ext");
         extGroup.add(setAcceptTxt, setAcceptPdf, clearExt);
         add(extGroup);
+
+        // --- Accepted File Types (old API) ---
+        var fileTypeGroup = createButtonGroup("File type (old API):");
+        var setAcceptFileTypeTxt = new NativeButton(".txt",
+                event -> upload.setAcceptedFileTypes(".txt"));
+        setAcceptFileTypeTxt.setId("set-accept-file-type-txt");
+        fileTypeGroup.add(setAcceptFileTypeTxt);
+        add(fileTypeGroup);
 
         // --- Handler ---
         var handlerGroup = createButtonGroup("Handler:");
