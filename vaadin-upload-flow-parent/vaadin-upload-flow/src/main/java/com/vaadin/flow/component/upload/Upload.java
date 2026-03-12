@@ -17,6 +17,7 @@ package com.vaadin.flow.component.upload;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
@@ -531,11 +532,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     @Deprecated(since = "25.2")
     public List<String> getAcceptedFileTypes() {
-        String accept = getElement().getProperty("accept", "");
-        if (accept.isEmpty()) {
-            return List.of();
+        String accepted = getElement().getProperty("accept");
+        if (accepted == null) {
+            return Collections.emptyList();
         }
-        return List.of(accept.split(","));
+        return List.of(accepted.split(","));
     }
 
     /**
