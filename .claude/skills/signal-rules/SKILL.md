@@ -35,14 +35,19 @@ The component must have unit tests to verify that state can not be updated imper
 This relates to Rule 1, however in this case, instead of developers calling a public API to imperatively modify state, the component itself modifies the state imperatively.
 
 For example:
-- A component has built-in validation that automatically triggers on value change events
-- The component effectively calls `getElement().setProperty("invalid", invalid)` to update the invalid state
-- A `bindInvalid` API would call `getElement().bindProperty("invalid", invalidSignal)`
-- Whenever the component tries to update the invalid state on value changes it would now throw a `BindingActiveException`, because `setProperty` checks that no signal binding is active.
+- A component has built-in validation that automatically triggers on value change events.
+- The component effectively calls `getElement().setProperty("invalid", invalid)` to update the invalid state.
+- A `bindInvalid` API would call `getElement().bindProperty("invalid", invalidSignal, null)`.
+- When the component tries to update the invalid state on value changes it would now throw a `BindingActiveException`, because `setProperty` checks that no signal binding is active.
 
 In this case having an API that establishes a one-way binding is conceptually wrong. This is a blocker. Do NOT attempt to work around it (e.g. by using a two-way binding or write callback instead). Do NOT write any code. Ask the user on how to proceed.
 
-This issue is not limited to `setProperty` / `bindProperty`, there are other ways to violate this rule. For example when storing state in class fields, applying it through `executeJs` or direct DOM manipulation. Always explore the component implementation to verify that it never modifies that state itself as part of its existing logic.
+There are multiple ways to violate this rule, for example:
+- The component uses imperative Element APIs, such as `setProperty` or `setAttribute`, internally to modify state, and a `bind*` API uses the corresponding reactive API, such as `bindProperty` or `bindAttribute`.
+- The component uses methods inherited from a base class to modify state imperatively, and a `bind*` API uses the corresponding reactive API.
+- The component uses `@Synchronize` to sync a property from the client, and a `bind*` API uses `bindProperty` for that property.
+
+Always explore the component implementation to verify that it never modifies state that can be bound through a one-way binding.
 
 ## Rule 3: Signal bindings need to run the same side effects as imperative APIs
 
