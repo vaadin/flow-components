@@ -143,14 +143,15 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindItems_notAttached_bindingInactiveUntilAttach() {
+    public void bindItems_notAttached_initialValueApplied() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var item2Signal = new ValueSignal<>(new AvatarGroupItem("Bob"));
         var listSignal = new ValueSignal<>(List.of(item1Signal, item2Signal));
 
         avatarGroup.bindItems(listSignal);
 
-        Assert.assertEquals(0, avatarGroup.getItems().size());
+        // Initial value is applied immediately (effect runs on creation)
+        Assert.assertEquals(2, avatarGroup.getItems().size());
 
         ui.add(avatarGroup);
 

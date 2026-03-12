@@ -434,9 +434,10 @@ public class DatePicker
      * Binds the given signal to the minimum date allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the minimum date is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The minimum date is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum date manually
      * through {@link #setMin(LocalDate)} throws a
@@ -486,9 +487,10 @@ public class DatePicker
      * Binds the given signal to the maximum date allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the maximum date is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The maximum date is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum date manually
      * through {@link #setMax(LocalDate)} throws a
@@ -937,9 +939,10 @@ public class DatePicker
      * Binds the given signal to the visible date when there is no value
      * selected.
      * <p>
-     * When a signal is bound, the initial position is kept synchronized with
-     * the signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The initial position is set immediately with the current signal value
+     * when the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the initial position manually
      * through {@link #setInitialPosition(LocalDate)} throws a
