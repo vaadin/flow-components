@@ -15,7 +15,11 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -199,5 +203,60 @@ public class UploadHelperTest {
     public void isFileTypeAccepted_multipleExtensions_oneMatches_accepted() {
         Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
                 "text/plain", List.of(), List.of(".pdf", ".txt")));
+    }
+
+    @Test
+    public void wrapHandlerWithFileTypeValidation_wrapperOverridesAllInterfaceMethods() {
+        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
+        });
+        UploadHandler wrapper = UploadHelper
+                .wrapHandlerWithFileTypeValidation(handler, List::of, List::of);
+
+        // Collect all non-static methods from UploadHandler and its
+        // super-interfaces. These are the methods the wrapper must override
+        // to ensure proper delegation.
+        // handleRequest is excluded because UploadHandler provides a default
+        // that routes to handleUploadRequest, which the wrapper overrides.
+        Set<String> interfaceMethods = new LinkedHashSet<>();
+        collectInterfaceMethods(UploadHandler.class, interfaceMethods);
+        interfaceMethods.removeIf(sig -> sig.startsWith("handleRequest("));
+
+        Set<String> wrapperMethods = new LinkedHashSet<>();
+        for (Method m : wrapper.getClass().getDeclaredMethods()) {
+            if (!m.isSynthetic()) {
+                wrapperMethods.add(methodSignature(m));
+            }
+        }
+
+        for (String sig : interfaceMethods) {
+            Assert.assertTrue(
+                    "Validation wrapper must delegate: " + sig
+                            + ". See NOTE in wrapWithFileTypeValidation.",
+                    wrapperMethods.contains(sig));
+        }
+    }
+
+    /**
+     * Collects all non-static method signatures from the given interface and
+     * all its super-interfaces (at any depth).
+     */
+    private static void collectInterfaceMethods(Class<?> iface,
+            Set<String> signatures) {
+        for (Method m : iface.getMethods()) {
+            if (!Modifier.isStatic(m.getModifiers())) {
+                signatures.add(methodSignature(m));
+            }
+        }
+    }
+
+    private static String methodSignature(Method m) {
+        StringBuilder sb = new StringBuilder(m.getName()).append('(');
+        Class<?>[] params = m.getParameterTypes();
+        for (int i = 0; i < params.length; i++) {
+            if (i > 0)
+                sb.append(',');
+            sb.append(params[i].getName());
+        }
+        return sb.append(')').toString();
     }
 }
