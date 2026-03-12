@@ -17,29 +17,29 @@ package com.vaadin.flow.component.avatar.tests;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
 import tools.jackson.databind.node.ArrayNode;
 
-public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
+class AvatarGroupSignalTest extends AbstractSignalsJUnit6Test {
 
     private AvatarGroup avatarGroup;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         avatarGroup = new AvatarGroup();
     }
 
     @Test
-    public void signalConstructor_setsItemsFromSignal() {
+    void signalConstructor_setsItemsFromSignal() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var item2Signal = new ValueSignal<>(new AvatarGroupItem("Bob"));
         var listSignal = new ValueSignal<>(List.of(item1Signal, item2Signal));
@@ -47,13 +47,14 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
         avatarGroup = new AvatarGroup(listSignal);
         ui.add(avatarGroup);
 
-        Assert.assertEquals(2, avatarGroup.getItems().size());
-        Assert.assertEquals("Alice", avatarGroup.getItems().get(0).getName());
-        Assert.assertEquals("Bob", avatarGroup.getItems().get(1).getName());
+        Assertions.assertEquals(2, avatarGroup.getItems().size());
+        Assertions.assertEquals("Alice",
+                avatarGroup.getItems().get(0).getName());
+        Assertions.assertEquals("Bob", avatarGroup.getItems().get(1).getName());
     }
 
     @Test
-    public void signalConstructor_updatesWhenSignalChanges() {
+    void signalConstructor_updatesWhenSignalChanges() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
@@ -63,27 +64,28 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
         var item2Signal = new ValueSignal<>(new AvatarGroupItem("Bob"));
         listSignal.set(List.of(item1Signal, item2Signal));
 
-        Assert.assertEquals(2, avatarGroup.getItems().size());
+        Assertions.assertEquals(2, avatarGroup.getItems().size());
 
         ui.fakeClientCommunication();
         ArrayNode clientItems = (ArrayNode) avatarGroup.getElement()
                 .getPropertyRaw("items");
-        Assert.assertEquals(2, clientItems.size());
+        Assertions.assertEquals(2, clientItems.size());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void signalConstructor_setItemsWhileBound_throws() {
+    @Test
+    void signalConstructor_setItemsWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         avatarGroup = new AvatarGroup(listSignal);
         ui.add(avatarGroup);
 
-        avatarGroup.setItems(List.of(new AvatarGroupItem("Bob")));
+        Assertions.assertThrows(BindingActiveException.class, () -> avatarGroup
+                .setItems(List.of(new AvatarGroupItem("Bob"))));
     }
 
     @Test
-    public void bindItems_setsItemsFromSignal() {
+    void bindItems_setsItemsFromSignal() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var item2Signal = new ValueSignal<>(new AvatarGroupItem("Bob"));
         var listSignal = new ValueSignal<>(List.of(item1Signal, item2Signal));
@@ -91,59 +93,62 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
         avatarGroup.bindItems(listSignal);
         ui.add(avatarGroup);
 
-        Assert.assertEquals(2, avatarGroup.getItems().size());
-        Assert.assertEquals("Alice", avatarGroup.getItems().get(0).getName());
-        Assert.assertEquals("Bob", avatarGroup.getItems().get(1).getName());
+        Assertions.assertEquals(2, avatarGroup.getItems().size());
+        Assertions.assertEquals("Alice",
+                avatarGroup.getItems().get(0).getName());
+        Assertions.assertEquals("Bob", avatarGroup.getItems().get(1).getName());
     }
 
     @Test
-    public void bindItems_updatesWhenListSignalChanges() {
+    void bindItems_updatesWhenListSignalChanges() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         avatarGroup.bindItems(listSignal);
         ui.add(avatarGroup);
 
-        Assert.assertEquals(1, avatarGroup.getItems().size());
+        Assertions.assertEquals(1, avatarGroup.getItems().size());
 
         var item2Signal = new ValueSignal<>(new AvatarGroupItem("Bob"));
         var item3Signal = new ValueSignal<>(new AvatarGroupItem("Charlie"));
         listSignal.set(List.of(item1Signal, item2Signal, item3Signal));
 
-        Assert.assertEquals(3, avatarGroup.getItems().size());
-        Assert.assertEquals("Charlie", avatarGroup.getItems().get(2).getName());
+        Assertions.assertEquals(3, avatarGroup.getItems().size());
+        Assertions.assertEquals("Charlie",
+                avatarGroup.getItems().get(2).getName());
 
         ui.fakeClientCommunication();
         ArrayNode clientItems = (ArrayNode) avatarGroup.getElement()
                 .getPropertyRaw("items");
-        Assert.assertEquals(3, clientItems.size());
+        Assertions.assertEquals(3, clientItems.size());
     }
 
     @Test
-    public void bindItems_updatesWhenItemSignalChanges() {
+    void bindItems_updatesWhenItemSignalChanges() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         avatarGroup.bindItems(listSignal);
         ui.add(avatarGroup);
 
-        Assert.assertEquals("Alice", avatarGroup.getItems().get(0).getName());
+        Assertions.assertEquals("Alice",
+                avatarGroup.getItems().get(0).getName());
 
         item1Signal.set(new AvatarGroupItem("Updated Alice"));
 
-        Assert.assertEquals("Updated Alice",
+        Assertions.assertEquals("Updated Alice",
                 avatarGroup.getItems().get(0).getName());
 
         ui.fakeClientCommunication();
         ArrayNode clientItems = (ArrayNode) avatarGroup.getElement()
                 .getPropertyRaw("items");
-        Assert.assertEquals(1, clientItems.size());
-        Assert.assertEquals("Updated Alice",
+        Assertions.assertEquals(1, clientItems.size());
+        Assertions.assertEquals("Updated Alice",
                 clientItems.get(0).get("name").asString());
     }
 
     @Test
-    public void bindItems_notAttached_initialValueApplied() {
+    void bindItems_notAttached_initialValueApplied() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var item2Signal = new ValueSignal<>(new AvatarGroupItem("Bob"));
         var listSignal = new ValueSignal<>(List.of(item1Signal, item2Signal));
@@ -151,57 +156,63 @@ public class AvatarGroupSignalTest extends AbstractSignalsUnitTest {
         avatarGroup.bindItems(listSignal);
 
         // Initial value is applied immediately (effect runs on creation)
-        Assert.assertEquals(2, avatarGroup.getItems().size());
+        Assertions.assertEquals(2, avatarGroup.getItems().size());
 
         ui.add(avatarGroup);
 
-        Assert.assertEquals(2, avatarGroup.getItems().size());
+        Assertions.assertEquals(2, avatarGroup.getItems().size());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void setItemsWhileBound_throws() {
+    @Test
+    void setItemsWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         avatarGroup.bindItems(listSignal);
         ui.add(avatarGroup);
 
-        avatarGroup.setItems(List.of(new AvatarGroupItem("Bob")));
+        Assertions.assertThrows(BindingActiveException.class, () -> avatarGroup
+                .setItems(List.of(new AvatarGroupItem("Bob"))));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void addWhileBound_throws() {
+    @Test
+    void addWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         avatarGroup.bindItems(listSignal);
         ui.add(avatarGroup);
 
-        avatarGroup.add(new AvatarGroupItem("Bob"));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> avatarGroup.add(new AvatarGroupItem("Bob")));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void removeWhileBound_throws() {
+    @Test
+    void removeWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         avatarGroup.bindItems(listSignal);
         ui.add(avatarGroup);
 
-        avatarGroup.remove(avatarGroup.getItems().get(0));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> avatarGroup.remove(avatarGroup.getItems().get(0)));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_calledTwice_throws() {
+    @Test
+    void bindItems_calledTwice_throws() {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
-        avatarGroup.bindItems(listSignal);
-        avatarGroup.bindItems(listSignal);
+        Assertions.assertThrows(BindingActiveException.class, () -> {
+            avatarGroup.bindItems(listSignal);
+            avatarGroup.bindItems(listSignal);
+        });
     }
 
-    @Test(expected = NullPointerException.class)
-    public void bindItems_nullSignal_throws() {
-        avatarGroup.bindItems(null);
+    @Test
+    void bindItems_nullSignal_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> avatarGroup.bindItems(null));
     }
 }
