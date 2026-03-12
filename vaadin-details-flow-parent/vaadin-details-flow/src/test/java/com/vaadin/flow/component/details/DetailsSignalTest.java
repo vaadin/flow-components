@@ -78,14 +78,15 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindChildren_notAttached_bindingInactiveUntilAttach() {
+    public void bindChildren_notAttached_initialValueApplied() {
         var textSignal1 = new ValueSignal<>("Item 1");
         var textSignal2 = new ValueSignal<>("Item 2");
         var listSignal = new ValueSignal<>(List.of(textSignal1, textSignal2));
 
         details.bindChildren(listSignal, Span::new);
 
-        Assert.assertEquals(0, details.getContent().count());
+        // Initial value is applied immediately (effect runs on creation)
+        Assert.assertEquals(2, details.getContent().count());
 
         UI.getCurrent().add(details);
 

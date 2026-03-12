@@ -891,9 +891,11 @@ public class DateTimePicker
      * Binds the given signal to the minimum date and time allowed to be set for
      * this field.
      * <p>
-     * When a signal is bound, the minimum date and time is kept synchronized
-     * with the signal value while the component is attached. When the component
-     * is detached, signal value changes have no effect.
+     * The minimum date and time is set immediately with the current signal
+     * value when the binding is created, and is kept synchronized with any
+     * subsequent signal value changes while the component is in attached state.
+     * When the component is in detached state, signal value changes have no
+     * effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum date and time
      * manually through {@link #setMin(LocalDateTime)} throws a
@@ -945,9 +947,11 @@ public class DateTimePicker
      * Binds the given signal to the maximum date and time allowed to be set for
      * this field.
      * <p>
-     * When a signal is bound, the maximum date and time is kept synchronized
-     * with the signal value while the component is attached. When the component
-     * is detached, signal value changes have no effect.
+     * The maximum date and time is set immediately with the current signal
+     * value when the binding is created, and is kept synchronized with any
+     * subsequent signal value changes while the component is in attached state.
+     * When the component is in detached state, signal value changes have no
+     * effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum date and time
      * manually through {@link #setMax(LocalDateTime)} throws a
