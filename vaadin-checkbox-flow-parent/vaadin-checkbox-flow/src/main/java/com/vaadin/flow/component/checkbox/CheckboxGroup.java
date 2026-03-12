@@ -390,6 +390,9 @@ public class CheckboxGroup<T>
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
             rebuild();
+            // Re-sync the presentation value so the element property uses the
+            // new keys matching the rebuilt checkboxes.
+            setPresentationValue(getValue());
         }
     }
 
