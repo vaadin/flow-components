@@ -64,7 +64,6 @@ public class SelectionPreservationIT extends AbstractComponentIT {
 
         clickElementWithJs("remove-item-5");
         clickElementWithJs("refresh-all");
-        clickElementWithJs("show-server-value");
 
         Assert.assertEquals("5", getServerValue());
         Assert.assertNull(group.getSelectedText());
@@ -78,7 +77,6 @@ public class SelectionPreservationIT extends AbstractComponentIT {
 
         clickElementWithJs("remove-item-5");
         clickElementWithJs("refresh-all");
-        clickElementWithJs("show-server-value");
 
         Assert.assertEquals("", getServerValue());
         Assert.assertNull(group.getSelectedText());
@@ -96,6 +94,7 @@ public class SelectionPreservationIT extends AbstractComponentIT {
     }
 
     private String getServerValue() {
+        clickElementWithJs("show-server-value");
         return $("span").id("server-value").getText();
     }
 }
