@@ -408,8 +408,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * Gets the list of accepted MIME types for upload.
      *
      * @return a list of accepted MIME types, never {@code null}
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
      */
     public List<String> getAcceptedMimeTypes() {
+        checkNoDeprecatedFileTypes("getAcceptedMimeTypes");
         return acceptedMimeTypes;
     }
 
@@ -470,8 +474,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * Gets the list of accepted file extensions for upload.
      *
      * @return a list of accepted file extensions, never {@code null}
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
      */
     public List<String> getAcceptedFileExtensions() {
+        checkNoDeprecatedFileTypes("getAcceptedFileExtensions");
         return acceptedFileExtensions;
     }
 
@@ -527,11 +535,23 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * Get the list of accepted file types for upload.
      *
      * @return a list of allowed file types, never <code>null</code>.
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedMimeTypes(String...)} or
+     *             {@link #setAcceptedFileExtensions(String...)} are configured,
+     *             as mixing the deprecated and new APIs is not supported
      * @deprecated Use {@link #getAcceptedMimeTypes()} and
      *             {@link #getAcceptedFileExtensions()} instead.
      */
     @Deprecated(since = "25.2")
     public List<String> getAcceptedFileTypes() {
+        if (!acceptedMimeTypes.isEmpty() || !acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot use getAcceptedFileTypes when "
+                            + "setAcceptedMimeTypes or "
+                            + "setAcceptedFileExtensions are configured. "
+                            + "Use getAcceptedMimeTypes() and "
+                            + "getAcceptedFileExtensions() instead.");
+        }
         String accepted = getElement().getProperty("accept");
         if (accepted == null) {
             return Collections.emptyList();
@@ -1005,7 +1025,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
                     + " when setAcceptedFileTypes is configured. "
                     + "Mixing the deprecated and new APIs is not "
                     + "supported. Clear the deprecated configuration "
-                    + "first by calling " + methodName + "(), "
+                    + "first by calling setAcceptedFileTypes(), "
                     + "or use the deprecated API exclusively.");
         }
     }

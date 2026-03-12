@@ -207,19 +207,19 @@ public class UploadTest {
     // --- setAcceptedFileTypes ---
 
     @Test
-    public void setAcceptedFileTypes_doesNotPopulateServerSideFields() {
+    public void setAcceptedFileTypes_newGettersThrow() {
         var upload = new Upload();
         upload.setAcceptedFileTypes("image/*", ".pdf", "application/json",
                 ".txt");
 
-        Assert.assertTrue(
-                "setAcceptedFileTypes should not populate server-side "
-                        + "MIME type field",
-                upload.getAcceptedMimeTypes().isEmpty());
-        Assert.assertTrue(
-                "setAcceptedFileTypes should not populate server-side "
-                        + "extension field",
-                upload.getAcceptedFileExtensions().isEmpty());
+        Assert.assertThrows(
+                "getAcceptedMimeTypes should throw when deprecated "
+                        + "setAcceptedFileTypes is configured",
+                IllegalStateException.class, upload::getAcceptedMimeTypes);
+        Assert.assertThrows(
+                "getAcceptedFileExtensions should throw when deprecated "
+                        + "setAcceptedFileTypes is configured",
+                IllegalStateException.class, upload::getAcceptedFileExtensions);
     }
 
     @Test
@@ -244,15 +244,13 @@ public class UploadTest {
     }
 
     @Test
-    public void getAcceptedFileTypes_fromSeparateSetters() {
+    public void getAcceptedFileTypes_fromSeparateSetters_throws() {
         var upload = new Upload();
         upload.setAcceptedMimeTypes("image/*");
         upload.setAcceptedFileExtensions(".pdf");
 
-        var types = upload.getAcceptedFileTypes();
-        Assert.assertEquals(2, types.size());
-        Assert.assertTrue(types.contains("image/*"));
-        Assert.assertTrue(types.contains(".pdf"));
+        Assert.assertThrows(IllegalStateException.class,
+                upload::getAcceptedFileTypes);
     }
 
     @Test
