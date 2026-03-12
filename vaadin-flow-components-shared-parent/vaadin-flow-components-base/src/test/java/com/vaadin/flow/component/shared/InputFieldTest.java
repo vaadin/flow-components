@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.shared;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -30,23 +30,23 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.function.SerializableFunction;
 
-public class InputFieldTest {
+class InputFieldTest {
 
     private TestComponent component;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void checkExtendedInterfaces() {
-        Assert.assertTrue(component instanceof HasEnabled);
-        Assert.assertTrue(component instanceof HasLabel);
-        Assert.assertTrue(component instanceof HasSize);
-        Assert.assertTrue(component instanceof HasStyle);
-        Assert.assertTrue(component instanceof HasTooltip);
-        Assert.assertTrue(component instanceof HasValue);
+    void checkExtendedInterfaces() {
+        Assertions.assertTrue(component instanceof HasEnabled);
+        Assertions.assertTrue(component instanceof HasLabel);
+        Assertions.assertTrue(component instanceof HasSize);
+        Assertions.assertTrue(component instanceof HasStyle);
+        Assertions.assertTrue(component instanceof HasTooltip);
+        Assertions.assertTrue(component instanceof HasValue);
     }
 
     @Tag("test")

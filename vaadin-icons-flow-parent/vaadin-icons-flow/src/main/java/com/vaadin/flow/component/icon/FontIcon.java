@@ -118,9 +118,10 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     /**
      * Binds the given signal to the character code of the font icon.
      * <p>
-     * When a signal is bound, the character code is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The character code is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the character code manually
      * through {@link #setCharCode(String)} throws a
@@ -166,9 +167,10 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     /**
      * Binds the given signal to the ligature name of the font icon.
      * <p>
-     * When a signal is bound, the ligature name is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The ligature name is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the ligature manually through
      * {@link #setLigature(String)} throws a

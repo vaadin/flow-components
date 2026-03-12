@@ -18,26 +18,26 @@ package com.vaadin.flow.component.shared.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 
-public class OverlayClassListProxyTest {
+class OverlayClassListProxyTest {
     private TestComponent component;
     private OverlayClassListProxy proxy;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         component = new TestComponent();
         proxy = new OverlayClassListProxy(component);
     }
 
     @Test
-    public void add() {
+    void add() {
         proxy.add("foo");
         proxy.add("bar");
         proxy.add("baz");
@@ -53,7 +53,7 @@ public class OverlayClassListProxyTest {
     }
 
     @Test
-    public void addAll() {
+    void addAll() {
         proxy.addAll(List.of("foo", "bar", "baz"));
 
         verifyClassNames("foo bar baz");
@@ -65,7 +65,7 @@ public class OverlayClassListProxyTest {
     }
 
     @Test
-    public void remove() {
+    void remove() {
         proxy.addAll(List.of("foo", "bar", "baz"));
 
         proxy.remove("bar");
@@ -79,7 +79,7 @@ public class OverlayClassListProxyTest {
     }
 
     @Test
-    public void removeAll() {
+    void removeAll() {
         proxy.addAll(List.of("foo", "bar", "baz"));
 
         proxy.removeAll(List.of("foo", "baz"));
@@ -90,7 +90,7 @@ public class OverlayClassListProxyTest {
     }
 
     @Test
-    public void removeIf() {
+    void removeIf() {
         proxy.addAll(List.of("foo", "bar", "baz"));
 
         proxy.removeIf("foo"::equals);
@@ -104,7 +104,7 @@ public class OverlayClassListProxyTest {
     }
 
     @Test
-    public void retainAll() {
+    void retainAll() {
         proxy.addAll(List.of("foo", "bar", "baz"));
 
         proxy.retainAll(List.of("foo", "baz"));
@@ -115,7 +115,7 @@ public class OverlayClassListProxyTest {
     }
 
     @Test
-    public void clear() {
+    void clear() {
         proxy.addAll(List.of("foo", "bar", "baz"));
 
         proxy.clear();
@@ -123,40 +123,40 @@ public class OverlayClassListProxyTest {
     }
 
     @Test
-    public void contains() {
+    void contains() {
         proxy.add("foo");
 
-        Assert.assertTrue(proxy.contains("foo"));
+        Assertions.assertTrue(proxy.contains("foo"));
 
         proxy.remove("foo");
 
-        Assert.assertFalse(proxy.contains("foo"));
+        Assertions.assertFalse(proxy.contains("foo"));
     }
 
     @Test
-    public void containsAll() {
+    void containsAll() {
         proxy.addAll(List.of("foo", "bar"));
 
-        Assert.assertTrue(proxy.containsAll(List.of("foo", "bar")));
+        Assertions.assertTrue(proxy.containsAll(List.of("foo", "bar")));
 
         proxy.remove("foo");
 
-        Assert.assertFalse(proxy.containsAll(List.of("foo", "bar")));
+        Assertions.assertFalse(proxy.containsAll(List.of("foo", "bar")));
     }
 
     @Test
-    public void isEmpty() {
-        Assert.assertTrue(proxy.isEmpty());
+    void isEmpty() {
+        Assertions.assertTrue(proxy.isEmpty());
 
         proxy.add("foo");
 
-        Assert.assertFalse(proxy.isEmpty());
+        Assertions.assertFalse(proxy.isEmpty());
     }
 
     private void verifyClassNames(String expected) {
-        Assert.assertEquals(expected,
+        Assertions.assertEquals(expected,
                 component.getElement().getProperty("overlayClass"));
-        Assert.assertEquals(expected, component.getClassName());
+        Assertions.assertEquals(expected, component.getClassName());
     }
 
     @Tag("test-component")

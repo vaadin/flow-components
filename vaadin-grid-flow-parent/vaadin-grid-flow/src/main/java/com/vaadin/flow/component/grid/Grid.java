@@ -213,8 +213,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.1.0-beta2")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/grid", version = "25.1.0-beta3")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-beta3")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -2719,6 +2719,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        DataViewUtils.checkNoActiveItemsBinding(this);
         if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
                 getSelectionPreservationMode()) && !dataProvider.isInMemory()) {
             throw new UnsupportedOperationException(
