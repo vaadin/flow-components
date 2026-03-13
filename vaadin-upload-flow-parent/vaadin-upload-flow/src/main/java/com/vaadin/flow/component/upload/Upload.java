@@ -518,10 +518,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
                             + "setAcceptedMimeTypes or "
                             + "setAcceptedFileExtensions are configured. "
                             + "Mixing the deprecated and new APIs is not "
-                            + "supported. Clear them first by calling "
-                            + "setAcceptedMimeTypes(null) and "
-                            + "setAcceptedFileExtensions(null), or use the "
-                            + "new API exclusively.");
+                            + "supported.");
         }
         if (acceptedFileTypes == null || acceptedFileTypes.length == 0) {
             getElement().setProperty("accept", "");
@@ -1024,9 +1021,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             throw new IllegalStateException("Cannot use " + methodName
                     + " when setAcceptedFileTypes is configured. "
                     + "Mixing the deprecated and new APIs is not "
-                    + "supported. Clear the deprecated configuration "
-                    + "first by calling setAcceptedFileTypes(), "
-                    + "or use the deprecated API exclusively.");
+                    + "supported.");
         }
     }
 
