@@ -67,6 +67,8 @@ public void throwsException() {
 }
 ```
 
+Only place the `assertThrows` call around the statement that is expected to throw, not multiple statements.
+
 ## @Ignore -> @Disabled
 
 ```java

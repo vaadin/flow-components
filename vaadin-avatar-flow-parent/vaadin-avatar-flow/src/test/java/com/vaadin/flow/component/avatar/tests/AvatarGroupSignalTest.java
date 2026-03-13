@@ -204,10 +204,9 @@ class AvatarGroupSignalTest extends AbstractSignalsJUnit6Test {
         var item1Signal = new ValueSignal<>(new AvatarGroupItem("Alice"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
-        Assertions.assertThrows(BindingActiveException.class, () -> {
-            avatarGroup.bindItems(listSignal);
-            avatarGroup.bindItems(listSignal);
-        });
+        avatarGroup.bindItems(listSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> avatarGroup.bindItems(listSignal));
     }
 
     @Test
