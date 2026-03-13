@@ -20,10 +20,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -33,16 +33,16 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
-import com.vaadin.tests.EnableFeatureFlagRule;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
 
-public class AttachmentListenerTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-    @Rule
-    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+class AttachmentListenerTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             AIComponentsFeatureFlagProvider.AI_COMPONENTS);
 
     private LLMProvider mockProvider;
@@ -50,8 +50,8 @@ public class AttachmentListenerTest {
     private AIFileReceiver mockFileReceiver;
     private AIMessage mockMessage;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         mockProvider = Mockito.mock(LLMProvider.class);
         mockMessageList = Mockito.mock(AIMessageList.class);
         mockFileReceiver = Mockito.mock(AIFileReceiver.class);
@@ -70,7 +70,7 @@ public class AttachmentListenerTest {
     // --- AttachmentSubmitListener tests ---
 
     @Test
-    public void submitListener_withAttachments_isCalled() {
+    void submitListener_withAttachments_isCalled() {
         var receivedEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
         var attachment = createAttachment("file.txt");
         Mockito.when(mockFileReceiver.takeAttachments())
@@ -82,15 +82,15 @@ public class AttachmentListenerTest {
                 .withAttachmentSubmitListener(receivedEvent::set).build();
         orchestrator.prompt("Hello");
 
-        Assert.assertNotNull(receivedEvent.get());
-        Assert.assertNotNull(receivedEvent.get().getMessageId());
-        Assert.assertEquals(1, receivedEvent.get().getAttachments().size());
-        Assert.assertEquals("file.txt",
+        Assertions.assertNotNull(receivedEvent.get());
+        Assertions.assertNotNull(receivedEvent.get().getMessageId());
+        Assertions.assertEquals(1, receivedEvent.get().getAttachments().size());
+        Assertions.assertEquals("file.txt",
                 receivedEvent.get().getAttachments().getFirst().name());
     }
 
     @Test
-    public void submitListener_withMultipleAttachments_receivesAll() {
+    void submitListener_withMultipleAttachments_receivesAll() {
         var receivedEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("a.txt"),
@@ -102,11 +102,11 @@ public class AttachmentListenerTest {
                 .withAttachmentSubmitListener(receivedEvent::set).build();
         orchestrator.prompt("Hello");
 
-        Assert.assertEquals(3, receivedEvent.get().getAttachments().size());
+        Assertions.assertEquals(3, receivedEvent.get().getAttachments().size());
     }
 
     @Test
-    public void submitListener_withoutAttachments_isNotCalled() {
+    void submitListener_withoutAttachments_isNotCalled() {
         var receivedEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
@@ -115,11 +115,11 @@ public class AttachmentListenerTest {
                 .withAttachmentSubmitListener(receivedEvent::set).build();
         orchestrator.prompt("Hello");
 
-        Assert.assertNull(receivedEvent.get());
+        Assertions.assertNull(receivedEvent.get());
     }
 
     @Test
-    public void submitListener_multiplePrompts_receiveDifferentMessageIds() {
+    void submitListener_multiplePrompts_receiveDifferentMessageIds() {
         var firstId = new AtomicReference<String>();
         var secondId = new AtomicReference<String>();
         var callCount = new int[] { 0 };
@@ -143,15 +143,15 @@ public class AttachmentListenerTest {
         orchestrator.prompt("First");
         orchestrator.prompt("Second");
 
-        Assert.assertNotNull(firstId.get());
-        Assert.assertNotNull(secondId.get());
-        Assert.assertNotEquals(firstId.get(), secondId.get());
+        Assertions.assertNotNull(firstId.get());
+        Assertions.assertNotNull(secondId.get());
+        Assertions.assertNotEquals(firstId.get(), secondId.get());
     }
 
     // --- AttachmentClickListener tests ---
 
     @Test
-    public void clickListener_configured_registersOnMessageList() {
+    void clickListener_configured_registersOnMessageList() {
         AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withAttachmentClickListener(event -> {
@@ -162,7 +162,7 @@ public class AttachmentListenerTest {
     }
 
     @Test
-    public void clickListener_notConfigured_doesNotRegisterOnMessageList() {
+    void clickListener_notConfigured_doesNotRegisterOnMessageList() {
         AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
 
@@ -172,7 +172,7 @@ public class AttachmentListenerTest {
     }
 
     @Test
-    public void clickCallback_translatesMessageToMessageId() {
+    void clickCallback_translatesMessageToMessageId() {
         var receivedSubmitEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
         var receivedClickEvent = new AtomicReference<AttachmentClickListener.AttachmentClickEvent>();
 
@@ -196,14 +196,15 @@ public class AttachmentListenerTest {
         // Simulate a click on the message that was added
         callbackCaptor.getValue().onAttachmentClick(mockMessage, 0);
 
-        Assert.assertNotNull(receivedClickEvent.get());
-        Assert.assertEquals(receivedSubmitEvent.get().getMessageId(),
+        Assertions.assertNotNull(receivedClickEvent.get());
+        Assertions.assertEquals(receivedSubmitEvent.get().getMessageId(),
                 receivedClickEvent.get().getMessageId());
-        Assert.assertEquals(0, receivedClickEvent.get().getAttachmentIndex());
+        Assertions.assertEquals(0,
+                receivedClickEvent.get().getAttachmentIndex());
     }
 
     @Test
-    public void clickCallback_withAttachmentIndex_passesCorrectIndex() {
+    void clickCallback_withAttachmentIndex_passesCorrectIndex() {
         var receivedClickEvent = new AtomicReference<AttachmentClickListener.AttachmentClickEvent>();
 
         Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(
@@ -224,11 +225,12 @@ public class AttachmentListenerTest {
 
         callbackCaptor.getValue().onAttachmentClick(mockMessage, 1);
 
-        Assert.assertEquals(1, receivedClickEvent.get().getAttachmentIndex());
+        Assertions.assertEquals(1,
+                receivedClickEvent.get().getAttachmentIndex());
     }
 
     @Test
-    public void clickCallback_unknownMessage_doesNotCallListener() {
+    void clickCallback_unknownMessage_doesNotCallListener() {
         var receivedClickEvent = new AtomicReference<AttachmentClickListener.AttachmentClickEvent>();
 
         var callbackCaptor = ArgumentCaptor
@@ -245,7 +247,7 @@ public class AttachmentListenerTest {
         var unknownMessage = createMockMessage();
         callbackCaptor.getValue().onAttachmentClick(unknownMessage, 0);
 
-        Assert.assertNull(receivedClickEvent.get());
+        Assertions.assertNull(receivedClickEvent.get());
     }
 
     // --- Helpers ---
