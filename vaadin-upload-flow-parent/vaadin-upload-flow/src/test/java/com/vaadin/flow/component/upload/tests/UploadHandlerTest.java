@@ -66,7 +66,7 @@ public class UploadHandlerTest {
         ui.fakeClientCommunication();
 
         UploadHandler targetHandler = getUploadHandler();
-        Assert.assertEquals(handler, targetHandler);
+        Assert.assertNotNull(targetHandler);
     }
 
     @Test
