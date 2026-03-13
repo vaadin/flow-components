@@ -50,10 +50,11 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindMin_elementNotAttached_bindingInactive_untilAttach() {
+    public void bindMin_elementNotAttached_initialValueApplied() {
         dateTimePicker.bindMin(signal);
 
-        Assert.assertNull(dateTimePicker.getMin());
+        // Initial value is applied immediately (effect runs on creation)
+        Assert.assertEquals(signal.peek(), dateTimePicker.getMin());
 
         UI.getCurrent().add(dateTimePicker);
         Assert.assertEquals(signal.peek(), dateTimePicker.getMin());
@@ -90,10 +91,11 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindMax_elementNotAttached_bindingInactive_untilAttach() {
+    public void bindMax_elementNotAttached_initialValueApplied() {
         dateTimePicker.bindMax(signal);
 
-        Assert.assertNull(dateTimePicker.getMax());
+        // Initial value is applied immediately (effect runs on creation)
+        Assert.assertEquals(signal.peek(), dateTimePicker.getMax());
 
         UI.getCurrent().add(dateTimePicker);
         Assert.assertEquals(signal.peek(), dateTimePicker.getMax());
@@ -125,11 +127,12 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindReadOnly_elementNotAttached_bindingInactive_untilAttach() {
+    public void bindReadOnly_elementNotAttached_initialValueApplied() {
         readonlySignal.set(true);
         dateTimePicker.bindReadOnly(readonlySignal);
 
-        Assert.assertFalse(dateTimePicker.isReadOnly());
+        // Initial value is applied immediately (effect runs on creation)
+        Assert.assertTrue(dateTimePicker.isReadOnly());
 
         UI.getCurrent().add(dateTimePicker);
         Assert.assertTrue(dateTimePicker.isReadOnly());

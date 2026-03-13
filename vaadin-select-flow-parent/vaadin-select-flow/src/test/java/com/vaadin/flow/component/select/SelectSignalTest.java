@@ -13,69 +13,66 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.radiobutton;
+package com.vaadin.flow.component.select;
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ListSignal;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.AbstractSignalsUnitTest;
 
-public class RadioButtonGroupBindItemsTest {
-
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
-
-    private RadioButtonGroup<String> radioButtonGroup;
-
-    @Before
-    public void setup() {
-        radioButtonGroup = new RadioButtonGroup<>();
-        var itemsSignal = new ListSignal<String>();
-        itemsSignal.insertLast("Item 1");
-        itemsSignal.insertLast("Item 2");
-        radioButtonGroup.bindItems(itemsSignal);
-        ui.getUI().add(radioButtonGroup);
-    }
+public class SelectSignalTest extends AbstractSignalsUnitTest {
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetDataProvider_throws() {
-        radioButtonGroup.setDataProvider(
+        var select = createSelectWithBoundItems();
+        select.setDataProvider(
                 DataProvider.ofItems("New Item 1", "New Item 2"));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithDataProvider_throws() {
-        radioButtonGroup
-                .setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
+        var select = createSelectWithBoundItems();
+        select.setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithInMemoryDataProvider_throws() {
-        radioButtonGroup.setItems(DataProvider
+        var select = createSelectWithBoundItems();
+        select.setItems(DataProvider
                 .ofCollection(Arrays.asList("New Item 1", "New Item 2")));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithListDataProvider_throws() {
-        radioButtonGroup.setItems(new ListDataProvider<>(
+        var select = createSelectWithBoundItems();
+        select.setItems(new ListDataProvider<>(
                 Arrays.asList("New Item 1", "New Item 2")));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithCollection_throws() {
-        radioButtonGroup.setItems(Arrays.asList("New Item 1", "New Item 2"));
+        var select = createSelectWithBoundItems();
+        select.setItems(Arrays.asList("New Item 1", "New Item 2"));
     }
 
     @Test(expected = BindingActiveException.class)
     public void bindItems_thenSetItemsWithVarargs_throws() {
-        radioButtonGroup.setItems("New Item 1", "New Item 2");
+        var select = createSelectWithBoundItems();
+        select.setItems("New Item 1", "New Item 2");
     }
 
+    private Select<String> createSelectWithBoundItems() {
+        var select = new Select<String>();
+        var itemsSignal = new ListSignal<String>();
+        itemsSignal.insertLast("Item 1");
+        itemsSignal.insertLast("Item 2");
+        select.bindItems(itemsSignal);
+        ui.add(select);
+        return select;
+    }
 }
