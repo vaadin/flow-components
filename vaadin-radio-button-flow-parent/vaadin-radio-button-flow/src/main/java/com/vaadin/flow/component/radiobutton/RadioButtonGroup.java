@@ -867,6 +867,9 @@ public class RadioButtonGroup<T>
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
             rebuild();
+            // Re-sync the presentation value so the element property uses the
+            // new key matching the rebuilt radio buttons.
+            setPresentationValue(getValue());
         }
     }
 
