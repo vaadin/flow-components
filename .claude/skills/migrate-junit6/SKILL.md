@@ -35,6 +35,22 @@ MockUIExtension ui = new MockUIExtension();
 
 Import: `com.vaadin.tests.MockUIRule` -> `com.vaadin.tests.MockUIExtension`
 
+## EnableFeatureFlagRule -> EnableFeatureFlagExtension
+
+```java
+// Before
+@Rule
+public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+        MyFeatureFlagProvider.MY_FEATURE);
+
+// After
+@RegisterExtension
+EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+        MyFeatureFlagProvider.MY_FEATURE);
+```
+
+Import: `com.vaadin.tests.EnableFeatureFlagRule` -> `com.vaadin.tests.EnableFeatureFlagExtension`
+
 ## Assertions
 
 Replace all `Assert.` with `Assertions.`. Method signatures are the same, except for **message-carrying overloads** where the message moves to the **last** parameter:
