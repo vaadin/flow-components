@@ -15,11 +15,21 @@
  */
 package com.vaadin.tests;
 
+import org.openqa.selenium.chrome.ChromeOptions;
+
 public abstract class AbstractComponentIT
         extends com.vaadin.flow.testutil.AbstractComponentIT {
 
     protected int getDeploymentPort() {
         return 8080;
+    }
+
+    @Override
+    protected void updateHeadlessChromeOptions(ChromeOptions chromeOptions) {
+        String extraArgs = System.getenv("TESTBENCH_CHROME_EXTRA_ARGS");
+        if (extraArgs != null && !extraArgs.isBlank()) {
+            chromeOptions.addArguments(extraArgs.split("\\s+"));
+        }
     }
 
     @Override
