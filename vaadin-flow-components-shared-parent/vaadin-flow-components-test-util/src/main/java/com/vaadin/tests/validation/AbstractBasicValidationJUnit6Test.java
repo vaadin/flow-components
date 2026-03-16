@@ -67,7 +67,8 @@ public abstract class AbstractBasicValidationJUnit6Test<C extends AbstractField<
     @Test
     void setErrorMessage_getErrorMessage() {
         Assertions.assertNull(testField.getErrorMessage());
-        Assertions.assertNull(testField.getElement().getProperty("errorMessage"));
+        Assertions
+                .assertNull(testField.getElement().getProperty("errorMessage"));
 
         testField.setErrorMessage("Error");
 
@@ -85,7 +86,8 @@ public abstract class AbstractBasicValidationJUnit6Test<C extends AbstractField<
         testField.setInvalid(true);
 
         Assertions.assertTrue(testField.isInvalid());
-        Assertions.assertTrue(testField.getElement().getProperty("invalid", false));
+        Assertions.assertTrue(
+                testField.getElement().getProperty("invalid", false));
     }
 
     protected abstract C createTestField();
