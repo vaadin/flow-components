@@ -28,29 +28,28 @@ class VirtualListTest {
     void paging_pagingDisabledByDefault() {
         VirtualList<String> virtualList = new VirtualList<>();
         Assertions.assertFalse(
-                        virtualList.getDataCommunicator().isPagingEnabled(),
-                        "VirtualList is not supposed to support the paging");
+                virtualList.getDataCommunicator().isPagingEnabled(),
+                "VirtualList is not supposed to support the paging");
     }
 
     @Test
     void paging_setPageSize_throws() {
         VirtualList<String> virtualList = new VirtualList<>();
         UnsupportedOperationException ex = Assertions.assertThrows(
-                        UnsupportedOperationException.class, () -> virtualList
-                                        .getDataCommunicator().setPageSize(50));
+                UnsupportedOperationException.class,
+                () -> virtualList.getDataCommunicator().setPageSize(50));
         Assertions.assertEquals("VirtualList does not support paging",
-                        ex.getMessage());
+                ex.getMessage());
     }
 
     @Test
     void paging_setPagingEnabled_throws() {
         VirtualList<String> virtualList = new VirtualList<>();
         UnsupportedOperationException ex = Assertions.assertThrows(
-                        UnsupportedOperationException.class,
-                        () -> virtualList.getDataCommunicator()
-                                        .setPagingEnabled(true));
+                UnsupportedOperationException.class,
+                () -> virtualList.getDataCommunicator().setPagingEnabled(true));
         Assertions.assertEquals("VirtualList does not support paging",
-                        ex.getMessage());
+                ex.getMessage());
     }
 
     @Test
@@ -60,19 +59,19 @@ class VirtualListTest {
                 + item;
         virtualList.setItemAccessibleNameGenerator(itemAccessibleNameGenerator);
         Assertions.assertEquals(itemAccessibleNameGenerator,
-                                virtualList.getItemAccessibleNameGenerator());
+                virtualList.getItemAccessibleNameGenerator());
     }
 
     @Test
     void setItemAccessibleNameGenerator_nullThrows() {
         VirtualList<String> virtualList = new VirtualList<>();
         Assertions.assertThrows(NullPointerException.class,
-                        () -> virtualList.setItemAccessibleNameGenerator(null));
+                () -> virtualList.setItemAccessibleNameGenerator(null));
     }
 
     @Test
     void implementsHasThemeVariant() {
-            Assertions.assertTrue(
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(VirtualList.class));
     }
 }

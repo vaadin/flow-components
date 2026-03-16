@@ -33,7 +33,8 @@ class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
     void bindItems_thenSetDataProvider_throws() {
         var list = createVirtualListWithBoundItems();
         Assertions.assertThrows(BindingActiveException.class,
-                () -> list.setDataProvider(DataProvider.ofItems("New Item 1", "New Item 2")));
+                () -> list.setDataProvider(
+                        DataProvider.ofItems("New Item 1", "New Item 2")));
     }
 
     @Test
