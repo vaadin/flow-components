@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.io.Serializable;
 import java.util.Objects;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
-import com.vaadin.flow.dom.ElementEffect;
+import com.vaadin.flow.dom.BindingContext;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -34,9 +35,26 @@ import com.vaadin.flow.signals.Signal;
 class GridSelectionSignalHelper {
 
     /**
-     * Binds a signal to a {@link HasValueAndElement} target, keeping the value
-     * synchronized while the element is attached.
+     * Result of binding a signal to a selection model value.
      *
+     * @param signalBinding
+     *            the signal binding for registering change callbacks
+     * @param cleanup
+     *            a registration to remove the effect and listener when the
+     *            selection model is removed
+     * @param <V>
+     *            the value type
+     */
+    record BindResult<V>(SignalBinding<V> signalBinding,
+            Registration cleanup) implements Serializable {
+    }
+
+    /**
+     * Binds a signal to a {@link HasValueAndElement} target, keeping the value
+     * synchronized while the owner component is attached.
+     *
+     * @param owner
+     *            the component that owns the effect lifecycle
      * @param target
      *            the HasValueAndElement to bind to
      * @param valueSignal
@@ -48,43 +66,51 @@ class GridSelectionSignalHelper {
      *            the value change event type
      * @param <V>
      *            the value type
+     * @return the binding result containing the signal binding and a cleanup
+     *         registration
      */
-    static <E extends HasValue.ValueChangeEvent<V>, V> void bindValue(
-            HasValueAndElement<E, V> target, Signal<V> valueSignal,
-            SerializableConsumer<V> writeCallback) {
+    @SuppressWarnings("unchecked")
+    static <E extends HasValue.ValueChangeEvent<V>, V> BindResult<V> bindValue(
+            Component owner, HasValueAndElement<E, V> target,
+            Signal<V> valueSignal, SerializableConsumer<V> writeCallback) {
         Objects.requireNonNull(valueSignal, "Signal cannot be null");
-        SignalBindingFeature feature = target.getElement().getNode()
-                .getFeature(SignalBindingFeature.class);
 
-        if (feature.hasBinding(SignalBindingFeature.VALUE)) {
-            throw new BindingActiveException();
-        }
-
+        SignalBinding<V> binding = new SignalBinding<>();
         boolean[] fromSignal = { false };
+        V[] previousValue = (V[]) new Object[] { valueSignal.peek() };
 
-        Registration effectReg = ElementEffect.bind(target.getElement(),
-                valueSignal, (element, value) -> {
-                    try {
-                        fromSignal[0] = true;
-                        target.setValue(value);
-                    } finally {
-                        fromSignal[0] = false;
-                    }
-                });
+        Registration effectReg = Signal.effect(owner, ctx -> {
+            V newValue = valueSignal.get();
+            V oldValue = previousValue[0];
+            try {
+                fromSignal[0] = true;
+                target.setValue(newValue);
+            } finally {
+                fromSignal[0] = false;
+            }
+            if (ctx.isInitialRun() || binding.hasCallbacks()) {
+                var bindingContext = new BindingContext<>(ctx.isInitialRun(),
+                        ctx.isBackgroundChange(), oldValue, newValue,
+                        target.getElement());
+                binding.setInitialContext(bindingContext);
+                if (binding.hasCallbacks()) {
+                    binding.fireOnChange(bindingContext);
+                }
+            }
+            previousValue[0] = newValue;
+        });
 
         Registration listenerReg = target.addValueChangeListener(event -> {
-            if (!fromSignal[0]) {
-                if (writeCallback != null) {
-                    writeCallback.accept(target.getValue());
-                }
+            if (!fromSignal[0] && writeCallback != null) {
+                writeCallback.accept(target.getValue());
             }
         });
 
-        Registration combined = () -> {
+        Registration cleanup = () -> {
             effectReg.remove();
             listenerReg.remove();
         };
-        feature.setBinding(SignalBindingFeature.VALUE, combined, valueSignal,
-                writeCallback);
+
+        return new BindResult<>(binding, cleanup);
     }
 }

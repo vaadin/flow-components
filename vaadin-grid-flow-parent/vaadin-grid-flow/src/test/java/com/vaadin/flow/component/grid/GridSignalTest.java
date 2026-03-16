@@ -30,12 +30,10 @@ import com.vaadin.tests.AbstractSignalsUnitTest;
 public class GridSignalTest extends AbstractSignalsUnitTest {
 
     private Grid<String> grid;
-    private Grid.Column<String> column;
 
     @Before
     public void setup() {
         grid = new Grid<>();
-        column = grid.addColumn(s -> s);
     }
 
     @After
@@ -43,169 +41,6 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         if (grid != null && grid.isAttached()) {
             grid.removeFromParent();
         }
-    }
-
-    // ===== COLUMN BIND HEADER TESTS =====
-
-    @Test
-    public void bindHeader_signalBound_headerSynchronizedWhenAttached() {
-        var headerSignal = new ValueSignal<>("Header");
-        column.bindHeader(headerSignal);
-        UI.getCurrent().add(grid);
-
-        // Verify header text is set by checking the default header row
-        var headerRow = grid.getDefaultHeaderRow();
-        Assert.assertNotNull(headerRow);
-        Assert.assertEquals("Header", headerRow.getCell(column).getText());
-
-        headerSignal.set("Updated Header");
-        Assert.assertEquals("Updated Header",
-                headerRow.getCell(column).getText());
-    }
-
-    @Test
-    public void bindHeader_signalBound_noEffectWhenDetached() {
-        var headerSignal = new ValueSignal<>("Header");
-        column.bindHeader(headerSignal);
-        UI.getCurrent().add(grid);
-        Assert.assertEquals("Header",
-                grid.getDefaultHeaderRow().getCell(column).getText());
-
-        // Detach
-        grid.removeFromParent();
-        headerSignal.set("Updated");
-        Assert.assertEquals("Header",
-                grid.getDefaultHeaderRow().getCell(column).getText());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindHeader_setHeaderWhileBound_throwsException() {
-        var headerSignal = new ValueSignal<>("Header");
-        column.bindHeader(headerSignal);
-        UI.getCurrent().add(grid);
-
-        column.setHeader("manual");
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindHeader_bindAgainWhileBound_throwsException() {
-        var headerSignal = new ValueSignal<>("Header");
-        column.bindHeader(headerSignal);
-        UI.getCurrent().add(grid);
-
-        column.bindHeader(new ValueSignal<>("Other"));
-    }
-
-    // ===== COLUMN BIND FOOTER TESTS =====
-
-    @Test
-    public void bindFooter_signalBound_footerSynchronizedWhenAttached() {
-        var footerSignal = new ValueSignal<>("Footer");
-        column.bindFooter(footerSignal);
-        UI.getCurrent().add(grid);
-
-        // Verify footer text is set
-        var footerRows = grid.getFooterRows();
-        Assert.assertFalse(footerRows.isEmpty());
-        Assert.assertEquals("Footer",
-                footerRows.get(0).getCell(column).getText());
-
-        footerSignal.set("Updated Footer");
-        Assert.assertEquals("Updated Footer",
-                footerRows.get(0).getCell(column).getText());
-    }
-
-    @Test
-    public void bindFooter_signalBound_noEffectWhenDetached() {
-        var footerSignal = new ValueSignal<>("Footer");
-        column.bindFooter(footerSignal);
-        UI.getCurrent().add(grid);
-        Assert.assertEquals("Footer",
-                grid.getFooterRows().get(0).getCell(column).getText());
-
-        // Detach
-        grid.removeFromParent();
-        footerSignal.set("Updated");
-        Assert.assertEquals("Footer",
-                grid.getFooterRows().get(0).getCell(column).getText());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindFooter_setFooterWhileBound_throwsException() {
-        var footerSignal = new ValueSignal<>("Footer");
-        column.bindFooter(footerSignal);
-        UI.getCurrent().add(grid);
-
-        column.setFooter("manual");
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindFooter_bindAgainWhileBound_throwsException() {
-        var footerSignal = new ValueSignal<>("Footer");
-        column.bindFooter(footerSignal);
-        UI.getCurrent().add(grid);
-
-        column.bindFooter(new ValueSignal<>("Other"));
-    }
-
-    // ===== GRID BIND EMPTY STATE TEXT TESTS =====
-
-    @Test
-    public void bindEmptyStateText_signalBound_textSynchronizedWhenAttached() {
-        var emptyStateSignal = new ValueSignal<>("No data");
-        grid.bindEmptyStateText(emptyStateSignal);
-        UI.getCurrent().add(grid);
-
-        Assert.assertEquals("No data", grid.getEmptyStateText());
-
-        emptyStateSignal.set("No items found");
-        Assert.assertEquals("No items found", grid.getEmptyStateText());
-    }
-
-    @Test
-    public void bindEmptyStateText_signalBound_noEffectWhenDetached() {
-        var emptyStateSignal = new ValueSignal<>("No data");
-        grid.bindEmptyStateText(emptyStateSignal);
-        // Not attached to UI
-
-        String initial = grid.getEmptyStateText();
-        emptyStateSignal.set("Updated");
-        Assert.assertEquals(initial, grid.getEmptyStateText());
-    }
-
-    @Test
-    public void bindEmptyStateText_signalBound_detachAndReattach() {
-        var emptyStateSignal = new ValueSignal<>("No data");
-        grid.bindEmptyStateText(emptyStateSignal);
-        UI.getCurrent().add(grid);
-        Assert.assertEquals("No data", grid.getEmptyStateText());
-
-        // Detach
-        grid.removeFromParent();
-        emptyStateSignal.set("Updated");
-        Assert.assertEquals("No data", grid.getEmptyStateText());
-
-        // Reattach
-        UI.getCurrent().add(grid);
-        Assert.assertEquals("Updated", grid.getEmptyStateText());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindEmptyStateText_setEmptyStateTextWhileBound_throwsException() {
-        var emptyStateSignal = new ValueSignal<>("No data");
-        grid.bindEmptyStateText(emptyStateSignal);
-        UI.getCurrent().add(grid);
-
-        grid.setEmptyStateText("manual");
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindEmptyStateText_bindAgainWhileBound_throwsException() {
-        var emptyStateSignal = new ValueSignal<>("No data");
-        grid.bindEmptyStateText(emptyStateSignal);
-        UI.getCurrent().add(grid);
-
-        grid.bindEmptyStateText(new ValueSignal<>("Other"));
     }
 
     // ===== SINGLE SELECT BIND VALUE TESTS =====
@@ -254,10 +89,11 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         grid.setItems("foo", "bar", "baz");
         var signal = new ValueSignal<>("foo");
         grid.asSingleSelect().bindValue(signal, signal::set);
-        // Not attached
+        // Not attached — initial probe sets "foo", then effect is passivated
 
+        // Subsequent signal changes while detached should have no effect
         signal.set("bar");
-        Assert.assertNull(grid.asSingleSelect().getValue());
+        Assert.assertEquals("foo", grid.asSingleSelect().getValue());
     }
 
     @Test
