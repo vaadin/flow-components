@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
@@ -90,5 +91,28 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
         return group.getChildren().filter(RadioButton.class::isInstance)
                 .map(child -> (RadioButton<String>) child)
                 .collect(Collectors.toList());
+    }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("One");
+        listSignal.insertLast("Two");
+
+        RadioButtonGroup<String> group = new RadioButtonGroup<>("Options",
+                listSignal);
+        UI.getCurrent().add(group);
+
+        List<String> items = group.getGenericDataView().getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("One", items.get(0));
+        Assert.assertEquals("Two", items.get(1));
+        Assert.assertEquals("Options", group.getLabel());
+
+        listSignal.insertLast("Three");
+
+        items = group.getGenericDataView().getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Three", items.get(2));
     }
 }

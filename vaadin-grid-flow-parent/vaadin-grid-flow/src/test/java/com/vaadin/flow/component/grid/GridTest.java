@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
@@ -27,6 +28,7 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.tests.MockUIRule;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
@@ -161,5 +163,26 @@ public class GridTest {
             }
             Assert.fail("Could not call Grid.setViewportRange");
         }
+    }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("One");
+        listSignal.insertLast("Two");
+
+        Grid<String> grid = new Grid<>(listSignal);
+        ui.add(grid);
+
+        List<String> items = grid.getGenericDataView().getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("One", items.get(0));
+        Assert.assertEquals("Two", items.get(1));
+
+        listSignal.insertLast("Three");
+
+        items = grid.getGenericDataView().getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Three", items.get(2));
     }
 }

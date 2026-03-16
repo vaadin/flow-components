@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
@@ -107,5 +108,28 @@ public class ComboBoxSignalTest extends AbstractSignalsUnitTest {
         Assert.assertNotNull("Data view should not be null", dataView);
         List<String> items = dataView.getItems().toList();
         Assert.assertEquals(2, items.size());
+    }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("Alice");
+        listSignal.insertLast("Bob");
+
+        comboBox = new ComboBox<>("People", listSignal);
+        ui.add(comboBox);
+
+        ComboBoxDataView<String> dataView = comboBox.getGenericDataView();
+        List<String> items = dataView.getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("Alice", items.get(0));
+        Assert.assertEquals("Bob", items.get(1));
+        Assert.assertEquals("People", comboBox.getLabel());
+
+        listSignal.insertLast("Charlie");
+
+        items = dataView.getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Charlie", items.get(2));
     }
 }
