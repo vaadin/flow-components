@@ -113,7 +113,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.1.0-beta4")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -414,6 +414,9 @@ public class CheckboxGroup<T>
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
             rebuild();
+            // Re-sync the presentation value so the element property uses the
+            // new keys matching the rebuilt checkboxes.
+            setPresentationValue(getValue());
         }
     }
 
