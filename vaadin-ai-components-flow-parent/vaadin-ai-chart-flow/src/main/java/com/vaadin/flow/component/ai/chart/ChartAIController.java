@@ -56,17 +56,8 @@ public class ChartAIController implements AIController {
 
     private String currentSqlQuery;
     private final List<ChartStateChangeListener> stateChangeListeners = new ArrayList<>();
-    private PendingRender pendingRender;
-
-    private static class PendingRender {
-        final String sqlQuery;
-        final String configJson;
-
-        PendingRender(String sqlQuery, String configJson) {
-            this.sqlQuery = sqlQuery;
-            this.configJson = configJson;
-        }
-    }
+    private String pendingDataQuery;
+    private String pendingConfigJson;
 
     /**
      * Creates a new AI chart controller.
@@ -187,20 +178,29 @@ public class ChartAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        if (pendingRender != null) {
-            try {
-                if (pendingRender.sqlQuery != null) {
-                    renderChart(pendingRender.sqlQuery,
-                            pendingRender.configJson);
-                } else {
-                    applyChartConfig(chart, pendingRender.configJson);
-                }
-                fireStateChangeEvent();
-            } catch (Exception e) {
-                LOGGER.error("Error rendering chart", e);
-            } finally {
-                pendingRender = null;
+        if (pendingDataQuery == null && pendingConfigJson == null) {
+            return;
+        }
+        try {
+            String sqlQuery = pendingDataQuery != null ? pendingDataQuery
+                    : currentSqlQuery;
+            if (sqlQuery != null) {
+                // Get config: use pending config, or fall back to current
+                // chart config
+                String configJson = pendingConfigJson != null
+                        ? pendingConfigJson
+                        : ChartSerialization
+                                .toJSON(chart.getConfiguration());
+                renderChart(sqlQuery, configJson);
+            } else if (pendingConfigJson != null) {
+                applyChartConfig(chart, pendingConfigJson);
             }
+            fireStateChangeEvent();
+        } catch (Exception e) {
+            LOGGER.error("Error rendering chart", e);
+        } finally {
+            pendingDataQuery = null;
+            pendingConfigJson = null;
         }
     }
 
@@ -380,12 +380,8 @@ public class ChartAIController implements AIController {
 
                     currentSqlQuery = query;
 
-                    // Get existing configuration from chart
-                    String config = ChartSerialization
-                            .toJSON(chart.getConfiguration());
-
                     // Defer rendering until request completes
-                    pendingRender = new PendingRender(query, config);
+                    pendingDataQuery = query;
 
                     return "Chart data update queued successfully";
                 } catch (Exception e) {
@@ -572,12 +568,9 @@ public class ChartAIController implements AIController {
                 try {
                     ObjectNode node = (ObjectNode) JacksonUtils
                             .readTree(arguments);
-                    String config = node.has("config")
+                    pendingConfigJson = node.has("config")
                             ? node.get("config").toString()
                             : node.toString();
-
-                    pendingRender = new PendingRender(currentSqlQuery,
-                            config);
                     return "Chart configuration update queued successfully";
                 } catch (Exception e) {
                     return "Error updating chart configuration: "
