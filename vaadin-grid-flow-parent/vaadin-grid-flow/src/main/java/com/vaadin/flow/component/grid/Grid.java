@@ -1482,7 +1482,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Creates a grid with the defined label and bound to the given list signal.
+     * Creates a grid bound to the given list signal.
      * <p>
      * The grid will automatically update its items when the signal changes.
      *
