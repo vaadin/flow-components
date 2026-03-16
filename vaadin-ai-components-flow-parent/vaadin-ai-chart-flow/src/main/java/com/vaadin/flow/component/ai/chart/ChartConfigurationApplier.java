@@ -56,8 +56,13 @@ class ChartConfigurationApplier implements Serializable {
 
     void applyConfiguration(Chart chart, String configJson) {
         try {
-            ObjectNode configNode = (ObjectNode) JacksonUtils
-                    .readTree(configJson);
+            JsonNode parsedNode = JacksonUtils.readTree(configJson);
+            if (!(parsedNode instanceof ObjectNode configNode)) {
+                LOGGER.warn(
+                        "Expected JSON object for chart config but got: {}",
+                        parsedNode.getNodeType());
+                return;
+            }
             Configuration config = chart.getConfiguration();
 
             String chartType = null;

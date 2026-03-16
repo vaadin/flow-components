@@ -359,9 +359,18 @@ public class ChartAIController implements AIController {
                 try {
                     ObjectNode node = (ObjectNode) JacksonUtils
                             .readTree(arguments);
-                    String config = node.has("config")
-                            ? node.get("config").toString()
-                            : node.toString();
+                    String config;
+                    if (node.has("config")
+                            && node.get("config").isObject()) {
+                        config = node.get("config").toString();
+                    } else if (node.has("config")
+                            && node.get("config").isString()) {
+                        // LLM passed config as a JSON string; parse
+                        // it to verify it's valid JSON
+                        config = node.get("config").asString();
+                    } else {
+                        config = node.toString();
+                    }
                     pendingRender = new PendingRender(currentSqlQuery,
                             config);
                     return "Chart configuration update queued successfully";
