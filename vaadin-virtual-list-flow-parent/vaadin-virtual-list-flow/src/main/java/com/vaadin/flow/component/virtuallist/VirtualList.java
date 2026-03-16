@@ -39,6 +39,7 @@ import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -160,6 +161,7 @@ public class VirtualList<T> extends Component
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "The dataProvider cannot be null");
+        DataViewUtils.checkNoActiveItemsBinding(this);
         getDataCommunicator().setDataProvider(dataProvider, null);
     }
 

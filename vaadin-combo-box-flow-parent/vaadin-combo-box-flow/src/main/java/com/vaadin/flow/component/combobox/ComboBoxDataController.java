@@ -487,6 +487,7 @@ class ComboBoxDataController<TItem>
                 "The data provider can not be null");
         Objects.requireNonNull(filterConverter,
                 "filterConverter cannot be null");
+        DataViewUtils.checkNoActiveItemsBinding(comboBox);
 
         if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
             userProvidedFilter = UserProvidedFilter.YES;
