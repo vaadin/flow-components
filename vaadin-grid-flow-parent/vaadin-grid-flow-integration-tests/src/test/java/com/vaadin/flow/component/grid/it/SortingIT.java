@@ -108,18 +108,18 @@ public class SortingIT extends AbstractComponentIT {
     public void setInitialSortOrder_sortByTwoColumns_sortCountIncreases() {
         findElement(By.id("sort-by-age")).click();
         WebElement count = findElement(By.id("sort-listener-count"));
-        Assert.assertEquals(count.getText(), "Sort count: 1");
+        Assert.assertEquals("Sort count: 1", count.getText());
         findElement(By.id("sort-by-two-columns")).click();
-        Assert.assertEquals(count.getText(), "Sort count: 2");
+        Assert.assertEquals("Sort count: 2", count.getText());
     }
 
     @Test
     public void setInitialSortOrder_updateTwoColumnHeaders_sortCountDoesNotIncrease() {
         findElement(By.id("sort-by-age")).click();
         WebElement count = findElement(By.id("sort-listener-count"));
-        Assert.assertEquals(count.getText(), "Sort count: 1");
+        Assert.assertEquals("Sort count: 1", count.getText());
         findElement(By.id("change-two-column-headers")).click();
-        Assert.assertEquals(count.getText(), "Sort count: 1");
+        Assert.assertEquals("Sort count: 1", count.getText());
     }
 
     @Test

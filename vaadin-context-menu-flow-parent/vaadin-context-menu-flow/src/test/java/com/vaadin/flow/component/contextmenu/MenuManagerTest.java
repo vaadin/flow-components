@@ -81,7 +81,7 @@ public class MenuManagerTest {
 
         Mockito.verify(item).setText("foo");
 
-        Assert.assertEquals(addedComponents.size(), 1);
+        Assert.assertEquals(1, addedComponents.size());
         Assert.assertEquals(item, addedComponents.get(0));
     }
 
@@ -94,7 +94,7 @@ public class MenuManagerTest {
 
         Mockito.verify(item).add(component);
 
-        Assert.assertEquals(addedComponents.size(), 1);
+        Assert.assertEquals(1, addedComponents.size());
         Assert.assertEquals(item, addedComponents.get(0));
     }
 
@@ -109,7 +109,7 @@ public class MenuManagerTest {
         Mockito.verify(item).setText("foo");
         Mockito.verify(item).addListener(ClickEvent.class, listener);
 
-        Assert.assertEquals(addedComponents.size(), 1);
+        Assert.assertEquals(1, addedComponents.size());
         Assert.assertEquals(item, addedComponents.get(0));
     }
 
@@ -122,7 +122,7 @@ public class MenuManagerTest {
         Mockito.verify(item).setText("foo");
         Mockito.verifyNoMoreInteractions(item);
 
-        Assert.assertEquals(addedComponents.size(), 1);
+        Assert.assertEquals(1, addedComponents.size());
         Assert.assertEquals(item, addedComponents.get(0));
     }
 
@@ -138,7 +138,7 @@ public class MenuManagerTest {
         Mockito.verify(item).add(component);
         Mockito.verify(item).addListener(ClickEvent.class, listener);
 
-        Assert.assertEquals(addedComponents.size(), 1);
+        Assert.assertEquals(1, addedComponents.size());
         Assert.assertEquals(item, addedComponents.get(0));
     }
 
@@ -152,7 +152,7 @@ public class MenuManagerTest {
         Mockito.verify(item).add(component);
         Mockito.verifyNoMoreInteractions(item);
 
-        Assert.assertEquals(addedComponents.size(), 1);
+        Assert.assertEquals(1, addedComponents.size());
         Assert.assertEquals(item, addedComponents.get(0));
     }
 

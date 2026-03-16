@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.select;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataProvider;
@@ -64,6 +66,28 @@ public class SelectSignalTest extends AbstractSignalsUnitTest {
     public void bindItems_thenSetItemsWithVarargs_throws() {
         var select = createSelectWithBoundItems();
         select.setItems("New Item 1", "New Item 2");
+    }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("One");
+        listSignal.insertLast("Two");
+
+        Select<String> select = new Select<>("Options", listSignal);
+        ui.add(select);
+
+        List<String> items = select.getGenericDataView().getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("One", items.get(0));
+        Assert.assertEquals("Two", items.get(1));
+        Assert.assertEquals("Options", select.getLabel());
+
+        listSignal.insertLast("Three");
+
+        items = select.getGenericDataView().getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Three", items.get(2));
     }
 
     private Select<String> createSelectWithBoundItems() {

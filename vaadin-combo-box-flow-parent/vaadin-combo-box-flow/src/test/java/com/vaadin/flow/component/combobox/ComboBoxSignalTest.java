@@ -210,4 +210,27 @@ public class ComboBoxSignalTest extends AbstractSignalsUnitTest {
         ui.add(comboBox);
         return comboBox;
     }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("Alice");
+        listSignal.insertLast("Bob");
+
+        comboBox = new ComboBox<>("People", listSignal);
+        ui.add(comboBox);
+
+        ComboBoxDataView<String> dataView = comboBox.getGenericDataView();
+        List<String> items = dataView.getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("Alice", items.get(0));
+        Assert.assertEquals("Bob", items.get(1));
+        Assert.assertEquals("People", comboBox.getLabel());
+
+        listSignal.insertLast("Charlie");
+
+        items = dataView.getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Charlie", items.get(2));
+    }
 }

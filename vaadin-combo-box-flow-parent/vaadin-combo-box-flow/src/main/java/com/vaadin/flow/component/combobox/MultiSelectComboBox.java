@@ -39,6 +39,7 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -257,6 +258,28 @@ public class MultiSelectComboBox<TItem>
             TItem... items) {
         this(label, listener);
         setItems(items);
+    }
+
+    /**
+     * Creates a multi-select combo box with the defined label and bound to the
+     * given list signal.
+     * <p>
+     * The multi-select combo box will automatically update its items when the
+     * signal changes.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param itemsSignal
+     *            the signal providing the list of items, not {@code null}
+     * @see #setItems(Collection)
+     * @see #setLabel(String)
+     * @since 25.1
+     */
+    public MultiSelectComboBox(String label,
+            Signal<? extends List<? extends Signal<TItem>>> itemsSignal) {
+        this();
+        setLabel(label);
+        bindItems(itemsSignal);
     }
 
     private static <T> Set<T> presentationToModel(

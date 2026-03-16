@@ -359,48 +359,39 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
     }
 
     private void assertCorrectCss(SpreadsheetElement c) {
-        Assert.assertEquals(c.getCellAt("A2").getCssValue("text-align"),
-                "center");
+        Assert.assertEquals("center",
+                c.getCellAt("A2").getCssValue("text-align"));
 
-        Assert.assertEquals(c.getCellAt("B2").getCssValue("text-align"),
-                "right");
+        Assert.assertEquals("right",
+                c.getCellAt("B2").getCssValue("text-align"));
 
-        Assert.assertEquals(
-                c.getCellAt("A3").getCssValue("border-bottom-color"),
-                "rgba(0, 0, 255, 1)");
-        Assert.assertEquals(
-                c.getCellAt("A3").getCssValue("border-bottom-style"), "solid");
-        Assert.assertEquals(
-                c.getCellAt("A3").getCssValue("border-bottom-width"), "4px");
+        Assert.assertEquals("rgba(0, 0, 255, 1)",
+                c.getCellAt("A3").getCssValue("border-bottom-color"));
+        Assert.assertEquals("solid",
+                c.getCellAt("A3").getCssValue("border-bottom-style"));
+        Assert.assertEquals("4px",
+                c.getCellAt("A3").getCssValue("border-bottom-width"));
 
-        Assert.assertEquals(c.getCellAt("B3").getCssValue("background-color"),
-                "rgba(0, 128, 0, 1)");
+        Assert.assertEquals("rgba(0, 128, 0, 1)",
+                c.getCellAt("B3").getCssValue("background-color"));
 
-        Assert.assertEquals(c.getCellAt("A4").getCssValue("color"),
-                "rgba(255, 0, 0, 1)");
+        Assert.assertEquals("rgba(255, 0, 0, 1)",
+                c.getCellAt("A4").getCssValue("color"));
 
-        Assert.assertEquals(c.getCellAt("C4").getCssValue("font-style"),
-                "italic");
+        Assert.assertEquals("italic",
+                c.getCellAt("C4").getCssValue("font-style"));
 
-        Assert.assertEquals(
-                (int) Math.ceil(
-                        parseSize(c.getCellAt("A5").getCssValue("font-size"))),
-                11);
-        Assert.assertEquals(
-                (int) Math.ceil(
-                        parseSize(c.getCellAt("B5").getCssValue("font-size"))),
-                14);
-        Assert.assertEquals(
-                (int) Math.ceil(
-                        parseSize(c.getCellAt("C5").getCssValue("font-size"))),
-                16);
-        Assert.assertEquals(
-                (int) Math.ceil(
-                        parseSize(c.getCellAt("D5").getCssValue("font-size"))),
-                19);
+        Assert.assertEquals(11, (int) Math
+                .ceil(parseSize(c.getCellAt("A5").getCssValue("font-size"))));
+        Assert.assertEquals(14, (int) Math
+                .ceil(parseSize(c.getCellAt("B5").getCssValue("font-size"))));
+        Assert.assertEquals(16, (int) Math
+                .ceil(parseSize(c.getCellAt("C5").getCssValue("font-size"))));
+        Assert.assertEquals(19, (int) Math
+                .ceil(parseSize(c.getCellAt("D5").getCssValue("font-size"))));
 
-        Assert.assertEquals(c.getCellAt("B4").getCssValue("font-weight"),
-                "700");
+        Assert.assertEquals("700",
+                c.getCellAt("B4").getCssValue("font-weight"));
     }
 
     private double parseSize(String size) {
