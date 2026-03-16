@@ -198,4 +198,45 @@ class SignalBindingUtilTest extends AbstractSignalsJUnit6Test {
 
         Assertions.assertTrue(binding.hasCallbacks());
     }
+
+    @Test
+    void mapBinding_nullSource_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> component.bindColor(null));
+        Assertions.assertEquals("Source signal cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void mapBinding_nullMapper_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<Color> source = new ValueSignal<>(Color.RED);
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class,
+                () -> SignalBindingUtil.mapBinding(source, null,
+                        mapped -> component.getElement().bindProperty("color",
+                                mapped, null)));
+        Assertions.assertEquals("Mapper function cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void mapBinding_nullBinder_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<Color> source = new ValueSignal<>(Color.RED);
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> SignalBindingUtil
+                        .mapBinding(source, Color::getValue, null));
+        Assertions.assertEquals("Binder function cannot be null",
+                exception.getMessage());
+    }
 }

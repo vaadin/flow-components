@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.shared.internal;
 
+import java.util.Objects;
+
 import com.vaadin.flow.dom.BindingContext;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableFunction;
@@ -57,6 +59,10 @@ public final class SignalBindingUtil {
     public static <T, U> SignalBinding<T> mapBinding(Signal<T> source,
             SerializableFunction<T, U> mapper,
             SerializableFunction<Signal<U>, SignalBinding<U>> binder) {
+        Objects.requireNonNull(source, "Source signal cannot be null");
+        Objects.requireNonNull(mapper, "Mapper function cannot be null");
+        Objects.requireNonNull(binder, "Binder function cannot be null");
+
         @SuppressWarnings("unchecked")
         T[] previous = (T[]) new Object[] { source.peek() };
 
