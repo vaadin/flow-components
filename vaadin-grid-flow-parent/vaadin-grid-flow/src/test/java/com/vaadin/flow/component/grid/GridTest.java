@@ -162,5 +162,4 @@ public class GridTest {
             Assert.fail("Could not call Grid.setViewportRange");
         }
     }
-
 }

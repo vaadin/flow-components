@@ -862,5 +862,4 @@ public class CheckboxGroupTest {
             return Objects.hash(getName());
         }
     }
-
 }

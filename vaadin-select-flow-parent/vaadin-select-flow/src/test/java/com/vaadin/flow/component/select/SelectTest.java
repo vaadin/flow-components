@@ -1033,5 +1033,4 @@ public class SelectTest {
             return Objects.hash(getName());
         }
     }
-
 }
