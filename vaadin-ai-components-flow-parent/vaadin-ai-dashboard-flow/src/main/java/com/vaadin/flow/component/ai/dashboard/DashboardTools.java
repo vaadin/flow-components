@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.dashboard;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -69,10 +70,12 @@ public class DashboardTools implements Serializable {
                 TOOLS:
                 1. getDashboardState() - Returns the current state of all widgets (id, title, type, colspan, rowspan)
                 2. updateWidget(widgetId, title, colspan, rowspan) - Updates a widget's properties
+                3. reorderWidgets(widgetIds) - Reorder widgets by providing the widget IDs in the desired order
 
                 WORKFLOW:
                 1. ALWAYS call getDashboardState() FIRST to see existing widgets
                 2. Use updateWidget() to change widget titles, sizes, or positions
+                3. Use reorderWidgets() to change the order of widgets on the dashboard
                 3. Widget IDs are assigned when widgets are created and shown in getDashboardState()
 
                 WIDGET PROPERTIES:
@@ -90,7 +93,7 @@ public class DashboardTools implements Serializable {
      */
     public List<LLMProvider.ToolDefinition> getTools() {
         return List.of(createGetDashboardStateTool(),
-                createUpdateWidgetTool());
+                createUpdateWidgetTool(), createReorderWidgetsTool());
     }
 
     /**
@@ -250,6 +253,85 @@ public class DashboardTools implements Serializable {
                     return "Widget '" + widgetId + "' updated successfully";
                 } catch (Exception e) {
                     return "Error updating widget: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    private LLMProvider.ToolDefinition createReorderWidgetsTool() {
+        return new LLMProvider.ToolDefinition() {
+            @Override
+            public String getName() {
+                return "reorderWidgets";
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                    Reorders the widgets on the dashboard. Provide the widget IDs \
+                    as a comma-separated string in the desired display order. \
+                    Use getDashboardState() first to get the current widget IDs. \
+                    Example: "grid-3,chart-1,chart-2"
+
+                    Parameters:
+                    - widgetIds (string, required): Comma-separated widget IDs \
+                    in the desired order, e.g. "grid-3,chart-1,chart-2"
+                    """;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "widgetIds": {
+                              "type": "string",
+                              "description": "Comma-separated widget IDs in the desired display order, e.g. 'grid-3,chart-1,chart-2'"
+                            }
+                          },
+                          "required": ["widgetIds"]
+                        }
+                        """;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    ObjectNode node = (ObjectNode) JacksonUtils
+                            .readTree(arguments);
+                    JsonNode idsNode = node.get("widgetIds");
+                    if (idsNode == null || idsNode.isNull()) {
+                        return "Error: widgetIds is required";
+                    }
+
+                    String[] ids = idsNode.asString().split(",");
+                    List<DashboardWidget> orderedWidgets = new ArrayList<>();
+                    for (String id : ids) {
+                        String trimmedId = id.trim();
+                        DashboardWidget widget = findWidgetById(trimmedId);
+                        if (widget == null) {
+                            return "Error: Widget with ID '" + trimmedId
+                                    + "' not found";
+                        }
+                        orderedWidgets.add(widget);
+                    }
+
+                    dashboard.getUI().ifPresentOrElse(ui -> {
+                        ui.access(() -> {
+                            dashboard.remove(orderedWidgets);
+                            for (DashboardWidget widget : orderedWidgets) {
+                                dashboard.add(widget);
+                            }
+                        });
+                    }, () -> {
+                        throw new IllegalStateException(
+                                "Dashboard is not attached to a UI");
+                    });
+
+                    return "Widgets reordered successfully";
+                } catch (Exception e) {
+                    return "Error reordering widgets: " + e.getMessage();
                 }
             }
         };

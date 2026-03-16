@@ -107,6 +107,7 @@ public class DashboardAIController implements AIController {
 
                 For ALL widgets:
                 11. updateWidget(widgetId, title, colspan, rowspan) - Update widget layout properties
+                12. reorderWidgets(widgetIds) - Reorder widgets by providing IDs in the desired order
 
                 WORKFLOW:
                 1. Use getSchema() to understand available data

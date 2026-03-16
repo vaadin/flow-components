@@ -72,6 +72,7 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         dashboard.setSizeFull();
         dashboard.setMinimumRowHeight("300px");
         dashboard.setMaximumColumnCount(4);
+        dashboard.setEditable(true);
 
         var dashboardController = new DashboardAIController(dashboard,
                 new InMemoryDatabaseProvider());
