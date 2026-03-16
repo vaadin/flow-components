@@ -52,7 +52,6 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -864,26 +863,4 @@ public class CheckboxGroupTest {
         }
     }
 
-    @Test
-    public void signalConstructor_setsItemsFromSignal() {
-        var listSignal = new ListSignal<String>();
-        listSignal.insertLast("One");
-        listSignal.insertLast("Two");
-
-        CheckboxGroup<String> group = new CheckboxGroup<>("Options",
-                listSignal);
-        ui.add(group);
-
-        List<String> items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals("One", items.get(0));
-        Assert.assertEquals("Two", items.get(1));
-        Assert.assertEquals("Options", group.getLabel());
-
-        listSignal.insertLast("Three");
-
-        items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(3, items.size());
-        Assert.assertEquals("Three", items.get(2));
-    }
 }

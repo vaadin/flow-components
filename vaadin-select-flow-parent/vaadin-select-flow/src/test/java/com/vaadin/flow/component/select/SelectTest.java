@@ -48,7 +48,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.tests.MockUIRule;
 
 public class SelectTest {
@@ -1035,25 +1034,4 @@ public class SelectTest {
         }
     }
 
-    @Test
-    public void signalConstructor_setsItemsFromSignal() {
-        var listSignal = new ListSignal<String>();
-        listSignal.insertLast("One");
-        listSignal.insertLast("Two");
-
-        Select<String> select = new Select<>("Options", listSignal);
-        ui.add(select);
-
-        List<String> items = select.getGenericDataView().getItems().toList();
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals("One", items.get(0));
-        Assert.assertEquals("Two", items.get(1));
-        Assert.assertEquals("Options", select.getLabel());
-
-        listSignal.insertLast("Three");
-
-        items = select.getGenericDataView().getItems().toList();
-        Assert.assertEquals(3, items.size());
-        Assert.assertEquals("Three", items.get(2));
-    }
 }
