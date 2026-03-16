@@ -88,7 +88,7 @@ public interface DatabaseProvider extends Serializable {
      * @throws NullPointerException
      *             if the query is {@code null}
      * @throws IllegalArgumentException
-     *             if the query is invalid or cannot be executed
+     *             if the query is invalid
      */
     List<Map<String, Object>> executeQuery(String sql);
 }
