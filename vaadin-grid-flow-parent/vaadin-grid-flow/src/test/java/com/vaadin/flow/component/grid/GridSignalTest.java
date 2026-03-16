@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -316,6 +317,27 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
     public void bindItems_thenSetItemsWithVarargs_throws() {
         var grid = createGridWithBoundItems();
         grid.setItems("New Item 1", "New Item 2");
+    }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("One");
+        listSignal.insertLast("Two");
+
+        Grid<String> grid = new Grid<>(listSignal);
+        ui.add(grid);
+
+        List<String> items = grid.getGenericDataView().getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("One", items.get(0));
+        Assert.assertEquals("Two", items.get(1));
+
+        listSignal.insertLast("Three");
+
+        items = grid.getGenericDataView().getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Three", items.get(2));
     }
 
     private Grid<String> createGridWithBoundItems() {

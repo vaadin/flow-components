@@ -146,4 +146,27 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
         ui.add(radioButtonGroup);
         return radioButtonGroup;
     }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("One");
+        listSignal.insertLast("Two");
+
+        RadioButtonGroup<String> group = new RadioButtonGroup<>("Options",
+                listSignal);
+        UI.getCurrent().add(group);
+
+        List<String> items = group.getGenericDataView().getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("One", items.get(0));
+        Assert.assertEquals("Two", items.get(1));
+        Assert.assertEquals("Options", group.getLabel());
+
+        listSignal.insertLast("Three");
+
+        items = group.getGenericDataView().getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Three", items.get(2));
+    }
 }
