@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -216,6 +217,16 @@ public class ChartTools implements Serializable {
     }
 
     /**
+     * Sets the pending data query for deferred rendering.
+     *
+     * @param query
+     *            the SQL query to set as pending
+     */
+    public void setPendingDataQuery(String query) {
+        this.pendingDataQuery = query;
+    }
+
+    /**
      * Returns the pending config JSON set by the updateConfig tool.
      *
      * @return the pending config JSON, or {@code null} if none
@@ -225,11 +236,73 @@ public class ChartTools implements Serializable {
     }
 
     /**
+     * Sets the pending config JSON for deferred rendering.
+     *
+     * @param configJson
+     *            the JSON configuration to set as pending
+     */
+    public void setPendingConfigJson(String configJson) {
+        this.pendingConfigJson = configJson;
+    }
+
+    /**
      * Clears pending data query and config JSON after rendering.
      */
     public void clearPending() {
         pendingDataQuery = null;
         pendingConfigJson = null;
+    }
+
+    /**
+     * Renders the chart with data from the given SQL query and applies the
+     * given configuration. This method executes the query, converts results to
+     * a data series, applies configuration, and redraws the chart.
+     * <p>
+     * Must be called from a UI access context or the chart must be attached to
+     * a UI.
+     * </p>
+     *
+     * @param sqlQuery
+     *            the SQL query to execute for data
+     * @param configJson
+     *            the JSON configuration to apply
+     * @throws Exception
+     *             if query execution or rendering fails
+     */
+    public void renderChart(String sqlQuery, String configJson)
+            throws Exception {
+        java.util.List<java.util.Map<String, Object>> results = databaseProvider
+                .executeQuery(sqlQuery);
+        DataSeries series = chartDataConverter.convertToDataSeries(results);
+
+        chart.getUI().ifPresentOrElse(currentUI -> {
+            currentUI.access(() -> {
+                var config = chart.getConfiguration();
+                config.setSeries(series);
+                configurationApplier.applyConfiguration(chart, configJson);
+                chart.drawChart();
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Chart is not attached to a UI");
+        });
+    }
+
+    /**
+     * Applies the given JSON configuration to the chart without changing data.
+     *
+     * @param configJson
+     *            the JSON configuration to apply
+     */
+    public void applyConfig(String configJson) {
+        chart.getUI().ifPresentOrElse(currentUI -> {
+            currentUI.access(() -> {
+                configurationApplier.applyConfiguration(chart, configJson);
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Chart is not attached to a UI");
+        });
     }
 
     // ===== Tool Implementations =====
