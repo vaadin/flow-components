@@ -131,6 +131,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tools.jackson.databind.JsonNode;
@@ -213,8 +214,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.1.0-beta3")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-beta3")
+@NpmPackage(value = "@vaadin/grid", version = "25.1.0-beta4")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-beta4")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -1478,6 +1479,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Grid(int pageSize) {
         this(pageSize, new DataCommunicatorBuilder<>());
+    }
+
+    /**
+     * Creates a grid bound to the given list signal.
+     * <p>
+     * The grid will automatically update its items when the signal changes.
+     *
+     * @param itemsSignal
+     *            the signal providing the list of items, not {@code null}
+     * @see #setItems(Collection)
+     * @since 25.1
+     */
+    public Grid(Signal<? extends List<? extends Signal<T>>> itemsSignal) {
+        this();
+        bindItems(itemsSignal);
     }
 
     /**

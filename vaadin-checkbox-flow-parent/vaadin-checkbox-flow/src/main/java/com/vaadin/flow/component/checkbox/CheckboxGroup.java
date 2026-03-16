@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -73,6 +74,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -111,7 +113,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.1.0-beta3")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.1.0-beta4")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -276,6 +278,28 @@ public class CheckboxGroup<T>
             T... items) {
         this(label, listener);
         setItems(items);
+    }
+
+    /**
+     * Creates a checkbox group with the defined label and bound to the given
+     * list signal.
+     * <p>
+     * The checkbox group will automatically update its items when the signal
+     * changes.
+     *
+     * @param label
+     *            the label describing the checkbox group
+     * @param itemsSignal
+     *            the signal providing the list of items, not {@code null}
+     * @see #setItems(Collection)
+     * @see #setLabel(String)
+     * @since 25.1
+     */
+    public CheckboxGroup(String label,
+            Signal<? extends List<? extends Signal<T>>> itemsSignal) {
+        this();
+        setLabel(label);
+        bindItems(itemsSignal);
     }
 
     @Override

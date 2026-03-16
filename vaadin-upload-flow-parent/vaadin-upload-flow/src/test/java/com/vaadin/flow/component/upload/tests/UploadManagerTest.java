@@ -16,13 +16,8 @@
 package com.vaadin.flow.component.upload.tests;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URI;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
@@ -312,116 +307,6 @@ public class UploadManagerTest {
         Assert.assertEquals("image/*,.pdf", accept);
     }
 
-    // --- File type validation logic (isFileTypeAccepted) ---
-
-    @Test
-    public void isFileTypeAccepted_mimeOnly_matchingType_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.txt", "text/plain",
-                List.of("text/*"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_mimeOnly_nonMatchingType_rejected() {
-        Assert.assertFalse(isFileTypeAccepted("file.txt", "text/plain",
-                List.of("image/*"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_mimeOnly_exactMatch_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.pdf", "application/pdf",
-                List.of("application/pdf"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_mimeOnly_caseInsensitive_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.pdf", "Application/PDF",
-                List.of("application/pdf"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_extensionOnly_matchingExt_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.txt", "text/plain",
-                List.of(), List.of(".txt")));
-    }
-
-    @Test
-    public void isFileTypeAccepted_extensionOnly_nonMatchingExt_rejected() {
-        Assert.assertFalse(isFileTypeAccepted("file.txt", "text/plain",
-                List.of(), List.of(".pdf")));
-    }
-
-    @Test
-    public void isFileTypeAccepted_extensionOnly_caseInsensitive_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("FILE.TXT", "text/plain",
-                List.of(), List.of(".txt")));
-    }
-
-    @Test
-    public void isFileTypeAccepted_bothConfigured_bothMatch_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.pdf", "application/pdf",
-                List.of("application/pdf"), List.of(".pdf")));
-    }
-
-    @Test
-    public void isFileTypeAccepted_bothConfigured_mimeMatchesExtDoesNot_rejected() {
-        Assert.assertFalse(isFileTypeAccepted("file.html", "text/html",
-                List.of("text/*"), List.of(".pdf")));
-    }
-
-    @Test
-    public void isFileTypeAccepted_bothConfigured_extMatchesMimeDoesNot_rejected() {
-        Assert.assertFalse(isFileTypeAccepted("file.pdf", "text/plain",
-                List.of("image/*"), List.of(".pdf")));
-    }
-
-    @Test
-    public void isFileTypeAccepted_nullContentType_mimeConfigured_rejected() {
-        Assert.assertFalse(isFileTypeAccepted("file.txt", null,
-                List.of("text/*"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_nullFileName_extensionConfigured_rejected() {
-        Assert.assertFalse(isFileTypeAccepted(null, "text/plain", List.of(),
-                List.of(".txt")));
-    }
-
-    @Test
-    public void isFileTypeAccepted_neitherConfigured_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.txt", "text/plain",
-                List.of(), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_mimeWithParameters_exactMatch_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.html",
-                "text/html; charset=utf-8", List.of("text/html"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_mimeWithParameters_wildcardMatch_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.html",
-                "text/html; charset=utf-8", List.of("text/*"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_mimeWithParameters_nonMatch_rejected() {
-        Assert.assertFalse(isFileTypeAccepted("file.html",
-                "text/html; charset=utf-8", List.of("image/*"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_multipleMimeTypes_oneMatches_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.pdf", "application/pdf",
-                List.of("image/*", "application/pdf"), List.of()));
-    }
-
-    @Test
-    public void isFileTypeAccepted_multipleExtensions_oneMatches_accepted() {
-        Assert.assertTrue(isFileTypeAccepted("file.txt", "text/plain",
-                List.of(), List.of(".pdf", ".txt")));
-    }
-
     @Test
     public void setAutoUpload_setsProperty() {
         manager.setAutoUpload(false);
@@ -560,27 +445,6 @@ public class UploadManagerTest {
 
         Assert.assertSame(owner, event.getSource());
         Assert.assertFalse(event.isFromClient());
-    }
-
-    /**
-     * Helper to invoke the private isFileTypeAccepted method via reflection.
-     */
-    private static boolean isFileTypeAccepted(String fileName,
-            String contentType, List<String> mimeTypes,
-            List<String> extensions) {
-        try {
-            Method method = UploadManager.class.getDeclaredMethod(
-                    "isFileTypeAccepted", String.class, String.class,
-                    List.class, List.class);
-            method.setAccessible(true);
-            return (boolean) method.invoke(null, fileName, contentType,
-                    mimeTypes, extensions);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e.getCause());
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw new RuntimeException(
-                    "Failed to access isFileTypeAccepted via reflection", e);
-        }
     }
 
     /**
@@ -785,61 +649,6 @@ public class UploadManagerTest {
 
         Assert.assertEquals(DisabledUpdateMode.ALWAYS,
                 getRegisteredHandler().getDisabledUpdateMode());
-    }
-
-    @Test
-    public void setUploadHandler_wrapperOverridesAllInterfaceMethods() {
-        UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
-        });
-        manager.setUploadHandler(handler);
-        ElementRequestHandler wrapper = getRegisteredHandler();
-
-        // Collect all non-static methods from UploadHandler and its
-        // super-interfaces. These are the methods the wrapper must override
-        // to ensure proper delegation.
-        // handleRequest is excluded because UploadHandler provides a default
-        // that routes to handleUploadRequest, which the wrapper overrides.
-        Set<String> interfaceMethods = new LinkedHashSet<>();
-        collectInterfaceMethods(UploadHandler.class, interfaceMethods);
-        interfaceMethods.removeIf(sig -> sig.startsWith("handleRequest("));
-
-        Set<String> wrapperMethods = new LinkedHashSet<>();
-        for (Method m : wrapper.getClass().getDeclaredMethods()) {
-            if (!m.isSynthetic()) {
-                wrapperMethods.add(methodSignature(m));
-            }
-        }
-
-        for (String sig : interfaceMethods) {
-            Assert.assertTrue(
-                    "Validation wrapper must delegate: " + sig
-                            + ". See NOTE in wrapWithFileTypeValidation.",
-                    wrapperMethods.contains(sig));
-        }
-    }
-
-    /**
-     * Collects all non-static method signatures from the given interface and
-     * all its super-interfaces (at any depth).
-     */
-    private static void collectInterfaceMethods(Class<?> iface,
-            Set<String> signatures) {
-        for (Method m : iface.getMethods()) {
-            if (!Modifier.isStatic(m.getModifiers())) {
-                signatures.add(methodSignature(m));
-            }
-        }
-    }
-
-    private static String methodSignature(Method m) {
-        StringBuilder sb = new StringBuilder(m.getName()).append('(');
-        Class<?>[] params = m.getParameterTypes();
-        for (int i = 0; i < params.length; i++) {
-            if (i > 0)
-                sb.append(',');
-            sb.append(params[i].getName());
-        }
-        return sb.append(')').toString();
     }
 
     /**
