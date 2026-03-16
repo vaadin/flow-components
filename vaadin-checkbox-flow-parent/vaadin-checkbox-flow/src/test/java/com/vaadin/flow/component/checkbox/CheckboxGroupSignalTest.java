@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.checkbox;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataProvider;
@@ -65,6 +67,29 @@ public class CheckboxGroupSignalTest extends AbstractSignalsUnitTest {
     public void bindItems_thenSetItemsWithVarargs_throws() {
         var checkboxGroup = createCheckboxGroupWithBoundItems();
         checkboxGroup.setItems("New Item 1", "New Item 2");
+    }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("One");
+        listSignal.insertLast("Two");
+
+        CheckboxGroup<String> group = new CheckboxGroup<>("Options",
+                listSignal);
+        ui.add(group);
+
+        List<String> items = group.getGenericDataView().getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("One", items.get(0));
+        Assert.assertEquals("Two", items.get(1));
+        Assert.assertEquals("Options", group.getLabel());
+
+        listSignal.insertLast("Three");
+
+        items = group.getGenericDataView().getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Three", items.get(2));
     }
 
     private CheckboxGroup<String> createCheckboxGroupWithBoundItems() {
