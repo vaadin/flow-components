@@ -47,6 +47,39 @@ public interface DatabaseProvider extends Serializable {
     String getSchema();
 
     /**
+     * Returns an LLM tool definition that retrieves the database schema.
+     * <p>
+     * This tool can be used by any controller that needs to expose database
+     * schema information to the LLM.
+     * </p>
+     *
+     * @return a tool definition for retrieving the schema
+     */
+    default LLMProvider.ToolDefinition getSchemaTool() {
+        return new LLMProvider.ToolDefinition() {
+            @Override
+            public String getName() {
+                return "getSchema";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Retrieves the database schema including tables, columns, and data types. Takes no parameters.";
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return getSchema();
+            }
+        };
+    }
+
+    /**
      * Executes a SQL query and returns the results.
      * <p>
      * <strong>Security Notice:</strong> This method should only execute SELECT
