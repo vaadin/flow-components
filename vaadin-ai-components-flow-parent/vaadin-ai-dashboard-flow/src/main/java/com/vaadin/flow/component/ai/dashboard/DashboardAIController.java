@@ -269,6 +269,7 @@ public class DashboardAIController implements AIController {
             dashboard.removeAll();
             chartToolsMap.clear();
             gridToolsMap.clear();
+            dashboardTools.clearSelectionCheckboxes();
 
             for (WidgetState ws : state.widgets()) {
                 if ("chart".equals(ws.type())) {
@@ -334,6 +335,7 @@ public class DashboardAIController implements AIController {
 
         ChartTools chartTools = new ChartTools(chart, databaseProvider);
         chartToolsMap.put(widgetId, chartTools);
+        dashboardTools.addSelectionCheckbox(widget);
 
         return widget;
     }
@@ -349,6 +351,7 @@ public class DashboardAIController implements AIController {
 
         GridTools gridTools = new GridTools(grid, databaseProvider);
         gridToolsMap.put(widgetId, gridTools);
+        dashboardTools.addSelectionCheckbox(widget);
 
         return widget;
     }

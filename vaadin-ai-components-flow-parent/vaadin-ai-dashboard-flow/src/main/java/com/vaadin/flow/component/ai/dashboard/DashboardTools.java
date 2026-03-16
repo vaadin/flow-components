@@ -17,12 +17,15 @@ package com.vaadin.flow.component.ai.dashboard;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -46,6 +49,7 @@ public class DashboardTools implements Serializable {
             .getLogger(DashboardTools.class);
 
     private final Dashboard dashboard;
+    private final Map<String, Checkbox> widgetCheckboxes = new LinkedHashMap<>();
 
     /**
      * Creates a new dashboard tools instance bound to the given dashboard.
@@ -55,6 +59,34 @@ public class DashboardTools implements Serializable {
      */
     public DashboardTools(Dashboard dashboard) {
         this.dashboard = dashboard;
+    }
+
+    /**
+     * Adds a selection checkbox to the widget's header content. The checkbox
+     * state is included in the dashboard state reported to the LLM, allowing
+     * users to select which widgets an AI action should target.
+     *
+     * @param widget
+     *            the widget to add a checkbox to
+     */
+    public void addSelectionCheckbox(DashboardWidget widget) {
+        String widgetId = widget.getId().orElse(null);
+        if (widgetId == null || widgetCheckboxes.containsKey(widgetId)) {
+            return;
+        }
+        var checkbox = new Checkbox();
+        checkbox.getElement().setAttribute("title",
+                "Select for AI actions");
+        widgetCheckboxes.put(widgetId, checkbox);
+        widget.setHeaderContent(checkbox);
+    }
+
+    /**
+     * Clears all tracked selection checkboxes. Should be called when the
+     * dashboard is cleared (e.g. during state restore).
+     */
+    public void clearSelectionCheckboxes() {
+        widgetCheckboxes.clear();
     }
 
     /**
@@ -82,7 +114,14 @@ public class DashboardTools implements Serializable {
                 - title: Display title shown on the widget header
                 - colspan: Number of columns the widget spans (default: 1, minimum: 1)
                 - rowspan: Number of rows the widget spans (default: 1, minimum: 1)
+                - selected: Whether the widget is currently selected by the user
                 - Larger colspan/rowspan values make the widget take more space in the dashboard grid
+
+                SELECTION:
+                - Users can select widgets in the dashboard UI
+                - getDashboardState() includes a "selected" field for each widget
+                - When the user refers to "selected widgets", apply the action ONLY to \
+                widgets where selected=true
                 """;
     }
 
@@ -153,6 +192,12 @@ public class DashboardTools implements Serializable {
                     }
                     sb.append(",\"contentType\":\"").append(contentType)
                             .append("\"");
+                    boolean selected = widget.getId()
+                            .map(id -> {
+                                Checkbox cb = widgetCheckboxes.get(id);
+                                return cb != null && cb.getValue();
+                            }).orElse(false);
+                    sb.append(",\"selected\":").append(selected);
                     sb.append("}");
                 }
                 sb.append("]}");
