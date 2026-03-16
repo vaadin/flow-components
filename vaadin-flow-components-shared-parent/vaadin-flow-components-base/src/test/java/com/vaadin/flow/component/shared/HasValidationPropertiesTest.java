@@ -33,19 +33,18 @@ class HasValidationPropertiesTest {
 
     @Test
     void initialErrorMessage() {
-        Assertions.assertEquals(component.getErrorMessage(), null);
+        Assertions.assertEquals(null, component.getErrorMessage());
     }
 
     @Test
     void changeErrorMessage() {
         component.setErrorMessage("This field is required");
-        Assertions.assertEquals(
-                component.getElement().getProperty("errorMessage"),
-                "This field is required");
+        Assertions.assertEquals("This field is required",
+                component.getElement().getProperty("errorMessage"));
 
         component.setErrorMessage(null);
-        Assertions.assertEquals(
-                component.getElement().getProperty("errorMessage"), "");
+        Assertions.assertEquals("",
+                component.getElement().getProperty("errorMessage"));
     }
 
     @Test

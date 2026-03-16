@@ -33,19 +33,18 @@ class HasAllowedCharPatternTest {
 
     @Test
     void initialValue() {
-        Assertions.assertEquals(component.getAllowedCharPattern(), "");
+        Assertions.assertEquals("", component.getAllowedCharPattern());
     }
 
     @Test
     void changeValue() {
         component.setAllowedCharPattern("[-+\\d]");
-        Assertions.assertEquals(
-                component.getElement().getProperty("allowedCharPattern"),
-                "[-+\\d]");
+        Assertions.assertEquals("[-+\\d]",
+                component.getElement().getProperty("allowedCharPattern"));
 
         component.setAllowedCharPattern(null);
-        Assertions.assertEquals(
-                component.getElement().getProperty("allowedCharPattern"), "");
+        Assertions.assertEquals("",
+                component.getElement().getProperty("allowedCharPattern"));
     }
 
     @Tag("test")
