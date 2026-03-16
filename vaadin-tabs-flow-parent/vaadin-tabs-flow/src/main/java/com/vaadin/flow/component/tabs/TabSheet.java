@@ -53,7 +53,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/tabsheet", version = "25.1.0-beta4")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -385,7 +385,9 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
     private void ensureSelectedTabContentAttached() {
         var content = tabToContent.get(tabs.getSelectedTab());
-        if (content != null && content.getParent() == null) {
+        if (content != null
+                && !Objects.equals(content.getParent(), getElement())) {
+            content.removeFromTree(false);
             getElement().appendChild(content);
         }
     }

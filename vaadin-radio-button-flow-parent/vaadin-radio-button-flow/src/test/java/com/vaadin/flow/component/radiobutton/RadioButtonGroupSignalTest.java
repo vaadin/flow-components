@@ -1,0 +1,149 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.radiobutton;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.local.ListSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.tests.AbstractSignalsUnitTest;
+
+public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
+    private final RadioButtonGroup<String> group = new RadioButtonGroup<>();
+    private final ValueSignal<Boolean> readonlySignal = new ValueSignal<>(
+            false);
+
+    @Test
+    public void bindReadOnly_elementAttached_updatesWithSignal() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+
+        Assert.assertFalse(group.isReadOnly());
+
+        readonlySignal.set(true);
+        Assert.assertTrue(group.isReadOnly());
+    }
+
+    @Test
+    public void bindReadOnly_elementNotAttached_initialValueApplied() {
+        readonlySignal.set(true);
+        group.bindReadOnly(readonlySignal);
+
+        // Initial value is applied immediately (effect runs on creation)
+        Assert.assertTrue(group.isReadOnly());
+
+        UI.getCurrent().add(group);
+        Assert.assertTrue(group.isReadOnly());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void setReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+        group.setReadOnly(true);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+        group.bindReadOnly(new ValueSignal<>(true));
+    }
+
+    @Test
+    public void bindReadOnly_disablesUncheckedButtons() {
+        group.setItems("One", "Two", "Three");
+        group.setValue("One");
+        group.bindReadOnly(readonlySignal);
+        UI.getCurrent().add(group);
+
+        readonlySignal.set(true);
+
+        List<RadioButton<String>> buttons = getRadioButtons();
+        Assert.assertTrue("Selected button should remain enabled",
+                buttons.get(0).isEnabled());
+        Assert.assertFalse("Unchecked button should be disabled",
+                buttons.get(1).isEnabled());
+        Assert.assertFalse("Unchecked button should be disabled",
+                buttons.get(2).isEnabled());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetDataProvider_throws() {
+        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
+        radioButtonGroup.setDataProvider(
+                DataProvider.ofItems("New Item 1", "New Item 2"));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithDataProvider_throws() {
+        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
+        radioButtonGroup
+                .setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithInMemoryDataProvider_throws() {
+        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
+        radioButtonGroup.setItems(DataProvider
+                .ofCollection(Arrays.asList("New Item 1", "New Item 2")));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithListDataProvider_throws() {
+        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
+        radioButtonGroup.setItems(new ListDataProvider<>(
+                Arrays.asList("New Item 1", "New Item 2")));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithCollection_throws() {
+        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
+        radioButtonGroup.setItems(Arrays.asList("New Item 1", "New Item 2"));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithVarargs_throws() {
+        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
+        radioButtonGroup.setItems("New Item 1", "New Item 2");
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<RadioButton<String>> getRadioButtons() {
+        return group.getChildren().filter(RadioButton.class::isInstance)
+                .map(child -> (RadioButton<String>) child)
+                .collect(Collectors.toList());
+    }
+
+    private RadioButtonGroup<String> createRadioButtonGroupWithBoundItems() {
+        var radioButtonGroup = new RadioButtonGroup<String>();
+        var itemsSignal = new ListSignal<String>();
+        itemsSignal.insertLast("Item 1");
+        itemsSignal.insertLast("Item 2");
+        radioButtonGroup.bindItems(itemsSignal);
+        ui.add(radioButtonGroup);
+        return radioButtonGroup;
+    }
+}

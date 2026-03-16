@@ -28,6 +28,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.signals.Signal;
@@ -179,9 +180,10 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * binding so that the property is updated when the signal's value is
      * updated.
      * <p>
-     * When a signal is bound, the minimum value is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The minimum value is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum value manually
      * through the setter throws a
@@ -189,12 +191,15 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *
      * @param signal
      *            the signal to bind the minimum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<Double> signal) {
-        getElement().bindProperty("min", signal, null);
+    public SignalBinding<Double> bindMin(Signal<Double> signal) {
+        return getElement().bindProperty("min", signal, null);
     }
 
     /**
@@ -202,9 +207,10 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * binding so that the property is updated when the signal's value is
      * updated.
      * <p>
-     * When a signal is bound, the maximum value is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The maximum value is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum value manually
      * through the setter throws a
@@ -212,12 +218,15 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *
      * @param signal
      *            the signal to bind the maximum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<Double> signal) {
-        getElement().bindProperty("max", signal, null);
+    public SignalBinding<Double> bindMax(Signal<Double> signal) {
+        return getElement().bindProperty("max", signal, null);
     }
 
     /**
@@ -225,9 +234,10 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * binding so that the property is updated when the signal's value is
      * updated.
      * <p>
-     * When a signal is bound, the step value is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The step value is set immediately with the current signal value when the
+     * binding is created, and is kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the step value manually
      * through the setter throws a
@@ -235,12 +245,15 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *
      * @param signal
      *            the signal to bind the step value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindStep(Signal<Double> signal) {
-        getElement().bindProperty("step", signal, null);
+    public SignalBinding<Double> bindStep(Signal<Double> signal) {
+        return getElement().bindProperty("step", signal, null);
     }
 
     /**

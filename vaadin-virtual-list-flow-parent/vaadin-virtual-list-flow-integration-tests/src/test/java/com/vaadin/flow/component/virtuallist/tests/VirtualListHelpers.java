@@ -51,4 +51,14 @@ public class VirtualListHelpers {
         }
         return array;
     }
+
+    public static String getItemText(WebDriver driver, WebElement element,
+            int index) {
+        Object result = ((JavascriptExecutor) driver).executeScript(
+                "const children = arguments[0].children;"
+                        + "if (arguments[1] >= children.length) return null;"
+                        + "return children[arguments[1]].textContent;",
+                element, index);
+        return result != null ? result.toString() : null;
+    }
 }

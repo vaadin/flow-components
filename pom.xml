@@ -7,7 +7,7 @@
         <version>3.0.0</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>25.1-SNAPSHOT</version>
+    <version>25.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
@@ -72,8 +72,8 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>25.1-SNAPSHOT</flow.version>
-        <testbench.version>10.1.0-alpha3</testbench.version>
+        <flow.version>25.2-SNAPSHOT</flow.version>
+        <testbench.version>10.1.0-beta2</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -83,8 +83,10 @@
         <karaf-maven-plugin.version>4.4.10</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.5</maven.failsafe.plugin.version>
-        <maven.resources.plugin.version>3.4.0</maven.resources.plugin.version>
-        <spotless.plugin.version>3.2.1</spotless.plugin.version>
+        <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
+        <spotless.plugin.version>3.3.0</spotless.plugin.version>
+        <checkstyle.version>13.3.0</checkstyle.version>
+        <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
@@ -99,9 +101,10 @@
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.0.3</spring-data-commons.version>
-        <reactor-core.version>3.8.3</reactor-core.version>
-        <langchain4j.version>1.11.0</langchain4j.version>
+        <reactor-core.version>3.8.4</reactor-core.version>
+        <langchain4j.version>1.12.2</langchain4j.version>
         <spring-ai.version>2.0.0-M2</spring-ai.version>
+        <junit.jupiter.version>6.0.3</junit.jupiter.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
@@ -164,6 +167,11 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.13.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.jupiter.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -366,12 +374,53 @@
                         <skip>${skipUnitTests}</skip>
                     </configuration>
                     <dependencies>
-                        <!-- Configure JUnit 4 provider explicitly to not depend on Surefire's auto-resolution when JUnit 6 is on the class path. -->
-                        <!-- JUnit 6 is pulled in transitively by modules that use Flow test dependencies -->
+                        <!-- Use JUnit Platform provider to run both JUnit 4 and JUnit 6 tests, -->
+                        <!-- allowing a gradual migration to JUnit 6 -->
                         <dependency>
-                            <groupId>org.apache.maven.surefire</groupId>
-                            <artifactId>surefire-junit4</artifactId>
-                            <version>${maven.surefire.plugin.version}</version>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter-engine</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.platform</groupId>
+                            <artifactId>junit-platform-commons</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.platform</groupId>
+                            <artifactId>junit-platform-engine</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.platform</groupId>
+                            <artifactId>junit-platform-launcher</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.vintage</groupId>
+                            <artifactId>junit-vintage-engine</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven.checkstyle.plugin.version}</version>
+                    <configuration>
+                        <configLocation>checkstyle/checkstyle.xml</configLocation>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.vaadin</groupId>
+                            <artifactId>vaadin-flow-components-checkstyle-rules</artifactId>
+                            <version>${project.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>

@@ -16,25 +16,25 @@
 package com.vaadin.flow.component.messages.tests;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.node.ArrayNode;
 
 public class MessageListUpdatesTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private UI ui;
     private MessageList messageList;
     private MessageListItem item1;
     private MessageListItem item2;
@@ -44,48 +44,51 @@ public class MessageListUpdatesTest {
         messageList = new MessageList();
         item1 = new MessageListItem();
         item2 = new MessageListItem();
-
-        ui = new UI();
-        var mockSession = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(mockSession);
         ui.add(messageList);
+        ui.dumpPendingJavaScriptInvocations();
     }
 
     @Test
     public void setSameTextAfterSetItems_noJSInvocations() {
         messageList.setItems(Arrays.asList(item1, item2));
         item1.setText("foo");
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertFullUpdate();
 
         item1.setText("foo");
-        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+        assertNoUpdate();
     }
 
     @Test
     public void setText_setNullText_doesNotThrow() {
         messageList.setItems(Arrays.asList(item1, item2));
         item1.setText("foo");
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertFullUpdate();
 
         item1.setText(null);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
     }
 
     @Test
     public void setItems_appendText() {
         messageList.setItems(Arrays.asList(item1, item2));
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertFullUpdate();
 
         item1.appendText("foo");
         Assert.assertEquals("foo", item1.getText());
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertSetItemTextUpdate(item1, "foo");
     }
 
     @Test
     public void setItems_setText_appendText() {
         messageList.setItems(Arrays.asList(item1, item2));
+        assertFullUpdate();
+
         item1.setText("foo");
+        assertSetItemTextUpdate(item1, "foo");
+
         item1.appendText("bar");
+        assertAppendItemTextUpdate(item1, "bar");
+
         Assert.assertEquals("foobar", item1.getText());
     }
 
@@ -93,27 +96,27 @@ public class MessageListUpdatesTest {
     public void setItems_setText_appendTextNull() {
         messageList.setItems(Arrays.asList(item1, item2));
         item1.setText("foo");
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertFullUpdate();
 
         item1.appendText(null);
-        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+        assertNoUpdate();
     }
 
     @Test
     public void setItems_setText_appendTextEmpty() {
         messageList.setItems(Arrays.asList(item1, item2));
         item1.setText("foo");
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertFullUpdate();
 
         item1.appendText("");
-        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+        assertNoUpdate();
     }
 
     @Test
     public void addItem() {
         messageList.addItem(item1);
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
-        Assert.assertEquals(item1, messageList.getItems().get(0));
+        assertAddItemUpdate(item1);
+        Assert.assertEquals(item1, messageList.getItems().getFirst());
         Assert.assertEquals(1, messageList.getItems().size());
     }
 
@@ -125,52 +128,57 @@ public class MessageListUpdatesTest {
     @Test
     public void addItem_updateText() {
         messageList.addItem(item1);
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertAddItemUpdate(item1);
 
         item1.setText("foo");
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertSetItemTextUpdate(item1, "foo");
     }
 
     @Test
     public void setItems_addItem() {
-        messageList.setItems(Arrays.asList(item1));
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        messageList.setItems(Collections.singletonList(item1));
+        assertFullUpdate();
 
         messageList.addItem(item2);
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertAddItemUpdate(item2);
     }
 
     @Test
-    public void setTextAfteraAddItem_noExtraJSInvocations() {
-        messageList.setItems(Arrays.asList(item1));
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+    public void setTextAfterAddItem_expectAddItemUpdate() {
+        messageList.setItems(Collections.singletonList(item1));
+        assertFullUpdate();
 
         messageList.addItem(item2);
         item2.setText("bar");
 
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        assertAddItemUpdate(item2);
     }
 
     @Test
     public void addItem_setItems_expectFullUpdate() {
         messageList.addItem(item1);
-        messageList.setItems(
-                Arrays.asList(new MessageListItem("Foo", null, "User")));
+        messageList.setItems(List.of(new MessageListItem("Foo", null, "User")));
         assertFullUpdate();
     }
 
     @Test
+    public void addItem_addItem_expectAddItemUpdate() {
+        messageList.addItem(item1);
+        messageList.addItem(item2);
+        assertAddItemUpdate(item1, item2);
+    }
+
+    @Test
     public void setItems_addItem_expectFullUpdate() {
-        messageList.setItems(
-                Arrays.asList(new MessageListItem("Foo", null, "User")));
+        messageList.setItems(List.of(new MessageListItem("Foo", null, "User")));
         messageList.addItem(item1);
         assertFullUpdate();
     }
 
     @Test
     public void setText_setItems_expectFullUpdate() {
-        messageList.setItems(Arrays.asList(item1));
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        messageList.setItems(Collections.singletonList(item1));
+        assertFullUpdate();
 
         item1.setText("foobar");
         messageList.setItems(item1, item2);
@@ -179,8 +187,8 @@ public class MessageListUpdatesTest {
 
     @Test
     public void setItems_setText_expectFullUpdate() {
-        messageList.setItems(Arrays.asList(item1));
-        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        messageList.setItems(Collections.singletonList(item1));
+        assertFullUpdate();
 
         messageList.setItems(item1, item2);
         item1.setText("foobar");
@@ -193,32 +201,80 @@ public class MessageListUpdatesTest {
      * the message list.
      */
     private void assertFullUpdate() {
-        var pendingInvocations = getPendingJavaScriptInvocations();
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
         // Expect only one pending invocation
         Assert.assertEquals(1, pendingInvocations.size());
 
-        var invocation = pendingInvocations.get(0);
+        var invocation = pendingInvocations.getFirst();
         // Expect the only invocation to be setItems
         Assert.assertTrue(invocation.getInvocation().getExpression()
                 .contains("setItems"));
 
         // Expect the parameters to equal the items in the message list
         var parameterItems = (ArrayNode) invocation.getInvocation()
-                .getParameters().get(0);
+                .getParameters().getFirst();
         var expectedItems = JacksonUtils.listToJson(messageList.getItems());
         Assert.assertTrue(
                 JacksonUtils.jsonEquals(expectedItems, parameterItems));
     }
 
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        fakeClientCommunication();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
+    private void assertAddItemUpdate(MessageListItem... items) {
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
+        // Expect only one pending invocation
+        Assert.assertEquals(1, pendingInvocations.size());
+
+        var invocation = pendingInvocations.getFirst();
+        // Expect the only invocation to be addItems
+        Assert.assertTrue(invocation.getInvocation().getExpression()
+                .contains("addItems"));
+
+        // Expect the parameters to equal the provided items as JSON
+        var parameterItems = (ArrayNode) invocation.getInvocation()
+                .getParameters().getFirst();
+        var expectedItems = JacksonUtils.listToJson(Arrays.asList(items));
+        Assert.assertTrue(
+                JacksonUtils.jsonEquals(expectedItems, parameterItems));
     }
 
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
+    private void assertSetItemTextUpdate(MessageListItem item, String newText) {
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
+        // Expect only one pending invocation
+        Assert.assertEquals(1, pendingInvocations.size());
+
+        var invocation = pendingInvocations.getFirst();
+        // Expect the only invocation to be setItemText
+        Assert.assertTrue(invocation.getInvocation().getExpression()
+                .contains("setItemText"));
+
+        // Expect the parameters to match the text and item index
+        var parameters = invocation.getInvocation().getParameters();
+        Assert.assertEquals(newText, parameters.get(0));
+        var expectedIndex = messageList.getItems().indexOf(item);
+        Assert.assertEquals(expectedIndex,
+                ((Number) parameters.get(1)).intValue());
     }
 
+    private void assertAppendItemTextUpdate(MessageListItem item,
+            String appendedText) {
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
+        // Expect only one pending invocation
+        Assert.assertEquals(1, pendingInvocations.size());
+
+        var invocation = pendingInvocations.getFirst();
+        // Expect the only invocation to be appendItemText
+        Assert.assertTrue(invocation.getInvocation().getExpression()
+                .contains("appendItemText"));
+
+        // Expect the parameters to match the text and item index
+        var parameters = invocation.getInvocation().getParameters();
+        Assert.assertEquals(appendedText, parameters.get(0));
+        var expectedIndex = messageList.getItems().indexOf(item);
+        Assert.assertEquals(expectedIndex,
+                ((Number) parameters.get(1)).intValue());
+    }
+
+    private void assertNoUpdate() {
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
+        Assert.assertEquals(0, pendingInvocations.size());
+    }
 }

@@ -28,11 +28,9 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.MockUIRule;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -102,7 +100,7 @@ public class NotificationTest {
 
     @Test
     public void constructorsWithNoDurationCreateNotCloseableNotifications() {
-        final long constructorsWithoutDurationParameter = 4L;
+        final long constructorsWithoutDurationParameter = 3L;
 
         long constructorsWithNoIntParameter = Stream
                 .of(Notification.class.getConstructors())
@@ -117,8 +115,7 @@ public class NotificationTest {
 
         Collection<Notification> notificationsToCheck = Arrays.asList(
                 new Notification(), new Notification("test"),
-                new Notification(new Span("one"), new Span("two")),
-                new Notification(new ValueSignal<>("signal")));
+                new Notification(new Span("one"), new Span("two")));
 
         Assert.assertEquals(
                 "Not all of the Notification constructors without duration parameter are tested",
@@ -136,7 +133,7 @@ public class NotificationTest {
 
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUiInstance() {
-        UI.setCurrent(null);
+        ui.clearUI();
         Notification notification = new Notification();
         notification.setOpened(true);
     }

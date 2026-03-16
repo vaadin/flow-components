@@ -44,6 +44,8 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -54,25 +56,21 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/button", version = "25.1.0-beta4")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
         HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
         HasThemeVariant<ButtonVariant>, HasTooltip {
 
+    private final Text textNode = new Text("");
     private Component iconComponent;
     private boolean iconAfterText;
     private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
 
-    // Explicit text node is used to manage the text content and text signal
-    // bindings of the button separatly from its icon. All `HasText` methods
-    // delegate to this node.
-    private final Text textNode = new Text("");
-
     private final SignalPropertySupport<String> textSupport = SignalPropertySupport
-            .<String> create(this, this::textChangeHandler);
+            .create(this, this::textChangeHandler);
 
     /**
      * Default constructor. Creates an empty button.
@@ -254,8 +252,7 @@ public class Button extends Component
      */
     @Override
     public void setText(String text) {
-        textNode.setText(text);
-        textChangeHandler(text);
+        textSupport.set(text);
     }
 
     @Override
@@ -264,9 +261,8 @@ public class Button extends Component
     }
 
     @Override
-    public void bindText(Signal<String> textSignal) {
-        textNode.bindText(textSignal);
-        textSupport.bind(textSignal);
+    public SignalBinding<String> bindText(Signal<String> textSignal) {
+        return textSupport.bind(textSignal);
     }
 
     /**
@@ -411,11 +407,28 @@ public class Button extends Component
      * When set to {@code true}, the button will be immediately disabled on the
      * client-side when clicked, preventing further clicks until re-enabled from
      * the server-side.
+     * <p>
+     * When the enabled state is bound to a signal, the disable on click feature
+     * can not be used. Disable on click requires the component to automatically
+     * manage the enabled state, however changes to the state can not be
+     * synchronized back to the signal due to {@link #bindEnabled(Signal)} only
+     * supporting one-way bindings.
      *
      * @param disableOnClick
      *            whether the button should be disabled when clicked
+     * @throws IllegalStateException
+     *             if the enabled state is already bound to a signal
      */
     public void setDisableOnClick(boolean disableOnClick) {
+        boolean hasEnabledBinding = getElement().getNode()
+                .getFeatureIfInitialized(SignalBindingFeature.class)
+                .map(feature -> feature
+                        .hasBinding(SignalBindingFeature.ENABLED))
+                .orElse(false);
+        if (disableOnClick && hasEnabledBinding) {
+            throw new IllegalStateException(
+                    "Disable on click is not supported when the enabled state is bound to a signal. ");
+        }
         disableOnClickController.setDisableOnClick(disableOnClick);
     }
 
@@ -453,6 +466,30 @@ public class Button extends Component
     public void setEnabled(boolean enabled) {
         Focusable.super.setEnabled(enabled);
         disableOnClickController.onSetEnabled(enabled);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * When the disable on click feature is active, the enabled state can not be
+     * bound to a signal. Disable on click requires the component to
+     * automatically manage the enabled state, however changes to the state can
+     * not be synchronized back to the signal due to
+     * {@link #bindEnabled(Signal)} only supporting one-way bindings.
+     *
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @throws IllegalStateException
+     *             if disable-on-click is active
+     */
+    @Override
+    public SignalBinding<Boolean> bindEnabled(Signal<Boolean> enabledSignal) {
+        if (isDisableOnClick()) {
+            throw new IllegalStateException(
+                    "Binding the enabled state to a signal is not supported when disable on click is active. ");
+        }
+        return Focusable.super.bindEnabled(enabledSignal);
     }
 
     /**
@@ -632,6 +669,8 @@ public class Button extends Component
      *            the text inside the button
      */
     private void textChangeHandler(String text) {
+        textNode.setText(text);
+
         var hasText = text != null && !text.isEmpty();
         var textNodeAttached = textNode.getParent().isPresent();
         if (hasText && !textNodeAttached) {

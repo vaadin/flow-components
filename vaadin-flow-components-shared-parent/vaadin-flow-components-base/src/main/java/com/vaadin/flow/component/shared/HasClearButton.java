@@ -18,6 +18,7 @@ package com.vaadin.flow.component.shared;
 import java.util.Objects;
 
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -54,9 +55,11 @@ public interface HasClearButton extends HasElement {
     /**
      * Binds a given signal to the visibility of the clear button.
      * <p>
-     * When a signal is bound, the clear button visibility is kept synchronized
-     * with the signal value while the element is in the attached state. When
-     * the element is detached, signal value changes have no effect.
+     * The clear button visibility is set immediately with the current signal
+     * value when the binding is created, and is kept synchronized with any
+     * subsequent signal value changes while the element is in attached state.
+     * When the element is in detached state, signal value changes have no
+     * effect.
      * <p>
      * While a signal is bound, any attempt to set the visibility manually
      * through {@link #setClearButtonVisible(boolean)} throws a
@@ -70,12 +73,16 @@ public interface HasClearButton extends HasElement {
      * @param signal
      *            the signal to bind the clear button visibility to, not
      *            {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setClearButtonVisible(boolean)
      * @since 25.1
      */
-    default void bindClearButtonVisible(Signal<Boolean> signal) {
+    default SignalBinding<Boolean> bindClearButtonVisible(
+            Signal<Boolean> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("clearButtonVisible",
+        return getElement().bindProperty("clearButtonVisible",
                 signal.map(
                         visible -> visible == null ? Boolean.FALSE : visible),
                 null);

@@ -17,193 +17,188 @@ package com.vaadin.flow.component.shared;
 
 import java.util.Optional;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.MockUIExtension;
 
-public class TooltipTest {
+class TooltipTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
-    private TestComponent component;
-    private UI ui;
+    private final TestComponent component = new TestComponent();
 
-    @Before
-    public void setup() {
-        component = new TestComponent();
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
+    @AfterEach
+    void tearDown() {
+        // UI.removeAll breaks when tooltip is removed in detach listener of the
+        // component, so remove manually beforehand
+        getTooltipElement().ifPresent(Element::removeFromTree);
     }
 
     @Test
-    public void createTooltip_tooltipNotAttached() {
+    void createTooltip_tooltipNotAttached() {
         Tooltip.forComponent(component);
-        Assert.assertFalse(getTooltipElement().isPresent());
+        Assertions.assertFalse(getTooltipElement().isPresent());
     }
 
     @Test
-    public void createTooltip_addComponent_tooltipAttached() {
+    void createTooltip_addComponent_tooltipAttached() {
         Tooltip.forComponent(component);
         ui.add(component);
-        Assert.assertTrue(getTooltipElement().isPresent());
+        Assertions.assertTrue(getTooltipElement().isPresent());
     }
 
     @Test
-    public void addComponent_createTooltip_tooltipAttached() {
+    void addComponent_createTooltip_tooltipAttached() {
         ui.add(component);
         Tooltip.forComponent(component);
-        Assert.assertTrue(getTooltipElement().isPresent());
+        Assertions.assertTrue(getTooltipElement().isPresent());
     }
 
     @Test
-    public void createTooltip_removeComponent_tooltipNotAttached() {
+    void createTooltip_removeComponent_tooltipNotAttached() {
         Tooltip.forComponent(component);
         ui.add(component);
         ui.remove(component);
-        Assert.assertFalse(getTooltipElement().isPresent());
+        Assertions.assertFalse(getTooltipElement().isPresent());
     }
 
     @Test
-    public void addComponent_createTooltip_changeUI_tooltipAttached() {
+    void addComponent_createTooltip_changeUI_tooltipAttached() {
         ui.add(component);
         Tooltip.forComponent(component);
 
         // Create a new UI and move the component to it (@PreserveOnRefresh)
-        ui = new UI();
-        UI.setCurrent(ui);
         component.getElement().removeFromTree(false);
+        ui.replaceUI();
         ui.add(component);
 
-        Assert.assertTrue(getTooltipElement().isPresent());
+        Assertions.assertTrue(getTooltipElement().isPresent());
     }
 
     @Test
-    public void createTooltip_setText() {
+    void createTooltip_setText() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setText("foo");
         ui.add(component);
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo",
                 getTooltipElement().get().getProperty("text"));
-        Assert.assertEquals("foo", tooltip.getText());
-        Assert.assertFalse(
+        Assertions.assertEquals("foo", tooltip.getText());
+        Assertions.assertFalse(
                 getTooltipElement().get().getProperty("markdown", false));
     }
 
     @Test
-    public void createTooltip_setMarkdown() {
+    void createTooltip_setMarkdown() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setMarkdown("**Markdown** _foo_");
         ui.add(component);
-        Assert.assertEquals("**Markdown** _foo_",
+        Assertions.assertEquals("**Markdown** _foo_",
                 getTooltipElement().get().getProperty("text"));
-        Assert.assertEquals("**Markdown** _foo_", tooltip.getText());
-        Assert.assertTrue(
+        Assertions.assertEquals("**Markdown** _foo_", tooltip.getText());
+        Assertions.assertTrue(
                 getTooltipElement().get().getProperty("markdown", false));
     }
 
     @Test
-    public void createTooltip_switchContentType() {
+    void createTooltip_switchContentType() {
         var tooltip = Tooltip.forComponent(component);
         ui.add(component);
 
         tooltip.setText("foo");
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 getTooltipElement().get().getProperty("markdown", false));
 
         tooltip.setMarkdown("**Markdown** _foo_");
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 getTooltipElement().get().getProperty("markdown", false));
 
         tooltip.setText("foo");
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 getTooltipElement().get().getProperty("markdown", false));
     }
 
     @Test
-    public void createTooltip_setFocusDelay() {
+    void createTooltip_setFocusDelay() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setFocusDelay(1000);
         ui.add(component);
-        Assert.assertEquals(1000,
+        Assertions.assertEquals(1000,
                 getTooltipElement().get().getProperty("focusDelay", 0));
-        Assert.assertEquals(1000, tooltip.getFocusDelay());
+        Assertions.assertEquals(1000, tooltip.getFocusDelay());
     }
 
     @Test
-    public void createTooltip_setHideDelay() {
+    void createTooltip_setHideDelay() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setHideDelay(1000);
         ui.add(component);
-        Assert.assertEquals(1000,
+        Assertions.assertEquals(1000,
                 getTooltipElement().get().getProperty("hideDelay", 0));
-        Assert.assertEquals(1000, tooltip.getHideDelay());
+        Assertions.assertEquals(1000, tooltip.getHideDelay());
     }
 
     @Test
-    public void createTooltip_setHoverDelay() {
+    void createTooltip_setHoverDelay() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setHoverDelay(1000);
         ui.add(component);
-        Assert.assertEquals(1000,
+        Assertions.assertEquals(1000,
                 getTooltipElement().get().getProperty("hoverDelay", 0));
-        Assert.assertEquals(1000, tooltip.getHoverDelay());
+        Assertions.assertEquals(1000, tooltip.getHoverDelay());
     }
 
     @Test
-    public void createTooltip_setPosition() {
+    void createTooltip_setPosition() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setPosition(TooltipPosition.END);
         ui.add(component);
-        Assert.assertEquals("end",
+        Assertions.assertEquals("end",
                 getTooltipElement().get().getProperty("position"));
-        Assert.assertEquals(TooltipPosition.END, tooltip.getPosition());
+        Assertions.assertEquals(TooltipPosition.END, tooltip.getPosition());
     }
 
     @Test
-    public void createTooltip_defaultPosition() {
+    void createTooltip_defaultPosition() {
         var tooltip = Tooltip.forComponent(component);
-        Assert.assertEquals(null, tooltip.getPosition());
+        Assertions.assertEquals(null, tooltip.getPosition());
     }
 
     @Test
-    public void createTooltip_setManual() {
+    void createTooltip_setManual() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setManual(true);
         ui.add(component);
-        Assert.assertEquals(true,
+        Assertions.assertEquals(true,
                 getTooltipElement().get().getProperty("manual", false));
-        Assert.assertEquals(true, tooltip.isManual());
+        Assertions.assertEquals(true, tooltip.isManual());
     }
 
     @Test
-    public void createTooltip_setOpened() {
+    void createTooltip_setOpened() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setOpened(true);
         ui.add(component);
-        Assert.assertEquals(true,
+        Assertions.assertEquals(true,
                 getTooltipElement().get().getProperty("opened", false));
-        Assert.assertEquals(true, tooltip.isOpened());
+        Assertions.assertEquals(true, tooltip.isOpened());
     }
 
     @Test
-    public void tooltipForCompopnentTwice_sameReference() {
+    void tooltipForCompopnentTwice_sameReference() {
         var tooltip = Tooltip.forComponent(component);
         var tooltip2 = Tooltip.forComponent(component);
-        Assert.assertSame(tooltip, tooltip2);
+        Assertions.assertSame(tooltip, tooltip2);
     }
 
     @Test
-    public void createTooltip_fluentAPI() {
+    void createTooltip_fluentAPI() {
         ui.add(component);
 
         var tooltip = Tooltip.forComponent(component).withText("foo")
@@ -212,39 +207,39 @@ public class TooltipTest {
 
         tooltip.setOpened(true);
 
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo",
                 getTooltipElement().get().getProperty("text"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 getTooltipElement().get().getProperty("markdown", false));
-        Assert.assertEquals(200,
+        Assertions.assertEquals(200,
                 getTooltipElement().get().getProperty("focusDelay", 0));
-        Assert.assertEquals(1000,
+        Assertions.assertEquals(1000,
                 getTooltipElement().get().getProperty("hideDelay", 0));
-        Assert.assertEquals(500,
+        Assertions.assertEquals(500,
                 getTooltipElement().get().getProperty("hoverDelay", 0));
-        Assert.assertEquals("bottom-end",
+        Assertions.assertEquals("bottom-end",
                 getTooltipElement().get().getProperty("position"));
-        Assert.assertEquals(true,
+        Assertions.assertEquals(true,
                 getTooltipElement().get().getProperty("manual", false));
     }
 
     @Test
-    public void createTooltip_fluentAPI_withMarkdown() {
+    void createTooltip_fluentAPI_withMarkdown() {
         ui.add(component);
 
         var tooltip = Tooltip.forComponent(component)
                 .withMarkdown("**Bold** _italic_");
 
-        Assert.assertNotNull(tooltip);
+        Assertions.assertNotNull(tooltip);
 
-        Assert.assertEquals("**Bold** _italic_",
+        Assertions.assertEquals("**Bold** _italic_",
                 getTooltipElement().get().getProperty("text"));
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 getTooltipElement().get().getProperty("markdown", false));
     }
 
     private Optional<Element> getTooltipElement() {
-        return ui.getElement().getChildren()
+        return ui.getUI().getElement().getChildren()
                 .filter(child -> child.getTag().equals("vaadin-tooltip"))
                 .findFirst();
     }

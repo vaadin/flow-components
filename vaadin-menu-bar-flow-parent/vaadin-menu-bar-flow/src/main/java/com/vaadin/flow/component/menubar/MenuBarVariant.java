@@ -50,7 +50,9 @@ public enum MenuBarVariant implements ThemeVariant {
     SUCCESS("success"),
     WARNING("warning"),
     ERROR("error"),
-    ALIGN_END("end-aligned");
+    ALIGN_END("end-aligned"),
+    SMALL("small"),
+    LARGE("large");
 
     private final String variant;
 

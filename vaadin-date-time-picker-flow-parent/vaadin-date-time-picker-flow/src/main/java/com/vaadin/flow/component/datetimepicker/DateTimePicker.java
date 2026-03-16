@@ -30,6 +30,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -47,6 +48,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -91,7 +93,7 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.1.0-beta4")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -192,6 +194,14 @@ public class DateTimePicker
 
     private ValidationController<DateTimePicker, LocalDateTime> validationController = new ValidationController<>(
             this);
+
+    private final SignalPropertySupport<Boolean> readonlySupport = SignalPropertySupport
+            .create(this, (value) -> {
+                super.setReadOnly(value);
+                datePicker.setReadOnly(value);
+                timePicker.setReadOnly(value);
+
+            });
 
     /**
      * Default constructor.
@@ -439,12 +449,12 @@ public class DateTimePicker
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        super.setReadOnly(readOnly);
-        // fixme(haprog) This override can probably be removed after we use a
-        // version which includes this fix:
-        // https://github.com/vaadin/vaadin-date-time-picker/pull/30
-        datePicker.setReadOnly(readOnly);
-        timePicker.setReadOnly(readOnly);
+        readonlySupport.set(readOnly);
+    }
+
+    @Override
+    public SignalBinding<Boolean> bindReadOnly(Signal<Boolean> readOnlySignal) {
+        return readonlySupport.bind(readOnlySignal);
     }
 
     @Override
@@ -881,9 +891,11 @@ public class DateTimePicker
      * Binds the given signal to the minimum date and time allowed to be set for
      * this field.
      * <p>
-     * When a signal is bound, the minimum date and time is kept synchronized
-     * with the signal value while the component is attached. When the component
-     * is detached, signal value changes have no effect.
+     * The minimum date and time is set immediately with the current signal
+     * value when the binding is created, and is kept synchronized with any
+     * subsequent signal value changes while the component is in attached state.
+     * When the component is in detached state, signal value changes have no
+     * effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum date and time
      * manually through {@link #setMin(LocalDateTime)} throws a
@@ -895,13 +907,16 @@ public class DateTimePicker
      * @param signal
      *            the signal to bind the minimum date and time to, not
      *            {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMin(LocalDateTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<LocalDateTime> signal) {
-        getElement().bindProperty("min",
+    public SignalBinding<String> bindMin(Signal<LocalDateTime> signal) {
+        return getElement().bindProperty("min",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
     }
 
@@ -932,9 +947,11 @@ public class DateTimePicker
      * Binds the given signal to the maximum date and time allowed to be set for
      * this field.
      * <p>
-     * When a signal is bound, the maximum date and time is kept synchronized
-     * with the signal value while the component is attached. When the component
-     * is detached, signal value changes have no effect.
+     * The maximum date and time is set immediately with the current signal
+     * value when the binding is created, and is kept synchronized with any
+     * subsequent signal value changes while the component is in attached state.
+     * When the component is in detached state, signal value changes have no
+     * effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum date and time
      * manually through {@link #setMax(LocalDateTime)} throws a
@@ -946,13 +963,16 @@ public class DateTimePicker
      * @param signal
      *            the signal to bind the maximum date and time to, not
      *            {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMax(LocalDateTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<LocalDateTime> signal) {
-        getElement().bindProperty("max",
+    public SignalBinding<String> bindMax(Signal<LocalDateTime> signal) {
+        return getElement().bindProperty("max",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
     }
 

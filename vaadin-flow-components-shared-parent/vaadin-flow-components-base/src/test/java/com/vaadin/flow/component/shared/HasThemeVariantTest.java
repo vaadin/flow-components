@@ -17,86 +17,86 @@ package com.vaadin.flow.component.shared;
 
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class HasThemeVariantTest extends AbstractSignalsUnitTest {
+class HasThemeVariantTest extends AbstractSignalsJUnit6Test {
 
     @Test
-    public void addThemeVariant_themeNamesContainsThemeVariant() {
+    void addThemeVariant_themeNamesContainsThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
                 component.getThemeNames());
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.removeThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
-    public void setThemeVariant_setTrue_addsThemeVariant() {
+    void setThemeVariant_setTrue_addsThemeVariant() {
         TestComponent component = new TestComponent();
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, true);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
                 component.getThemeNames());
     }
 
     @Test
-    public void setThemeVariant_setFalse_removesThemeVariant() {
+    void setThemeVariant_setFalse_removesThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, false);
 
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
-    public void setThemeVariants_overridesExisting() {
+    void setThemeVariants_overridesExisting() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariants(TestComponentVariant.TEST_VARIANT_2,
                 TestComponentVariant.TEST_VARIANT_3);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT_2.getVariantName(),
                         TestComponentVariant.TEST_VARIANT_3.getVariantName()),
                 component.getThemeNames());
     }
 
     @Test
-    public void setThemeVariants_withoutArgs_clearsThemeVariants() {
+    void setThemeVariants_withoutArgs_clearsThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariants();
 
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
-    public void setThemeVariants_setTrue_addsThemeVariants() {
+    void setThemeVariants_setTrue_addsThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT_3);
         component.setThemeVariants(true, TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName(),
                         TestComponentVariant.TEST_VARIANT_2.getVariantName(),
                         TestComponentVariant.TEST_VARIANT_3.getVariantName()),
@@ -104,7 +104,7 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void setThemeVariants_setFalse_removesThemeVariants() {
+    void setThemeVariants_setFalse_removesThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2,
@@ -112,67 +112,51 @@ public class HasThemeVariantTest extends AbstractSignalsUnitTest {
         component.setThemeVariants(false, TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT_3.getVariantName()),
                 component.getThemeNames());
     }
 
     @Test
-    public void bindThemeVariant_setSignalValueTrue_themeNamesContainsThemeVariant() {
+    void bindThemeVariant_setSignalValueTrue_themeNamesContainsThemeVariant() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
                 component.getThemeNames());
     }
 
     @Test
-    public void bindThemeVariant_setSignalValueFalse_themeNamesDoesNotContainThemeVariant() {
+    void bindThemeVariant_setSignalValueFalse_themeNamesDoesNotContainThemeVariant() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
 
         signal.set(false);
-        Assert.assertTrue(component.getThemeNames().isEmpty());
+        Assertions.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
-    public void bindThemeVariant_setThemeVariants_removesBinding() {
+    void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-        // setThemeVariants calls getThemeNames().clear() which removes the
-        // binding
-        component.setThemeVariants(); // clears all variants and biding
+        Assertions.assertFalse(component.getThemeNames().isEmpty());
 
-        Assert.assertTrue(component.getThemeNames().isEmpty());
-        Assert.assertTrue(signal.peek());
-        signal.set(true); // no effect
-        Assert.assertTrue(component.getThemeNames().isEmpty());
-    }
-
-    @Test
-    public void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-        Assert.assertFalse(component.getThemeNames().isEmpty());
-
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .removeThemeVariants(TestComponentVariant.TEST_VARIANT));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .addThemeVariants(TestComponentVariant.TEST_VARIANT));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariant(TestComponentVariant.TEST_VARIANT, false));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariant(TestComponentVariant.TEST_VARIANT, true));
-        Assert.assertThrows(BindingActiveException.class, () -> component
+        Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariants(false, TestComponentVariant.TEST_VARIANT));
     }
 

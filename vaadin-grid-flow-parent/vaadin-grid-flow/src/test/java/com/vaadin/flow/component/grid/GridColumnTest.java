@@ -21,14 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -37,8 +35,11 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.tests.MockUIRule;
 
 public class GridColumnTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     Grid<String> grid;
     Column<String> firstColumn;
@@ -47,8 +48,6 @@ public class GridColumnTest {
     Column<String> fourthColumn;
 
     IconRenderer<String> renderer;
-
-    private UI ui;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -61,15 +60,6 @@ public class GridColumnTest {
         thirdColumn = grid.addColumn(str -> str);
         renderer = new IconRenderer<String>(generator -> new Span(":D"));
         fourthColumn = grid.addColumn(renderer);
-
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test

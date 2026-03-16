@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
-import static org.mockito.Mockito.mock;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,22 +25,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.StatusChangeEvent;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class EditorImplTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     private Grid<String> grid;
     private TestEditor editor;
-    private MockUI ui;
 
     private static class TestEditor extends EditorImpl<String> {
 
@@ -58,17 +56,10 @@ public class EditorImplTest {
         }
     }
 
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
-    }
-
     @Before
     public void setup() {
         grid = new Grid<>();
-        ui = new MockUI();
-        ui.getElement().appendChild(grid.getElement());
+        ui.add(grid);
         editor = new TestEditor(grid);
 
         editor.setBinder(new Binder<>());
@@ -80,7 +71,7 @@ public class EditorImplTest {
         try {
             // Edit an item that is not in the grid's active range yet
             editor.editItem("foo");
-            fakeClientResponse();
+            ui.fakeClientCommunication();
         } catch (Exception e) {
             Assert.fail("No exception should be thrown");
         }
@@ -91,7 +82,7 @@ public class EditorImplTest {
         editor = new TestEditor(grid);
         editor.editItem("bar");
 
-        fakeClientResponse();
+        ui.fakeClientCommunication();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -100,10 +91,10 @@ public class EditorImplTest {
 
         editor.setBuffered(true);
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.editItem("foo");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
     }
 
     @Test
@@ -133,11 +124,11 @@ public class EditorImplTest {
         grid.getDataCommunicator().getKeyMapper().key("foo");
 
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.refreshedItems.clear();
         editor.editItem("foo");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals(2, editor.refreshedItems.size());
         Assert.assertEquals("bar", editor.refreshedItems.get(0));
@@ -147,7 +138,7 @@ public class EditorImplTest {
     @Test
     public void cancel_eventIsFiredAndItemIsRefreshed() {
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.refreshedItems.clear();
 
@@ -184,7 +175,7 @@ public class EditorImplTest {
     @Test
     public void save_editorIsOpened_editorIsInNotBufferedMode_noEvents() {
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.refreshedItems.clear();
 
@@ -204,7 +195,7 @@ public class EditorImplTest {
     @Test
     public void save_editorIsOpened_editorIsInBufferedMode_eventsAreFired() {
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.refreshedItems.clear();
         editor.setBuffered(true);
@@ -230,7 +221,7 @@ public class EditorImplTest {
                 .bind(ValueProvider.identity(), (item, value) -> {
                 });
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.refreshedItems.clear();
         editor.setBuffered(true);
@@ -257,7 +248,7 @@ public class EditorImplTest {
                 "Buffered editor should be closed using save() or cancel()");
 
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.refreshedItems.clear();
         editor.setBuffered(true);
@@ -277,7 +268,7 @@ public class EditorImplTest {
     @Test
     public void editorInUnBufferedMode_closeEditorSendsCloseEvent() {
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         editor.refreshedItems.clear();
 
@@ -323,19 +314,11 @@ public class EditorImplTest {
         editor.addOpenListener(
                 event -> openEventCapure.compareAndSet(null, event));
         editor.editItem("bar");
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertNotNull(statusEventCapture.get());
         Assert.assertNotNull(openEventCapure.get());
 
         Assert.assertEquals("bar", openEventCapure.get().getItem());
-    }
-
-    public static class MockUI extends UI {
-
-        public MockUI() {
-            getInternals().setSession(mock(VaadinSession.class));
-        }
-
     }
 }

@@ -30,6 +30,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -67,7 +68,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-badge")
-@NpmPackage(value = "@vaadin/badge", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/badge", version = "25.1.0-beta4")
 @JsModule("@vaadin/badge/src/vaadin-badge.js")
 public class Badge extends Component
         implements HasSize, HasText, HasThemeVariant<BadgeVariant> {
@@ -204,8 +205,9 @@ public class Badge extends Component
     /**
      * Sets the given string as the text content of this component.
      * <p>
-     * This method removes any existing text-content and replaces it with the
-     * given text. Other slotted children (such as icons) are preserved.
+     * This method removes any existing content in the default slot and replaces
+     * it with the given text. Other slotted children (such as icons) are
+     * preserved.
      *
      * @param text
      *            the text content to set, or {@code null} to remove existing
@@ -213,6 +215,7 @@ public class Badge extends Component
      */
     @Override
     public void setText(String text) {
+        updateContent(null);
         textSignalSupport.set(text);
     }
 
@@ -227,8 +230,9 @@ public class Badge extends Component
     }
 
     @Override
-    public void bindText(Signal<String> textSignal) {
-        textSignalSupport.bind(textSignal);
+    public SignalBinding<String> bindText(Signal<String> textSignal) {
+        updateContent(null);
+        return textSignalSupport.bind(textSignal);
     }
 
     /**
@@ -250,9 +254,12 @@ public class Badge extends Component
      *
      * @param numberSignal
      *            the signal providing the number value
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      */
-    public void bindNumber(Signal<Integer> numberSignal) {
-        getElement().bindProperty("number", numberSignal, null);
+    public SignalBinding<Integer> bindNumber(Signal<Integer> numberSignal) {
+        return getElement().bindProperty("number", numberSignal, null);
     }
 
     /**
@@ -268,22 +275,16 @@ public class Badge extends Component
     /**
      * Sets the given component as the content of this badge.
      * <p>
-     * The content is placed in the default slot of the badge.
+     * This method removes any existing content in the default slot and replaces
+     * it with the given component. Other slotted children (such as icons) are
+     * preserved.
      *
      * @param content
      *            the content component, or {@code null} to remove it
      */
     public void setContent(Component content) {
-        var oldContent = getContent();
-        if (oldContent == content) {
-            return;
-        }
-        if (oldContent != null) {
-            getElement().removeChild(oldContent.getElement());
-        }
-        if (content != null) {
-            getElement().appendChild(content.getElement());
-        }
+        textSignalSupport.set(null);
+        updateContent(content);
     }
 
     /**
@@ -350,12 +351,25 @@ public class Badge extends Component
         textNode.setText(text);
 
         if (text == null || text.isEmpty()) {
-            getElement().removeChild(textNode.getElement());
+            textNode.removeFromParent();
             return;
         }
 
         if (textNode.getParent().isEmpty()) {
             getElement().appendChild(textNode.getElement());
+        }
+    }
+
+    private void updateContent(Component content) {
+        var oldContent = getContent();
+        if (oldContent == content) {
+            return;
+        }
+        if (oldContent != null) {
+            getElement().removeChild(oldContent.getElement());
+        }
+        if (content != null) {
+            getElement().appendChild(content.getElement());
         }
     }
 }

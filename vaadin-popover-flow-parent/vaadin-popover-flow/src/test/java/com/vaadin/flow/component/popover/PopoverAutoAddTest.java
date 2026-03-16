@@ -15,44 +15,23 @@
  */
 package com.vaadin.flow.component.popover;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.internal.ModalRoot;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 /**
  * @author Vaadin Ltd.
  */
 public class PopoverAutoAddTest {
-    private UI ui = new UI();
-    private VaadinSession session;
-
-    @Before
-    public void setup() {
-        UI.setCurrent(ui);
-
-        session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-        VaadinSession.setCurrent(session);
-        Mockito.when(session.getErrorHandler()).thenReturn(event -> {
-            throw new RuntimeException(event.getThrowable());
-        });
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void setTarget_autoAdded() {
@@ -61,8 +40,9 @@ public class PopoverAutoAddTest {
         popover.setTarget(target);
         ui.add(target);
 
-        fakeClientResponse();
-        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+        ui.fakeClientCommunication();
+        Assert.assertEquals(ui.getUI().getElement(),
+                popover.getElement().getParent());
     }
 
     @Test
@@ -71,11 +51,11 @@ public class PopoverAutoAddTest {
         Div target = new Div();
         popover.setTarget(target);
         ui.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         popover.setTarget(null);
 
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertNull(popover.getElement().getParent());
     }
 
@@ -85,11 +65,11 @@ public class PopoverAutoAddTest {
         Div target = new Div();
         popover.setTarget(target);
         ui.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         ui.remove(target);
 
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertNull(popover.getElement().getParent());
     }
 
@@ -103,7 +83,7 @@ public class PopoverAutoAddTest {
         ui.removeAll();
 
         Assert.assertNull(popover.getElement().getParent());
-        Assert.assertEquals(0, ui.getChildren().count());
+        Assert.assertEquals(0, ui.getUI().getChildren().count());
     }
 
     @Test
@@ -112,14 +92,15 @@ public class PopoverAutoAddTest {
         Div target = new Div();
         popover.setTarget(target);
         ui.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Div other = new Div();
         ui.add(other);
         popover.setTarget(other);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+        Assert.assertEquals(ui.getUI().getElement(),
+                popover.getElement().getParent());
     }
 
     @Test
@@ -128,16 +109,17 @@ public class PopoverAutoAddTest {
         Div target = new Div();
         popover.setTarget(target);
         ui.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Div other = new Div();
         ui.add(other);
         popover.setTarget(other);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         ui.remove(target);
-        fakeClientResponse();
-        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+        ui.fakeClientCommunication();
+        Assert.assertEquals(ui.getUI().getElement(),
+                popover.getElement().getParent());
     }
 
     @Test
@@ -146,11 +128,11 @@ public class PopoverAutoAddTest {
         Div target = new Div();
         popover.setTarget(target);
         ui.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Div other = new Div();
         popover.setTarget(other);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertNull(popover.getElement().getParent());
     }
@@ -161,17 +143,16 @@ public class PopoverAutoAddTest {
         Div target = new Div();
         popover.setTarget(target);
         ui.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Create a new UI and move the component to it (@PreserveOnRefresh)
-        ui = new UI();
-        UI.setCurrent(ui);
-        ui.getInternals().setSession(session);
         target.getElement().removeFromTree(false);
+        ui.replaceUI();
         ui.add(target);
 
-        fakeClientResponse();
-        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+        ui.fakeClientCommunication();
+        Assert.assertEquals(ui.getUI().getElement(),
+                popover.getElement().getParent());
     }
 
     @Test
@@ -182,24 +163,24 @@ public class PopoverAutoAddTest {
         ui.add(target);
 
         Div modalElement = new Div();
-        ui.setChildComponentModal(modalElement, true);
-        fakeClientResponse();
+        ui.getUI().setChildComponentModal(modalElement, true);
+        ui.fakeClientCommunication();
 
-        Assert.assertEquals(ui, popover.getParent().orElseThrow());
+        Assert.assertEquals(ui.getUI(), popover.getParent().orElseThrow());
     }
 
     @Test
     public void openModal_setTargetOutsideOfModal_popoverIsAttachedToUi() {
         Div modal = new Div();
         ui.add(modal);
-        ui.setChildComponentModal(modal, true);
+        ui.getUI().setChildComponentModal(modal, true);
 
         Div target = new Div();
         Popover popover = new Popover();
         popover.setTarget(target);
         ui.add(target);
 
-        Assert.assertEquals(ui, popover.getParent().orElseThrow());
+        Assert.assertEquals(ui.getUI(), popover.getParent().orElseThrow());
     }
 
     @Test
@@ -210,7 +191,7 @@ public class PopoverAutoAddTest {
         firstPopover.add(target);
         var secondPopover = new Popover();
         secondPopover.setTarget(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertEquals(
                 "Second popover should be attached to first popover",
                 firstPopover, secondPopover.getParent().orElse(null));
@@ -224,7 +205,7 @@ public class PopoverAutoAddTest {
         modal.getElement().appendChild(target.getElement());
         var popover = new Popover();
         popover.setTarget(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertEquals("Popover should be attached to modal", modal,
                 popover.getParent().orElse(null));
     }
@@ -237,10 +218,10 @@ public class PopoverAutoAddTest {
         modal.getElement().appendChild(target.getElement());
         var popover = new Popover();
         popover.setTarget(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         target.removeFromParent();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse("Popover should be detached",
                 popover.getParent().isPresent());
     }
@@ -253,7 +234,7 @@ public class PopoverAutoAddTest {
         modal.add(target);
         var popover = new Popover();
         popover.setTarget(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertEquals("Popover should be attached to modal", modal,
                 popover.getParent().orElse(null));
     }
@@ -266,7 +247,7 @@ public class PopoverAutoAddTest {
         modal.add(target);
         var popover = new Popover();
         popover.setTarget(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertEquals("Popover should be attached to modal", modal,
                 popover.getParent().orElse(null));
     }
@@ -279,10 +260,10 @@ public class PopoverAutoAddTest {
         modal.add(target);
         var popover = new Popover();
         popover.setTarget(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         target.removeFromParent();
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse("Popover should be detached",
                 popover.getParent().isPresent());
     }
@@ -295,16 +276,16 @@ public class PopoverAutoAddTest {
         var popover = new Popover();
         popover.setTarget(target);
         modal.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals("custom-slot",
                 popover.getElement().getAttribute("slot"));
 
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         var newModal = new TestModalContainer();
         ui.add(newModal);
         newModal.add(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertFalse("Popover should not have value for slot attribute",
                 popover.getElement().hasAttribute("slot"));
     }
@@ -317,15 +298,9 @@ public class PopoverAutoAddTest {
         modal.getElement().appendVirtualChild(target.getElement());
         var popover = new Popover();
         popover.setTarget(target);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Assert.assertEquals("Popover should be attached to modal", modal,
                 popover.getParent().orElse(null));
-    }
-
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 
     @ModalRoot

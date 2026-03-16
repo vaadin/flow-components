@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.icon;
 
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
@@ -330,9 +331,10 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Binds the given signal to the symbol of the SVG icon.
      * <p>
-     * When a signal is bound, the symbol is kept synchronized with the signal
-     * value while the component is attached. When the component is detached,
-     * signal value changes have no effect.
+     * The symbol is set immediately with the current signal value when the
+     * binding is created, and is kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the symbol manually through
      * {@link #setSymbol(String)} throws a
@@ -340,13 +342,16 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *
      * @param signal
      *            the signal to bind the symbol to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setSymbol(String)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindSymbol(Signal<String> signal) {
-        getElement().bindProperty("symbol", signal, null);
+    public SignalBinding<String> bindSymbol(Signal<String> signal) {
+        return getElement().bindProperty("symbol", signal, null);
     }
 
     @Override

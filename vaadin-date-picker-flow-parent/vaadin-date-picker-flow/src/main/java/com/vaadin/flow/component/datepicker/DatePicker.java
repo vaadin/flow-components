@@ -62,6 +62,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -127,7 +128,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.1.0-beta4")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "4.1.0")
@@ -433,9 +434,10 @@ public class DatePicker
      * Binds the given signal to the minimum date allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the minimum date is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The minimum date is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum date manually
      * through {@link #setMin(LocalDate)} throws a
@@ -443,13 +445,16 @@ public class DatePicker
      *
      * @param signal
      *            the signal to bind the minimum date to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMin(LocalDate)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<LocalDate> signal) {
-        getElement().bindProperty("min",
+    public SignalBinding<String> bindMin(Signal<LocalDate> signal) {
+        return getElement().bindProperty("min",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
     }
 
@@ -482,9 +487,10 @@ public class DatePicker
      * Binds the given signal to the maximum date allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the maximum date is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The maximum date is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum date manually
      * through {@link #setMax(LocalDate)} throws a
@@ -492,14 +498,18 @@ public class DatePicker
      *
      * @param signal
      *            the signal to bind the maximum date to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMax(LocalDate)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<LocalDate> signal) {
+    public SignalBinding<String> bindMax(Signal<LocalDate> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("max", signal.map(FORMATTER::apply), null);
+        return getElement().bindProperty("max", signal.map(FORMATTER::apply),
+                null);
     }
 
     /**
@@ -929,9 +939,10 @@ public class DatePicker
      * Binds the given signal to the visible date when there is no value
      * selected.
      * <p>
-     * When a signal is bound, the initial position is kept synchronized with
-     * the signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The initial position is set immediately with the current signal value
+     * when the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the initial position manually
      * through {@link #setInitialPosition(LocalDate)} throws a
@@ -939,13 +950,16 @@ public class DatePicker
      *
      * @param signal
      *            the signal to bind the initial position to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setInitialPosition(LocalDate)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindInitialPosition(Signal<LocalDate> signal) {
-        getElement().bindProperty("initialPosition",
+    public SignalBinding<String> bindInitialPosition(Signal<LocalDate> signal) {
+        return getElement().bindProperty("initialPosition",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
     }
 

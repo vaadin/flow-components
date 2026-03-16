@@ -31,6 +31,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -56,10 +57,12 @@ import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Base class for the {@link ListBox} and {@link MultiSelectListBox}.
@@ -67,7 +70,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/list-box", version = "25.1.0-alpha9")
+@NpmPackage(value = "@vaadin/list-box", version = "25.1.0-beta4")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
@@ -107,6 +110,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
+        DataViewUtils.checkNoActiveItemsBinding(this);
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
@@ -237,19 +241,45 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     /**
-     * <b>Not supported!</b>
+     * ListBox does not support showing a required indicator.
      * <p>
-     * Not supported by the client-side web-component, see
-     * <a href= "https://github.com/vaadin/vaadin-list-box/issues/19">issue in
-     * GitHub</a>.
+     * This method is inherited from {@link HasValueAndElement} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
      *
-     * @throws UnsupportedOperationException
+     * @param requiredIndicatorVisible
+     *            the required indicator visibility value
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
      */
+    @Deprecated
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         throw new UnsupportedOperationException(
-                "Not supported by the client-side web-component: "
-                        + "https://github.com/vaadin/vaadin-list-box/issues/19");
+                "ListBox does not support showing a required indicator");
+    }
+
+    /**
+     * ListBox does not support showing a required indicator.
+     * <p>
+     * This method is inherited from {@link HasValueAndElement} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
+     *
+     * @param requiredSignal
+     *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
+    @Override
+    public SignalBinding<Boolean> bindRequiredIndicatorVisible(
+            Signal<Boolean> requiredSignal) {
+        throw new UnsupportedOperationException(
+                "ListBox does not support showing a required indicator");
     }
 
     @SuppressWarnings("unchecked")
