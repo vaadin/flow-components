@@ -41,8 +41,8 @@ public class MenuBarThemeIT extends AbstractComponentIT {
     public void toggleMenuBarTheme_themeIsToggled() {
         Assert.assertFalse(menuBar.hasAttribute("theme"));
         click("toggle-theme");
-        Assert.assertEquals(menuBar.getDomAttribute("theme"),
-                MenuBarThemePage.MENU_BAR_THEME);
+        Assert.assertEquals(MenuBarThemePage.MENU_BAR_THEME,
+                menuBar.getDomAttribute("theme"));
         click("toggle-theme");
         Assert.assertFalse(menuBar.hasAttribute("theme"));
     }
@@ -53,8 +53,8 @@ public class MenuBarThemeIT extends AbstractComponentIT {
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
         click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertEquals(menuButton1.getDomAttribute("theme"),
-                MenuBarThemePage.MENU_ITEM_THEME);
+        Assert.assertEquals(MenuBarThemePage.MENU_ITEM_THEME,
+                menuButton1.getDomAttribute("theme"));
         click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
@@ -66,8 +66,8 @@ public class MenuBarThemeIT extends AbstractComponentIT {
         click("toggle-item-1-visibility");
         click("toggle-item-1-visibility");
         MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertEquals(menuButton1.getDomAttribute("theme"),
-                MenuBarThemePage.MENU_ITEM_THEME);
+        Assert.assertEquals(MenuBarThemePage.MENU_ITEM_THEME,
+                menuButton1.getDomAttribute("theme"));
     }
 
     @Test
@@ -90,9 +90,8 @@ public class MenuBarThemeIT extends AbstractComponentIT {
         subMenu.waitUntilClosed();
 
         subMenu = menuBar.getButtons().get(0).openSubMenu();
-        Assert.assertEquals(
-                subMenu.getMenuItems().get(1).getDomAttribute("theme"),
-                MenuBarThemePage.SUB_ITEM_THEME);
+        Assert.assertEquals(MenuBarThemePage.SUB_ITEM_THEME,
+                subMenu.getMenuItems().get(1).getDomAttribute("theme"));
 
         click("toggle-sub-theme");
         subMenu.waitUntilClosed();
