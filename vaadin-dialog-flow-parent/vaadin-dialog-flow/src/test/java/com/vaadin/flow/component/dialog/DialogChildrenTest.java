@@ -159,8 +159,8 @@ public class DialogChildrenTest {
         dialog.getElement().setProperty("virtualChildNodeIds", "[-1]");
 
         newParent.remove(child);
-        Assert.assertEquals(
-                dialog.getElement().getProperty("virtualChildNodeIds"), "[-1]");
+        Assert.assertEquals("[-1]",
+                dialog.getElement().getProperty("virtualChildNodeIds"));
     }
 
     @Test

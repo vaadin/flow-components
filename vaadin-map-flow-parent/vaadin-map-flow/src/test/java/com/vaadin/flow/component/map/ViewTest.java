@@ -27,13 +27,13 @@ public class ViewTest {
     public void viewProjectionDefaultIsSet() {
         View view = new View();
 
-        Assert.assertEquals(view.getProjection(), "EPSG:3857");
+        Assert.assertEquals("EPSG:3857", view.getProjection());
     }
 
     @Test
     public void viewProjectionDefaultCanBeChanged() {
         View view = new View("EPSG:4326");
 
-        Assert.assertEquals(view.getProjection(), "EPSG:4326");
+        Assert.assertEquals("EPSG:4326", view.getProjection());
     }
 }

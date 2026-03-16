@@ -49,31 +49,31 @@ public class StyleIT extends AbstractSpreadsheetIT {
     }
 
     private void assertCorrectCss() {
-        Assert.assertEquals(getCellStyle("A2", "text-align"), "center");
+        Assert.assertEquals("center", getCellStyle("A2", "text-align"));
 
-        Assert.assertEquals(getCellStyle("B2", "text-align"), "right");
+        Assert.assertEquals("right", getCellStyle("B2", "text-align"));
 
-        Assert.assertEquals(getCellStyle("A3", "border-bottom-color"),
-                "rgba(0, 0, 255, 1)");
-        Assert.assertEquals(getCellStyle("A3", "border-bottom-style"), "solid");
-        Assert.assertEquals(getCellStyle("A3", "border-bottom-width"), "4px");
+        Assert.assertEquals("rgba(0, 0, 255, 1)",
+                getCellStyle("A3", "border-bottom-color"));
+        Assert.assertEquals("solid", getCellStyle("A3", "border-bottom-style"));
+        Assert.assertEquals("4px", getCellStyle("A3", "border-bottom-width"));
 
-        Assert.assertEquals(getCellStyle("B3", "background-color"),
-                "rgba(0, 128, 0, 1)");
+        Assert.assertEquals("rgba(0, 128, 0, 1)",
+                getCellStyle("B3", "background-color"));
 
-        Assert.assertEquals(getCellStyle("A4", "color"), "rgba(255, 0, 0, 1)");
+        Assert.assertEquals("rgba(255, 0, 0, 1)", getCellStyle("A4", "color"));
 
-        Assert.assertEquals(getCellStyle("C4", "font-style"), "italic");
+        Assert.assertEquals("italic", getCellStyle("C4", "font-style"));
 
-        Assert.assertEquals(
-                (int) Math.ceil(getSize(getCellStyle("A5", "font-size"))), 11);
-        Assert.assertEquals(
-                (int) Math.ceil(getSize(getCellStyle("B5", "font-size"))), 14);
-        Assert.assertEquals(
-                (int) Math.ceil(getSize(getCellStyle("C5", "font-size"))), 16);
-        Assert.assertEquals(
-                (int) Math.ceil(getSize(getCellStyle("D5", "font-size"))), 19);
+        Assert.assertEquals(11,
+                (int) Math.ceil(getSize(getCellStyle("A5", "font-size"))));
+        Assert.assertEquals(14,
+                (int) Math.ceil(getSize(getCellStyle("B5", "font-size"))));
+        Assert.assertEquals(16,
+                (int) Math.ceil(getSize(getCellStyle("C5", "font-size"))));
+        Assert.assertEquals(19,
+                (int) Math.ceil(getSize(getCellStyle("D5", "font-size"))));
 
-        Assert.assertEquals(getCellStyle("B4", "font-weight"), "700");
+        Assert.assertEquals("700", getCellStyle("B4", "font-weight"));
     }
 }
