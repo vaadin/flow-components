@@ -15,62 +15,64 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.function.SerializableFunction;
 
-public class VirtualListTest {
-
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
+class VirtualListTest {
 
     @Test
-    public void paging_pagingDisabledByDefault() {
+    void paging_pagingDisabledByDefault() {
         VirtualList<String> virtualList = new VirtualList<>();
-        Assert.assertFalse("VirtualList is not supposed to support the paging",
-                virtualList.getDataCommunicator().isPagingEnabled());
+        Assertions.assertFalse(
+                        virtualList.getDataCommunicator().isPagingEnabled(),
+                        "VirtualList is not supposed to support the paging");
     }
 
     @Test
-    public void paging_setPageSize_throws() {
+    void paging_setPageSize_throws() {
         VirtualList<String> virtualList = new VirtualList<>();
-        exceptionRule.expect(UnsupportedOperationException.class);
-        exceptionRule.expectMessage("VirtualList does not support paging");
-        virtualList.getDataCommunicator().setPageSize(50);
+        UnsupportedOperationException ex = Assertions.assertThrows(
+                        UnsupportedOperationException.class, () -> virtualList
+                                        .getDataCommunicator().setPageSize(50));
+        Assertions.assertEquals("VirtualList does not support paging",
+                        ex.getMessage());
     }
 
     @Test
-    public void paging_setPagingEnabled_throws() {
+    void paging_setPagingEnabled_throws() {
         VirtualList<String> virtualList = new VirtualList<>();
-        exceptionRule.expect(UnsupportedOperationException.class);
-        exceptionRule.expectMessage("VirtualList does not support paging");
-        virtualList.getDataCommunicator().setPagingEnabled(true);
+        UnsupportedOperationException ex = Assertions.assertThrows(
+                        UnsupportedOperationException.class,
+                        () -> virtualList.getDataCommunicator()
+                                        .setPagingEnabled(true));
+        Assertions.assertEquals("VirtualList does not support paging",
+                        ex.getMessage());
     }
 
     @Test
-    public void setItemAccessibleNameGenerator_get() {
+    void setItemAccessibleNameGenerator_get() {
         VirtualList<String> virtualList = new VirtualList<>();
         SerializableFunction<String, String> itemAccessibleNameGenerator = item -> "Accessible "
                 + item;
         virtualList.setItemAccessibleNameGenerator(itemAccessibleNameGenerator);
-        Assert.assertEquals(itemAccessibleNameGenerator,
-                virtualList.getItemAccessibleNameGenerator());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setItemAccessibleNameGenerator_nullThrows() {
-        VirtualList<String> virtualList = new VirtualList<>();
-        virtualList.setItemAccessibleNameGenerator(null);
+        Assertions.assertEquals(itemAccessibleNameGenerator,
+                                virtualList.getItemAccessibleNameGenerator());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void setItemAccessibleNameGenerator_nullThrows() {
+        VirtualList<String> virtualList = new VirtualList<>();
+        Assertions.assertThrows(NullPointerException.class,
+                        () -> virtualList.setItemAccessibleNameGenerator(null));
+    }
+
+    @Test
+    void implementsHasThemeVariant() {
+            Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(VirtualList.class));
     }
 }
