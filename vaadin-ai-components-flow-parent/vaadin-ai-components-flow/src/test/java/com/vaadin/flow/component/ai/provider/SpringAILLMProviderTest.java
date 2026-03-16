@@ -26,10 +26,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.ai.chat.client.ChatClient;
@@ -47,51 +47,51 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
 
-public class SpringAILLMProviderTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class SpringAILLMProviderTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private ChatModel mockChatModel;
     private SpringAILLMProvider provider;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         provider = new SpringAILLMProvider(mockChatModel);
     }
 
     @Test
-    public void stream_withNullRequest_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void stream_withNullRequest_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.stream(null).blockFirst());
     }
 
     @Test
-    public void stream_withNullUserMessage_throwsNullPointerException() {
+    void stream_withNullUserMessage_throwsNullPointerException() {
         var request = new TestLLMRequest(null, null, Collections.emptyList(),
                 new Object[0]);
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.stream(request).blockFirst());
     }
 
     @Test
-    public void constructor_withNullChatModel_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void constructor_withNullChatModel_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new SpringAILLMProvider((ChatModel) null));
     }
 
     @Test
-    public void constructor_withNullChatClient_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void constructor_withNullChatClient_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new SpringAILLMProvider((ChatClient) null));
     }
 
     @Test
-    public void constructor_withChatClient_nonStreaming_returnsResponse() {
+    void constructor_withChatClient_nonStreaming_returnsResponse() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientProvider = new SpringAILLMProvider(chatClient);
         chatClientProvider.setStreaming(false);
@@ -100,13 +100,13 @@ public class SpringAILLMProviderTest {
 
         var results = chatClientProvider.stream(request).collectList().block();
 
-        Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals("Full response", results.getFirst());
+        Assertions.assertNotNull(results);
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals("Full response", results.getFirst());
     }
 
     @Test
-    public void constructor_withChatClient_defaultConfig_returnsStreamedTokens() {
+    void constructor_withChatClient_defaultConfig_returnsStreamedTokens() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientStreamingProvider = new SpringAILLMProvider(chatClient);
         var request = createSimpleRequest("Hello");
@@ -118,11 +118,11 @@ public class SpringAILLMProviderTest {
 
         var results = chatClientStreamingProvider.stream(request).collectList()
                 .block();
-        Assert.assertEquals(tokens, results);
+        Assertions.assertEquals(tokens, results);
     }
 
     @Test
-    public void constructor_withChatClient_setNonStreaming_setStreaming_returnsStreamedTokens() {
+    void constructor_withChatClient_setNonStreaming_setStreaming_returnsStreamedTokens() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientStreamingProvider = new SpringAILLMProvider(chatClient);
         chatClientStreamingProvider.setStreaming(false);
@@ -136,53 +136,53 @@ public class SpringAILLMProviderTest {
 
         var results = chatClientStreamingProvider.stream(request).collectList()
                 .block();
-        Assert.assertEquals(tokens, results);
+        Assertions.assertEquals(tokens, results);
     }
 
     @Test
-    public void stream_withNonStreamingModel_returnsResponse() {
+    void stream_withNonStreamingModel_returnsResponse() {
         provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat("Full response");
 
         var results = provider.stream(request).collectList().block();
 
-        Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals("Full response", results.getFirst());
+        Assertions.assertNotNull(results);
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals("Full response", results.getFirst());
     }
 
     @Test
-    public void stream_chatModelThrowsException_propagatesError() {
+    void stream_chatModelThrowsException_propagatesError() {
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
                 .thenThrow(new RuntimeException("API error"));
-        Assert.assertThrows(RuntimeException.class,
+        Assertions.assertThrows(RuntimeException.class,
                 () -> provider.stream(request).blockFirst());
     }
 
     @Test
-    public void stream_emptyTextResponse_returnsEmpty() {
+    void stream_emptyTextResponse_returnsEmpty() {
         provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat("");
         var results = provider.stream(request).collectList().block();
-        Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
     }
 
     @Test
-    public void stream_nullTextResponse_returnsEmpty() {
+    void stream_nullTextResponse_returnsEmpty() {
         provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat(null);
         var results = provider.stream(request).collectList().block();
-        Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
     }
 
     @Test
-    public void stream_withSystemPromptInRequest_includesSystemMessage() {
+    void stream_withSystemPromptInRequest_includesSystemMessage() {
         provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", "You are a helpful assistant",
                 Collections.emptyList(), new Object[0]);
@@ -192,11 +192,11 @@ public class SpringAILLMProviderTest {
 
         var hasSystemMessage = capturePrompt().getInstructions().stream()
                 .anyMatch(SystemMessage.class::isInstance);
-        Assert.assertTrue(hasSystemMessage);
+        Assertions.assertTrue(hasSystemMessage);
     }
 
     @Test
-    public void stream_withNullSystemPrompt_noSystemMessage() {
+    void stream_withNullSystemPrompt_noSystemMessage() {
         provider.setStreaming(false);
         var request = createSimpleRequest("Hello");
         mockSimpleChat("Response");
@@ -205,11 +205,11 @@ public class SpringAILLMProviderTest {
 
         var hasSystemMessage = capturePrompt().getInstructions().stream()
                 .anyMatch(SystemMessage.class::isInstance);
-        Assert.assertFalse(hasSystemMessage);
+        Assertions.assertFalse(hasSystemMessage);
     }
 
     @Test
-    public void stream_withEmptySystemPrompt_noSystemMessage() {
+    void stream_withEmptySystemPrompt_noSystemMessage() {
         provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", "   ",
                 Collections.emptyList(), new Object[0]);
@@ -219,20 +219,20 @@ public class SpringAILLMProviderTest {
 
         var hasSystemMessage = capturePrompt().getInstructions().stream()
                 .anyMatch(SystemMessage.class::isInstance);
-        Assert.assertFalse(hasSystemMessage);
+        Assertions.assertFalse(hasSystemMessage);
     }
 
     @Test
-    public void stream_withNullAttachments_returnsResponse() {
+    void stream_withNullAttachments_returnsResponse() {
         provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", null, null, new Object[0]);
         mockSimpleChat("Hi");
         var result = provider.stream(request).blockFirst();
-        Assert.assertEquals("Hi", result);
+        Assertions.assertEquals("Hi", result);
     }
 
     @Test
-    public void stream_withNullAttachmentInList_throwsNullPointerException() {
+    void stream_withNullAttachmentInList_throwsNullPointerException() {
         var attachment = new AIAttachment("test.txt", "text/plain",
                 "Test".getBytes(StandardCharsets.UTF_8));
         var attachments = new ArrayList<AIAttachment>();
@@ -243,12 +243,12 @@ public class SpringAILLMProviderTest {
                 new Object[0]);
         mockSimpleChat("hi");
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.stream(request).blockFirst());
     }
 
     @Test
-    public void stream_withUnsupportedAttachmentType_ignoresAttachment() {
+    void stream_withUnsupportedAttachmentType_ignoresAttachment() {
         provider.setStreaming(false);
         var attachment = new AIAttachment("file.bin",
                 "application/octet-stream", "data".getBytes());
@@ -263,7 +263,7 @@ public class SpringAILLMProviderTest {
     }
 
     @Test
-    public void stream_withPdfAttachment_handlesPdf() {
+    void stream_withPdfAttachment_handlesPdf() {
         provider.setStreaming(false);
         var pdfData = "PDF binary content".getBytes(StandardCharsets.UTF_8);
         var attachment = new AIAttachment("document.pdf", "application/pdf",
@@ -274,13 +274,13 @@ public class SpringAILLMProviderTest {
         mockSimpleChat("Summary");
 
         var result = provider.stream(request).blockFirst();
-        Assert.assertEquals("Summary", result);
+        Assertions.assertEquals("Summary", result);
 
         Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
     }
 
     @Test
-    public void stream_withBinaryPdfData_handlesBinaryPdf() {
+    void stream_withBinaryPdfData_handlesBinaryPdf() {
         provider.setStreaming(false);
         // Binary PDF data should be handled correctly
         var binaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46, (byte) 0xFF,
@@ -293,13 +293,13 @@ public class SpringAILLMProviderTest {
         mockSimpleChat("Summary");
 
         var result = provider.stream(request).blockFirst();
-        Assert.assertEquals("Summary", result);
+        Assertions.assertEquals("Summary", result);
 
         Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
     }
 
     @Test
-    public void stream_withImageAttachment_processesImage() {
+    void stream_withImageAttachment_processesImage() {
         provider.setStreaming(false);
         var imageData = "fake-image-data".getBytes();
         var attachment = new AIAttachment("test.png", "image/png", imageData);
@@ -309,13 +309,13 @@ public class SpringAILLMProviderTest {
         mockSimpleChat("It's a test");
 
         var result = provider.stream(request).blockFirst();
-        Assert.assertEquals("It's a test", result);
+        Assertions.assertEquals("It's a test", result);
 
         Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
     }
 
     @Test
-    public void stream_withTextAttachment_processesText() {
+    void stream_withTextAttachment_processesText() {
         provider.setStreaming(false);
         var textContent = "Test UTF-8: é à ü";
         var attachment = new AIAttachment("test.txt", "text/plain",
@@ -326,13 +326,13 @@ public class SpringAILLMProviderTest {
         mockSimpleChat("Summary");
 
         var result = provider.stream(request).blockFirst();
-        Assert.assertEquals("Summary", result);
+        Assertions.assertEquals("Summary", result);
 
         Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
     }
 
     @Test
-    public void stream_withStreamingModel_returnsStreamedTokens() {
+    void stream_withStreamingModel_returnsStreamedTokens() {
         var request = createSimpleRequest("Hello");
         var tokens = List.of("Hello", " ", "World");
 
@@ -341,11 +341,11 @@ public class SpringAILLMProviderTest {
                         .map(this::mockSimpleChatResponse).toList()));
 
         var results = provider.stream(request).collectList().block();
-        Assert.assertEquals(tokens, results);
+        Assertions.assertEquals(tokens, results);
     }
 
     @Test
-    public void stream_withSingleTool_toolsAreConfigured() {
+    void stream_withSingleTool_toolsAreConfigured() {
         provider.setStreaming(false);
         var toolObject = new SampleToolsClass();
         var request = new TestLLMRequest("Get temperature", null,
@@ -355,15 +355,15 @@ public class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        Assert.assertNotNull(chatOptions);
+        Assertions.assertNotNull(chatOptions);
         var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
                 .getToolCallbacks();
-        Assert.assertNotNull(toolCallbacks);
-        Assert.assertEquals(2, toolCallbacks.size());
+        Assertions.assertNotNull(toolCallbacks);
+        Assertions.assertEquals(2, toolCallbacks.size());
     }
 
     @Test
-    public void stream_withMultipleToolObjects_allToolsAreConfigured() {
+    void stream_withMultipleToolObjects_allToolsAreConfigured() {
         provider.setStreaming(false);
         var tool1 = new SampleToolsClass();
         var tool2 = new AnotherSampleToolsClass();
@@ -374,15 +374,15 @@ public class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        Assert.assertNotNull(chatOptions);
+        Assertions.assertNotNull(chatOptions);
         var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
                 .getToolCallbacks();
-        Assert.assertNotNull(toolCallbacks);
-        Assert.assertEquals(3, toolCallbacks.size());
+        Assertions.assertNotNull(toolCallbacks);
+        Assertions.assertEquals(3, toolCallbacks.size());
     }
 
     @Test
-    public void stream_withEmptyToolsArray_noToolCallbacksConfigured() {
+    void stream_withEmptyToolsArray_noToolCallbacksConfigured() {
         provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
                 new Object[0]);
@@ -394,11 +394,11 @@ public class SpringAILLMProviderTest {
         var noToolCallbacks = chatOptions == null
                 || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
                         .isEmpty();
-        Assert.assertTrue(noToolCallbacks);
+        Assertions.assertTrue(noToolCallbacks);
     }
 
     @Test
-    public void stream_withNullToolsArray_noToolCallbacksConfigured() {
+    void stream_withNullToolsArray_noToolCallbacksConfigured() {
         provider.setStreaming(false);
         var request = new TestLLMRequest("Hello", null, Collections.emptyList(),
                 null);
@@ -410,11 +410,11 @@ public class SpringAILLMProviderTest {
         var noToolCallbacks = chatOptions == null
                 || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
                         .isEmpty();
-        Assert.assertTrue(noToolCallbacks);
+        Assertions.assertTrue(noToolCallbacks);
     }
 
     @Test
-    public void chatMemory_retainsHistory() {
+    void chatMemory_retainsHistory() {
         provider.setStreaming(false);
         var response1 = mockSimpleChatResponse("Response 1");
         var response2 = mockSimpleChatResponse("Response 2");
@@ -426,11 +426,11 @@ public class SpringAILLMProviderTest {
 
         var secondRequestMessages = getPromptCaptor(2).getAllValues().get(1)
                 .getInstructions();
-        Assert.assertEquals(3, secondRequestMessages.size());
+        Assertions.assertEquals(3, secondRequestMessages.size());
     }
 
     @Test
-    public void stream_preservesChatHistoryAcrossRequests() {
+    void stream_preservesChatHistoryAcrossRequests() {
         provider.setStreaming(false);
         var response1 = mockSimpleChatResponse("Hi there");
         var response2 = mockSimpleChatResponse("I'm good");
@@ -441,15 +441,14 @@ public class SpringAILLMProviderTest {
         provider.stream(createSimpleRequest("How are you?")).blockFirst();
 
         var allPrompts = getPromptCaptor(2).getAllValues();
-        Assert.assertEquals("First call should have 1 user message", 1,
-                allPrompts.get(0).getInstructions().size());
-        Assert.assertEquals(
-                "Second call should have 3 messages (user1, ai1, user2)", 3,
-                allPrompts.get(1).getInstructions().size());
+        Assertions.assertEquals(1, allPrompts.get(0).getInstructions().size(),
+                "First call should have 1 user message");
+        Assertions.assertEquals(3, allPrompts.get(1).getInstructions().size(),
+                "Second call should have 3 messages (user1, ai1, user2)");
     }
 
     @Test
-    public void stream_withMaxMessagesLimit_dropsOldestMessages() {
+    void stream_withMaxMessagesLimit_dropsOldestMessages() {
         provider.setStreaming(false);
         var requestCount = 20;
 
@@ -467,23 +466,28 @@ public class SpringAILLMProviderTest {
         var messageCount = lastRequest.getInstructions().size();
         // Spring AI's MessageWindowChatMemory with maxMessages(30) may include
         // up to 31 messages when building the prompt (30 in memory + current)
-        Assert.assertTrue("Message count should not exceed memory limit, got: "
-                + messageCount, messageCount <= 31);
+        Assertions.assertTrue(messageCount <= 31,
+                "Message count should not exceed memory limit, got: "
+                        + messageCount);
 
         var userMessageTexts = lastRequest.getInstructions().stream()
                 .filter(UserMessage.class::isInstance)
                 .map(UserMessage.class::cast).map(UserMessage::getText)
                 .toList();
-        Assert.assertFalse("Should not contain very old messages",
+        Assertions.assertFalse(
                 userMessageTexts.stream()
-                        .anyMatch(text -> text.contains("Message 0")));
-        Assert.assertTrue("Should contain recent messages",
-                userMessageTexts.stream().anyMatch(text -> text
-                        .contains("Message " + (requestCount - 1))));
+                        .anyMatch(text -> text.contains("Message 0")),
+                "Should not contain very old messages");
+        Assertions
+                .assertTrue(
+                        userMessageTexts.stream()
+                                .anyMatch(text -> text.contains(
+                                        "Message " + (requestCount - 1))),
+                        "Should contain recent messages");
     }
 
     @Test
-    public void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
+    void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
         provider.setStreaming(false);
         var imageAttachment = new AIAttachment("photo.jpg", "image/jpeg",
                 "fake-image".getBytes());
@@ -505,11 +509,11 @@ public class SpringAILLMProviderTest {
         var userMessage = (UserMessage) messages.getFirst();
 
         // 3 supported attachments (image, text, pdf) - unsupported is ignored
-        Assert.assertEquals(3, userMessage.getMedia().size());
+        Assertions.assertEquals(3, userMessage.getMedia().size());
     }
 
     @Test
-    public void stream_withAudioAttachment_processesAudio() {
+    void stream_withAudioAttachment_processesAudio() {
         provider.setStreaming(false);
         var audioData = "fake-audio-data".getBytes();
         var attachment = new AIAttachment("audio.mp3", "audio/mpeg", audioData);
@@ -523,13 +527,13 @@ public class SpringAILLMProviderTest {
         var userMessage = (UserMessage) messages.getFirst();
         var media = userMessage.getMedia();
 
-        Assert.assertEquals(1, media.size());
-        Assert.assertEquals("audio/mpeg",
+        Assertions.assertEquals(1, media.size());
+        Assertions.assertEquals("audio/mpeg",
                 media.getFirst().getMimeType().toString());
     }
 
     @Test
-    public void stream_withVideoAttachment_processesVideo() {
+    void stream_withVideoAttachment_processesVideo() {
         provider.setStreaming(false);
         var videoData = "fake-video-data".getBytes();
         var attachment = new AIAttachment("video.mp4", "video/mp4", videoData);
@@ -543,13 +547,13 @@ public class SpringAILLMProviderTest {
         var userMessage = (UserMessage) messages.getFirst();
         var media = userMessage.getMedia();
 
-        Assert.assertEquals(1, media.size());
-        Assert.assertEquals("video/mp4",
+        Assertions.assertEquals(1, media.size());
+        Assertions.assertEquals("video/mp4",
                 media.getFirst().getMimeType().toString());
     }
 
     @Test
-    public void stream_withStreamingAndPushDisabled_logsWarning() {
+    void stream_withStreamingAndPushDisabled_logsWarning() {
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
@@ -565,14 +569,14 @@ public class SpringAILLMProviderTest {
             provider.stream(request).collectList().block();
 
             var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assert.assertTrue(errContent.contains("Push is not enabled"));
+            Assertions.assertTrue(errContent.contains("Push is not enabled"));
         } finally {
             System.setErr(originalErr);
         }
     }
 
     @Test
-    public void stream_withNonStreamingAndPushDisabled_doesNotLogWarning() {
+    void stream_withNonStreamingAndPushDisabled_doesNotLogWarning() {
         provider.setStreaming(false);
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
@@ -586,14 +590,14 @@ public class SpringAILLMProviderTest {
             provider.stream(request).collectList().block();
 
             var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assert.assertFalse(errContent.contains("Push is not enabled"));
+            Assertions.assertFalse(errContent.contains("Push is not enabled"));
         } finally {
             System.setErr(originalErr);
         }
     }
 
     @Test
-    public void setHistory_restoresConversation() {
+    void setHistory_restoresConversation() {
         provider.setStreaming(false);
         var history = List.of(
                 new ChatMessage(ChatMessage.Role.USER, "Previous question",
@@ -613,16 +617,16 @@ public class SpringAILLMProviderTest {
         var captor = ArgumentCaptor.forClass(Prompt.class);
         Mockito.verify(mockChatModel).call(captor.capture());
         var messages = captor.getValue().getInstructions();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 messages.stream().anyMatch(msg -> msg instanceof UserMessage
                         && Objects.equals(msg.getText(), "Previous question")));
-        Assert.assertTrue(messages.stream()
+        Assertions.assertTrue(messages.stream()
                 .anyMatch(msg -> msg instanceof AssistantMessage
                         && Objects.equals(msg.getText(), "Previous answer")));
     }
 
     @Test
-    public void setHistory_clearsExistingHistory() {
+    void setHistory_clearsExistingHistory() {
         provider.setStreaming(false);
         var response = mockSimpleChatResponse("Old response");
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
@@ -647,22 +651,22 @@ public class SpringAILLMProviderTest {
         Mockito.verify(mockChatModel, Mockito.atLeast(2))
                 .call(captor.capture());
         var lastMessages = captor.getAllValues().getLast().getInstructions();
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 lastMessages.stream().anyMatch(msg -> msg instanceof UserMessage
                         && Objects.equals(msg.getText(), "Old message")));
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 lastMessages.stream().anyMatch(msg -> msg instanceof UserMessage
                         && Objects.equals(msg.getText(), "New question")));
     }
 
     @Test
-    public void setHistory_withNullHistory_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void setHistory_withNullHistory_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.setHistory(null, Collections.emptyMap()));
     }
 
     @Test
-    public void setHistory_exceedingMaxMessages_evictsOldest() {
+    void setHistory_exceedingMaxMessages_evictsOldest() {
         provider.setStreaming(false);
         var history = new ArrayList<ChatMessage>();
         for (int i = 0; i < 20; i++) {
@@ -671,7 +675,7 @@ public class SpringAILLMProviderTest {
             history.add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                     "Answer " + i, null, null));
         }
-        Assert.assertEquals(40, history.size());
+        Assertions.assertEquals(40, history.size());
 
         provider.setHistory(history, Collections.emptyMap());
 
@@ -690,27 +694,27 @@ public class SpringAILLMProviderTest {
                         || msg instanceof AssistantMessage)
                 .toList();
         // +1 for the "Check" message we sent to trigger the request
-        Assert.assertTrue(chatMessages.size() <= 31);
-        Assert.assertTrue(
+        Assertions.assertTrue(chatMessages.size() <= 31);
+        Assertions.assertTrue(
                 chatMessages.stream().anyMatch(msg -> msg instanceof UserMessage
                         && Objects.equals(msg.getText(), "Question 19")));
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 chatMessages.stream().anyMatch(msg -> msg instanceof UserMessage
                         && Objects.equals(msg.getText(), "Question 0")));
     }
 
     @Test
-    public void setHistory_withChatClientConstructor_throwsUnsupportedOperationException() {
+    void setHistory_withChatClientConstructor_throwsUnsupportedOperationException() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientProvider = new SpringAILLMProvider(chatClient);
         var history = new ArrayList<ChatMessage>();
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> chatClientProvider.setHistory(history,
                         Collections.emptyMap()));
     }
 
     @Test
-    public void setHistory_withAttachments_restoresUserMessageWithMedia() {
+    void setHistory_withAttachments_restoresUserMessageWithMedia() {
         provider.setStreaming(false);
         var imageData = "fake-image-data".getBytes();
         var attachment = new AIAttachment("photo.png", "image/png", imageData);
@@ -740,13 +744,13 @@ public class SpringAILLMProviderTest {
                 .findFirst().orElseThrow();
 
         // Should have media attached
-        Assert.assertEquals(1, restoredUserMsg.getMedia().size());
-        Assert.assertEquals("image/png",
+        Assertions.assertEquals(1, restoredUserMsg.getMedia().size());
+        Assertions.assertEquals("image/png",
                 restoredUserMsg.getMedia().getFirst().getMimeType().toString());
     }
 
     @Test
-    public void setHistory_withAttachments_assistantMessageIgnoresAttachments() {
+    void setHistory_withAttachments_assistantMessageIgnoresAttachments() {
         provider.setStreaming(false);
         var attachment = new AIAttachment("file.txt", "text/plain",
                 "content".getBytes());
@@ -765,21 +769,21 @@ public class SpringAILLMProviderTest {
         Mockito.verify(mockChatModel).call(captor.capture());
         var messages = captor.getValue().getInstructions();
 
-        Assert.assertTrue(messages.stream()
+        Assertions.assertTrue(messages.stream()
                 .anyMatch(msg -> msg instanceof AssistantMessage
                         && Objects.equals(msg.getText(), "Hello")));
     }
 
     @Test
-    public void setHistory_withAttachments_nullAttachmentMapThrows() {
+    void setHistory_withAttachments_nullAttachmentMapThrows() {
         var history = List.of(
                 new ChatMessage(ChatMessage.Role.USER, "Hello", null, null));
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.setHistory(history, null));
     }
 
     @Test
-    public void setHistory_withEmptyAttachmentMap_behavesLikeTextOnly() {
+    void setHistory_withEmptyAttachmentMap_behavesLikeTextOnly() {
         provider.setStreaming(false);
         var history = List.of(
                 new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
@@ -801,7 +805,7 @@ public class SpringAILLMProviderTest {
                 .map(UserMessage.class::cast)
                 .filter(msg -> Objects.equals(msg.getText(), "Hello"))
                 .findFirst().orElseThrow();
-        Assert.assertTrue(userMsg.getMedia().isEmpty());
+        Assertions.assertTrue(userMsg.getMedia().isEmpty());
     }
 
     private void mockSimpleChat(String responseText) {
