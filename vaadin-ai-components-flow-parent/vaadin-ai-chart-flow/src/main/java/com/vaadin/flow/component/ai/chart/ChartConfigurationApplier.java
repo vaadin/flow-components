@@ -56,7 +56,13 @@ class ChartConfigurationApplier implements Serializable {
 
     void applyConfiguration(Chart chart, String configJson) {
         try {
-            JsonNode parsedNode = JacksonUtils.readTree(configJson);
+            JsonNode parsedNode = JacksonUtils.getMapper()
+                    .readTree(configJson);
+            // Handle double-encoded JSON strings from LLM
+            if (parsedNode.isTextual()) {
+                parsedNode = JacksonUtils.getMapper()
+                        .readTree(parsedNode.asString());
+            }
             if (!(parsedNode instanceof ObjectNode configNode)) {
                 LOGGER.warn(
                         "Expected JSON object for chart config but got: {}",
