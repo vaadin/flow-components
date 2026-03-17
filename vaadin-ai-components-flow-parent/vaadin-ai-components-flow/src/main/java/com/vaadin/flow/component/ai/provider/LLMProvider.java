@@ -235,7 +235,7 @@ public interface LLMProvider {
      * method.
      * </p>
      */
-    interface ToolDefinition extends Serializable {
+    interface ToolDefinition {
 
         /**
          * Gets the unique name of this tool.
@@ -279,9 +279,9 @@ public interface LLMProvider {
          * Executes the tool with the given arguments.
          * <p>
          * Implementations should return a human-readable result string on
-         * success. On failure, implementations may throw any runtime
-         * exception; the provider will catch it and report the error message
-         * back to the LLM so it can recover gracefully.
+         * success. On failure, implementations may throw any runtime exception;
+         * the provider will catch it and report the error message back to the
+         * LLM so it can recover gracefully.
          * </p>
          *
          * @param arguments

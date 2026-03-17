@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import java.util.Collections;
 import java.util.List;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -60,7 +59,7 @@ public interface AIController {
      * @return a list of tool definitions, never {@code null} but may be empty
      */
     default List<LLMProvider.ToolDefinition> getTools() {
-        return Collections.emptyList();
+        return List.of();
     }
 
     /**

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.provider;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -296,7 +297,7 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private static void warnDuplicateToolNames(
             List<LLMProvider.ToolDefinition> tools) {
-        var seen = new java.util.HashSet<String>();
+        var seen = new HashSet<String>();
         for (var tool : tools) {
             if (!seen.add(tool.getName())) {
                 LOGGER.warn(

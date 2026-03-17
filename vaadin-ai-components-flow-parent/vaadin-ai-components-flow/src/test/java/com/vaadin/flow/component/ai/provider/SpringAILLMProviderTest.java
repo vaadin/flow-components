@@ -906,8 +906,7 @@ class SpringAILLMProviderTest {
                 args -> "result2");
 
         var request = new TestLLMRequestWithExplicitTools("Call tool", null,
-                Collections.emptyList(), new Object[0],
-                List.of(tool1, tool2));
+                Collections.emptyList(), new Object[0], List.of(tool1, tool2));
         mockSimpleChat("Done");
 
         var originalErr = System.err;

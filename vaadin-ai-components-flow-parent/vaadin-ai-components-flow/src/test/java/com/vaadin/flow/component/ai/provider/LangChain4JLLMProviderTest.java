@@ -934,8 +934,7 @@ class LangChain4JLLMProviderTest {
                 args -> "result2");
 
         var request = new TestLLMRequestWithExplicitTools("Call tool", null,
-                Collections.emptyList(), new Object[0],
-                List.of(tool1, tool2));
+                Collections.emptyList(), new Object[0], List.of(tool1, tool2));
 
         var response = mockSimpleResponse("Done");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
@@ -976,8 +975,7 @@ class LangChain4JLLMProviderTest {
             provider.stream(request).blockFirst();
             var errContent = errStream.toString(StandardCharsets.UTF_8);
             Assertions.assertTrue(
-                    errContent
-                            .contains("Duplicate tool name 'getTemperature'"),
+                    errContent.contains("Duplicate tool name 'getTemperature'"),
                     "Expected duplicate tool name warning, got: " + errContent);
         } finally {
             System.setErr(originalErr);
