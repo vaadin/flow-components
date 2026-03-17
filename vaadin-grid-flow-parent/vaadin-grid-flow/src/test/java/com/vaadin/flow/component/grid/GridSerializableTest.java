@@ -37,6 +37,7 @@ public class GridSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.treegrid\\.it\\..*",
                 "com\\.vaadin\\.flow\\.component\\.datepicker\\..*",
                 "com\\.vaadin\\.flow\\.component\\.grid\\.GridColumnOrderHelper.*",
+                "com\\.vaadin\\.flow\\.component\\.grid\\.GridSelectionSignalHelper.*",
                 "com\\.vaadin\\.flow\\.spring\\..*"));
     }
 
