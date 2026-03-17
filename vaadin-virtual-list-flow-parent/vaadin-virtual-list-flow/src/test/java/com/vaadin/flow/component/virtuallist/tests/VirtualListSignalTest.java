@@ -67,8 +67,8 @@ class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
         list.bindItems(listSignal);
         ui.add(list);
 
-        var items = list.getDataProvider().fetch(
-                new com.vaadin.flow.data.provider.Query<>()).toList();
+        var items = list.getDataProvider()
+                .fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
         Assertions.assertEquals(1, items.size());
         Assertions.assertEquals("original", items.get(0));
 
@@ -76,8 +76,8 @@ class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
         listSignal.peek().getFirst().set("updated");
 
         // Verify the items reflect the update
-        items = list.getDataProvider().fetch(
-                new com.vaadin.flow.data.provider.Query<>()).toList();
+        items = list.getDataProvider()
+                .fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
         Assertions.assertEquals(1, items.size());
         Assertions.assertEquals("updated", items.get(0));
     }

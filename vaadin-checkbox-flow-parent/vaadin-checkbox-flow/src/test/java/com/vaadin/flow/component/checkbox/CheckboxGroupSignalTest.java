@@ -115,10 +115,8 @@ public class CheckboxGroupSignalTest extends AbstractSignalsUnitTest {
 
     @SuppressWarnings("unchecked")
     private List<String> getCheckboxLabels(CheckboxGroup<String> group) {
-        return group.getChildren()
-                .filter(Checkbox.class::isInstance)
-                .map(c -> ((Checkbox) c).getLabel())
-                .toList();
+        return group.getChildren().filter(Checkbox.class::isInstance)
+                .map(c -> ((Checkbox) c).getLabel()).toList();
     }
 
     private CheckboxGroup<String> createCheckboxGroupWithBoundItems() {

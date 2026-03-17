@@ -746,8 +746,8 @@ public class RadioButtonGroup<T>
                     if (identityChanged) {
                         Component newButton = createRadioButton(newItem);
                         getElement().insertChild(
-                                getElement().indexOfChild(
-                                        oldButton.getElement()),
+                                getElement()
+                                        .indexOfChild(oldButton.getElement()),
                                 newButton.getElement());
                         oldButton.getElement().removeFromParent();
                     } else {
@@ -897,7 +897,8 @@ public class RadioButtonGroup<T>
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> refreshEvent) {
-            keyMapper.refresh(refreshEvent.getItem(), refreshEvent.getOldItem());
+            keyMapper.refresh(refreshEvent.getItem(),
+                    refreshEvent.getOldItem());
             resetRadioButton(refreshEvent.getItem(), refreshEvent.getOldItem());
         } else {
             keyMapper.removeAll();

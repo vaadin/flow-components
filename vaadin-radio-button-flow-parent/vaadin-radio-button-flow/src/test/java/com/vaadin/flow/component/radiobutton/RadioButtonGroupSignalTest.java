@@ -170,12 +170,9 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
     }
 
     @SuppressWarnings("unchecked")
-    private List<String> getRadioButtonItems(
-            RadioButtonGroup<String> group) {
-        return group.getChildren()
-                .filter(RadioButton.class::isInstance)
-                .map(c -> ((RadioButton<String>) c).getItem())
-                .toList();
+    private List<String> getRadioButtonItems(RadioButtonGroup<String> group) {
+        return group.getChildren().filter(RadioButton.class::isInstance)
+                .map(c -> ((RadioButton<String>) c).getItem()).toList();
     }
 
     @Test
