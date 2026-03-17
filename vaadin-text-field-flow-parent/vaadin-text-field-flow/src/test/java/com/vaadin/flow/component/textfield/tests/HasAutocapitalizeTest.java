@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.Autocapitalize;
 import com.vaadin.flow.component.textfield.HasAutocapitalize;
 
-public class HasAutocapitalizeTest {
+class HasAutocapitalizeTest {
 
     @Tag("div")
     public static class HasAutocapitalizeComponent extends Component
@@ -32,45 +32,47 @@ public class HasAutocapitalizeTest {
     }
 
     @Test
-    public void defaultValue() {
+    void defaultValue() {
         HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
         Autocapitalize autocapitalize = c.getAutocapitalize();
-        Assert.assertNull(autocapitalize);
+        Assertions.assertNull(autocapitalize);
     }
 
     @Test
-    public void emptyValue() {
+    void emptyValue() {
         HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
         c.getElement().setAttribute("autocapitalize", "");
         Autocapitalize autocapitalize = c.getAutocapitalize();
-        Assert.assertEquals(Autocapitalize.SENTENCES, autocapitalize);
+        Assertions.assertEquals(Autocapitalize.SENTENCES, autocapitalize);
     }
 
     @Test
-    public void noCapitalization() {
+    void noCapitalization() {
         HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
         c.setAutocapitalize(Autocapitalize.NONE);
-        Assert.assertEquals(Autocapitalize.NONE, c.getAutocapitalize());
+        Assertions.assertEquals(Autocapitalize.NONE, c.getAutocapitalize());
     }
 
     @Test
-    public void sentencesCapitalization() {
+    void sentencesCapitalization() {
         HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
         c.setAutocapitalize(Autocapitalize.SENTENCES);
-        Assert.assertEquals(Autocapitalize.SENTENCES, c.getAutocapitalize());
+        Assertions.assertEquals(Autocapitalize.SENTENCES,
+                c.getAutocapitalize());
     }
 
     @Test
-    public void wordsCapitalization() {
+    void wordsCapitalization() {
         HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
         c.setAutocapitalize(Autocapitalize.WORDS);
-        Assert.assertEquals(Autocapitalize.WORDS, c.getAutocapitalize());
+        Assertions.assertEquals(Autocapitalize.WORDS, c.getAutocapitalize());
     }
 
     @Test
-    public void charsCapitalization() {
+    void charsCapitalization() {
         HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
         c.setAutocapitalize(Autocapitalize.CHARACTERS);
-        Assert.assertEquals(Autocapitalize.CHARACTERS, c.getAutocapitalize());
+        Assertions.assertEquals(Autocapitalize.CHARACTERS,
+                c.getAutocapitalize());
     }
 }
