@@ -17,8 +17,8 @@ package com.vaadin.flow.component.button.tests;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Text;
@@ -27,7 +27,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.HasTooltip;
 
-public class ButtonTest {
+class ButtonTest {
 
     private Button button;
     private Icon icon;
@@ -35,101 +35,101 @@ public class ButtonTest {
     private static final String TEST_STRING = "lorem ipsum";
 
     @Test
-    public void emptyCtor() {
+    void emptyCtor() {
         button = new Button();
-        Assert.assertEquals("", button.getText());
-        Assert.assertNull(button.getIcon());
+        Assertions.assertEquals("", button.getText());
+        Assertions.assertNull(button.getIcon());
     }
 
     @Test
-    public void textCtor() {
+    void textCtor() {
         button = new Button("foo");
-        Assert.assertEquals("foo", button.getText());
-        Assert.assertNull(button.getIcon());
+        Assertions.assertEquals("foo", button.getText());
+        Assertions.assertNull(button.getIcon());
     }
 
     @Test
-    public void iconCtor() {
+    void iconCtor() {
         Icon icon = new Icon();
         button = new Button(icon);
-        Assert.assertEquals("", button.getText());
-        Assert.assertEquals(icon, button.getIcon());
+        Assertions.assertEquals("", button.getText());
+        Assertions.assertEquals(icon, button.getIcon());
     }
 
     @Test
-    public void emptyButton_hasNoChildren() {
+    void emptyButton_hasNoChildren() {
         button = new Button();
-        Assert.assertEquals("Empty button should have no children", 0,
-                button.getElement().getChildren().count());
+        Assertions.assertEquals(0, button.getElement().getChildren().count(),
+                "Empty button should have no children");
     }
 
     @Test
-    public void emptyButtonWithEmptyText_hasNoChildren() {
+    void emptyButtonWithEmptyText_hasNoChildren() {
         button = new Button("");
-        Assert.assertEquals("Button with empty text should have no children", 0,
-                button.getElement().getChildren().count());
+        Assertions.assertEquals(0, button.getElement().getChildren().count(),
+                "Button with empty text should have no children");
     }
 
     @Test
-    public void buttonWithText_hasChild() {
+    void buttonWithText_hasChild() {
         button = new Button("foo");
-        Assert.assertEquals("Button with text should have one child", 1,
-                button.getElement().getChildren().count());
-        Assert.assertTrue("Child should be a text node", button.getElement()
-                .getChildren().findFirst().get().isTextNode());
+        Assertions.assertEquals(1, button.getElement().getChildren().count(),
+                "Button with text should have one child");
+        Assertions.assertTrue(button.getElement().getChildren().findFirst()
+                .get().isTextNode(), "Child should be a text node");
     }
 
     @Test
-    public void emptyButton_setText_addsChild() {
+    void emptyButton_setText_addsChild() {
         button = new Button();
-        Assert.assertEquals("Empty button should have no children", 0,
-                button.getElement().getChildren().count());
+        Assertions.assertEquals(0, button.getElement().getChildren().count(),
+                "Empty button should have no children");
 
         button.setText("foo");
-        Assert.assertEquals("Button with text should have one child", 1,
-                button.getElement().getChildren().count());
-        Assert.assertTrue("Child should be a text node", button.getElement()
-                .getChildren().findFirst().get().isTextNode());
+        Assertions.assertEquals(1, button.getElement().getChildren().count(),
+                "Button with text should have one child");
+        Assertions.assertTrue(button.getElement().getChildren().findFirst()
+                .get().isTextNode(), "Child should be a text node");
     }
 
     @Test
-    public void buttonWithText_clearText_removesChild() {
+    void buttonWithText_clearText_removesChild() {
         button = new Button("foo");
-        Assert.assertEquals("Button with text should have one child", 1,
-                button.getElement().getChildren().count());
+        Assertions.assertEquals(1, button.getElement().getChildren().count(),
+                "Button with text should have one child");
 
         button.setText(null);
-        Assert.assertEquals("Button with null text should have no children", 0,
-                button.getElement().getChildren().count());
+        Assertions.assertEquals(0, button.getElement().getChildren().count(),
+                "Button with null text should have no children");
 
         button.setText("bar");
-        Assert.assertEquals("Button with text should have one child", 1,
-                button.getElement().getChildren().count());
+        Assertions.assertEquals(1, button.getElement().getChildren().count(),
+                "Button with text should have one child");
 
         button.setText("");
-        Assert.assertEquals("Button with empty text should have no children", 0,
-                button.getElement().getChildren().count());
+        Assertions.assertEquals(0, button.getElement().getChildren().count(),
+                "Button with empty text should have no children");
     }
 
     @Test
-    public void textAndIconCtor() {
+    void textAndIconCtor() {
         Icon icon = new Icon();
         button = new Button("foo", icon);
-        Assert.assertEquals("foo", button.getText());
-        Assert.assertEquals(icon, button.getIcon());
+        Assertions.assertEquals("foo", button.getText());
+        Assertions.assertEquals(icon, button.getIcon());
     }
 
     @Test
-    public void textIconAndEventCtor() {
+    void textIconAndEventCtor() {
         Icon icon = new Icon();
         button = new Button("foo", icon, event -> {
         });
-        Assert.assertEquals("foo", button.getText());
-        Assert.assertEquals(icon, button.getIcon());
+        Assertions.assertEquals("foo", button.getText());
+        Assertions.assertEquals(icon, button.getIcon());
     }
 
     @Test
-    public void setIcon() {
+    void setIcon() {
         button = new Button("foo", new Icon());
 
         icon = new Icon();
@@ -137,31 +137,32 @@ public class ButtonTest {
         assertIconBeforeText();
 
         button.setIcon(null);
-        Assert.assertNull(button.getIcon());
-        Assert.assertFalse(
+        Assertions.assertNull(button.getIcon());
+        Assertions.assertFalse(
                 button.getChildren().anyMatch(child -> child.equals(icon)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void textNodeAsIcon_throws() {
-        button = new Button("foo", new Text("bar"));
+    @Test
+    void textNodeAsIcon_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Button("foo", new Text("bar")));
     }
 
     @Test
-    public void setText() {
+    void setText() {
         button = new Button("foo", new Icon());
         button.setText(null);
-        Assert.assertEquals("", button.getText());
+        Assertions.assertEquals("", button.getText());
 
         button.setText("bar");
-        Assert.assertEquals("bar", button.getText());
+        Assertions.assertEquals("bar", button.getText());
 
         button.setText("");
-        Assert.assertEquals("", button.getText());
+        Assertions.assertEquals("", button.getText());
     }
 
     @Test
-    public void setText_setIcon_changeOrder() {
+    void setText_setIcon_changeOrder() {
         icon = new Icon();
         button = new Button();
 
@@ -174,7 +175,7 @@ public class ButtonTest {
     }
 
     @Test
-    public void changeOrder_setIcon_setText_changeOrder() {
+    void changeOrder_setIcon_setText_changeOrder() {
         icon = new Icon();
         button = new Button();
 
@@ -189,34 +190,35 @@ public class ButtonTest {
     }
 
     @Test
-    public void setIconWithoutText_noSlot() {
+    void setIconWithoutText_noSlot() {
         icon = new Icon();
         button = new Button();
 
         button.setIcon(icon);
-        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+        Assertions.assertFalse(icon.getElement().hasAttribute("slot"));
 
         // Changing icon position should have no effect
         button.setIconAfterText(true);
-        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+        Assertions.assertFalse(icon.getElement().hasAttribute("slot"));
 
         button.setIconAfterText(false);
-        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+        Assertions.assertFalse(icon.getElement().hasAttribute("slot"));
     }
 
     @Test
-    public void setIcon_setText_slotUpdated() {
+    void setIcon_setText_slotUpdated() {
         icon = new Icon();
         button = new Button();
 
         button.setIcon(icon);
         button.setText(TEST_STRING);
 
-        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
+        Assertions.assertEquals("prefix",
+                icon.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void setIcon_setAndRemoveText_slotRemoved() {
+    void setIcon_setAndRemoveText_slotRemoved() {
         icon = new Icon();
         button = new Button();
 
@@ -224,21 +226,21 @@ public class ButtonTest {
         button.setText(TEST_STRING);
         button.setText(null);
 
-        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+        Assertions.assertFalse(icon.getElement().hasAttribute("slot"));
     }
 
     @Test
-    public void setEnabled() {
+    void setEnabled() {
         button = new Button();
         button.setEnabled(true);
-        Assert.assertTrue(button.isEnabled());
+        Assertions.assertTrue(button.isEnabled());
 
         button.setEnabled(false);
-        Assert.assertFalse(button.isEnabled());
+        Assertions.assertFalse(button.isEnabled());
     }
 
     @Test
-    public void setText_slotAttributeIsPreserved() {
+    void setText_slotAttributeIsPreserved() {
         button = new Button();
         button.setText("foo");
         Icon icon = new Icon(VaadinIcon.BULLSEYE);
@@ -246,24 +248,25 @@ public class ButtonTest {
         button.setIcon(icon);
 
         button.setText("bar");
-        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
+        Assertions.assertEquals("prefix",
+                icon.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void testFireClick() {
+    void testFireClick() {
         button = new Button();
         AtomicBoolean clicked = new AtomicBoolean(false);
         button.addClickListener(e -> {
             clicked.set(true);
         });
 
-        Assert.assertFalse(clicked.get());
+        Assertions.assertFalse(clicked.get());
         button.click();
-        Assert.assertTrue(clicked.get());
+        Assertions.assertTrue(clicked.get());
     }
 
     @Test
-    public void testFireClickDisabled() {
+    void testFireClickDisabled() {
         button = new Button();
         button.setEnabled(false);
         AtomicBoolean clicked = new AtomicBoolean(false);
@@ -271,13 +274,13 @@ public class ButtonTest {
             clicked.set(true);
         });
 
-        Assert.assertFalse(clicked.get());
+        Assertions.assertFalse(clicked.get());
         button.click();
-        Assert.assertFalse(clicked.get());
+        Assertions.assertFalse(clicked.get());
     }
 
     @Test
-    public void disableOnClick_click_componentIsDisabled() {
+    void disableOnClick_click_componentIsDisabled() {
         AtomicBoolean buttonIsEnabled = new AtomicBoolean(true);
 
         button = new Button("foo",
@@ -285,53 +288,56 @@ public class ButtonTest {
         button.setDisableOnClick(true);
         button.click();
 
-        Assert.assertFalse(
-                "Button should have been disabled when event has been fired",
-                buttonIsEnabled.get());
+        Assertions.assertFalse(buttonIsEnabled.get(),
+                "Button should have been disabled when event has been fired");
     }
 
     @Test
-    public void disableOnClick_clickRevertsDisabled_componentIsEnabled() {
+    void disableOnClick_clickRevertsDisabled_componentIsEnabled() {
         button = new Button("foo", event -> event.getSource().setEnabled(true));
         button.setDisableOnClick(true);
         button.click();
-        Assert.assertTrue("Button should be enabled", button.isEnabled());
+        Assertions.assertTrue(button.isEnabled(), "Button should be enabled");
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         button = new Button();
-        Assert.assertTrue(button instanceof HasTooltip);
+        Assertions.assertTrue(button instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         button = new Button();
-        Assert.assertTrue(button instanceof HasAriaLabel);
+        Assertions.assertTrue(button instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         button = new Button();
         button.setAriaLabel("Aria label");
 
-        Assert.assertTrue(button.getAriaLabel().isPresent());
-        Assert.assertEquals("Aria label", button.getAriaLabel().get());
+        Assertions.assertTrue(button.getAriaLabel().isPresent());
+        Assertions.assertEquals("Aria label", button.getAriaLabel().get());
     }
 
     private void assertIconBeforeText() {
-        Assert.assertTrue("Icon should be child of button",
+        Assertions.assertTrue(
                 button.getElement().getChildren()
-                        .anyMatch(child -> child.equals(icon.getElement())));
-        Assert.assertFalse(button.isIconAfterText());
-        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
+                        .anyMatch(child -> child.equals(icon.getElement())),
+                "Icon should be child of button");
+        Assertions.assertFalse(button.isIconAfterText());
+        Assertions.assertEquals("prefix",
+                icon.getElement().getAttribute("slot"));
     }
 
     private void assertIconAfterText() {
-        Assert.assertTrue("Icon should be child of button",
+        Assertions.assertTrue(
                 button.getElement().getChildren()
-                        .anyMatch(child -> child.equals(icon.getElement())));
-        Assert.assertTrue(button.isIconAfterText());
-        Assert.assertEquals("suffix", icon.getElement().getAttribute("slot"));
+                        .anyMatch(child -> child.equals(icon.getElement())),
+                "Icon should be child of button");
+        Assertions.assertTrue(button.isIconAfterText());
+        Assertions.assertEquals("suffix",
+                icon.getElement().getAttribute("slot"));
     }
 }

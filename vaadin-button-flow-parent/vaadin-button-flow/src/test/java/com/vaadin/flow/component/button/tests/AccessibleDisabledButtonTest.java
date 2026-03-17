@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
@@ -31,14 +31,14 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.tests.EnableFeatureFlagRule;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
-public class AccessibleDisabledButtonTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-    @Rule
-    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+class AccessibleDisabledButtonTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS);
 
     private Button button = Mockito.spy(Button.class);
@@ -51,15 +51,15 @@ public class AccessibleDisabledButtonTest {
     private ComponentEventListener mockBlurListener = Mockito
             .mock(ComponentEventListener.class);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         button.setEnabled(false);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void accessibleButtonsDisabled_focusListenerDisabled() {
-        featureFlagRule.disableFeature();
+    void accessibleButtonsDisabled_focusListenerDisabled() {
+        featureFlagExtension.disableFeature();
 
         button.addFocusListener(mockFocusListener);
 
@@ -71,7 +71,7 @@ public class AccessibleDisabledButtonTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void accessibleButtonsEnabled_focusListenerEnabled() {
+    void accessibleButtonsEnabled_focusListenerEnabled() {
         button.addFocusListener(mockFocusListener);
 
         fakeClientDomEvent(button, "focus");
@@ -82,8 +82,8 @@ public class AccessibleDisabledButtonTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void accessibleButtonsDisabled_blurListenerDisabled() {
-        featureFlagRule.disableFeature();
+    void accessibleButtonsDisabled_blurListenerDisabled() {
+        featureFlagExtension.disableFeature();
 
         button.addBlurListener(mockBlurListener);
 
@@ -95,7 +95,7 @@ public class AccessibleDisabledButtonTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void accessibleButtonsEnabled_blurListenerEnabled() {
+    void accessibleButtonsEnabled_blurListenerEnabled() {
         button.addBlurListener(mockBlurListener);
 
         fakeClientDomEvent(button, "blur");
@@ -105,8 +105,8 @@ public class AccessibleDisabledButtonTest {
     }
 
     @Test
-    public void accessibleButtonsDisabled_focusShortcutDisabled() {
-        featureFlagRule.disableFeature();
+    void accessibleButtonsDisabled_focusShortcutDisabled() {
+        featureFlagExtension.disableFeature();
 
         button.addFocusShortcut(Key.KEY_A);
         ui.add(button);
@@ -124,7 +124,7 @@ public class AccessibleDisabledButtonTest {
     }
 
     @Test
-    public void accessibleButtonsEnabled_focusShortcutEnabled() {
+    void accessibleButtonsEnabled_focusShortcutEnabled() {
         button.addFocusShortcut(Key.KEY_A);
         ui.add(button);
         ui.fakeClientCommunication();
