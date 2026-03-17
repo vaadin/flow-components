@@ -35,6 +35,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.SignalBindingUtil;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -200,20 +202,14 @@ public class MessageList extends Component
      *            the signal to bind the items to, not {@code null}
      * @since 25.1
      */
-    public <S extends Signal<MessageListItem>> void bindItems(
+    public <S extends Signal<MessageListItem>> SignalBinding<List<? extends Signal<MessageListItem>>> bindItems(
             Signal<List<S>> itemsSignal) {
-        Objects.requireNonNull(itemsSignal, "Signal cannot be null");
-        var node = getElement().getNode();
-        var feature = node.getFeature(SignalBindingFeature.class);
-        if (feature.hasBinding(ITEMS_BINDING)) {
-            throw new BindingActiveException();
-        }
-        Registration registration = Signal.effect(this, () -> {
-            List<? extends Signal<MessageListItem>> signals = itemsSignal.get();
-            updateItems(signals.stream().map(Signal::get)
-                    .collect(Collectors.toCollection(ArrayList::new)));
-        });
-        feature.setBinding(ITEMS_BINDING, registration, itemsSignal);
+        return SignalBindingUtil.effectBinding(this, ITEMS_BINDING, itemsSignal,
+                signalItems -> {
+                    var messageItems = signalItems.stream().map(Signal::get)
+                            .collect(Collectors.toList());
+                    updateItems(messageItems);
+                });
     }
 
     private void throwIfItemsBindingActive() {

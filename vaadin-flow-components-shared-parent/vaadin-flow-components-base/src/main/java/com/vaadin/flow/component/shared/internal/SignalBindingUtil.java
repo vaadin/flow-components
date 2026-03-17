@@ -17,9 +17,13 @@ package com.vaadin.flow.component.shared.internal;
 
 import java.util.Objects;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.BindingContext;
 import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -80,5 +84,66 @@ public final class SignalBindingUtil {
             }
         });
         return outer;
+    }
+
+    /**
+     * Creates a signal binding that runs an effect whenever the signal value
+     * changes. The binding is registered on the component using the specified
+     * binding type. If a binding of the same type is already active, a
+     * {@link BindingActiveException} is thrown.
+     * <p>
+     * This is useful when there is no existing Flow API to bind the signal to
+     * (such as a property), but the component still needs to react to signal
+     * changes, for example to run Javascript.
+     *
+     * @param owner
+     *            the component that owns the effect, not {@code null}
+     * @param bindingType
+     *            a unique identifier for the binding type, used to prevent
+     *            duplicate bindings on the same component, not {@code null}
+     * @param signal
+     *            the signal to observe, not {@code null}
+     * @param effect
+     *            the consumer to invoke with the signal's current value
+     *            whenever it changes, not {@code null}
+     * @param <T>
+     *            the signal value type
+     * @return a {@link SignalBinding} that can be used to register change
+     *         callbacks
+     * @throws BindingActiveException
+     *             if a binding of the same type is already active on the
+     *             component
+     */
+    public static <T> SignalBinding<T> effectBinding(Component owner,
+            String bindingType, Signal<T> signal,
+            SerializableConsumer<T> effect) {
+        Objects.requireNonNull(owner, "Owner cannot be null");
+        Objects.requireNonNull(bindingType, "Binding type cannot be null");
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        Objects.requireNonNull(effect, "Effect cannot be null");
+
+        var node = owner.getElement().getNode();
+        var feature = node.getFeature(SignalBindingFeature.class);
+        if (feature.hasBinding(bindingType)) {
+            throw new BindingActiveException();
+        }
+
+        T[] previous = (T[]) new Object[] { signal.peek() };
+        SignalBinding<T> binding = new SignalBinding<>();
+
+        Signal.effect(owner, ctx -> {
+            T value = signal.get();
+            effect.accept(value);
+            if (binding.hasCallbacks()) {
+                binding.fireOnChange(new BindingContext<>(ctx.isInitialRun(),
+                        ctx.isBackgroundChange(), previous[0], value,
+                        owner.getElement()));
+            }
+            previous[0] = value;
+        });
+
+        feature.setBinding(bindingType, signal, null);
+
+        return binding;
     }
 }
