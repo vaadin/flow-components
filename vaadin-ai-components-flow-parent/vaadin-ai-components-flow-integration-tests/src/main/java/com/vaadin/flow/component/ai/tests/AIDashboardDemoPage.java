@@ -32,10 +32,10 @@ import com.vaadin.flow.component.ai.dashboard.DashboardAIController.WidgetState;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LangChain4JLLMProvider;
 import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -52,7 +52,6 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  */
-@CssImport("@vaadin/aura/aura.css")
 @Route("vaadin-ai/ai-dashboard-demo")
 public class AIDashboardDemoPage extends HorizontalLayout {
 
@@ -96,6 +95,11 @@ public class AIDashboardDemoPage extends HorizontalLayout {
 
         var saveStateButton = new NativeButton("Save Current State");
         saveStateButton.addClickListener(e -> {
+            if (dashboard.getWidgets().isEmpty()) {
+                saveStateButton.getElement().executeJs(
+                        "window.alert('No widgets to save')");
+                return;
+            }
             DashboardState state = dashboardController.getState();
             if (state != null) {
                 saveStateToFile(state);
@@ -113,7 +117,21 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         dashboardSection.setFlexGrow(0, buttonBar);
 
         // Chat section (right)
-        var messageList = new MessageList();
+        var welcomeMessage = new MessageListItem("""
+                Welcome! This dashboard is backed by sales, employees, \
+                and products data. I can:
+                - **Create widgets** (charts, grids)
+                - **Update or remove** existing widgets
+                - **Resize and rearrange** the layout
+
+                Try these prompts:
+                - `Show monthly revenue as a bar chart`
+                - `Add a grid of all employees sorted by salary`
+                - `Show total units sold per product category`
+
+                You can also **select widgets** on the dashboard and ask \
+                me to modify or remove them.""", "Assistant");
+        var messageList = new MessageList(welcomeMessage);
         messageList.setSizeFull();
         var messageInput = new MessageInput();
         messageInput.setWidthFull();
@@ -122,11 +140,10 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         chatSection.setPadding(false);
         chatSection.setFlexGrow(1, messageList);
 
-        // Create LLM provider via OpenRouter
-        var apiKey = System.getenv("OPENROUTER_API_KEY");
+        // Create LLM provider via OpenAI
+        var apiKey = System.getenv("OPENAI_API_KEY");
         var model = OpenAiStreamingChatModel.builder().apiKey(apiKey)
-                .baseUrl("https://openrouter.ai/api/v1")
-                .modelName("anthropic/claude-sonnet-4").build();
+                .modelName("gpt-4o-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
         // Create orchestrator with controller
