@@ -39,7 +39,7 @@ public class BasicIT extends AbstractComponentIT {
     public void editColumnsAdded() {
         List<TestBenchElement> columns = grid.$("vaadin-grid-pro-edit-column")
                 .all();
-        Assert.assertEquals(columns.size(), 6);
+        Assert.assertEquals(6, columns.size());
     }
 
     @Test

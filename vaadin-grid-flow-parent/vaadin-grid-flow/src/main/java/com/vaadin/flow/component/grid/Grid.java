@@ -131,6 +131,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tools.jackson.databind.JsonNode;
@@ -213,8 +214,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.1.0-beta2")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/grid", version = "25.1.0-beta4")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.1.0-beta4")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -1481,6 +1482,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Creates a grid bound to the given list signal.
+     * <p>
+     * The grid will automatically update its items when the signal changes.
+     *
+     * @param itemsSignal
+     *            the signal providing the list of items, not {@code null}
+     * @see #setItems(Collection)
+     * @since 25.1
+     */
+    public Grid(Signal<? extends List<? extends Signal<T>>> itemsSignal) {
+        this();
+        bindItems(itemsSignal);
+    }
+
+    /**
      * Creates a new grid with an initial set of columns for each of the bean's
      * properties. The property-values of the bean will be converted to Strings.
      * Full names of the properties will be used as the
@@ -2719,6 +2735,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        DataViewUtils.checkNoActiveItemsBinding(this);
         if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
                 getSelectionPreservationMode()) && !dataProvider.isInMemory()) {
             throw new UnsupportedOperationException(

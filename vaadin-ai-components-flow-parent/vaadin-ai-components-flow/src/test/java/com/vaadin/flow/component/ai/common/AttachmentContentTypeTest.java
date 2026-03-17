@@ -15,68 +15,68 @@
  */
 package com.vaadin.flow.component.ai.common;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class AttachmentContentTypeTest {
+class AttachmentContentTypeTest {
 
     @Test
-    public void supportedContentType_fromMimeType_withImageTypes_returnsImage() {
-        Assert.assertEquals(AttachmentContentType.IMAGE,
+    void supportedContentType_fromMimeType_withImageTypes_returnsImage() {
+        Assertions.assertEquals(AttachmentContentType.IMAGE,
                 AttachmentContentType.fromMimeType("image/png"));
-        Assert.assertEquals(AttachmentContentType.IMAGE,
+        Assertions.assertEquals(AttachmentContentType.IMAGE,
                 AttachmentContentType.fromMimeType("image/jpeg"));
-        Assert.assertEquals(AttachmentContentType.IMAGE,
+        Assertions.assertEquals(AttachmentContentType.IMAGE,
                 AttachmentContentType.fromMimeType("image/gif"));
     }
 
     @Test
-    public void supportedContentType_fromMimeType_withTextTypes_returnsText() {
-        Assert.assertEquals(AttachmentContentType.TEXT,
+    void supportedContentType_fromMimeType_withTextTypes_returnsText() {
+        Assertions.assertEquals(AttachmentContentType.TEXT,
                 AttachmentContentType.fromMimeType("text/plain"));
-        Assert.assertEquals(AttachmentContentType.TEXT,
+        Assertions.assertEquals(AttachmentContentType.TEXT,
                 AttachmentContentType.fromMimeType("text/html"));
     }
 
     @Test
-    public void supportedContentType_fromMimeType_withPdfTypes_returnsPdf() {
-        Assert.assertEquals(AttachmentContentType.PDF,
+    void supportedContentType_fromMimeType_withPdfTypes_returnsPdf() {
+        Assertions.assertEquals(AttachmentContentType.PDF,
                 AttachmentContentType.fromMimeType("application/pdf"));
-        Assert.assertEquals(AttachmentContentType.PDF,
+        Assertions.assertEquals(AttachmentContentType.PDF,
                 AttachmentContentType.fromMimeType("application/x-pdf"));
     }
 
     @Test
-    public void supportedContentType_fromMimeType_withAudioTypes_returnsAudio() {
-        Assert.assertEquals(AttachmentContentType.AUDIO,
+    void supportedContentType_fromMimeType_withAudioTypes_returnsAudio() {
+        Assertions.assertEquals(AttachmentContentType.AUDIO,
                 AttachmentContentType.fromMimeType("audio/mpeg"));
-        Assert.assertEquals(AttachmentContentType.AUDIO,
+        Assertions.assertEquals(AttachmentContentType.AUDIO,
                 AttachmentContentType.fromMimeType("audio/wav"));
-        Assert.assertEquals(AttachmentContentType.AUDIO,
+        Assertions.assertEquals(AttachmentContentType.AUDIO,
                 AttachmentContentType.fromMimeType("audio/ogg"));
     }
 
     @Test
-    public void supportedContentType_fromMimeType_withVideoTypes_returnsVideo() {
-        Assert.assertEquals(AttachmentContentType.VIDEO,
+    void supportedContentType_fromMimeType_withVideoTypes_returnsVideo() {
+        Assertions.assertEquals(AttachmentContentType.VIDEO,
                 AttachmentContentType.fromMimeType("video/mp4"));
-        Assert.assertEquals(AttachmentContentType.VIDEO,
+        Assertions.assertEquals(AttachmentContentType.VIDEO,
                 AttachmentContentType.fromMimeType("video/webm"));
-        Assert.assertEquals(AttachmentContentType.VIDEO,
+        Assertions.assertEquals(AttachmentContentType.VIDEO,
                 AttachmentContentType.fromMimeType("video/ogg"));
     }
 
     @Test
-    public void supportedContentType_fromMimeType_withUnsupportedTypes_returnsUnsupported() {
-        Assert.assertEquals(AttachmentContentType.UNSUPPORTED,
+    void supportedContentType_fromMimeType_withUnsupportedTypes_returnsUnsupported() {
+        Assertions.assertEquals(AttachmentContentType.UNSUPPORTED,
                 AttachmentContentType.fromMimeType("application/octet-stream"));
-        Assert.assertEquals(AttachmentContentType.UNSUPPORTED,
+        Assertions.assertEquals(AttachmentContentType.UNSUPPORTED,
                 AttachmentContentType.fromMimeType("application/json"));
     }
 
     @Test
-    public void supportedContentType_fromMimeType_withNull_returnsUnsupported() {
-        Assert.assertEquals(AttachmentContentType.UNSUPPORTED,
+    void supportedContentType_fromMimeType_withNull_returnsUnsupported() {
+        Assertions.assertEquals(AttachmentContentType.UNSUPPORTED,
                 AttachmentContentType.fromMimeType(null));
     }
 }

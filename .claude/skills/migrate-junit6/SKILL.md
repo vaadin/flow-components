@@ -35,6 +35,22 @@ MockUIExtension ui = new MockUIExtension();
 
 Import: `com.vaadin.tests.MockUIRule` -> `com.vaadin.tests.MockUIExtension`
 
+## EnableFeatureFlagRule -> EnableFeatureFlagExtension
+
+```java
+// Before
+@Rule
+public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+        MyFeatureFlagProvider.MY_FEATURE);
+
+// After
+@RegisterExtension
+EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+        MyFeatureFlagProvider.MY_FEATURE);
+```
+
+Import: `com.vaadin.tests.EnableFeatureFlagRule` -> `com.vaadin.tests.EnableFeatureFlagExtension`
+
 ## Assertions
 
 Replace all `Assert.` with `Assertions.`. Method signatures are the same, except for **message-carrying overloads** where the message moves to the **last** parameter:
@@ -66,6 +82,8 @@ public void throwsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> doSomething());
 }
 ```
+
+Only place the `assertThrows` call around the statement that is expected to throw, not multiple statements.
 
 ## @Ignore -> @Disabled
 
@@ -104,6 +122,7 @@ JUnit 6 does **not** process JUnit 4 `@Rule` annotations from parent classes. Te
 | JUnit 4 | JUnit 6 |
 |---|---|
 | `AbstractSignalsUnitTest` | `AbstractSignalsJUnit6Test` |
+| `AbstractBasicValidationTest` | `AbstractBasicValidationJUnit6Test` |
 
 ## After editing
 
@@ -111,4 +130,10 @@ After converting all files, run the unit tests for the affected module to verify
 
 ```
 mvn test -pl <module-path>
+```
+
+Also, run the following command to fix any formatting issues that may have been introduced:
+
+```
+mvn spotless:apply -pl <module-path>
 ```

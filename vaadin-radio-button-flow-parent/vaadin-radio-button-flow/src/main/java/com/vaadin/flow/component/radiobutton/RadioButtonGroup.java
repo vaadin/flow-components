@@ -17,6 +17,7 @@ package com.vaadin.flow.component.radiobutton;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,7 +104,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.1.0-beta4")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T> implements
@@ -290,6 +291,28 @@ public class RadioButtonGroup<T>
         setItems(items);
     }
 
+    /**
+     * Creates a radio button group with the defined label and bound to the
+     * given list signal.
+     * <p>
+     * The radio button group will automatically update its items when the
+     * signal changes.
+     *
+     * @param label
+     *            the label describing the radio button group
+     * @param itemsSignal
+     *            the signal providing the list of items, not {@code null}
+     * @see #setItems(Collection)
+     * @see #setLabel(String)
+     * @since 25.1
+     */
+    public RadioButtonGroup(String label,
+            Signal<? extends List<? extends Signal<T>>> itemsSignal) {
+        this();
+        setLabel(label);
+        bindItems(itemsSignal);
+    }
+
     @Override
     public RadioButtonGroupDataView<T> setItems(
             DataProvider<T, Void> dataProvider) {
@@ -379,6 +402,7 @@ public class RadioButtonGroup<T>
      *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
+        DataViewUtils.checkNoActiveItemsBinding(this);
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
 
@@ -866,6 +890,9 @@ public class RadioButtonGroup<T>
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
             rebuild();
+            // Re-sync the presentation value so the element property uses the
+            // new key matching the rebuilt radio buttons.
+            setPresentationValue(getValue());
         }
     }
 

@@ -15,13 +15,22 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
@@ -107,5 +116,121 @@ public class ComboBoxSignalTest extends AbstractSignalsUnitTest {
         Assert.assertNotNull("Data view should not be null", dataView);
         List<String> items = dataView.getItems().toList();
         Assert.assertEquals(2, items.size());
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithCollection_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        comboBox.setItems(Arrays.asList("New Item 1", "New Item 2"));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithItemFilterAndCollection_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        ComboBox.ItemFilter<String> itemFilter = (item, filterText) -> item
+                .toLowerCase().contains(filterText.toLowerCase());
+        comboBox.setItems(itemFilter,
+                Arrays.asList("New Item 1", "New Item 2"));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithItemFilterAndVarargs_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        ComboBox.ItemFilter<String> itemFilter = (item, filterText) -> item
+                .toLowerCase().contains(filterText.toLowerCase());
+        comboBox.setItems(itemFilter, "New Item 1", "New Item 2");
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithItemFilterAndListDataProvider_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        ComboBox.ItemFilter<String> itemFilter = (item, filterText) -> item
+                .toLowerCase().contains(filterText.toLowerCase());
+        ListDataProvider<String> dataProvider = new ListDataProvider<>(
+                Arrays.asList("New Item 1", "New Item 2"));
+        comboBox.setItems(itemFilter, dataProvider);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithListDataProvider_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        comboBox.setItems(new ListDataProvider<>(
+                Arrays.asList("New Item 1", "New Item 2")));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithFetchCallback_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        CallbackDataProvider.FetchCallback<String, String> fetchCallback = query -> Stream
+                .of("New Item 1", "New Item 2");
+        comboBox.setItems(fetchCallback);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithFetchAndCountCallback_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        CallbackDataProvider.FetchCallback<String, String> fetchCallback = query -> Stream
+                .of("New Item 1", "New Item 2");
+        CallbackDataProvider.CountCallback<String, String> countCallback = query -> 2;
+        comboBox.setItems(fetchCallback, countCallback);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithDataProviderString_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        comboBox.setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetItemsWithInMemoryDataProviderAndFilterConverter_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        SerializableFunction<String, SerializablePredicate<String>> filterConverter = filterText -> item -> item
+                .toLowerCase().contains(filterText.toLowerCase());
+        comboBox.setItems(
+                DataProvider.ofCollection(
+                        Arrays.asList("New Item 1", "New Item 2")),
+                filterConverter);
+    }
+
+    @Test(expected = BindingActiveException.class)
+    public void bindItems_thenSetDataProviderWithFetchItemsCallback_throws() {
+        var comboBox = createComboBoxWithBoundItems();
+        ComboBox.FetchItemsCallback<String> fetchItems = (filter, offset,
+                limit) -> Stream.of("New Item 1", "New Item 2");
+        SerializableFunction<String, Integer> sizeCallback = filter -> 2;
+        comboBox.setDataProvider(fetchItems, sizeCallback);
+    }
+
+    private ComboBox<String> createComboBoxWithBoundItems() {
+        var comboBox = new ComboBox<String>();
+        var itemsSignal = new ListSignal<String>();
+        itemsSignal.insertLast("Item 1");
+        itemsSignal.insertLast("Item 2");
+        comboBox.bindItems(itemsSignal);
+        ui.add(comboBox);
+        return comboBox;
+    }
+
+    @Test
+    public void signalConstructor_setsItemsFromSignal() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("Alice");
+        listSignal.insertLast("Bob");
+
+        comboBox = new ComboBox<>("People", listSignal);
+        ui.add(comboBox);
+
+        ComboBoxDataView<String> dataView = comboBox.getGenericDataView();
+        List<String> items = dataView.getItems().toList();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals("Alice", items.get(0));
+        Assert.assertEquals("Bob", items.get(1));
+        Assert.assertEquals("People", comboBox.getLabel());
+
+        listSignal.insertLast("Charlie");
+
+        items = dataView.getItems().toList();
+        Assert.assertEquals(3, items.size());
+        Assert.assertEquals("Charlie", items.get(2));
     }
 }
