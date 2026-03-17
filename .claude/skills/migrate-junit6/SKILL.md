@@ -130,3 +130,9 @@ After converting all files, run the unit tests for the affected module to verify
 ```
 mvn test -pl <module-path>
 ```
+
+Also, run the following command to fix any formatting issues that may have been introduced:
+
+```
+mvn spotless:apply -pl <module-path>
+```
