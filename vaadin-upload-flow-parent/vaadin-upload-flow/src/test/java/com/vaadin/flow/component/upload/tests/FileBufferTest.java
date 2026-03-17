@@ -19,16 +19,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.internal.StringUtil;
 
-public class FileBufferTest {
+class FileBufferTest {
 
     @Test
-    public void shouldBeAbleToReadFileAfterReceiving() throws IOException {
+    void shouldBeAbleToReadFileAfterReceiving() throws IOException {
         FileBuffer fileBuffer = new FileBuffer();
         final String data = "Upload data";
         final byte[] dataBytes = data.getBytes(Charset.defaultCharset());
@@ -37,6 +37,6 @@ public class FileBufferTest {
         }
         final String readData = StringUtil
                 .toUTF8String(fileBuffer.getInputStream());
-        Assert.assertEquals(data, readData);
+        Assertions.assertEquals(data, readData);
     }
 }
