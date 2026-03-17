@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -158,6 +159,55 @@ class HasThemeVariantTest extends AbstractSignalsJUnit6Test {
                 .setThemeVariant(TestComponentVariant.TEST_VARIANT, true));
         Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariants(false, TestComponentVariant.TEST_VARIANT));
+    }
+
+    @Test
+    void bindThemeVariants_setsThemeNames() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<List<TestComponentVariant>> signal = new ValueSignal<>(
+                List.of(TestComponentVariant.TEST_VARIANT,
+                        TestComponentVariant.TEST_VARIANT_2));
+        component.bindThemeVariants(signal);
+
+        Assertions.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_2.getVariantName()),
+                component.getThemeNames());
+    }
+
+    @Test
+    void bindThemeVariants_signalChanges_themeNamesUpdated() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<List<TestComponentVariant>> signal = new ValueSignal<>(
+                List.of(TestComponentVariant.TEST_VARIANT));
+        component.bindThemeVariants(signal);
+
+        Assertions.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
+                component.getThemeNames());
+
+        signal.set(List.of(TestComponentVariant.TEST_VARIANT_2,
+                TestComponentVariant.TEST_VARIANT_3));
+
+        Assertions.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT_2.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_3.getVariantName()),
+                component.getThemeNames());
+    }
+
+    @Test
+    void bindThemeVariants_editWithActiveGroupBinding_throwsBindingActiveException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+        ValueSignal<List<TestComponentVariant>> signal = new ValueSignal<>(
+                List.of(TestComponentVariant.TEST_VARIANT));
+        component.bindThemeVariants(signal);
+
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> component.bindThemeVariants(new ValueSignal<>(
+                        List.of(TestComponentVariant.TEST_VARIANT_2))));
     }
 
     private enum TestComponentVariant implements ThemeVariant {

@@ -68,7 +68,7 @@ class HasTooltipTest {
         var tooltip = component.setTooltipText("foo");
         var tooltip2 = component.setTooltipText("bar");
         Assertions.assertEquals(tooltip, tooltip2);
-        Assertions.assertEquals(component.getTooltip().getText(), "bar");
+        Assertions.assertEquals("bar", component.getTooltip().getText());
     }
 
     @Test
@@ -76,7 +76,7 @@ class HasTooltipTest {
         var tooltip = component.setTooltipText("foo");
         var tooltip2 = component.setTooltipText(null);
         Assertions.assertEquals(tooltip, tooltip2);
-        Assertions.assertEquals(component.getTooltip().getText(), null);
+        Assertions.assertEquals(null, component.getTooltip().getText());
     }
 
     @Test

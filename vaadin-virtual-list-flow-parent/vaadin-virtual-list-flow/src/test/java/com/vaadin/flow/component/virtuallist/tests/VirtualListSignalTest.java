@@ -18,38 +18,44 @@ package com.vaadin.flow.component.virtuallist.tests;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ListSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class VirtualListSignalTest extends AbstractSignalsUnitTest {
+class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
 
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetDataProvider_throws() {
+    @Test
+    void bindItems_thenSetDataProvider_throws() {
         var list = createVirtualListWithBoundItems();
-        list.setDataProvider(DataProvider.ofItems("New Item 1", "New Item 2"));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> list.setDataProvider(
+                        DataProvider.ofItems("New Item 1", "New Item 2")));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetCollection_throws() {
+    @Test
+    void bindItems_thenSetCollection_throws() {
         var list = createVirtualListWithBoundItems();
-        list.setItems(Collections.emptyList());
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> list.setItems(Collections.emptyList()));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItems_throws() {
+    @Test
+    void bindItems_thenSetItems_throws() {
         var list = createVirtualListWithBoundItems();
-        list.setItems("New Item 1");
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> list.setItems("New Item 1"));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetStream_throws() {
+    @Test
+    void bindItems_thenSetStream_throws() {
         var list = createVirtualListWithBoundItems();
-        list.setItems(Stream.of("New Item 1", "New Item 2"));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> list.setItems(Stream.of("New Item 1", "New Item 2")));
     }
 
     private VirtualList<String> createVirtualListWithBoundItems() {

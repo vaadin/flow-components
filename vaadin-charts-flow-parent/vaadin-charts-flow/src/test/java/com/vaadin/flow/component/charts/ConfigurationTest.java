@@ -33,7 +33,7 @@ public class ConfigurationTest {
         conf.setSeries(Arrays.asList(new ListSeries()));
         conf.addSeries(new ListSeries());
 
-        assertEquals(conf.getSeries().size(), 2);
+        assertEquals(2, conf.getSeries().size());
     }
 
     @Test
@@ -45,6 +45,6 @@ public class ConfigurationTest {
 
         series.add(new ListSeries());
 
-        assertEquals(conf.getSeries().size(), 0);
+        assertEquals(0, conf.getSeries().size());
     }
 }

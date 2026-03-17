@@ -291,8 +291,8 @@ public class DialogTestPageIT extends AbstractDialogIT {
         Long overLayWidthAfterResize = getSizeFromElement(overlayPart,
                 ElementConstants.STYLE_WIDTH);
 
-        Assert.assertEquals(overLayHeightAfterResize, maxValue);
-        Assert.assertEquals(overLayWidthAfterResize, maxValue);
+        Assert.assertEquals(maxValue, overLayHeightAfterResize);
+        Assert.assertEquals(maxValue, overLayWidthAfterResize);
 
         resizeDialog(overlayPart, -75, -75);
 
@@ -301,8 +301,8 @@ public class DialogTestPageIT extends AbstractDialogIT {
         overLayWidthAfterResize = getSizeFromElement(overlayPart,
                 ElementConstants.STYLE_WIDTH);
 
-        Assert.assertEquals(overLayHeightAfterResize, minValue);
-        Assert.assertEquals(overLayWidthAfterResize, minValue);
+        Assert.assertEquals(minValue, overLayHeightAfterResize);
+        Assert.assertEquals(minValue, overLayWidthAfterResize);
     }
 
     @Test
@@ -360,8 +360,8 @@ public class DialogTestPageIT extends AbstractDialogIT {
         String overlayHeight = overlay
                 .getCssValue(ElementConstants.STYLE_HEIGHT);
 
-        Assert.assertEquals(overlayWidth, "500px");
-        Assert.assertEquals(overlayHeight, "500px");
+        Assert.assertEquals("500px", overlayWidth);
+        Assert.assertEquals("500px", overlayHeight);
 
         getDialog().findElement(By.tagName("button")).click();
         findElement(By.id("dimension-open-self-attached-button")).click();
@@ -371,8 +371,8 @@ public class DialogTestPageIT extends AbstractDialogIT {
         overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
         overlayHeight = overlay.getCssValue(ElementConstants.STYLE_HEIGHT);
 
-        Assert.assertEquals(overlayWidth, "500px");
-        Assert.assertEquals(overlayHeight, "500px");
+        Assert.assertEquals("500px", overlayWidth);
+        Assert.assertEquals("500px", overlayHeight);
     }
 
     @Test
@@ -388,8 +388,8 @@ public class DialogTestPageIT extends AbstractDialogIT {
         String overlayHeight = overlayPart
                 .getCssValue(ElementConstants.STYLE_HEIGHT);
 
-        Assert.assertEquals(overlayWidth, "500px");
-        Assert.assertEquals(overlayHeight, "500px");
+        Assert.assertEquals("500px", overlayWidth);
+        Assert.assertEquals("500px", overlayHeight);
 
         getDialog().findElement(By.tagName("button")).click();
         findElement(By.id("dimension-open-attached-button")).click();
@@ -399,8 +399,8 @@ public class DialogTestPageIT extends AbstractDialogIT {
         overlayWidth = overlayPart.getCssValue(ElementConstants.STYLE_WIDTH);
         overlayHeight = overlayPart.getCssValue(ElementConstants.STYLE_HEIGHT);
 
-        Assert.assertEquals(overlayWidth, "500px");
-        Assert.assertEquals(overlayHeight, "500px");
+        Assert.assertEquals("500px", overlayWidth);
+        Assert.assertEquals("500px", overlayHeight);
     }
 
     @Test
