@@ -202,7 +202,7 @@ public class MessageList extends Component
      *            the signal to bind the items to, not {@code null}
      * @since 25.1
      */
-    public <S extends Signal<MessageListItem>> SignalBinding<List<? extends Signal<MessageListItem>>> bindItems(
+    public <S extends Signal<MessageListItem>> SignalBinding<List<S>> bindItems(
             Signal<List<S>> itemsSignal) {
         return SignalBindingUtil.effectBinding(this, ITEMS_BINDING, itemsSignal,
                 signalItems -> {
