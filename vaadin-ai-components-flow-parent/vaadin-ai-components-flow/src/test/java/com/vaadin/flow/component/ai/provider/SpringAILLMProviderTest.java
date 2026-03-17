@@ -929,10 +929,10 @@ class SpringAILLMProviderTest {
         }
     }
 
-    private static LLMProvider.ToolDefinition createExplicitTool(String name,
+    private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<String, String> executor) {
-        return new LLMProvider.ToolDefinition() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return name;
@@ -973,7 +973,7 @@ class SpringAILLMProviderTest {
 
     private record TestLLMRequestWithExplicitTools(String userMessage,
             String systemPrompt, List<AIAttachment> attachments, Object[] tools,
-            List<LLMProvider.ToolDefinition> explicitTools)
+            List<LLMProvider.ToolSpec> explicitTools)
             implements
                 LLMRequest {
     }

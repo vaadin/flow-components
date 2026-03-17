@@ -214,7 +214,7 @@ public interface LLMProvider {
          * @return list of explicit tool definitions, never {@code null} but may
          *         be empty
          */
-        default List<ToolDefinition> explicitTools() {
+        default List<ToolSpec> explicitTools() {
             return List.of();
         }
     }
@@ -235,7 +235,7 @@ public interface LLMProvider {
      * method.
      * </p>
      */
-    interface ToolDefinition {
+    interface ToolSpec {
 
         /**
          * Gets the unique name of this tool.

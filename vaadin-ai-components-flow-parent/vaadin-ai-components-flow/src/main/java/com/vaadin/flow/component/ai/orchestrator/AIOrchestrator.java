@@ -414,7 +414,7 @@ public class AIOrchestrator implements Serializable {
             }
 
             @Override
-            public List<LLMProvider.ToolDefinition> explicitTools() {
+            public List<LLMProvider.ToolSpec> explicitTools() {
                 return controllerTools;
             }
         };
@@ -435,7 +435,7 @@ public class AIOrchestrator implements Serializable {
         }
         for (var controller : controllers) {
             try {
-                controller.onRequestCompleted(responseText);
+                controller.onRequestCompleted();
             } catch (Exception e) {
                 LOGGER.error("Error in controller onRequestCompleted", e);
             }

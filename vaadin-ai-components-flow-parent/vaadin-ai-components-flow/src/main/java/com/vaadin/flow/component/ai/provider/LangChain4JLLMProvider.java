@@ -197,9 +197,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
         var tools = request.tools();
         var explicitTools = request.explicitTools();
-        if ((tools == null || tools.length == 0) && explicitTools.isEmpty()) {
-            return Collections.emptyMap();
-        }
         var toolExecutors = new HashMap<String, ToolExecutor>();
         // Add tools from LangChain4j @Tool annotated methods. Create executors
         // for each annotated method including private methods.
@@ -255,7 +252,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private static ToolSpecification toToolSpecification(
-            LLMProvider.ToolDefinition tool) {
+            LLMProvider.ToolSpec tool) {
         var builder = ToolSpecification.builder().name(tool.getName())
                 .description(tool.getDescription());
         var schema = tool.getParametersSchema();

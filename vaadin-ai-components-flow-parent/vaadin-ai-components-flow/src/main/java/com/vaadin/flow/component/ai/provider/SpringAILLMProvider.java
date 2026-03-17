@@ -34,6 +34,7 @@ import org.springframework.ai.content.Media;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
+import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
@@ -272,10 +273,10 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     private static ToolCallback toToolCallback(
-            LLMProvider.ToolDefinition tool) {
+            LLMProvider.ToolSpec tool) {
         return new ToolCallback() {
             @Override
-            public org.springframework.ai.tool.definition.ToolDefinition getToolDefinition() {
+            public ToolDefinition getToolDefinition() {
                 var schema = tool.getParametersSchema();
                 return DefaultToolDefinition.builder().name(tool.getName())
                         .description(tool.getDescription())
@@ -296,7 +297,7 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     private static void warnDuplicateToolNames(
-            List<LLMProvider.ToolDefinition> tools) {
+            List<LLMProvider.ToolSpec> tools) {
         var seen = new HashSet<String>();
         for (var tool : tools) {
             if (!seen.add(tool.getName())) {
