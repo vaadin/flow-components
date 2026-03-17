@@ -1,27 +1,48 @@
 {
   "widgets" : [ {
+    "widgetId" : "chart-2",
+    "title" : "Product Sales Distribution",
+    "type" : "chart",
+    "colspan" : 1,
+    "rowspan" : 1,
+    "sqlQuery" : "SELECT CATEGORY, SUM(UNITS_SOLD) FROM PRODUCTS GROUP BY CATEGORY",
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Product Sales by Category\"},\"tooltip\":{\"pointFormat\":\"<b>{point.percentage:.1f}%</b><br/>Units: {point.y}\"}}",
+    "dataSource" : "default"
+  }, {
+    "widgetId" : "grid-5",
+    "title" : "Top Products",
+    "type" : "grid",
+    "colspan" : 1,
+    "rowspan" : 2,
+    "sqlQuery" : "SELECT PRODUCT_NAME, UNITS_SOLD, PRICE FROM PRODUCTS ORDER BY UNITS_SOLD DESC LIMIT 10",
+    "configuration" : null,
+    "dataSource" : "default"
+  }, {
     "widgetId" : "chart-1",
     "title" : "Average Salary by Department",
     "type" : "chart",
     "colspan" : 1,
     "rowspan" : 1,
-    "sqlQuery" : "SELECT DEPARTMENT, AVG(SALARY) FROM EMPLOYEES GROUP BY DEPARTMENT ORDER BY AVG(SALARY) DESC",
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"column\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Average Salary by Department\"},\"tooltip\":{\"pointFormat\":\"<b>{point.y:,.0f}</b> dollars\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Department\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Average Salary ($)\"}}}"
+    "sqlQuery" : "SELECT DEPARTMENT, AVG(SALARY) FROM EMPLOYEES GROUP BY DEPARTMENT",
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"column\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Average Salary by Department\"},\"tooltip\":{},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Department\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Average Salary ($)\"}}}",
+    "dataSource" : "default"
   }, {
-    "widgetId" : "chart-2",
-    "title" : "Monthly Revenue Trends",
+    "widgetId" : "grid-3",
+    "title" : "Employee Directory",
+    "type" : "grid",
+    "colspan" : 1,
+    "rowspan" : 1,
+    "sqlQuery" : "SELECT NAME, DEPARTMENT, SALARY, AGE FROM EMPLOYEES ORDER BY DEPARTMENT, NAME",
+    "configuration" : null,
+    "dataSource" : "default"
+  }, {
+    "widgetId" : "chart-4",
+    "title" : "Age vs Salary Analysis",
     "type" : "chart",
     "colspan" : 1,
     "rowspan" : 1,
-    "sqlQuery" : "SELECT \"MONTH\", SUM(REVENUE) FROM SALES GROUP BY \"MONTH\" ORDER BY SUM(REVENUE)",
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"line\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Monthly Revenue Trends\"},\"tooltip\":{\"pointFormat\":\"<b>{point.y:,.0f}</b> dollars\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Month\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Total Revenue ($)\"}}}"
-  }, {
-    "widgetId" : "grid-3",
-    "title" : "Product Inventory",
-    "type" : "grid",
-    "colspan" : 2,
-    "rowspan" : 1,
-    "sqlQuery" : "SELECT PRODUCT_NAME AS \"Product Name\", CATEGORY AS \"Category\", UNITS_SOLD AS \"Units Sold\", PRICE AS \"Price ($)\" FROM PRODUCTS ORDER BY UNITS_SOLD DESC",
-    "configuration" : null
+    "sqlQuery" : "SELECT AGE, SALARY FROM EMPLOYEES",
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"scatter\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Employee Age vs Salary\"},\"tooltip\":{\"pointFormat\":\"Age: <b>{point.x}</b><br/>Salary: <b>${point.y:,.0f}</b>\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Age (years)\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Salary ($)\"}}}",
+    "dataSource" : "default"
   } ]
 }

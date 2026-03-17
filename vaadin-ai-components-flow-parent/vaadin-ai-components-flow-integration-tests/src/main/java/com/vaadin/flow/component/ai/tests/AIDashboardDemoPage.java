@@ -73,6 +73,7 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         dashboard.setMinimumRowHeight("300px");
         dashboard.setMaximumColumnCount(4);
         dashboard.setEditable(true);
+        dashboard.setDenseLayout(true);
 
         var dashboardController = new DashboardAIController(dashboard,
                 new InMemoryDatabaseProvider());
@@ -152,6 +153,7 @@ public class AIDashboardDemoPage extends HorizontalLayout {
                 widgetNode.put("rowspan", ws.rowspan());
                 widgetNode.put("sqlQuery", ws.sqlQuery());
                 widgetNode.put("configuration", ws.configuration());
+                widgetNode.put("dataSource", ws.dataSource());
                 widgetsArray.add(widgetNode);
             }
 
@@ -186,7 +188,8 @@ public class AIDashboardDemoPage extends HorizontalLayout {
                         node.has("colspan") ? node.get("colspan").asInt() : 1,
                         node.has("rowspan") ? node.get("rowspan").asInt() : 1,
                         getStringOrNull(node, "sqlQuery"),
-                        getStringOrNull(node, "configuration")));
+                        getStringOrNull(node, "configuration"),
+                        getStringOrNull(node, "dataSource")));
             }
 
             LOGGER.info("Dashboard state loaded from {}", STATE_FILE);
