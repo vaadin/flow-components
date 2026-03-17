@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
@@ -28,54 +28,54 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
-public class PrefixSuffixTest {
+class PrefixSuffixTest {
 
     @Test
-    public void bigDecimalField() {
+    void bigDecimalField() {
         BigDecimalField c = new BigDecimalField();
-        Assert.assertTrue(c instanceof HasPrefix);
-        Assert.assertTrue(c instanceof HasSuffix);
+        Assertions.assertTrue(c instanceof HasPrefix);
+        Assertions.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void emailField() {
+    void emailField() {
         EmailField c = new EmailField();
-        Assert.assertTrue(c instanceof HasPrefix);
-        Assert.assertTrue(c instanceof HasSuffix);
+        Assertions.assertTrue(c instanceof HasPrefix);
+        Assertions.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void integerField() {
+    void integerField() {
         IntegerField c = new IntegerField();
-        Assert.assertTrue(c instanceof HasPrefix);
-        Assert.assertTrue(c instanceof HasSuffix);
+        Assertions.assertTrue(c instanceof HasPrefix);
+        Assertions.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void numberField() {
+    void numberField() {
         NumberField c = new NumberField();
-        Assert.assertTrue(c instanceof HasPrefix);
-        Assert.assertTrue(c instanceof HasSuffix);
+        Assertions.assertTrue(c instanceof HasPrefix);
+        Assertions.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void passwordField() {
+    void passwordField() {
         PasswordField c = new PasswordField();
-        Assert.assertTrue(c instanceof HasPrefix);
-        Assert.assertTrue(c instanceof HasSuffix);
+        Assertions.assertTrue(c instanceof HasPrefix);
+        Assertions.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void textArea() {
+    void textArea() {
         TextArea c = new TextArea();
-        Assert.assertTrue(c instanceof HasPrefix);
-        Assert.assertTrue(c instanceof HasSuffix);
+        Assertions.assertTrue(c instanceof HasPrefix);
+        Assertions.assertTrue(c instanceof HasSuffix);
     }
 
     @Test
-    public void textField() {
+    void textField() {
         TextField c = new TextField();
-        Assert.assertTrue(c instanceof HasPrefix);
-        Assert.assertTrue(c instanceof HasSuffix);
+        Assertions.assertTrue(c instanceof HasPrefix);
+        Assertions.assertTrue(c instanceof HasSuffix);
     }
 }
