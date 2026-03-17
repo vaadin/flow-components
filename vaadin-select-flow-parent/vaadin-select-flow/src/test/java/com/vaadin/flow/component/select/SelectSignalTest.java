@@ -99,17 +99,30 @@ public class SelectSignalTest extends AbstractSignalsUnitTest {
         select.bindItems(listSignal);
         ui.add(select);
 
-        List<String> items = select.getGenericDataView().getItems().toList();
-        Assert.assertEquals(1, items.size());
-        Assert.assertEquals("original", items.get(0));
+        List<String> labels = getItemLabels(select);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("original", labels.get(0));
 
         // Update the item signal value (identity change)
         listSignal.peek().getFirst().set("updated");
 
-        // Verify the data provider items reflect the update
-        items = select.getGenericDataView().getItems().toList();
-        Assert.assertEquals(1, items.size());
-        Assert.assertEquals("updated", items.get(0));
+        // Verify the item element was updated with the new label
+        labels = getItemLabels(select);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("updated", labels.get(0));
+    }
+
+    private List<String> getItemLabels(Select<String> select) {
+        // Items are inside the listBox element (first child of select)
+        var listBoxElement = select.getElement().getChild(0);
+        var labels = new java.util.ArrayList<String>();
+        for (int i = 0; i < listBoxElement.getChildCount(); i++) {
+            String text = listBoxElement.getChild(i).getText();
+            if (text != null && !text.isEmpty()) {
+                labels.add(text);
+            }
+        }
+        return labels;
     }
 
     private Select<String> createSelectWithBoundItems() {
