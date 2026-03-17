@@ -404,17 +404,17 @@ public class CheckboxGroup<T>
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> dataRefreshEvent) {
-            T otherItem = dataRefreshEvent.getItem();
+            T newItem = dataRefreshEvent.getItem();
             T oldItem = dataRefreshEvent.getOldItem();
             Object oldItemId = getItemId(oldItem);
-            Object newItemId = getItemId(otherItem);
+            Object newItemId = getItemId(newItem);
             boolean identityChanged = !Objects.equals(oldItemId, newItemId);
-            keyMapper.refresh(otherItem, oldItem);
+            keyMapper.refresh(newItem, oldItem);
             getCheckboxItems().filter(
                     item -> Objects.equals(getItemId(item.item), oldItemId))
                     .findFirst().ifPresent(oldCheckbox -> {
                         if (identityChanged) {
-                            Checkbox newCheckbox = createCheckBox(otherItem);
+                            Checkbox newCheckbox = createCheckBox(newItem);
                             getElement().insertChild(
                                     getElement().indexOfChild(
                                             oldCheckbox.getElement()),

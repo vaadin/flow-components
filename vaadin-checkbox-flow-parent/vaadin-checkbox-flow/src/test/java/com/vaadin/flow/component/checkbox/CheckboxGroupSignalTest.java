@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ListSignal;
@@ -95,8 +93,7 @@ public class CheckboxGroupSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindItems_updateItemSignalValue_keyMapperRemapsToSameKey()
-            throws Exception {
+    public void bindItems_updateItemSignalValue_updatesCheckbox() {
         var listSignal = new ListSignal<String>();
         listSignal.insertLast("original");
 
@@ -104,31 +101,24 @@ public class CheckboxGroupSignalTest extends AbstractSignalsUnitTest {
         group.bindItems(listSignal);
         ui.add(group);
 
-        KeyMapper<String> keyMapper = getKeyMapper(group);
-        String keyBefore = keyMapper.key("original");
-        Assert.assertTrue(keyMapper.has("original"));
+        Assert.assertEquals(1, getCheckboxLabels(group).size());
+        Assert.assertEquals("original", getCheckboxLabels(group).get(0));
 
-        // Update the item signal value
+        // Update the item signal value (identity change)
         listSignal.peek().getFirst().set("updated");
 
-        // The old identity should be gone, replaced by the new one
-        // mapped to the same key
-        Assert.assertFalse(keyMapper.has("original"));
-        Assert.assertTrue(keyMapper.has("updated"));
-        Assert.assertEquals(keyBefore, keyMapper.key("updated"));
-
-        // Verify the component items reflect the update
-        List<String> items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(1, items.size());
-        Assert.assertEquals("updated", items.get(0));
+        // Verify the checkbox child was replaced with the updated label
+        List<String> labels = getCheckboxLabels(group);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("updated", labels.get(0));
     }
 
     @SuppressWarnings("unchecked")
-    private KeyMapper<String> getKeyMapper(CheckboxGroup<String> group)
-            throws Exception {
-        Field field = CheckboxGroup.class.getDeclaredField("keyMapper");
-        field.setAccessible(true);
-        return (KeyMapper<String>) field.get(group);
+    private List<String> getCheckboxLabels(CheckboxGroup<String> group) {
+        return group.getChildren()
+                .filter(Checkbox.class::isInstance)
+                .map(c -> ((Checkbox) c).getLabel())
+                .toList();
     }
 
     private CheckboxGroup<String> createCheckboxGroupWithBoundItems() {

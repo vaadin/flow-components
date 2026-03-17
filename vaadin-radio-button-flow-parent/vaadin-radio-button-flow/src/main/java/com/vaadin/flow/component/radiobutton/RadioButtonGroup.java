@@ -736,21 +736,15 @@ public class RadioButtonGroup<T>
         }
     }
 
-    private void resetRadioButton(T item) {
-        resetRadioButton(item, item);
-    }
-
-    private void resetRadioButton(T oldItem, T newItem) {
-        boolean identityChanged = !Objects.equals(getItemId(oldItem),
-                getItemId(newItem));
+    private void resetRadioButton(T newItem, T oldItem) {
+        boolean identityChanged = !Objects.equals(getItemId(newItem),
+                getItemId(oldItem));
         getRadioButtons()
                 .filter(radioButton -> getItemId(radioButton.getItem())
                         .equals(getItemId(oldItem)))
                 .findFirst().ifPresent(oldButton -> {
                     if (identityChanged) {
-                        RadioButton<T> newButton = new RadioButton<>(
-                                keyMapper.key(newItem), newItem);
-                        updateButton(newButton);
+                        Component newButton = createRadioButton(newItem);
                         getElement().insertChild(
                                 getElement().indexOfChild(
                                         oldButton.getElement()),
@@ -904,7 +898,7 @@ public class RadioButtonGroup<T>
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> refreshEvent) {
             keyMapper.refresh(refreshEvent.getItem(), refreshEvent.getOldItem());
-            resetRadioButton(refreshEvent.getOldItem(), refreshEvent.getItem());
+            resetRadioButton(refreshEvent.getItem(), refreshEvent.getOldItem());
         } else {
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);

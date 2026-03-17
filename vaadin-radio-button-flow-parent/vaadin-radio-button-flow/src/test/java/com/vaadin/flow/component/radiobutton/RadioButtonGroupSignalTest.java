@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +24,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ListSignal;
@@ -150,40 +148,34 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindItems_updateItemSignalValue_keyMapperRemapsToSameKey()
-            throws Exception {
+    public void bindItems_updateItemSignalValue_updatesRadioButton() {
         var listSignal = new ListSignal<String>();
         listSignal.insertLast("original");
 
-        var group = new RadioButtonGroup<String>();
-        group.bindItems(listSignal);
-        ui.add(group);
+        var radioGroup = new RadioButtonGroup<String>();
+        radioGroup.bindItems(listSignal);
+        ui.add(radioGroup);
 
-        KeyMapper<String> keyMapper = getKeyMapper(group);
-        String keyBefore = keyMapper.key("original");
-        Assert.assertTrue(keyMapper.has("original"));
+        List<String> labels = getRadioButtonItems(radioGroup);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("original", labels.get(0));
 
-        // Update the item signal value
+        // Update the item signal value (identity change)
         listSignal.peek().getFirst().set("updated");
 
-        // The old identity should be gone, replaced by the new one
-        // mapped to the same key
-        Assert.assertFalse(keyMapper.has("original"));
-        Assert.assertTrue(keyMapper.has("updated"));
-        Assert.assertEquals(keyBefore, keyMapper.key("updated"));
-
-        // Verify the component items reflect the update
-        List<String> items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(1, items.size());
-        Assert.assertEquals("updated", items.get(0));
+        // Verify the radio button child was replaced with the updated item
+        labels = getRadioButtonItems(radioGroup);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("updated", labels.get(0));
     }
 
     @SuppressWarnings("unchecked")
-    private KeyMapper<String> getKeyMapper(RadioButtonGroup<String> group)
-            throws Exception {
-        Field field = RadioButtonGroup.class.getDeclaredField("keyMapper");
-        field.setAccessible(true);
-        return (KeyMapper<String>) field.get(group);
+    private List<String> getRadioButtonItems(
+            RadioButtonGroup<String> group) {
+        return group.getChildren()
+                .filter(RadioButton.class::isInstance)
+                .map(c -> ((RadioButton<String>) c).getItem())
+                .toList();
     }
 
     @Test

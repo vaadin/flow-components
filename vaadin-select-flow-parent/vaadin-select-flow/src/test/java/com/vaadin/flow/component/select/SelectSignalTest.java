@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.select;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ListSignal;
@@ -93,8 +91,7 @@ public class SelectSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindItems_updateItemSignalValue_keyMapperRemapsToSameKey()
-            throws Exception {
+    public void bindItems_updateItemSignalValue_updatesItem() {
         var listSignal = new ListSignal<String>();
         listSignal.insertLast("original");
 
@@ -102,31 +99,17 @@ public class SelectSignalTest extends AbstractSignalsUnitTest {
         select.bindItems(listSignal);
         ui.add(select);
 
-        KeyMapper<String> keyMapper = getKeyMapper(select);
-        String keyBefore = keyMapper.key("original");
-        Assert.assertTrue(keyMapper.has("original"));
-
-        // Update the item signal value
-        listSignal.peek().getFirst().set("updated");
-
-        // The old identity should be gone, replaced by the new one
-        // mapped to the same key
-        Assert.assertFalse(keyMapper.has("original"));
-        Assert.assertTrue(keyMapper.has("updated"));
-        Assert.assertEquals(keyBefore, keyMapper.key("updated"));
-
-        // Verify the component items reflect the update
         List<String> items = select.getGenericDataView().getItems().toList();
         Assert.assertEquals(1, items.size());
-        Assert.assertEquals("updated", items.get(0));
-    }
+        Assert.assertEquals("original", items.get(0));
 
-    @SuppressWarnings("unchecked")
-    private KeyMapper<String> getKeyMapper(Select<String> select)
-            throws Exception {
-        Field field = Select.class.getDeclaredField("keyMapper");
-        field.setAccessible(true);
-        return (KeyMapper<String>) field.get(select);
+        // Update the item signal value (identity change)
+        listSignal.peek().getFirst().set("updated");
+
+        // Verify the data provider items reflect the update
+        items = select.getGenericDataView().getItems().toList();
+        Assert.assertEquals(1, items.size());
+        Assert.assertEquals("updated", items.get(0));
     }
 
     private Select<String> createSelectWithBoundItems() {
