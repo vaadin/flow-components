@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -36,46 +35,45 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Tests for the {@link TextField}.
  */
-public class TextFieldTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class TextFieldTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void setValueNull() {
+    void setValueNull() {
         TextField textField = new TextField();
-        assertEquals("Value should be an empty string", "",
-                textField.getValue());
+        assertEquals("", textField.getValue(),
+                "Value should be an empty string");
 
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage("Null value is not supported");
-
-        textField.setValue(null);
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> textField.setValue(null));
+        Assertions.assertTrue(
+                exception.getMessage().contains("Null value is not supported"));
     }
 
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         TextField textField = new TextField();
-        Assert.assertEquals("", textField.getValue());
-        Assert.assertEquals("", textField.getElement().getProperty("value"));
+        Assertions.assertEquals("", textField.getValue());
+        Assertions.assertEquals("",
+                textField.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
         TextField textField = new TextField((String) null);
-        Assert.assertEquals("", textField.getValue());
-        Assert.assertEquals("", textField.getElement().getProperty("value"));
+        Assertions.assertEquals("", textField.getValue());
+        Assertions.assertEquals("",
+                textField.getElement().getProperty("value"));
     }
 
     @Test
-    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+    void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-text-field");
         element.setProperty("value", "test");
 
@@ -88,12 +86,12 @@ public class TextFieldTest {
                 .thenAnswer(invocation -> new TextField());
 
         TextField textField = Component.from(element, TextField.class);
-        Assert.assertEquals("test",
+        Assertions.assertEquals("test",
                 textField.getElement().getProperty("value"));
     }
 
     @Test
-    public void clearButtonVisiblePropertyValue() {
+    void clearButtonVisiblePropertyValue() {
         TextField textField = new TextField();
 
         assertClearButtonPropertyValueEquals(textField, true);
@@ -109,7 +107,7 @@ public class TextFieldTest {
     }
 
     @Test
-    public void autoselectPropertyValue() {
+    void autoselectPropertyValue() {
         TextField textField = new TextField();
 
         assertAutoselectPropertyValueEquals(textField, true);
@@ -117,30 +115,30 @@ public class TextFieldTest {
     }
 
     @Test
-    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         "foo", TextField.class, ui);
     }
 
     @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+    void addThemeVariant_themeAttributeContainsThemeVariant() {
         TextField field = new TextField();
         field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertTrue(themeNames
+        Assertions.assertTrue(themeNames
                 .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         TextField field = new TextField();
         field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertFalse(themeNames
+        Assertions.assertFalse(themeNames
                 .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
@@ -153,57 +151,59 @@ public class TextFieldTest {
     }
 
     @Test
-    public void implementsHasAllowedCharPattern() {
-        assertTrue("TextField should support char pattern",
+    void implementsHasAllowedCharPattern() {
+        assertTrue(
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new TextField().getClass()));
+                        .isAssignableFrom(new TextField().getClass()),
+                "TextField should support char pattern");
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         TextField field = new TextField();
-        Assert.assertTrue(field instanceof HasTooltip);
+        Assertions.assertTrue(field instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         TextField field = new TextField();
-        Assert.assertTrue(field instanceof HasAriaLabel);
+        Assertions.assertTrue(field instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         TextField field = new TextField();
 
         field.setAriaLabel("aria-label");
-        Assert.assertTrue(field.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+        Assertions.assertTrue(field.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", field.getAriaLabel().get());
 
         field.setAriaLabel(null);
-        Assert.assertTrue(field.getAriaLabel().isEmpty());
+        Assertions.assertTrue(field.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         TextField field = new TextField();
 
         field.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+        Assertions.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                field.getAriaLabelledBy().get());
 
         field.setAriaLabelledBy(null);
-        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         TextField field = new TextField();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextField, String>, String>);
     }
 
     @Test
-    public void setI18n_getI18n() {
+    void setI18n_getI18n() {
         TextField textField = new TextField();
         TextField.TextFieldI18n i18n = new TextField.TextFieldI18n()
                 .setRequiredErrorMessage("Required error")
@@ -211,12 +211,12 @@ public class TextFieldTest {
                 .setMaxLengthErrorMessage("Max length error")
                 .setPatternErrorMessage("Pattern error");
         textField.setI18n(i18n);
-        Assert.assertEquals(i18n, textField.getI18n());
+        Assertions.assertEquals(i18n, textField.getI18n());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(TextField.class));
     }
 }
