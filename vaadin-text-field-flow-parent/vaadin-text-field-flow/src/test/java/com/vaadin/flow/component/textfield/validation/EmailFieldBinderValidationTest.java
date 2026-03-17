@@ -20,7 +20,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public class EmailFieldBinderValidationTest
+class EmailFieldBinderValidationTest
         extends AbstractBinderValidationTest<String, EmailField> {
 
     @Override

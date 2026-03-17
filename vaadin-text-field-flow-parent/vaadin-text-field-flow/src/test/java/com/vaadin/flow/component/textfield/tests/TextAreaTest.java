@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -36,46 +35,43 @@ import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Tests for the {@link TextArea}.
  */
-public class TextAreaTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class TextAreaTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void setValueNull() {
+    void setValueNull() {
         TextArea textArea = new TextArea();
-        assertEquals("Value should be an empty string", "",
-                textArea.getValue());
+        assertEquals("", textArea.getValue(),
+                "Value should be an empty string");
 
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage("Null value is not supported");
-
-        textArea.setValue(null);
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> textArea.setValue(null));
+        Assertions.assertTrue(
+                exception.getMessage().contains("Null value is not supported"));
     }
 
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         TextArea textArea = new TextArea();
-        Assert.assertEquals("", textArea.getValue());
-        Assert.assertEquals("", textArea.getElement().getProperty("value"));
+        Assertions.assertEquals("", textArea.getValue());
+        Assertions.assertEquals("", textArea.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
         TextArea textArea = new TextArea((String) null);
-        Assert.assertEquals("", textArea.getValue());
-        Assert.assertEquals("", textArea.getElement().getProperty("value"));
+        Assertions.assertEquals("", textArea.getValue());
+        Assertions.assertEquals("", textArea.getElement().getProperty("value"));
     }
 
     @Test
-    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+    void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-text-area");
         element.setProperty("value", "test");
 
@@ -88,11 +84,12 @@ public class TextAreaTest {
                 .thenAnswer(invocation -> new TextArea());
 
         TextArea textArea = Component.from(element, TextArea.class);
-        Assert.assertEquals("test", textArea.getElement().getProperty("value"));
+        Assertions.assertEquals("test",
+                textArea.getElement().getProperty("value"));
     }
 
     @Test
-    public void clearButtonVisiblePropertyValue() {
+    void clearButtonVisiblePropertyValue() {
         TextArea textArea = new TextArea();
 
         assertClearButtonPropertyValueEquals(textArea, true);
@@ -108,7 +105,7 @@ public class TextAreaTest {
     }
 
     @Test
-    public void autoselectPropertyValue() {
+    void autoselectPropertyValue() {
         TextArea textArea = new TextArea();
 
         assertAutoselectPropertyValueEquals(textArea, true);
@@ -116,14 +113,14 @@ public class TextAreaTest {
     }
 
     @Test
-    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         "foo", TextArea.class, ui);
     }
 
     @Test
-    public void patternPropertyValue() {
+    void patternPropertyValue() {
         String testPattern = "TEST";
         TextArea textArea = new TextArea();
 
@@ -142,116 +139,120 @@ public class TextAreaTest {
     }
 
     @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+    void addThemeVariant_themeAttributeContainsThemeVariant() {
         TextArea textArea = new TextArea();
         textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assert.assertTrue(themeNames
+        Assertions.assertTrue(themeNames
                 .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         TextArea textArea = new TextArea();
         textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
         textArea.removeThemeVariants(TextAreaVariant.LUMO_SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assert.assertFalse(themeNames
+        Assertions.assertFalse(themeNames
                 .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
-    public void implementsHasAllowedCharPattern() {
-        assertTrue("TextArea should support char pattern",
+    void implementsHasAllowedCharPattern() {
+        assertTrue(
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new TextArea().getClass()));
+                        .isAssignableFrom(new TextArea().getClass()),
+                "TextArea should support char pattern");
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         TextArea textArea = new TextArea();
-        Assert.assertTrue(textArea instanceof HasTooltip);
+        Assertions.assertTrue(textArea instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         TextArea field = new TextArea();
-        Assert.assertTrue(field instanceof HasAriaLabel);
+        Assertions.assertTrue(field instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         TextArea field = new TextArea();
 
         field.setAriaLabel("aria-label");
-        Assert.assertTrue(field.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+        Assertions.assertTrue(field.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", field.getAriaLabel().get());
 
         field.setAriaLabel(null);
-        Assert.assertTrue(field.getAriaLabel().isEmpty());
+        Assertions.assertTrue(field.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         TextArea field = new TextArea();
 
         field.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+        Assertions.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                field.getAriaLabelledBy().get());
 
         field.setAriaLabelledBy(null);
-        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         TextArea field = new TextArea();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextArea, String>, String>);
     }
 
     @Test
-    public void getMinRows_defaultValue() {
+    void getMinRows_defaultValue() {
         TextArea field = new TextArea();
 
-        Assert.assertEquals(2, field.getMinRows());
+        Assertions.assertEquals(2, field.getMinRows());
     }
 
     @Test
-    public void setMinRows() {
+    void setMinRows() {
         TextArea field = new TextArea();
         field.setMinRows(5);
 
-        Assert.assertEquals(5, field.getMinRows());
-        Assert.assertEquals(5, field.getElement().getProperty("minRows", 0));
+        Assertions.assertEquals(5, field.getMinRows());
+        Assertions.assertEquals(5,
+                field.getElement().getProperty("minRows", 0));
     }
 
     @Test
-    public void getMaxRows_defaultValue() {
+    void getMaxRows_defaultValue() {
         TextArea field = new TextArea();
 
-        Assert.assertNull(field.getMaxRows());
+        Assertions.assertNull(field.getMaxRows());
     }
 
     @Test
-    public void setMaxRows() {
+    void setMaxRows() {
         TextArea field = new TextArea();
         field.setMaxRows(5);
 
-        Assert.assertEquals(5, (int) field.getMaxRows());
-        Assert.assertEquals(5, field.getElement().getProperty("maxRows", 0));
+        Assertions.assertEquals(5, (int) field.getMaxRows());
+        Assertions.assertEquals(5,
+                field.getElement().getProperty("maxRows", 0));
 
         field.setMaxRows(null);
 
-        Assert.assertNull(field.getMaxRows());
-        Assert.assertNull(field.getElement().getProperty("maxRows"));
+        Assertions.assertNull(field.getMaxRows());
+        Assertions.assertNull(field.getElement().getProperty("maxRows"));
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(TextArea.class));
     }
 }
