@@ -30,7 +30,9 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.content.Media;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.definition.DefaultToolDefinition;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
@@ -206,6 +208,13 @@ public class SpringAILLMProvider implements LLMProvider {
         if (tools != null && tools.length > 0) {
             promptSpec = promptSpec.tools(tools);
         }
+        var explicitTools = request.explicitTools();
+        if (explicitTools != null && !explicitTools.isEmpty()) {
+            var callbacks = explicitTools.stream()
+                    .map(SpringAILLMProvider::toToolCallback)
+                    .toArray(ToolCallback[]::new);
+            promptSpec = promptSpec.toolCallbacks(callbacks);
+        }
         return promptSpec;
     }
 
@@ -258,6 +267,26 @@ public class SpringAILLMProvider implements LLMProvider {
                 .formatTextAttachment(attachment.name(), textContent);
         return Media.builder().mimeType(MimeType.valueOf("text/plain"))
                 .data(formattedText).build();
+    }
+
+    private static ToolCallback toToolCallback(
+            LLMProvider.ToolDefinition tool) {
+        return new ToolCallback() {
+            @Override
+            public org.springframework.ai.tool.definition.ToolDefinition getToolDefinition() {
+                var schema = tool.getParametersSchema();
+                return DefaultToolDefinition.builder().name(tool.getName())
+                        .description(tool.getDescription())
+                        .inputSchema(schema != null ? schema
+                                : "{\"type\":\"object\",\"properties\":{}}")
+                        .build();
+            }
+
+            @Override
+            public String call(String arguments) {
+                return tool.execute(arguments);
+            }
+        };
     }
 
     private static void checkPushConfiguration() {

@@ -1501,6 +1501,334 @@ class AIOrchestratorTest {
         Assertions.assertEquals(2, history.size());
     }
 
+    // --- AIController tests ---
+
+    @Test
+    void builder_withNullController_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class, () -> AIOrchestrator
+                .builder(mockProvider, null).withController(null));
+    }
+
+    @Test
+    void builder_withController_collectsToolsForRequest() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var tool = createToolDefinition("myTool", "A test tool");
+        AIController controller = createController(tool);
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var explicitTools = captor.getValue().explicitTools();
+        Assertions.assertEquals(1, explicitTools.size());
+        Assertions.assertEquals("myTool", explicitTools.getFirst().getName());
+    }
+
+    @Test
+    void builder_withMultipleControllers_collectsAllTools() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var tool1 = createToolDefinition("tool1", "First tool");
+        var tool2 = createToolDefinition("tool2", "Second tool");
+        AIController controller1 = createController(tool1);
+        AIController controller2 = createController(tool2);
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller1)
+                .withController(controller2).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var explicitTools = captor.getValue().explicitTools();
+        Assertions.assertEquals(2, explicitTools.size());
+        Assertions.assertEquals("tool1", explicitTools.get(0).getName());
+        Assertions.assertEquals("tool2", explicitTools.get(1).getName());
+    }
+
+    @Test
+    void builder_withController_callsOnRequestCompleted() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response text"));
+
+        var captured = new ArrayList<String>();
+        AIController controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolDefinition> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onRequestCompleted(String responseText) {
+                captured.add(responseText);
+            }
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals(1, captured.size());
+        Assertions.assertEquals("Response text", captured.getFirst());
+    }
+
+    @Test
+    void builder_withController_onRequestCompletedReceivesFullStreamedResponse() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hello", " ", "World"));
+
+        var captured = new ArrayList<String>();
+        AIController controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolDefinition> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onRequestCompleted(String responseText) {
+                captured.add(responseText);
+            }
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hi");
+
+        Assertions.assertEquals(1, captured.size());
+        Assertions.assertEquals("Hello World", captured.getFirst());
+    }
+
+    @Test
+    void builder_withControllerOnRequestCompletedThrows_logsAndContinues() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        AIController throwingController = new AIController() {
+            @Override
+            public List<LLMProvider.ToolDefinition> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onRequestCompleted(String responseText) {
+                throw new RuntimeException("Controller error");
+            }
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withController(throwingController).build();
+
+        // Should not throw
+        orchestrator.prompt("Hello");
+
+        // History should still be recorded
+        var history = orchestrator.getHistory();
+        Assertions.assertEquals(2, history.size());
+    }
+
+    @Test
+    void builder_withController_onRequestCompletedNotCalledOnError() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var captured = new ArrayList<String>();
+        AIController controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolDefinition> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onRequestCompleted(String responseText) {
+                captured.add(responseText);
+            }
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(captured.isEmpty(),
+                "onRequestCompleted should not be called on error");
+    }
+
+    @Test
+    void builder_withControllerAndResponseCompleteListener_bothCalled() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var listenerCapture = new ArrayList<String>();
+        var controllerCapture = new ArrayList<String>();
+        AIController controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolDefinition> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onRequestCompleted(String responseText) {
+                controllerCapture.add(responseText);
+            }
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseCompleteListener(
+                        event -> listenerCapture.add(event.getResponse()))
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals(1, listenerCapture.size());
+        Assertions.assertEquals(1, controllerCapture.size());
+        Assertions.assertEquals("Response", listenerCapture.getFirst());
+        Assertions.assertEquals("Response", controllerCapture.getFirst());
+    }
+
+    @Test
+    void builder_withNoControllers_explicitToolsIsEmpty() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty());
+    }
+
+    @Test
+    void reconnect_withControllers_replacesControllers() {
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("New Response"));
+
+        var tool1 = createToolDefinition("originalTool", "Original");
+        AIController originalController = createController(tool1);
+
+        // Build without mocks (no message list) so it can serialize
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withController(originalController).build();
+
+        // Serialize and deserialize to simulate session restore
+        orchestrator = serializeAndDeserialize(orchestrator);
+
+        var tool2 = createToolDefinition("newTool", "New");
+        AIController newController = createController(tool2);
+
+        orchestrator.reconnect(newProvider).withControllers(newController)
+                .apply();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        var explicitTools = captor.getValue().explicitTools();
+        Assertions.assertEquals(1, explicitTools.size());
+        Assertions.assertEquals("newTool", explicitTools.getFirst().getName());
+    }
+
+    private static AIController createController(
+            LLMProvider.ToolDefinition... tools) {
+        return new AIController() {
+            @Override
+            public List<LLMProvider.ToolDefinition> getTools() {
+                return List.of(tools);
+            }
+        };
+    }
+
+    private static LLMProvider.ToolDefinition createToolDefinition(String name,
+            String description) {
+        return new LLMProvider.ToolDefinition() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return "result";
+            }
+        };
+    }
+
+    private static AIOrchestrator serializeAndDeserialize(
+            AIOrchestrator orchestrator) {
+        try {
+            var baos = new java.io.ByteArrayOutputStream();
+            var oos = new java.io.ObjectOutputStream(baos);
+            oos.writeObject(orchestrator);
+            oos.close();
+            var bais = new java.io.ByteArrayInputStream(baos.toByteArray());
+            var ois = new java.io.ObjectInputStream(bais);
+            return (AIOrchestrator) ois.readObject();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private AIOrchestrator getSimpleOrchestrator() {
         return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)

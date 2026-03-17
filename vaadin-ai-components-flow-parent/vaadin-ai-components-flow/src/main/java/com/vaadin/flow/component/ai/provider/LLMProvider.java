@@ -202,5 +202,88 @@ public interface LLMProvider {
          * @return array of tool objects, never {@code null} but may be empty
          */
         Object[] tools();
+
+        /**
+         * Gets the explicit tool definitions for this request. Unlike
+         * vendor-specific annotated tools returned by {@link #tools()}, these
+         * are framework-agnostic tool definitions provided programmatically
+         * (typically by
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController}
+         * instances).
+         *
+         * @return list of explicit tool definitions, never {@code null} but may
+         *         be empty
+         */
+        default List<ToolDefinition> explicitTools() {
+            return List.of();
+        }
+    }
+
+    /**
+     * A framework-agnostic tool definition that the LLM can invoke.
+     * <p>
+     * Unlike vendor-specific tool annotations (e.g., LangChain4j's
+     * {@code @Tool}, Spring AI's {@code @Tool}), this interface allows tools to
+     * be defined programmatically without depending on any specific AI
+     * framework.
+     * </p>
+     * <p>
+     * Tool definitions are typically provided by
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController}
+     * implementations through their
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#getTools()}
+     * method.
+     * </p>
+     */
+    interface ToolDefinition extends Serializable {
+
+        /**
+         * Gets the unique name of this tool.
+         *
+         * @return the tool name, never {@code null}
+         */
+        String getName();
+
+        /**
+         * Gets a human-readable description of what this tool does. This
+         * description is sent to the LLM to help it decide when to invoke the
+         * tool.
+         *
+         * @return the tool description, never {@code null}
+         */
+        String getDescription();
+
+        /**
+         * Gets the JSON Schema describing the parameters this tool accepts. The
+         * schema should follow the JSON Schema specification.
+         * <p>
+         * Example:
+         * </p>
+         *
+         * <pre>
+         * {
+         *   "type": "object",
+         *   "properties": {
+         *     "query": { "type": "string", "description": "The SQL query" }
+         *   },
+         *   "required": ["query"]
+         * }
+         * </pre>
+         *
+         * @return the JSON Schema string, or {@code null} if the tool takes no
+         *         parameters
+         */
+        String getParametersSchema();
+
+        /**
+         * Executes the tool with the given arguments.
+         *
+         * @param arguments
+         *            the tool arguments as a JSON string matching the
+         *            parameters schema, or {@code null} if the tool takes no
+         *            parameters
+         * @return the result of the tool execution as a string
+         */
+        String execute(String arguments);
     }
 }
