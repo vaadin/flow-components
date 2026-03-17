@@ -23,9 +23,12 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
+
+import tools.jackson.databind.node.ArrayNode;
 
 public class MessageListSignalTest extends AbstractSignalsUnitTest {
 
@@ -48,6 +51,8 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(2, messageList.getItems().size());
         Assert.assertEquals("Hello", messageList.getItems().get(0).getText());
         Assert.assertEquals("World", messageList.getItems().get(1).getText());
+
+        assertFullUpdate();
     }
 
     @Test
@@ -57,11 +62,13 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
 
         messageList = new MessageList(listSignal);
         ui.add(messageList);
+        assertFullUpdate();
 
         var item2Signal = new ValueSignal<>(new MessageListItem("World"));
         listSignal.set(List.of(item1Signal, item2Signal));
 
         Assert.assertEquals(2, messageList.getItems().size());
+        assertFullUpdate();
     }
 
     @Test(expected = BindingActiveException.class)
@@ -87,6 +94,7 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals(2, messageList.getItems().size());
         Assert.assertEquals("Hello", messageList.getItems().get(0).getText());
         Assert.assertEquals("World", messageList.getItems().get(1).getText());
+        assertFullUpdate();
     }
 
     @Test
@@ -98,6 +106,7 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
         ui.add(messageList);
 
         Assert.assertEquals(1, messageList.getItems().size());
+        assertFullUpdate();
 
         var item2Signal = new ValueSignal<>(new MessageListItem("World"));
         var item3Signal = new ValueSignal<>(new MessageListItem("Foo"));
@@ -105,6 +114,7 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
 
         Assert.assertEquals(3, messageList.getItems().size());
         Assert.assertEquals("Foo", messageList.getItems().get(2).getText());
+        assertFullUpdate();
     }
 
     @Test
@@ -116,11 +126,13 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
         ui.add(messageList);
 
         Assert.assertEquals("Hello", messageList.getItems().get(0).getText());
+        assertFullUpdate();
 
         item1Signal.set(new MessageListItem("Updated Hello"));
 
         Assert.assertEquals("Updated Hello",
                 messageList.getItems().get(0).getText());
+        assertFullUpdate();
     }
 
     @Test(expected = BindingActiveException.class)
@@ -157,5 +169,28 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
     @Test(expected = NullPointerException.class)
     public void bindItems_nullSignal_throws() {
         messageList.bindItems(null);
+    }
+
+    /**
+     * Asserts that the only pending JavaScript invocation is a full update
+     * (setItems) and that the parameters of the invocation match the items in
+     * the message list.
+     */
+    private void assertFullUpdate() {
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
+        // Expect only one pending invocation
+        Assert.assertEquals(1, pendingInvocations.size());
+
+        var invocation = pendingInvocations.getFirst();
+        // Expect the only invocation to be setItems
+        Assert.assertTrue(invocation.getInvocation().getExpression()
+                .contains("setItems"));
+
+        // Expect the parameters to equal the items in the message list
+        var parameterItems = (ArrayNode) invocation.getInvocation()
+                .getParameters().getFirst();
+        var expectedItems = JacksonUtils.listToJson(messageList.getItems());
+        Assert.assertTrue(
+                JacksonUtils.jsonEquals(expectedItems, parameterItems));
     }
 }
