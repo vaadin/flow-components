@@ -122,6 +122,7 @@ JUnit 6 does **not** process JUnit 4 `@Rule` annotations from parent classes. Te
 | JUnit 4 | JUnit 6 |
 |---|---|
 | `AbstractSignalsUnitTest` | `AbstractSignalsJUnit6Test` |
+| `AbstractBasicValidationTest` | `AbstractBasicValidationJUnit6Test` |
 
 ## After editing
 
@@ -129,4 +130,10 @@ After converting all files, run the unit tests for the affected module to verify
 
 ```
 mvn test -pl <module-path>
+```
+
+Also, run the following command to fix any formatting issues that may have been introduced:
+
+```
+mvn spotless:apply -pl <module-path>
 ```

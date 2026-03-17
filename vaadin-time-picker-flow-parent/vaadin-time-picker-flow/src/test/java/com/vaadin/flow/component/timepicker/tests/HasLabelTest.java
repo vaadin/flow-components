@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.timepicker.TimePicker;
 
-public class HasLabelTest {
+class HasLabelTest {
 
     @Test
-    public void tab() {
+    void tab() {
         TimePicker c = new TimePicker();
-        Assert.assertTrue(c instanceof HasLabel);
+        Assertions.assertTrue(c instanceof HasLabel);
     }
 
 }
