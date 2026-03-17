@@ -137,10 +137,11 @@ public class DashboardAIController implements AIController {
                 12. reorderWidgets(widgetIds) - Reorder widgets by providing IDs in the desired order
 
                 WORKFLOW:
-                1. Use getSchema() to understand available data
-                2. Create widgets with addChartWidget() or addGridWidget() - ALWAYS provide the query \
+                1. ALWAYS call getDashboardState() FIRST before doing anything else. Widget selections \
+                can change between requests, so you must check the current state every time.
+                2. Use getSchema() to understand available data
+                3. Create widgets with addChartWidget() or addGridWidget() - ALWAYS provide the query \
                 and config parameters to populate them with data immediately
-                3. Use getDashboardState() to see existing widgets if needed
                 4. Use widget-specific tools (suffixed with widgetId) to update existing widgets
                 5. Use updateWidget() to adjust layout (title, size)
 

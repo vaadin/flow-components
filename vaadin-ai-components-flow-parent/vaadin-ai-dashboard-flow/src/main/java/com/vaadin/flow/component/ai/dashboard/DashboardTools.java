@@ -105,10 +105,12 @@ public class DashboardTools implements Serializable {
                 3. reorderWidgets(widgetIds) - Reorder widgets by providing the widget IDs in the desired order
 
                 WORKFLOW:
-                1. ALWAYS call getDashboardState() FIRST to see existing widgets
+                1. ALWAYS call getDashboardState() FIRST before doing anything else. \
+                Widget selections can change between requests, so you must check the \
+                current state every time.
                 2. Use updateWidget() to change widget titles, sizes, or positions
                 3. Use reorderWidgets() to change the order of widgets on the dashboard
-                3. Widget IDs are assigned when widgets are created and shown in getDashboardState()
+                4. Widget IDs are assigned when widgets are created and shown in getDashboardState()
 
                 WIDGET PROPERTIES:
                 - title: Display title shown on the widget header
@@ -120,6 +122,8 @@ public class DashboardTools implements Serializable {
                 SELECTION:
                 - Users can select widgets in the dashboard UI
                 - getDashboardState() includes a "selected" field for each widget
+                - Selections can change at any time, so ALWAYS call getDashboardState() at the \
+                start of each request to get the current selection state
                 - When the user refers to "selected widgets", apply the action ONLY to \
                 widgets where selected=true
                 """;
@@ -155,7 +159,7 @@ public class DashboardTools implements Serializable {
 
             @Override
             public String getDescription() {
-                return "Returns the current state of the dashboard including all widgets with their IDs, titles, types, colspan, and rowspan. Takes no parameters.";
+                return "Returns the current state of the dashboard including all widgets with their IDs, titles, types, colspan, rowspan, and selection state. IMPORTANT: Always call this first in every request, as widget selections can change between requests. Takes no parameters.";
             }
 
             @Override
