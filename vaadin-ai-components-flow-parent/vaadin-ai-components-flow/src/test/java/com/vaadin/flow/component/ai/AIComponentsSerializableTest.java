@@ -55,6 +55,9 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory",
                 "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\..*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\..*",
+                // AIController — intentionally not serializable; restored
+                // via reconnect()
+                "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIController",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.AIComponentsFeatureFlagProvider",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Reconnector",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Builder"));

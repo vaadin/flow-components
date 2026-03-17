@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,10 +38,16 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * <li><b>Lifecycle hooks</b> — via {@link #onRequestCompleted(String)}, called
  * after each successful LLM response</li>
  * </ul>
+ * <p>
+ * Controllers are <b>not serialized</b> with the orchestrator. After
+ * deserialization, restore controllers via
+ * {@link AIOrchestrator#reconnect(com.vaadin.flow.component.ai.provider.LLMProvider)
+ * reconnect(provider)}{@code .withControllers(controller).apply()}.
+ * </p>
  *
  * @author Vaadin Ltd
  */
-public interface AIController extends Serializable {
+public interface AIController {
 
     /**
      * Returns the framework-agnostic tools provided by this controller.

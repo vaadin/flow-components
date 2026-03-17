@@ -138,7 +138,7 @@ public class AIOrchestrator implements Serializable {
     private AIInput input;
     private AIFileReceiver fileReceiver;
     private transient Object[] tools = new Object[0];
-    private List<AIController> controllers = new ArrayList<>();
+    private transient List<AIController> controllers = new ArrayList<>();
     private String userName;
     private String assistantName;
     private AttachmentSubmitListener attachmentSubmitListener;
@@ -459,8 +459,9 @@ public class AIOrchestrator implements Serializable {
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        // Initialize tools to empty array
+        // Initialize transient fields to safe defaults
         tools = new Object[0];
+        controllers = List.of();
     }
 
     /**
