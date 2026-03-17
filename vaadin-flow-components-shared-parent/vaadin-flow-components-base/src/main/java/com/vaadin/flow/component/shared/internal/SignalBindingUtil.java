@@ -23,6 +23,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
@@ -131,8 +132,9 @@ public final class SignalBindingUtil {
         Objects.requireNonNull(signal, "Signal cannot be null");
         Objects.requireNonNull(effect, "Effect cannot be null");
 
-        var node = owner.getElement().getNode();
-        var feature = node.getFeature(SignalBindingFeature.class);
+        StateNode node = owner.getElement().getNode();
+        SignalBindingFeature feature = node
+                .getFeature(SignalBindingFeature.class);
         if (feature.hasBinding(bindingType)) {
             throw new BindingActiveException();
         }
@@ -174,8 +176,9 @@ public final class SignalBindingUtil {
         Objects.requireNonNull(component, "Component cannot be null");
         Objects.requireNonNull(bindingType, "Binding type cannot be null");
 
-        var node = component.getElement().getNode();
-        var feature = node.getFeature(SignalBindingFeature.class);
+        StateNode node = component.getElement().getNode();
+        SignalBindingFeature feature = node
+                .getFeature(SignalBindingFeature.class);
         if (feature.hasBinding(bindingType)) {
             throw new BindingActiveException();
         }
