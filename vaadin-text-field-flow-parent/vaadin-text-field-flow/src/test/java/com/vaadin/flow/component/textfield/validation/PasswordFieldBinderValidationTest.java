@@ -20,7 +20,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public class PasswordFieldBinderValidationTest
+class PasswordFieldBinderValidationTest
         extends AbstractBinderValidationTest<String, PasswordField> {
 
     @Override
