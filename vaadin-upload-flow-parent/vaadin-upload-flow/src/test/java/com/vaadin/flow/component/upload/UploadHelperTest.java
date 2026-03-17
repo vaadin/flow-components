@@ -21,192 +21,192 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.streams.UploadHandler;
-import com.vaadin.tests.EnableFeatureFlagRule;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class UploadHelperTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-    @Rule
-    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+class UploadHelperTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
     private Div owner;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         owner = new Div();
         ui.add(owner);
     }
 
     @Test
-    public void hasUploadHandler_withDefaultConstructor_returnsFalse() {
+    void hasUploadHandler_withDefaultConstructor_returnsFalse() {
         var manager = new UploadManager(owner);
-        Assert.assertFalse(UploadHelper.hasUploadHandler(manager));
+        Assertions.assertFalse(UploadHelper.hasUploadHandler(manager));
     }
 
     @Test
-    public void hasUploadHandler_withHandlerInConstructor_returnsTrue() {
+    void hasUploadHandler_withHandlerInConstructor_returnsTrue() {
         var handler = UploadHandler.inMemory((metadata, data) -> {
         });
         var manager = new UploadManager(owner, handler);
-        Assert.assertTrue(UploadHelper.hasUploadHandler(manager));
+        Assertions.assertTrue(UploadHelper.hasUploadHandler(manager));
     }
 
     @Test
-    public void hasUploadHandler_withDefaultConstructor_setHandler_returnsTrue() {
+    void hasUploadHandler_withDefaultConstructor_setHandler_returnsTrue() {
         var manager = new UploadManager(owner);
         var handler = UploadHandler.inMemory((metadata, data) -> {
         });
         manager.setUploadHandler(handler);
-        Assert.assertTrue(UploadHelper.hasUploadHandler(manager));
+        Assertions.assertTrue(UploadHelper.hasUploadHandler(manager));
     }
 
     @Test
-    public void hasUploadHandler_upload_withDefaultConstructor_returnsFalse() {
+    void hasUploadHandler_upload_withDefaultConstructor_returnsFalse() {
         var upload = new Upload();
-        Assert.assertFalse(UploadHelper.hasUploadHandler(upload));
+        Assertions.assertFalse(UploadHelper.hasUploadHandler(upload));
     }
 
     @Test
-    public void hasUploadHandler_upload_withHandlerInConstructor_returnsTrue() {
+    void hasUploadHandler_upload_withHandlerInConstructor_returnsTrue() {
         var handler = UploadHandler.inMemory((metadata, data) -> {
         });
         var upload = new Upload(handler);
-        Assert.assertTrue(UploadHelper.hasUploadHandler(upload));
+        Assertions.assertTrue(UploadHelper.hasUploadHandler(upload));
     }
 
     @Test
-    public void hasUploadHandler_upload_withDefaultConstructor_setHandler_returnsTrue() {
+    void hasUploadHandler_upload_withDefaultConstructor_setHandler_returnsTrue() {
         var upload = new Upload();
         var handler = UploadHandler.inMemory((metadata, data) -> {
         });
         upload.setUploadHandler(handler);
-        Assert.assertTrue(UploadHelper.hasUploadHandler(upload));
+        Assertions.assertTrue(UploadHelper.hasUploadHandler(upload));
     }
 
     @Test
-    public void isFileTypeAccepted_mimeOnly_matchingType_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
+    void isFileTypeAccepted_mimeOnly_matchingType_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
                 "text/plain", List.of("text/*"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_mimeOnly_nonMatchingType_rejected() {
-        Assert.assertFalse(UploadHelper.isFileTypeAccepted("file.txt",
+    void isFileTypeAccepted_mimeOnly_nonMatchingType_rejected() {
+        Assertions.assertFalse(UploadHelper.isFileTypeAccepted("file.txt",
                 "text/plain", List.of("image/*"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_mimeOnly_exactMatch_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.pdf",
+    void isFileTypeAccepted_mimeOnly_exactMatch_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.pdf",
                 "application/pdf", List.of("application/pdf"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_mimeOnly_caseInsensitive_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.pdf",
+    void isFileTypeAccepted_mimeOnly_caseInsensitive_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.pdf",
                 "Application/PDF", List.of("application/pdf"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_extensionOnly_matchingExt_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
+    void isFileTypeAccepted_extensionOnly_matchingExt_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
                 "text/plain", List.of(), List.of(".txt")));
     }
 
     @Test
-    public void isFileTypeAccepted_extensionOnly_nonMatchingExt_rejected() {
-        Assert.assertFalse(UploadHelper.isFileTypeAccepted("file.txt",
+    void isFileTypeAccepted_extensionOnly_nonMatchingExt_rejected() {
+        Assertions.assertFalse(UploadHelper.isFileTypeAccepted("file.txt",
                 "text/plain", List.of(), List.of(".pdf")));
     }
 
     @Test
-    public void isFileTypeAccepted_extensionOnly_caseInsensitive_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("FILE.TXT",
+    void isFileTypeAccepted_extensionOnly_caseInsensitive_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("FILE.TXT",
                 "text/plain", List.of(), List.of(".txt")));
     }
 
     @Test
-    public void isFileTypeAccepted_bothConfigured_bothMatch_accepted() {
-        Assert.assertTrue(
+    void isFileTypeAccepted_bothConfigured_bothMatch_accepted() {
+        Assertions.assertTrue(
                 UploadHelper.isFileTypeAccepted("file.pdf", "application/pdf",
                         List.of("application/pdf"), List.of(".pdf")));
     }
 
     @Test
-    public void isFileTypeAccepted_bothConfigured_mimeMatchesExtDoesNot_rejected() {
-        Assert.assertFalse(UploadHelper.isFileTypeAccepted("file.html",
+    void isFileTypeAccepted_bothConfigured_mimeMatchesExtDoesNot_rejected() {
+        Assertions.assertFalse(UploadHelper.isFileTypeAccepted("file.html",
                 "text/html", List.of("text/*"), List.of(".pdf")));
     }
 
     @Test
-    public void isFileTypeAccepted_bothConfigured_extMatchesMimeDoesNot_rejected() {
-        Assert.assertFalse(UploadHelper.isFileTypeAccepted("file.pdf",
+    void isFileTypeAccepted_bothConfigured_extMatchesMimeDoesNot_rejected() {
+        Assertions.assertFalse(UploadHelper.isFileTypeAccepted("file.pdf",
                 "text/plain", List.of("image/*"), List.of(".pdf")));
     }
 
     @Test
-    public void isFileTypeAccepted_neitherConfigured_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
+    void isFileTypeAccepted_neitherConfigured_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
                 "text/plain", List.of(), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_nullContentType_mimeConfigured_rejected() {
-        Assert.assertFalse(UploadHelper.isFileTypeAccepted("file.txt", null,
+    void isFileTypeAccepted_nullContentType_mimeConfigured_rejected() {
+        Assertions.assertFalse(UploadHelper.isFileTypeAccepted("file.txt", null,
                 List.of("text/*"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_nullFileName_extensionConfigured_rejected() {
-        Assert.assertFalse(UploadHelper.isFileTypeAccepted(null, "text/plain",
-                List.of(), List.of(".txt")));
+    void isFileTypeAccepted_nullFileName_extensionConfigured_rejected() {
+        Assertions.assertFalse(UploadHelper.isFileTypeAccepted(null,
+                "text/plain", List.of(), List.of(".txt")));
     }
 
     @Test
-    public void isFileTypeAccepted_mimeWithParameters_exactMatch_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.html",
+    void isFileTypeAccepted_mimeWithParameters_exactMatch_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.html",
                 "text/html; charset=utf-8", List.of("text/html"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_mimeWithParameters_wildcardMatch_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.html",
+    void isFileTypeAccepted_mimeWithParameters_wildcardMatch_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.html",
                 "text/html; charset=utf-8", List.of("text/*"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_mimeWithParameters_nonMatch_rejected() {
-        Assert.assertFalse(UploadHelper.isFileTypeAccepted("file.html",
+    void isFileTypeAccepted_mimeWithParameters_nonMatch_rejected() {
+        Assertions.assertFalse(UploadHelper.isFileTypeAccepted("file.html",
                 "text/html; charset=utf-8", List.of("image/*"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_multipleMimeTypes_oneMatches_accepted() {
-        Assert.assertTrue(
+    void isFileTypeAccepted_multipleMimeTypes_oneMatches_accepted() {
+        Assertions.assertTrue(
                 UploadHelper.isFileTypeAccepted("file.pdf", "application/pdf",
                         List.of("image/*", "application/pdf"), List.of()));
     }
 
     @Test
-    public void isFileTypeAccepted_multipleExtensions_oneMatches_accepted() {
-        Assert.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
+    void isFileTypeAccepted_multipleExtensions_oneMatches_accepted() {
+        Assertions.assertTrue(UploadHelper.isFileTypeAccepted("file.txt",
                 "text/plain", List.of(), List.of(".pdf", ".txt")));
     }
 
     @Test
-    public void wrapHandlerWithFileTypeValidation_wrapperOverridesAllInterfaceMethods() {
+    void wrapHandlerWithFileTypeValidation_wrapperOverridesAllInterfaceMethods() {
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
         UploadHandler wrapper = UploadHelper
@@ -229,10 +229,9 @@ public class UploadHelperTest {
         }
 
         for (String sig : interfaceMethods) {
-            Assert.assertTrue(
+            Assertions.assertTrue(wrapperMethods.contains(sig),
                     "Validation wrapper must delegate: " + sig
-                            + ". See NOTE in wrapWithFileTypeValidation.",
-                    wrapperMethods.contains(sig));
+                            + ". See NOTE in wrapWithFileTypeValidation.");
         }
     }
 

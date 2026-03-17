@@ -32,8 +32,8 @@ public class FlexComponentTest {
         component.add(div);
         component.setFlexShrink(2, div);
 
-        Assert.assertEquals("should set flex-shrink",
-                component.getFlexShrink(div), 2, 0);
+        Assert.assertEquals("should set flex-shrink", 2,
+                component.getFlexShrink(div), 0);
     }
 
     @Test
@@ -42,8 +42,8 @@ public class FlexComponentTest {
         Div div = new Div();
         component.add(div);
 
-        Assert.assertEquals("should return 1 if flex-shirk not set",
-                component.getFlexShrink(div), 1, 0);
+        Assert.assertEquals("should return 1 if flex-shirk not set", 1,
+                component.getFlexShrink(div), 0);
     }
 
     @Test(expected = IllegalArgumentException.class)

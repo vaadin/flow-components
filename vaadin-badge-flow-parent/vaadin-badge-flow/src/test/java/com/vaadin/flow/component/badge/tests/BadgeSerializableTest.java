@@ -17,5 +17,5 @@ package com.vaadin.flow.component.badge.tests;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class BadgeSerializableTest extends ClassesSerializableTest {
+class BadgeSerializableTest extends ClassesSerializableTest {
 }
