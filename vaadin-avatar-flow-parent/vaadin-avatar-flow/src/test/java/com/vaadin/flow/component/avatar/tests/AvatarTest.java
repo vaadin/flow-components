@@ -42,33 +42,33 @@ class AvatarTest {
     @Test
     void setName_getName() {
         avatar.setName("foo");
-        Assertions.assertEquals(avatar.getName(), "foo");
+        Assertions.assertEquals("foo", avatar.getName());
     }
 
     @Test
     void setAbbr_getAbbr() {
         avatar.setAbbreviation("fb");
-        Assertions.assertEquals(avatar.getAbbreviation(), "fb");
+        Assertions.assertEquals("fb", avatar.getAbbreviation());
     }
 
     @Test
     void setImgLink_getImgLink() {
         avatar.setImage("https://vaadin.com/");
-        Assertions.assertEquals(avatar.getImage(), "https://vaadin.com/");
+        Assertions.assertEquals("https://vaadin.com/", avatar.getImage());
     }
 
     @Test
     void constructAvatarWithName() {
         Avatar avatar = new Avatar("foo");
-        Assertions.assertEquals(avatar.getName(), "foo");
+        Assertions.assertEquals("foo", avatar.getName());
     }
 
     @Test
     void constructAvatarWithNameAndImage() {
         Avatar avatar = new Avatar("foo", "https://vaadin.com/");
 
-        Assertions.assertEquals(avatar.getName(), "foo");
-        Assertions.assertEquals(avatar.getImage(), "https://vaadin.com/");
+        Assertions.assertEquals("foo", avatar.getName());
+        Assertions.assertEquals("https://vaadin.com/", avatar.getImage());
     }
 
     @Test
@@ -83,12 +83,12 @@ class AvatarTest {
     @Test
     void setTooltipEnabled_isTooltipEnabled() {
         avatar.setTooltipEnabled(true);
-        Assertions.assertEquals(avatar.isTooltipEnabled(), true);
+        Assertions.assertEquals(true, avatar.isTooltipEnabled());
         Assertions.assertTrue(
                 avatar.getElement().getProperty("withTooltip", false));
 
         avatar.setTooltipEnabled(false);
-        Assertions.assertEquals(avatar.isTooltipEnabled(), false);
+        Assertions.assertEquals(false, avatar.isTooltipEnabled());
         Assertions.assertFalse(
                 avatar.getElement().getProperty("withTooltip", false));
     }

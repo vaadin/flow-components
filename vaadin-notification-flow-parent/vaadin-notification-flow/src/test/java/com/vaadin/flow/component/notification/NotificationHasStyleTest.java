@@ -26,13 +26,12 @@ public class NotificationHasStyleTest {
     @Test
     public void addClassName_notificationHasOverlayClass() {
         notification.addClassName("foo");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"), "foo");
+        Assert.assertEquals("foo",
+                notification.getElement().getProperty("overlayClass"));
 
         notification.addClassName("bar");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"),
-                "foo bar");
+        Assert.assertEquals("foo bar",
+                notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
@@ -40,19 +39,19 @@ public class NotificationHasStyleTest {
         notification.addClassName("foo");
 
         notification.removeClassName("foo");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"), null);
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
     public void setClassNameString_notificationHasOverlayClass() {
         notification.setClassName("foo");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"), "foo");
+        Assert.assertEquals("foo",
+                notification.getElement().getProperty("overlayClass"));
 
         notification.setClassName("bar");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"), "bar");
+        Assert.assertEquals("bar",
+                notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
@@ -61,8 +60,8 @@ public class NotificationHasStyleTest {
 
         notification.setClassName("foo", false);
 
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"), null);
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
@@ -70,21 +69,19 @@ public class NotificationHasStyleTest {
         notification.setClassName("foo bar");
         notification.getClassNames().set("foo", false);
 
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"), "bar");
+        Assert.assertEquals("bar",
+                notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
     public void addClassNames_notificationHasOverlayClass() {
         notification.addClassNames("foo", "bar");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"),
-                "foo bar");
+        Assert.assertEquals("foo bar",
+                notification.getElement().getProperty("overlayClass"));
 
         notification.addClassNames("baz", "qux");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"),
-                "foo bar baz qux");
+        Assert.assertEquals("foo bar baz qux",
+                notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
@@ -92,9 +89,8 @@ public class NotificationHasStyleTest {
         notification.addClassNames("foo", "bar", "baz", "qux");
 
         notification.removeClassNames("foo", "bar");
-        Assert.assertEquals(
-                notification.getElement().getProperty("overlayClass"),
-                "baz qux");
+        Assert.assertEquals("baz qux",
+                notification.getElement().getProperty("overlayClass"));
     }
 
     @Test(expected = UnsupportedOperationException.class)

@@ -96,7 +96,7 @@ public class ListBoxUnitTest {
         listBox.setValue(new CustomItem(1L));
 
         Assert.assertNotNull(listBox.getValue());
-        Assert.assertEquals(listBox.getValue().getName(), "First");
+        Assert.assertEquals("First", listBox.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -130,7 +130,7 @@ public class ListBoxUnitTest {
         listBox.setValue(new CustomItem(1L));
 
         Assert.assertNotNull(listBox.getValue());
-        Assert.assertEquals(listBox.getValue().getName(), "First");
+        Assert.assertEquals("First", listBox.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:

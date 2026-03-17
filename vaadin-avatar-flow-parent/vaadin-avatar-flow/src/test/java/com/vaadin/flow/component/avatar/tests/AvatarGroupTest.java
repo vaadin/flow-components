@@ -41,35 +41,35 @@ class AvatarGroupTest {
     @Test
     void setName_getName() {
         avatarGroupItem1.setName("foo bar");
-        Assertions.assertEquals(avatarGroupItem1.getName(), "foo bar");
+        Assertions.assertEquals("foo bar", avatarGroupItem1.getName());
     }
 
     @Test
     void setAbbr_getAbbr() {
         avatarGroupItem1.setAbbreviation("fb");
-        Assertions.assertEquals(avatarGroupItem1.getAbbreviation(), "fb");
+        Assertions.assertEquals("fb", avatarGroupItem1.getAbbreviation());
     }
 
     @Test
     void setImgUrl_getImgUrl() {
         avatarGroupItem1.setImage("https://vaadin.com/");
-        Assertions.assertEquals(avatarGroupItem1.getImage(),
-                "https://vaadin.com/");
+        Assertions.assertEquals("https://vaadin.com/",
+                avatarGroupItem1.getImage());
     }
 
     @Test
     void setColorIndex_getColorIndex() {
         avatarGroupItem1.setColorIndex(3);
-        Assertions.assertEquals(avatarGroupItem1.getColorIndex(), (Integer) 3);
+        Assertions.assertEquals((Integer) 3, avatarGroupItem1.getColorIndex());
     }
 
     @Test
     void addClassNames_removeClassNames_getClassNames() {
         avatarGroupItem1.addClassNames("foo", "bar");
-        Assertions.assertEquals(avatarGroupItem1.getClassName(), "foo bar");
+        Assertions.assertEquals("foo bar", avatarGroupItem1.getClassName());
 
         avatarGroupItem1.removeClassNames("foo");
-        Assertions.assertEquals(avatarGroupItem1.getClassName(), "bar");
+        Assertions.assertEquals("bar", avatarGroupItem1.getClassName());
     }
 
     @Test

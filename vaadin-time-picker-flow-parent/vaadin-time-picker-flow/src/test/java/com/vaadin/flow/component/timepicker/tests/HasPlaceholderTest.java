@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.timepicker.TimePicker;
 
-public class HasPlaceholderTest {
+class HasPlaceholderTest {
 
     @Test
-    public void tab() {
+    void tab() {
         TimePicker c = new TimePicker();
-        Assert.assertTrue(c instanceof HasPlaceholder);
+        Assertions.assertTrue(c instanceof HasPlaceholder);
     }
 
 }
