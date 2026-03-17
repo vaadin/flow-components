@@ -35,7 +35,7 @@ public abstract class AbstractBasicValidationJUnit6Test<C extends AbstractField<
     protected C testField;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         testField = createTestField();
     }
 
