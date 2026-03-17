@@ -58,6 +58,32 @@ class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
                 () -> list.setItems(Stream.of("New Item 1", "New Item 2")));
     }
 
+    @Test
+    void bindItems_updateItemSignalValue_keyMapperRemapsToSameKey() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("original");
+
+        var list = new VirtualList<String>();
+        list.bindItems(listSignal);
+        ui.add(list);
+
+        // Force a flush so the key mapper has assigned a key
+        ui.fakeClientCommunication();
+
+        var keyMapper = list.getDataCommunicator().getKeyMapper();
+        String keyBefore = keyMapper.key("original");
+        Assertions.assertTrue(keyMapper.has("original"));
+
+        // Update the item signal value
+        listSignal.peek().getFirst().set("updated");
+
+        // The old identity should be gone, replaced by the new one
+        // mapped to the same key
+        Assertions.assertFalse(keyMapper.has("original"));
+        Assertions.assertTrue(keyMapper.has("updated"));
+        Assertions.assertEquals(keyBefore, keyMapper.key("updated"));
+    }
+
     private VirtualList<String> createVirtualListWithBoundItems() {
         var list = new VirtualList<String>();
         var itemsSignal = new ListSignal<String>();
