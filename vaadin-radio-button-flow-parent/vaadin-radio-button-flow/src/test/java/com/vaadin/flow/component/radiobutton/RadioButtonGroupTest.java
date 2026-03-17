@@ -341,7 +341,7 @@ public class RadioButtonGroupTest {
         radioButtonGroup.setValue(new CustomItem(1L));
 
         Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(radioButtonGroup.getValue().getName(), "First");
+        Assert.assertEquals("First", radioButtonGroup.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -438,7 +438,7 @@ public class RadioButtonGroupTest {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("enabled", "disabled", null);
         group.setValue(null);
-        Assert.assertEquals(group.getValue(), null);
+        Assert.assertEquals(null, group.getValue());
     }
 
     @Test

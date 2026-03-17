@@ -74,12 +74,12 @@ public class FlexLayoutTest {
         FlexLayout.ContentAlignment contentAlignment = FlexLayout.ContentAlignment.CENTER;
         layout.setAlignContent(contentAlignment);
 
-        Assert.assertEquals("should set align-content",
-                layout.getAlignContent(), contentAlignment);
+        Assert.assertEquals("should set align-content", contentAlignment,
+                layout.getAlignContent());
 
         layout.setAlignContent(null);
         Assert.assertEquals("should return stretch if no align-content set",
-                layout.getAlignContent(), FlexLayout.ContentAlignment.STRETCH);
+                FlexLayout.ContentAlignment.STRETCH, layout.getAlignContent());
     }
 
     @Test
@@ -89,8 +89,8 @@ public class FlexLayoutTest {
         layout.add(div);
         layout.setFlexBasis("10px", div);
 
-        Assert.assertEquals("should set flex-basis", layout.getFlexBasis(div),
-                "10px");
+        Assert.assertEquals("should set flex-basis", "10px",
+                layout.getFlexBasis(div));
 
         layout.setFlexBasis(null, div);
         Assert.assertNull("should remove flex-basis from component",
@@ -103,12 +103,12 @@ public class FlexLayoutTest {
         FlexLayout.FlexDirection direction = FlexLayout.FlexDirection.ROW_REVERSE;
         layout.setFlexDirection(direction);
 
-        Assert.assertEquals("should set flex-direction",
-                layout.getFlexDirection(), direction);
+        Assert.assertEquals("should set flex-direction", direction,
+                layout.getFlexDirection());
 
         layout.setFlexDirection(null);
         Assert.assertEquals("should return row if no flex-direction set",
-                layout.getFlexDirection(), FlexLayout.FlexDirection.ROW);
+                FlexLayout.FlexDirection.ROW, layout.getFlexDirection());
     }
 
     @Test
@@ -117,13 +117,13 @@ public class FlexLayoutTest {
         Div div = new Div();
         layout.add(div);
 
-        Assert.assertEquals("should return 0 if no order set",
-                layout.getOrder(div), 0);
+        Assert.assertEquals("should return 0 if no order set", 0,
+                layout.getOrder(div));
 
         layout.setOrder(1, div);
-        Assert.assertEquals("should set order", layout.getOrder(div), 1);
+        Assert.assertEquals("should set order", 1, layout.getOrder(div));
 
         layout.setOrder(0, div);
-        Assert.assertEquals("should unset order", layout.getOrder(div), 0);
+        Assert.assertEquals("should unset order", 0, layout.getOrder(div));
     }
 }

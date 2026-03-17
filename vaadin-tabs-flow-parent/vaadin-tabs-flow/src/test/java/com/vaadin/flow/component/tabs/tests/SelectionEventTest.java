@@ -130,8 +130,8 @@ public class SelectionEventTest {
                 tabs.getSelectedIndex());
 
         Assert.assertEquals(
-                "The selected tab should be null after removing all tabs",
-                tabs.getSelectedTab(), null);
+                "The selected tab should be null after removing all tabs", null,
+                tabs.getSelectedTab());
     }
 
     @Test
@@ -150,8 +150,8 @@ public class SelectionEventTest {
                 tabs.getSelectedIndex());
 
         Assert.assertEquals(
-                "The selected tab should be null after removing all tabs",
-                tabs.getSelectedTab(), null);
+                "The selected tab should be null after removing all tabs", null,
+                tabs.getSelectedTab());
     }
 
     @Test
@@ -301,7 +301,7 @@ public class SelectionEventTest {
         Assert.assertEquals(tab2, tabs.getSelectedTab());
 
         tabs.remove(tab2);
-        Assert.assertEquals(tabs.getSelectedIndex(), -1);
+        Assert.assertEquals(-1, tabs.getSelectedIndex());
     }
 
     @Test

@@ -29,7 +29,11 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionEvent;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -46,6 +50,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     private T selectedItem;
     private boolean deselectAllowed = true;
+    private Registration selectionBindingCleanup;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -143,6 +148,18 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             public Element getElement() {
                 return getGrid().getElement();
             }
+
+            @Override
+            public SignalBinding<T> bindValue(Signal<T> valueSignal,
+                    SerializableConsumer<T> writeCallback) {
+                if (selectionBindingCleanup != null) {
+                    throw new BindingActiveException();
+                }
+                var result = GridSelectionSignalHelper.bindValue(getGrid(),
+                        this, valueSignal, writeCallback);
+                selectionBindingCleanup = result.cleanup();
+                return result.signalBinding();
+            }
         };
     }
 
@@ -176,6 +193,10 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     @Override
     protected void remove() {
         super.remove();
+        if (selectionBindingCleanup != null) {
+            selectionBindingCleanup.remove();
+            selectionBindingCleanup = null;
+        }
         deselectAll();
     }
 
