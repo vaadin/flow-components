@@ -88,6 +88,32 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("Three", items.get(2));
     }
 
+    @Test
+    public void bindItems_updateItemSignalValue_keyMapperRemapsToSameKey() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("original");
+
+        var grid = new Grid<String>();
+        grid.bindItems(listSignal);
+        ui.add(grid);
+
+        // Force a flush so the key mapper has assigned a key
+        ui.fakeClientCommunication();
+
+        var keyMapper = grid.getDataCommunicator().getKeyMapper();
+        String keyBefore = keyMapper.key("original");
+        Assert.assertTrue(keyMapper.has("original"));
+
+        // Update the item signal value
+        listSignal.peek().getFirst().set("updated");
+
+        // The old identity should be gone, replaced by the new one
+        // mapped to the same key
+        Assert.assertFalse(keyMapper.has("original"));
+        Assert.assertTrue(keyMapper.has("updated"));
+        Assert.assertEquals(keyBefore, keyMapper.key("updated"));
+    }
+
     private Grid<String> createGridWithBoundItems() {
         var grid = new Grid<String>();
         var itemsSignal = new ListSignal<String>();
