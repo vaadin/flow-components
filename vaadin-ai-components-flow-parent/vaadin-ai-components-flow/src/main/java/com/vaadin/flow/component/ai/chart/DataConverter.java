@@ -20,20 +20,23 @@ import java.util.List;
 import java.util.Map;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.Series;
 
 /**
- * Converter from database query results into a {@link DataSeries} suitable for
- * rendering in a chart. The input format matches the result of
+ * Converts database query results into chart {@link Series} for rendering. The
+ * input format matches the result of
  * {@link DatabaseProvider#executeQuery(String)}, where each row is a
  * column-name-to-value map.
+ * <p>
+ * Implementations may return one or more series depending on the data.
+ * </p>
  *
  * @author Vaadin Ltd
  */
 public interface DataConverter extends Serializable {
 
     /**
-     * Converts database query results into a {@link DataSeries}.
+     * Converts database query results into one or more chart series.
      * <p>
      * Each element in the input list represents a single row returned by the
      * database, with column names as keys and column values as values.
@@ -41,9 +44,10 @@ public interface DataConverter extends Serializable {
      *
      * @param data
      *            the query results to convert, not {@code null}
-     * @return a data series ready for use in a chart, never {@code null}
+     * @return a list of series ready for use in a chart, never {@code null} and
+     *         never empty
      * @throws NullPointerException
      *             if data is {@code null}
      */
-    DataSeries convertToDataSeries(List<Map<String, Object>> data);
+    List<Series> convertToSeries(List<Map<String, Object>> data);
 }
