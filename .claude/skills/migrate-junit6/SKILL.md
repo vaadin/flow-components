@@ -122,6 +122,7 @@ JUnit 6 does **not** process JUnit 4 `@Rule` annotations from parent classes. Te
 | JUnit 4 | JUnit 6 |
 |---|---|
 | `AbstractSignalsUnitTest` | `AbstractSignalsJUnit6Test` |
+| `AbstractBasicValidationTest` | `AbstractBasicValidationJUnit6Test` |
 
 ## After editing
 
