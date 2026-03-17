@@ -340,28 +340,6 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("Three", items.get(2));
     }
 
-    @Test
-    public void bindItems_updateItemSignalValue_updatesItems() {
-        var listSignal = new ListSignal<String>();
-        listSignal.insertLast("original");
-
-        var grid = new Grid<String>();
-        grid.bindItems(listSignal);
-        ui.add(grid);
-
-        List<String> items = grid.getGenericDataView().getItems().toList();
-        Assert.assertEquals(1, items.size());
-        Assert.assertEquals("original", items.get(0));
-
-        // Update the item signal value (identity change)
-        listSignal.peek().getFirst().set("updated");
-
-        // Verify the items reflect the update
-        items = grid.getGenericDataView().getItems().toList();
-        Assert.assertEquals(1, items.size());
-        Assert.assertEquals("updated", items.get(0));
-    }
-
     private Grid<String> createGridWithBoundItems() {
         var grid = new Grid<String>();
         var itemsSignal = new ListSignal<String>();

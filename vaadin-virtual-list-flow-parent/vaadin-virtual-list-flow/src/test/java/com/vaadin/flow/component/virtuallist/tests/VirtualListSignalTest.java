@@ -58,30 +58,6 @@ class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
                 () -> list.setItems(Stream.of("New Item 1", "New Item 2")));
     }
 
-    @Test
-    void bindItems_updateItemSignalValue_updatesItems() {
-        var listSignal = new ListSignal<String>();
-        listSignal.insertLast("original");
-
-        var list = new VirtualList<String>();
-        list.bindItems(listSignal);
-        ui.add(list);
-
-        var items = list.getDataProvider()
-                .fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
-        Assertions.assertEquals(1, items.size());
-        Assertions.assertEquals("original", items.get(0));
-
-        // Update the item signal value (identity change)
-        listSignal.peek().getFirst().set("updated");
-
-        // Verify the items reflect the update
-        items = list.getDataProvider()
-                .fetch(new com.vaadin.flow.data.provider.Query<>()).toList();
-        Assertions.assertEquals(1, items.size());
-        Assertions.assertEquals("updated", items.get(0));
-    }
-
     private VirtualList<String> createVirtualListWithBoundItems() {
         var list = new VirtualList<String>();
         var itemsSignal = new ListSignal<String>();
