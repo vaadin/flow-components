@@ -405,11 +405,25 @@ public class CheckboxGroup<T>
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> dataRefreshEvent) {
             T otherItem = dataRefreshEvent.getItem();
-            Object otherItemId = getItemId(otherItem);
-            keyMapper.refresh(otherItem);
+            T oldItem = dataRefreshEvent.getOldItem();
+            Object oldItemId = getItemId(oldItem);
+            Object newItemId = getItemId(otherItem);
+            boolean identityChanged = !Objects.equals(oldItemId, newItemId);
+            keyMapper.refresh(otherItem, oldItem);
             getCheckboxItems().filter(
-                    item -> Objects.equals(getItemId(item.item), otherItemId))
-                    .findFirst().ifPresent(this::updateCheckbox);
+                    item -> Objects.equals(getItemId(item.item), oldItemId))
+                    .findFirst().ifPresent(oldCheckbox -> {
+                        if (identityChanged) {
+                            Checkbox newCheckbox = createCheckBox(otherItem);
+                            getElement().insertChild(
+                                    getElement().indexOfChild(
+                                            oldCheckbox.getElement()),
+                                    newCheckbox.getElement());
+                            remove(oldCheckbox);
+                        } else {
+                            updateCheckbox(oldCheckbox);
+                        }
+                    });
         } else {
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);

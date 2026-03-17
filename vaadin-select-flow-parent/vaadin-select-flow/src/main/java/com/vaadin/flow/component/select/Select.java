@@ -1110,13 +1110,14 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private void onDataChange(DataChangeEvent<T> event) {
         if (event instanceof DataChangeEvent.DataRefreshEvent) {
-            T updatedItem = ((DataChangeEvent.DataRefreshEvent<T>) event)
-                    .getItem();
+            DataChangeEvent.DataRefreshEvent<T> refreshEvent = (DataChangeEvent.DataRefreshEvent<T>) event;
+            T updatedItem = refreshEvent.getItem();
+            T oldItem = refreshEvent.getOldItem();
             IdentifierProvider<T> identifierProvider = getIdentifierProvider();
-            Object updatedItemId = identifierProvider.apply(updatedItem);
-            keyMapper.refresh(updatedItem);
+            Object oldItemId = identifierProvider.apply(oldItem);
+            keyMapper.refresh(updatedItem, oldItem);
             getItems()
-                    .filter(vaadinItem -> updatedItemId.equals(
+                    .filter(vaadinItem -> oldItemId.equals(
                             identifierProvider.apply(vaadinItem.getItem())))
                     .findAny().ifPresent(item -> {
                         item.setItem(updatedItem);
