@@ -15,15 +15,6 @@ add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
-For AI-assisted chart generation, add:
-```
-<dependency>
-    <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-ai-chart-flow</artifactId>
-    <version>${component.version}</version>
-</dependency>
-```
-
 ## License
 
 Apache License 2.0
