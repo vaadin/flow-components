@@ -19,14 +19,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.charts.model.Series;
 
 /**
- * Converts database query results into chart {@link Series} for rendering. The
- * input format matches the result of
- * {@link DatabaseProvider#executeQuery(String)}, where each row is a
- * column-name-to-value map.
+ * Converts tabular data into chart {@link Series} for rendering. The input is a
+ * list of rows, where each row is a column-name-to-value map.
  * <p>
  * Implementations may return one or more series depending on the data.
  * </p>
@@ -36,14 +33,14 @@ import com.vaadin.flow.component.charts.model.Series;
 public interface DataConverter extends Serializable {
 
     /**
-     * Converts database query results into one or more chart series.
+     * Converts tabular data into one or more chart series.
      * <p>
-     * Each element in the input list represents a single row returned by the
-     * database, with column names as keys and column values as values.
+     * Each element in the input list represents a single row, with column names
+     * as keys and column values as values.
      * </p>
      *
      * @param data
-     *            the query results to convert, not {@code null}
+     *            the tabular data to convert, not {@code null}
      * @return a list of series ready for use in a chart, never {@code null} and
      *         never empty
      * @throws NullPointerException
