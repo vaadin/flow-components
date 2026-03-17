@@ -40,7 +40,6 @@ import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
@@ -132,7 +131,7 @@ public class MessageList extends Component
      *            {@code null} items
      */
     public void setItems(Collection<MessageListItem> items) {
-        throwIfItemsBindingActive();
+        SignalBindingUtil.throwIfBindingActive(this, ITEMS_BINDING);
         Objects.requireNonNull(items,
                 "Can't set null item collection to MessageList.");
         items.forEach(item -> Objects.requireNonNull(item,
@@ -165,7 +164,7 @@ public class MessageList extends Component
      *            the item to add, not {@code null}
      */
     public void addItem(MessageListItem item) {
-        throwIfItemsBindingActive();
+        SignalBindingUtil.throwIfBindingActive(this, ITEMS_BINDING);
         Objects.requireNonNull(item, "Can't add null item to MessageList.");
 
         item.setHost(this);
@@ -209,16 +208,6 @@ public class MessageList extends Component
                     var messageItems = signalItems.stream().map(Signal::get)
                             .collect(Collectors.toList());
                     updateItems(messageItems);
-                });
-    }
-
-    private void throwIfItemsBindingActive() {
-        getElement().getNode()
-                .getFeatureIfInitialized(SignalBindingFeature.class)
-                .ifPresent(feature -> {
-                    if (feature.hasBinding(ITEMS_BINDING)) {
-                        throw new BindingActiveException();
-                    }
                 });
     }
 

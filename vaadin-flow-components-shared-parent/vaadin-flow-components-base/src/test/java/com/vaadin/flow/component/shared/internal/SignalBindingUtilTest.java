@@ -487,4 +487,61 @@ class SignalBindingUtilTest extends AbstractSignalsJUnit6Test {
         Assertions.assertEquals("Effect cannot be null",
                 exception.getMessage());
     }
+
+    @Test
+    void throwIfBindingActive_noBinding_doesNotThrow() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        Assertions.assertDoesNotThrow(() -> SignalBindingUtil
+                .throwIfBindingActive(component, "test"));
+    }
+
+    @Test
+    void throwIfBindingActive_bindingActive_throwsBindingActiveException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+        SignalBindingUtil.effectBinding(component, "test", signal, v -> {
+        });
+
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> SignalBindingUtil.throwIfBindingActive(component,
+                        "test"));
+    }
+
+    @Test
+    void throwIfBindingActive_differentBindingType_doesNotThrow() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+        SignalBindingUtil.effectBinding(component, "type1", signal, v -> {
+        });
+
+        Assertions.assertDoesNotThrow(() -> SignalBindingUtil
+                .throwIfBindingActive(component, "type2"));
+    }
+
+    @Test
+    void throwIfBindingActive_nullComponent_throwsNullPointerException() {
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class,
+                () -> SignalBindingUtil.throwIfBindingActive(null, "test"));
+        Assertions.assertEquals("Component cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void throwIfBindingActive_nullBindingType_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class,
+                () -> SignalBindingUtil.throwIfBindingActive(component, null));
+        Assertions.assertEquals("Binding type cannot be null",
+                exception.getMessage());
+    }
 }

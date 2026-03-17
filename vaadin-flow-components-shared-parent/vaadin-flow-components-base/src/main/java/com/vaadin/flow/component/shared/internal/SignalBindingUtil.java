@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.BindingContext;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -87,14 +88,22 @@ public final class SignalBindingUtil {
     }
 
     /**
-     * Creates a signal binding that runs an effect whenever the signal value
-     * changes. The binding is registered on the component using the specified
-     * binding type. If a binding of the same type is already active, a
-     * {@link BindingActiveException} is thrown.
+     * Creates a signal effect with {@link Signal#effect} and returns a
+     * {@link SignalBinding} that is notified with the updated signal value when
+     * the effect runs.
      * <p>
-     * This is useful when there is no existing Flow API to bind the signal to
-     * (such as a property), but the component still needs to react to signal
-     * changes, for example to run Javascript.
+     * This is useful for implementing bind APIs in components which only run
+     * side-effects (update a class field, run Javascript), but can not use an
+     * existing Flow API (such as
+     * {@link Element#bindProperty(String, Signal, SerializableConsumer)}) to
+     * create a binding.
+     * <p>
+     * The binding is registered on the component using the specified binding
+     * type. If a binding of the same type is already active, a
+     * {@link BindingActiveException} is thrown. Components can use
+     * {@link #throwIfBindingActive} to manually check for active bindings in
+     * their API methods to prevent changes that would interfere with the
+     * binding.
      *
      * @param owner
      *            the component that owns the effect, not {@code null}
@@ -145,5 +154,30 @@ public final class SignalBindingUtil {
         feature.setBinding(bindingType, signal, null);
 
         return binding;
+    }
+
+    /**
+     * Throws a {@link BindingActiveException} if a binding of the specified
+     * type is active on the component. This can be used in component APIs to
+     * prevent changes that would interfere with an active binding.
+     * 
+     * @param component
+     *            the component to check for active bindings, not {@code null}
+     * @param bindingType
+     *            a unique identifier for the binding type to check, not
+     *            {@code null}
+     * @throws BindingActiveException
+     *             if a binding of the specified type is active on the component
+     */
+    public static void throwIfBindingActive(Component component,
+            String bindingType) {
+        Objects.requireNonNull(component, "Component cannot be null");
+        Objects.requireNonNull(bindingType, "Binding type cannot be null");
+
+        var node = component.getElement().getNode();
+        var feature = node.getFeature(SignalBindingFeature.class);
+        if (feature.hasBinding(bindingType)) {
+            throw new BindingActiveException();
+        }
     }
 }
