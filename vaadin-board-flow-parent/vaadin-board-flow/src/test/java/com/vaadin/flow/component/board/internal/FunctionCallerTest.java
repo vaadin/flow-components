@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Html;
@@ -26,7 +26,7 @@ import com.vaadin.flow.server.VaadinSession;
 public class FunctionCallerTest {
 
     @Test
-    public void callsFunctionBeforeAttach_invokedOnce() throws Exception {
+    void callsFunctionBeforeAttach_invokedOnce() throws Exception {
         Html html = new Html("<div>foo</div>");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
@@ -39,7 +39,7 @@ public class FunctionCallerTest {
     }
 
     @Test
-    public void callsFunctionAfterAttach_invokedOnce() throws Exception {
+    void callsFunctionAfterAttach_invokedOnce() throws Exception {
         Html html = new Html("<div>foo</div>");
         UI ui = new UI();
         ui.add(html);
@@ -51,8 +51,7 @@ public class FunctionCallerTest {
     }
 
     @Test
-    public void callsFunctionBeforeAndAfterAttach_invokedOnce()
-            throws Exception {
+    void callsFunctionBeforeAndAfterAttach_invokedOnce() throws Exception {
 
         Html html = new Html("<div>foo</div>");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
@@ -66,16 +65,16 @@ public class FunctionCallerTest {
     }
 
     @Test
-    public void trackingPropertyRemoved() throws Exception {
+    void trackingPropertyRemoved() throws Exception {
         Html html = new Html("<div>foo</div>");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         UI ui = new UI();
         ui.add(html);
 
         String trackingProperty = "CALLONCE_foo";
-        Assert.assertTrue(html.getElement().hasProperty(trackingProperty));
+        Assertions.assertTrue(html.getElement().hasProperty(trackingProperty));
         assertPendingInvocations(ui, "return $0.foo()");
-        Assert.assertFalse(html.getElement().hasProperty(trackingProperty));
+        Assertions.assertFalse(html.getElement().hasProperty(trackingProperty));
     }
 
     public static void assertPendingInvocations(UI ui, String expectedJS)
@@ -91,8 +90,8 @@ public class FunctionCallerTest {
                 .invoke(internals);
         List<PendingJavaScriptInvocation> invocations = pendingJS
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, invocations.size());
-        Assert.assertEquals(expectedJS,
+        Assertions.assertEquals(1, invocations.size());
+        Assertions.assertEquals(expectedJS,
                 invocations.get(0).getInvocation().getExpression());
 
     }
