@@ -72,8 +72,8 @@ public class PointTest {
         Point point = new Point(new Coordinate(value, value * -1));
         point.translate(-1 * delta, delta);
 
-        Assert.assertEquals(point.getCoordinates().getX(), value * -1, 0.00001);
-        Assert.assertEquals(point.getCoordinates().getY(), value, 0.00001);
+        Assert.assertEquals(value * -1, point.getCoordinates().getX(), 0.00001);
+        Assert.assertEquals(value, point.getCoordinates().getY(), 0.00001);
     }
 
     private static class TestPoint extends Point {

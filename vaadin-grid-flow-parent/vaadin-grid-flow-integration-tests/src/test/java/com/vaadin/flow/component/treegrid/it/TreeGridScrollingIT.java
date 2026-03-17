@@ -32,8 +32,8 @@ public class TreeGridScrollingIT extends AbstractTreeGridIT {
 
     @Test
     public void scrollingTree_expandCollapseFromBeginning_correctItemsShown() {
-        Assert.assertEquals(getTreeGrid().getRowCount(),
-                TreeGridScrollingPage.DEFAULT_NODES);
+        Assert.assertEquals(TreeGridScrollingPage.DEFAULT_NODES,
+                getTreeGrid().getRowCount());
 
         verifyRow(0, 0, 0);
         verifyRow(10, 0, 10);

@@ -59,7 +59,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Expect to have two notification pop-ups for two notification buttons clicked",
-                notifications.size(), 2);
+                2, notifications.size());
         Assert.assertTrue("Expect to have the first notification shown",
                 notifications.stream()
                         .anyMatch(text -> text.contains("1111111")));
