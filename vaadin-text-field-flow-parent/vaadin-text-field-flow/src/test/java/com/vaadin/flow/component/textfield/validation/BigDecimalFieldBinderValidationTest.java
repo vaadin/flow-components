@@ -17,12 +17,12 @@ package com.vaadin.flow.component.textfield.validation;
 
 import java.math.BigDecimal;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public class BigDecimalFieldBinderValidationTest
+class BigDecimalFieldBinderValidationTest
         extends AbstractBinderValidationTest<BigDecimal, BigDecimalField> {
 
     @Override
@@ -51,7 +51,7 @@ public class BigDecimalFieldBinderValidationTest
     }
 
     @Override
-    @Ignore("Component doesn't have validation constraints")
-    public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
+    @Disabled("Component doesn't have validation constraints")
+    void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
     }
 }
