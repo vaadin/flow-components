@@ -17,8 +17,8 @@ package com.vaadin.flow.component.timepicker.tests.validation;
 
 import java.time.LocalTime;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.timepicker.TimePicker;
@@ -26,12 +26,12 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.tests.validation.AbstractBasicValidationTest;
+import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
 
-public class BasicValidationTest
-        extends AbstractBasicValidationTest<TimePicker, LocalTime> {
+class BasicValidationTest
+        extends AbstractBasicValidationJUnit6Test<TimePicker, LocalTime> {
     @Test
-    public void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
+    void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
         testField.addValidationStatusChangeListener(event1 -> {
             testField.addValidationStatusChangeListener(event2 -> {
             });
@@ -43,87 +43,89 @@ public class BasicValidationTest
     }
 
     @Test
-    public void badInput_validate_emptyErrorMessageDisplayed() {
+    void badInput_validate_emptyErrorMessageDisplayed() {
         testField.getElement().setProperty("_hasInputValue", true);
         fakeClientPropertyChange(testField, "_inputElementValue", "foo");
         fakeClientDomEvent(testField, "unparsable-change");
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setBadInputErrorMessage("Time has invalid format"));
         fakeClientPropertyChange(testField, "_inputElementValue", "foo");
         fakeClientDomEvent(testField, "unparsable-change");
-        Assert.assertEquals("Time has invalid format",
+        Assertions.assertEquals("Time has invalid format",
                 testField.getErrorMessage());
     }
 
     @Test
-    public void required_validate_emptyErrorMessageDisplayed() {
+    void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(LocalTime.now());
         testField.setValue(null);
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(LocalTime.now());
         testField.setValue(null);
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assertions.assertEquals("Field is required",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void min_validate_emptyErrorMessageDisplayed() {
+    void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(LocalTime.now());
         testField.setValue(LocalTime.now().minusHours(1));
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void min_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void min_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setMin(LocalTime.now());
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setMinErrorMessage("Time is too small"));
         testField.setValue(LocalTime.now().minusHours(1));
-        Assert.assertEquals("Time is too small", testField.getErrorMessage());
+        Assertions.assertEquals("Time is too small",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void max_validate_emptyErrorMessageDisplayed() {
+    void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(LocalTime.now());
         testField.setValue(LocalTime.now().plusHours(1));
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void max_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void max_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setMax(LocalTime.now());
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setMaxErrorMessage("Time is too big"));
         testField.setValue(LocalTime.now().plusHours(1));
-        Assert.assertEquals("Time is too big", testField.getErrorMessage());
+        Assertions.assertEquals("Time is too big", testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+    void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalTime.now());
         testField.setValue(null);
-        Assert.assertEquals("Custom error message",
+        Assertions.assertEquals("Custom error message",
                 testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -133,7 +135,8 @@ public class BasicValidationTest
         testField.setErrorMessage("");
         testField.setValue(LocalTime.now());
         testField.setValue(null);
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assertions.assertEquals("Field is required",
+                testField.getErrorMessage());
     }
 
     protected TimePicker createTestField() {
