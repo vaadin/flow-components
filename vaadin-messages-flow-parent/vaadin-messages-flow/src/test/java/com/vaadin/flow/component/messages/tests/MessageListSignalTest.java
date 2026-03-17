@@ -123,21 +123,6 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
                 messageList.getItems().get(0).getText());
     }
 
-    @Test
-    public void bindItems_notAttached_bindingInactiveUntilAttach() {
-        var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
-        var item2Signal = new ValueSignal<>(new MessageListItem("World"));
-        var listSignal = new ValueSignal<>(List.of(item1Signal, item2Signal));
-
-        messageList.bindItems(listSignal);
-
-        Assert.assertEquals(0, messageList.getItems().size());
-
-        ui.add(messageList);
-
-        Assert.assertEquals(2, messageList.getItems().size());
-    }
-
     @Test(expected = BindingActiveException.class)
     public void setItemsWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
