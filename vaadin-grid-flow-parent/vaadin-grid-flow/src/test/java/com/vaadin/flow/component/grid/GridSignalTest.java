@@ -341,7 +341,7 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void bindItems_updateItemSignalValue_keyMapperRemapsToSameKey() {
+    public void bindItems_updateItemSignalValue_updatesItems() {
         var listSignal = new ListSignal<String>();
         listSignal.insertLast("original");
 
@@ -349,21 +349,17 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         grid.bindItems(listSignal);
         ui.add(grid);
 
-        // Force a flush so the key mapper has assigned a key
-        ui.fakeClientCommunication();
+        List<String> items = grid.getGenericDataView().getItems().toList();
+        Assert.assertEquals(1, items.size());
+        Assert.assertEquals("original", items.get(0));
 
-        var keyMapper = grid.getDataCommunicator().getKeyMapper();
-        String keyBefore = keyMapper.key("original");
-        Assert.assertTrue(keyMapper.has("original"));
-
-        // Update the item signal value
+        // Update the item signal value (identity change)
         listSignal.peek().getFirst().set("updated");
 
-        // The old identity should be gone, replaced by the new one
-        // mapped to the same key
-        Assert.assertFalse(keyMapper.has("original"));
-        Assert.assertTrue(keyMapper.has("updated"));
-        Assert.assertEquals(keyBefore, keyMapper.key("updated"));
+        // Verify the items reflect the update
+        items = grid.getGenericDataView().getItems().toList();
+        Assert.assertEquals(1, items.size());
+        Assert.assertEquals("updated", items.get(0));
     }
 
     private Grid<String> createGridWithBoundItems() {

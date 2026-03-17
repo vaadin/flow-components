@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.select;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -115,7 +116,7 @@ public class SelectSignalTest extends AbstractSignalsUnitTest {
     private List<String> getItemLabels(Select<String> select) {
         // Items are inside the listBox element (first child of select)
         var listBoxElement = select.getElement().getChild(0);
-        var labels = new java.util.ArrayList<String>();
+        var labels = new ArrayList<String>();
         for (int i = 0; i < listBoxElement.getChildCount(); i++) {
             String text = listBoxElement.getChild(i).getText();
             if (text != null && !text.isEmpty()) {

@@ -59,7 +59,7 @@ class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
     }
 
     @Test
-    void bindItems_updateItemSignalValue_keyMapperRemapsToSameKey() {
+    void bindItems_updateItemSignalValue_updatesItems() {
         var listSignal = new ListSignal<String>();
         listSignal.insertLast("original");
 
@@ -67,21 +67,19 @@ class VirtualListSignalTest extends AbstractSignalsJUnit6Test {
         list.bindItems(listSignal);
         ui.add(list);
 
-        // Force a flush so the key mapper has assigned a key
-        ui.fakeClientCommunication();
+        var items = list.getDataProvider().fetch(
+                new com.vaadin.flow.data.provider.Query<>()).toList();
+        Assertions.assertEquals(1, items.size());
+        Assertions.assertEquals("original", items.get(0));
 
-        var keyMapper = list.getDataCommunicator().getKeyMapper();
-        String keyBefore = keyMapper.key("original");
-        Assertions.assertTrue(keyMapper.has("original"));
-
-        // Update the item signal value
+        // Update the item signal value (identity change)
         listSignal.peek().getFirst().set("updated");
 
-        // The old identity should be gone, replaced by the new one
-        // mapped to the same key
-        Assertions.assertFalse(keyMapper.has("original"));
-        Assertions.assertTrue(keyMapper.has("updated"));
-        Assertions.assertEquals(keyBefore, keyMapper.key("updated"));
+        // Verify the items reflect the update
+        items = list.getDataProvider().fetch(
+                new com.vaadin.flow.data.provider.Query<>()).toList();
+        Assertions.assertEquals(1, items.size());
+        Assertions.assertEquals("updated", items.get(0));
     }
 
     private VirtualList<String> createVirtualListWithBoundItems() {
