@@ -277,12 +277,19 @@ public interface LLMProvider {
 
         /**
          * Executes the tool with the given arguments.
+         * <p>
+         * Implementations should return a human-readable result string on
+         * success. On failure, implementations may throw any runtime
+         * exception; the provider will catch it and report the error message
+         * back to the LLM so it can recover gracefully.
+         * </p>
          *
          * @param arguments
          *            the tool arguments as a JSON string matching the
          *            parameters schema, or {@code null} if the tool takes no
          *            parameters
-         * @return the result of the tool execution as a string
+         * @return the result of the tool execution as a string, never
+         *         {@code null}
          */
         String execute(String arguments);
     }

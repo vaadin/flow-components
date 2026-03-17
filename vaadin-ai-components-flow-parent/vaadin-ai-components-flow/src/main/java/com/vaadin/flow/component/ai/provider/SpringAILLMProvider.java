@@ -210,6 +210,7 @@ public class SpringAILLMProvider implements LLMProvider {
         }
         var explicitTools = request.explicitTools();
         if (explicitTools != null && !explicitTools.isEmpty()) {
+            warnDuplicateToolNames(explicitTools);
             var callbacks = explicitTools.stream()
                     .map(SpringAILLMProvider::toToolCallback)
                     .toArray(ToolCallback[]::new);
@@ -284,9 +285,25 @@ public class SpringAILLMProvider implements LLMProvider {
 
             @Override
             public String call(String arguments) {
-                return tool.execute(arguments);
+                try {
+                    return tool.execute(arguments);
+                } catch (Exception e) {
+                    return "Error executing tool: " + e.getMessage();
+                }
             }
         };
+    }
+
+    private static void warnDuplicateToolNames(
+            List<LLMProvider.ToolDefinition> tools) {
+        var seen = new java.util.HashSet<String>();
+        for (var tool : tools) {
+            if (!seen.add(tool.getName())) {
+                LOGGER.warn(
+                        "Duplicate tool name '{}': previous tool will be replaced",
+                        tool.getName());
+            }
+        }
     }
 
     private static void checkPushConfiguration() {

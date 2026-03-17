@@ -926,6 +926,64 @@ class LangChain4JLLMProviderTest {
         Assertions.assertTrue(names.contains("getHumidity"));
     }
 
+    @Test
+    void stream_withDuplicateExplicitToolNames_logsWarning() {
+        var tool1 = createExplicitTool("sameName", "First tool", null,
+                args -> "result1");
+        var tool2 = createExplicitTool("sameName", "Second tool", null,
+                args -> "result2");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0],
+                List.of(tool1, tool2));
+
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var originalErr = System.err;
+        var errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        try {
+            provider.stream(request).blockFirst();
+            var errContent = errStream.toString(StandardCharsets.UTF_8);
+            Assertions.assertTrue(
+                    errContent.contains("Duplicate tool name 'sameName'"),
+                    "Expected duplicate tool name warning, got: " + errContent);
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
+    @Test
+    void stream_withDuplicateAnnotatedAndExplicitToolName_logsWarning() {
+        var toolObject = new SampleToolsClass();
+        var explicitTool = createExplicitTool("getTemperature",
+                "Overrides annotated tool", null, args -> "explicit result");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[] { toolObject },
+                List.of(explicitTool));
+
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var originalErr = System.err;
+        var errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        try {
+            provider.stream(request).blockFirst();
+            var errContent = errStream.toString(StandardCharsets.UTF_8);
+            Assertions.assertTrue(
+                    errContent
+                            .contains("Duplicate tool name 'getTemperature'"),
+                    "Expected duplicate tool name warning, got: " + errContent);
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
     private static LLMProvider.ToolDefinition createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<String, String> executor) {

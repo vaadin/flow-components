@@ -897,6 +897,39 @@ class SpringAILLMProviderTest {
         Assertions.assertNotNull(toolDef.inputSchema());
     }
 
+    @Test
+    void stream_withDuplicateExplicitToolNames_logsWarning() {
+        provider.setStreaming(false);
+        var tool1 = createExplicitTool("sameName", "First tool", null,
+                args -> "result1");
+        var tool2 = createExplicitTool("sameName", "Second tool", null,
+                args -> "result2");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0],
+                List.of(tool1, tool2));
+        mockSimpleChat("Done");
+
+        var originalErr = System.err;
+        var errStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errStream));
+        try {
+            // Spring AI also validates duplicate names and throws, but our
+            // warning fires before the framework validation
+            try {
+                provider.stream(request).blockFirst();
+            } catch (Exception ignored) {
+                // Spring AI may throw on duplicate tool names
+            }
+            var errContent = errStream.toString(StandardCharsets.UTF_8);
+            Assertions.assertTrue(
+                    errContent.contains("Duplicate tool name 'sameName'"),
+                    "Expected duplicate tool name warning, got: " + errContent);
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
     private static LLMProvider.ToolDefinition createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<String, String> executor) {
