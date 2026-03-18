@@ -8,17 +8,17 @@
  */
 package com.vaadin.flow.component.charts;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasTheme;
 
-public class ChartHasThemeTest {
+class ChartHasThemeTest {
 
     @Test
-    public void hasTheme() {
+    void hasTheme() {
         Chart chart = new Chart();
-        Assert.assertTrue(chart instanceof HasTheme);
+        Assertions.assertTrue(chart instanceof HasTheme);
     }
 
 }

@@ -9,41 +9,38 @@
 package com.vaadin.flow.component.charts;
 
 import static com.vaadin.flow.component.charts.util.ChartSerialization.toJSON;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.ObjectMapper;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ChartOptionsJSONSerializationTest {
+class ChartOptionsJSONSerializationTest {
 
-    @Mock
-    private UI ui;
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private ChartOptions options;
 
-    @Before
-    public void setup() {
-        options = ChartOptions.get(ui);
+    @BeforeEach
+    void setup() {
+        options = ChartOptions.get(ui.getUI());
     }
 
     @Test
-    public void toJSON_NoLang_EmptyJsonSerialized() {
+    void toJSON_NoLang_EmptyJsonSerialized() {
         assertEquals("{}", toJSON(options));
     }
 
     @Test
-    public void toJSON_LangWithFinnishLocale_LocaleSerialized_Months() {
+    void toJSON_LangWithFinnishLocale_LocaleSerialized_Months() {
         final String[] fiMonths = new String[] { "Tammikuu", "Helmikuu",
                 "Maaliskuu", "Huhtikuu", "Toukokuu", "Kesäkuu", "Heinäkuu",
                 "Elokuu", "Syyskuu", "Lokakuu", "Marraskuu", "Joulukuu" };
@@ -55,11 +52,11 @@ public class ChartOptionsJSONSerializationTest {
         ObjectMapper om = ChartSerialization.createObjectMapper();
         ChartOptions chartOptions = om.readValue(json, ChartOptions.class);
 
-        Assert.assertArrayEquals(fiMonths, chartOptions.getLang().getMonths());
+        assertArrayEquals(fiMonths, chartOptions.getLang().getMonths());
     }
 
     @Test
-    public void toJSON_LangWithFinnishLocale_LocaleSerialized_ShortMonths() {
+    void toJSON_LangWithFinnishLocale_LocaleSerialized_ShortMonths() {
         final String[] fiShortMonths = new String[] { "Tammi", "Helmi",
                 "Maalis", "Huhti", "Touko", "Kesä", "Heinä", "Elo", "Syys",
                 "Loka", "Marras", "Joulu" };
@@ -70,12 +67,11 @@ public class ChartOptionsJSONSerializationTest {
         ObjectMapper om = ChartSerialization.createObjectMapper();
         ChartOptions fromJson = om.readValue(json, ChartOptions.class);
 
-        Assert.assertArrayEquals(fiShortMonths,
-                fromJson.getLang().getShortMonths());
+        assertArrayEquals(fiShortMonths, fromJson.getLang().getShortMonths());
     }
 
     @Test
-    public void toJSON_LangWithFinnishLocale_LocaleSerialized_Days() {
+    void toJSON_LangWithFinnishLocale_LocaleSerialized_Days() {
         final String[] fiDays = new String[] { "Ma", "Ti", "Ke", "To", "Pe",
                 "La", "Su" };
         final Lang fi = new Lang();
@@ -86,6 +82,6 @@ public class ChartOptionsJSONSerializationTest {
         ObjectMapper om = ChartSerialization.createObjectMapper();
         ChartOptions chartOptions = om.readValue(json, ChartOptions.class);
 
-        Assert.assertArrayEquals(fiDays, chartOptions.getLang().getWeekdays());
+        assertArrayEquals(fiDays, chartOptions.getLang().getWeekdays());
     }
 }
