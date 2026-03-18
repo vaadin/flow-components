@@ -144,7 +144,7 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         // Create LLM provider via OpenAI
         var apiKey = System.getenv("OPENAI_API_KEY");
         var model = OpenAiStreamingChatModel.builder().apiKey(apiKey)
-                .modelName("gpt-4o-mini").build();
+                .modelName("gpt-5.4-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
         // Create orchestrator with controller
