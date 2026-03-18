@@ -262,4 +262,17 @@ public class MultiSelectListBox<T>
                 .collect(Collectors.toSet());
         return ids1.equals(ids2);
     }
+
+    @Override
+    protected void onItemIdentityChanged(T oldItem, T newItem) {
+        Set<T> currentValue = getValue();
+        if (currentValue.stream()
+                .anyMatch(s -> getItemId(s).equals(getItemId(oldItem)))) {
+            Set<T> newValue = currentValue.stream()
+                    .map(s -> getItemId(s).equals(getItemId(oldItem)) ? newItem
+                            : s)
+                    .collect(Collectors.toSet());
+            setValue(newValue);
+        }
+    }
 }

@@ -106,4 +106,13 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
             return false;
         return getItemId(value1).equals(getItemId(value2));
     }
+
+    @Override
+    protected void onItemIdentityChanged(T oldItem, T newItem) {
+        T currentValue = getValue();
+        if (currentValue != null
+                && getItemId(currentValue).equals(getItemId(oldItem))) {
+            setValue(newItem);
+        }
+    }
 }

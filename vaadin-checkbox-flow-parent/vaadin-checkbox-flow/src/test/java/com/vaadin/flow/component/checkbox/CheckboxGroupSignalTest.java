@@ -17,6 +17,7 @@ package com.vaadin.flow.component.checkbox;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -111,6 +112,29 @@ public class CheckboxGroupSignalTest extends AbstractSignalsUnitTest {
         List<String> labels = getCheckboxLabels(group);
         Assert.assertEquals(1, labels.size());
         Assert.assertEquals("updated", labels.get(0));
+    }
+
+    @Test
+    public void bindItems_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        var group = new CheckboxGroup<String>();
+        group.bindItems(listSignal);
+        ui.add(group);
+
+        // Select the first item
+        group.setValue(Set.of("a"));
+        Assert.assertEquals(Set.of("a"), group.getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals(Set.of("a-updated"), group.getValue());
+        Assert.assertEquals(List.of("a-updated", "b"),
+                getCheckboxLabels(group));
     }
 
     @SuppressWarnings("unchecked")

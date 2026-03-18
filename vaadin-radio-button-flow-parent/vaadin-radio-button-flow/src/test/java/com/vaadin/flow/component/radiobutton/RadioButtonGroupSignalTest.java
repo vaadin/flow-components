@@ -169,6 +169,29 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("updated", labels.get(0));
     }
 
+    @Test
+    public void bindItems_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        var radioGroup = new RadioButtonGroup<String>();
+        radioGroup.bindItems(listSignal);
+        ui.add(radioGroup);
+
+        // Select the first item
+        radioGroup.setValue("a");
+        Assert.assertEquals("a", radioGroup.getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals("a-updated", radioGroup.getValue());
+        Assert.assertEquals(List.of("a-updated", "b"),
+                getRadioButtonItems(radioGroup));
+    }
+
     @SuppressWarnings("unchecked")
     private List<String> getRadioButtonItems(RadioButtonGroup<String> group) {
         return group.getChildren().filter(RadioButton.class::isInstance)

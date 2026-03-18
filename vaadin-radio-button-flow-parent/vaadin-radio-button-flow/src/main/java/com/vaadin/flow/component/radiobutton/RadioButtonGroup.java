@@ -750,6 +750,13 @@ public class RadioButtonGroup<T>
                                         .indexOfChild(oldButton.getElement()),
                                 newButton.getElement());
                         oldButton.getElement().removeFromParent();
+                        // Preserve selection
+                        T currentValue = getValue();
+                        if (currentValue != null
+                                && Objects.equals(getItemId(currentValue),
+                                        getItemId(oldItem))) {
+                            setValue(newItem);
+                        }
                     } else {
                         updateButton(oldButton);
                     }

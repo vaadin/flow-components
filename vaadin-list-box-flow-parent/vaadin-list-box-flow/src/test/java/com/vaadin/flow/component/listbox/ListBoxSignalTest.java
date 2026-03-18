@@ -17,6 +17,7 @@ package com.vaadin.flow.component.listbox;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
@@ -123,6 +124,52 @@ public class ListBoxSignalTest extends AbstractSignalsUnitTest {
         labels = getItemLabels(listBox);
         Assert.assertEquals(1, labels.size());
         Assert.assertEquals("updated", labels.get(0));
+    }
+
+    @Test
+    public void listBox_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        var listBox = new ListBox<String>();
+        listBox.bindItems(listSignal);
+        ui.add(listBox);
+
+        // Select the first item
+        listBox.setValue("a");
+        Assert.assertEquals("a", listBox.getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals("a-updated", listBox.getValue());
+        Assert.assertEquals(List.of("a-updated", "b"),
+                getItemLabels(listBox));
+    }
+
+    @Test
+    public void multiSelectListBox_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        var listBox = new MultiSelectListBox<String>();
+        listBox.bindItems(listSignal);
+        ui.add(listBox);
+
+        // Select the first item
+        listBox.setValue(Set.of("a"));
+        Assert.assertEquals(Set.of("a"), listBox.getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals(Set.of("a-updated"), listBox.getValue());
+        Assert.assertEquals(List.of("a-updated", "b"),
+                getItemLabels(listBox));
     }
 
     @SuppressWarnings("unchecked")

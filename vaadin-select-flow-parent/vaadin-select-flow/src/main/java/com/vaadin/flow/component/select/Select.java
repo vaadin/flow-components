@@ -1122,6 +1122,12 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
                     .findAny().ifPresent(item -> {
                         item.setItem(updatedItem);
                         updateItem(item);
+                        // Preserve selection
+                        T currentValue = getValue();
+                        if (currentValue != null && oldItemId.equals(
+                                identifierProvider.apply(currentValue))) {
+                            setValue(updatedItem);
+                        }
                     });
         } else {
             reset();

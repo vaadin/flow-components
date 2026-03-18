@@ -113,6 +113,27 @@ public class SelectSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("updated", labels.get(0));
     }
 
+    @Test
+    public void bindItems_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        var select = new Select<String>();
+        select.bindItems(listSignal);
+        ui.add(select);
+
+        // Select the first item
+        select.setValue("a");
+        Assert.assertEquals("a", select.getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals("a-updated", select.getValue());
+    }
+
     private List<String> getItemLabels(Select<String> select) {
         // Items are inside the listBox element (first child of select)
         var listBoxElement = select.getElement().getChild(0);

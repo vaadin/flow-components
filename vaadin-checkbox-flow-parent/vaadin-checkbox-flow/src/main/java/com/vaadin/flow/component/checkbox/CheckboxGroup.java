@@ -420,6 +420,17 @@ public class CheckboxGroup<T>
                                             oldCheckbox.getElement()),
                                     newCheckbox.getElement());
                             remove(oldCheckbox);
+                            // Preserve selection
+                            Set<T> currentValue = getValue();
+                            if (currentValue.stream().anyMatch(
+                                    s -> Objects.equals(getItemId(s),
+                                            oldItemId))) {
+                                Set<T> newValue = currentValue.stream()
+                                        .map(s -> Objects.equals(getItemId(s),
+                                                oldItemId) ? newItem : s)
+                                        .collect(Collectors.toSet());
+                                setValue(newValue);
+                            }
                         } else {
                             updateCheckbox(oldCheckbox);
                         }

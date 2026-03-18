@@ -140,11 +140,18 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                         if (identityChanged) {
                             VaadinItem<ITEM> newComponent = createItemComponent(
                                     newItem);
-                            getElement().insertChild(
-                                    getElement().indexOfChild(
-                                            oldComponent.getElement()),
+                            int index = getElement().indexOfChild(
+                                    oldComponent.getElement());
+                            getElement().insertChild(index,
                                     newComponent.getElement());
                             oldComponent.getElement().removeFromParent();
+                            // Update the items list to reflect the new
+                            // identity
+                            int itemIndex = items.indexOf(oldItem);
+                            if (itemIndex >= 0) {
+                                items.set(itemIndex, newItem);
+                            }
+                            onItemIdentityChanged(oldItem, newItem);
                         } else {
                             refresh(oldComponent);
                         }
@@ -153,6 +160,19 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             clear();
             rebuild();
         }
+    }
+
+    /**
+     * Called after an item's DOM element has been replaced due to an identity
+     * change. Subclasses can override this to update their selection state.
+     *
+     * @param oldItem
+     *            the old item that was replaced
+     * @param newItem
+     *            the new item that replaced it
+     */
+    protected void onItemIdentityChanged(ITEM oldItem, ITEM newItem) {
+        // no-op by default
     }
 
     @Override
