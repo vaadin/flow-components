@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -30,71 +30,71 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class CheckboxUnitTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class CheckboxUnitTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void initialValue() {
+    void initialValue() {
         Checkbox checkbox = new Checkbox();
-        Assert.assertFalse(checkbox.getValue());
+        Assertions.assertFalse(checkbox.getValue());
 
         checkbox = new Checkbox(true);
-        Assert.assertTrue(checkbox.getValue());
+        Assertions.assertTrue(checkbox.getValue());
 
         checkbox = new Checkbox(false);
-        Assert.assertFalse(checkbox.getValue());
+        Assertions.assertFalse(checkbox.getValue());
     }
 
     @Test
-    public void testIndeterminate() {
+    void testIndeterminate() {
         Checkbox checkbox = new Checkbox();
-        Assert.assertFalse(checkbox.isIndeterminate());
+        Assertions.assertFalse(checkbox.isIndeterminate());
 
         checkbox = new Checkbox(true);
-        Assert.assertFalse(checkbox.isIndeterminate());
+        Assertions.assertFalse(checkbox.isIndeterminate());
 
         checkbox.setIndeterminate(true);
-        Assert.assertTrue(checkbox.getValue());
-        Assert.assertTrue(checkbox.isIndeterminate());
+        Assertions.assertTrue(checkbox.getValue());
+        Assertions.assertTrue(checkbox.isIndeterminate());
 
         checkbox.setValue(true);
-        Assert.assertTrue(checkbox.getValue());
-        Assert.assertTrue(checkbox.isIndeterminate());
+        Assertions.assertTrue(checkbox.getValue());
+        Assertions.assertTrue(checkbox.isIndeterminate());
 
         checkbox.setValue(false);
-        Assert.assertFalse(checkbox.getValue());
-        Assert.assertTrue(checkbox.isIndeterminate());
+        Assertions.assertFalse(checkbox.getValue());
+        Assertions.assertTrue(checkbox.isIndeterminate());
 
         checkbox.setIndeterminate(false);
-        Assert.assertFalse(checkbox.getValue());
-        Assert.assertFalse(checkbox.isIndeterminate());
+        Assertions.assertFalse(checkbox.getValue());
+        Assertions.assertFalse(checkbox.isIndeterminate());
     }
 
     @Test
-    public void labelAndInitialValueCtor() {
+    void labelAndInitialValueCtor() {
         Checkbox checkbox = new Checkbox("foo", true);
-        Assert.assertTrue(checkbox.getValue());
-        Assert.assertEquals("foo", checkbox.getLabel());
+        Assertions.assertTrue(checkbox.getValue());
+        Assertions.assertEquals("foo", checkbox.getLabel());
 
         checkbox = new Checkbox("foo", false);
-        Assert.assertFalse(checkbox.getValue());
-        Assert.assertEquals("foo", checkbox.getLabel());
+        Assertions.assertFalse(checkbox.getValue());
+        Assertions.assertEquals("foo", checkbox.getLabel());
     }
 
     @Test
-    public void setEnable() {
+    void setEnable() {
         Checkbox checkbox = new Checkbox("foo", true);
         checkbox.setEnabled(true);
-        Assert.assertTrue(checkbox.isEnabled());
+        Assertions.assertTrue(checkbox.isEnabled());
         checkbox.setEnabled(false);
-        Assert.assertFalse(checkbox.isEnabled());
+        Assertions.assertFalse(checkbox.isEnabled());
     }
 
     @Test
-    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-checkbox");
         element.setProperty("checked", true);
 
@@ -106,63 +106,63 @@ public class CheckboxUnitTest {
         Mockito.when(instantiator.createComponent(Checkbox.class))
                 .thenAnswer(invocation -> new Checkbox());
         Checkbox field = Component.from(element, Checkbox.class);
-        Assert.assertEquals(Boolean.TRUE,
+        Assertions.assertEquals(Boolean.TRUE,
                 field.getElement().getPropertyRaw("checked"));
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         Checkbox checkbox = new Checkbox();
-        Assert.assertTrue(checkbox instanceof HasTooltip);
+        Assertions.assertTrue(checkbox instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         Checkbox checkbox = new Checkbox();
-        Assert.assertTrue(checkbox instanceof HasAriaLabel);
+        Assertions.assertTrue(checkbox instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         Checkbox checkbox = new Checkbox();
         checkbox.setAriaLabel("aria-label");
 
-        Assert.assertTrue(checkbox.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", checkbox.getAriaLabel().get());
+        Assertions.assertTrue(checkbox.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", checkbox.getAriaLabel().get());
 
         checkbox.setAriaLabel(null);
-        Assert.assertTrue(checkbox.getAriaLabel().isEmpty());
+        Assertions.assertTrue(checkbox.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         Checkbox checkbox = new Checkbox();
         checkbox.setAriaLabelledBy("aria-labelledby");
 
-        Assert.assertTrue(checkbox.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby",
+        Assertions.assertTrue(checkbox.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
                 checkbox.getAriaLabelledBy().get());
 
         checkbox.setAriaLabelledBy(null);
-        Assert.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         Checkbox field = new Checkbox();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>);
     }
 
     @Test
-    public void implementsHasValidationProperties() {
+    void implementsHasValidationProperties() {
         Checkbox field = new Checkbox();
-        Assert.assertTrue(field instanceof HasValidationProperties);
+        Assertions.assertTrue(field instanceof HasValidationProperties);
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Checkbox.class));
     }
 }
