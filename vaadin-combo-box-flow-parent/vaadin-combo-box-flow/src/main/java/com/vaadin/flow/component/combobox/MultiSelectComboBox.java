@@ -34,8 +34,8 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -418,8 +418,7 @@ public class MultiSelectComboBox<TItem>
     }
 
     @Override
-    void onItemRefreshed(
-            DataChangeEvent.DataRefreshEvent<TItem> refreshEvent) {
+    void onItemRefreshed(DataChangeEvent.DataRefreshEvent<TItem> refreshEvent) {
         TItem newItem = refreshEvent.getItem();
         TItem oldItem = refreshEvent.getOldItem();
         DataProvider<TItem, ?> dataProvider = getDataProvider();
@@ -432,9 +431,8 @@ public class MultiSelectComboBox<TItem>
             return;
         }
         Set<TItem> currentValue = getValue();
-        if (currentValue.stream()
-                .anyMatch(s -> Objects.equals(dataProvider.getId(s),
-                        oldItemId))) {
+        if (currentValue.stream().anyMatch(
+                s -> Objects.equals(dataProvider.getId(s), oldItemId))) {
             Set<TItem> newValue = currentValue.stream()
                     .map(s -> Objects.equals(dataProvider.getId(s), oldItemId)
                             ? newItem

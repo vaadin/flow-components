@@ -608,8 +608,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param refreshEvent
      *            the data refresh event
      */
-    void onItemRefreshed(
-            DataChangeEvent.DataRefreshEvent<TItem> refreshEvent) {
+    void onItemRefreshed(DataChangeEvent.DataRefreshEvent<TItem> refreshEvent) {
         // no-op by default, overridden in ComboBox and MultiSelectComboBox
     }
 

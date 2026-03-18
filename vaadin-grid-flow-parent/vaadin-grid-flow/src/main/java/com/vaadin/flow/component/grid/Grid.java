@@ -1736,9 +1736,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             });
         } else if (selectionModel instanceof GridMultiSelectionModel<T> multi) {
             Set<T> selected = multi.getSelectedItems();
-            if (selected.stream().anyMatch(
-                    s -> Objects.equals(getDataProvider().getId(s),
-                            oldItemId))) {
+            if (selected.stream().anyMatch(s -> Objects
+                    .equals(getDataProvider().getId(s), oldItemId))) {
                 multi.deselect(oldItem);
                 multi.select(newItem);
             }
