@@ -17,5 +17,5 @@ package com.vaadin.flow.component.card;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class CardSerializableTest extends ClassesSerializableTest {
+class CardSerializableTest extends ClassesSerializableTest {
 }

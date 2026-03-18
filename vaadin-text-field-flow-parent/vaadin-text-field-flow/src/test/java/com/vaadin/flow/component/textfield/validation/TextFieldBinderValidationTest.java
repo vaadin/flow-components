@@ -20,7 +20,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public class TextFieldBinderValidationTest
+class TextFieldBinderValidationTest
         extends AbstractBinderValidationTest<String, TextField> {
 
     protected void initField() {

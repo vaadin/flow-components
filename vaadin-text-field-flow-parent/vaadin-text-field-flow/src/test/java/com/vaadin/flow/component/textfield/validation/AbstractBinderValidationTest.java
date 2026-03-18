@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import com.vaadin.flow.component.Component;
@@ -27,7 +27,7 @@ import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public abstract class AbstractBinderValidationTest<T, K extends Component & HasValue<?, T>> {
+abstract class AbstractBinderValidationTest<T, K extends Component & HasValue<?, T>> {
 
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAIL";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
@@ -62,68 +62,70 @@ public abstract class AbstractBinderValidationTest<T, K extends Component & HasV
     @Mock
     private BindingValidationStatusHandler statusMock;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         MockitoAnnotations.openMocks(this);
         initField();
     }
 
     @Test
-    public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
+    void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
         attachBinderToField();
         setComponentInvalidValue();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
         var status = statusCaptor.getValue();
 
-        Assert.assertTrue("Validation should fail", status.isError());
+        Assertions.assertTrue(status.isError(), "Validation should fail");
     }
 
     @Test
-    public void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
+    void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
         attachBinderToField();
         setBinderInvalidValue();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
         var status = statusCaptor.getValue();
 
-        Assert.assertTrue("Binder validation should fail", status.isError());
-        Assert.assertEquals(BINDER_FAIL_MESSAGE,
+        Assertions.assertTrue(status.isError(),
+                "Binder validation should fail");
+        Assertions.assertEquals(BINDER_FAIL_MESSAGE,
                 status.getMessage().orElse(""));
     }
 
     @Test
-    public void setRequiredOnBinder_validate_binderValidationFails() {
+    void setRequiredOnBinder_validate_binderValidationFails() {
         var binder = attachBinderToField(true);
         binder.validate();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
         var status = statusCaptor.getValue();
 
-        Assert.assertTrue("Binder validation should fail", status.isError());
-        Assert.assertEquals(BINDER_REQUIRED_MESSAGE,
+        Assertions.assertTrue(status.isError(),
+                "Binder validation should fail");
+        Assertions.assertEquals(BINDER_REQUIRED_MESSAGE,
                 status.getMessage().orElse(""));
     }
 
     @Test
-    public void setRequiredOnComponent_validate_binderValidationPasses() {
+    void setRequiredOnComponent_validate_binderValidationPasses() {
         var binder = attachBinderToField();
         field.setRequiredIndicatorVisible(true);
         binder.validate();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
-        Assert.assertFalse("Validation should be ok",
-                statusCaptor.getValue().isError());
+        Assertions.assertFalse(statusCaptor.getValue().isError(),
+                "Validation should be ok");
     }
 
     @Test
-    public void elementWithConstraints_validValue_validationPasses() {
+    void elementWithConstraints_validValue_validationPasses() {
         attachBinderToField();
         setValidValue();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
-        Assert.assertFalse("Validation should be ok",
-                statusCaptor.getValue().isError());
+        Assertions.assertFalse(statusCaptor.getValue().isError(),
+                "Validation should be ok");
     }
 
     private Binder<?> attachBinderToField() {

@@ -18,7 +18,7 @@ package com.vaadin.flow.component.textfield.tests;
 import java.io.Serializable;
 import java.util.Optional;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -27,11 +27,12 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.AnnotationReader;
 import com.vaadin.flow.internal.ReflectTools;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 class ComponentFromTest {
     static <T extends Serializable> void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
-            T value, Class<? extends Component> componentClass, MockUIRule ui) {
+            T value, Class<? extends Component> componentClass,
+            MockUIExtension ui) {
         Optional<Tag> tag = AnnotationReader.getAnnotationFor(componentClass,
                 Tag.class);
         Element element = new Element(tag.get().value());
@@ -48,6 +49,7 @@ class ComponentFromTest {
                 invocation -> ReflectTools.createInstance(componentClass));
 
         Component field = Component.from(element, componentClass);
-        Assert.assertEquals(value, field.getElement().getPropertyRaw("value"));
+        Assertions.assertEquals(value,
+                field.getElement().getPropertyRaw("value"));
     }
 }
