@@ -250,6 +250,13 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
+    public void setOverlaySize_resetToNull() {
+        layout.setOverlaySize("500px");
+        layout.setOverlaySize(null);
+        Assert.assertNull(layout.getOverlaySize());
+    }
+
+    @Test
     public void setOverlaySizeWithUnit_getOverlaySize() {
         layout.setOverlaySize(100, Unit.PERCENTAGE);
         Assert.assertEquals("100.0%", layout.getOverlaySize());
