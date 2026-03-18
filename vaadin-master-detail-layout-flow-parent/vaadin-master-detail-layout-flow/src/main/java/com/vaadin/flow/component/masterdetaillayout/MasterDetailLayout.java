@@ -90,6 +90,24 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
+     * Creates a Master Detail Layout with the given master size, detail size,
+     * and expanding side.
+     *
+     * @param masterSize
+     *            the size of the master area in CSS length units
+     * @param detailSize
+     *            the size of the detail area in CSS length units
+     * @param expandingSide
+     *            which area(s) expand to fill available space
+     */
+    public MasterDetailLayout(String masterSize, String detailSize,
+            Expand expandingSide) {
+        setMasterSize(masterSize);
+        setDetailSize(detailSize);
+        setExpand(expandingSide);
+    }
+
+    /**
      * Gets the component currently in the master area.
      *
      * @return the component in the master area, or {@code null} if there is no
