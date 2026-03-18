@@ -24,7 +24,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
-class ColumnAndBarTest extends ChartTestBase {
+public class ColumnAndBarTest extends ChartTestBase {
 
     protected Integer[][] columnAndBarData = { { 100, 200 }, { 200, 300 },
             { 400, 400 }, { 800, 500 }, { 1600, 600 } };

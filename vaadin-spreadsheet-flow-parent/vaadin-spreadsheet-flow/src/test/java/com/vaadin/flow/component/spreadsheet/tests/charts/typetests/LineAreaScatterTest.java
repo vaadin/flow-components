@@ -22,7 +22,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
-class LineAreaScatterTest extends ChartTestBase {
+public class LineAreaScatterTest extends ChartTestBase {
 
     @Test
     void lineChartWithOrWithoutMarker() throws Exception {

@@ -20,7 +20,7 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
-class PieAndDonutTest extends ChartTestBase {
+public class PieAndDonutTest extends ChartTestBase {
 
     protected Double[][] pieData = { { 100d, 200d, 2000d, 800d, 99d } };
 
