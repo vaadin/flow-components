@@ -111,7 +111,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/select", version = "25.1.0-beta4")
+@NpmPackage(value = "@vaadin/select", version = "25.1.0-rc1")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
