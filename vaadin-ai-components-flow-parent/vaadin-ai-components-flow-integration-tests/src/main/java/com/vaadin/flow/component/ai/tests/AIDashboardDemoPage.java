@@ -132,6 +132,7 @@ public class AIDashboardDemoPage extends HorizontalLayout {
                 You can also **select widgets** on the dashboard and ask \
                 me to modify or remove them.""", "Assistant");
         var messageList = new MessageList(welcomeMessage);
+        messageList.setMarkdown(true);
         messageList.setSizeFull();
         var messageInput = new MessageInput();
         messageInput.setWidthFull();
