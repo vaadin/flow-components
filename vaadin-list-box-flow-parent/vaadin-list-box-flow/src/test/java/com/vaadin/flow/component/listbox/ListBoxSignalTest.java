@@ -145,8 +145,7 @@ public class ListBoxSignalTest extends AbstractSignalsUnitTest {
 
         // Verify selection is preserved with the new item
         Assert.assertEquals("a-updated", listBox.getValue());
-        Assert.assertEquals(List.of("a-updated", "b"),
-                getItemLabels(listBox));
+        Assert.assertEquals(List.of("a-updated", "b"), getItemLabels(listBox));
     }
 
     @Test
@@ -168,8 +167,7 @@ public class ListBoxSignalTest extends AbstractSignalsUnitTest {
 
         // Verify selection is preserved with the new item
         Assert.assertEquals(Set.of("a-updated"), listBox.getValue());
-        Assert.assertEquals(List.of("a-updated", "b"),
-                getItemLabels(listBox));
+        Assert.assertEquals(List.of("a-updated", "b"), getItemLabels(listBox));
     }
 
     @SuppressWarnings("unchecked")

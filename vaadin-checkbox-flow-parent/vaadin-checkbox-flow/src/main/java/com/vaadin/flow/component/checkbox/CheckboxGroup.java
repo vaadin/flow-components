@@ -422,9 +422,8 @@ public class CheckboxGroup<T>
                             remove(oldCheckbox);
                             // Preserve selection
                             Set<T> currentValue = getValue();
-                            if (currentValue.stream().anyMatch(
-                                    s -> Objects.equals(getItemId(s),
-                                            oldItemId))) {
+                            if (currentValue.stream().anyMatch(s -> Objects
+                                    .equals(getItemId(s), oldItemId))) {
                                 Set<T> newValue = currentValue.stream()
                                         .map(s -> Objects.equals(getItemId(s),
                                                 oldItemId) ? newItem : s)

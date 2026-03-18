@@ -140,8 +140,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                         if (identityChanged) {
                             VaadinItem<ITEM> newComponent = createItemComponent(
                                     newItem);
-                            int index = getElement().indexOfChild(
-                                    oldComponent.getElement());
+                            int index = getElement()
+                                    .indexOfChild(oldComponent.getElement());
                             getElement().insertChild(index,
                                     newComponent.getElement());
                             oldComponent.getElement().removeFromParent();

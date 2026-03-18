@@ -268,9 +268,8 @@ public class MultiSelectListBox<T>
         Set<T> currentValue = getValue();
         if (currentValue.stream()
                 .anyMatch(s -> getItemId(s).equals(getItemId(oldItem)))) {
-            Set<T> newValue = currentValue.stream()
-                    .map(s -> getItemId(s).equals(getItemId(oldItem)) ? newItem
-                            : s)
+            Set<T> newValue = currentValue.stream().map(
+                    s -> getItemId(s).equals(getItemId(oldItem)) ? newItem : s)
                     .collect(Collectors.toSet());
             setValue(newValue);
         }
