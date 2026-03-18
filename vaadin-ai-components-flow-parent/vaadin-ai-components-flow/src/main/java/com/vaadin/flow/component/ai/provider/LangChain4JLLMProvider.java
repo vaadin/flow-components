@@ -248,53 +248,42 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 .description(tool.getDescription());
         var schema = tool.getParametersSchema();
         if (schema != null && !schema.isBlank()) {
-            try {
-                var schemaNode = new tools.jackson.databind.json.JsonMapper()
-                        .readTree(schema);
-                var propertiesNode = schemaNode.get("properties");
-                var requiredNode = schemaNode.get("required");
-                if (propertiesNode != null && propertiesNode.isObject()) {
-                    var propertiesMap = new HashMap<String, dev.langchain4j.model.chat.request.json.JsonSchemaElement>();
-                    var requiredList = new ArrayList<String>();
-                    var properties = propertiesNode.properties().iterator();
-                    while (properties.hasNext()) {
-                        var entry = properties.next();
-                        var paramName = entry.getKey();
-                        var paramNode = entry.getValue();
-                        var description = paramNode.has("description")
-                                ? paramNode.get("description").asString()
-                                : "";
-                        propertiesMap.put(paramName,
-                                dev.langchain4j.model.chat.request.json.JsonStringSchema
-                                        .builder()
-                                        .description(description).build());
-                        if (requiredNode != null && requiredNode.isArray()
-                                && containsValue(requiredNode, paramName)) {
-                            requiredList.add(paramName);
-                        }
-                    }
-                    builder.parameters(
-                            dev.langchain4j.model.chat.request.json.JsonObjectSchema
-                                    .builder()
-                                    .addProperties(propertiesMap)
-                                    .required(requiredList).build());
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Failed to parse tool parameter schema for {}: {}",
-                        tool.getName(), e.getMessage());
-            }
+            builder.parameters(parseParametersSchema(schema));
         }
         return builder.build();
     }
 
-    private static boolean containsValue(
-            tools.jackson.databind.JsonNode arrayNode, String value) {
-        for (var element : arrayNode) {
-            if (value.equals(element.asString())) {
-                return true;
+    private static dev.langchain4j.model.chat.request.json.JsonObjectSchema parseParametersSchema(
+            String schemaJson) {
+        try {
+            var root = new tools.jackson.databind.json.JsonMapper()
+                    .readTree(schemaJson);
+            var schemaBuilder = dev.langchain4j.model.chat.request.json.JsonObjectSchema
+                    .builder();
+            if (root.has("properties") && root.get("properties").isObject()) {
+                var propsIter = root.get("properties").properties().iterator();
+                while (propsIter.hasNext()) {
+                    var entry = propsIter.next();
+                    schemaBuilder.addProperty(entry.getKey(),
+                            dev.langchain4j.model.chat.request.json.JsonRawSchema
+                                    .from(entry.getValue().toString()));
+                }
             }
+            if (root.has("required") && root.get("required").isArray()) {
+                var required = new ArrayList<String>();
+                for (var r : root.get("required")) {
+                    required.add(r.asString());
+                }
+                schemaBuilder.required(required);
+            }
+            return schemaBuilder.build();
+        } catch (Exception e) {
+            LOGGER.warn(
+                    "Failed to parse tool parameters schema, using empty schema",
+                    e);
+            return dev.langchain4j.model.chat.request.json.JsonObjectSchema
+                    .builder().build();
         }
-        return false;
     }
 
     private void executeChat(ChatExecutionContext context) {

@@ -49,12 +49,12 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  */
-class ChartConfigurationApplier implements Serializable {
+public class ChartConfigurationApplier implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartConfigurationApplier.class);
 
-    void applyConfiguration(Chart chart, String configJson) {
+    public void applyConfiguration(Chart chart, String configJson) {
         try {
             JsonNode parsedNode = JacksonUtils.getMapper()
                     .readTree(configJson);

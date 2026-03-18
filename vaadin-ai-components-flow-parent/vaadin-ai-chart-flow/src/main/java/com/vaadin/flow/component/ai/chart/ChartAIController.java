@@ -18,12 +18,14 @@ package com.vaadin.flow.component.ai.chart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.DatabaseTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -41,6 +43,16 @@ import tools.jackson.databind.node.ObjectNode;
  * allow the LLM to query database schemas and create/update chart
  * visualizations based on natural language requests.
  * </p>
+ * <p>
+ * The chart tools are built on top of {@link ChartRegistry} and
+ * {@link ChartTools}, which are reusable building blocks that can also be used
+ * by other controllers (e.g., a DashboardAIController).
+ * </p>
+ * <p>
+ * State changes requested by the LLM through the update tools are deferred and
+ * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
+ * redraws during a multi-tool LLM turn.
+ * </p>
  *
  * @author Vaadin Ltd
  */
@@ -49,31 +61,42 @@ public class ChartAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAIController.class);
 
-    private final ChartTools chartTools;
+    private static final String DEFAULT_CHART_ID = "chart";
+
+    private final Chart chart;
+    private final ChartRegistry registry;
     private final DatabaseProvider databaseProvider;
+    private DataConverter dataConverter;
+    private final ChartConfigurationApplier configurationApplier;
     private final List<ChartStateChangeListener> stateChangeListeners = new ArrayList<>();
 
     /**
      * Creates a new AI chart controller.
      *
      * @param chart
-     *            the chart component to update
+     *            the chart component to update, not {@code null}
      * @param databaseProvider
-     *            the database provider for schema and query execution
+     *            the database provider for schema and query execution, not
+     *            {@code null}
      */
     public ChartAIController(Chart chart, DatabaseProvider databaseProvider) {
+        this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-        this.chartTools = new ChartTools(chart, databaseProvider);
+        this.dataConverter = new DefaultDataConverter();
+        this.configurationApplier = new ChartConfigurationApplier();
+        this.registry = new ChartRegistry(
+                id -> DEFAULT_CHART_ID.equals(id) ? chart : null,
+                () -> Set.of(DEFAULT_CHART_ID));
     }
 
     /**
-     * Returns the chart tools instance used by this controller.
+     * Returns the chart registry used by this controller.
      *
-     * @return the chart tools
+     * @return the chart registry, never {@code null}
      */
-    public ChartTools getChartTools() {
-        return chartTools;
+    public ChartRegistry getRegistry() {
+        return registry;
     }
 
     /**
@@ -84,7 +107,26 @@ public class ChartAIController implements AIController {
      *            the data converter to use, not {@code null}
      */
     public void setDataConverter(DataConverter dataConverter) {
-        chartTools.setDataConverter(dataConverter);
+        this.dataConverter = Objects.requireNonNull(dataConverter,
+                "Data converter cannot be null");
+    }
+
+    /**
+     * Returns the data converter.
+     *
+     * @return the data converter
+     */
+    public DataConverter getDataConverter() {
+        return dataConverter;
+    }
+
+    /**
+     * Returns the configuration applier.
+     *
+     * @return the configuration applier
+     */
+    public ChartConfigurationApplier getConfigurationApplier() {
+        return configurationApplier;
     }
 
     /**
@@ -123,36 +165,24 @@ public class ChartAIController implements AIController {
     @Override
     public List<LLMProvider.ToolDefinition> getTools() {
         List<LLMProvider.ToolDefinition> tools = new ArrayList<>();
-        tools.add(databaseProvider.getSchemaTool());
-        tools.addAll(chartTools.getTools());
+        tools.addAll(DatabaseTools.createAll(databaseProvider));
+        tools.addAll(ChartTools.createAll(registry));
         return tools;
     }
 
     @Override
     public void onRequestCompleted() {
-        if (chartTools.getPendingDataQuery() == null
-                && chartTools.getPendingConfigJson() == null) {
+        ChartEntry entry = registry.getEntries().get(DEFAULT_CHART_ID);
+        if (entry == null || !entry.hasPendingState()) {
             return;
         }
         try {
-            String sqlQuery = chartTools.getPendingDataQuery() != null
-                    ? chartTools.getPendingDataQuery()
-                    : chartTools.getCurrentSqlQuery();
-            if (sqlQuery != null) {
-                String configJson = chartTools.getPendingConfigJson() != null
-                        ? chartTools.getPendingConfigJson()
-                        : ChartSerialization.toJSON(
-                                chartTools.getChart().getConfiguration());
-                renderChart(sqlQuery, configJson);
-            } else if (chartTools.getPendingConfigJson() != null) {
-                applyChartConfig(chartTools.getChart(),
-                        chartTools.getPendingConfigJson());
-            }
+            applyPendingState(entry);
             fireStateChangeEvent();
         } catch (Exception e) {
             LOGGER.error("Error rendering chart", e);
         } finally {
-            chartTools.clearPending();
+            entry.clearPendingState();
         }
     }
 
@@ -162,11 +192,14 @@ public class ChartAIController implements AIController {
      * @return the current state, or {@code null} if no chart has been created
      */
     public ChartState getState() {
-        if (chartTools.getCurrentSqlQuery() == null) {
+        ChartEntry entry = registry.getEntries().get(DEFAULT_CHART_ID);
+        List<String> queries = entry != null ? entry.getQueries()
+                : List.of();
+        if (queries.isEmpty()) {
             return null;
         }
         String configJson = ChartSerialization
-                .toJSON(chartTools.getChart().getConfiguration());
+                .toJSON(chart.getConfiguration());
         try {
             ObjectNode configNode = (ObjectNode) JacksonUtils
                     .readTree(configJson);
@@ -175,7 +208,7 @@ public class ChartAIController implements AIController {
         } catch (Exception e) {
             LOGGER.warn("Failed to remove series from config", e);
         }
-        return new ChartState(chartTools.getCurrentSqlQuery(), configJson);
+        return new ChartState(queries, configJson);
     }
 
     /**
@@ -185,12 +218,11 @@ public class ChartAIController implements AIController {
      *            the state to restore
      */
     public void restoreState(ChartState state) {
-        chartTools.setCurrentSqlQuery(state.sqlQuery);
-        if (chartTools.getCurrentSqlQuery() != null
-                && state.configuration != null) {
+        ChartEntry entry = registry.getEntry(DEFAULT_CHART_ID);
+        entry.setQueries(state.queries());
+        if (!state.queries().isEmpty() && state.configuration() != null) {
             try {
-                renderChart(chartTools.getCurrentSqlQuery(),
-                        state.configuration);
+                renderChart(state.queries(), state.configuration());
             } catch (Exception e) {
                 LOGGER.error("Failed to restore chart", e);
             }
@@ -200,8 +232,59 @@ public class ChartAIController implements AIController {
     /**
      * State record for persistence.
      */
-    public record ChartState(String sqlQuery,
+    public record ChartState(List<String> queries,
             String configuration) implements java.io.Serializable {
+    }
+
+    // ===== Rendering Methods =====
+
+    private void applyPendingState(ChartEntry entry) {
+        String configJson = entry.getPendingConfigurationJson();
+        List<String> pendingQueries = entry.getPendingQueries();
+
+        // Determine effective queries
+        entry.applyPendingQueries();
+        List<String> effectiveQueries = entry.getQueries();
+
+        if (!effectiveQueries.isEmpty()) {
+            // We have queries — render with data
+            String effectiveConfig = configJson != null ? configJson
+                    : ChartSerialization.toJSON(chart.getConfiguration());
+            renderChart(effectiveQueries, effectiveConfig);
+        } else if (configJson != null) {
+            // Config-only update, no data
+            applyChartConfig(configJson);
+        }
+    }
+
+    private void renderChart(List<String> queries, String configJson) {
+        chart.getUI().ifPresentOrElse(currentUI -> {
+            currentUI.access(() -> {
+                Configuration config = chart.getConfiguration();
+                List<DataSeries> allSeries = new ArrayList<>();
+                for (String query : queries) {
+                    var results = databaseProvider.executeQuery(query);
+                    allSeries.add(dataConverter.convertToDataSeries(results));
+                }
+                config.setSeries(allSeries.toArray(new DataSeries[0]));
+                configurationApplier.applyConfiguration(chart, configJson);
+                chart.drawChart();
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Chart is not attached to a UI");
+        });
+    }
+
+    private void applyChartConfig(String configJson) {
+        chart.getUI().ifPresentOrElse(currentUI -> {
+            currentUI.access(() -> {
+                configurationApplier.applyConfiguration(chart, configJson);
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Chart is not attached to a UI");
+        });
     }
 
     // ===== Event Firing =====
@@ -222,41 +305,5 @@ public class ChartAIController implements AIController {
                 }
             }
         }
-    }
-
-    // ===== Rendering Methods =====
-
-    private void renderChart(String sqlQuery, String configJson)
-            throws Exception {
-        List<java.util.Map<String, Object>> results = databaseProvider
-                .executeQuery(sqlQuery);
-        DataSeries series = chartTools.getDataConverter()
-                .convertToDataSeries(results);
-        Chart chart = chartTools.getChart();
-
-        chart.getUI().ifPresentOrElse(currentUI -> {
-            currentUI.access(() -> {
-                Configuration config = chart.getConfiguration();
-                config.setSeries(series);
-                chartTools.getConfigurationApplier()
-                        .applyConfiguration(chart, configJson);
-                chart.drawChart();
-            });
-        }, () -> {
-            throw new IllegalStateException(
-                    "Chart is not attached to a UI");
-        });
-    }
-
-    private void applyChartConfig(Chart chart, String configJson) {
-        chart.getUI().ifPresentOrElse(currentUI -> {
-            currentUI.access(() -> {
-                chartTools.getConfigurationApplier()
-                        .applyConfiguration(chart, configJson);
-            });
-        }, () -> {
-            throw new IllegalStateException(
-                    "Chart is not attached to a UI");
-        });
     }
 }

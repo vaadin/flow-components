@@ -169,7 +169,10 @@ public class AIDashboardDemoPage extends HorizontalLayout {
                 widgetNode.put("type", ws.type());
                 widgetNode.put("colspan", ws.colspan());
                 widgetNode.put("rowspan", ws.rowspan());
-                widgetNode.put("sqlQuery", ws.sqlQuery());
+                if (ws.queries() != null) {
+                    ArrayNode queriesArray = widgetNode.putArray("queries");
+                    ws.queries().forEach(queriesArray::add);
+                }
                 widgetNode.put("configuration", ws.configuration());
                 widgetNode.put("dataSource", ws.dataSource());
                 widgetsArray.add(widgetNode);
@@ -199,13 +202,20 @@ public class AIDashboardDemoPage extends HorizontalLayout {
 
             List<WidgetState> widgets = new ArrayList<>();
             for (JsonNode node : widgetsNode) {
+                List<String> queries = null;
+                if (node.has("queries") && !node.get("queries").isNull()) {
+                    queries = new ArrayList<>();
+                    for (JsonNode q : node.get("queries")) {
+                        queries.add(q.asString());
+                    }
+                }
                 widgets.add(new WidgetState(
                         getStringOrNull(node, "widgetId"),
                         getStringOrNull(node, "title"),
                         getStringOrNull(node, "type"),
                         node.has("colspan") ? node.get("colspan").asInt() : 1,
                         node.has("rowspan") ? node.get("rowspan").asInt() : 1,
-                        getStringOrNull(node, "sqlQuery"),
+                        queries,
                         getStringOrNull(node, "configuration"),
                         getStringOrNull(node, "dataSource")));
             }

@@ -1,48 +1,48 @@
 {
   "widgets" : [ {
-    "widgetId" : "chart-2",
-    "title" : "Product Sales Distribution",
+    "widgetId" : "chart-3",
+    "title" : "Revenue by Month and Region",
     "type" : "chart",
     "colspan" : 1,
-    "rowspan" : 1,
-    "sqlQuery" : "SELECT CATEGORY, SUM(UNITS_SOLD) FROM PRODUCTS GROUP BY CATEGORY",
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Product Sales by Category\"},\"tooltip\":{\"pointFormat\":\"<b>{point.percentage:.1f}%</b><br/>Units: {point.y}\"}}",
+    "rowspan" : 2,
+    "queries" : [ "SELECT \"MONTH\" AS category, SUM(REVENUE) AS total_revenue FROM SALES GROUP BY \"MONTH\" ORDER BY MIN(ID)", "SELECT REGION AS category, SUM(REVENUE) AS total_revenue FROM SALES GROUP BY REGION ORDER BY SUM(REVENUE) DESC" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"column\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Revenue by Month and Region\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Category\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Revenue\"}}}",
     "dataSource" : "default"
   }, {
-    "widgetId" : "grid-5",
-    "title" : "Top Products",
+    "widgetId" : "grid-1",
+    "title" : "Employees Overview",
     "type" : "grid",
     "colspan" : 1,
-    "rowspan" : 2,
-    "sqlQuery" : "SELECT PRODUCT_NAME, UNITS_SOLD, PRICE FROM PRODUCTS ORDER BY UNITS_SOLD DESC LIMIT 10",
+    "rowspan" : 1,
+    "queries" : [ "SELECT NAME AS \"Employee Name\", DEPARTMENT AS \"Department\", AGE AS \"Age\", SALARY AS \"Salary\" FROM EMPLOYEES ORDER BY SALARY DESC" ],
     "configuration" : null,
     "dataSource" : "default"
   }, {
-    "widgetId" : "chart-1",
-    "title" : "Average Salary by Department",
-    "type" : "chart",
-    "colspan" : 1,
-    "rowspan" : 1,
-    "sqlQuery" : "SELECT DEPARTMENT, AVG(SALARY) FROM EMPLOYEES GROUP BY DEPARTMENT",
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"column\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Average Salary by Department\"},\"tooltip\":{},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Department\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Average Salary ($)\"}}}",
-    "dataSource" : "default"
-  }, {
-    "widgetId" : "grid-3",
-    "title" : "Employee Directory",
+    "widgetId" : "grid-2",
+    "title" : "Product Pricing and Sales",
     "type" : "grid",
-    "colspan" : 1,
+    "colspan" : 2,
     "rowspan" : 1,
-    "sqlQuery" : "SELECT NAME, DEPARTMENT, SALARY, AGE FROM EMPLOYEES ORDER BY DEPARTMENT, NAME",
+    "queries" : [ "SELECT PRODUCT_NAME AS \"Product\", CATEGORY AS \"Category\", PRICE AS \"Price\", UNITS_SOLD AS \"Units Sold\" FROM PRODUCTS ORDER BY UNITS_SOLD DESC" ],
     "configuration" : null,
     "dataSource" : "default"
   }, {
     "widgetId" : "chart-4",
-    "title" : "Age vs Salary Analysis",
+    "title" : "Units Sold by Product Category",
     "type" : "chart",
     "colspan" : 1,
     "rowspan" : 1,
-    "sqlQuery" : "SELECT AGE, SALARY FROM EMPLOYEES",
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"scatter\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Employee Age vs Salary\"},\"tooltip\":{\"pointFormat\":\"Age: <b>{point.x}</b><br/>Salary: <b>${point.y:,.0f}</b>\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Age (years)\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Salary ($)\"}}}",
+    "queries" : [ "SELECT CATEGORY AS category, SUM(UNITS_SOLD) AS total_units FROM PRODUCTS GROUP BY CATEGORY ORDER BY SUM(UNITS_SOLD) DESC" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Units Sold by Product Category\"}}",
+    "dataSource" : "default"
+  }, {
+    "widgetId" : "chart-5",
+    "title" : "Average Salary by Department",
+    "type" : "chart",
+    "colspan" : 1,
+    "rowspan" : 2,
+    "queries" : [ "SELECT DEPARTMENT AS category, AVG(SALARY) AS avg_salary FROM EMPLOYEES GROUP BY DEPARTMENT ORDER BY AVG(SALARY) DESC" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"bar\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Average Salary by Department\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Department\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Average Salary\"}}}",
     "dataSource" : "default"
   } ]
 }

@@ -65,8 +65,8 @@ public class AIChartDemoPage extends HorizontalLayout {
 
         chartController.addStateChangeListener(event -> {
             ChartState state = event.getState();
-            System.out.println("Chart state changed - Query: "
-                    + state.sqlQuery());
+            System.out.println("Chart state changed - Queries: "
+                    + state.queries());
         });
 
         // Create LLM provider via OpenRouter

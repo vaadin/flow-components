@@ -20,15 +20,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.chart.ChartConfigurationApplier;
+import com.vaadin.flow.component.ai.chart.ChartEntry;
+import com.vaadin.flow.component.ai.chart.ChartRegistry;
 import com.vaadin.flow.component.ai.chart.ChartTools;
+import com.vaadin.flow.component.ai.chart.DataConverter;
+import com.vaadin.flow.component.ai.chart.DefaultDataConverter;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.DatabaseTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
@@ -44,6 +53,11 @@ import tools.jackson.databind.node.ObjectNode;
  * that allow the LLM to create and manage widgets containing charts or grids,
  * update widget properties, and query database data.
  * </p>
+ * <p>
+ * Chart tools use a {@link ChartRegistry} with dynamic chart resolution, so
+ * the LLM uses a {@code chartId} parameter to target specific charts. There is
+ * no need for per-widget tool prefixing for chart operations.
+ * </p>
  *
  * @author Vaadin Ltd
  */
@@ -58,7 +72,11 @@ public class DashboardAIController implements AIController {
     private final Map<String, DatabaseProvider> databaseProviders;
     private final DashboardTools dashboardTools;
 
-    private final Map<String, ChartTools> chartToolsMap = new LinkedHashMap<>();
+    private final Map<String, Chart> chartMap = new LinkedHashMap<>();
+    private final ChartRegistry chartRegistry;
+    private final DataConverter dataConverter = new DefaultDataConverter();
+    private final ChartConfigurationApplier configurationApplier = new ChartConfigurationApplier();
+
     private final Map<String, GridTools> gridToolsMap = new LinkedHashMap<>();
     private final Map<String, String> widgetDataSourceMap = new LinkedHashMap<>();
 
@@ -102,6 +120,9 @@ public class DashboardAIController implements AIController {
         }
         this.databaseProviders = new LinkedHashMap<>(databaseProviders);
         this.dashboardTools = new DashboardTools(dashboard);
+        this.chartRegistry = new ChartRegistry(
+                id -> chartMap.get(id),
+                () -> Set.copyOf(chartMap.keySet()));
     }
 
     /**
@@ -116,17 +137,16 @@ public class DashboardAIController implements AIController {
                 data grids, update their properties, and query database data.
 
                 AVAILABLE TOOLS:
-                1. getSchema() / getSchema_{name}() - Get database schema to understand available data. \
-                When multiple data sources are available, use getSchema_{name}() for each source.
+                1. get_database_schema() - Get database schema to understand available data.
                 2. getDashboardState() - Get current dashboard state with all widgets
                 3. addChartWidget(title, query, config, colspan, rowspan, dataSource) - Add a new chart widget with data
                 4. addGridWidget(title, query, colspan, rowspan, dataSource) - Add a new grid widget with data
                 5. removeWidget(widgetId) - Remove a widget from the dashboard
 
-                For EXISTING CHART widgets (use widgetId suffix in tool names):
-                6. getCurrentState_{widgetId}() - Get chart's current state
-                7. updateData_{widgetId}(query) - Update chart data with SQL query
-                8. updateConfig_{widgetId}(config) - Update chart configuration
+                For EXISTING CHART widgets (use widgetId as chartId):
+                6. get_chart_state(chartId) - Get chart's current state
+                7. update_chart_data_source(chartId, queries) - Update chart data with SQL queries
+                8. update_chart_configuration(chartId, configuration) - Update chart configuration
 
                 For EXISTING GRID widgets (use widgetId suffix in tool names):
                 9. getGridCurrentState_{widgetId}() - Get grid's current state
@@ -139,15 +159,16 @@ public class DashboardAIController implements AIController {
                 WORKFLOW:
                 1. ALWAYS call getDashboardState() FIRST before doing anything else. Widget selections \
                 can change between requests, so you must check the current state every time.
-                2. Use getSchema() to understand available data
+                2. Use get_database_schema() to understand available data
                 3. Create widgets with addChartWidget() or addGridWidget() - ALWAYS provide the query \
                 and config parameters to populate them with data immediately
-                4. Use widget-specific tools (suffixed with widgetId) to update existing widgets
+                4. Use chart tools (get_chart_state, update_chart_data_source, update_chart_configuration) \
+                with the widget ID as chartId to update existing chart widgets
                 5. Use updateWidget() to adjust layout (title, size)
 
                 IMPORTANT: When creating a widget, ALWAYS provide the query parameter (and config \
-                for charts) so the widget is populated with data immediately. The widget-specific \
-                tools (e.g. updateData_{widgetId}) are only available for widgets that already exist.
+                for charts) so the widget is populated with data immediately. The chart and grid \
+                tools are only available for widgets that already exist.
 
                 """
                 + ChartTools.getSystemPrompt() + "\n\n"
@@ -160,8 +181,8 @@ public class DashboardAIController implements AIController {
 
         // Database schema tools
         if (databaseProviders.size() == 1) {
-            tools.add(databaseProviders.values().iterator().next()
-                    .getSchemaTool());
+            tools.addAll(DatabaseTools.createAll(
+                    databaseProviders.values().iterator().next()));
         } else {
             for (Map.Entry<String, DatabaseProvider> entry : databaseProviders
                     .entrySet()) {
@@ -178,14 +199,10 @@ public class DashboardAIController implements AIController {
         tools.add(createAddGridWidgetTool());
         tools.add(createRemoveWidgetTool());
 
-        // Per-widget content tools
-        for (Map.Entry<String, ChartTools> entry : chartToolsMap.entrySet()) {
-            String widgetId = entry.getKey();
-            ChartTools chartTools = entry.getValue();
-            for (LLMProvider.ToolDefinition tool : chartTools.getTools()) {
-                tools.add(prefixTool(tool, widgetId));
-            }
-        }
+        // Chart tools (shared across all charts via registry)
+        tools.addAll(ChartTools.createAll(chartRegistry));
+
+        // Per-widget grid tools (still prefixed)
         for (Map.Entry<String, GridTools> entry : gridToolsMap.entrySet()) {
             String widgetId = entry.getKey();
             GridTools gridTools = entry.getValue();
@@ -199,33 +216,23 @@ public class DashboardAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        // Render pending chart updates
-        for (Map.Entry<String, ChartTools> entry : chartToolsMap.entrySet()) {
-            ChartTools chartTools = entry.getValue();
-            if (chartTools.getPendingDataQuery() == null
-                    && chartTools.getPendingConfigJson() == null) {
+        // Render pending chart updates via registry
+        for (var mapEntry : chartRegistry.getEntries().entrySet()) {
+            String chartId = mapEntry.getKey();
+            ChartEntry entry = mapEntry.getValue();
+            if (!entry.hasPendingState()) {
                 continue;
             }
             try {
-                String sqlQuery = chartTools.getPendingDataQuery() != null
-                        ? chartTools.getPendingDataQuery()
-                        : chartTools.getCurrentSqlQuery();
-                if (sqlQuery != null) {
-                    String configJson = chartTools
-                            .getPendingConfigJson() != null
-                                    ? chartTools.getPendingConfigJson()
-                                    : ChartSerialization.toJSON(chartTools
-                                            .getChart().getConfiguration());
-                    chartTools.renderChart(sqlQuery, configJson);
-                } else if (chartTools.getPendingConfigJson() != null) {
-                    chartTools.applyConfig(
-                            chartTools.getPendingConfigJson());
-                }
+                Chart chart = chartRegistry.getChart(chartId);
+                applyPendingChartState(chart, entry, chartId);
+            } catch (IllegalArgumentException e) {
+                // Chart was removed — skip silently
             } catch (Exception e) {
                 LOGGER.error("Error rendering chart for widget {}",
-                        entry.getKey(), e);
+                        chartId, e);
             } finally {
-                chartTools.clearPending();
+                entry.clearPendingState();
             }
         }
 
@@ -259,17 +266,18 @@ public class DashboardAIController implements AIController {
                 continue;
             }
             String type;
-            String sqlQuery = null;
+            List<String> queries = null;
             String configuration = null;
 
-            if (chartToolsMap.containsKey(widgetId)) {
+            if (chartMap.containsKey(widgetId)) {
                 type = "chart";
-                ChartTools ct = chartToolsMap.get(widgetId);
-                sqlQuery = ct.getCurrentSqlQuery();
-                if (sqlQuery != null) {
+                ChartEntry entry = chartRegistry.getEntries().get(widgetId);
+                if (entry != null && !entry.getQueries().isEmpty()) {
+                    queries = entry.getQueries();
                     try {
+                        Chart chart = chartMap.get(widgetId);
                         String configJson = ChartSerialization
-                                .toJSON(ct.getChart().getConfiguration());
+                                .toJSON(chart.getConfiguration());
                         ObjectNode configNode = (ObjectNode) JacksonUtils
                                 .readTree(configJson);
                         configNode.remove("series");
@@ -282,13 +290,17 @@ public class DashboardAIController implements AIController {
                 }
             } else if (gridToolsMap.containsKey(widgetId)) {
                 type = "grid";
-                sqlQuery = gridToolsMap.get(widgetId).getCurrentSqlQuery();
+                String sqlQuery = gridToolsMap.get(widgetId)
+                        .getCurrentSqlQuery();
+                if (sqlQuery != null) {
+                    queries = List.of(sqlQuery);
+                }
             } else {
                 continue;
             }
 
             widgetStates.add(new WidgetState(widgetId, widget.getTitle(), type,
-                    widget.getColspan(), widget.getRowspan(), sqlQuery,
+                    widget.getColspan(), widget.getRowspan(), queries,
                     configuration, widgetDataSourceMap.get(widgetId)));
         }
         return new DashboardState(widgetStates);
@@ -301,10 +313,9 @@ public class DashboardAIController implements AIController {
      *            the state to restore
      */
     public void restoreState(DashboardState state) {
-        // Clear existing widgets
         dashboard.getUI().ifPresent(ui -> ui.access(() -> {
             dashboard.removeAll();
-            chartToolsMap.clear();
+            chartMap.clear();
             gridToolsMap.clear();
             widgetDataSourceMap.clear();
             dashboardTools.clearSelectionCheckboxes();
@@ -315,11 +326,14 @@ public class DashboardAIController implements AIController {
                             ws.title(), ws.colspan(), ws.rowspan(),
                             ws.dataSource());
                     dashboard.add(widget);
-                    if (ws.sqlQuery() != null) {
-                        ChartTools ct = chartToolsMap.get(ws.widgetId());
-                        ct.setCurrentSqlQuery(ws.sqlQuery());
+                    if (ws.queries() != null && !ws.queries().isEmpty()) {
+                        ChartEntry entry = chartRegistry
+                                .getEntry(ws.widgetId());
+                        entry.setQueries(ws.queries());
                         try {
-                            ct.renderChart(ws.sqlQuery(), ws.configuration());
+                            renderChart(chartMap.get(ws.widgetId()),
+                                    ws.queries(), ws.configuration(),
+                                    ws.dataSource());
                         } catch (Exception e) {
                             LOGGER.error(
                                     "Failed to restore chart widget {}",
@@ -331,11 +345,11 @@ public class DashboardAIController implements AIController {
                             ws.title(), ws.colspan(), ws.rowspan(),
                             ws.dataSource());
                     dashboard.add(widget);
-                    if (ws.sqlQuery() != null) {
+                    if (ws.queries() != null && !ws.queries().isEmpty()) {
                         GridTools gt = gridToolsMap.get(ws.widgetId());
-                        gt.setCurrentSqlQuery(ws.sqlQuery());
+                        gt.setCurrentSqlQuery(ws.queries().get(0));
                         try {
-                            gt.renderGrid(ws.sqlQuery());
+                            gt.renderGrid(ws.queries().get(0));
                         } catch (Exception e) {
                             LOGGER.error(
                                     "Failed to restore grid widget {}",
@@ -358,7 +372,8 @@ public class DashboardAIController implements AIController {
      * State record for a single widget.
      */
     public record WidgetState(String widgetId, String title, String type,
-            int colspan, int rowspan, String sqlQuery, String configuration,
+            int colspan, int rowspan, List<String> queries,
+            String configuration,
             String dataSource) implements java.io.Serializable {
     }
 
@@ -373,9 +388,7 @@ public class DashboardAIController implements AIController {
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
 
-        DatabaseProvider provider = resolveProvider(dataSource);
-        ChartTools chartTools = new ChartTools(chart, provider);
-        chartToolsMap.put(widgetId, chartTools);
+        chartMap.put(widgetId, chart);
         widgetDataSourceMap.put(widgetId, resolveDataSourceName(dataSource));
         dashboardTools.addSelectionCheckbox(widget);
 
@@ -420,6 +433,53 @@ public class DashboardAIController implements AIController {
         return dataSource;
     }
 
+    // ===== Rendering =====
+
+    private void applyPendingChartState(Chart chart, ChartEntry entry,
+            String widgetId) {
+        String configJson = entry.getPendingConfigurationJson();
+
+        entry.applyPendingQueries();
+        List<String> effectiveQueries = entry.getQueries();
+
+        if (!effectiveQueries.isEmpty()) {
+            String dataSourceName = widgetDataSourceMap.get(widgetId);
+            String effectiveConfig = configJson != null ? configJson
+                    : ChartSerialization.toJSON(chart.getConfiguration());
+            renderChart(chart, effectiveQueries, effectiveConfig,
+                    dataSourceName);
+        } else if (configJson != null) {
+            chart.getUI().ifPresentOrElse(ui -> {
+                ui.access(() -> configurationApplier
+                        .applyConfiguration(chart, configJson));
+            }, () -> {
+                throw new IllegalStateException(
+                        "Chart is not attached to a UI");
+            });
+        }
+    }
+
+    private void renderChart(Chart chart, List<String> queries,
+            String configJson, String dataSourceName) {
+        DatabaseProvider provider = resolveProvider(dataSourceName);
+        chart.getUI().ifPresentOrElse(ui -> {
+            ui.access(() -> {
+                Configuration config = chart.getConfiguration();
+                List<DataSeries> allSeries = new ArrayList<>();
+                for (String query : queries) {
+                    var results = provider.executeQuery(query);
+                    allSeries.add(dataConverter.convertToDataSeries(results));
+                }
+                config.setSeries(allSeries.toArray(new DataSeries[0]));
+                configurationApplier.applyConfiguration(chart, configJson);
+                chart.drawChart();
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Chart is not attached to a UI");
+        });
+    }
+
     // ===== Tool Factory Methods =====
 
     private LLMProvider.ToolDefinition createAddChartWidgetTool() {
@@ -433,13 +493,16 @@ public class DashboardAIController implements AIController {
             public String getDescription() {
                 return """
                     Adds a new chart widget to the dashboard, optionally populated with data.
-                    IMPORTANT: Always provide query and config to create a widget with data immediately.
+                    IMPORTANT: Always provide queries and config to create a widget with data immediately.
 
                     Parameters:
                     - title (string, optional): Widget title
-                    - query (string, optional): SQL SELECT query to populate the chart with data
+                    - queries (array of strings, optional): SQL SELECT queries to populate the chart (one per series). \
+                    Use this for multi-series charts.
+                    - query (string, optional): Single SQL SELECT query (shorthand for one-series charts). \
+                    If both query and queries are provided, queries takes precedence.
                     - config (object, optional): Chart configuration (type, title, axes, etc.). \
-                    CRITICAL: Always include chart.type. Do NOT include 'series' - data comes from query.
+                    CRITICAL: Always include chart.type. Do NOT include 'series' - data comes from queries.
                     - colspan (integer, optional): Column span (default: 1)
                     - rowspan (integer, optional): Row span (default: 1)
                     - dataSource (string, optional): Name of the data source to use
@@ -453,7 +516,8 @@ public class DashboardAIController implements AIController {
                           "type": "object",
                           "properties": {
                             "title": { "type": "string", "description": "Widget title" },
-                            "query": { "type": "string", "description": "SQL SELECT query to populate the chart" },
+                            "queries": { "type": "array", "items": { "type": "string" }, "description": "SQL SELECT queries to populate the chart, one per series" },
+                            "query": { "type": "string", "description": "Single SQL SELECT query (shorthand for one-series charts)" },
                             "config": {
                               "type": "object",
                               "description": "Chart configuration. CRITICAL: Always include chart.type. Do NOT include 'series'.",
@@ -491,7 +555,7 @@ public class DashboardAIController implements AIController {
                     String title = "Chart";
                     int colspan = 1;
                     int rowspan = 1;
-                    String query = null;
+                    List<String> queries = null;
                     String configJson = null;
                     String dataSource = null;
 
@@ -501,8 +565,17 @@ public class DashboardAIController implements AIController {
                         if (node.has("title") && !node.get("title").isNull()) {
                             title = node.get("title").asString();
                         }
-                        if (node.has("query") && !node.get("query").isNull()) {
-                            query = node.get("query").asString();
+                        if (node.has("queries")
+                                && !node.get("queries").isNull()
+                                && node.get("queries").isArray()) {
+                            queries = new ArrayList<>();
+                            for (var q : node.get("queries")) {
+                                queries.add(q.asString());
+                            }
+                        } else if (node.has("query")
+                                && !node.get("query").isNull()) {
+                            queries = List.of(
+                                    node.get("query").asString());
                         }
                         if (node.has("config")
                                 && !node.get("config").isNull()) {
@@ -522,10 +595,12 @@ public class DashboardAIController implements AIController {
                         }
                     }
 
-                    // Validate query if provided
+                    // Validate queries if provided
                     DatabaseProvider provider = resolveProvider(dataSource);
-                    if (query != null) {
-                        provider.executeQuery(query);
+                    if (queries != null) {
+                        for (String q : queries) {
+                            provider.executeQuery(q);
+                        }
                     }
 
                     String widgetId = "chart-" + (++widgetCounter);
@@ -539,12 +614,12 @@ public class DashboardAIController implements AIController {
                     });
 
                     // Queue data and config for deferred rendering
-                    if (query != null) {
-                        ChartTools ct = chartToolsMap.get(widgetId);
-                        ct.setCurrentSqlQuery(query);
-                        ct.setPendingDataQuery(query);
+                    if (queries != null) {
+                        ChartEntry entry = chartRegistry.getEntry(widgetId);
+                        entry.setQueries(queries);
+                        entry.setPendingQueries(queries);
                         if (configJson != null) {
-                            ct.setPendingConfigJson(configJson);
+                            entry.setPendingConfigurationJson(configJson);
                         }
                     }
 
@@ -552,7 +627,8 @@ public class DashboardAIController implements AIController {
                             + "\",\"type\":\"chart\",\"title\":\""
                             + title.replace("\"", "\\\"")
                             + "\",\"message\":\"Chart widget added"
-                            + (query != null ? " with data" : "") + ".\"}";
+                            + (queries != null ? " with data" : "")
+                            + ".\"}";
                 } catch (Exception e) {
                     return "Error adding chart widget: " + e.getMessage();
                 }
@@ -729,7 +805,7 @@ public class DashboardAIController implements AIController {
                         dashboard.remove(toRemove);
                     });
 
-                    chartToolsMap.remove(widgetId);
+                    chartMap.remove(widgetId);
                     gridToolsMap.remove(widgetId);
                     widgetDataSourceMap.remove(widgetId);
 
@@ -748,14 +824,15 @@ public class DashboardAIController implements AIController {
         return new LLMProvider.ToolDefinition() {
             @Override
             public String getName() {
-                return "getSchema_" + name;
+                return "get_database_schema_" + name;
             }
 
             @Override
             public String getDescription() {
-                return "Retrieves the database schema for the '"
+                return "Gets the database schema for the '"
                         + name
-                        + "' data source, including tables, columns, and data types. Takes no parameters.";
+                        + "' data source, including table names, column names "
+                        + "with their types, and the SQL dialect.";
             }
 
             @Override
@@ -770,7 +847,7 @@ public class DashboardAIController implements AIController {
         };
     }
 
-    // ===== Tool Prefixing =====
+    // ===== Tool Prefixing (for GridTools) =====
 
     private LLMProvider.ToolDefinition prefixTool(
             LLMProvider.ToolDefinition original, String widgetId) {
