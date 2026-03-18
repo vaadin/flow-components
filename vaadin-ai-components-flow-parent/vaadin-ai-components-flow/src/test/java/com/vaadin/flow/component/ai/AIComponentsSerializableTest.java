@@ -53,10 +53,9 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory\\$LazyHolder",
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory",
+                "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\..*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\..*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.AIComponentsFeatureFlagProvider",
-                // AIOrchestrator — private constructor, requires LLMProvider
-                "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Reconnector",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Builder"));
     }
