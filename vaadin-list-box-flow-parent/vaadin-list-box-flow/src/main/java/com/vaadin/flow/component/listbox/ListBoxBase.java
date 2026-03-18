@@ -127,8 +127,28 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     void handleDataChange(DataChangeEvent<ITEM> event) {
-        if (event instanceof DataRefreshEvent) {
-            refresh(((DataRefreshEvent<ITEM>) event).getItem());
+        if (event instanceof DataRefreshEvent<ITEM> refreshEvent) {
+            ITEM newItem = refreshEvent.getItem();
+            ITEM oldItem = refreshEvent.getOldItem();
+            Object oldItemId = getItemId(oldItem);
+            Object newItemId = getItemId(newItem);
+            boolean identityChanged = !Objects.equals(oldItemId, newItemId);
+            getItemComponents().stream()
+                    .filter(vaadinItem -> getItemId(vaadinItem.getItem())
+                            .equals(oldItemId))
+                    .findFirst().ifPresent(oldComponent -> {
+                        if (identityChanged) {
+                            VaadinItem<ITEM> newComponent = createItemComponent(
+                                    newItem);
+                            getElement().insertChild(
+                                    getElement().indexOfChild(
+                                            oldComponent.getElement()),
+                                    newComponent.getElement());
+                            oldComponent.getElement().removeFromParent();
+                        } else {
+                            refresh(oldComponent);
+                        }
+                    });
         } else {
             clear();
             rebuild();

@@ -16,7 +16,10 @@
 package com.vaadin.flow.component.listbox;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataProvider;
@@ -76,6 +79,57 @@ public class ListBoxSignalTest extends AbstractSignalsUnitTest {
     public void bindItems_thenSetItemsWithVarargs_throws() {
         var listBox = createListBoxWithBoundItems();
         listBox.setItems("New Item 1", "New Item 2");
+    }
+
+    @Test
+    public void bindItems_updateItemSignalValue_updatesItem() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("original");
+
+        var listBox = new ListBox<String>();
+        listBox.bindItems(listSignal);
+        ui.add(listBox);
+
+        List<String> labels = getItemLabels(listBox);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("original", labels.get(0));
+
+        // Update the item signal value (identity change)
+        listSignal.peek().getFirst().set("updated");
+
+        // Verify the item component was replaced with the updated label
+        labels = getItemLabels(listBox);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("updated", labels.get(0));
+    }
+
+    @Test
+    public void multiSelectListBox_bindItems_updateItemSignalValue_updatesItem() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("original");
+
+        var listBox = new MultiSelectListBox<String>();
+        listBox.bindItems(listSignal);
+        ui.add(listBox);
+
+        List<String> labels = getItemLabels(listBox);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("original", labels.get(0));
+
+        // Update the item signal value (identity change)
+        listSignal.peek().getFirst().set("updated");
+
+        // Verify the item component was replaced with the updated label
+        labels = getItemLabels(listBox);
+        Assert.assertEquals(1, labels.size());
+        Assert.assertEquals("updated", labels.get(0));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getItemLabels(ListBoxBase<?, String, ?> listBox) {
+        return listBox.getChildren().filter(VaadinItem.class::isInstance)
+                .map(c -> ((VaadinItem<String>) c).getItem())
+                .collect(Collectors.toList());
     }
 
     private ListBox<String> createListBoxWithBoundItems() {
