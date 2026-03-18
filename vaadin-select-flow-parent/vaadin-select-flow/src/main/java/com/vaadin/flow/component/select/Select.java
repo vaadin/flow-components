@@ -630,7 +630,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        DataViewUtils.checkNoActiveItemsBinding(this);
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
