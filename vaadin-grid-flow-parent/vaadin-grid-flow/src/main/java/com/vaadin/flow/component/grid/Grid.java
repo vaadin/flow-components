@@ -1710,9 +1710,38 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         onDataProviderChange();
-        if (!(dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent)
-                && !(getSelectionModel() instanceof GridNoneSelectionModel)) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> refreshEvent) {
+            updateSelectionOnIdentityChange(refreshEvent);
+        } else if (!(getSelectionModel() instanceof GridNoneSelectionModel)) {
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
+        }
+    }
+
+    private void updateSelectionOnIdentityChange(
+            DataChangeEvent.DataRefreshEvent<T> refreshEvent) {
+        T newItem = refreshEvent.getItem();
+        T oldItem = refreshEvent.getOldItem();
+        Object oldItemId = getDataProvider().getId(oldItem);
+        Object newItemId = getDataProvider().getId(newItem);
+        if (Objects.equals(oldItemId, newItemId)) {
+            return;
+        }
+        GridSelectionModel<T> selectionModel = getSelectionModel();
+        if (selectionModel instanceof GridSingleSelectionModel<T> single) {
+            single.getSelectedItem().ifPresent(selected -> {
+                if (Objects.equals(getDataProvider().getId(selected),
+                        oldItemId)) {
+                    single.select(newItem);
+                }
+            });
+        } else if (selectionModel instanceof GridMultiSelectionModel<T> multi) {
+            Set<T> selected = multi.getSelectedItems();
+            if (selected.stream().anyMatch(
+                    s -> Objects.equals(getDataProvider().getId(s),
+                            oldItemId))) {
+                multi.deselect(oldItem);
+                multi.select(newItem);
+            }
         }
     }
 

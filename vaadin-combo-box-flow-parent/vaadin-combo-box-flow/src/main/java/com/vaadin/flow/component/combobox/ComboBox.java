@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.DataProvider;
+
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Unit;
@@ -385,6 +388,26 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
         return Objects.equals(dataProvider.getId(item),
                 dataProvider.getId(value));
+    }
+
+    @Override
+    void onItemRefreshed(DataChangeEvent.DataRefreshEvent<T> refreshEvent) {
+        T newItem = refreshEvent.getItem();
+        T oldItem = refreshEvent.getOldItem();
+        DataProvider<T, ?> dataProvider = getDataProvider();
+        if (dataProvider == null) {
+            return;
+        }
+        Object oldItemId = dataProvider.getId(oldItem);
+        Object newItemId = dataProvider.getId(newItem);
+        if (Objects.equals(oldItemId, newItemId)) {
+            return;
+        }
+        T currentValue = getValue();
+        if (currentValue != null
+                && Objects.equals(dataProvider.getId(currentValue), oldItemId)) {
+            setValue(newItem);
+        }
     }
 
     @Override

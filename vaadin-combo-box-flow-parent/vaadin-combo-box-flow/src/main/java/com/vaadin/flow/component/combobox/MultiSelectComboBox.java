@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -31,7 +32,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -412,6 +415,33 @@ public class MultiSelectComboBox<TItem>
     public void setValue(Collection<TItem> items) {
         Set<TItem> value = new LinkedHashSet<>(items);
         setValue(value);
+    }
+
+    @Override
+    void onItemRefreshed(
+            DataChangeEvent.DataRefreshEvent<TItem> refreshEvent) {
+        TItem newItem = refreshEvent.getItem();
+        TItem oldItem = refreshEvent.getOldItem();
+        DataProvider<TItem, ?> dataProvider = getDataProvider();
+        if (dataProvider == null) {
+            return;
+        }
+        Object oldItemId = dataProvider.getId(oldItem);
+        Object newItemId = dataProvider.getId(newItem);
+        if (Objects.equals(oldItemId, newItemId)) {
+            return;
+        }
+        Set<TItem> currentValue = getValue();
+        if (currentValue.stream()
+                .anyMatch(s -> Objects.equals(dataProvider.getId(s),
+                        oldItemId))) {
+            Set<TItem> newValue = currentValue.stream()
+                    .map(s -> Objects.equals(dataProvider.getId(s), oldItemId)
+                            ? newItem
+                            : s)
+                    .collect(Collectors.toSet());
+            setValue(newValue);
+        }
     }
 
     @Override

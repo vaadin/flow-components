@@ -58,6 +58,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -598,6 +599,18 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         }
         super.setValue(value);
         refreshValue();
+    }
+
+    /**
+     * Called when an item has been refreshed. Subclasses can override this to
+     * update their selection when an item's identity changes.
+     *
+     * @param refreshEvent
+     *            the data refresh event
+     */
+    void onItemRefreshed(
+            DataChangeEvent.DataRefreshEvent<TItem> refreshEvent) {
+        // no-op by default, overridden in ComboBox and MultiSelectComboBox
     }
 
     @Override

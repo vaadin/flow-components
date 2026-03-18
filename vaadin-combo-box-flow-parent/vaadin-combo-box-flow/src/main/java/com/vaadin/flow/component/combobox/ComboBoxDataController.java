@@ -638,10 +638,9 @@ class ComboBoxDataController<TItem>
             dataProviderListener.remove();
         }
         dataProviderListener = dataProvider.addDataProviderListener(e -> {
-            if (e instanceof DataChangeEvent.DataRefreshEvent) {
-                dataCommunicator
-                        .refresh(((DataChangeEvent.DataRefreshEvent<TItem>) e)
-                                .getItem());
+            if (e instanceof DataChangeEvent.DataRefreshEvent<TItem> refreshEvent) {
+                dataCommunicator.refresh(refreshEvent.getItem());
+                comboBox.onItemRefreshed(refreshEvent);
             } else {
                 reset();
             }
