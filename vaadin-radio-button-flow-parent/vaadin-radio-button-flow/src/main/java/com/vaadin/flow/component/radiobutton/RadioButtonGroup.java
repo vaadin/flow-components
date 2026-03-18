@@ -17,7 +17,6 @@ package com.vaadin.flow.component.radiobutton;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -289,28 +288,6 @@ public class RadioButtonGroup<T>
             T... items) {
         this(label, listener);
         setItems(items);
-    }
-
-    /**
-     * Creates a radio button group with the defined label and bound to the
-     * given list signal.
-     * <p>
-     * The radio button group will automatically update its items when the
-     * signal changes.
-     *
-     * @param label
-     *            the label describing the radio button group
-     * @param itemsSignal
-     *            the signal providing the list of items, not {@code null}
-     * @see #setItems(Collection)
-     * @see #setLabel(String)
-     * @since 25.1
-     */
-    public RadioButtonGroup(String label,
-            Signal<? extends List<? extends Signal<T>>> itemsSignal) {
-        this();
-        setLabel(label);
-        bindItems(itemsSignal);
     }
 
     @Override
