@@ -11,24 +11,24 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
-public class EmptyFileTest {
+class EmptyFileTest {
 
     @Test
-    public void loadFile_emptySheet_firstRowRendered() {
+    void loadFile_emptySheet_firstRowRendered() {
         var s = TestHelper.createSpreadsheet("empty.xlsx");
 
         var rowH = getSpreadsheetRowH(s);
 
-        Assert.assertTrue("Row heights not sent to client", rowH != null);
+        Assertions.assertTrue(rowH != null, "Row heights not sent to client");
 
         for (int i = 0; i < rowH.length; i++) {
-            Assert.assertTrue("Row is zero height, should be default",
-                    rowH[i] > 0);
+            Assertions.assertTrue(rowH[i] > 0,
+                    "Row is zero height, should be default");
         }
 
     }
@@ -56,7 +56,7 @@ public class EmptyFileTest {
             }
 
         }
-        Assert.fail("Could not get RowH with reflection");
+        Assertions.fail("Could not get RowH with reflection");
         return null;
     }
 }
