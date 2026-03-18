@@ -24,8 +24,8 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * providing tools that the LLM can use.
  * <p>
  * Controllers provide domain-specific tools and functionality to the AI
- * orchestrator. Tools are functions that the AI can call to perform actions like
- * querying databases, creating visualizations, filling forms, etc.
+ * orchestrator. Tools are functions that the AI can call to perform actions
+ * like querying databases, creating visualizations, filling forms, etc.
  * </p>
  * <p>
  * Controllers are <b>not serialized</b> with the orchestrator. After

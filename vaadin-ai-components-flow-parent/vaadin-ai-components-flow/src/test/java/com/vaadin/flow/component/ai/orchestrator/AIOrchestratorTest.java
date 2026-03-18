@@ -1685,19 +1685,19 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList)
-                .withController(controller).build();
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
 
         var originalErr = System.err;
         var errStream = new java.io.ByteArrayOutputStream();
         System.setErr(new java.io.PrintStream(errStream));
         try {
             orchestrator.prompt("Hello");
-            var errContent = errStream.toString(java.nio.charset.StandardCharsets.UTF_8);
+            var errContent = errStream
+                    .toString(java.nio.charset.StandardCharsets.UTF_8);
             Assertions.assertTrue(
                     errContent.contains("Duplicate tool name 'sameName'"),
-                    "Expected duplicate tool name warning, got: "
-                            + errContent);
+                    "Expected duplicate tool name warning, got: " + errContent);
         } finally {
             System.setErr(originalErr);
         }

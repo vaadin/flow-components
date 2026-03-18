@@ -270,8 +270,7 @@ public class SpringAILLMProvider implements LLMProvider {
                 .data(formattedText).build();
     }
 
-    private static ToolCallback toToolCallback(
-            LLMProvider.ToolSpec tool) {
+    private static ToolCallback toToolCallback(LLMProvider.ToolSpec tool) {
         return new ToolCallback() {
             @Override
             public ToolDefinition getToolDefinition() {

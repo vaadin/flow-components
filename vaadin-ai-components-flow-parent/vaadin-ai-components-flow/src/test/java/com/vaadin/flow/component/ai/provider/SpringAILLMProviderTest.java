@@ -973,9 +973,7 @@ class SpringAILLMProviderTest {
 
     private record TestLLMRequestWithExplicitTools(String userMessage,
             String systemPrompt, List<AIAttachment> attachments, Object[] tools,
-            List<LLMProvider.ToolSpec> explicitTools)
-            implements
-                LLMRequest {
+            List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
     }
 
     private static class SampleToolsClass {
