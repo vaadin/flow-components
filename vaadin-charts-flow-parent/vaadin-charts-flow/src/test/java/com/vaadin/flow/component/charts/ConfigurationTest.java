@@ -8,13 +8,13 @@
  */
 package com.vaadin.flow.component.charts;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.ListSeries;
@@ -24,10 +24,10 @@ import com.vaadin.flow.component.charts.model.Series;
  * Tests for the {@link Configuration}
  *
  */
-public class ConfigurationTest {
+class ConfigurationTest {
 
-    @Test(expected = Test.None.class)
-    public void configurationSetSeriesWithArraysAsListTest() {
+    @Test
+    void configurationSetSeriesWithArraysAsListTest() {
         Configuration conf = new Configuration();
 
         conf.setSeries(Arrays.asList(new ListSeries()));
@@ -37,7 +37,7 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void configurationSetSeriesWithListShouldMakeShallowCopyTest() {
+    void configurationSetSeriesWithListShouldMakeShallowCopyTest() {
         Configuration conf = new Configuration();
 
         List<Series> series = new ArrayList<>();
