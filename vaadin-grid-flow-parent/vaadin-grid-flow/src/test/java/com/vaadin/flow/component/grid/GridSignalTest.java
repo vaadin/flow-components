@@ -340,6 +340,46 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         Assert.assertEquals("Three", items.get(2));
     }
 
+    @Test
+    public void singleSelect_bindItems_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        grid.bindItems(listSignal);
+        ui.add(grid);
+
+        grid.asSingleSelect().setValue("a");
+        Assert.assertEquals("a", grid.asSingleSelect().getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals("a-updated", grid.asSingleSelect().getValue());
+    }
+
+    @Test
+    public void multiSelect_bindItems_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        grid.bindItems(listSignal);
+        ui.add(grid);
+
+        grid.asMultiSelect().setValue(Set.of("a"));
+        Assert.assertEquals(Set.of("a"), grid.asMultiSelect().getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals(Set.of("a-updated"),
+                grid.asMultiSelect().getValue());
+    }
+
     private Grid<String> createGridWithBoundItems() {
         var grid = new Grid<String>();
         var itemsSignal = new ListSignal<String>();

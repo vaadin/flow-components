@@ -201,6 +201,25 @@ public class ComboBoxSignalTest extends AbstractSignalsUnitTest {
         comboBox.setDataProvider(fetchItems, sizeCallback);
     }
 
+    @Test
+    public void bindItems_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        comboBox.bindItems(listSignal);
+        ui.add(comboBox);
+
+        comboBox.setValue("a");
+        Assert.assertEquals("a", comboBox.getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals("a-updated", comboBox.getValue());
+    }
+
     private ComboBox<String> createComboBoxWithBoundItems() {
         var comboBox = new ComboBox<String>();
         var itemsSignal = new ListSignal<String>();

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -45,5 +46,25 @@ public class MultiSelectComboBoxSignalTest extends AbstractSignalsUnitTest {
         items = comboBox.getGenericDataView().getItems().toList();
         Assert.assertEquals(3, items.size());
         Assert.assertEquals("Charlie", items.get(2));
+    }
+
+    @Test
+    public void bindItems_selectItem_updateIdentity_selectionPreserved() {
+        var listSignal = new ListSignal<String>();
+        listSignal.insertLast("a");
+        listSignal.insertLast("b");
+
+        var comboBox = new MultiSelectComboBox<String>();
+        comboBox.bindItems(listSignal);
+        ui.add(comboBox);
+
+        comboBox.setValue(Set.of("a"));
+        Assert.assertEquals(Set.of("a"), comboBox.getValue());
+
+        // Change the identity of the selected item
+        listSignal.peek().getFirst().set("a-updated");
+
+        // Verify selection is preserved with the new item
+        Assert.assertEquals(Set.of("a-updated"), comboBox.getValue());
     }
 }
