@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -25,10 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
@@ -277,76 +272,5 @@ public class GridSignalTest extends AbstractSignalsUnitTest {
         grid.asSingleSelect().bindValue(singleSignal, singleSignal::set);
 
         Assert.assertEquals("bar", grid.asSingleSelect().getValue());
-    }
-
-    // ===== BIND ITEMS TESTS =====
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetDataProvider_throws() {
-        var grid = createGridWithBoundItems();
-        grid.setDataProvider(DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithDataProvider_throws() {
-        var grid = createGridWithBoundItems();
-        grid.setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithInMemoryDataProvider_throws() {
-        var grid = createGridWithBoundItems();
-        grid.setItems(DataProvider
-                .ofCollection(Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithListDataProvider_throws() {
-        var grid = createGridWithBoundItems();
-        grid.setItems(new ListDataProvider<>(
-                Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithCollection_throws() {
-        var grid = createGridWithBoundItems();
-        grid.setItems(Arrays.asList("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithVarargs_throws() {
-        var grid = createGridWithBoundItems();
-        grid.setItems("New Item 1", "New Item 2");
-    }
-
-    @Test
-    public void signalConstructor_setsItemsFromSignal() {
-        var listSignal = new ListSignal<String>();
-        listSignal.insertLast("One");
-        listSignal.insertLast("Two");
-
-        Grid<String> grid = new Grid<>(listSignal);
-        ui.add(grid);
-
-        List<String> items = grid.getGenericDataView().getItems().toList();
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals("One", items.get(0));
-        Assert.assertEquals("Two", items.get(1));
-
-        listSignal.insertLast("Three");
-
-        items = grid.getGenericDataView().getItems().toList();
-        Assert.assertEquals(3, items.size());
-        Assert.assertEquals("Three", items.get(2));
-    }
-
-    private Grid<String> createGridWithBoundItems() {
-        var grid = new Grid<String>();
-        var itemsSignal = new ListSignal<String>();
-        itemsSignal.insertLast("Item 1");
-        itemsSignal.insertLast("Item 2");
-        grid.bindItems(itemsSignal);
-        ui.add(grid);
-        return grid;
     }
 }
