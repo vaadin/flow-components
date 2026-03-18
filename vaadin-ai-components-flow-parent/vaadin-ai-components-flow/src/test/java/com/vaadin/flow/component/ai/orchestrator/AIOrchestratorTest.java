@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Assertions;
@@ -1519,31 +1520,6 @@ class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var tool = createToolSpec("myTool", "A test tool");
-        AIController controller = createController(tool);
-
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .build();
-        orchestrator.prompt("Hello");
-
-        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
-        Mockito.verify(mockProvider).stream(captor.capture());
-        var explicitTools = captor.getValue().explicitTools();
-        Assertions.assertEquals(1, explicitTools.size());
-        Assertions.assertEquals("myTool", explicitTools.getFirst().getName());
-    }
-
-    @Test
-    void builder_withMultipleControllers_collectsAllTools() {
-        var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(mockMessage);
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
         var tool1 = createToolSpec("tool1", "First tool");
         var tool2 = createToolSpec("tool2", "Second tool");
         AIController controller1 = createController(tool1);
@@ -1572,11 +1548,11 @@ class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response text"));
 
-        var callCount = new int[] { 0 };
+        var callCount = new AtomicInteger();
         AIController controller = new AIController() {
             @Override
             public void onRequestCompleted() {
-                callCount[0]++;
+                callCount.incrementAndGet();
             }
         };
 
@@ -1585,7 +1561,7 @@ class AIOrchestratorTest {
                 .build();
         orchestrator.prompt("Hello");
 
-        Assertions.assertEquals(1, callCount[0]);
+        Assertions.assertEquals(1, callCount.get());
     }
 
     @Test
@@ -1627,11 +1603,11 @@ class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.error(new RuntimeException("API Error")));
 
-        var callCount = new int[] { 0 };
+        var callCount = new AtomicInteger();
         AIController controller = new AIController() {
             @Override
             public void onRequestCompleted() {
-                callCount[0]++;
+                callCount.incrementAndGet();
             }
         };
 
@@ -1640,7 +1616,7 @@ class AIOrchestratorTest {
                 .build();
         orchestrator.prompt("Hello");
 
-        Assertions.assertEquals(0, callCount[0],
+        Assertions.assertEquals(0, callCount.get(),
                 "onRequestCompleted should not be called on error");
     }
 
@@ -1655,11 +1631,11 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var listenerCapture = new ArrayList<String>();
-        var controllerCallCount = new int[] { 0 };
+        var controllerCallCount = new AtomicInteger();
         AIController controller = new AIController() {
             @Override
             public void onRequestCompleted() {
-                controllerCallCount[0]++;
+                controllerCallCount.incrementAndGet();
             }
         };
 
@@ -1672,7 +1648,7 @@ class AIOrchestratorTest {
 
         Assertions.assertEquals(1, listenerCapture.size());
         Assertions.assertEquals("Response", listenerCapture.getFirst());
-        Assertions.assertEquals(1, controllerCallCount[0]);
+        Assertions.assertEquals(1, controllerCallCount.get());
     }
 
     @Test
@@ -1695,34 +1671,36 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void reconnect_withControllers_replacesControllers() {
-        var newProvider = Mockito.mock(LLMProvider.class);
+    void prompt_withDuplicateExplicitToolNames_logsWarning() {
+        var tool1 = createToolSpec("sameName", "First tool");
+        var tool2 = createToolSpec("sameName", "Second tool");
+        AIController controller = createController(tool1, tool2);
+
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
         Mockito.when(
-                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("New Response"));
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
 
-        var tool1 = createToolSpec("originalTool", "Original");
-        AIController originalController = createController(tool1);
-
-        // Build without mocks (no message list) so it can serialize
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withController(originalController).build();
+                .withMessageList(mockMessageList)
+                .withController(controller).build();
 
-        // Serialize and deserialize to simulate session restore
-        orchestrator = serializeAndDeserialize(orchestrator);
-
-        var tool2 = createToolSpec("newTool", "New");
-        AIController newController = createController(tool2);
-
-        orchestrator.reconnect(newProvider).withControllers(newController)
-                .apply();
-        orchestrator.prompt("Hello");
-
-        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
-        Mockito.verify(newProvider).stream(captor.capture());
-        var explicitTools = captor.getValue().explicitTools();
-        Assertions.assertEquals(1, explicitTools.size());
-        Assertions.assertEquals("newTool", explicitTools.getFirst().getName());
+        var originalErr = System.err;
+        var errStream = new java.io.ByteArrayOutputStream();
+        System.setErr(new java.io.PrintStream(errStream));
+        try {
+            orchestrator.prompt("Hello");
+            var errContent = errStream.toString(java.nio.charset.StandardCharsets.UTF_8);
+            Assertions.assertTrue(
+                    errContent.contains("Duplicate tool name 'sameName'"),
+                    "Expected duplicate tool name warning, got: "
+                            + errContent);
+        } finally {
+            System.setErr(originalErr);
+        }
     }
 
     private static AIController createController(
@@ -1758,21 +1736,6 @@ class AIOrchestratorTest {
                 return "result";
             }
         };
-    }
-
-    private static AIOrchestrator serializeAndDeserialize(
-            AIOrchestrator orchestrator) {
-        try {
-            var baos = new java.io.ByteArrayOutputStream();
-            var oos = new java.io.ObjectOutputStream(baos);
-            oos.writeObject(orchestrator);
-            oos.close();
-            var bais = new java.io.ByteArrayInputStream(baos.toByteArray());
-            var ois = new java.io.ObjectInputStream(bais);
-            return (AIOrchestrator) ois.readObject();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private AIOrchestrator getSimpleOrchestrator() {

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.ai.provider;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -212,7 +211,6 @@ public class SpringAILLMProvider implements LLMProvider {
         }
         var explicitTools = request.explicitTools();
         if (explicitTools != null && !explicitTools.isEmpty()) {
-            warnDuplicateToolNames(explicitTools);
             var callbacks = explicitTools.stream()
                     .map(SpringAILLMProvider::toToolCallback)
                     .toArray(ToolCallback[]::new);
@@ -294,18 +292,6 @@ public class SpringAILLMProvider implements LLMProvider {
                 }
             }
         };
-    }
-
-    private static void warnDuplicateToolNames(
-            List<LLMProvider.ToolSpec> tools) {
-        var seen = new HashSet<String>();
-        for (var tool : tools) {
-            if (!seen.add(tool.getName())) {
-                LOGGER.warn(
-                        "Duplicate tool name '{}': previous tool will be replaced",
-                        tool.getName());
-            }
-        }
     }
 
     private static void checkPushConfiguration() {

@@ -210,22 +210,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
                                     .toolSpecificationFrom(method).name();
                             var toolExecutor = getToolExecutor(toolObject,
                                     method);
-                            if (toolExecutors.containsKey(toolExecutorKey)) {
-                                LOGGER.warn(
-                                        "Duplicate tool name '{}': previous tool will be replaced",
-                                        toolExecutorKey);
-                            }
                             toolExecutors.put(toolExecutorKey, toolExecutor);
                         });
             }
         }
         // Add explicit (framework-agnostic) tools
         for (var tool : explicitTools) {
-            if (toolExecutors.containsKey(tool.getName())) {
-                LOGGER.warn(
-                        "Duplicate tool name '{}': previous tool will be replaced",
-                        tool.getName());
-            }
             toolExecutors.put(tool.getName(),
                     (execReq, memoryId) -> tool.execute(execReq.arguments()));
         }

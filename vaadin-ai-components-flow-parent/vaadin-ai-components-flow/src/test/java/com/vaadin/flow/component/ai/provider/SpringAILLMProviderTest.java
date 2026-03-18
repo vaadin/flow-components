@@ -851,6 +851,38 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitTool_passesArgumentsToCallback() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<String>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "result for " + args;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var chatOptions = capturePrompt().getOptions();
+        var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
+                .getToolCallbacks();
+        Assertions.assertEquals(1, toolCallbacks.size());
+
+        // Call the callback directly to verify arguments are forwarded
+        var toolArgs = "{\"city\":\"Helsinki\"}";
+        var result = toolCallbacks.getFirst().call(toolArgs);
+        Assertions.assertEquals(1, receivedArgs.size(),
+                "Tool executor should have been called once");
+        Assertions.assertEquals(toolArgs, receivedArgs.getFirst(),
+                "Tool executor should receive the arguments passed to the callback");
+        Assertions.assertEquals("result for " + toolArgs, result);
+    }
+
+    @Test
     void stream_withBothVendorAndExplicitTools_allConfigured() {
         provider.setStreaming(false);
         var vendorTool = new SampleToolsClass();
@@ -895,38 +927,6 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals("A simple tool", toolDef.description());
         // Should have a default empty schema
         Assertions.assertNotNull(toolDef.inputSchema());
-    }
-
-    @Test
-    void stream_withDuplicateExplicitToolNames_logsWarning() {
-        provider.setStreaming(false);
-        var tool1 = createExplicitTool("sameName", "First tool", null,
-                args -> "result1");
-        var tool2 = createExplicitTool("sameName", "Second tool", null,
-                args -> "result2");
-
-        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
-                Collections.emptyList(), new Object[0], List.of(tool1, tool2));
-        mockSimpleChat("Done");
-
-        var originalErr = System.err;
-        var errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        try {
-            // Spring AI also validates duplicate names and throws, but our
-            // warning fires before the framework validation
-            try {
-                provider.stream(request).blockFirst();
-            } catch (Exception ignored) {
-                // Spring AI may throw on duplicate tool names
-            }
-            var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assertions.assertTrue(
-                    errContent.contains("Duplicate tool name 'sameName'"),
-                    "Expected duplicate tool name warning, got: " + errContent);
-        } finally {
-            System.setErr(originalErr);
-        }
     }
 
     private static LLMProvider.ToolSpec createExplicitTool(String name,

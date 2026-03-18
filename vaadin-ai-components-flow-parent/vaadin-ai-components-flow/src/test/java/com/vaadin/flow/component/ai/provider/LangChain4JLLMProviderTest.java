@@ -876,6 +876,39 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitTool_passesArgumentsToExecutor() {
+        var receivedArgs = new ArrayList<String>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "result for " + args;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var toolArgs = "{\"city\":\"Helsinki\"}";
+        var response1 = mockSimpleResponseWithTool("myTool", toolArgs);
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size(),
+                "Tool executor should have been called once");
+        Assertions.assertEquals(toolArgs, receivedArgs.getFirst(),
+                "Tool executor should receive the arguments from the LLM response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("result for " + toolArgs,
+                toolResults.getFirst().text());
+    }
+
+    @Test
     void stream_withExplicitToolNullSchema_createsToolWithoutParameters() {
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
                 null, args -> "done");
@@ -926,62 +959,6 @@ class LangChain4JLLMProviderTest {
         Assertions.assertTrue(names.contains("getHumidity"));
     }
 
-    @Test
-    void stream_withDuplicateExplicitToolNames_logsWarning() {
-        var tool1 = createExplicitTool("sameName", "First tool", null,
-                args -> "result1");
-        var tool2 = createExplicitTool("sameName", "Second tool", null,
-                args -> "result2");
-
-        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
-                Collections.emptyList(), new Object[0], List.of(tool1, tool2));
-
-        var response = mockSimpleResponse("Done");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        var originalErr = System.err;
-        var errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        try {
-            provider.stream(request).blockFirst();
-            var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assertions.assertTrue(
-                    errContent.contains("Duplicate tool name 'sameName'"),
-                    "Expected duplicate tool name warning, got: " + errContent);
-        } finally {
-            System.setErr(originalErr);
-        }
-    }
-
-    @Test
-    void stream_withDuplicateAnnotatedAndExplicitToolName_logsWarning() {
-        var toolObject = new SampleToolsClass();
-        var explicitTool = createExplicitTool("getTemperature",
-                "Overrides annotated tool", null, args -> "explicit result");
-
-        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
-                Collections.emptyList(), new Object[] { toolObject },
-                List.of(explicitTool));
-
-        var response = mockSimpleResponse("Done");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        var originalErr = System.err;
-        var errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        try {
-            provider.stream(request).blockFirst();
-            var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assertions.assertTrue(
-                    errContent.contains("Duplicate tool name 'getTemperature'"),
-                    "Expected duplicate tool name warning, got: " + errContent);
-        } finally {
-            System.setErr(originalErr);
-        }
-    }
-
     private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<String, String> executor) {
@@ -1029,12 +1006,17 @@ class LangChain4JLLMProviderTest {
     }
 
     private static ChatResponse mockSimpleResponseWithTool(String toolName) {
+        return mockSimpleResponseWithTool(toolName, "{}");
+    }
+
+    private static ChatResponse mockSimpleResponseWithTool(String toolName,
+            String arguments) {
         var aiMessage1 = Mockito.mock(AiMessage.class);
         Mockito.when(aiMessage1.text()).thenReturn("");
         Mockito.when(aiMessage1.hasToolExecutionRequests()).thenReturn(true);
         var toolRequest = Mockito.mock(ToolExecutionRequest.class);
         Mockito.when(toolRequest.name()).thenReturn(toolName);
-        Mockito.when(toolRequest.arguments()).thenReturn("{}");
+        Mockito.when(toolRequest.arguments()).thenReturn(arguments);
         Mockito.when(aiMessage1.toolExecutionRequests())
                 .thenReturn(List.of(toolRequest));
         var response1 = Mockito.mock(ChatResponse.class);

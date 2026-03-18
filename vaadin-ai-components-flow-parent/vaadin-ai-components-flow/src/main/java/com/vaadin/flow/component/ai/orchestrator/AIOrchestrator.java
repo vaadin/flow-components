@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -391,6 +392,7 @@ public class AIOrchestrator implements Serializable {
         final var finalSystemPrompt = effectiveSystemPrompt;
         var controllerTools = controllers.stream().map(AIController::getTools)
                 .filter(Objects::nonNull).flatMap(List::stream).toList();
+        warnDuplicateToolNames(controllerTools);
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -438,6 +440,18 @@ public class AIOrchestrator implements Serializable {
                 controller.onRequestCompleted();
             } catch (Exception e) {
                 LOGGER.error("Error in controller onRequestCompleted", e);
+            }
+        }
+    }
+
+    private static void warnDuplicateToolNames(
+            List<LLMProvider.ToolSpec> tools) {
+        var seen = new HashSet<String>();
+        for (var tool : tools) {
+            if (!seen.add(tool.getName())) {
+                LOGGER.warn(
+                        "Duplicate tool name '{}': previous tool will be replaced",
+                        tool.getName());
             }
         }
     }
