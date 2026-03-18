@@ -18,7 +18,6 @@ package com.vaadin.flow.component.combobox;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,20 +28,16 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 
 import tools.jackson.databind.node.ObjectNode;
 
 public class ComboBoxTest extends ComboBoxBaseTest {
-
-    private UI ui;
 
     private enum Category {
         CATEGORY_1, CATEGORY_2, CATEGORY_3;
@@ -64,12 +59,6 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     protected <TItem> ComboBoxBase<?, TItem, ?> createComboBox(
             Class<TItem> itemClass) {
         return new ComboBox<>();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test
@@ -189,16 +178,10 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-combo-box");
         element.setProperty("value", "foo");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
-
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(ComboBox.class))
                 .thenAnswer(invocation -> new ComboBox());
@@ -227,6 +210,12 @@ public class ComboBoxTest extends ComboBoxBaseTest {
         ComboBox<String> comboBox = new ComboBox<>();
         Assert.assertTrue(
                 comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<ComboBox<String>, String>, String>);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(ComboBox.class));
     }
 
     @Test

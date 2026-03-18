@@ -15,21 +15,20 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.BigDecimalField;
@@ -37,76 +36,64 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIExtension;
 
-public class BigDecimalFieldTest extends TextFieldTest {
+class BigDecimalFieldTest extends TextFieldTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private BigDecimalField field;
 
-    private UI ui;
-
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         field = new BigDecimalField();
         field.setLocale(Locale.US);
     }
 
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
-
     @Override
     @Test
-    public void setValueNull() {
-        assertNull("Value should be null", field.getValue());
+    void setValueNull() {
+        assertNull(field.getValue(), "Value should be null");
         field.setValue(new BigDecimal("1"));
         field.setValue(null); // not throwing
     }
 
     @Override
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         BigDecimalField bigDecimalField = new BigDecimalField();
-        Assert.assertNull(bigDecimalField.getValue());
-        Assert.assertEquals("",
+        Assertions.assertNull(bigDecimalField.getValue());
+        Assertions.assertEquals("",
                 bigDecimalField.getElement().getProperty("value"));
     }
 
     @Override
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
     }
 
     @Override
     @Test
-    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+    void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-big-decimal-field");
         element.setProperty("value", "1");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(BigDecimalField.class))
                 .thenAnswer(invocation -> new BigDecimalField());
 
         BigDecimalField bigDecimalField = Component.from(element,
                 BigDecimalField.class);
-        Assert.assertEquals("1",
+        Assertions.assertEquals("1",
                 bigDecimalField.getElement().getProperty("value"));
     }
 
     @Test
-    public void valueFormatting_scientificNotationRemoved() {
+    void valueFormatting_scientificNotationRemoved() {
         assertValueFormatting(new BigDecimal("1e9"), "1000000000");
         assertValueFormatting(new BigDecimal("-1e9"), "-1000000000");
 
@@ -115,18 +102,18 @@ public class BigDecimalFieldTest extends TextFieldTest {
     }
 
     @Test
-    public void valueFormatting_trailingZerosPreserved_leadingZerosRemoved() {
+    void valueFormatting_trailingZerosPreserved_leadingZerosRemoved() {
         assertValueFormatting(new BigDecimal("001.100"), "1.100");
     }
 
     @Test
-    public void valueFormatting_scalePreserved() {
+    void valueFormatting_scalePreserved() {
         assertValueFormatting(new BigDecimal("1.10").setScale(4), "1.1000");
         assertValueFormatting(new BigDecimal("1.10").setScale(1), "1.1");
     }
 
     @Test
-    public void valueFormatting_scaleWithRounding() {
+    void valueFormatting_scaleWithRounding() {
         assertValueFormatting(
                 new BigDecimal("1.01").setScale(1, BigDecimal.ROUND_CEILING),
                 "1.1");
@@ -137,78 +124,79 @@ public class BigDecimalFieldTest extends TextFieldTest {
 
     @Override
     @Test
-    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
-                        BigDecimal.TEN.toString(), BigDecimalField.class);
+                        BigDecimal.TEN.toString(), BigDecimalField.class, ui);
     }
 
     @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+    void addThemeVariant_themeAttributeContainsThemeVariant() {
         field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertTrue(themeNames
+        Assertions.assertTrue(themeNames
                 .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertFalse(themeNames
+        Assertions.assertFalse(themeNames
                 .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(field instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(field instanceof HasTooltip);
     }
 
     private void assertValueFormatting(BigDecimal bigDecimal,
             String expectedValueProp) {
         field.setValue(bigDecimal);
-        Assert.assertEquals(expectedValueProp,
+        Assertions.assertEquals(expectedValueProp,
                 field.getElement().getProperty("value"));
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         BigDecimalField field = new BigDecimalField();
-        Assert.assertTrue(field instanceof HasAriaLabel);
+        Assertions.assertTrue(field instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         BigDecimalField field = new BigDecimalField();
 
         field.setAriaLabel("aria-label");
-        Assert.assertTrue(field.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+        Assertions.assertTrue(field.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", field.getAriaLabel().get());
 
         field.setAriaLabel(null);
-        Assert.assertTrue(field.getAriaLabel().isEmpty());
+        Assertions.assertTrue(field.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         BigDecimalField field = new BigDecimalField();
 
         field.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+        Assertions.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                field.getAriaLabelledBy().get());
 
         field.setAriaLabelledBy(null);
-        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 
     @Test
     @Override
-    public void implementsInputField() {
+    void implementsInputField() {
         BigDecimalField field = new BigDecimalField();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<BigDecimalField, BigDecimal>, BigDecimal>);
     }
 }

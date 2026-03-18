@@ -25,6 +25,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.SplitterDragEndEvent;
 
@@ -271,5 +272,11 @@ public class SplitLayoutUnitTest {
                 splitLayout, true, "432.68px", "267.32px"));
 
         Assert.assertEquals(61.81, splitLayout.getSplitterPosition(), 0.01);
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(SplitLayout.class));
     }
 }

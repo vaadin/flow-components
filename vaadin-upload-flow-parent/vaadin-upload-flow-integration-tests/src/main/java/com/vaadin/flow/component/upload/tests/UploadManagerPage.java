@@ -15,17 +15,20 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.component.upload.UploadFileList;
+import com.vaadin.flow.component.upload.UploadFormat;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Test page for UploadManager.
@@ -58,14 +61,22 @@ public class UploadManagerPage extends UploadDropZone {
         layout.add(owner);
 
         // Create the manager with an upload handler
-        manager = new UploadManager(owner,
-                UploadHandler.inMemory((metadata, data) -> {
-                    // Use UI.access() since upload handler runs on background
-                    // thread
-                    UI.getCurrent()
-                            .access(() -> log("Uploaded: " + metadata.fileName()
-                                    + " (" + data.length + " bytes)"));
-                }));
+        manager = new UploadManager(owner, uploadEvent -> {
+            HttpServletRequest request = (HttpServletRequest) uploadEvent
+                    .getRequest();
+            String format;
+            try {
+                request.getParts();
+                format = "multipart";
+            } catch (ServletException e) {
+                format = "raw";
+            }
+            byte[] data = uploadEvent.getInputStream().readAllBytes();
+            String fileName = uploadEvent.getFileName();
+            String uploadFormat = format;
+            uploadEvent.getUI().access(() -> log("Uploaded: " + fileName + " ("
+                    + data.length + " bytes, " + uploadFormat + ")"));
+        });
 
         // Link the drop zone to the manager
         setUploadManager(manager);
@@ -74,7 +85,7 @@ public class UploadManagerPage extends UploadDropZone {
         manager.addFileRemovedListener(
                 event -> log("Removed: " + event.getFileName()));
         manager.addFileRejectedListener(event -> log("Rejected: "
-                + event.getFileName() + " - " + event.getErrorMessage()));
+                + event.getFileName() + " - " + event.getReason()));
         manager.addAllFinishedListener(event -> log("All uploads finished"));
 
         // Create upload button linked to the manager
@@ -219,6 +230,17 @@ public class UploadManagerPage extends UploadDropZone {
         reattachOwner.setId("reattach-owner");
         ownerGroup.add(detachOwner, reattachOwner);
         layout.add(ownerGroup);
+
+        // --- Upload Format ---
+        var formatGroup = createButtonGroup("Format:");
+        var setMultipart = new NativeButton("Multipart",
+                event -> manager.setUploadFormat(UploadFormat.MULTIPART));
+        setMultipart.setId("set-format-multipart");
+        var setRaw = new NativeButton("Raw",
+                event -> manager.setUploadFormat(UploadFormat.RAW));
+        setRaw.setId("set-format-raw");
+        formatGroup.add(setMultipart, setRaw);
+        layout.add(formatGroup);
 
         // --- File Operations ---
         var fileOpsGroup = createButtonGroup("Files:");

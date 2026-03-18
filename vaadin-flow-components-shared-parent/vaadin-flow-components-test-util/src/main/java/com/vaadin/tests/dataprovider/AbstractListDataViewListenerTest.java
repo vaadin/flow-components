@@ -21,19 +21,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 // Originally from com.vaadin.flow.data.provider.AbstractListDataViewListenerTest
 // If this breaks, check there for updates
 
 public abstract class AbstractListDataViewListenerTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     @Test
     public void addItemCountChangeListener_itemsCountChanged_listenersAreNotified() {
@@ -47,7 +49,6 @@ public abstract class AbstractListDataViewListenerTest {
         dataView.addItemCountChangeListener(
                 event -> invocationCounter.incrementAndGet());
 
-        UI ui = new MockUI();
         ui.add((Component) component);
 
         dataView.setFilter("one"::equals);
@@ -57,7 +58,7 @@ public abstract class AbstractListDataViewListenerTest {
         dataView.addItem("last");
         dataView.removeItem("item0");
 
-        fakeClientCall(ui);
+        ui.fakeClientCommunication();
 
         Assert.assertEquals(
                 "Unexpected number of item count change listener invocations "
@@ -73,11 +74,10 @@ public abstract class AbstractListDataViewListenerTest {
 
         AtomicBoolean invocationChecker = new AtomicBoolean(false);
 
-        UI ui = new MockUI();
         ui.add((Component) component);
 
         // Make initial item count change
-        fakeClientCall(ui);
+        ui.fakeClientCommunication();
 
         dataView.addItemCountChangeListener(
                 event -> invocationChecker.getAndSet(true));
@@ -86,7 +86,7 @@ public abstract class AbstractListDataViewListenerTest {
 
         // Make item count change after sort. No event should be sent as item
         // count stays the same.
-        fakeClientCall(ui);
+        ui.fakeClientCommunication();
 
         Assert.assertFalse("Unexpected item count listener invocation",
                 invocationChecker.get());
@@ -100,11 +100,10 @@ public abstract class AbstractListDataViewListenerTest {
 
         AtomicBoolean invocationChecker = new AtomicBoolean(false);
 
-        UI ui = new MockUI();
         ui.add((Component) component);
 
         // Make initial item count event
-        fakeClientCall(ui);
+        ui.fakeClientCommunication();
 
         dataView.addItemCountChangeListener(event -> {
             Assert.assertEquals("Unexpected item count", 1,
@@ -117,7 +116,7 @@ public abstract class AbstractListDataViewListenerTest {
 
         // Item count change should be sent as item count has changed after
         // filtering.
-        fakeClientCall(ui);
+        ui.fakeClientCommunication();
 
         Assert.assertTrue("Item count change never called",
                 invocationChecker.get());
@@ -144,12 +143,6 @@ public abstract class AbstractListDataViewListenerTest {
     }
 
     protected abstract HasListDataView<String, ? extends AbstractListDataView<String>> getComponent();
-
-    private void fakeClientCall(UI ui) {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
-    }
 
     private HasListDataView<String, ? extends AbstractListDataView<String>> getVerifiedComponent() {
         HasListDataView<String, ? extends AbstractListDataView<String>> component = getComponent();

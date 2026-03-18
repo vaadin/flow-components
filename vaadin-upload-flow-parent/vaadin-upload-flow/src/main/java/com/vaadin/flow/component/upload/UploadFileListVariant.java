@@ -22,7 +22,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * component.
  */
 public enum UploadFileListVariant implements ThemeVariant {
-    LUMO_THUMBNAILS("thumbnails"), AURA_THUMBNAILS("thumbnails");
+    THUMBNAILS("thumbnails");
 
     private final String variant;
 

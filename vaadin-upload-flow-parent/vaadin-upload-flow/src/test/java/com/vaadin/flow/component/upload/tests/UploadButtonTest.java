@@ -16,129 +16,101 @@
 package com.vaadin.flow.component.upload.tests;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class UploadButtonTest {
+class UploadButtonTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+            ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
-    private UI ui;
     private Div owner;
     private UploadManager manager;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
-    @Before
-    public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-        StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
-                mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
-                .mockFeatureFlag(mockContext);
-        ui.getInternals().setSession(mockSession);
-
+    @BeforeEach
+    void setup() {
         owner = new Div();
         ui.add(owner);
         manager = new UploadManager(owner);
     }
 
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
-    }
-
     @Test
-    public void constructor_default_createsButton() {
+    void constructor_default_createsButton() {
         UploadButton button = new UploadButton();
 
-        Assert.assertNotNull(button);
-        Assert.assertEquals("vaadin-upload-button",
+        Assertions.assertNotNull(button);
+        Assertions.assertEquals("vaadin-upload-button",
                 button.getElement().getTag());
     }
 
     @Test
-    public void constructor_withManager_linksToManager() {
+    void constructor_withManager_linksToManager() {
         UploadButton button = new UploadButton(manager);
 
-        Assert.assertSame(manager, button.getUploadManager());
+        Assertions.assertSame(manager, button.getUploadManager());
     }
 
     @Test
-    public void constructor_withTextAndManager_setsTextAndLinksToManager() {
+    void constructor_withTextAndManager_setsTextAndLinksToManager() {
         UploadButton button = new UploadButton("Upload", manager);
 
-        Assert.assertEquals("Upload", button.getText());
-        Assert.assertSame(manager, button.getUploadManager());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void constructor_withNull_throws() {
-        new UploadButton(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void constructor_withTextAndNullManager_throws() {
-        new UploadButton("Upload", null);
+        Assertions.assertEquals("Upload", button.getText());
+        Assertions.assertSame(manager, button.getUploadManager());
     }
 
     @Test
-    public void setUploadManager_linksToManager() {
+    void constructor_withNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new UploadButton(null));
+    }
+
+    @Test
+    void constructor_withTextAndNullManager_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new UploadButton("Upload", null));
+    }
+
+    @Test
+    void setUploadManager_linksToManager() {
         UploadButton button = new UploadButton();
 
         button.setUploadManager(manager);
 
-        Assert.assertSame(manager, button.getUploadManager());
+        Assertions.assertSame(manager, button.getUploadManager());
     }
 
     @Test
-    public void getUploadManager_default_returnsNull() {
+    void getUploadManager_default_returnsNull() {
         UploadButton button = new UploadButton();
 
-        Assert.assertNull(button.getUploadManager());
+        Assertions.assertNull(button.getUploadManager());
     }
 
     @Test
-    public void extendsButton() {
-        Assert.assertTrue(Button.class.isAssignableFrom(UploadButton.class));
+    void extendsButton() {
+        Assertions
+                .assertTrue(Button.class.isAssignableFrom(UploadButton.class));
     }
 
     @Test
-    public void setUploadManager_changeManager_detachAndReattach_onlyOneManagerLinkJsExecuted() {
+    void setUploadManager_changeManager_detachAndReattach_onlyOneManagerLinkJsExecuted() {
         // Create two managers
         Div owner2 = new Div();
         ui.add(owner2);
@@ -147,44 +119,33 @@ public class UploadButtonTest {
         // Create button with first manager
         UploadButton button = new UploadButton(manager);
         ui.add(button);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Change to second manager
         button.setUploadManager(manager2);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         // Drain pending JS invocations
-        ui.getInternals().dumpPendingJavaScriptInvocations();
+        ui.dumpPendingJavaScriptInvocations();
 
         // Detach and reattach the button
         ui.remove(button);
         ui.add(button);
 
         // Get pending JS invocations after reattach
-        List<PendingJavaScriptInvocation> pendingInvocations = getPendingJavaScriptInvocations();
+        List<PendingJavaScriptInvocation> pendingInvocations = ui
+                .dumpPendingJavaScriptInvocations();
 
         // Count how many "this.manager = " JS invocations are pending
         long managerLinkCount = pendingInvocations.stream().filter(inv -> inv
                 .getInvocation().getExpression().contains("this.manager"))
                 .count();
 
-        Assert.assertEquals(
+        Assertions.assertEquals(1, managerLinkCount,
                 "Only one 'this.manager' JS invocation should be pending after reattach. "
-                        + "Old attach listeners should be removed when setUploadManager is called.",
-                1, managerLinkCount);
+                        + "Old attach listeners should be removed when setUploadManager is called.");
 
         // Verify that the button is linked to manager2
-        Assert.assertSame(manager2, button.getUploadManager());
-    }
-
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        fakeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
+        Assertions.assertSame(manager2, button.getUploadManager());
     }
 }

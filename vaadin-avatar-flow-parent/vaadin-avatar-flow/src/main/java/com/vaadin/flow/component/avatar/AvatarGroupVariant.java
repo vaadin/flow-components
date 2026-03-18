@@ -27,7 +27,16 @@ public enum AvatarGroupVariant implements ThemeVariant {
     LUMO_XSMALL("xsmall"),
     LUMO_REVERSE("reverse"),
     AURA_FILLED("filled"),
-    AURA_REVERSE("reverse");
+    /**
+     * @deprecated Use {@link #REVERSE} instead.
+     */
+    @Deprecated
+    AURA_REVERSE("reverse"),
+    XLARGE("xlarge"),
+    LARGE("large"),
+    SMALL("small"),
+    XSMALL("xsmall"),
+    REVERSE("reverse");
 
     private final String variant;
 

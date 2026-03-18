@@ -10,38 +10,30 @@ package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.FormulaValueChangeEvent;
+import com.vaadin.tests.MockUIRule;
 
 public class FormulasTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private Spreadsheet spreadsheet;
-
-    private UI ui;
 
     @Before
     public void init() {
         spreadsheet = new Spreadsheet();
-        ui = new UI();
-        UI.setCurrent(ui);
 
         // onSheetScroll must be invoked once, otherwise cell comments are not
         // loaded
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
                 "[1, 1, 1, 1]");
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test

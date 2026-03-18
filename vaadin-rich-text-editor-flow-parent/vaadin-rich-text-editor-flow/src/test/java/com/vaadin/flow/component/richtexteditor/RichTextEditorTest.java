@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,11 +21,10 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -34,17 +32,11 @@ import tools.jackson.databind.node.ArrayNode;
  * Tests for the {@link RichTextEditor}.
  */
 public class RichTextEditorTest {
-
-    private UI ui;
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
 
     @Test
     public void setValueNull() {
@@ -226,16 +218,11 @@ public class RichTextEditorTest {
         Element element = new Element("vaadin-rich-text-editor");
 
         element.setProperty("value", "foo");
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(RichTextEditor.class))
                 .thenAnswer(invocation -> new RichTextEditor());
@@ -269,5 +256,11 @@ public class RichTextEditorTest {
         Assert.assertEquals("#0066cc", options.get(1));
         Assert.assertEquals("#008a00", options.get(2));
         Assert.assertEquals("#e60000", options.get(3));
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(RichTextEditor.class));
     }
 }

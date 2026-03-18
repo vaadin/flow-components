@@ -15,20 +15,19 @@
  */
 package com.vaadin.flow.component.login;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class LoginOverlaySlotsTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private UI ui;
     private LoginOverlay overlay;
 
     @Tag("div")
@@ -37,20 +36,8 @@ public class LoginOverlaySlotsTest {
 
     @Before
     public void setup() {
-        ui = new UI();
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-
         overlay = new LoginOverlay();
         ui.add(overlay);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -58,17 +45,14 @@ public class LoginOverlaySlotsTest {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
-        ui = new UI();
-        UI.setCurrent(ui);
-
         overlay.getCustomFormArea().add(foo, bar);
 
         Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
         Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(foo.getElement().getAttribute("slot"),
-                "custom-form-area");
-        Assert.assertEquals(bar.getElement().getAttribute("slot"),
-                "custom-form-area");
+        Assert.assertEquals("custom-form-area",
+                foo.getElement().getAttribute("slot"));
+        Assert.assertEquals("custom-form-area",
+                bar.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -81,10 +65,10 @@ public class LoginOverlaySlotsTest {
 
         Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
         Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(foo.getElement().getAttribute("slot"),
-                "custom-form-area");
-        Assert.assertEquals(bar.getElement().getAttribute("slot"),
-                "custom-form-area");
+        Assert.assertEquals("custom-form-area",
+                foo.getElement().getAttribute("slot"));
+        Assert.assertEquals("custom-form-area",
+                bar.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -95,14 +79,14 @@ public class LoginOverlaySlotsTest {
         overlay.getCustomFormArea().add(foo, bar);
 
         overlay.getCustomFormArea().remove(foo);
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertNotEquals(foo.getElement().getAttribute("slot"),
-                "custom-form-area");
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertNotEquals("custom-form-area",
+                foo.getElement().getAttribute("slot"));
 
         overlay.getCustomFormArea().remove(bar);
-        Assert.assertEquals(bar.getElement().getParent(), null);
-        Assert.assertNotEquals(bar.getElement().getAttribute("slot"),
-                "custom-form-area");
+        Assert.assertEquals(null, bar.getElement().getParent());
+        Assert.assertNotEquals("custom-form-area",
+                bar.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -114,9 +98,9 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getCustomFormArea().remove(foo);
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertNotEquals(foo.getElement().getAttribute("slot"),
-                "custom-form-area");
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertNotEquals("custom-form-area",
+                foo.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -128,8 +112,8 @@ public class LoginOverlaySlotsTest {
 
         overlay.getCustomFormArea().removeAll();
 
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertEquals(bar.getElement().getParent(), null);
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
@@ -142,8 +126,8 @@ public class LoginOverlaySlotsTest {
 
         overlay.getCustomFormArea().removeAll();
 
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertEquals(bar.getElement().getParent(), null);
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
@@ -155,8 +139,8 @@ public class LoginOverlaySlotsTest {
 
         Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
         Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(foo.getElement().getAttribute("slot"), "footer");
-        Assert.assertEquals(bar.getElement().getAttribute("slot"), "footer");
+        Assert.assertEquals("footer", foo.getElement().getAttribute("slot"));
+        Assert.assertEquals("footer", bar.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -169,8 +153,8 @@ public class LoginOverlaySlotsTest {
 
         Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
         Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(foo.getElement().getAttribute("slot"), "footer");
-        Assert.assertEquals(bar.getElement().getAttribute("slot"), "footer");
+        Assert.assertEquals("footer", foo.getElement().getAttribute("slot"));
+        Assert.assertEquals("footer", bar.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -181,11 +165,11 @@ public class LoginOverlaySlotsTest {
         overlay.getFooter().add(foo, bar);
 
         overlay.getFooter().remove(foo);
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertNotEquals(foo.getElement().getAttribute("slot"), "footer");
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertNotEquals("footer", foo.getElement().getAttribute("slot"));
 
         overlay.getFooter().remove(bar);
-        Assert.assertEquals(bar.getElement().getParent(), null);
+        Assert.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
@@ -198,8 +182,8 @@ public class LoginOverlaySlotsTest {
 
         overlay.getFooter().remove(foo);
 
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertNotEquals(foo.getElement().getAttribute("slot"), "footer");
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertNotEquals("footer", foo.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -211,8 +195,8 @@ public class LoginOverlaySlotsTest {
 
         overlay.getFooter().removeAll();
 
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertEquals(bar.getElement().getParent(), null);
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
@@ -225,7 +209,7 @@ public class LoginOverlaySlotsTest {
 
         overlay.getFooter().removeAll();
 
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertEquals(bar.getElement().getParent(), null);
+        Assert.assertEquals(null, foo.getElement().getParent());
+        Assert.assertEquals(null, bar.getElement().getParent());
     }
 }

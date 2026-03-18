@@ -17,23 +17,26 @@ package com.vaadin.flow.component.slider.tests;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class SliderWarningsTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
-    private UI ui = new MockUI();
     private Logger mockedLogger;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
     private MockedStatic<LoggerFactory> mockLoggerFactoryStatic;
 
     @Before
@@ -45,33 +48,22 @@ public class SliderWarningsTest {
         mockLoggerFactoryStatic
                 .when(() -> LoggerFactory.getLogger(Slider.class))
                 .thenReturn(mockedLogger);
-
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags
-                .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT))
-                .thenReturn(true);
-
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
-                .thenReturn(mockFeatureFlags);
     }
 
     @After
     public void tearDown() {
         mockLoggerFactoryStatic.close();
-        mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
     }
 
     @Test
     public void setMinGreaterThanMax_warnsMinGreaterThanMax() {
         Slider slider = new Slider();
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setMin(200);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
                 Mockito.eq(200.0), Mockito.eq(100.0));
@@ -81,11 +73,11 @@ public class SliderWarningsTest {
     public void setMaxLessThanMin_warnsMinGreaterThanMax() {
         Slider slider = new Slider();
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setMax(-10);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
                 Mockito.eq(0.0), Mockito.eq(-10.0));
@@ -95,11 +87,11 @@ public class SliderWarningsTest {
     public void setValueOutOfRange_warnsValueOutOfRange() {
         Slider slider = new Slider(0, 100);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setValue(150.0);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(
                 Mockito.contains("outside the configured range"),
@@ -111,11 +103,11 @@ public class SliderWarningsTest {
         Slider slider = new Slider(0, 100);
         slider.setStep(10);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setValue(15.0);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(
                 Mockito.contains("not aligned with step"), Mockito.eq(15.0),
@@ -127,11 +119,11 @@ public class SliderWarningsTest {
         Slider slider = new Slider(0, 100);
         slider.setStep(10);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setValue(50.0);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any());
@@ -141,22 +133,16 @@ public class SliderWarningsTest {
     public void setMultipleProperties_onlyOneCheckPerResponseCycle() {
         Slider slider = new Slider(0, 100);
         ui.add(slider);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
         slider.setMin(10);
         slider.setMax(50);
         slider.setStep(5);
         slider.setValue(25.0);
-        fakeClientResponse();
+        ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any());
-    }
-
-    private void fakeClientResponse() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

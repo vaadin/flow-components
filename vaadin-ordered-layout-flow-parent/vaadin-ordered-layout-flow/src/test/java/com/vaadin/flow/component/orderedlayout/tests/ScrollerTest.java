@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 public class ScrollerTest {
 
@@ -102,5 +103,11 @@ public class ScrollerTest {
 
         scroller.setEnabled(false);
         Assert.assertFalse(input.isEnabled());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Scroller.class));
     }
 }

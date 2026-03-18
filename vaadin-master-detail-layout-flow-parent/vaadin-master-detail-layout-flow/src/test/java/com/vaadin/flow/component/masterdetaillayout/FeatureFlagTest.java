@@ -15,57 +15,28 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class FeatureFlagTest {
-    private final UI ui = new UI();
-    private final FeatureFlags mockFeatureFlags = Mockito
-            .mock(FeatureFlags.class);
-    private final MockedStatic<FeatureFlags> mockFeatureFlagsStatic = Mockito
-            .mockStatic(FeatureFlags.class);
-
-    @Before
-    public void setup() {
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
-
-        ui.getInternals().setSession(mockSession);
-    }
-
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
 
     @Test
     public void featureEnabled_attachLayout_doesNotThrow() {
-        Mockito.when(mockFeatureFlags
-                .isEnabled(FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT))
-                .thenReturn(true);
         ui.add(new MasterDetailLayout());
     }
 
     @Test(expected = ExperimentalFeatureException.class)
     public void featureDisabled_attachLayout_throwsExperimentalFeatureException() {
-        Mockito.when(mockFeatureFlags
-                .isEnabled(FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT))
-                .thenReturn(false);
+        featureFlagRule.disableFeature();
         ui.add(new MasterDetailLayout());
     }
 }

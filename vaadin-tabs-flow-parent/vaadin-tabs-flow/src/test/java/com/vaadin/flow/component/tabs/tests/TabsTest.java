@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
@@ -202,11 +203,11 @@ public class TabsTest {
     public void tabsAutoselectConstructor() {
         Tabs tabs1 = new Tabs(true);
         tabs1.add(new Tab("Tab"));
-        Assert.assertEquals(tabs1.getSelectedIndex(), 0);
+        Assert.assertEquals(0, tabs1.getSelectedIndex());
 
         Tabs tabs2 = new Tabs(false);
         tabs2.add(new Tab("Tab"));
-        Assert.assertEquals(tabs2.getSelectedIndex(), -1);
+        Assert.assertEquals(-1, tabs2.getSelectedIndex());
     }
 
     @Test
@@ -216,7 +217,7 @@ public class TabsTest {
         Tabs tabs2 = new Tabs(false, tab1, tab2);
 
         Assert.assertNull(tabs2.getSelectedTab());
-        Assert.assertEquals(tabs2.getSelectedIndex(), -1);
+        Assert.assertEquals(-1, tabs2.getSelectedIndex());
     }
 
     @Test
@@ -302,5 +303,10 @@ public class TabsTest {
         tabs.setSelectedIndex(0);
 
         Assert.assertEquals(null, tabs.getSelectedTab());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Tabs.class));
     }
 }

@@ -28,6 +28,9 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
@@ -223,11 +226,28 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * When set to {@code true}, the item will be immediately disabled on the
      * client-side when clicked, preventing further clicks until re-enabled from
      * the server-side.
+     * <p>
+     * When the enabled state is bound to a signal, the disable on click feature
+     * can not be used. Disable on click requires the component to automatically
+     * manage the enabled state, however changes to the state can not be
+     * synchronized back to the signal due to {@link #bindEnabled(Signal)} only
+     * supporting one-way bindings.
      *
      * @param disableOnClick
      *            whether the item should be disabled when clicked
+     * @throws IllegalStateException
+     *             if the enabled state is already bound to a signal
      */
     public void setDisableOnClick(boolean disableOnClick) {
+        boolean hasEnabledBinding = getElement().getNode()
+                .getFeatureIfInitialized(SignalBindingFeature.class)
+                .map(feature -> feature
+                        .hasBinding(SignalBindingFeature.ENABLED))
+                .orElse(false);
+        if (disableOnClick && hasEnabledBinding) {
+            throw new IllegalStateException(
+                    "Disable on click is not supported when the enabled state is bound to a signal. ");
+        }
         disableOnClickController.setDisableOnClick(disableOnClick);
     }
 
@@ -244,6 +264,30 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     public void setEnabled(boolean enabled) {
         HasComponents.super.setEnabled(enabled);
         disableOnClickController.onSetEnabled(enabled);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * When the disable on click feature is active, the enabled state can not be
+     * bound to a signal. Disable on click requires the component to
+     * automatically manage the enabled state, however changes to the state can
+     * not be synchronized back to the signal due to
+     * {@link #bindEnabled(Signal)} only supporting one-way bindings.
+     *
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @throws IllegalStateException
+     *             if disable-on-click is active
+     */
+    @Override
+    public SignalBinding<Boolean> bindEnabled(Signal<Boolean> enabledSignal) {
+        if (isDisableOnClick()) {
+            throw new IllegalStateException(
+                    "Binding the enabled state to a signal is not supported when disable on click is active. ");
+        }
+        return HasComponents.super.bindEnabled(enabledSignal);
     }
 
     /**

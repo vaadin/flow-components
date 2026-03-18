@@ -15,22 +15,23 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class ButtonSignalTest extends AbstractSignalsUnitTest {
+class ButtonSignalTest extends AbstractSignalsJUnit6Test {
 
     private Button button;
     private Icon icon;
@@ -43,14 +44,14 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     private ValueSignal<String> textSignal;
     private Signal<String> computedSignal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         textSignal = new ValueSignal<>("foo");
         computedSignal = Signal.computed(() -> textSignal.get() + " bar");
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (button != null) {
             if (button.isAttached()) {
                 button.removeFromParent();
@@ -60,24 +61,24 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textSignalCtor() {
+    void textSignalCtor() {
         button = new Button(textSignal);
         UI.getCurrent().add(button);
         assertTextSignalBindingActive();
-        Assert.assertNull(button.getIcon());
+        Assertions.assertNull(button.getIcon());
     }
 
     @Test
-    public void textSignalAndIconCtor() {
+    void textSignalAndIconCtor() {
         Icon icon = new Icon();
         button = new Button(textSignal, icon);
         UI.getCurrent().add(button);
         assertTextSignalBindingActive();
-        Assert.assertEquals(icon, button.getIcon());
+        Assertions.assertEquals(icon, button.getIcon());
     }
 
     @Test
-    public void textSignalAndEventCtor() {
+    void textSignalAndEventCtor() {
         button = new Button(textSignal, listener);
         UI.getCurrent().add(button);
         assertTextSignalBindingActive();
@@ -87,42 +88,45 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textSignalAndIconAndEventCtor() {
+    void textSignalAndIconAndEventCtor() {
         Icon icon = new Icon();
         button = new Button(textSignal, icon, listener);
         UI.getCurrent().add(button);
         assertTextSignalBindingActive();
-        Assert.assertEquals(icon, button.getIcon());
+        Assertions.assertEquals(icon, button.getIcon());
         button.click();
         Mockito.verify(listener, Mockito.times(1))
                 .onComponentEvent(Mockito.any());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void textNodeAsIcon_throws() {
-        button = new Button(textSignal, new Text("bar"));
+    @Test
+    void textNodeAsIcon_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Button(textSignal, new Text("bar")));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void textSignalAndSetText_error() {
+    @Test
+    void textSignalAndSetText_error() {
         button = new Button(textSignal, new Icon());
         UI.getCurrent().add(button);
 
-        button.setText("bar");
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> button.setText("bar"));
     }
 
     @Test
-    public void setIcon_textSignalChange_slotRemoved() {
+    void setIcon_textSignalChange_slotRemoved() {
         icon = new Icon();
         button = new Button(textSignal, icon);
+        UI.getCurrent().add(button);
 
         textSignal.set("");
 
-        Assert.assertFalse(icon.getElement().hasAttribute("slot"));
+        Assertions.assertFalse(icon.getElement().hasAttribute("slot"));
     }
 
     @Test
-    public void textSignalChange_slotAttributeIsPreserved() {
+    void textSignalChange_slotAttributeIsPreserved() {
         button = new Button(textSignal);
         UI.getCurrent().add(button);
         Icon icon = new Icon(VaadinIcon.BULLSEYE);
@@ -130,17 +134,18 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         button.setIcon(icon);
 
         textSignal.set("bar");
-        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
+        Assertions.assertEquals("prefix",
+                icon.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void textSignal_notAttached() {
+    void textSignal_notAttached() {
         button = new Button(textSignal);
         assertTextSignalBindingInactive();
     }
 
     @Test
-    public void textSignal_detachedAndAttached() {
+    void textSignal_detachedAndAttached() {
         button = new Button(textSignal);
         UI.getCurrent().add(button);
         button.removeFromParent();
@@ -151,24 +156,25 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
     }
 
     @Test
-    public void textComputedSignalCtor() {
+    void textComputedSignalCtor() {
         button = new Button(computedSignal);
         UI.getCurrent().add(button);
-        Assert.assertEquals("foo bar", button.getText());
+        Assertions.assertEquals("foo bar", button.getText());
         textSignal.set("bar");
-        Assert.assertEquals("bar bar", button.getText());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void textComputedSignalCtor_bindText() {
-        button = new Button(computedSignal);
-        UI.getCurrent().add(button);
-
-        button.bindText(textSignal);
+        Assertions.assertEquals("bar bar", button.getText());
     }
 
     @Test
-    public void textSignalConstructors_usesBindText() {
+    void textComputedSignalCtor_bindText() {
+        button = new Button(computedSignal);
+        UI.getCurrent().add(button);
+
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> button.bindText(textSignal));
+    }
+
+    @Test
+    void textSignalConstructors_usesBindText() {
         var mockButton = Mockito.mock(Button.class);
         class SpyButton extends Button {
             public SpyButton(Signal<String> textSignal) {
@@ -185,9 +191,9 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
             }
 
             @Override
-            public void bindText(Signal<String> value) {
+            public SignalBinding<String> bindText(Signal<String> value) {
                 mockButton.bindText(value);
-                super.bindText(value);
+                return super.bindText(value);
             }
         }
         ;
@@ -201,32 +207,52 @@ public class ButtonSignalTest extends AbstractSignalsUnitTest {
         Mockito.clearInvocations(mockButton);
     }
 
+    @Test
+    void bindEnabled_disableOnClickActive_throws() {
+        button = new Button("foo");
+        button.setDisableOnClick(true);
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> button.bindEnabled(new ValueSignal<>(true)));
+    }
+
+    @Test
+    void setDisableOnClick_enabledBindingActive_throws() {
+        button = new Button("foo");
+        UI.getCurrent().add(button);
+        button.bindEnabled(new ValueSignal<>(true));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> button.setDisableOnClick(true));
+    }
+
+    @Test
+    void setDisableOnClickFalse_enabledBindingActive_doesNotThrow() {
+        button = new Button("foo");
+        UI.getCurrent().add(button);
+        button.bindEnabled(new ValueSignal<>(true));
+
+        button.setDisableOnClick(false);
+    }
+
+    @Test
+    void bindEnabled_disableOnClickNotActive_doesNotThrow() {
+        button = new Button("foo");
+        UI.getCurrent().add(button);
+
+        button.bindEnabled(new ValueSignal<>(true));
+    }
+
     private void assertTextSignalBindingActive() {
         textSignal.set("foo");
-        Assert.assertEquals("foo", button.getText());
+        Assertions.assertEquals("foo", button.getText());
         textSignal.set("bar");
-        Assert.assertEquals("bar", button.getText());
+        Assertions.assertEquals("bar", button.getText());
     }
 
     private void assertTextSignalBindingInactive() {
         var currentText = button.getText();
         textSignal.set(currentText + " with change");
-        Assert.assertEquals(currentText, button.getText());
-    }
-
-    private void assertIconBeforeText() {
-        Assert.assertTrue("Icon should be child of button",
-                button.getElement().getChildren()
-                        .anyMatch(child -> child.equals(icon.getElement())));
-        Assert.assertFalse(button.isIconAfterText());
-        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
-    }
-
-    private void assertIconAfterText() {
-        Assert.assertTrue("Icon should be child of button",
-                button.getElement().getChildren()
-                        .anyMatch(child -> child.equals(icon.getElement())));
-        Assert.assertTrue(button.isIconAfterText());
-        Assert.assertEquals("suffix", icon.getElement().getAttribute("slot"));
+        Assertions.assertEquals(currentText, button.getText());
     }
 }

@@ -28,7 +28,10 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Abstract base class for slider components.
@@ -170,6 +173,87 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
         }
         getElement().setProperty("step", step);
         schedulePropertyConsistencyCheck();
+    }
+
+    /**
+     * Binds the given signal to the minimum value of the slider as a one-way
+     * binding so that the property is updated when the signal's value is
+     * updated.
+     * <p>
+     * The minimum value is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the minimum value manually
+     * through the setter throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the minimum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public SignalBinding<Double> bindMin(Signal<Double> signal) {
+        return getElement().bindProperty("min", signal, null);
+    }
+
+    /**
+     * Binds the given signal to the maximum value of the slider as a one-way
+     * binding so that the property is updated when the signal's value is
+     * updated.
+     * <p>
+     * The maximum value is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the maximum value manually
+     * through the setter throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the maximum value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public SignalBinding<Double> bindMax(Signal<Double> signal) {
+        return getElement().bindProperty("max", signal, null);
+    }
+
+    /**
+     * Binds the given signal to the step value of the slider as a one-way
+     * binding so that the property is updated when the signal's value is
+     * updated.
+     * <p>
+     * The step value is set immediately with the current signal value when the
+     * binding is created, and is kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to set the step value manually
+     * through the setter throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param signal
+     *            the signal to bind the step value to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
+     *      SerializableConsumer)
+     * @since 25.1
+     */
+    public SignalBinding<Double> bindStep(Signal<Double> signal) {
+        return getElement().bindProperty("step", signal, null);
     }
 
     /**

@@ -20,19 +20,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
@@ -43,99 +40,80 @@ import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
 import com.vaadin.flow.server.streams.UploadResult;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class UploadHandlerTest {
-    private UI ui;
-    private StreamResourceRegistry streamResourceRegistry;
+class UploadHandlerTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
     private Upload upload;
 
-    @Before
-    public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        streamResourceRegistry = new StreamResourceRegistry(mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        ui.getInternals().setSession(mockSession);
-
+    @BeforeEach
+    void setup() {
         upload = new Upload();
         ui.add(upload);
     }
 
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-    }
-
     @Test
-    public void setUploadHandler_setsHandlerInTargetStreamResource()
+    void setUploadHandler_setsHandlerInTargetStreamResource()
             throws URISyntaxException {
         InMemoryUploadHandler handler = new InMemoryUploadHandler(
                 (metadata, data) -> {
                 });
         upload.setUploadHandler(handler);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         UploadHandler targetHandler = getUploadHandler();
-        Assert.assertEquals(handler, targetHandler);
+        Assertions.assertNotNull(targetHandler);
     }
 
     @Test
-    public void setUploadHandler_generatedUrlEndsWithUpload() {
+    void setUploadHandler_generatedUrlEndsWithUpload() {
         upload.setUploadHandler(event -> {
         });
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         String targetUploadUrl = upload.getElement().getAttribute("target");
-        Assert.assertTrue("Upload url should end with 'upload'",
-                targetUploadUrl.endsWith("upload"));
+        Assertions.assertTrue(targetUploadUrl.endsWith("upload"),
+                "Upload url should end with 'upload'");
     }
 
     @Test
-    public void setUploadHandler_withCustomTarget_generatedUrlEndsWithCustomName() {
+    void setUploadHandler_withCustomTarget_generatedUrlEndsWithCustomName() {
         String targetName = "custom-target";
         upload.setUploadHandler(event -> {
         }, targetName);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         String targetUploadUrl = upload.getElement().getAttribute("target");
-        Assert.assertTrue(
-                "Upload url should end with custom target name 'custom-target'",
-                targetUploadUrl.endsWith(targetName));
+        Assertions.assertTrue(targetUploadUrl.endsWith(targetName),
+                "Upload url should end with custom target name 'custom-target'");
     }
 
     @Test
-    public void setUploadHandler_withNullTarget_throws() {
-        Assert.assertThrows(NullPointerException.class,
+    void setUploadHandler_withNullTarget_throws() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> upload.setUploadHandler(event -> {
                 }, null));
     }
 
     @Test
-    public void setUploadHandler_withBlankTarget_throws() {
-        Assert.assertThrows(IllegalArgumentException.class,
+    void setUploadHandler_withBlankTarget_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> upload.setUploadHandler(event -> {
                 }, ""));
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> upload.setUploadHandler(event -> {
                 }, "   "));
     }
 
     @Test
-    public void uploadWithStandardHandler_activeUploadsIsChanged_from0to1_from1to0()
+    void uploadWithStandardHandler_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException, URISyntaxException {
         // Not uploading initially
-        Assert.assertFalse(upload.isUploading());
+        Assertions.assertFalse(upload.isUploading());
 
         // Simulate an upload using a handler, verify that uploading flag is set
         // while upload is in progress
@@ -143,16 +121,16 @@ public class UploadHandlerTest {
                 .spy(new InMemoryUploadCallback() {
                     @Override
                     public void complete(UploadMetadata metadata, byte[] data) {
-                        Assert.assertTrue(upload.isUploading());
+                        Assertions.assertTrue(upload.isUploading());
                     }
                 });
         InMemoryUploadHandler handler = new InMemoryUploadHandler(callback);
         upload.setUploadHandler(handler);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         simulateUpload();
 
         // Verify flag is reset after upload completes
-        Assert.assertFalse(upload.isUploading());
+        Assertions.assertFalse(upload.isUploading());
 
         // Sanity check that callback containing the assertion was called
         Mockito.verify(callback, Mockito.times(1)).complete(Mockito.any(),
@@ -160,10 +138,10 @@ public class UploadHandlerTest {
     }
 
     @Test
-    public void uploadWithCustomHandler_activeUploadsIsChanged_from0to1_from1to0()
+    void uploadWithCustomHandler_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException, URISyntaxException {
         // Not uploading initially
-        Assert.assertFalse(upload.isUploading());
+        Assertions.assertFalse(upload.isUploading());
 
         // Simulate an upload using a custom handler, verify that uploading flag
         // is set while upload is in progress
@@ -172,7 +150,7 @@ public class UploadHandlerTest {
             public void handleUploadRequest(UploadEvent event) {
                 // when the upload starts,
                 // then the upload is in progress
-                Assert.assertTrue(upload.isUploading());
+                Assertions.assertTrue(upload.isUploading());
             }
 
             @Override
@@ -206,51 +184,51 @@ public class UploadHandlerTest {
             }
         });
         upload.setUploadHandler(customHandler);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         simulateUpload();
 
         // Verify flag is reset after upload completes
-        Assert.assertFalse(upload.isUploading());
+        Assertions.assertFalse(upload.isUploading());
 
         // verify that the original methods of custom handler were called
         Mockito.verify(customHandler)
                 .handleUploadRequest(Mockito.any(UploadEvent.class));
         Mockito.verify(customHandler)
                 .responseHandled(Mockito.any(UploadResult.class));
-        Assert.assertEquals(111L, customHandler.getRequestSizeMax());
-        Assert.assertEquals(222L, customHandler.getFileSizeMax());
-        Assert.assertEquals(333L, customHandler.getFileCountMax());
-        Assert.assertEquals("custom-postfix", customHandler.getUrlPostfix());
-        Assert.assertTrue(customHandler.isAllowInert());
-        Assert.assertEquals(DisabledUpdateMode.ALWAYS,
+        Assertions.assertEquals(111L, customHandler.getRequestSizeMax());
+        Assertions.assertEquals(222L, customHandler.getFileSizeMax());
+        Assertions.assertEquals(333L, customHandler.getFileCountMax());
+        Assertions.assertEquals("custom-postfix",
+                customHandler.getUrlPostfix());
+        Assertions.assertTrue(customHandler.isAllowInert());
+        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
                 customHandler.getDisabledUpdateMode());
     }
 
     @Test
-    public void uploadWithoutHandler_throwsWhenUploadStarts()
+    void uploadWithoutHandler_throwsWhenUploadStarts()
             throws URISyntaxException {
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
         UploadHandler uploadHandler = getUploadHandler();
 
-        Assert.assertThrows(
-                "Expected IllegalStateException for Upload with no handler",
-                IllegalStateException.class,
-                () -> uploadHandler.handleUploadRequest(null));
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> uploadHandler.handleUploadRequest(null),
+                "Expected IllegalStateException for Upload with no handler");
     }
 
     @Test
-    public void setUploadHandler_maxFileIsDefined_maxFileIsPreserved() {
+    void setUploadHandler_maxFileIsDefined_maxFileIsPreserved() {
         upload.setMaxFiles(5);
         upload.setUploadHandler(event -> {
         });
-        Assert.assertEquals(5, upload.getMaxFiles());
+        Assertions.assertEquals(5, upload.getMaxFiles());
     }
 
     @Test
-    public void setUploadHandler_maxFileIsNotDefined_doesNotSetMaxFiles() {
+    void setUploadHandler_maxFileIsNotDefined_doesNotSetMaxFiles() {
         upload.setUploadHandler(event -> {
         });
-        Assert.assertNull(upload.getElement().getProperty("maxFiles"));
+        Assertions.assertNull(upload.getElement().getProperty("maxFiles"));
     }
 
     private void simulateUpload() throws IOException, URISyntaxException {
@@ -262,28 +240,22 @@ public class UploadHandlerTest {
                 .thenReturn(new ByteArrayInputStream("test data".getBytes()));
 
         UploadHandler uploadHandler = getUploadHandler();
-        uploadHandler.handleRequest(request, response, session,
+        uploadHandler.handleRequest(request, response, ui.getSession(),
                 upload.getElement());
     }
 
     private UploadHandler getUploadHandler() throws URISyntaxException {
         String target = upload.getElement().getAttribute("target");
-        Assert.assertNotNull("Target attribute is not set", target);
+        Assertions.assertNotNull(target, "Target attribute is not set");
 
-        Optional<AbstractStreamResource> maybeResource = streamResourceRegistry
-                .getResource(new URI(target));
-        Assert.assertTrue("No resource found for target: " + target,
-                maybeResource.isPresent());
+        Optional<AbstractStreamResource> maybeResource = ui.getSession()
+                .getResourceRegistry().getResource(new URI(target));
+        Assertions.assertTrue(maybeResource.isPresent(),
+                "No resource found for target: " + target);
 
         StreamResourceRegistry.ElementStreamResource elementStreamResource = (StreamResourceRegistry.ElementStreamResource) maybeResource
                 .get();
 
         return (UploadHandler) elementStreamResource.getElementRequestHandler();
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

@@ -11,7 +11,6 @@ package com.vaadin.flow.component.gridpro;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,31 +27,25 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.MockUIRule;
 
 import tools.jackson.databind.node.ObjectNode;
 
 public class GridProTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
 
     GridPro<Person> grid;
     ObjectNode selectedItem;
     ArrayList<Person> items = new ArrayList<>();
     Person testItem = new Person("Foo", 1996);
 
-    private UI ui;
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setup() {
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui = new UI();
-        ui.getInternals().setSession(session);
-
-        UI.setCurrent(ui);
-
         grid = Mockito.spy(GridPro.class);
 
         Mockito.when(grid.getDataProvider())
@@ -71,16 +64,10 @@ public class GridProTest {
         selectedItem.put("col0", "foo");
     }
 
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
-
     @Test
     public void setEnterNextRow_getEnterNextRow() {
         grid.setEnterNextRow(true);
-        Assert.assertEquals(grid.getEnterNextRow(), true);
+        Assert.assertEquals(true, grid.getEnterNextRow());
     }
 
     @Test

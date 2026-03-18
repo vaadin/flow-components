@@ -20,18 +20,20 @@ import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.tests.MockUI;
+import com.vaadin.tests.MockUIRule;
 
 public class GridLazyDataViewTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private GridLazyDataView<String> dataView;
     private Grid<String> grid;
-    private MockUI ui;
 
     @Before
     public void setup() {
@@ -43,7 +45,6 @@ public class GridLazyDataViewTest {
                 }, query -> 3);
 
         grid = new Grid<>();
-        ui = new MockUI();
         ui.add(grid);
 
         dataView = grid.setItems(dataProvider);
@@ -69,14 +70,8 @@ public class GridLazyDataViewTest {
 
         dataView.setItemCountCallback(query -> 2);
 
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Assert.assertEquals("Invalid item count reported", 2, itemCount.get());
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

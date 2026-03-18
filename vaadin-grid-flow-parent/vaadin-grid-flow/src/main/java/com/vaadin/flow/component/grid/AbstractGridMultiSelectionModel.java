@@ -43,7 +43,11 @@ import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -60,6 +64,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private final Map<Object, T> selected;
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
+    private Registration selectionBindingCleanup;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -101,6 +106,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     protected void remove() {
         super.remove();
+        if (selectionBindingCleanup != null) {
+            selectionBindingCleanup.remove();
+            selectionBindingCleanup = null;
+        }
         deselectAll();
         if (selectionColumn.getParent().map(getGrid()::equals).orElse(false)) {
             getGrid().getElement().removeChild(selectionColumn.getElement());
@@ -293,6 +302,18 @@ public abstract class AbstractGridMultiSelectionModel<T>
             @Override
             public Set<T> getSelectedItems() {
                 return AbstractGridMultiSelectionModel.this.getSelectedItems();
+            }
+
+            @Override
+            public SignalBinding<Set<T>> bindValue(Signal<Set<T>> valueSignal,
+                    SerializableConsumer<Set<T>> writeCallback) {
+                if (selectionBindingCleanup != null) {
+                    throw new BindingActiveException();
+                }
+                var result = GridSelectionSignalHelper.bindValue(getGrid(),
+                        this, valueSignal, writeCallback);
+                selectionBindingCleanup = result.cleanup();
+                return result.signalBinding();
             }
         };
     }

@@ -8,17 +8,17 @@
  */
 package com.vaadin.flow.component.board;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.board.internal.FunctionCallerTest;
 
-public class BoardTest {
+class BoardTest {
 
     @Test
-    public void addOne() throws Exception {
+    void addOne() throws Exception {
         DummyComponent c1 = new DummyComponent();
         Board board = new Board();
         Row addedRow = board.addRow(c1);
@@ -28,7 +28,7 @@ public class BoardTest {
     }
 
     @Test
-    public void addFour() throws Exception {
+    void addFour() throws Exception {
         DummyComponent c1 = new DummyComponent();
         DummyComponent c2 = new DummyComponent();
         DummyComponent c3 = new DummyComponent();
@@ -40,19 +40,20 @@ public class BoardTest {
         assertChildren(addedRow, c1, c2, c3, c4);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void addFive() throws Exception {
+    @Test
+    void addFive() throws Exception {
         DummyComponent c1 = new DummyComponent();
         DummyComponent c2 = new DummyComponent();
         DummyComponent c3 = new DummyComponent();
         DummyComponent c4 = new DummyComponent();
         DummyComponent c5 = new DummyComponent();
         Board board = new Board();
-        board.addRow(c1, c2, c3, c4, c5);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> board.addRow(c1, c2, c3, c4, c5));
     }
 
     @Test
-    public void addManyRows() throws Exception {
+    void addManyRows() throws Exception {
         DummyComponent c1 = new DummyComponent();
         DummyComponent c2 = new DummyComponent();
         Board board = new Board();
@@ -65,7 +66,7 @@ public class BoardTest {
     }
 
     @Test
-    public void removeRow() throws Exception {
+    void removeRow() throws Exception {
         DummyComponent c1 = new DummyComponent();
         DummyComponent c2 = new DummyComponent();
         DummyComponent c3 = new DummyComponent();
@@ -87,16 +88,17 @@ public class BoardTest {
         assertChildren(board);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void removeUnrelated() throws Exception {
+    @Test
+    void removeUnrelated() throws Exception {
         Board board = new Board();
         Component dummy = new DummyComponent();
         board.addRow(dummy);
-        board.remove(dummy);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> board.remove(dummy));
     }
 
     @Test
-    public void redrawCallsRedraw() throws Exception {
+    void redrawCallsRedraw() throws Exception {
         UI ui = new UI();
         Board board = new Board();
         ui.add(board);
@@ -107,9 +109,9 @@ public class BoardTest {
 
     static void assertChildren(Component parent,
             Component... expectedChildren) {
-        Assert.assertEquals(expectedChildren.length,
+        Assertions.assertEquals(expectedChildren.length,
                 parent.getChildren().count());
-        Assert.assertArrayEquals(expectedChildren,
+        Assertions.assertArrayEquals(expectedChildren,
                 parent.getChildren().toArray());
     }
 

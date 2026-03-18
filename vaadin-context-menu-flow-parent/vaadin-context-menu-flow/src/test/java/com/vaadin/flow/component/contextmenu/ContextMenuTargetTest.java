@@ -18,37 +18,19 @@ package com.vaadin.flow.component.contextmenu;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class ContextMenuTargetTest {
-    private final UI ui = new UI();
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+
     private final ContextMenu menu = new ContextMenu();
-
-    @Before
-    public void setup() {
-        var mockSession = Mockito.mock(VaadinSession.class);
-        var mockService = Mockito.mock(VaadinService.class);
-        var mockContext = Mockito.mock(VaadinContext.class);
-        var mockConfiguration = Mockito.mock(DeploymentConfiguration.class);
-
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockSession.getConfiguration())
-                .thenReturn(mockConfiguration);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-
-        ui.getInternals().setSession(mockSession);
-    }
 
     @Test
     public void setTarget_attachTarget_initTargetConnector() {
@@ -76,7 +58,7 @@ public class ContextMenuTargetTest {
         menu.setTarget(target);
 
         ui.add(target);
-        ui.beforeClientResponse(target, context -> ui.remove(target));
+        ui.getUI().beforeClientResponse(target, context -> ui.remove(target));
 
         assertNoTargetConnectorInit(getPendingInvocations());
     }
@@ -167,9 +149,7 @@ public class ContextMenuTargetTest {
     }
 
     protected List<PendingJavaScriptInvocation> getPendingInvocations() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
+        ui.fakeClientCommunication();
+        return ui.dumpPendingJavaScriptInvocations();
     }
 }

@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
@@ -27,44 +26,24 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.MockUIRule;
 
 public class MasterDetailLayoutTest {
-    private final UI ui = new UI();
-    private final MasterDetailLayout layout = new MasterDetailLayout();
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+    @Rule
+    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+            FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
 
-    private final FeatureFlags mockFeatureFlags = Mockito
-            .mock(FeatureFlags.class);
-    private final MockedStatic<FeatureFlags> mockFeatureFlagsStatic = Mockito
-            .mockStatic(FeatureFlags.class);
+    private final MasterDetailLayout layout = new MasterDetailLayout();
 
     @Before
     public void setup() {
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
-
-        Mockito.when(mockFeatureFlags
-                .isEnabled(FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT))
-                .thenReturn(true);
-
-        ui.getInternals().setSession(mockSession);
         ui.add(layout);
-    }
-
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
     }
 
     @Test
@@ -393,6 +372,12 @@ public class MasterDetailLayoutTest {
         Mockito.verify(listener).onComponentEvent(detailEscapePressEvent);
     }
 
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(HasThemeVariant.class
+                .isAssignableFrom(MasterDetailLayout.class));
+    }
+
     private void assertMasterContent(Component component) {
         Assert.assertEquals("", component.getElement().getAttribute("slot"));
         Assert.assertEquals(layout.getElement(),
@@ -407,8 +392,8 @@ public class MasterDetailLayoutTest {
 
     private void assertSetDetailCall(Component component,
             boolean skipTransition) {
-        fakeClientCommunication();
-        var pendingJavaScriptInvocations = ui.getInternals()
+        ui.fakeClientCommunication();
+        var pendingJavaScriptInvocations = ui
                 .dumpPendingJavaScriptInvocations();
 
         Assert.assertEquals(1, pendingJavaScriptInvocations.size());
@@ -423,11 +408,5 @@ public class MasterDetailLayoutTest {
                 pendingJavaScriptInvocation.getInvocation().getExpression());
         Assert.assertEquals(element, parameters.get(0));
         Assert.assertEquals(skipTransition, parameters.get(1));
-    }
-
-    protected void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

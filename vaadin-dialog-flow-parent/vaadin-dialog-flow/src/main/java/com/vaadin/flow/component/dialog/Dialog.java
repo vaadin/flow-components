@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ModalityMode;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -45,6 +46,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
@@ -78,7 +80,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-rc1")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -95,6 +97,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
     private ModalityMode modality = ModalityMode.VISUAL;
+
+    private final SignalPropertySupport<Boolean> visibleSupport = SignalPropertySupport
+            .create(this, value -> {
+                Dialog.super.setVisible(value);
+                applyModality();
+            });
 
     /**
      * Creates an empty dialog.
@@ -318,6 +326,29 @@ public class Dialog extends Component implements HasComponents, HasSize,
         getElement().setProperty("width", value);
     }
 
+    /**
+     * Dialog does not support one-way binding of the width as the width may be
+     * modified for resizable dialogs.
+     * <p>
+     * This method is inherited from {@link HasSize} and is marked as deprecated
+     * to indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException} when called.
+     * 
+     * @param widthSignal
+     *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
+    @Override
+    public SignalBinding<String> bindWidth(Signal<String> widthSignal) {
+        throw new UnsupportedOperationException(
+                "One-way binding of the width is not supported as the width may be modified for resizable dialogs.");
+    }
+
     @Override
     public void setMinWidth(String value) {
         minWidth = value;
@@ -333,6 +364,29 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Override
     public void setHeight(String value) {
         getElement().setProperty("height", value);
+    }
+
+    /**
+     * Dialog does not support one-way binding of the height as the height may
+     * be modified for resizable dialogs.
+     * <p>
+     * This method is inherited from {@link HasSize} and is marked as deprecated
+     * to indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException} when called.
+     *
+     * @param heightSignal
+     *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
+    @Override
+    public SignalBinding<String> bindHeight(Signal<String> heightSignal) {
+        throw new UnsupportedOperationException(
+                "One-way binding of the height is not supported as the height may be modified for resizable dialogs.");
     }
 
     @Override
@@ -737,28 +791,26 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Sets whether dragging the dialog outside the viewport is prevented.
-     * <p>
-     * When enabled, all four edges of the dialog will remain visible during
-     * dragging. The dialog may still become partially hidden when the viewport
-     * is resized.
-     * <p>
-     * Note: This property only has an effect when the dialog is
-     * {@link #setDraggable(boolean) draggable}.
+     * Set to true to prevent the dialog from moving outside the viewport
+     * bounds. When enabled, all four edges of the dialog will remain visible,
+     * for example when dragging the dialog or when the viewport is resized.
+     * Note that the dialog will also adjust any programmatically configured
+     * size and position so that it stays within the viewport.
      *
      * @param keepInViewport
-     *            {@code true} to prevent dragging outside the viewport,
-     *            {@code false} otherwise
+     *            {@code true} to prevent the dialog from moving outside the
+     *            viewport bounds, {@code false} otherwise
      */
     public void setKeepInViewport(boolean keepInViewport) {
         getElement().setProperty("keepInViewport", keepInViewport);
     }
 
     /**
-     * Gets whether dragging the dialog outside the viewport is prevented.
+     * Gets whether the dialog is prevented from moving outside the viewport
+     * bounds or not.
      *
-     * @return {@code true} if dragging outside the viewport is prevented,
-     *         {@code false} otherwise (default).
+     * @return {@code true} if the dialog is prevented from moving outside the
+     *         viewport bounds, {@code false} otherwise
      */
     public boolean isKeepInViewport() {
         return getElement().getProperty("keepInViewport", false);
@@ -991,8 +1043,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        applyModality();
+        visibleSupport.set(visible);
+    }
+
+    @Override
+    public SignalBinding<Boolean> bindVisible(Signal<Boolean> visibleSignal) {
+        return visibleSupport.bind(visibleSignal);
     }
 
     /**

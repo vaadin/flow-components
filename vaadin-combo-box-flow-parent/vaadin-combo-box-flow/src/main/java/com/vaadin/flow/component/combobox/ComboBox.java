@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -33,6 +34,7 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -88,7 +90,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.1.0-rc1")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -270,6 +272,28 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
             T... items) {
         this(label, listener);
         setItems(items);
+    }
+
+    /**
+     * Creates a combo box with the defined label and bound to the given list
+     * signal.
+     * <p>
+     * The combo box will automatically update its items when the signal
+     * changes.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param itemsSignal
+     *            the signal providing the list of items, not {@code null}
+     * @see #setItems(Collection)
+     * @see #setLabel(String)
+     * @since 25.1
+     */
+    public ComboBox(String label,
+            Signal<? extends List<? extends Signal<T>>> itemsSignal) {
+        this();
+        setLabel(label);
+        bindItems(itemsSignal);
     }
 
     private static <T> T presentationToModel(ComboBox<T> comboBox,

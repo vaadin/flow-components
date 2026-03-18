@@ -15,13 +15,19 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -33,6 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.AIComponentsExperimentalFeatureException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
@@ -40,6 +47,8 @@ import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.Receiver;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.server.streams.UploadHandler;
@@ -72,26 +81,41 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withInput(messageInput) // optional
  *         .withMessageList(messageList) // optional
- *         .withFileReceiver(upload) // optional
+ *         .withFileReceiver(uploadManager) // optional
  *         .withTools(toolObj) // optional, for @Tool annotations
  *         .withUserName(userName) // optional
  *         .withAssistantName(assistantName) // optional
+ *         .withResponseCompleteListener(e -&gt; save(e.getResponse())) // optional
+ *         .withHistory(savedHistory, savedAttachments) // optional, for restore
  *         .build();
  * </pre>
  * <p>
- * Conversation history is managed internally by the {@link LLMProvider}
- * instance. Each orchestrator maintains its own conversation context through
- * its provider instance.
+ * The orchestrator tracks conversation history internally and delegates to the
+ * {@link LLMProvider} for the LLM's working memory. Use {@link #getHistory()}
+ * to obtain a snapshot and {@link Builder#withHistory(List, Map)} to restore
+ * conversation state (including attachments) across sessions. To persist
+ * history automatically after each exchange, use
+ * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)}.
  * </p>
  * <p>
- * <b>Note:</b> AIOrchestrator is not serializable. If your application uses
- * session persistence, you will need to create a new orchestrator instance
- * after session restore.
+ * <b>Serialization:</b> The LLM provider and tool objects are not serialized
+ * (they are transient). After deserialization, call
+ * {@link #reconnect(LLMProvider)} to restore transient dependencies and replay
+ * the conversation history onto the new provider:
+ *
+ * <pre>
+ * orchestrator.reconnect(provider).withTools(toolObj) // optional
+ *         .withAttachments(attachmentsByMsgId) // optional
+ *         .apply();
+ * </pre>
+ *
+ * The conversation history, UI component bindings, and listeners are preserved
+ * across serialization.
  * </p>
  *
  * @author Vaadin Ltd
  */
-public class AIOrchestrator {
+public class AIOrchestrator implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AIOrchestrator.class);
@@ -106,17 +130,19 @@ public class AIOrchestrator {
      */
     static final String FEATURE_FLAG_ID = AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
 
-    private final LLMProvider provider;
+    private transient LLMProvider provider;
     private final String systemPrompt;
     private AIMessageList messageList;
     private AIInput input;
     private AIFileReceiver fileReceiver;
-    private Object[] tools = new Object[0];
+    private transient Object[] tools = new Object[0];
     private String userName;
     private String assistantName;
     private AttachmentSubmitListener attachmentSubmitListener;
     private AttachmentClickListener attachmentClickListener;
+    private ResponseCompleteListener responseCompleteListener;
     private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
+    private final List<ChatMessage> conversationHistory = new CopyOnWriteArrayList<>();
 
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
@@ -164,18 +190,109 @@ public class AIOrchestrator {
      * @param userMessage
      *            the prompt to send to the AI
      * @throws IllegalStateException
-     *             if no UI context is available
+     *             if no UI context is available, or if the orchestrator needs
+     *             to be reconnected after deserialization (see
+     *             {@link #reconnect(LLMProvider)})
      */
     public void prompt(String userMessage) {
         doPrompt(userMessage);
     }
 
-    private AIMessage addUserMessageToList(String userMessage,
-            List<AIAttachment> attachments) {
-        if (messageList != null) {
-            return messageList.addMessage(userMessage, userName, attachments);
+    /**
+     * Returns a {@link Reconnector} to restore transient dependencies after
+     * deserialization. The provider is required; tools and attachments are
+     * optional.
+     * <p>
+     * Example usage:
+     * </p>
+     *
+     * <pre>
+     * orchestrator.reconnect(provider).withTools(toolObj)
+     *         .withAttachments(attachmentsByMsgId).apply();
+     * </pre>
+     * <p>
+     * Calling {@link Reconnector#apply()} replays the existing conversation
+     * history onto the new provider so it has full context for subsequent
+     * prompts. The UI is not modified -- message list, input, and file receiver
+     * components retain their state across serialization.
+     * </p>
+     * <p>
+     * This method should only be called on a deserialized instance where the
+     * provider is {@code null}.
+     * </p>
+     *
+     * @param provider
+     *            the LLM provider to use, not {@code null}
+     * @return a reconnector for restoring additional transient dependencies
+     * @throws NullPointerException
+     *             if provider is {@code null}
+     * @throws IllegalStateException
+     *             if the orchestrator is already connected (provider is not
+     *             {@code null})
+     */
+    public Reconnector reconnect(LLMProvider provider) {
+        Objects.requireNonNull(provider, "Provider cannot be null");
+        if (this.provider != null) {
+            throw new IllegalStateException(
+                    "AIOrchestrator is already connected. "
+                            + "reconnect() should only be called after deserialization.");
         }
-        return null;
+        return new Reconnector(this, provider);
+    }
+
+    /**
+     * Returns the conversation history.
+     * <p>
+     * The returned list contains all user and assistant messages exchanged
+     * through this orchestrator. User messages include a
+     * {@link ChatMessage#messageId()} matching the ID provided to the
+     * {@link AttachmentSubmitListener}, which can be used to correlate with
+     * externally stored attachment data.
+     * <p>
+     * <b>Note:</b> This method returns a point-in-time snapshot. If a streaming
+     * response is in progress, the snapshot may contain the user message
+     * without its corresponding assistant response. For automatic persistence,
+     * use
+     * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)} to
+     * be notified at the right time, then call {@code getHistory()} from that
+     * callback.
+     *
+     * @return an unmodifiable copy of the conversation history, never
+     *         {@code null}
+     */
+    public List<ChatMessage> getHistory() {
+        return List.copyOf(conversationHistory);
+    }
+
+    private void restoreHistory(List<ChatMessage> history,
+            Map<String, List<AIAttachment>> attachmentsByMessageId) {
+        provider.setHistory(history, attachmentsByMessageId);
+
+        conversationHistory.addAll(history);
+
+        if (messageList != null) {
+            for (var message : history) {
+                AIMessage aiMessage;
+                if (message.role() == ChatMessage.Role.USER) {
+                    var attachments = message.messageId() != null
+                            ? attachmentsByMessageId.getOrDefault(
+                                    message.messageId(),
+                                    Collections.emptyList())
+                            : Collections.<AIAttachment> emptyList();
+                    aiMessage = messageList.addMessage(message.content(),
+                            userName, attachments);
+                    if (message.messageId() != null) {
+                        itemToMessageId.put(aiMessage, message.messageId());
+                    }
+                } else {
+                    aiMessage = messageList.addMessage(message.content(),
+                            assistantName, Collections.emptyList());
+                }
+                if (message.time() != null) {
+                    aiMessage.setTime(message.time());
+                }
+            }
+        }
     }
 
     private AIMessage createAssistantMessagePlaceholder() {
@@ -188,11 +305,13 @@ public class AIOrchestrator {
 
     private void streamResponseToMessage(LLMProvider.LLMRequest request,
             AIMessage assistantMessage, UI ui) {
+        var responseBuilder = new StringBuilder();
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
         responseStream.doFinally(signal -> {
             isProcessing.set(false);
         }).subscribe(token -> {
+            responseBuilder.append(token);
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.appendText(token));
             }
@@ -209,12 +328,26 @@ public class AIOrchestrator {
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.setText(userMessage));
             }
-        }, () -> LOGGER.debug("LLM streaming completed successfully"));
+        }, () -> {
+            var responseText = responseBuilder.toString();
+            if (!responseText.isEmpty()) {
+                conversationHistory
+                        .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                                responseText, null, Instant.now()));
+                fireResponseCompleteListener(responseText);
+            }
+            LOGGER.debug("LLM streaming completed successfully");
+        });
     }
 
     private void doPrompt(String userMessage) {
         if (userMessage == null || userMessage.isBlank()) {
             return;
+        }
+        if (provider == null) {
+            throw new IllegalStateException(
+                    "AIOrchestrator needs to be reconnected after "
+                            + "deserialization. Call reconnect(provider) first.");
         }
         if (!isProcessing.compareAndSet(false, true)) {
             LOGGER.warn(
@@ -230,9 +363,12 @@ public class AIOrchestrator {
 
         var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
                 : List.<AIAttachment> of();
-        var userAIMessage = addUserMessageToList(userMessage, attachments);
+        var userAIMessage = messageList == null ? null
+                : messageList.addMessage(userMessage, userName, attachments);
 
         var messageId = UUID.randomUUID().toString();
+        conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
+                userMessage, messageId, Instant.now()));
         if (userAIMessage != null) {
             itemToMessageId.put(userAIMessage, messageId);
         }
@@ -277,6 +413,18 @@ public class AIOrchestrator {
         streamResponseToMessage(request, assistantMessage, ui);
     }
 
+    private void fireResponseCompleteListener(String responseText) {
+        if (responseCompleteListener != null) {
+            try {
+                responseCompleteListener.onResponseComplete(
+                        new ResponseCompleteListener.ResponseCompleteEvent(
+                                responseText));
+            } catch (Exception e) {
+                LOGGER.error("Error in response complete listener", e);
+            }
+        }
+    }
+
     private void checkFeatureFlag(UI ui) {
         if (featureFlagChecked.get()) {
             return;
@@ -288,6 +436,107 @@ public class AIOrchestrator {
                     "AIOrchestrator");
         }
         featureFlagChecked.set(true);
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        // Initialize tools to empty array
+        tools = new Object[0];
+    }
+
+    /**
+     * Fluent API for restoring transient dependencies on an
+     * {@link AIOrchestrator} after deserialization. Obtain an instance via
+     * {@link AIOrchestrator#reconnect(LLMProvider)}.
+     * <p>
+     * The provider is specified when the reconnector is created. Optional
+     * transient dependencies (tools and file attachments) can be restored via
+     * chained methods before calling {@link #apply()}. The {@code apply()} call
+     * replays the existing conversation history onto the new provider but does
+     * not modify the UI.
+     * </p>
+     *
+     * <pre>
+     * orchestrator.reconnect(provider).withTools(toolObj) // optional
+     *         .withAttachments(attachmentsByMsgId) // optional
+     *         .apply();
+     * </pre>
+     */
+    public static class Reconnector {
+        private final AIOrchestrator orchestrator;
+        private final LLMProvider provider;
+        private Object[] tools;
+        private Map<String, List<AIAttachment>> attachmentsByMessageId;
+
+        private Reconnector(AIOrchestrator orchestrator, LLMProvider provider) {
+            this.orchestrator = orchestrator;
+            this.provider = provider;
+        }
+
+        /**
+         * Sets the objects containing vendor-specific tool-annotated methods
+         * that will be available to the LLM.
+         *
+         * @param tools
+         *            the objects containing tool methods
+         * @return this reconnector
+         */
+        public Reconnector withTools(Object... tools) {
+            this.tools = tools;
+            return this;
+        }
+
+        /**
+         * Sets the file attachments to restore on the new provider's
+         * conversation memory. The map is keyed by
+         * {@link ChatMessage#messageId()} and contains the list of
+         * {@link AIAttachment} objects for each message.
+         * <p>
+         * Attachments are not stored in the orchestrator's conversation
+         * history. If the application persisted attachment data via
+         * {@link AttachmentSubmitListener} before serialization, pass it here
+         * so the new provider can reconstruct multimodal context. Pass
+         * {@link Collections#emptyMap()} (the default) if there are no
+         * attachments to restore.
+         * <p>
+         * The UI is not affected by this method; attachment thumbnails in the
+         * message list are preserved across serialization automatically.
+         *
+         * @param attachmentsByMessageId
+         *            a map from message ID to attachment list
+         * @return this reconnector
+         */
+        public Reconnector withAttachments(
+                Map<String, List<AIAttachment>> attachmentsByMessageId) {
+            this.attachmentsByMessageId = attachmentsByMessageId;
+            return this;
+        }
+
+        /**
+         * Applies the reconnection, restoring the provider, tools, and
+         * conversation history on the new provider. The existing conversation
+         * history is replayed onto the new provider's memory so that it has
+         * full context for subsequent prompts.
+         * <p>
+         * The UI (message list, input, file receiver) is not modified -- those
+         * components survive serialization and retain their state
+         * automatically.
+         */
+        public void apply() {
+            orchestrator.isProcessing.set(false);
+            orchestrator.provider = provider;
+            if (tools != null) {
+                orchestrator.tools = tools;
+            }
+            if (!orchestrator.conversationHistory.isEmpty()) {
+                provider.setHistory(
+                        List.copyOf(orchestrator.conversationHistory),
+                        attachmentsByMessageId == null ? Collections.emptyMap()
+                                : attachmentsByMessageId);
+            }
+        }
     }
 
     /**
@@ -306,10 +555,11 @@ public class AIOrchestrator {
      * {@link #withMessageList(MessageList)} – connects a message list component
      * to display the conversation. If omitted, responses are still streamed but
      * not rendered.</li>
-     * <li>{@link #withFileReceiver(AIFileReceiver)} or
-     * {@link #withFileReceiver(UploadManager)} – enables file upload support.
-     * Uploaded files are sent to the LLM as attachments with the next
-     * prompt.</li>
+     * <li>{@link #withFileReceiver(AIFileReceiver)},
+     * {@link #withFileReceiver(UploadManager)}, or
+     * {@link #withFileReceiver(Upload) withFileReceiver(Upload)} – enables file
+     * upload support. Uploaded files are sent to the LLM as attachments with
+     * the next prompt.</li>
      * <li>{@link #withTools(Object...)} – registers objects containing
      * vendor-specific tool-annotated methods (e.g. LangChain4j's {@code @Tool}
      * or Spring AI's {@code @Tool}) that the LLM can invoke.</li>
@@ -317,12 +567,19 @@ public class AIOrchestrator {
      * messages (defaults to "You").</li>
      * <li>{@link #withAssistantName(String)} – sets the display name for
      * assistant messages (defaults to "Assistant").</li>
+     * <li>{@link #withResponseCompleteListener(ResponseCompleteListener)} –
+     * registers a callback that fires after each successful exchange with the
+     * assistant's response text, enabling persistence via
+     * {@link AIOrchestrator#getHistory()} or follow-up actions.</li>
+     * <li>{@link #withHistory(List, Map)} – restores a previously saved
+     * conversation history with attachments (from
+     * {@link AIOrchestrator#getHistory()}).</li>
      * </ul>
      * <p>
      * Both Flow components ({@link MessageInput}, {@link MessageList},
-     * {@link UploadManager}) and custom implementations of the AI interfaces
-     * ({@link AIInput}, {@link AIMessageList}, {@link AIFileReceiver}) are
-     * accepted.
+     * {@link UploadManager}, {@link Upload}) and custom implementations of the
+     * AI interfaces ({@link AIInput}, {@link AIMessageList},
+     * {@link AIFileReceiver}) are accepted.
      * </p>
      */
     public static class Builder {
@@ -336,6 +593,9 @@ public class AIOrchestrator {
         private String assistantName;
         private AttachmentSubmitListener attachmentSubmitListener;
         private AttachmentClickListener attachmentClickListener;
+        private ResponseCompleteListener responseCompleteListener;
+        private List<ChatMessage> history;
+        private Map<String, List<AIAttachment>> historyAttachments;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -425,6 +685,31 @@ public class AIOrchestrator {
         }
 
         /**
+         * Sets the file receiver component using a Flow Upload component. The
+         * provided upload should not have an UploadHandler or a Receiver set
+         * beforehand.
+         *
+         * @param upload
+         *            the Flow Upload component
+         * @return this builder
+         * @throws IllegalArgumentException
+         *             if the {@link Upload} already has an
+         *             {@link UploadHandler} or a {@link Receiver}
+         */
+        public Builder withFileReceiver(Upload upload) {
+            if (UploadHelper.hasUploadHandler(upload)) {
+                throw new IllegalArgumentException(
+                        "The provided Upload already has an UploadHandler.");
+            }
+            if (upload.getReceiver() != null) {
+                throw new IllegalArgumentException(
+                        "The provided Upload already has a Receiver.");
+            }
+            this.fileReceiver = wrapUpload(upload);
+            return this;
+        }
+
+        /**
          * Sets the objects containing vendor-specific tool-annotated methods
          * that will be available to the LLM.
          * <p>
@@ -481,7 +766,8 @@ public class AIOrchestrator {
          * submitted to the LLM provider. This allows you to store attachment
          * data in your own storage. The listener receives a unique message ID
          * that can later be used to identify the attachments when they are
-         * clicked.
+         * clicked or when restoring conversation history via
+         * {@link #withHistory(List, Map)}.
          *
          * @param listener
          *            the listener to call on attachment submit
@@ -515,6 +801,62 @@ public class AIOrchestrator {
         }
 
         /**
+         * Sets a listener that is called after each successful exchange — when
+         * the assistant's response has been fully streamed and added to the
+         * conversation history. This is the recommended hook for persisting
+         * conversation state (via {@link AIOrchestrator#getHistory()}),
+         * triggering follow-up actions, or updating UI elements.
+         * <p>
+         * The listener is called from a background thread (Reactor scheduler).
+         * It is safe to perform blocking I/O (e.g. database writes) directly.
+         * To update Vaadin UI components from this listener, use
+         * {@code ui.access()}.
+         * <p>
+         * The listener is not called when the LLM response fails, times out, or
+         * produces an empty response, nor when history is restored via
+         * {@link #withHistory(List, Map)}.
+         *
+         * @param listener
+         *            the listener to call after each successful exchange
+         * @return this builder
+         */
+        public Builder withResponseCompleteListener(
+                ResponseCompleteListener listener) {
+            this.responseCompleteListener = listener;
+            return this;
+        }
+
+        /**
+         * Sets the conversation history and associated attachments to restore
+         * when the orchestrator is built. This restores the LLM provider's
+         * conversation context (including multimodal content), the message list
+         * UI with attachment thumbnails, and the internal message ID mappings
+         * for attachment click handling.
+         * <p>
+         * The attachment map is keyed by {@link ChatMessage#messageId()} and
+         * contains the list of {@link AIAttachment} objects for each message.
+         * Messages whose IDs are not in the map are restored as text-only. The
+         * attachments are used once during initialization and are not retained
+         * by the orchestrator. Pass {@link Collections#emptyMap()} if there are
+         * no attachments to restore.
+         *
+         * @param history
+         *            the conversation history to restore, not {@code null}
+         * @param attachmentsByMessageId
+         *            a map from message ID to attachment list, not {@code null}
+         * @return this builder
+         */
+        public Builder withHistory(List<ChatMessage> history,
+                Map<String, List<AIAttachment>> attachmentsByMessageId) {
+            Objects.requireNonNull(history, "History must not be null");
+            Objects.requireNonNull(attachmentsByMessageId,
+                    "Attachments map must not be null");
+            this.history = history;
+            this.historyAttachments = attachmentsByMessageId;
+            return this;
+        }
+
+        /**
          * Builds the orchestrator.
          *
          * @return the configured orchestrator
@@ -530,6 +872,7 @@ public class AIOrchestrator {
                     : assistantName;
             orchestrator.attachmentSubmitListener = attachmentSubmitListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
+            orchestrator.responseCompleteListener = responseCompleteListener;
             if (input != null) {
                 input.addSubmitListener(orchestrator::doPrompt);
             }
@@ -544,6 +887,10 @@ public class AIOrchestrator {
                     }
                 });
             }
+            if (history != null) {
+                orchestrator.restoreHistory(history, historyAttachments);
+            }
+
             LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
                     + "fileReceiver={}, tools={}, userName={}, assistantName={}",
                     orchestrator.messageList != null,
@@ -566,6 +913,10 @@ public class AIOrchestrator {
         private static AIFileReceiver wrapUploadManager(
                 UploadManager uploadManager) {
             return new UploadManagerWrapper(uploadManager);
+        }
+
+        private static AIFileReceiver wrapUpload(Upload upload) {
+            return new UploadWrapper(upload);
         }
     }
 }

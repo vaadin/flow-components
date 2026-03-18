@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>25.1-SNAPSHOT</version>
+        <version>25.2-SNAPSHOT</version>
     </parent>
     <artifactId>flow-components-bom</artifactId>
     <packaging>pom</packaging>
@@ -50,6 +50,16 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-avatar-testbench</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-badge-flow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-badge-testbench</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -13,6 +13,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * DashboardWidget represents a customizable widget that can be placed within a
@@ -25,7 +27,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
  */
 @Tag("vaadin-dashboard-widget")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.1.0-rc1")
 public class DashboardWidget extends Component {
 
     private int colspan = 1;
@@ -205,11 +207,42 @@ public class DashboardWidget extends Component {
     }
 
     /**
-     * @throws UnsupportedOperationException
-     *             Dashboard widget does not support setting visibility
+     * DashboardWidget does not support setting visibility.
+     * <p>
+     * This method is inherited from {@link Component} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
+     *
+     * @param visible
+     *            the visibility value
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
      */
+    @Deprecated
     @Override
     public void setVisible(boolean visible) {
+        throw new UnsupportedOperationException(
+                "Dashboard widget does not support setting visibility");
+    }
+
+    /**
+     * DashboardWidget does not support binding the visible state to a signal.
+     * <p>
+     * This method is inherited from {@link Component} and is marked as
+     * deprecated to indicate that it is not supported. This method will throw
+     * an {@link UnsupportedOperationException} when called.
+     *
+     * @param visibleSignal
+     *            the signal to bind, not <code>null</code>
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @deprecated This method is not supported and will throw an exception when
+     *             called.
+     */
+    @Deprecated
+    @Override
+    public SignalBinding<Boolean> bindVisible(Signal<Boolean> visibleSignal) {
         throw new UnsupportedOperationException(
                 "Dashboard widget does not support setting visibility");
     }

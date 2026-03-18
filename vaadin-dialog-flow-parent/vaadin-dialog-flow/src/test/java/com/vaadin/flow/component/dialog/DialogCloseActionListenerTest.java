@@ -15,39 +15,28 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.MockUIRule;
 
 public class DialogCloseActionListenerTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
-    private final UI ui = new UI();
     private Dialog dialog;
     private ComponentEventListener<Dialog.DialogCloseActionEvent> mockListener;
 
     @SuppressWarnings({ "unchecked" })
     @Before
     public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-
         dialog = new Dialog();
         mockListener = Mockito.mock(ComponentEventListener.class);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test

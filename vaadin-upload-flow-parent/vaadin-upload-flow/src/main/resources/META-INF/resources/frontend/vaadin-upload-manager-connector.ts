@@ -1,5 +1,4 @@
-// @ts-expect-error
-import { UploadManager } from '@vaadin/upload/vaadin-upload-manager.js';
+import { UploadManager, type UploadFormat } from '@vaadin/upload/vaadin-upload-manager.js';
 
 /**
  * Connector element for UploadManager. This element is added as a virtual child
@@ -12,6 +11,7 @@ import { UploadManager } from '@vaadin/upload/vaadin-upload-manager.js';
  * - maxFileSize: Maximum file size in bytes (optional)
  * - accept: Accepted file types (optional)
  * - noAuto: Disable auto-upload (optional)
+ * - uploadFormat: Upload format ('raw' or 'multipart', optional)
  * - disabled: Whether the manager is disabled (from attribute)
  *
  * Events dispatched to the connector element for server-side handling:
@@ -47,6 +47,10 @@ class UploadManagerConnector extends HTMLElement {
 
   set noAuto(value: boolean) {
     this.manager.noAuto = value;
+  }
+
+  set uploadFormat(value: UploadFormat) {
+    this.manager.uploadFormat = value;
   }
 
   clearFileList() {

@@ -563,6 +563,27 @@ public class UploadManagerIT extends AbstractUploadIT {
                 uploadButton.hasAttribute("disabled"));
     }
 
+    @Test
+    public void uploadFile_defaultFormat_rawRequestReceived() throws Exception {
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+        assertLogContains("Uploaded: " + tempFile.getName() + " (");
+        Assert.assertTrue("Default format should be raw",
+                getLogText().contains(", raw)"));
+    }
+
+    @Test
+    public void setUploadFormat_multipart_multipartRequestReceived()
+            throws Exception {
+        clickButton("set-format-multipart");
+
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+        assertLogContains("Uploaded: " + tempFile.getName() + " (");
+        Assert.assertTrue("Format should be multipart after setting it",
+                getLogText().contains(", multipart)"));
+    }
+
     private UploadManagerTester getUploadManagerTester() {
         return $(UploadButtonElement.class).id("upload-button")
                 .getUploadManager();

@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.applayout;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
@@ -34,17 +34,17 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.Element;
 
-public class AppLayoutTest {
+class AppLayoutTest {
 
     private AppLayout systemUnderTest;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         systemUnderTest = new AppLayout();
     }
 
     @Test
-    public void setContent() {
+    void setContent() {
         Div content = new Div();
         systemUnderTest.setContent(content);
 
@@ -54,7 +54,7 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void setContentNull() {
+    void setContentNull() {
         systemUnderTest.setContent(null); // No NPE.
 
         Div content = new Div();
@@ -69,7 +69,7 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void addToDrawer() {
+    void addToDrawer() {
         final Component component = new Div();
         systemUnderTest.addToDrawer(component);
         assertEquals("drawer", component.getElement().getAttribute("slot"));
@@ -77,7 +77,7 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void addToNavbar() {
+    void addToNavbar() {
         final Component component = new Div();
         systemUnderTest.addToNavbar(component);
         assertEquals("navbar", component.getElement().getAttribute("slot"));
@@ -85,13 +85,13 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void addToNavbarTouchOptimizedTrue() {
+    void addToNavbarTouchOptimizedTrue() {
         final boolean touchOptimized = true;
         addToNavbarTouchOptimized(touchOptimized, "navbar touch-optimized");
     }
 
     @Test
-    public void addToNavbarTouchOptimizedFalse() {
+    void addToNavbarTouchOptimizedFalse() {
         final boolean touchOptimized = false;
         addToNavbarTouchOptimized(touchOptimized, "navbar");
     }
@@ -105,30 +105,30 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void removeContent() {
+    void removeContent() {
         testRemoval(systemUnderTest::setContent);
         assertNull(systemUnderTest.getContent());
     }
 
     @Test
-    public void removeDrawer() {
+    void removeDrawer() {
         testRemoval(systemUnderTest::addToDrawer);
     }
 
     @Test
-    public void removeNavbar() {
+    void removeNavbar() {
         testRemoval(systemUnderTest::addToNavbar);
     }
 
     @Test
-    public void removeNavbarTouchOptimizedTrue() {
+    void removeNavbarTouchOptimizedTrue() {
         final boolean touchOptimized = true;
         testRemoval(component -> systemUnderTest.addToNavbar(touchOptimized,
                 component));
     }
 
     @Test
-    public void removeNavbarTouchOptimizedFalse() {
+    void removeNavbarTouchOptimizedFalse() {
         final boolean touchOptimized = false;
         testRemoval(component -> systemUnderTest.addToNavbar(touchOptimized,
                 component));
@@ -146,23 +146,24 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void testShowRouterLayoutContentWithNullValue() {
+    void testShowRouterLayoutContentWithNullValue() {
         testShowRouterLayoutContent(null);
     }
 
     @Test
-    public void testShowRouterLayoutContentWithValidValue() {
+    void testShowRouterLayoutContentWithValidValue() {
         testShowRouterLayoutContent(new Div());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testShowRouterLayoutContentThrowsExceptionForNonComponent() {
+    @Test
+    void testShowRouterLayoutContentThrowsExceptionForNonComponent() {
         final Element element = new Element("div");
-        systemUnderTest.showRouterLayoutContent(() -> element);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> systemUnderTest.showRouterLayoutContent(() -> element));
     }
 
     @Test
-    public void testAfterNavigationClosesDrawerOnOverlay() {
+    void testAfterNavigationClosesDrawerOnOverlay() {
         systemUnderTest.getElement().setProperty("overlay", true);
         assertTrue(systemUnderTest.isOverlay());
         final boolean expectedDrawerOpened = false;
@@ -170,7 +171,7 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void testAfterNavigationDoesNotCloseDrawerIfNotOverlay() {
+    void testAfterNavigationDoesNotCloseDrawerIfNotOverlay() {
         systemUnderTest.getElement().setProperty("overlay", false);
         assertFalse(systemUnderTest.isOverlay());
         final boolean expectedDrawerOpened = true;
@@ -178,19 +179,19 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void testDrawerOpen() {
+    void testDrawerOpen() {
         systemUnderTest.setDrawerOpened(true);
         testDrawerOpened(true);
     }
 
     @Test
-    public void testDrawerClose() {
+    void testDrawerClose() {
         systemUnderTest.setDrawerOpened(false);
         testDrawerOpened(false);
     }
 
     @Test
-    public void setI18n() {
+    void setI18n() {
         AppLayout.AppLayoutI18n i18n = new AppLayout.AppLayoutI18n()
                 .setDrawer("Custom Drawer");
         systemUnderTest.setI18n(i18n);
@@ -198,8 +199,8 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void hasStyle() {
-        Assert.assertTrue(systemUnderTest instanceof HasStyle);
+    void hasStyle() {
+        Assertions.assertTrue(systemUnderTest instanceof HasStyle);
     }
 
     private void testDrawerOpened(boolean expectedDrawerOpened) {

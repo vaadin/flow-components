@@ -15,32 +15,33 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class NumberFieldSignalTest extends AbstractSignalsUnitTest {
+class NumberFieldSignalTest extends AbstractSignalsJUnit6Test {
 
     private NumberField numberField;
     private ValueSignal<Double> minSignal;
     private ValueSignal<Double> maxSignal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         numberField = new NumberField();
         minSignal = new ValueSignal<>(0.0);
         maxSignal = new ValueSignal<>(100.0);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (numberField != null && numberField.isAttached()) {
             numberField.removeFromParent();
         }
@@ -49,124 +50,152 @@ public class NumberFieldSignalTest extends AbstractSignalsUnitTest {
     // ===== MIN BINDING TESTS =====
 
     @Test
-    public void bindMin_signalBound_minSynchronizedWhenAttached() {
+    void bindMin_signalBound_minSynchronizedWhenAttached() {
         numberField.bindMin(minSignal);
         UI.getCurrent().add(numberField);
 
-        Assert.assertEquals(0.0, numberField.getMin(), 0.001);
+        Assertions.assertEquals(0.0, numberField.getMin(), 0.001);
 
         minSignal.set(10.0);
-        Assert.assertEquals(10.0, numberField.getMin(), 0.001);
+        Assertions.assertEquals(10.0, numberField.getMin(), 0.001);
 
         minSignal.set(5.5);
-        Assert.assertEquals(5.5, numberField.getMin(), 0.001);
+        Assertions.assertEquals(5.5, numberField.getMin(), 0.001);
     }
 
     @Test
-    public void bindMin_signalBound_noEffectWhenDetached() {
+    void bindMin_signalBound_noEffectWhenDetached() {
         numberField.bindMin(minSignal);
         // Not attached to UI
 
         double initialMin = numberField.getMin();
         minSignal.set(10.0);
-        Assert.assertEquals(initialMin, numberField.getMin(), 0.001);
+        Assertions.assertEquals(initialMin, numberField.getMin(), 0.001);
     }
 
     @Test
-    public void bindMin_signalBound_detachAndReattach() {
+    void bindMin_signalBound_detachAndReattach() {
         numberField.bindMin(minSignal);
         UI.getCurrent().add(numberField);
-        Assert.assertEquals(0.0, numberField.getMin(), 0.001);
+        Assertions.assertEquals(0.0, numberField.getMin(), 0.001);
 
         // Detach
         numberField.removeFromParent();
         minSignal.set(10.0);
-        Assert.assertEquals(0.0, numberField.getMin(), 0.001);
+        Assertions.assertEquals(0.0, numberField.getMin(), 0.001);
 
         // Reattach
         UI.getCurrent().add(numberField);
-        Assert.assertEquals(10.0, numberField.getMin(), 0.001);
+        Assertions.assertEquals(10.0, numberField.getMin(), 0.001);
 
         minSignal.set(15.0);
-        Assert.assertEquals(15.0, numberField.getMin(), 0.001);
+        Assertions.assertEquals(15.0, numberField.getMin(), 0.001);
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMin_setMinWhileBound_throwsException() {
+    @Test
+    void bindMin_thenSetStep_stepValidationUsesMin() {
+        minSignal.set(1.0);
         numberField.bindMin(minSignal);
         UI.getCurrent().add(numberField);
 
-        numberField.setMin(10.0);
+        numberField.setStep(3.0);
+
+        // With min=1 and step=3: valid values are 1, 4, 7, 10, ...
+        // Value 4 = 1 + 1*3, should be valid
+        numberField.setValue(4.0);
+        ValidationResult result = numberField.getDefaultValidator()
+                .apply(numberField.getValue(), null);
+        Assertions.assertFalse(result.isError(),
+                "Value 4 should be valid (1 + 1*3)");
+
+        // Value 3 = not aligned with step from min=1, should be invalid.
+        numberField.setValue(3.0);
+        result = numberField.getDefaultValidator().apply(numberField.getValue(),
+                null);
+        Assertions.assertTrue(result.isError(),
+                "Value 3 should be invalid (not aligned with step 3 from min 1).");
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMin_bindAgainWhileBound_throwsException() {
+    @Test
+    void bindMin_setMinWhileBound_throwsException() {
+        numberField.bindMin(minSignal);
+        UI.getCurrent().add(numberField);
+
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> numberField.setMin(10.0));
+    }
+
+    @Test
+    void bindMin_bindAgainWhileBound_throwsException() {
         numberField.bindMin(minSignal);
         UI.getCurrent().add(numberField);
 
         ValueSignal<Double> anotherSignal = new ValueSignal<>(50.0);
-        numberField.bindMin(anotherSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> numberField.bindMin(anotherSignal));
     }
 
     // ===== MAX BINDING TESTS =====
 
     @Test
-    public void bindMax_signalBound_maxSynchronizedWhenAttached() {
+    void bindMax_signalBound_maxSynchronizedWhenAttached() {
         numberField.bindMax(maxSignal);
         UI.getCurrent().add(numberField);
 
-        Assert.assertEquals(100.0, numberField.getMax(), 0.001);
+        Assertions.assertEquals(100.0, numberField.getMax(), 0.001);
 
         maxSignal.set(200.0);
-        Assert.assertEquals(200.0, numberField.getMax(), 0.001);
+        Assertions.assertEquals(200.0, numberField.getMax(), 0.001);
 
         maxSignal.set(150.5);
-        Assert.assertEquals(150.5, numberField.getMax(), 0.001);
+        Assertions.assertEquals(150.5, numberField.getMax(), 0.001);
     }
 
     @Test
-    public void bindMax_signalBound_noEffectWhenDetached() {
+    void bindMax_signalBound_noEffectWhenDetached() {
         numberField.bindMax(maxSignal);
         // Not attached to UI
 
         double initialMax = numberField.getMax();
         maxSignal.set(200.0);
-        Assert.assertEquals(initialMax, numberField.getMax(), 0.001);
+        Assertions.assertEquals(initialMax, numberField.getMax(), 0.001);
     }
 
     @Test
-    public void bindMax_signalBound_detachAndReattach() {
+    void bindMax_signalBound_detachAndReattach() {
         numberField.bindMax(maxSignal);
         UI.getCurrent().add(numberField);
-        Assert.assertEquals(100.0, numberField.getMax(), 0.001);
+        Assertions.assertEquals(100.0, numberField.getMax(), 0.001);
 
         // Detach
         numberField.removeFromParent();
         maxSignal.set(200.0);
-        Assert.assertEquals(100.0, numberField.getMax(), 0.001);
+        Assertions.assertEquals(100.0, numberField.getMax(), 0.001);
 
         // Reattach
         UI.getCurrent().add(numberField);
-        Assert.assertEquals(200.0, numberField.getMax(), 0.001);
+        Assertions.assertEquals(200.0, numberField.getMax(), 0.001);
 
         maxSignal.set(250.0);
-        Assert.assertEquals(250.0, numberField.getMax(), 0.001);
+        Assertions.assertEquals(250.0, numberField.getMax(), 0.001);
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMax_setMaxWhileBound_throwsException() {
+    @Test
+    void bindMax_setMaxWhileBound_throwsException() {
         numberField.bindMax(maxSignal);
         UI.getCurrent().add(numberField);
 
-        numberField.setMax(200.0);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> numberField.setMax(200.0));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMax_bindAgainWhileBound_throwsException() {
+    @Test
+    void bindMax_bindAgainWhileBound_throwsException() {
         numberField.bindMax(maxSignal);
         UI.getCurrent().add(numberField);
 
         ValueSignal<Double> anotherSignal = new ValueSignal<>(500.0);
-        numberField.bindMax(anotherSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> numberField.bindMax(anotherSignal));
     }
 }

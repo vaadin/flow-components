@@ -14,22 +14,22 @@ import java.util.Locale;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.tests.MockUIRule;
 
 public class BuiltinFormatsTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     Cell cell;
     Spreadsheet spreadsheet;
     CellStyle cellStyle;
     DataFormat dataFormat;
-
-    private UI ui;
 
     @Before
     public void init() {
@@ -37,9 +37,7 @@ public class BuiltinFormatsTest {
     }
 
     private void setupWithLocale(Locale locale) {
-        ui = new UI();
         ui.setLocale(locale);
-        UI.setCurrent(ui);
 
         spreadsheet = new Spreadsheet();
 
@@ -48,12 +46,6 @@ public class BuiltinFormatsTest {
 
         cell = spreadsheet.createCell(0, 0, null);
         cell.setCellStyle(cellStyle);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test

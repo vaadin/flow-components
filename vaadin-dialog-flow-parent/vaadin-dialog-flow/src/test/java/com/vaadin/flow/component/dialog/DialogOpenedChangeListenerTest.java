@@ -17,18 +17,19 @@ package com.vaadin.flow.component.dialog;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIRule;
 
 public class DialogOpenedChangeListenerTest {
-    private final UI ui = new UI();
+    @Rule
+    public MockUIRule ui = new MockUIRule();
+
     private Dialog dialog;
     private AtomicReference<Dialog.OpenedChangeEvent> event;
     private ComponentEventListener<Dialog.OpenedChangeEvent> mockListener;
@@ -36,23 +37,12 @@ public class DialogOpenedChangeListenerTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-
         dialog = new Dialog();
         event = new AtomicReference<>();
         dialog.addOpenedChangeListener(event::set);
 
         mockListener = Mockito.mock(ComponentEventListener.class);
         dialog.addOpenedChangeListener(mockListener);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test

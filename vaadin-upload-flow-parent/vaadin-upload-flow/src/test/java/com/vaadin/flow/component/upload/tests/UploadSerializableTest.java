@@ -17,16 +17,13 @@ package com.vaadin.flow.component.upload.tests;
 
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileBuffer;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class UploadSerializableTest extends ClassesSerializableTest {
-    private static final UI FAKE_UI = new UI();
-
+class UploadSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
 
@@ -36,20 +33,8 @@ public class UploadSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory\\$LazyHolder"));
     }
 
-    @Override
-    protected void resetThreadLocals() {
-        super.resetThreadLocals();
-        UI.setCurrent(null);
-    }
-
-    @Override
-    protected void setupThreadLocals() {
-        super.setupThreadLocals();
-        UI.setCurrent(FAKE_UI);
-    }
-
     @Test
-    public void serializeFileBuffer() throws Throwable {
+    void serializeFileBuffer() throws Throwable {
         FileBuffer fileBuffer = new FileBuffer();
         fileBuffer.receiveUpload("foo.txt", "text/plain");
 
@@ -57,7 +42,7 @@ public class UploadSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    public void serializeMultiFileBuffer() throws Throwable {
+    void serializeMultiFileBuffer() throws Throwable {
         MultiFileBuffer multiFileBuffer = new MultiFileBuffer();
         multiFileBuffer.receiveUpload("foo.txt", "text/plain");
 
@@ -65,7 +50,7 @@ public class UploadSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    public void serializeMultiFileBuffer_restoreFileMap() {
+    void serializeMultiFileBuffer_restoreFileMap() {
         MultiFileBuffer multiFileBuffer = new MultiFileBuffer();
         try {
             multiFileBuffer = serializeAndDeserialize(multiFileBuffer);

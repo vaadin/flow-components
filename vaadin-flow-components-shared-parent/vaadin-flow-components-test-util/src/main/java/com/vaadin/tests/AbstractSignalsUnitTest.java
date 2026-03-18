@@ -15,10 +15,7 @@
  */
 package com.vaadin.tests;
 
-import org.junit.After;
-import org.junit.Before;
-
-import com.vaadin.flow.component.UI;
+import org.junit.Rule;
 
 /**
  * Base class for testing components with full-stack signals. Since signal
@@ -26,21 +23,6 @@ import com.vaadin.flow.component.UI;
  * mock UI instance for attaching components under test.
  */
 public class AbstractSignalsUnitTest {
-
-    private UI mockUI;
-
-    @Before
-    public void setupUI() {
-        mockUI = new MockUI();
-        UI.setCurrent(mockUI);
-    }
-
-    @After
-    public void teardownUI() {
-        if (UI.getCurrent() != null) {
-            UI.getCurrent().removeAll();
-            UI.setCurrent(null);
-        }
-        mockUI = null;
-    }
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 }

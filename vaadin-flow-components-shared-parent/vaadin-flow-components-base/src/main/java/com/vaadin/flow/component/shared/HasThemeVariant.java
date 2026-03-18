@@ -15,9 +15,12 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.shared.internal.SignalBindingUtil;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -111,10 +114,37 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      *            the theme variant to bind, not {@code null} or blank
      * @param signal
      *            the boolean signal to bind to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see HasTheme#bindThemeName(String, Signal)
      */
-    default void bindThemeVariant(TVariantEnum variant,
+    default SignalBinding<Boolean> bindThemeVariant(TVariantEnum variant,
             Signal<Boolean> signal) {
-        bindThemeName(variant.getVariantName(), signal);
+        return bindThemeName(variant.getVariantName(), signal);
+    }
+
+    /**
+     * Binds the theme variants of this component to a {@link Signal} so that
+     * the theme list is dynamically updated to match the signal's value. Only
+     * one group binding is allowed per component.
+     * <p>
+     * This is a typed variant of {@link HasTheme#bindThemeNames(Signal)} that
+     * works with theme variant enums instead of raw theme name strings.
+     *
+     * @param variants
+     *            the signal providing the list of theme variants, not
+     *            {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @see HasTheme#bindThemeNames(Signal)
+     */
+    default SignalBinding<List<TVariantEnum>> bindThemeVariants(
+            Signal<List<TVariantEnum>> variants) {
+        return SignalBindingUtil.mapBinding(
+                variants, list -> list.stream()
+                        .map(TVariantEnum::getVariantName).toList(),
+                this::bindThemeNames);
     }
 }

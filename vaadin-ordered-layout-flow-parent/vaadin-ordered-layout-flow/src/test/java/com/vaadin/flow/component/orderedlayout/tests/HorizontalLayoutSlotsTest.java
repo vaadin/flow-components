@@ -17,23 +17,24 @@ package com.vaadin.flow.component.orderedlayout.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.tests.MockUIRule;
 
 public class HorizontalLayoutSlotsTest {
+    @Rule
+    public final MockUIRule ui = new MockUIRule();
+
     private HorizontalLayout layout;
-    private UI ui;
 
     @Before
     public void setup() {
         layout = new HorizontalLayout();
-        ui = new UI();
-        UI.setCurrent(ui);
         ui.add(layout);
     }
 
@@ -50,7 +51,7 @@ public class HorizontalLayoutSlotsTest {
         Div div = new Div();
         layout.addToMiddle(div);
         Assert.assertEquals(div, layout.getComponentAt(0));
-        Assert.assertEquals(div.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals("middle", div.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -58,7 +59,7 @@ public class HorizontalLayoutSlotsTest {
         Div div = new Div();
         layout.addToEnd(div);
         Assert.assertEquals(div, layout.getComponentAt(0));
-        Assert.assertEquals(div.getElement().getAttribute("slot"), "end");
+        Assert.assertEquals("end", div.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -125,7 +126,7 @@ public class HorizontalLayoutSlotsTest {
 
         layout.replace(div1, div2);
 
-        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals("middle", div1.getElement().getAttribute("slot"));
         Assert.assertNull(div2.getElement().getAttribute("slot"));
     }
 
@@ -140,7 +141,7 @@ public class HorizontalLayoutSlotsTest {
         layout.replace(div1, div2);
 
         Assert.assertNull(div1.getElement().getAttribute("slot"));
-        Assert.assertEquals(div2.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals("middle", div2.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -153,7 +154,7 @@ public class HorizontalLayoutSlotsTest {
 
         layout.replace(div1, div2);
 
-        Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
+        Assert.assertEquals("end", div1.getElement().getAttribute("slot"));
         Assert.assertNull(div2.getElement().getAttribute("slot"));
     }
 
@@ -168,7 +169,7 @@ public class HorizontalLayoutSlotsTest {
         layout.replace(div1, div2);
 
         Assert.assertNull(div1.getElement().getAttribute("slot"));
-        Assert.assertEquals(div2.getElement().getAttribute("slot"), "end");
+        Assert.assertEquals("end", div2.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -181,8 +182,8 @@ public class HorizontalLayoutSlotsTest {
 
         layout.replace(div1, div2);
 
-        Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
-        Assert.assertEquals(div2.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals("end", div1.getElement().getAttribute("slot"));
+        Assert.assertEquals("middle", div2.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -195,8 +196,8 @@ public class HorizontalLayoutSlotsTest {
 
         layout.replace(div1, div2);
 
-        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
-        Assert.assertEquals(div2.getElement().getAttribute("slot"), "end");
+        Assert.assertEquals("middle", div1.getElement().getAttribute("slot"));
+        Assert.assertEquals("end", div2.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -209,7 +210,7 @@ public class HorizontalLayoutSlotsTest {
         layout.replace(div1, div2);
 
         Assert.assertNull(div1.getElement().getAttribute("slot"));
-        Assert.assertEquals(div2.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals("middle", div2.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -222,7 +223,7 @@ public class HorizontalLayoutSlotsTest {
         layout.replace(div1, div2);
 
         Assert.assertNull(div1.getElement().getAttribute("slot"));
-        Assert.assertEquals(div2.getElement().getAttribute("slot"), "end");
+        Assert.assertEquals("end", div2.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -269,7 +270,7 @@ public class HorizontalLayoutSlotsTest {
         layout.addComponentAtIndex(1, div3);
 
         Assert.assertEquals(div3, layout.getComponentAt(1));
-        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals("middle", div1.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -298,10 +299,10 @@ public class HorizontalLayoutSlotsTest {
         layout.addToEnd(div3);
 
         layout.addComponentAtIndex(1, div1);
-        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals("middle", div1.getElement().getAttribute("slot"));
 
         layout.addComponentAtIndex(2, div1);
-        Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
+        Assert.assertEquals("end", div1.getElement().getAttribute("slot"));
     }
 
     @Test

@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -34,50 +34,43 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.MockUIExtension;
 
-public class TimePickerTest {
+class TimePickerTest {
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
-    private UI ui;
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
-    }
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         TimePicker picker = new TimePicker();
-        Assert.assertNull(picker.getValue());
-        Assert.assertEquals("", picker.getElement().getProperty("value"));
+        Assertions.assertNull(picker.getValue());
+        Assertions.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
         TimePicker picker = new TimePicker((LocalTime) null);
-        Assert.assertNull(picker.getValue());
-        Assert.assertEquals("", picker.getElement().getProperty("value"));
+        Assertions.assertNull(picker.getValue());
+        Assertions.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsTime_valuePropertyHasInitialValue() {
+    void initialValueIsTime_valuePropertyHasInitialValue() {
         TimePicker picker = new TimePicker(LocalTime.of(9, 32));
         assertEquals(LocalTime.of(9, 32), picker.getValue());
         assertEquals("09:32", picker.getElement().getProperty("value"));
     }
 
     @Test
-    public void timePicker_basicCases() {
+    void timePicker_basicCases() {
         TimePicker picker = new TimePicker();
 
         picker.setValue(LocalTime.of(5, 30));
@@ -88,33 +81,33 @@ public class TimePickerTest {
     }
 
     @Test
-    public void emptyValueIsNull() {
+    void emptyValueIsNull() {
         TimePicker picker = new TimePicker();
-        Assert.assertNull(picker.getEmptyValue());
+        Assertions.assertNull(picker.getEmptyValue());
     }
 
     @Test
-    public void setInitialValue_emptyValueIsNull() {
+    void setInitialValue_emptyValueIsNull() {
         TimePicker picker = new TimePicker(LocalTime.of(5, 30));
-        Assert.assertNull(picker.getEmptyValue());
+        Assertions.assertNull(picker.getEmptyValue());
     }
 
     @Test
-    public void timePicker_nullValue() {
+    void timePicker_nullValue() {
         TimePicker timePicker = new TimePicker();
         timePicker.setValue(null);
         assertEquals(null, timePicker.getValue());
     }
 
     @Test
-    public void timePickerWithLabel() {
+    void timePickerWithLabel() {
         String label = new String("Time Picker Label");
         TimePicker picker = new TimePicker(label);
         assertEquals(label, picker.getElement().getProperty("label"));
     }
 
     @Test
-    public void timePickerWithPlaceholder() {
+    void timePickerWithPlaceholder() {
         String placeholder = new String("This is a Time Picker");
         TimePicker picker = new TimePicker();
         picker.setPlaceholder(placeholder);
@@ -124,85 +117,91 @@ public class TimePickerTest {
     }
 
     @Test
-    public void testSetStep_dividesEvenly_matchesGetter() {
+    void testSetStep_dividesEvenly_matchesGetter() {
         TimePicker timePicker = new TimePicker();
 
-        assertEquals("Invalid default step", Duration.ofHours(1),
-                timePicker.getStep());
+        assertEquals(Duration.ofHours(1), timePicker.getStep(),
+                "Invalid default step");
 
         timePicker.setStep(Duration.ofSeconds(1));
-        assertEquals("Invalid step returned", Duration.ofSeconds(1),
-                timePicker.getStep());
+        assertEquals(Duration.ofSeconds(1), timePicker.getStep(),
+                "Invalid step returned");
 
         timePicker.setStep(Duration.ofMillis(1));
-        assertEquals("Invalid step returned", Duration.ofMillis(1),
-                timePicker.getStep());
+        assertEquals(Duration.ofMillis(1), timePicker.getStep(),
+                "Invalid step returned");
 
         timePicker.setStep(Duration.ofMillis(10));
-        assertEquals("Invalid step returned", Duration.ofMillis(10),
-                timePicker.getStep());
+        assertEquals(Duration.ofMillis(10), timePicker.getStep(),
+                "Invalid step returned");
 
         timePicker.setStep(Duration.ofMillis(100));
-        assertEquals("Invalid step returned", Duration.ofMillis(100),
-                timePicker.getStep());
+        assertEquals(Duration.ofMillis(100), timePicker.getStep(),
+                "Invalid step returned");
 
         timePicker.setStep(Duration.ofMillis(1000));
-        assertEquals("Invalid step returned", Duration.ofSeconds(1),
-                timePicker.getStep());
+        assertEquals(Duration.ofSeconds(1), timePicker.getStep(),
+                "Invalid step returned");
 
         // the next 3 would be broken in the web component
         // https://github.com/vaadin/vaadin-time-picker/issues/79
         timePicker.setStep(Duration.ofMinutes(40));
-        assertEquals("Invalid step returned", Duration.ofMinutes(40),
-                timePicker.getStep());
+        assertEquals(Duration.ofMinutes(40), timePicker.getStep(),
+                "Invalid step returned");
 
         timePicker.setStep(Duration.ofMinutes(45));
-        assertEquals("Invalid step returned", Duration.ofMinutes(45),
-                timePicker.getStep());
+        assertEquals(Duration.ofMinutes(45), timePicker.getStep(),
+                "Invalid step returned");
 
         timePicker.setStep(Duration.ofMinutes(90));
-        assertEquals("Invalid step returned", Duration.ofMinutes(90),
-                timePicker.getStep());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetStep_secondsNotDivideEvenly_throwsException() {
-        TimePicker timePicker = new TimePicker();
-        timePicker.setStep(Duration.ofSeconds(11));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetStep_minutesNotDivideEvenly_throwsException() {
-        TimePicker timePicker = new TimePicker();
-        timePicker.setStep(Duration.ofMinutes(35));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetStep_millisecondsNotDivideEvenly_throwsException() {
-        TimePicker timePicker = new TimePicker();
-        timePicker.setStep(Duration.ofMillis(333));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetStep_hoursNotDivideEvenly_throwsException() {
-        TimePicker timePicker = new TimePicker();
-        timePicker.setStep(Duration.ofHours(5));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetStep_negativeStep_throwsException() {
-        TimePicker timePicker = new TimePicker();
-        timePicker.setStep(Duration.ofMinutes(-15));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetStep_lessThan0Ms_throwsException() {
-        TimePicker timePicker = new TimePicker();
-        timePicker.setStep(Duration.ofNanos(500_000));
+        assertEquals(Duration.ofMinutes(90), timePicker.getStep(),
+                "Invalid step returned");
     }
 
     @Test
-    public void setMin_getMin_null() {
+    void testSetStep_secondsNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> timePicker.setStep(Duration.ofSeconds(11)));
+    }
+
+    @Test
+    void testSetStep_minutesNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> timePicker.setStep(Duration.ofMinutes(35)));
+    }
+
+    @Test
+    void testSetStep_millisecondsNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> timePicker.setStep(Duration.ofMillis(333)));
+    }
+
+    @Test
+    void testSetStep_hoursNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> timePicker.setStep(Duration.ofHours(5)));
+    }
+
+    @Test
+    void testSetStep_negativeStep_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> timePicker.setStep(Duration.ofMinutes(-15)));
+    }
+
+    @Test
+    void testSetStep_lessThan0Ms_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> timePicker.setStep(Duration.ofNanos(500_000)));
+    }
+
+    @Test
+    void setMin_getMin_null() {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMin());
         timePicker.setMin(null);
@@ -210,7 +209,7 @@ public class TimePickerTest {
     }
 
     @Test
-    public void setMax_getMax_null() {
+    void setMax_getMax_null() {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMax());
         timePicker.setMax(null);
@@ -218,37 +217,33 @@ public class TimePickerTest {
     }
 
     @Test
-    public void clearButtonVisiblePropertyValue() {
+    void clearButtonVisiblePropertyValue() {
         TimePicker timePicker = new TimePicker();
 
-        assertFalse("Clear button should not be visible by default",
-                timePicker.isClearButtonVisible());
+        assertFalse(timePicker.isClearButtonVisible(),
+                "Clear button should not be visible by default");
         assertClearButtonPropertyValueEquals(timePicker, true);
         assertClearButtonPropertyValueEquals(timePicker, false);
     }
 
     @Test
-    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-time-picker");
 
         String value = LocalTime.now().plus(31l, ChronoUnit.MINUTES).toString();
         element.setProperty("value", value);
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
-        VaadinService service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
 
         Instantiator instantiator = Mockito.mock(Instantiator.class);
 
-        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(ui.getService().getInstantiator())
+                .thenReturn(instantiator);
 
         Mockito.when(instantiator.createComponent(TimePicker.class))
                 .thenAnswer(invocation -> new TimePicker());
 
         TimePicker field = Component.from(element, TimePicker.class);
-        Assert.assertEquals(value, field.getElement().getPropertyRaw("value"));
+        Assertions.assertEquals(value,
+                field.getElement().getPropertyRaw("value"));
     }
 
     public void assertClearButtonPropertyValueEquals(TimePicker timePicker,
@@ -260,7 +255,7 @@ public class TimePickerTest {
     }
 
     @Test
-    public void setAutoOpenDisabled() {
+    void setAutoOpenDisabled() {
         TimePicker timePicker = new TimePicker();
         assertTrue(timePicker.isAutoOpen());
         timePicker.setAutoOpen(false);
@@ -270,68 +265,70 @@ public class TimePickerTest {
     }
 
     @Test
-    public void implementsHasAllowedCharPattern() {
-        Assert.assertTrue("TimePicker should support char pattern",
+    void implementsHasAllowedCharPattern() {
+        Assertions.assertTrue(
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new TimePicker().getClass()));
+                        .isAssignableFrom(new TimePicker().getClass()),
+                "TimePicker should support char pattern");
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         TimePicker timePicker = new TimePicker();
-        Assert.assertTrue(timePicker instanceof HasTooltip);
+        Assertions.assertTrue(timePicker instanceof HasTooltip);
     }
 
     @Test
-    public void setPrefix_hasPrefix() {
+    void setPrefix_hasPrefix() {
         TimePicker picker = new TimePicker();
         TestPrefix prefix = new TestPrefix();
 
         picker.setPrefixComponent(prefix);
 
-        Assert.assertEquals(prefix, picker.getPrefixComponent());
+        Assertions.assertEquals(prefix, picker.getPrefixComponent());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setTextAsPrefix_throws() {
+    @Test
+    void setTextAsPrefix_throws() {
         TimePicker picker = new TimePicker();
-        picker.setPrefixComponent(new Text("Prefix"));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> picker.setPrefixComponent(new Text("Prefix")));
     }
 
     @Test
-    public void implementHasAriaLabel() {
-        Assert.assertTrue(
-                "Time picker should support aria-label and aria-labelledby",
-                HasAriaLabel.class.isAssignableFrom(TimePicker.class));
+    void implementHasAriaLabel() {
+        Assertions.assertTrue(
+                HasAriaLabel.class.isAssignableFrom(TimePicker.class),
+                "Time picker should support aria-label and aria-labelledby");
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         TimePicker timePicker = new TimePicker();
 
         timePicker.setAriaLabel("aria-label");
-        Assert.assertTrue(timePicker.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", timePicker.getAriaLabel().get());
+        Assertions.assertTrue(timePicker.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", timePicker.getAriaLabel().get());
 
         timePicker.setAriaLabel(null);
-        Assert.assertTrue(timePicker.getAriaLabel().isEmpty());
+        Assertions.assertTrue(timePicker.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         TimePicker timePicker = new TimePicker();
 
         timePicker.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(timePicker.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby",
+        Assertions.assertTrue(timePicker.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
                 timePicker.getAriaLabelledBy().get());
 
         timePicker.setAriaLabelledBy(null);
-        Assert.assertTrue(timePicker.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(timePicker.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void unregisterInvalidChangeListenerOnEvent() {
+    void unregisterInvalidChangeListenerOnEvent() {
         var timePicker = new TimePicker();
 
         var listenerInvokedCount = new AtomicInteger(0);
@@ -343,13 +340,13 @@ public class TimePickerTest {
         timePicker.setInvalid(true);
         timePicker.setInvalid(false);
 
-        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         TimePicker field = new TimePicker();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>);
     }
 

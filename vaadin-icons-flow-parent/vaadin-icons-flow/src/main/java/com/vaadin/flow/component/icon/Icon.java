@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -28,7 +29,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  * @see VaadinIcon
  */
-@NpmPackage(value = "@vaadin/icons", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/icons", version = "25.1.0-rc1")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 public class Icon extends AbstractIcon<Icon> {
 
@@ -140,9 +141,10 @@ public class Icon extends AbstractIcon<Icon> {
     /**
      * Binds the given signal to the icon of the component.
      * <p>
-     * When a signal is bound, the icon is kept synchronized with the signal
-     * value while the component is attached. When the component is detached,
-     * signal value changes have no effect.
+     * The icon is set immediately with the current signal value when the
+     * binding is created, and is kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the icon manually through
      * {@link #setIcon(VaadinIcon)} throws a
@@ -150,12 +152,15 @@ public class Icon extends AbstractIcon<Icon> {
      *
      * @param signal
      *            the signal to bind the icon to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setIcon(VaadinIcon)
      * @see com.vaadin.flow.dom.Element#bindAttribute(String, Signal)
      * @since 25.1
      */
-    public void bindIcon(Signal<VaadinIcon> signal) {
-        getElement().bindAttribute(ICON_ATTRIBUTE_NAME,
+    public SignalBinding<String> bindIcon(Signal<VaadinIcon> signal) {
+        return getElement().bindAttribute(ICON_ATTRIBUTE_NAME,
                 signal == null ? null
                         : signal.map(icon -> VAADIN_ICON_COLLECTION_NAME + ":"
                                 + normalizeIcon(icon)));

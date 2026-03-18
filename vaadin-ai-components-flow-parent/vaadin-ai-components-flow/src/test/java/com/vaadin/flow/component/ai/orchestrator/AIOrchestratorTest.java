@@ -21,26 +21,26 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.imageio.ImageIO;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
@@ -49,28 +49,29 @@ import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
 
-public class AIOrchestratorTest {
+class AIOrchestratorTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
 
     private LLMProvider mockProvider;
     private AIMessageList mockMessageList;
     private AIInput mockInput;
     private AIFileReceiver mockFileReceiver;
-    private static MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
-    private static UI mockUI;
-
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         mockProvider = Mockito.mock(LLMProvider.class);
         mockMessageList = Mockito.mock(AIMessageList.class);
         mockInput = Mockito.mock(AIInput.class);
@@ -79,25 +80,14 @@ public class AIOrchestratorTest {
                 .thenReturn(Collections.emptyList());
     }
 
-    @After
-    public void tearDown() {
-        if (mockFeatureFlagsStatic != null) {
-            mockFeatureFlagsStatic.close();
-            mockFeatureFlagsStatic = null;
-        }
-        UI.setCurrent(null);
-        mockUI = null;
-    }
-
     @Test
-    public void builder_withNullProvider_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void builder_withNullProvider_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> AIOrchestrator.builder(null, null));
     }
 
     @Test
-    public void builder_withProvider_usesProviderForPrompts() {
-        mockUi();
+    void builder_withProvider_usesProviderForPrompts() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -115,8 +105,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withSystemPrompt_includesSystemPromptInRequest() {
-        mockUi();
+    void builder_withSystemPrompt_includesSystemPromptInRequest() {
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -132,12 +121,11 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertEquals(systemPrompt, captor.getValue().systemPrompt());
+        Assertions.assertEquals(systemPrompt, captor.getValue().systemPrompt());
     }
 
     @Test
-    public void builder_withMessageList_addsMessagesToList() {
-        mockUi();
+    void builder_withMessageList_addsMessagesToList() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -155,7 +143,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withInput_addsSubmitListener() {
+    void builder_withInput_addsSubmitListener() {
         AIOrchestrator.builder(mockProvider, null).withInput(mockInput).build();
 
         Mockito.verify(mockInput)
@@ -163,8 +151,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withToolObjects_setsTools() {
-        mockUi();
+    void builder_withToolObjects_setsTools() {
         var tool = new SampleTool();
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -181,20 +168,19 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertEquals(1, captor.getValue().tools().length);
-        Assert.assertSame(tool, captor.getValue().tools()[0]);
+        Assertions.assertEquals(1, captor.getValue().tools().length);
+        Assertions.assertSame(tool, captor.getValue().tools()[0]);
     }
 
     @Test
-    public void builder_withNullToolObjects_handlesNullGracefully() {
+    void builder_withNullToolObjects_handlesNullGracefully() {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withTools((Object[]) null).build();
-        Assert.assertNotNull(orchestrator);
+        Assertions.assertNotNull(orchestrator);
     }
 
     @Test
-    public void prompt_withValidMessage_sendsRequestToProvider() {
-        mockUi();
+    void prompt_withValidMessage_sendsRequestToProvider() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -207,26 +193,25 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertEquals("Hello", captor.getValue().userMessage());
+        Assertions.assertEquals("Hello", captor.getValue().userMessage());
     }
 
     @Test
-    public void prompt_withNullMessage_doesNotSendRequest() {
+    void prompt_withNullMessage_doesNotSendRequest() {
         prompt(null);
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
     @Test
-    public void prompt_withEmptyMessage_doesNotSendRequest() {
+    void prompt_withEmptyMessage_doesNotSendRequest() {
         prompt("   ");
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
     @Test
-    public void prompt_withSystemPrompt_includesSystemPromptInRequest() {
-        mockUi();
+    void prompt_withSystemPrompt_includesSystemPromptInRequest() {
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -242,13 +227,12 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertEquals(systemPrompt, captor.getValue().systemPrompt());
+        Assertions.assertEquals(systemPrompt, captor.getValue().systemPrompt());
     }
 
     @Test
-    public void prompt_withStreamingResponse_updatesMessageWithTokens()
+    void prompt_withStreamingResponse_updatesMessageWithTokens()
             throws Exception {
-        mockUi();
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(3);
         Mockito.doAnswer(inv -> {
@@ -264,8 +248,8 @@ public class AIOrchestratorTest {
 
         prompt("Hi");
 
-        Assert.assertTrue("Tokens should be appended within timeout",
-                latch.await(2, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(2, TimeUnit.SECONDS),
+                "Tokens should be appended within timeout");
 
         var inOrder = Mockito.inOrder(mockMessage);
         inOrder.verify(mockMessage).appendText("Hello");
@@ -274,8 +258,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withStreamingError_setsErrorMessage() throws Exception {
-        mockUi();
+    void prompt_withStreamingError_setsErrorMessage() throws Exception {
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(1);
         Mockito.doAnswer(inv -> {
@@ -292,8 +275,8 @@ public class AIOrchestratorTest {
         var orchestrator = getSimpleOrchestrator();
         orchestrator.prompt("Hi");
 
-        Assert.assertTrue("Error message should be set within timeout",
-                latch.await(2, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(2, TimeUnit.SECONDS),
+                "Error message should be set within timeout");
 
         Mockito.verify(mockMessage)
                 .setText("An error occurred. Please try again.");
@@ -301,8 +284,7 @@ public class AIOrchestratorTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void inputSubmit_triggersPromptProcessing() {
-        mockUi();
+    void inputSubmit_triggersPromptProcessing() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -324,8 +306,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void userMessage_isAddedToMessageList() {
-        mockUi();
+    void userMessage_isAddedToMessageList() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -345,8 +326,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void assistantPlaceholder_isCreated() {
-        mockUi();
+    void assistantPlaceholder_isCreated() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -363,8 +343,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withTools_includesToolsInRequest() {
-        mockUi();
+    void prompt_withTools_includesToolsInRequest() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -381,21 +360,20 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertEquals(1, captor.getValue().tools().length);
-        Assert.assertEquals(tool, captor.getValue().tools()[0]);
+        Assertions.assertEquals(1, captor.getValue().tools().length);
+        Assertions.assertEquals(tool, captor.getValue().tools()[0]);
     }
 
     @Test
-    public void prompt_withoutUIContext_throwsIllegalStateException() {
-        UI.setCurrent(null);
+    void prompt_withoutUIContext_throwsIllegalStateException() {
+        ui.clearUI();
         var orchestrator = getSimpleOrchestrator();
-        Assert.assertThrows(IllegalStateException.class,
+        Assertions.assertThrows(IllegalStateException.class,
                 () -> orchestrator.prompt("Hello"));
     }
 
     @Test
-    public void prompt_whileProcessing_isIgnored() {
-        mockUi();
+    void prompt_whileProcessing_isIgnored() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -414,8 +392,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withoutSystemPrompt_sendsNullSystemPromptInRequest() {
-        mockUi();
+    void prompt_withoutSystemPrompt_sendsNullSystemPromptInRequest() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -430,12 +407,11 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertNull(captor.getValue().systemPrompt());
+        Assertions.assertNull(captor.getValue().systemPrompt());
     }
 
     @Test
-    public void prompt_withWhitespaceOnlySystemPrompt_sendsNullSystemPrompt() {
-        mockUi();
+    void prompt_withWhitespaceOnlySystemPrompt_sendsNullSystemPrompt() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -451,12 +427,11 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertNull(captor.getValue().systemPrompt());
+        Assertions.assertNull(captor.getValue().systemPrompt());
     }
 
     @Test
-    public void builder_withFlowMessageList_wrapsCorrectly() {
-        mockUi();
+    void builder_withFlowMessageList_wrapsCorrectly() {
         var flowMessageList = Mockito.mock(MessageList.class);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -469,7 +444,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withFlowMessageInput_wrapsCorrectly() {
+    void builder_withFlowMessageInput_wrapsCorrectly() {
         var flowMessageInput = Mockito.mock(MessageInput.class);
         AIOrchestrator.builder(mockProvider, null).withInput(flowMessageInput)
                 .build();
@@ -478,29 +453,43 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withFlowUpload_withExistingHandler_throws() {
-        mockUi();
+    void builder_withFlowUpload_withExistingHandler_throws() {
         var flowUploadManager = new UploadManager(new Div(),
                 UploadHandler.inMemory((x, y) -> {
                 }));
         var builder = AIOrchestrator.builder(mockProvider, null);
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> builder.withFileReceiver(flowUploadManager));
     }
 
     @Test
-    public void builder_withFlowUpload_withoutHandler_succeeds() {
-        mockUi();
+    void builder_withFlowUpload_withoutHandler_succeeds() {
         var flowUploadManager = new UploadManager(new Div());
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withFileReceiver(flowUploadManager).build();
-        Assert.assertNotNull(orchestrator);
+        Assertions.assertNotNull(orchestrator);
+    }
+
+    @Test
+    void builder_withUploadComponent_withExistingHandler_throws() {
+        var upload = new Upload(UploadHandler.inMemory((x, y) -> {
+        }));
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> builder.withFileReceiver(upload));
+    }
+
+    @Test
+    void builder_withUploadComponent_withoutHandler_succeeds() {
+        var upload = new Upload();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(upload).build();
+        Assertions.assertNotNull(orchestrator);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void inputSubmit_withNullValue_doesNotProcess() {
-        mockUi();
+    void inputSubmit_withNullValue_doesNotProcess() {
         getSimpleOrchestrator();
         var listenerCaptor = ArgumentCaptor
                 .forClass(SerializableConsumer.class);
@@ -512,8 +501,7 @@ public class AIOrchestratorTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void inputSubmit_withEmptyValue_doesNotProcess() {
-        mockUi();
+    void inputSubmit_withEmptyValue_doesNotProcess() {
         getSimpleOrchestrator();
         var listenerCaptor = ArgumentCaptor
                 .forClass(SerializableConsumer.class);
@@ -528,8 +516,7 @@ public class AIOrchestratorTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void inputSubmit_whileProcessing_isIgnored() {
-        mockUi();
+    void inputSubmit_whileProcessing_isIgnored() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -554,8 +541,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withAttachments_includesAttachmentsInRequest() {
-        mockUi();
+    void prompt_withAttachments_includesAttachmentsInRequest() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -572,16 +558,15 @@ public class AIOrchestratorTest {
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
         var attachments = captor.getValue().attachments();
-        Assert.assertNotNull(attachments);
-        Assert.assertEquals(2, attachments.size());
-        Assert.assertEquals("test.txt", attachments.getFirst().name());
-        Assert.assertEquals("image.png", attachments.get(1).name());
+        Assertions.assertNotNull(attachments);
+        Assertions.assertEquals(2, attachments.size());
+        Assertions.assertEquals("test.txt", attachments.getFirst().name());
+        Assertions.assertEquals("image.png", attachments.get(1).name());
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void prompt_withAttachments_createsMessageWithAttachments() {
-        mockUi();
+    void prompt_withAttachments_createsMessageWithAttachments() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -602,16 +587,16 @@ public class AIOrchestratorTest {
                 attachmentsCaptor.capture());
 
         var aiAttachments = (List<AIAttachment>) attachmentsCaptor.getValue();
-        Assert.assertEquals(1, aiAttachments.size());
-        Assert.assertEquals("test.txt", aiAttachments.getFirst().name());
-        Assert.assertEquals("text/plain", aiAttachments.getFirst().mimeType());
-        Assert.assertArrayEquals("test".getBytes(),
+        Assertions.assertEquals(1, aiAttachments.size());
+        Assertions.assertEquals("test.txt", aiAttachments.getFirst().name());
+        Assertions.assertEquals("text/plain",
+                aiAttachments.getFirst().mimeType());
+        Assertions.assertArrayEquals("test".getBytes(),
                 aiAttachments.getFirst().data());
     }
 
     @Test
-    public void prompt_withTimeout_setsTimeoutErrorMessage() throws Exception {
-        mockUi();
+    void prompt_withTimeout_setsTimeoutErrorMessage() throws Exception {
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(1);
         Mockito.doAnswer(inv -> {
@@ -627,16 +612,15 @@ public class AIOrchestratorTest {
 
         prompt("Hello");
 
-        Assert.assertTrue("Timeout error should be set within timeout",
-                latch.await(2, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(2, TimeUnit.SECONDS),
+                "Timeout error should be set within timeout");
 
         Mockito.verify(mockMessage)
                 .setText("Request timed out. Please try again.");
     }
 
     @Test
-    public void prompt_withoutMessageList_stillSendsToProvider() {
-        mockUi();
+    void prompt_withoutMessageList_stillSendsToProvider() {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -648,8 +632,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withEmptyResponse_completesSuccessfully() {
-        mockUi();
+    void prompt_withEmptyResponse_completesSuccessfully() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -668,8 +651,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withSystemPromptWithLeadingTrailingWhitespace_trimmed() {
-        mockUi();
+    void prompt_withSystemPromptWithLeadingTrailingWhitespace_trimmed() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -686,13 +668,12 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertEquals("You are helpful",
+        Assertions.assertEquals("You are helpful",
                 captor.getValue().systemPrompt());
     }
 
     @Test
-    public void prompt_withMultipleTokens_appendsAllTokens() throws Exception {
-        mockUi();
+    void prompt_withMultipleTokens_appendsAllTokens() throws Exception {
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(4);
         Mockito.doAnswer(inv -> {
@@ -708,16 +689,15 @@ public class AIOrchestratorTest {
 
         prompt("Hello");
 
-        Assert.assertTrue("All tokens should be appended within timeout",
-                latch.await(2, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(2, TimeUnit.SECONDS),
+                "All tokens should be appended within timeout");
 
         Mockito.verify(mockMessage, Mockito.times(4))
                 .appendText(Mockito.anyString());
     }
 
     @Test
-    public void prompt_requestContainsCorrectTools() {
-        mockUi();
+    void prompt_requestContainsCorrectTools() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -736,14 +716,13 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertEquals(2, captor.getValue().tools().length);
-        Assert.assertSame(tool1, captor.getValue().tools()[0]);
-        Assert.assertSame(tool2, captor.getValue().tools()[1]);
+        Assertions.assertEquals(2, captor.getValue().tools().length);
+        Assertions.assertSame(tool1, captor.getValue().tools()[0]);
+        Assertions.assertSame(tool2, captor.getValue().tools()[1]);
     }
 
     @Test
-    public void prompt_requestContainsEmptyAttachmentsList() {
-        mockUi();
+    void prompt_requestContainsEmptyAttachmentsList() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -756,13 +735,12 @@ public class AIOrchestratorTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assert.assertNotNull(captor.getValue().attachments());
-        Assert.assertTrue(captor.getValue().attachments().isEmpty());
+        Assertions.assertNotNull(captor.getValue().attachments());
+        Assertions.assertTrue(captor.getValue().attachments().isEmpty());
     }
 
     @Test
-    public void prompt_callsTakeAttachments() {
-        mockUi();
+    void prompt_callsTakeAttachments() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -777,8 +755,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_namesNotConfigured_usesDefaultNames() {
-        mockUi();
+    void builder_namesNotConfigured_usesDefaultNames() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -802,8 +779,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withCustomUserName_usesCustomUserName() {
-        mockUi();
+    void builder_withCustomUserName_usesCustomUserName() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -825,8 +801,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withCustomAssistantName_usesCustomAssistantName() {
-        mockUi();
+    void builder_withCustomAssistantName_usesCustomAssistantName() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -845,8 +820,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withCustomUserNameAndAssistantName_usesBothCustomNames() {
-        mockUi();
+    void builder_withCustomUserNameAndAssistantName_usesBothCustomNames() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -871,8 +845,7 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void builder_withNullUserName_throws() {
-        mockUi();
+    void builder_withNullUserName_throws() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
@@ -882,13 +855,12 @@ public class AIOrchestratorTest {
 
         var builder = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList);
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> builder.withUserName(null));
     }
 
     @Test
-    public void builder_withNullAssistantName_throws() {
-        mockUi();
+    void builder_withNullAssistantName_throws() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.any(), Mockito.anyList())).thenReturn(mockMessage);
@@ -898,8 +870,635 @@ public class AIOrchestratorTest {
 
         var builder = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList);
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> builder.withAssistantName(null));
+    }
+
+    @Test
+    void chatMessage_withMessageId_preservesMessageId() {
+        var message = new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-123",
+                null);
+        Assertions.assertEquals(ChatMessage.Role.USER, message.role());
+        Assertions.assertEquals("Hello", message.content());
+        Assertions.assertEquals("msg-123", message.messageId());
+    }
+
+    @Test
+    void chatMessage_withoutMessageId_setsMessageIdToNull() {
+        var message = new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there",
+                null, null);
+        Assertions.assertEquals(ChatMessage.Role.ASSISTANT, message.role());
+        Assertions.assertEquals("Hi there", message.content());
+        Assertions.assertNull(message.messageId());
+        Assertions.assertNull(message.time());
+    }
+
+    @Test
+    void chatMessage_withTime_preservesTime() {
+        var now = Instant.now();
+        var message = new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1",
+                now);
+        Assertions.assertEquals(now, message.time());
+        Assertions.assertEquals("msg-1", message.messageId());
+    }
+
+    @Test
+    void getHistory_onFreshOrchestrator_returnsEmptyList() {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        Assertions.assertTrue(orchestrator.getHistory().isEmpty());
+    }
+
+    @Test
+    void getHistory_afterPrompt_containsUserAndAssistantMessages() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello");
+
+        var history = orchestrator.getHistory();
+        Assertions.assertEquals(2, history.size());
+        Assertions.assertEquals(ChatMessage.Role.USER,
+                history.getFirst().role());
+        Assertions.assertEquals("Hello", history.getFirst().content());
+        Assertions.assertNotNull(history.getFirst().messageId());
+        Assertions.assertEquals(ChatMessage.Role.ASSISTANT,
+                history.get(1).role());
+        Assertions.assertEquals("Response", history.get(1).content());
+        Assertions.assertNull(history.get(1).messageId());
+    }
+
+    @Test
+    void getHistory_afterPrompt_recordsTimestamps() {
+        var before = Instant.now();
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello");
+        var after = Instant.now();
+
+        var history = orchestrator.getHistory();
+        Assertions.assertNotNull(history.getFirst().time());
+        Assertions.assertFalse(history.getFirst().time().isBefore(before));
+        Assertions.assertFalse(history.getFirst().time().isAfter(after));
+        Assertions.assertNotNull(history.get(1).time());
+        Assertions.assertFalse(history.get(1).time().isBefore(before));
+        Assertions.assertFalse(history.get(1).time().isAfter(after));
+    }
+
+    @Test
+    void withHistory_withTimestamps_restoresTimesOnUIMessages() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var pastTime = Instant.parse("2025-06-15T10:30:00Z");
+        var history = List.of(new ChatMessage(ChatMessage.Role.USER, "Hello",
+                "msg-1", pastTime));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        Mockito.verify(mockMessage).setTime(pastTime);
+    }
+
+    @Test
+    void withHistory_withNullTimestamp_doesNotCallSetTime() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        Mockito.verify(mockMessage, Mockito.never())
+                .setTime(Mockito.any(Instant.class));
+    }
+
+    @Test
+    void getHistory_afterMultipleTokens_concatenatesAssistantResponse() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hello", " ", "World"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hi");
+
+        var history = orchestrator.getHistory();
+        Assertions.assertEquals(2, history.size());
+        Assertions.assertEquals("Hello World", history.get(1).content());
+    }
+
+    @Test
+    void getHistory_afterStreamError_doesNotAddAssistantMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hi");
+
+        var history = orchestrator.getHistory();
+        Assertions.assertEquals(1, history.size());
+        Assertions.assertEquals(ChatMessage.Role.USER,
+                history.getFirst().role());
+    }
+
+    @Test
+    void getHistory_returnsUnmodifiableCopy() {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        var history = orchestrator.getHistory();
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> history.add(new ChatMessage(ChatMessage.Role.USER, "test",
+                        null, null)));
+    }
+
+    @Test
+    void withHistory_withNullHistory_throwsNullPointerException() {
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> builder.withHistory(null, Collections.emptyMap()));
+    }
+
+    @Test
+    void withHistory_restoresProviderContext() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        Mockito.verify(mockProvider).setHistory(history,
+                Collections.emptyMap());
+    }
+
+    @Test
+    void withHistory_restoresMessageListUI() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage("Hello", "You",
+                Collections.emptyList());
+        inOrder.verify(mockMessageList).addMessage("Hi there", "Assistant",
+                Collections.emptyList());
+    }
+
+    @Test
+    void withHistory_restoresConversationHistory() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        var restored = orchestrator.getHistory();
+        Assertions.assertEquals(2, restored.size());
+        Assertions.assertEquals("Hello", restored.getFirst().content());
+        Assertions.assertEquals("msg-1", restored.getFirst().messageId());
+        Assertions.assertEquals("Hi there", restored.get(1).content());
+        Assertions.assertNull(restored.get(1).messageId());
+    }
+
+    @Test
+    void withHistory_withCustomNames_usesCustomNamesInUI() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withUserName("Alice")
+                .withAssistantName("Bot")
+                .withHistory(history, Collections.emptyMap()).build();
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage("Hello", "Alice",
+                Collections.emptyList());
+        inOrder.verify(mockMessageList).addMessage("Hi there", "Bot",
+                Collections.emptyList());
+    }
+
+    @Test
+    void withHistory_rebuildsMsgIdMapping_attachmentClickWorks() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var clickCaptor = ArgumentCaptor
+                .forClass(AIMessageList.AttachmentClickCallback.class);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var clickEvents = new ArrayList<AttachmentClickListener.AttachmentClickEvent>();
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withAttachmentClickListener(clickEvents::add)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        Mockito.verify(mockMessageList)
+                .addAttachmentClickListener(clickCaptor.capture());
+
+        // Simulate clicking an attachment on the restored user message
+        clickCaptor.getValue().onAttachmentClick(mockMessage, 0);
+
+        Assertions.assertEquals(1, clickEvents.size());
+        Assertions.assertEquals("msg-1", clickEvents.getFirst().getMessageId());
+        Assertions.assertEquals(0, clickEvents.getFirst().getAttachmentIndex());
+    }
+
+    @Test
+    void withHistory_exceedingProviderMaxMessages_preservesFullHistory() {
+        var history = new ArrayList<ChatMessage>();
+        for (int i = 0; i < 20; i++) {
+            history.add(new ChatMessage(ChatMessage.Role.USER, "Question " + i,
+                    "msg-" + i, null));
+            history.add(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                    "Answer " + i, null, null));
+        }
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        var restored = orchestrator.getHistory();
+        Assertions.assertEquals(40, restored.size(),
+                "Orchestrator should preserve the full history regardless "
+                        + "of provider's max message window");
+        Assertions.assertEquals("Question 0", restored.getFirst().content());
+        Assertions.assertEquals("msg-0", restored.getFirst().messageId());
+        Assertions.assertEquals("Question 19", restored.get(38).content());
+    }
+
+    @Test
+    void withHistory_whenProviderThrows_buildThrows() {
+        Mockito.doThrow(new UnsupportedOperationException("Not supported"))
+                .when(mockProvider)
+                .setHistory(Mockito.anyList(), Mockito.anyMap());
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null));
+
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withHistory(history, Collections.emptyMap()).build());
+    }
+
+    @Test
+    void withHistory_withoutMessageList_onlyRestoresProvider() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        Mockito.verify(mockProvider).setHistory(history,
+                Collections.emptyMap());
+        var restored = orchestrator.getHistory();
+        Assertions.assertEquals(2, restored.size());
+    }
+
+    @Test
+    void withHistory_withAttachments_restoresAttachmentsInUI() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var imageData = "fake-image".getBytes();
+        var attachment = new AIAttachment("photo.png", "image/png", imageData);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Look at this", "msg-1",
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Nice photo!", null,
+                        null));
+        var attachments = Map.of("msg-1", List.of(attachment));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withHistory(history, attachments).build();
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage("Look at this", "You",
+                List.of(attachment));
+        inOrder.verify(mockMessageList).addMessage("Nice photo!", "Assistant",
+                Collections.emptyList());
+    }
+
+    @Test
+    void withHistory_withAttachments_passesAttachmentsToProvider() {
+        var imageData = "fake-image".getBytes();
+        var attachment = new AIAttachment("photo.png", "image/png", imageData);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Look at this", "msg-1",
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Nice photo!", null,
+                        null));
+        var attachments = Map.of("msg-1", List.of(attachment));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, attachments).build();
+
+        Mockito.verify(mockProvider).setHistory(history, attachments);
+    }
+
+    @Test
+    void withHistory_withAttachmentMap_onlyUserMessagesGetAttachments() {
+        var mockUserMessage = createMockMessage();
+        var mockAssistantMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockUserMessage, mockAssistantMessage);
+
+        var attachment = new AIAttachment("file.txt", "text/plain",
+                "content".getBytes());
+        // Deliberately map an assistant message ID to attachments
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", "msg-2",
+                        null));
+        var attachments = Map.of("msg-1", List.of(attachment), "msg-2",
+                List.of(attachment));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withHistory(history, attachments).build();
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage("Hello", "You",
+                List.of(attachment));
+        // Assistant message should always get empty list, even if map has entry
+        inOrder.verify(mockMessageList).addMessage("Hi there", "Assistant",
+                Collections.emptyList());
+    }
+
+    @Test
+    void withHistory_withEmptyAttachmentMap_usesEmptyAttachments() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withHistory(history, Collections.emptyMap()).build();
+
+        Mockito.verify(mockMessageList).addMessage("Hello", "You",
+                Collections.emptyList());
+        Mockito.verify(mockProvider).setHistory(history,
+                Collections.emptyMap());
+    }
+
+    @Test
+    void withHistory_withAttachments_nullHistoryThrows() {
+        var attachments = Map.<String, List<AIAttachment>> of();
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> builder.withHistory(null, attachments));
+    }
+
+    @Test
+    void withHistory_withAttachments_nullAttachmentMapThrows() {
+        var history = List.<ChatMessage> of();
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> builder.withHistory(history, null));
+    }
+
+    @Test
+    void withHistory_withAttachments_messageWithNoMessageId_getsEmptyAttachments() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var attachment = new AIAttachment("file.txt", "text/plain",
+                "content".getBytes());
+        // User message without messageId
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", null, null));
+        var attachments = Map.of("some-id", List.of(attachment));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withHistory(history, attachments).build();
+
+        Mockito.verify(mockMessageList).addMessage("Hello", "You",
+                Collections.emptyList());
+    }
+
+    @Test
+    void responseCompleteListener_afterSuccessfulExchange_firesWithResponse() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var captured = new ArrayList<String>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseCompleteListener(
+                        event -> captured.add(event.getResponse()))
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals(1, captured.size());
+        Assertions.assertEquals("Response", captured.getFirst());
+    }
+
+    @Test
+    void responseCompleteListener_afterStreamError_doesNotFire() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var captured = new ArrayList<String>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseCompleteListener(
+                        event -> captured.add(event.getResponse()))
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(captured.isEmpty(),
+                "Listener should not fire on error");
+    }
+
+    @Test
+    void responseCompleteListener_afterEmptyResponse_doesNotFire() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.empty());
+
+        var captured = new ArrayList<String>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseCompleteListener(
+                        event -> captured.add(event.getResponse()))
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(captured.isEmpty(),
+                "Listener should not fire on empty response");
+    }
+
+    @Test
+    void responseCompleteListener_receivesResponseText() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hello", " ", "World"));
+
+        var captured = new ArrayList<String>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseCompleteListener(
+                        event -> captured.add(event.getResponse()))
+                .build();
+        orchestrator.prompt("Hi");
+
+        Assertions.assertEquals(1, captured.size());
+        Assertions.assertEquals("Hello World", captured.getFirst());
+    }
+
+    @Test
+    void responseCompleteListener_afterMultipleExchanges_firesEachTime() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response 1"))
+                .thenReturn(Flux.just("Response 2"));
+
+        var captured = new ArrayList<String>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseCompleteListener(
+                        event -> captured.add(event.getResponse()))
+                .build();
+        orchestrator.prompt("First");
+        orchestrator.prompt("Second");
+
+        Assertions.assertEquals(2, captured.size());
+        Assertions.assertEquals("Response 1", captured.get(0));
+        Assertions.assertEquals("Response 2", captured.get(1));
+    }
+
+    @Test
+    void responseCompleteListener_withRestoredHistory_doesNotFire() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi there", null,
+                        null));
+
+        var captured = new ArrayList<String>();
+        AIOrchestrator.builder(mockProvider, null)
+                .withResponseCompleteListener(
+                        event -> captured.add(event.getResponse()))
+                .withHistory(history, Collections.emptyMap()).build();
+
+        Assertions.assertTrue(captured.isEmpty(),
+                "Listener should not fire when history is restored via withHistory()");
+    }
+
+    @Test
+    void responseCompleteListener_listenerThrows_doesNotBreakStreaming() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseCompleteListener(event -> {
+                    throw new RuntimeException("Listener error");
+                }).build();
+
+        // Should not throw
+        orchestrator.prompt("Hello");
+
+        // History should still be recorded
+        var history = orchestrator.getHistory();
+        Assertions.assertEquals(2, history.size());
     }
 
     private AIOrchestrator getSimpleOrchestrator() {
@@ -911,41 +1510,6 @@ public class AIOrchestratorTest {
 
     private void prompt(String message) {
         getSimpleOrchestrator().prompt(message);
-    }
-
-    private static void mockUi() {
-        mockUI = Mockito.mock(UI.class);
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
-            var futureTask = new FutureTask<Void>(() -> {
-                UI.setCurrent(mockUI);
-                try {
-                    command.execute();
-                } finally {
-                    UI.setCurrent(null);
-                }
-                return null;
-            });
-            new Thread(futureTask).start();
-            return futureTask;
-        }).when(mockUI).access(Mockito.any(Command.class));
-
-        // Mock feature flags to enable the AI components feature
-        FeatureFlags mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(AIOrchestrator.FEATURE_FLAG_ID))
-                .thenReturn(true);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-        Mockito.when(mockUI.getSession()).thenReturn(mockSession);
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
-                .thenReturn(mockFeatureFlags);
-
-        UI.setCurrent(mockUI);
     }
 
     private static AIMessage createMockMessage() {
@@ -967,11 +1531,10 @@ public class AIOrchestratorTest {
     }
 
     @Test
-    public void prompt_withFlowMessageList_scalesImageAttachmentThumbnails()
+    void prompt_withFlowMessageList_scalesImageAttachmentThumbnails()
             throws Exception {
         var initialWidth = 500;
         var initialHeight = 400;
-        mockUi();
         var flowMessageList = new MessageList();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -988,24 +1551,22 @@ public class AIOrchestratorTest {
 
         var attachment = flowMessageList.getItems().getFirst().getAttachments()
                 .getFirst();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 attachment.url().startsWith("data:image/jpeg;base64,"));
 
         var scaledImage = decodeDataUrlToImage(attachment.url());
         // 200 is the hardcoded max size for thumbnails
         var scaleFactor = (double) 200 / Math.max(initialWidth, initialHeight);
-        Assert.assertEquals((int) (scaleFactor * initialWidth),
+        Assertions.assertEquals((int) (scaleFactor * initialWidth),
                 scaledImage.getWidth());
-        Assert.assertEquals((int) (scaleFactor * initialHeight),
+        Assertions.assertEquals((int) (scaleFactor * initialHeight),
                 scaledImage.getHeight());
     }
 
     @Test
-    public void prompt_withFlowMessageList_smallImageNotScaled()
-            throws Exception {
+    void prompt_withFlowMessageList_smallImageNotScaled() throws Exception {
         var initialWidth = 100;
         var initialHeight = 80;
-        mockUi();
         var flowMessageList = new MessageList();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -1022,17 +1583,16 @@ public class AIOrchestratorTest {
 
         var attachment = flowMessageList.getItems().getFirst().getAttachments()
                 .getFirst();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 attachment.url().startsWith("data:image/png;base64,"));
 
         var image = decodeDataUrlToImage(attachment.url());
-        Assert.assertEquals(initialWidth, image.getWidth());
-        Assert.assertEquals(initialHeight, image.getHeight());
+        Assertions.assertEquals(initialWidth, image.getWidth());
+        Assertions.assertEquals(initialHeight, image.getHeight());
     }
 
     @Test
-    public void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl() {
-        mockUi();
+    void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl() {
         var flowMessageList = new MessageList();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -1047,9 +1607,9 @@ public class AIOrchestratorTest {
 
         var attachment = flowMessageList.getItems().getFirst().getAttachments()
                 .getFirst();
-        Assert.assertEquals("document.pdf", attachment.name());
-        Assert.assertEquals("application/pdf", attachment.mimeType());
-        Assert.assertNull(attachment.url());
+        Assertions.assertEquals("document.pdf", attachment.name());
+        Assertions.assertEquals("application/pdf", attachment.mimeType());
+        Assertions.assertNull(attachment.url());
     }
 
     private static byte[] createTestImage(int width, int height)

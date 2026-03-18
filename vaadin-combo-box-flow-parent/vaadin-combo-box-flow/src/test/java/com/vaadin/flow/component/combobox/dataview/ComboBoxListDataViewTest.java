@@ -30,21 +30,17 @@ import com.vaadin.flow.component.combobox.ComboBoxBase;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.tests.MockUI;
 import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
-
     private List<String> items;
     private ComboBoxListDataView<String> dataView;
     private ComboBox<String> component;
-    private MockUI ui;
 
     @Before
     public void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         component = new ComboBox<>();
-        ui = new MockUI();
         ui.add(component);
 
         dataView = component.setItems(items);
@@ -65,7 +61,7 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         setClientFilter(component, "ba");
         // Close combo box drop down to trigger the filter erase
         component.setOpened(false);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         Stream<String> filteredItems = dataView.getItems();
 
@@ -103,7 +99,7 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         setClientFilter(component, "ba");
         // Close combo box drop down to trigger the filter erase
         component.setOpened(false);
-        fakeClientCommunication();
+        ui.fakeClientCommunication();
 
         int itemCount = dataView.getItemCount();
 
@@ -168,11 +164,5 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

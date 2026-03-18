@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 
 public class DetailsTest {
@@ -55,34 +56,6 @@ public class DetailsTest {
     }
 
     @Test
-    public void setSummaryText_createsSummaryComponent() {
-        Assert.assertNull(details.getSummary());
-        details.setSummaryText("summary");
-        var summary = details.getSummary();
-        Assert.assertEquals("summary", summary.getElement().getText());
-    }
-
-    @Test
-    public void setSummaryText_reusesBuiltinSummaryComponent() {
-        details.setSummaryText("initial summary");
-        var builtinSummary = details.getSummary();
-        details.setSummaryText("updated summary");
-        Assert.assertEquals("updated summary",
-                builtinSummary.getElement().getText());
-        Assert.assertEquals(builtinSummary, details.getSummary());
-    }
-
-    @Test
-    public void setSummaryText_reusesCustomSummaryComponent() {
-        var customSummary = new Span("initial summary");
-        details.setSummary(customSummary);
-        details.setSummaryText("updated summary");
-        Assert.assertEquals("updated summary",
-                customSummary.getElement().getText());
-        Assert.assertEquals(customSummary, details.getSummary());
-    }
-
-    @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(details instanceof HasTooltip);
     }
@@ -99,5 +72,11 @@ public class DetailsTest {
         details.setOpened(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsHasThemeVariant() {
+        Assert.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Details.class));
     }
 }

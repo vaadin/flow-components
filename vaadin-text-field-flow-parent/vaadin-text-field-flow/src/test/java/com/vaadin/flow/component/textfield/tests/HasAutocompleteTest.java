@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.HasAutocomplete;
 
-public class HasAutocompleteTest {
+class HasAutocompleteTest {
 
     @Tag("div")
     public static class HasAutocompleteComponent extends Component
@@ -32,397 +32,416 @@ public class HasAutocompleteTest {
     }
 
     @Test
-    public void defaultValue() {
+    void defaultValue() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
-        Assert.assertEquals(null, c.getAutocomplete());
+        Assertions.assertEquals(null, c.getAutocomplete());
     }
 
     @Test
-    public void emptyValue() {
+    void emptyValue() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.getElement().setAttribute("autocomplete", "");
-        Assert.assertEquals(Autocomplete.OFF, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.OFF, c.getAutocomplete());
     }
 
     @Test
-    public void noAutocomplete() {
+    void noAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.OFF);
-        Assert.assertEquals(Autocomplete.OFF, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.OFF, c.getAutocomplete());
     }
 
     @Test
-    public void onAutocomplete() {
+    void onAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ON);
-        Assert.assertEquals(Autocomplete.ON, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ON, c.getAutocomplete());
     }
 
     @Test
-    public void nameAutocomplete() {
+    void nameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.NAME);
-        Assert.assertEquals(Autocomplete.NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.NAME, c.getAutocomplete());
     }
 
     @Test
-    public void honorificPrefixAutocomplete() {
+    void honorificPrefixAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.HONORIFIC_PREFIX);
-        Assert.assertEquals(Autocomplete.HONORIFIC_PREFIX, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.HONORIFIC_PREFIX,
+                c.getAutocomplete());
     }
 
     @Test
-    public void givenNameAutocomplete() {
+    void givenNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.GIVEN_NAME);
-        Assert.assertEquals(Autocomplete.GIVEN_NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.GIVEN_NAME, c.getAutocomplete());
     }
 
     @Test
-    public void additionalNameAutocomplete() {
+    void additionalNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDITIONAL_NAME);
-        Assert.assertEquals(Autocomplete.ADDITIONAL_NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDITIONAL_NAME,
+                c.getAutocomplete());
     }
 
     @Test
-    public void familyNameAutocomplete() {
+    void familyNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.FAMILY_NAME);
-        Assert.assertEquals(Autocomplete.FAMILY_NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.FAMILY_NAME, c.getAutocomplete());
     }
 
     @Test
-    public void honorificSuffixAutocomplete() {
+    void honorificSuffixAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.HONORIFIC_SUFFIX);
-        Assert.assertEquals(Autocomplete.HONORIFIC_SUFFIX, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.HONORIFIC_SUFFIX,
+                c.getAutocomplete());
     }
 
     @Test
-    public void nicknameAutocomplete() {
+    void nicknameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.NICKNAME);
-        Assert.assertEquals(Autocomplete.NICKNAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.NICKNAME, c.getAutocomplete());
     }
 
     @Test
-    public void emailAutocomplete() {
+    void emailAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.EMAIL);
-        Assert.assertEquals(Autocomplete.EMAIL, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.EMAIL, c.getAutocomplete());
     }
 
     @Test
-    public void usernameAutocomplete() {
+    void usernameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.USERNAME);
-        Assert.assertEquals(Autocomplete.USERNAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.USERNAME, c.getAutocomplete());
     }
 
     @Test
-    public void newPasswordAutocomplete() {
+    void newPasswordAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.NEW_PASSWORD);
-        Assert.assertEquals(Autocomplete.NEW_PASSWORD, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.NEW_PASSWORD, c.getAutocomplete());
     }
 
     @Test
-    public void currentPasswordAutocomplete() {
+    void currentPasswordAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CURRENT_PASSWORD);
-        Assert.assertEquals(Autocomplete.CURRENT_PASSWORD, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CURRENT_PASSWORD,
+                c.getAutocomplete());
     }
 
     @Test
-    public void organizationTitleAutocomplete() {
+    void organizationTitleAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ORGANIZATION_TITLE);
-        Assert.assertEquals(Autocomplete.ORGANIZATION_TITLE,
+        Assertions.assertEquals(Autocomplete.ORGANIZATION_TITLE,
                 c.getAutocomplete());
     }
 
     @Test
-    public void organizationAutocomplete() {
+    void organizationAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ORGANIZATION);
-        Assert.assertEquals(Autocomplete.ORGANIZATION, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ORGANIZATION, c.getAutocomplete());
     }
 
     @Test
-    public void streetAddressAutocomplete() {
+    void streetAddressAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.STREET_ADDRESS);
-        Assert.assertEquals(Autocomplete.STREET_ADDRESS, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.STREET_ADDRESS,
+                c.getAutocomplete());
     }
 
     @Test
-    public void addressLine1Autocomplete() {
+    void addressLine1Autocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDRESS_LINE1);
-        Assert.assertEquals(Autocomplete.ADDRESS_LINE1, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDRESS_LINE1,
+                c.getAutocomplete());
     }
 
     @Test
-    public void addressLine2Autocomplete() {
+    void addressLine2Autocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDRESS_LINE2);
-        Assert.assertEquals(Autocomplete.ADDRESS_LINE2, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDRESS_LINE2,
+                c.getAutocomplete());
     }
 
     @Test
-    public void addressLine3Autocomplete() {
+    void addressLine3Autocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDRESS_LINE3);
-        Assert.assertEquals(Autocomplete.ADDRESS_LINE3, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDRESS_LINE3,
+                c.getAutocomplete());
     }
 
     @Test
-    public void addressLevel1Autocomplete() {
+    void addressLevel1Autocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDRESS_LEVEL1);
-        Assert.assertEquals(Autocomplete.ADDRESS_LEVEL1, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDRESS_LEVEL1,
+                c.getAutocomplete());
     }
 
     @Test
-    public void addressLevel2Autocomplete() {
+    void addressLevel2Autocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDRESS_LEVEL2);
-        Assert.assertEquals(Autocomplete.ADDRESS_LEVEL2, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDRESS_LEVEL2,
+                c.getAutocomplete());
     }
 
     @Test
-    public void addressLevel3Autocomplete() {
+    void addressLevel3Autocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDRESS_LEVEL3);
-        Assert.assertEquals(Autocomplete.ADDRESS_LEVEL3, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDRESS_LEVEL3,
+                c.getAutocomplete());
     }
 
     @Test
-    public void addressLevel4Autocomplete() {
+    void addressLevel4Autocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.ADDRESS_LEVEL4);
-        Assert.assertEquals(Autocomplete.ADDRESS_LEVEL4, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.ADDRESS_LEVEL4,
+                c.getAutocomplete());
     }
 
     @Test
-    public void countryAutocomplete() {
+    void countryAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.COUNTRY);
-        Assert.assertEquals(Autocomplete.COUNTRY, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.COUNTRY, c.getAutocomplete());
     }
 
     @Test
-    public void countryNameAutocomplete() {
+    void countryNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.COUNTRY_NAME);
-        Assert.assertEquals(Autocomplete.COUNTRY_NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.COUNTRY_NAME, c.getAutocomplete());
     }
 
     @Test
-    public void postalCodeAutocomplete() {
+    void postalCodeAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.POSTAL_CODE);
-        Assert.assertEquals(Autocomplete.POSTAL_CODE, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.POSTAL_CODE, c.getAutocomplete());
     }
 
     @Test
-    public void ccNameAutocomplete() {
+    void ccNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_NAME);
-        Assert.assertEquals(Autocomplete.CC_NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_NAME, c.getAutocomplete());
     }
 
     @Test
-    public void ccGivenNameAutocomplete() {
+    void ccGivenNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_GIVEN_NAME);
-        Assert.assertEquals(Autocomplete.CC_GIVEN_NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_GIVEN_NAME,
+                c.getAutocomplete());
     }
 
     @Test
-    public void ccAdditionalNameAutocomplete() {
+    void ccAdditionalNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_ADDITIONAL_NAME);
-        Assert.assertEquals(Autocomplete.CC_ADDITIONAL_NAME,
+        Assertions.assertEquals(Autocomplete.CC_ADDITIONAL_NAME,
                 c.getAutocomplete());
     }
 
     @Test
-    public void ccFamilyNameAutocomplete() {
+    void ccFamilyNameAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_FAMILY_NAME);
-        Assert.assertEquals(Autocomplete.CC_FAMILY_NAME, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_FAMILY_NAME,
+                c.getAutocomplete());
     }
 
     @Test
-    public void ccNumberAutocomplete() {
+    void ccNumberAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_NUMBER);
-        Assert.assertEquals(Autocomplete.CC_NUMBER, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_NUMBER, c.getAutocomplete());
     }
 
     @Test
-    public void ccExpAutocomplete() {
+    void ccExpAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_EXP);
-        Assert.assertEquals(Autocomplete.CC_EXP, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_EXP, c.getAutocomplete());
     }
 
     @Test
-    public void ccExpMonthAutocomplete() {
+    void ccExpMonthAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_EXP_MONTH);
-        Assert.assertEquals(Autocomplete.CC_EXP_MONTH, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_EXP_MONTH, c.getAutocomplete());
     }
 
     @Test
-    public void ccExpYearAutocomplete() {
+    void ccExpYearAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_EXP_YEAR);
-        Assert.assertEquals(Autocomplete.CC_EXP_YEAR, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_EXP_YEAR, c.getAutocomplete());
     }
 
     @Test
-    public void ccCscAutocomplete() {
+    void ccCscAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_CSC);
-        Assert.assertEquals(Autocomplete.CC_CSC, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_CSC, c.getAutocomplete());
     }
 
     @Test
-    public void ccTypeAutocomplete() {
+    void ccTypeAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.CC_TYPE);
-        Assert.assertEquals(Autocomplete.CC_TYPE, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.CC_TYPE, c.getAutocomplete());
     }
 
     @Test
-    public void transactionCurrencyAutocomplete() {
+    void transactionCurrencyAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TRANSACTION_CURRENCY);
-        Assert.assertEquals(Autocomplete.TRANSACTION_CURRENCY,
+        Assertions.assertEquals(Autocomplete.TRANSACTION_CURRENCY,
                 c.getAutocomplete());
     }
 
     @Test
-    public void transactionAmountAutocomplete() {
+    void transactionAmountAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TRANSACTION_AMOUNT);
-        Assert.assertEquals(Autocomplete.TRANSACTION_AMOUNT,
+        Assertions.assertEquals(Autocomplete.TRANSACTION_AMOUNT,
                 c.getAutocomplete());
     }
 
     @Test
-    public void languageAutocomplete() {
+    void languageAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.LANGUAGE);
-        Assert.assertEquals(Autocomplete.LANGUAGE, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.LANGUAGE, c.getAutocomplete());
     }
 
     @Test
-    public void bdayAutocomplete() {
+    void bdayAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.BDAY);
-        Assert.assertEquals(Autocomplete.BDAY, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.BDAY, c.getAutocomplete());
     }
 
     @Test
-    public void bdayDayAutocomplete() {
+    void bdayDayAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.BDAY_DAY);
-        Assert.assertEquals(Autocomplete.BDAY_DAY, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.BDAY_DAY, c.getAutocomplete());
     }
 
     @Test
-    public void bdayMonthAutocomplete() {
+    void bdayMonthAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.BDAY_MONTH);
-        Assert.assertEquals(Autocomplete.BDAY_MONTH, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.BDAY_MONTH, c.getAutocomplete());
     }
 
     @Test
-    public void bdayYearAutocomplete() {
+    void bdayYearAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.BDAY_YEAR);
-        Assert.assertEquals(Autocomplete.BDAY_YEAR, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.BDAY_YEAR, c.getAutocomplete());
     }
 
     @Test
-    public void sexAutocomplete() {
+    void sexAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.SEX);
-        Assert.assertEquals(Autocomplete.SEX, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.SEX, c.getAutocomplete());
     }
 
     @Test
-    public void telAutocomplete() {
+    void telAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL);
-        Assert.assertEquals(Autocomplete.TEL, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL, c.getAutocomplete());
     }
 
     @Test
-    public void telCountryCodeAutocomplete() {
+    void telCountryCodeAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL_COUNTRY_CODE);
-        Assert.assertEquals(Autocomplete.TEL_COUNTRY_CODE, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL_COUNTRY_CODE,
+                c.getAutocomplete());
     }
 
     @Test
-    public void telNationalAutocomplete() {
+    void telNationalAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL_NATIONAL);
-        Assert.assertEquals(Autocomplete.TEL_NATIONAL, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL_NATIONAL, c.getAutocomplete());
     }
 
     @Test
-    public void telAreaCodeAutocomplete() {
+    void telAreaCodeAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL_AREA_CODE);
-        Assert.assertEquals(Autocomplete.TEL_AREA_CODE, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL_AREA_CODE,
+                c.getAutocomplete());
     }
 
     @Test
-    public void telLocalAutocomplete() {
+    void telLocalAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL_LOCAL);
-        Assert.assertEquals(Autocomplete.TEL_LOCAL, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL_LOCAL, c.getAutocomplete());
     }
 
     @Test
-    public void telLocalPrefixAutocomplete() {
+    void telLocalPrefixAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL_LOCAL_PREFIX);
-        Assert.assertEquals(Autocomplete.TEL_LOCAL_PREFIX, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL_LOCAL_PREFIX,
+                c.getAutocomplete());
     }
 
     @Test
-    public void telLocalSuffixAutocomplete() {
+    void telLocalSuffixAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL_LOCAL_SUFFIX);
-        Assert.assertEquals(Autocomplete.TEL_LOCAL_SUFFIX, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL_LOCAL_SUFFIX,
+                c.getAutocomplete());
     }
 
     @Test
-    public void telExtensionAutocomplete() {
+    void telExtensionAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.TEL_EXTENSION);
-        Assert.assertEquals(Autocomplete.TEL_EXTENSION, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.TEL_EXTENSION,
+                c.getAutocomplete());
     }
 
     @Test
-    public void urlAutocomplete() {
+    void urlAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.URL);
-        Assert.assertEquals(Autocomplete.URL, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.URL, c.getAutocomplete());
     }
 
     @Test
-    public void photoAutocomplete() {
+    void photoAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.PHOTO);
-        Assert.assertEquals(Autocomplete.PHOTO, c.getAutocomplete());
+        Assertions.assertEquals(Autocomplete.PHOTO, c.getAutocomplete());
     }
 }

@@ -15,148 +15,119 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import java.util.concurrent.CompletableFuture;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class UploadDropZoneTest {
+class UploadDropZoneTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+            ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
-    private UI ui;
     private Div owner;
     private UploadManager manager;
-    private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
-    @Before
-    public void setup() {
-        ui = Mockito.spy(new UI());
-        UI.setCurrent(ui);
-
-        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
-        StreamResourceRegistry streamResourceRegistry = new StreamResourceRegistry(
-                mockSession);
-        Mockito.when(mockSession.getResourceRegistry())
-                .thenReturn(streamResourceRegistry);
-        Mockito.when(mockSession.access(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    invocation.getArgument(0, Command.class).execute();
-                    return new CompletableFuture<>();
-                });
-        Mockito.when(mockSession.getService()).thenReturn(mockService);
-        Mockito.when(mockService.getContext()).thenReturn(mockContext);
-        mockFeatureFlagsStatic = UploadManagerFeatureFlagHelper
-                .mockFeatureFlag(mockContext);
-        ui.getInternals().setSession(mockSession);
-
+    @BeforeEach
+    void setup() {
         owner = new Div();
         ui.add(owner);
         manager = new UploadManager(owner);
     }
 
-    @After
-    public void tearDown() {
-        mockFeatureFlagsStatic.close();
-        UI.setCurrent(null);
-    }
-
     @Test
-    public void constructor_default_createsDropZone() {
+    void constructor_default_createsDropZone() {
         UploadDropZone dropZone = new UploadDropZone();
 
-        Assert.assertNotNull(dropZone);
-        Assert.assertEquals("vaadin-upload-drop-zone",
+        Assertions.assertNotNull(dropZone);
+        Assertions.assertEquals("vaadin-upload-drop-zone",
                 dropZone.getElement().getTag());
     }
 
     @Test
-    public void constructor_withManager_linksToManager() {
+    void constructor_withManager_linksToManager() {
         UploadDropZone dropZone = new UploadDropZone(manager);
 
-        Assert.assertSame(manager, dropZone.getUploadManager());
+        Assertions.assertSame(manager, dropZone.getUploadManager());
     }
 
     @Test
-    public void constructor_withContentAndManager_setsContentAndLinksToManager() {
+    void constructor_withContentAndManager_setsContentAndLinksToManager() {
         Span content = new Span("Drop files here");
         UploadDropZone dropZone = new UploadDropZone(content, manager);
 
-        Assert.assertSame(content, dropZone.getContent());
-        Assert.assertSame(manager, dropZone.getUploadManager());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void constructor_withNull_throws() {
-        new UploadDropZone((UploadManager) null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void constructor_withContentAndNullManager_throws() {
-        new UploadDropZone(new Span(), null);
+        Assertions.assertSame(content, dropZone.getContent());
+        Assertions.assertSame(manager, dropZone.getUploadManager());
     }
 
     @Test
-    public void setUploadManager_linksToManager() {
+    void constructor_withNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new UploadDropZone((UploadManager) null));
+    }
+
+    @Test
+    void constructor_withContentAndNullManager_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new UploadDropZone(new Span(), null));
+    }
+
+    @Test
+    void setUploadManager_linksToManager() {
         UploadDropZone dropZone = new UploadDropZone();
 
         dropZone.setUploadManager(manager);
 
-        Assert.assertSame(manager, dropZone.getUploadManager());
+        Assertions.assertSame(manager, dropZone.getUploadManager());
     }
 
     @Test
-    public void getUploadManager_default_returnsNull() {
+    void getUploadManager_default_returnsNull() {
         UploadDropZone dropZone = new UploadDropZone();
 
-        Assert.assertNull(dropZone.getUploadManager());
+        Assertions.assertNull(dropZone.getUploadManager());
     }
 
     @Test
-    public void implementsHasEnabled() {
-        Assert.assertTrue(
+    void implementsHasEnabled() {
+        Assertions.assertTrue(
                 HasEnabled.class.isAssignableFrom(UploadDropZone.class));
     }
 
     @Test
-    public void implementsHasSize() {
-        Assert.assertTrue(HasSize.class.isAssignableFrom(UploadDropZone.class));
+    void implementsHasSize() {
+        Assertions.assertTrue(
+                HasSize.class.isAssignableFrom(UploadDropZone.class));
     }
 
     @Test
-    public void setContent_setsChildComponent() {
+    void setContent_setsChildComponent() {
         UploadDropZone dropZone = new UploadDropZone();
         Span span = new Span("Drop files here");
 
         dropZone.setContent(span);
 
-        Assert.assertEquals(1, dropZone.getElement().getChildCount());
-        Assert.assertSame(span, dropZone.getContent());
+        Assertions.assertEquals(1, dropZone.getElement().getChildCount());
+        Assertions.assertSame(span, dropZone.getContent());
     }
 
     @Test
-    public void setContent_replacesExistingContent() {
+    void setContent_replacesExistingContent() {
         UploadDropZone dropZone = new UploadDropZone();
         Span first = new Span("First");
         Span second = new Span("Second");
@@ -164,25 +135,25 @@ public class UploadDropZoneTest {
         dropZone.setContent(first);
         dropZone.setContent(second);
 
-        Assert.assertEquals(1, dropZone.getElement().getChildCount());
-        Assert.assertSame(second, dropZone.getContent());
+        Assertions.assertEquals(1, dropZone.getElement().getChildCount());
+        Assertions.assertSame(second, dropZone.getContent());
     }
 
     @Test
-    public void setContent_null_removesContent() {
+    void setContent_null_removesContent() {
         UploadDropZone dropZone = new UploadDropZone();
         dropZone.setContent(new Span("Content"));
 
         dropZone.setContent(null);
 
-        Assert.assertEquals(0, dropZone.getElement().getChildCount());
-        Assert.assertNull(dropZone.getContent());
+        Assertions.assertEquals(0, dropZone.getElement().getChildCount());
+        Assertions.assertNull(dropZone.getContent());
     }
 
     @Test
-    public void getContent_default_returnsNull() {
+    void getContent_default_returnsNull() {
         UploadDropZone dropZone = new UploadDropZone();
 
-        Assert.assertNull(dropZone.getContent());
+        Assertions.assertNull(dropZone.getContent());
     }
 }

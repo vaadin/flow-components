@@ -69,6 +69,11 @@ class MessageListItemWrapper implements AIMessage {
     }
 
     @Override
+    public void setTime(Instant time) {
+        item.setTime(time);
+    }
+
+    @Override
     public String getUserName() {
         return item.getUserName();
     }

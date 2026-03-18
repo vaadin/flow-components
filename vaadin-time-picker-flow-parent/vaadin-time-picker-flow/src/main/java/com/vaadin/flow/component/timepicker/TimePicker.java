@@ -35,7 +35,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -56,6 +55,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -111,7 +111,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.1.0-rc1")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -135,8 +135,6 @@ public class TimePicker
 
     private Locale locale;
 
-    private LocalTime max;
-    private LocalTime min;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
     private String unparsableValue;
@@ -145,6 +143,8 @@ public class TimePicker
 
     private Validator<LocalTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
+        var min = getMin();
+        var max = getMax();
 
         if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
@@ -185,11 +185,6 @@ public class TimePicker
 
     private ValidationController<TimePicker, LocalTime> validationController = new ValidationController<>(
             this);
-
-    private final SignalPropertySupport<LocalTime> minSupport = SignalPropertySupport
-            .create(this, value -> this.min = value);
-    private final SignalPropertySupport<LocalTime> maxSupport = SignalPropertySupport
-            .create(this, value -> this.max = value);
 
     /**
      * Default constructor.
@@ -782,9 +777,7 @@ public class TimePicker
      * @see TimePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalTime min) {
-        this.min = min;
-        String minString = format(min);
-        getElement().setProperty("min", minString == null ? "" : minString);
+        getElement().setProperty("min", FORMATTER.apply(min));
     }
 
     /**
@@ -794,7 +787,7 @@ public class TimePicker
      * @see #setMax(LocalTime)
      */
     public LocalTime getMin() {
-        return this.min;
+        return PARSER.apply(getElement().getProperty("min"));
     }
 
     /**
@@ -809,9 +802,7 @@ public class TimePicker
      * @see TimePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalTime max) {
-        this.max = max;
-        String maxString = format(max);
-        getElement().setProperty("max", maxString == null ? "" : maxString);
+        getElement().setProperty("max", FORMATTER.apply(max));
     }
 
     /**
@@ -821,16 +812,17 @@ public class TimePicker
      * @see #setMin(LocalTime)
      */
     public LocalTime getMax() {
-        return this.max;
+        return PARSER.apply(getElement().getProperty("max"));
     }
 
     /**
      * Binds the given signal to the minimum time allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the minimum time is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The minimum time is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum time manually
      * through {@link #setMin(LocalTime)} throws a
@@ -838,27 +830,28 @@ public class TimePicker
      *
      * @param signal
      *            the signal to bind the minimum time to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMin(LocalTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMin(Signal<LocalTime> signal) {
+    public SignalBinding<String> bindMin(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("min",
-                signal.map(
-                        time -> Objects.requireNonNullElse(format(time), "")),
+        return getElement().bindProperty("min", signal.map(FORMATTER::apply),
                 null);
-        minSupport.bind(signal);
     }
 
     /**
      * Binds the given signal to the maximum time allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the maximum time is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The maximum time is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum time manually
      * through {@link #setMax(LocalTime)} throws a
@@ -866,18 +859,18 @@ public class TimePicker
      *
      * @param signal
      *            the signal to bind the maximum time to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
      * @see #setMax(LocalTime)
      * @see com.vaadin.flow.dom.Element#bindProperty(String, Signal,
      *      SerializableConsumer)
      * @since 25.1
      */
-    public void bindMax(Signal<LocalTime> signal) {
+    public SignalBinding<String> bindMax(Signal<LocalTime> signal) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("max",
-                signal.map(
-                        time -> Objects.requireNonNullElse(format(time), "")),
+        return getElement().bindProperty("max", signal.map(FORMATTER::apply),
                 null);
-        maxSupport.bind(signal);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -902,10 +895,6 @@ public class TimePicker
     public static Stream<Locale> getSupportedAvailableLocales() {
         return Stream.of(Locale.getAvailableLocales())
                 .filter(locale -> !locale.getLanguage().isEmpty());
-    }
-
-    private static String format(LocalTime time) {
-        return time != null ? time.toString() : null;
     }
 
     /**

@@ -49,6 +49,14 @@ public interface AIMessage extends Serializable {
     Instant getTime();
 
     /**
+     * Sets the timestamp of the message.
+     *
+     * @param time
+     *            the timestamp to set
+     */
+    void setTime(Instant time);
+
+    /**
      * Gets the name of the message sender.
      *
      * @return the sender name

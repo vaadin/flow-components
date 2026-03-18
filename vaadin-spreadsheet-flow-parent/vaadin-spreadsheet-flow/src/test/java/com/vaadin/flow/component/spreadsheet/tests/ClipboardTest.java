@@ -11,34 +11,26 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.ProtectedEditEvent;
+import com.vaadin.tests.MockUIRule;
 
 public class ClipboardTest {
+    @Rule
+    public MockUIRule ui = new MockUIRule();
 
     private Spreadsheet spreadsheet;
-
-    private UI ui;
 
     @Before
     public void init() {
         spreadsheet = new Spreadsheet();
         spreadsheet.setLocale(Locale.US);
-        ui = new UI();
-        UI.setCurrent(ui);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
-        ui = null;
     }
 
     @Test

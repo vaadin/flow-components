@@ -17,92 +17,92 @@ package com.vaadin.flow.component.ai.provider;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 
-public class LLMProviderHelpersTest {
+class LLMProviderHelpersTest {
 
     @Test
-    public void decodeAsUtf8_withValidUtf8_strictMode_returnsDecodedString() {
+    void decodeAsUtf8_withValidUtf8_strictMode_returnsDecodedString() {
         var data = getValidUtf8Data();
         var input = new String(data, StandardCharsets.UTF_8);
         var result = LLMProviderHelpers.decodeAsUtf8(data, "test.txt", true);
-        Assert.assertEquals(input, result);
+        Assertions.assertEquals(input, result);
     }
 
     @Test
-    public void decodeAsUtf8_withValidUtf8_lenientMode_returnsDecodedString() {
+    void decodeAsUtf8_withValidUtf8_lenientMode_returnsDecodedString() {
         var data = getValidUtf8Data();
         var input = new String(data, StandardCharsets.UTF_8);
         var result = LLMProviderHelpers.decodeAsUtf8(data, "test.txt", false);
-        Assert.assertEquals(input, result);
+        Assertions.assertEquals(input, result);
     }
 
     @Test
-    public void decodeAsUtf8_withInvalidUtf8_strictMode_throwsException() {
+    void decodeAsUtf8_withInvalidUtf8_strictMode_throwsException() {
         var data = getInvalidUtf8Data();
-        var exception = Assert.assertThrows(IllegalArgumentException.class,
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> LLMProviderHelpers.decodeAsUtf8(data, "binary.pdf",
                         true));
-        Assert.assertTrue(exception.getMessage().contains("binary.pdf"));
-        Assert.assertTrue(exception.getMessage().contains("invalid UTF-8"));
+        Assertions.assertTrue(exception.getMessage().contains("binary.pdf"));
+        Assertions.assertTrue(exception.getMessage().contains("invalid UTF-8"));
     }
 
     @Test
-    public void decodeAsUtf8_withInvalidUtf8_lenientMode_replacesInvalidSequences() {
+    void decodeAsUtf8_withInvalidUtf8_lenientMode_replacesInvalidSequences() {
         var data = getInvalidUtf8Data();
         var result = LLMProviderHelpers.decodeAsUtf8(data, "test.txt", false);
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.startsWith("Hi"));
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.startsWith("Hi"));
     }
 
     @Test
-    public void decodeAsUtf8_withEmptyData_returnsEmptyString() {
+    void decodeAsUtf8_withEmptyData_returnsEmptyString() {
         var data = new byte[0];
         var result = LLMProviderHelpers.decodeAsUtf8(data, "empty.txt", true);
-        Assert.assertEquals("", result);
+        Assertions.assertEquals("", result);
     }
 
     @Test
-    public void formatTextAttachment_returnsCorrectFormat() {
+    void formatTextAttachment_returnsCorrectFormat() {
         var result = LLMProviderHelpers.formatTextAttachment("doc.txt",
                 "Hello World");
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "\n<attachment filename=\"doc.txt\">\nHello World\n</attachment>\n",
                 result);
     }
 
     @Test
-    public void formatTextAttachment_withSpecialCharactersInContent_preservesContent() {
+    void formatTextAttachment_withSpecialCharactersInContent_preservesContent() {
         var content = "Line1\nLine2\n<xml>tag</xml>";
         var result = LLMProviderHelpers.formatTextAttachment("file.txt",
                 content);
-        Assert.assertTrue(result.contains(content));
-        Assert.assertTrue(result.contains("filename=\"file.txt\""));
+        Assertions.assertTrue(result.contains(content));
+        Assertions.assertTrue(result.contains("filename=\"file.txt\""));
     }
 
     @Test
-    public void formatTextAttachment_withEmptyContent_returnsValidFormat() {
+    void formatTextAttachment_withEmptyContent_returnsValidFormat() {
         var result = LLMProviderHelpers.formatTextAttachment("empty.txt", "");
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "\n<attachment filename=\"empty.txt\">\n\n</attachment>\n",
                 result);
     }
 
     @Test
-    public void validateAttachment_withValidAttachment_doesNotThrow() {
+    void validateAttachment_withValidAttachment_doesNotThrow() {
         var attachment = new AIAttachment("file.txt", "text/plain",
                 getValidUtf8Data());
         LLMProviderHelpers.validateAttachment(attachment);
     }
 
     @Test
-    public void validateAttachment_withNullAttachment_throwsNullPointerException() {
-        var exception = Assert.assertThrows(NullPointerException.class,
+    void validateAttachment_withNullAttachment_throwsNullPointerException() {
+        var exception = Assertions.assertThrows(NullPointerException.class,
                 () -> LLMProviderHelpers.validateAttachment(null));
-        Assert.assertEquals("Attachment must not be null",
+        Assertions.assertEquals("Attachment must not be null",
                 exception.getMessage());
     }
 

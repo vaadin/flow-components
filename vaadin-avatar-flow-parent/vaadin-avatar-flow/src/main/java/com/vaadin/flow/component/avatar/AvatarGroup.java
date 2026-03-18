@@ -36,11 +36,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
@@ -52,6 +54,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -70,7 +73,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.1.0-alpha7")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.1.0-rc1")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -549,6 +552,9 @@ public class AvatarGroup extends Component
         }
     }
 
+    private final SignalPropertySupport<Collection<AvatarGroupItem>> itemsSupport = SignalPropertySupport
+            .create(this, this::updateItems);
+
     private List<AvatarGroupItem> items = Collections.emptyList();
     private boolean pendingUpdate = false;
 
@@ -583,17 +589,31 @@ public class AvatarGroup extends Component
     }
 
     /**
+     * Creates an avatar group with the provided signal bound to the items.
+     * <p>
+     * The rendered avatars are updated when the signal's value or any
+     * individual item signal changes.
+     *
+     * @param <S>
+     *            the type of signal holding individual items
+     * @param itemsSignal
+     *            the signal to bind the items to, not {@code null}
+     * @see #bindItems(Signal)
+     * @since 25.1
+     */
+    public <S extends Signal<AvatarGroupItem>> AvatarGroup(
+            Signal<List<S>> itemsSignal) {
+        bindItems(itemsSignal);
+    }
+
+    /**
      * Sets the items that will be displayed as avatars.
      *
      * @param items
      *            the items to set
      */
     public void setItems(Collection<AvatarGroupItem> items) {
-        this.items.forEach(item -> item.setHost(null));
-
-        this.items = new ArrayList<>(items);
-        items.stream().forEach(item -> item.setHost(this));
-        setClientItems();
+        itemsSupport.set(items);
     }
 
     /**
@@ -604,6 +624,13 @@ public class AvatarGroup extends Component
      */
     public void setItems(AvatarGroupItem... items) {
         setItems(Arrays.asList(items));
+    }
+
+    private void updateItems(Collection<AvatarGroupItem> items) {
+        this.items.forEach(item -> item.setHost(null));
+        this.items = new ArrayList<>(items);
+        this.items.forEach(item -> item.setHost(this));
+        setClientItems();
     }
 
     private void setClientItems() {
@@ -653,6 +680,37 @@ public class AvatarGroup extends Component
      */
     public List<AvatarGroupItem> getItems() {
         return Collections.unmodifiableList(items);
+    }
+
+    /**
+     * Binds the given signal to the items of the avatar group as a one-way
+     * binding so that the rendered avatars are updated when the signal's value
+     * or any individual item signal changes.
+     * <p>
+     * The items are set immediately with the current signal value when the
+     * binding is created, and are kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to modify items manually through
+     * {@link #setItems(Collection)}, {@link #add(AvatarGroupItem...)}, or
+     * {@link #remove(AvatarGroupItem...)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.
+     *
+     * @param <S>
+     *            the type of signal holding individual items
+     * @param itemsSignal
+     *            the signal to bind the items to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.1
+     */
+    public <S extends Signal<AvatarGroupItem>> SignalBinding<Collection<AvatarGroupItem>> bindItems(
+            Signal<List<S>> itemsSignal) {
+        Objects.requireNonNull(itemsSignal, "Signal cannot be null");
+        return itemsSupport.bind(() -> itemsSignal.get().stream()
+                .map(Signal::get).collect(Collectors.toList()));
     }
 
     /**
