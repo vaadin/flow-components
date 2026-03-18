@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.poi.ss.util.CellReference;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
@@ -94,32 +94,33 @@ public class ChartTestBase {
     }
 
     protected void assertData(List<Series> seriesList, Number[] data) {
-        Assert.assertEquals("The number of series is not correct", data.length,
-                ((DataSeries) seriesList.get(0)).getData().size());
+        Assertions.assertEquals(data.length,
+                ((DataSeries) seriesList.get(0)).getData().size(),
+                "The number of series is not correct");
         for (int i = 0; i < data.length; i++) {
             final Number y = ((DataSeries) seriesList.get(0)).getData().get(i)
                     .getY();
             if (data[i] != null) {
-                Assert.assertEquals((Double) y, data[i].doubleValue(), 0.1);
+                Assertions.assertEquals((Double) y, data[i].doubleValue(), 0.1);
             } else {
-                Assert.assertNull(y);
+                Assertions.assertNull(y);
             }
         }
     }
 
     protected void assertData(List<Series> seriesList, Number[][] data) {
-        Assert.assertEquals("The number of series is not correct", data.length,
-                seriesList.size());
+        Assertions.assertEquals(data.length, seriesList.size(),
+                "The number of series is not correct");
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[i].length; j++) {
                 final Number y = ((DataSeries) seriesList.get(i)).getData()
                         .get(j).getY();
 
                 if (data[i][j] != null) {
-                    Assert.assertEquals((Double) y, data[i][j].doubleValue(),
-                            0.1);
+                    Assertions.assertEquals((Double) y,
+                            data[i][j].doubleValue(), 0.1);
                 } else {
-                    Assert.assertNull(y);
+                    Assertions.assertNull(y);
                 }
             }
         }
@@ -131,17 +132,19 @@ public class ChartTestBase {
             final Number x = series.getData().get(i).getX();
 
             if (data[i] != null) {
-                Assert.assertEquals((Double) x, data[0][i].doubleValue(), 0.1);
-                Assert.assertEquals((Double) y, data[1][i].doubleValue(), 0.1);
+                Assertions.assertEquals((Double) x, data[0][i].doubleValue(),
+                        0.1);
+                Assertions.assertEquals((Double) y, data[1][i].doubleValue(),
+                        0.1);
             } else {
-                Assert.assertNull(y);
+                Assertions.assertNull(y);
             }
         }
     }
 
     protected void assert3dEnabled(Configuration conf) {
-        Assert.assertTrue("3D should be enabled for this chart",
-                conf.getChart().getOptions3d().getEnabled());
+        Assertions.assertTrue(conf.getChart().getOptions3d().getEnabled(),
+                "3D should be enabled for this chart");
     }
 
     protected void assertSeriesType(List<Series> seriesList, ChartType type) {
@@ -151,8 +154,8 @@ public class ChartTestBase {
     }
 
     protected void assertSingleSeriesType(Series series, ChartType type) {
-        Assert.assertEquals("Wrong series type", type,
-                series.getPlotOptions().getChartType());
+        Assertions.assertEquals(type, series.getPlotOptions().getChartType(),
+                "Wrong series type");
     }
 
     protected void assertStacking(List<Series> seriesList, Stacking stacking) {
@@ -169,10 +172,9 @@ public class ChartTestBase {
                 actualStacking = ((PlotOptionsBar) plotOptions).getStacking();
             }
 
-            Assert.assertEquals(
+            Assertions.assertEquals(stacking, actualStacking,
                     "Stacking type is wrong for series "
-                            + seriesList.indexOf(series),
-                    stacking, actualStacking);
+                            + seriesList.indexOf(series));
         }
     }
 
@@ -195,11 +197,10 @@ public class ChartTestBase {
 
             System.out.println("Dash style is " + actualDashStyle);
 
-            Assert.assertEquals(
-                    "Dash style is wrong for series "
-                            + seriesList.indexOf(series),
+            Assertions.assertEquals(
                     dashStyles[Math.min(dashStyles.length - 1, index++)],
-                    actualDashStyle);
+                    actualDashStyle, "Dash style is wrong for series "
+                            + seriesList.indexOf(series));
         }
     }
 
