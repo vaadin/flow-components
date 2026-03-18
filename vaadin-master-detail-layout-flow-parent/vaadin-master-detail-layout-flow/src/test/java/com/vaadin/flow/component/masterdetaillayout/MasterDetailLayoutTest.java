@@ -47,6 +47,18 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
+    public void constructorWithSizesAndExpand() {
+        var customLayout = new MasterDetailLayout("400px", "200px",
+                MasterDetailLayout.Expand.MASTER);
+        ui.add(customLayout);
+
+        Assert.assertEquals("400px", customLayout.getMasterSize());
+        Assert.assertEquals("200px", customLayout.getDetailSize());
+        Assert.assertEquals(MasterDetailLayout.Expand.MASTER,
+                customLayout.getExpand());
+    }
+
+    @Test
     public void setMaster() {
         var master = new Div();
         layout.setMaster(master);
