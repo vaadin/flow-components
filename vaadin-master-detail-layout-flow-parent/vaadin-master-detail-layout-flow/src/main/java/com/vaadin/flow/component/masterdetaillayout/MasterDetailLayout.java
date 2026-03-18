@@ -79,7 +79,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      * Supported expand values for {@link MasterDetailLayout}. Controls which
      * area(s) expand to fill available space.
      */
-    public enum Expand {
+    public enum ExpandingArea {
         MASTER, DETAIL, BOTH
     }
 
@@ -97,14 +97,36 @@ public class MasterDetailLayout extends Component implements HasSize,
      *            the size of the master area in CSS length units
      * @param detailSize
      *            the size of the detail area in CSS length units
-     * @param expandingSide
+     * @param expandingArea
      *            which area(s) expand to fill available space
      */
     public MasterDetailLayout(String masterSize, String detailSize,
-            Expand expandingSide) {
+            ExpandingArea expandingArea) {
         setMasterSize(masterSize);
         setDetailSize(detailSize);
-        setExpand(expandingSide);
+        setExpandingArea(expandingArea);
+    }
+
+    /**
+     * Creates a Master Detail Layout with the given master size, detail size,
+     * and expanding area.
+     *
+     * @param masterSize
+     *            the size of the master area
+     * @param masterUnit
+     *            the unit for the master size
+     * @param detailSize
+     *            the size of the detail area
+     * @param detailUnit
+     *            the unit for the detail size
+     * @param expandingArea
+     *            which area(s) expand to fill available space
+     */
+    public MasterDetailLayout(float masterSize, Unit masterUnit,
+            float detailSize, Unit detailUnit, ExpandingArea expandingArea) {
+        setMasterSize(masterSize, masterUnit);
+        setDetailSize(detailSize, detailUnit);
+        setExpandingArea(expandingArea);
     }
 
     /**
@@ -370,30 +392,30 @@ public class MasterDetailLayout extends Component implements HasSize,
 
     /**
      * Gets which area(s) expand to fill available space. Defaults to
-     * {@link Expand#BOTH}.
+     * {@link ExpandingArea#BOTH}.
      *
-     * @return the expand mode
+     * @return the expanding area
      */
-    public Expand getExpand() {
+    public ExpandingArea getExpandingArea() {
         String expand = getElement().getProperty("expand");
         if (expand != null) {
-            return Expand.valueOf(expand.toUpperCase());
+            return ExpandingArea.valueOf(expand.toUpperCase());
         }
-        return Expand.BOTH;
+        return ExpandingArea.BOTH;
     }
 
     /**
      * Controls which area(s) expand to fill available space. Possible values
-     * are {@link Expand#MASTER}, {@link Expand#DETAIL}, and
-     * {@link Expand#BOTH}. Defaults to {@link Expand#BOTH}.
+     * are {@link ExpandingArea#MASTER}, {@link ExpandingArea#DETAIL}, and
+     * {@link ExpandingArea#BOTH}. Defaults to {@link ExpandingArea#BOTH}.
      *
-     * @param expand
-     *            the expand mode
+     * @param expandingArea
+     *            the expanding area
      */
-    public void setExpand(Expand expand) {
-        Objects.requireNonNull(expand, "Expand cannot be null");
+    public void setExpandingArea(ExpandingArea expandingArea) {
+        Objects.requireNonNull(expandingArea, "ExpandingArea cannot be null");
         getElement().setProperty("expand",
-                expand.name().toLowerCase(Locale.ENGLISH));
+                expandingArea.name().toLowerCase(Locale.ENGLISH));
     }
 
     /**
