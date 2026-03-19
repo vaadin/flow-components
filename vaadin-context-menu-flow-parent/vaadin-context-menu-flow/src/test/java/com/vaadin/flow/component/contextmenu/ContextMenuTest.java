@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -34,10 +34,10 @@ import com.vaadin.flow.component.html.Span;
 /**
  * Unit tests for the ContextMenu.
  */
-public class ContextMenuTest {
+class ContextMenuTest {
 
     @Test
-    public void createContextMenuWithTargetAndChildren_getChildrenReturnsChildren() {
+    void createContextMenuWithTargetAndChildren_getChildrenReturnsChildren() {
         Span span1 = new Span("Text 1");
         Span span2 = new Span("Text 2");
         Span span3 = new Span("Text 3");
@@ -49,82 +49,80 @@ public class ContextMenuTest {
 
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
-        Assert.assertEquals(2, children.size());
-        Assert.assertTrue(children.contains(span1));
-        Assert.assertTrue(children.contains(span2));
+        Assertions.assertEquals(2, children.size());
+        Assertions.assertTrue(children.contains(span1));
+        Assertions.assertTrue(children.contains(span2));
 
         contextMenu.addComponent(span3);
         children = contextMenu.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(3, children.size());
-        Assert.assertTrue(children.contains(span1));
-        Assert.assertTrue(children.contains(span2));
-        Assert.assertTrue(children.contains(span3));
+        Assertions.assertEquals(3, children.size());
+        Assertions.assertTrue(children.contains(span1));
+        Assertions.assertTrue(children.contains(span2));
+        Assertions.assertTrue(children.contains(span3));
 
         contextMenu.remove(span2);
         children = contextMenu.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(2, children.size());
-        Assert.assertTrue(children.contains(span1));
-        Assert.assertTrue(children.contains(span3));
+        Assertions.assertEquals(2, children.size());
+        Assertions.assertTrue(children.contains(span1));
+        Assertions.assertTrue(children.contains(span3));
 
         contextMenu.remove(span1);
         children = contextMenu.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(1, children.size());
-        Assert.assertTrue(children.contains(span3));
+        Assertions.assertEquals(1, children.size());
+        Assertions.assertTrue(children.contains(span3));
 
         contextMenu.removeAll();
         children = contextMenu.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(0, children.size());
+        Assertions.assertEquals(0, children.size());
     }
 
     @Test
-    public void setTarget_removeAll_targetNotMoved() {
+    void setTarget_removeAll_targetNotMoved() {
         Span target = new Span("target");
         Div div = new Div(target);
 
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(target);
 
-        Assert.assertEquals(
-                "The target component should be attached to its original parent",
-                div, target.getParent().get());
+        Assertions.assertEquals(div, target.getParent().get(),
+                "The target component should be attached to its original parent");
 
         contextMenu.removeAll();
 
-        Assert.assertEquals(
-                "The target component should be attached to its original parent",
-                div, target.getParent().get());
+        Assertions.assertEquals(div, target.getParent().get(),
+                "The target component should be attached to its original parent");
     }
 
     @Test
-    public void addItem_getChildren_returnsMenuItem() {
+    void addItem_getChildren_returnsMenuItem() {
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.addItem("foo", null);
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, children.size());
+        Assertions.assertEquals(1, children.size());
         assertComponentIsMenuItem(children.get(0), "foo");
     }
 
     @Test
-    public void addItem_getItems_returnsMenuItem() {
+    void addItem_getItems_returnsMenuItem() {
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.addItem("foo", null);
         List<MenuItem> children = contextMenu.getItems();
-        Assert.assertEquals(1, children.size());
+        Assertions.assertEquals(1, children.size());
         assertComponentIsMenuItem(children.get(0), "foo");
     }
 
     @Test
-    public void addItem_remove_noChildrenNorItems() {
+    void addItem_remove_noChildrenNorItems() {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem item = contextMenu.addItem("foo", null);
         contextMenu.remove(item);
-        Assert.assertEquals(0, contextMenu.getChildren().count());
-        Assert.assertEquals(0, contextMenu.getItems().size());
+        Assertions.assertEquals(0, contextMenu.getChildren().count());
+        Assertions.assertEquals(0, contextMenu.getItems().size());
     }
 
     @Test
-    public void addItemsAndComponents_getChildrenReturnsAllInOrder() {
+    void addItemsAndComponents_getChildrenReturnsAllInOrder() {
         ContextMenu contextMenu = new ContextMenu();
 
         MenuItem item1 = contextMenu.addItem("foo", null);
@@ -139,16 +137,16 @@ public class ContextMenuTest {
 
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
-        Assert.assertEquals(4, children.size());
+        Assertions.assertEquals(4, children.size());
 
-        Assert.assertEquals(item1, children.get(0));
-        Assert.assertEquals(span1, children.get(1));
-        Assert.assertEquals(item2, children.get(2));
-        Assert.assertEquals(span2, children.get(3));
+        Assertions.assertEquals(item1, children.get(0));
+        Assertions.assertEquals(span1, children.get(1));
+        Assertions.assertEquals(item2, children.get(2));
+        Assertions.assertEquals(span2, children.get(3));
     }
 
     @Test
-    public void addItemsAndSeparator_separatorOnlyIncludedInChildren() {
+    void addItemsAndSeparator_separatorOnlyIncludedInChildren() {
         var contextMenu = new ContextMenu();
         var item1 = contextMenu.addItem("foo", null);
         contextMenu.addSeparator();
@@ -156,16 +154,16 @@ public class ContextMenuTest {
 
         var children = contextMenu.getChildren().toList();
         var items = contextMenu.getItems();
-        Assert.assertEquals(3, children.size());
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals(item1, children.get(0));
-        Assert.assertEquals(item2, children.get(2));
-        Assert.assertEquals(item1, items.get(0));
-        Assert.assertEquals(item2, items.get(1));
+        Assertions.assertEquals(3, children.size());
+        Assertions.assertEquals(2, items.size());
+        Assertions.assertEquals(item1, children.get(0));
+        Assertions.assertEquals(item2, children.get(2));
+        Assertions.assertEquals(item1, items.get(0));
+        Assertions.assertEquals(item2, items.get(1));
     }
 
     @Test
-    public void addItemsAndComponents_getItemsReturnsItemsOnly() {
+    void addItemsAndComponents_getItemsReturnsItemsOnly() {
         ContextMenu contextMenu = new ContextMenu();
 
         MenuItem item1 = contextMenu.addItem("foo", null);
@@ -179,23 +177,25 @@ public class ContextMenuTest {
         contextMenu.addComponent(span2);
 
         List<MenuItem> items = contextMenu.getItems();
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals(item1, items.get(0));
-        Assert.assertEquals(item2, items.get(1));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addComponentAtIndex_negativeIndex() {
-        addDivAtIndex(-1);
-    }
-
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
-        addDivAtIndex(1);
+        Assertions.assertEquals(2, items.size());
+        Assertions.assertEquals(item1, items.get(0));
+        Assertions.assertEquals(item2, items.get(1));
     }
 
     @Test
-    public void addItemsWithNullClickListeners_doesNotThrow() {
+    void addComponentAtIndex_negativeIndex() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> addDivAtIndex(-1));
+    }
+
+    @Test
+    void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
+        Assertions.assertThrows(IndexOutOfBoundsException.class,
+                () -> addDivAtIndex(1));
+    }
+
+    @Test
+    void addItemsWithNullClickListeners_doesNotThrow() {
         ContextMenu contextMenu = new ContextMenu();
 
         MenuItem foo = contextMenu.addItem("foo", null);
@@ -206,7 +206,7 @@ public class ContextMenuTest {
     }
 
     @Test
-    public void serializeContextMenu() throws IOException {
+    void serializeContextMenu() throws IOException {
         NativeButton menuButton = new NativeButton();
         ContextMenu menu = new ContextMenu(menuButton);
         menu.addComponent(new Span());
@@ -224,14 +224,13 @@ public class ContextMenuTest {
 
     private void assertComponentIsMenuItem(Component component,
             String expectedText) {
-        Assert.assertTrue(
-                "Component is not an instance of " + MenuItem.class.getName(),
-                MenuItem.class.isInstance(component));
-        Assert.assertEquals(expectedText, ((MenuItem) component).getText());
+        Assertions.assertTrue(MenuItem.class.isInstance(component),
+                "Component is not an instance of " + MenuItem.class.getName());
+        Assertions.assertEquals(expectedText, ((MenuItem) component).getText());
     }
 
     @Test
-    public void unregisterOpenedChangeListenerOnEvent() {
+    void unregisterOpenedChangeListenerOnEvent() {
         ContextMenu contextMenu = new ContextMenu();
         AtomicInteger listenerInvokedCount = new AtomicInteger(0);
         contextMenu.addOpenedChangeListener(e -> {
@@ -244,24 +243,25 @@ public class ContextMenuTest {
         ComponentUtil.fireEvent(contextMenu,
                 new ContextMenuBase.OpenedChangeEvent<>(contextMenu, false));
 
-        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Test
-    public void setPosition_getPosition() {
+    void setPosition_getPosition() {
         var targetDiv = new Div();
         var contextMenu = new ContextMenu(targetDiv);
         contextMenu.setPosition(ContextMenuPosition.END);
-        Assert.assertEquals(ContextMenuPosition.END.getPosition(),
+        Assertions.assertEquals(ContextMenuPosition.END.getPosition(),
                 contextMenu.getElement().getProperty("position"));
-        Assert.assertEquals(ContextMenuPosition.END, contextMenu.getPosition());
+        Assertions.assertEquals(ContextMenuPosition.END,
+                contextMenu.getPosition());
     }
 
     @Test
-    public void defaultPosition_equalsNull() {
+    void defaultPosition_equalsNull() {
         var targetDiv = new Div();
         var contextMenu = new ContextMenu(targetDiv);
 
-        Assert.assertNull(contextMenu.getPosition());
+        Assertions.assertNull(contextMenu.getPosition());
     }
 }

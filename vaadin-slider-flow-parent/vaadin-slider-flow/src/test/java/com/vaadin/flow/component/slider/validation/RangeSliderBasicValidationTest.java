@@ -17,10 +17,10 @@ package com.vaadin.flow.component.slider.validation;
 
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
-import com.vaadin.tests.validation.AbstractBasicValidationTest;
+import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
 
-public class RangeSliderBasicValidationTest
-        extends AbstractBasicValidationTest<RangeSlider, RangeSliderValue> {
+class RangeSliderBasicValidationTest extends
+        AbstractBasicValidationJUnit6Test<RangeSlider, RangeSliderValue> {
 
     @Override
     protected RangeSlider createTestField() {
