@@ -53,12 +53,16 @@ import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * LangChain4j implementation of {@link LLMProvider}.
@@ -95,6 +99,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             .getLogger(LangChain4JLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
@@ -191,21 +196,28 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
         var tools = request.tools();
-        if (tools == null) {
-            return Collections.emptyMap();
-        }
+        var explicitTools = request.explicitTools();
         var toolExecutors = new HashMap<String, ToolExecutor>();
         // Add tools from LangChain4j @Tool annotated methods. Create executors
         // for each annotated method including private methods.
-        for (var toolObject : tools) {
-            Arrays.stream(toolObject.getClass().getDeclaredMethods())
-                    .filter(method -> method.isAnnotationPresent(Tool.class))
-                    .forEach(method -> {
-                        var toolExecutorKey = ToolSpecifications
-                                .toolSpecificationFrom(method).name();
-                        var toolExecutor = getToolExecutor(toolObject, method);
-                        toolExecutors.put(toolExecutorKey, toolExecutor);
-                    });
+        if (tools != null) {
+            for (var toolObject : tools) {
+                Arrays.stream(toolObject.getClass().getDeclaredMethods())
+                        .filter(method -> method
+                                .isAnnotationPresent(Tool.class))
+                        .forEach(method -> {
+                            var toolExecutorKey = ToolSpecifications
+                                    .toolSpecificationFrom(method).name();
+                            var toolExecutor = getToolExecutor(toolObject,
+                                    method);
+                            toolExecutors.put(toolExecutorKey, toolExecutor);
+                        });
+            }
+        }
+        // Add explicit (framework-agnostic) tools
+        for (var tool : explicitTools) {
+            toolExecutors.put(tool.getName(),
+                    (execReq, memoryId) -> tool.execute(execReq.arguments()));
         }
         return toolExecutors;
     }
@@ -217,12 +229,52 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private List<ToolSpecification> prepareToolSpecifications(
             LLMRequest request) {
-        if (request.tools() == null) {
-            return Collections.emptyList();
+        var specs = new ArrayList<ToolSpecification>();
+        if (request.tools() != null) {
+            Arrays.stream(request.tools())
+                    .map(ToolSpecifications::toolSpecificationsFrom)
+                    .flatMap(List::stream).forEach(specs::add);
         }
-        return Arrays.stream(request.tools())
-                .map(ToolSpecifications::toolSpecificationsFrom)
-                .flatMap(List::stream).toList();
+        request.explicitTools().stream()
+                .map(LangChain4JLLMProvider::toToolSpecification)
+                .forEach(specs::add);
+        return specs;
+    }
+
+    private static ToolSpecification toToolSpecification(
+            LLMProvider.ToolSpec tool) {
+        var builder = ToolSpecification.builder().name(tool.getName())
+                .description(tool.getDescription());
+        var schema = tool.getParametersSchema();
+        if (schema != null && !schema.isBlank()) {
+            builder.parameters(parseParametersSchema(schema));
+        }
+        return builder.build();
+    }
+
+    private static JsonObjectSchema parseParametersSchema(String schemaJson) {
+        try {
+            JsonNode root = OBJECT_MAPPER.readTree(schemaJson);
+            var schemaBuilder = JsonObjectSchema.builder();
+            if (root.has("properties")) {
+                JsonNode props = root.get("properties");
+                for (String name : props.propertyNames()) {
+                    schemaBuilder.addProperty(name,
+                            JsonRawSchema.from(props.get(name).toString()));
+                }
+            }
+            if (root.has("required")) {
+                var required = new ArrayList<String>();
+                root.get("required")
+                        .forEach(e -> required.add(e.stringValue()));
+                schemaBuilder.required(required);
+            }
+            return schemaBuilder.build();
+        } catch (Exception e) {
+            LOGGER.warn("Failed to parse tool parameters schema, "
+                    + "using empty schema", e);
+            return JsonObjectSchema.builder().build();
+        }
     }
 
     private void executeChat(ChatExecutionContext context) {
