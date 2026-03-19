@@ -20,22 +20,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 
-public class MultiSelectComboBoxSelectionWithIdProviderTest {
+class MultiSelectComboBoxSelectionWithIdProviderTest {
 
     MultiSelectComboBox<Person> comboBox;
     private MultiSelectionListener<MultiSelectComboBox<Person>, Person> selectionListenerSpy;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         comboBox = new MultiSelectComboBox<>();
         List<Person> items = List.of(new Person(1, "Magnus"),
                 new Person(2, "Amelia"), new Person(3, "Adelaide"));
@@ -46,40 +46,40 @@ public class MultiSelectComboBoxSelectionWithIdProviderTest {
     }
 
     @Test
-    public void isSelected_usesDataProviderIdentity() {
+    void isSelected_usesDataProviderIdentity() {
         // Select "Amelia"
         comboBox.select(new Person(2, "Amelia"));
 
         // Check for "amelia", but with same ID
-        Assert.assertTrue(comboBox.isSelected(new Person(2, "amelia")));
+        Assertions.assertTrue(comboBox.isSelected(new Person(2, "amelia")));
     }
 
     @Test
-    public void select_selectDuplicate_noChanges() {
+    void select_selectDuplicate_noChanges() {
         // Select "Amelia"
         comboBox.select(new Person(2, "Amelia"));
         // Select "amelia", but with same ID
         comboBox.select(new Person(2, "amelia"));
 
         // One item selected
-        Assert.assertEquals(1, comboBox.getSelectedItems().size());
+        Assertions.assertEquals(1, comboBox.getSelectedItems().size());
         // Change listener only triggered once
         Mockito.verify(selectionListenerSpy, Mockito.times(1))
                 .selectionChange(Mockito.any());
     }
 
     @Test
-    public void selectMultiple_ignoresDuplicates() {
+    void selectMultiple_ignoresDuplicates() {
         // Select 3 duplicates of the same person
         comboBox.select(new Person(2, "Amelia"), new Person(2, "amelia"),
                 new Person(2, "amelai"));
 
         // One item selected
-        Assert.assertEquals(1, comboBox.getSelectedItems().size());
+        Assertions.assertEquals(1, comboBox.getSelectedItems().size());
     }
 
     @Test
-    public void select_changeHashCode_deselect_nothingSelected() {
+    void select_changeHashCode_deselect_nothingSelected() {
         // Select "Amelia"
         Person bean = new Person(2, "Amelia");
         comboBox.select(bean);
@@ -89,11 +89,11 @@ public class MultiSelectComboBoxSelectionWithIdProviderTest {
         comboBox.deselect(bean);
 
         // Should be deselected
-        Assert.assertEquals(0, comboBox.getSelectedItems().size());
+        Assertions.assertEquals(0, comboBox.getSelectedItems().size());
     }
 
     @Test
-    public void setValue_setValueWithDuplicates_noChanges() {
+    void setValue_setValueWithDuplicates_noChanges() {
         // Set value
         comboBox.setValue(
                 Set.of(new Person(1, "Magnus"), new Person(2, "Amelia")));
@@ -107,7 +107,7 @@ public class MultiSelectComboBoxSelectionWithIdProviderTest {
     }
 
     @Test
-    public void selectAllWithDuplicates_deselectAll_nothingSelected() {
+    void selectAllWithDuplicates_deselectAll_nothingSelected() {
         // Select duplicates with different hashcode than the data provider
         // items
         comboBox.select(new Person(1, "magnus"));
@@ -117,18 +117,18 @@ public class MultiSelectComboBoxSelectionWithIdProviderTest {
         comboBox.deselectAll();
 
         // Should have empty selection
-        Assert.assertEquals(0, comboBox.getSelectedItems().size());
+        Assertions.assertEquals(0, comboBox.getSelectedItems().size());
     }
 
     @Test
-    public void selectItem_changeIdentityProvider_itemStillSelected() {
+    void selectItem_changeIdentityProvider_itemStillSelected() {
         // Select Magnus, identified by ID 1
         comboBox.select(new Person(1, "Magnus"));
         // Change identifier provider to identify person by name
         comboBox.getGenericDataView().setIdentifierProvider(Person::getName);
         // Check if person is now identified by name, while passing a different
         // ID
-        Assert.assertTrue(comboBox.isSelected(new Person(2, "Magnus")));
+        Assertions.assertTrue(comboBox.isSelected(new Person(2, "Magnus")));
     }
 
     private static class TestDataProvider extends ListDataProvider<Person> {
