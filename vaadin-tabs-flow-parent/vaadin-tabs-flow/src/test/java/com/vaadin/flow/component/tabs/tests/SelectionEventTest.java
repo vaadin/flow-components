@@ -17,9 +17,9 @@ package com.vaadin.flow.component.tabs.tests;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -27,7 +27,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 /**
  * @author Vaadin Ltd.
  */
-public class SelectionEventTest {
+class SelectionEventTest {
 
     private Tabs tabs;
     private Tab tab1;
@@ -35,8 +35,8 @@ public class SelectionEventTest {
 
     private int eventCount;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         tab1 = new Tab("foo");
         tab2 = new Tab("bar");
         tabs = new Tabs(tab1, tab2);
@@ -48,230 +48,206 @@ public class SelectionEventTest {
 
     private void addSelectedChangeListener(Tabs tabs) {
         tabs.addSelectedChangeListener(e -> {
-            Assert.assertFalse(
-                    "isFromClient() returned true for an event fired from server",
-                    e.isFromClient());
+            Assertions.assertFalse(e.isFromClient(),
+                    "isFromClient() returned true for an event fired from server");
             eventCount++;
         });
     }
 
     @Test
-    public void changeSelectionInServerSide_eventFiredSynchronously() {
+    void changeSelectionInServerSide_eventFiredSynchronously() {
         tabs.setSelectedTab(tab2);
-        Assert.assertEquals(
+        Assertions.assertEquals(1, eventCount,
                 "Selection event should have been fired immediately after "
-                        + "changing the selection on server side.",
-                1, eventCount);
+                        + "changing the selection on server side.");
 
         tabs.setSelectedTab(tab2);
-        Assert.assertEquals("The tab was already selected, selection event "
-                + "should not have been fired.", 1, eventCount);
+        Assertions.assertEquals(1, eventCount,
+                "The tab was already selected, selection event "
+                        + "should not have been fired.");
 
         tabs.setSelectedIndex(0);
-        Assert.assertEquals(
+        Assertions.assertEquals(2, eventCount,
                 "Selection event should have been fired immediately after "
-                        + "changing the selection on server side.",
-                2, eventCount);
+                        + "changing the selection on server side.");
 
         tabs.setSelectedIndex(0);
-        Assert.assertEquals("The tab was already selected, selection event "
-                + "should not have been fired.", 2, eventCount);
+        Assertions.assertEquals(2, eventCount,
+                "The tab was already selected, selection event "
+                        + "should not have been fired.");
     }
 
     @Test
-    public void removeSelectedTab_selectionChanged() {
+    void removeSelectedTab_selectionChanged() {
         tabs.remove(tab1);
-        Assert.assertEquals(
-                "Selection event should have been fired after removing the selected tab",
-                1, eventCount);
-        Assert.assertEquals(
-                "The next tab should be selected after removing the selected tab",
-                tabs.getSelectedTab(), tab2);
+        Assertions.assertEquals(1, eventCount,
+                "Selection event should have been fired after removing the selected tab");
+        Assertions.assertEquals(tabs.getSelectedTab(), tab2,
+                "The next tab should be selected after removing the selected tab");
     }
 
     @Test
-    public void removeLaterTab_selectionNotChanged() {
+    void removeLaterTab_selectionNotChanged() {
         tabs.remove(tab2);
-        Assert.assertEquals(
-                "Selection event should not have been fired after removing the other tab",
-                0, eventCount);
-        Assert.assertEquals("The selected tab should not have been changed",
-                tabs.getSelectedTab(), tab1);
+        Assertions.assertEquals(0, eventCount,
+                "Selection event should not have been fired after removing the other tab");
+        Assertions.assertEquals(tabs.getSelectedTab(), tab1,
+                "The selected tab should not have been changed");
     }
 
     @Test
-    public void removeEarlierTab_selectionNotChanged() {
+    void removeEarlierTab_selectionNotChanged() {
         tabs.setSelectedTab(tab2);
-        Assert.assertEquals(1, eventCount);
+        Assertions.assertEquals(1, eventCount);
         tabs.remove(tab1);
 
-        Assert.assertEquals(
-                "Selection event should not have been fired after removing the other tab",
-                1, eventCount);
+        Assertions.assertEquals(1, eventCount,
+                "Selection event should not have been fired after removing the other tab");
 
-        Assert.assertEquals(
-                "The selected index should have been reduced to keep the old selection",
-                0, tabs.getSelectedIndex());
+        Assertions.assertEquals(0, tabs.getSelectedIndex(),
+                "The selected index should have been reduced to keep the old selection");
 
-        Assert.assertEquals("The selected tab should not have been changed",
-                tabs.getSelectedTab(), tab2);
+        Assertions.assertEquals(tabs.getSelectedTab(), tab2,
+                "The selected tab should not have been changed");
     }
 
     @Test
-    public void removeAllTabs_selectionChangedToNull_selectedIndexMinusOne() {
+    void removeAllTabs_selectionChangedToNull_selectedIndexMinusOne() {
         tabs.remove(tab1, tab2);
 
-        Assert.assertEquals(
-                "Selection event should have been fired after removing all the tabs",
-                1, eventCount);
+        Assertions.assertEquals(1, eventCount,
+                "Selection event should have been fired after removing all the tabs");
 
-        Assert.assertEquals(
-                "The selected index should be -1 when there are no tabs", -1,
-                tabs.getSelectedIndex());
+        Assertions.assertEquals(-1, tabs.getSelectedIndex(),
+                "The selected index should be -1 when there are no tabs");
 
-        Assert.assertEquals(
-                "The selected tab should be null after removing all tabs", null,
-                tabs.getSelectedTab());
+        Assertions.assertEquals(null, tabs.getSelectedTab(),
+                "The selected tab should be null after removing all tabs");
     }
 
     @Test
-    public void selectSecondTab_removeAll_selectionChangedToNull_selectedIndexMinusOne() {
+    void selectSecondTab_removeAll_selectionChangedToNull_selectedIndexMinusOne() {
         tabs.setSelectedIndex(1);
-        Assert.assertEquals(1, eventCount);
+        Assertions.assertEquals(1, eventCount);
 
         tabs.removeAll();
 
-        Assert.assertEquals(
-                "Selection event should have been fired after removing all the tabs",
-                2, eventCount);
+        Assertions.assertEquals(2, eventCount,
+                "Selection event should have been fired after removing all the tabs");
 
-        Assert.assertEquals(
-                "The selected index should be -1 when there are no tabs", -1,
-                tabs.getSelectedIndex());
+        Assertions.assertEquals(-1, tabs.getSelectedIndex(),
+                "The selected index should be -1 when there are no tabs");
 
-        Assert.assertEquals(
-                "The selected tab should be null after removing all tabs", null,
-                tabs.getSelectedTab());
+        Assertions.assertEquals(null, tabs.getSelectedTab(),
+                "The selected tab should be null after removing all tabs");
     }
 
     @Test
-    public void addTabs_selectionNotChanged() {
+    void addTabs_selectionNotChanged() {
         tabs.addTabAsFirst(new Tab());
         tabs.add(new Tab());
 
-        Assert.assertEquals(
-                "Selection event should not have been fired after adding new tabs",
-                0, eventCount);
+        Assertions.assertEquals(0, eventCount,
+                "Selection event should not have been fired after adding new tabs");
 
-        Assert.assertEquals(
-                "Selection should not have been changed after adding new tabs",
-                tab1, tabs.getSelectedTab());
+        Assertions.assertEquals(tab1, tabs.getSelectedTab(),
+                "Selection should not have been changed after adding new tabs");
 
-        Assert.assertEquals(
-                "Selected index should have been incremented after adding new tab in the beginning",
-                1, tabs.getSelectedIndex());
+        Assertions.assertEquals(1, tabs.getSelectedIndex(),
+                "Selected index should have been incremented after adding new tab in the beginning");
     }
 
     @Test
-    public void selectLastTab_removeLastTab_secondLastTabIsSelected() {
+    void selectLastTab_removeLastTab_secondLastTabIsSelected() {
         tabs.setSelectedTab(tab2);
-        Assert.assertEquals(1, eventCount);
+        Assertions.assertEquals(1, eventCount);
         tabs.remove(tab2);
-        Assert.assertEquals(
-                "Selection event should have been fired after removing the selected tab",
-                2, eventCount);
-        Assert.assertEquals(
-                "The new last tab should be selected after removing the last tab which was selected",
-                tab1, tabs.getSelectedTab());
+        Assertions.assertEquals(2, eventCount,
+                "Selection event should have been fired after removing the selected tab");
+        Assertions.assertEquals(tab1, tabs.getSelectedTab(),
+                "The new last tab should be selected after removing the last tab which was selected");
     }
 
     @Test
-    public void replaceSelectedTab_eventIsFired_newTabIsSelected() {
+    void replaceSelectedTab_eventIsFired_newTabIsSelected() {
         Tab replaceTab = new Tab("replace");
         tabs.replace(tab1, replaceTab);
-        Assert.assertEquals(
-                "Selection event should have been fired after replacing the selected tab",
-                1, eventCount);
-        Assert.assertEquals(
-                "After replacing the selected tab, the new tab should be selected",
-                replaceTab, tabs.getSelectedTab());
+        Assertions.assertEquals(1, eventCount,
+                "Selection event should have been fired after replacing the selected tab");
+        Assertions.assertEquals(replaceTab, tabs.getSelectedTab(),
+                "After replacing the selected tab, the new tab should be selected");
     }
 
     @Test
-    public void removeNonChildTab_selectionNotChanged() {
+    void removeNonChildTab_selectionNotChanged() {
         tabs.setSelectedTab(tab2);
-        Assert.assertEquals(1, eventCount);
+        Assertions.assertEquals(1, eventCount);
         Tab orphan = new Tab();
         tabs.remove(orphan);
-        Assert.assertEquals(
+        Assertions.assertEquals(1, eventCount,
                 "Selection event should not have been fired after "
-                        + "removing a Tab which is not a child of the Tabs.",
-                1, eventCount);
-        Assert.assertEquals(
+                        + "removing a Tab which is not a child of the Tabs.");
+        Assertions.assertEquals(tab2, tabs.getSelectedTab(),
                 "Selected tab should not have been changed after "
-                        + "removing a Tab which is not a child of the Tabs.",
-                tab2, tabs.getSelectedTab());
+                        + "removing a Tab which is not a child of the Tabs.");
     }
 
     @Test
-    public void unselect_eventFired_selectedIndexMinusOne() {
+    void unselect_eventFired_selectedIndexMinusOne() {
         tabs.setSelectedTab(null);
-        Assert.assertEquals("Unselecting the selected tab should fire event", 1,
-                eventCount);
-        Assert.assertEquals("The selected tab should be null after unselecting",
-                null, tabs.getSelectedTab());
-        Assert.assertEquals("The selected index is -1 when no tab is selected",
-                -1, tabs.getSelectedIndex());
+        Assertions.assertEquals(1, eventCount,
+                "Unselecting the selected tab should fire event");
+        Assertions.assertEquals(null, tabs.getSelectedTab(),
+                "The selected tab should be null after unselecting");
+        Assertions.assertEquals(-1, tabs.getSelectedIndex(),
+                "The selected index is -1 when no tab is selected");
     }
 
     @Test
-    public void unselectWithIndex() {
+    void unselectWithIndex() {
         tabs.setSelectedIndex(-1);
-        Assert.assertEquals("Unselecting the selected tab should fire event", 1,
-                eventCount);
-        Assert.assertEquals("The selected tab should be null after unselecting",
-                null, tabs.getSelectedTab());
+        Assertions.assertEquals(1, eventCount,
+                "Unselecting the selected tab should fire event");
+        Assertions.assertEquals(null, tabs.getSelectedTab(),
+                "The selected tab should be null after unselecting");
     }
 
     @Test
-    public void unselectWithAnyNegativeIndex_selectedIndexMinusOne() {
+    void unselectWithAnyNegativeIndex_selectedIndexMinusOne() {
         tabs.setSelectedIndex(-100);
-        Assert.assertEquals("Unselecting the selected tab should fire event", 1,
-                eventCount);
-        Assert.assertEquals("The selected tab should be null after unselecting",
-                null, tabs.getSelectedTab());
-        Assert.assertEquals(
+        Assertions.assertEquals(1, eventCount,
+                "Unselecting the selected tab should fire event");
+        Assertions.assertEquals(null, tabs.getSelectedTab(),
+                "The selected tab should be null after unselecting");
+        Assertions.assertEquals(-1, tabs.getSelectedIndex(),
                 "The selected index should return -1 when no tab is selected, even "
-                        + "when the index was set as some other negative number",
-                -1, tabs.getSelectedIndex());
+                        + "when the index was set as some other negative number");
     }
 
     @Test
-    public void unselect_selectOldSelection_eventFired() {
+    void unselect_selectOldSelection_eventFired() {
         tabs.setSelectedTab(null);
         tabs.setSelectedTab(tab1);
-        Assert.assertEquals("Selection event should have been fired", 2,
-                eventCount);
-        Assert.assertEquals("Selected tab should be the one which was selected",
-                tab1, tabs.getSelectedTab());
+        Assertions.assertEquals(2, eventCount,
+                "Selection event should have been fired");
+        Assertions.assertEquals(tab1, tabs.getSelectedTab(),
+                "Selected tab should be the one which was selected");
     }
 
     @Test
-    public void unselectMultipleTimes_noEvent() {
+    void unselectMultipleTimes_noEvent() {
         tabs.setSelectedTab(null);
-        Assert.assertEquals(1, eventCount);
+        Assertions.assertEquals(1, eventCount);
         tabs.setSelectedTab(null);
-        Assert.assertEquals(
-                "Selection was not changed, no event should've been fired", 1,
-                eventCount);
+        Assertions.assertEquals(1, eventCount,
+                "Selection was not changed, no event should've been fired");
         tabs.setSelectedIndex(-1);
-        Assert.assertEquals(
-                "Selection was not changed, no event should've been fired", 1,
-                eventCount);
+        Assertions.assertEquals(1, eventCount,
+                "Selection was not changed, no event should've been fired");
     }
 
     @Test
-    public void tabsAutoselectFalse_previousAndCurrentTab() {
+    void tabsAutoselectFalse_previousAndCurrentTab() {
         AtomicReference<Tab> currentTab = new AtomicReference<>();
         AtomicReference<Tab> previousTab = new AtomicReference<>();
         tabs = new Tabs();
@@ -283,77 +259,72 @@ public class SelectionEventTest {
         });
 
         tabs.setSelectedTab(tab1);
-        Assert.assertEquals("Current tab should be tab 1", currentTab.get(),
-                tab1);
-        Assert.assertNull("Previous tab should be empty", previousTab.get());
+        Assertions.assertEquals(currentTab.get(), tab1,
+                "Current tab should be tab 1");
+        Assertions.assertNull(previousTab.get(),
+                "Previous tab should be empty");
 
         tabs.setSelectedTab(tab2);
-        Assert.assertEquals("Current tab should be tab 2", currentTab.get(),
-                tab2);
-        Assert.assertEquals("Previous tab should be tab 1", previousTab.get(),
-                tab1);
+        Assertions.assertEquals(currentTab.get(), tab2,
+                "Current tab should be tab 2");
+        Assertions.assertEquals(previousTab.get(), tab1,
+                "Previous tab should be tab 1");
     }
 
     @Test
-    public void removeCurrent_withoutAutomaticSelectionResetsSelection() {
+    void removeCurrent_withoutAutomaticSelectionResetsSelection() {
         tabs.setAutoselect(false);
         tabs.setSelectedIndex(1);
-        Assert.assertEquals(tab2, tabs.getSelectedTab());
+        Assertions.assertEquals(tab2, tabs.getSelectedTab());
 
         tabs.remove(tab2);
-        Assert.assertEquals(-1, tabs.getSelectedIndex());
+        Assertions.assertEquals(-1, tabs.getSelectedIndex());
     }
 
     @Test
-    public void addFirstTabWithAddComponentAtIndex_firstTabAutoselected() {
+    void addFirstTabWithAddComponentAtIndex_firstTabAutoselected() {
         tabs = new Tabs();
         addSelectedChangeListener(tabs);
 
         tabs.addTabAtIndex(0, tab1);
 
-        Assert.assertEquals(
-                "Unexpected selected index after adding the first tab.", 0,
-                tabs.getSelectedIndex());
-        Assert.assertEquals(
-                "Expected the first added tab to be automatically selected.",
-                tab1, tabs.getSelectedTab());
-        Assert.assertEquals("Expected autoselection to fire an event.", 1,
-                eventCount);
+        Assertions.assertEquals(0, tabs.getSelectedIndex(),
+                "Unexpected selected index after adding the first tab.");
+        Assertions.assertEquals(tab1, tabs.getSelectedTab(),
+                "Expected the first added tab to be automatically selected.");
+        Assertions.assertEquals(1, eventCount,
+                "Expected autoselection to fire an event.");
     }
 
     @Test
-    public void addSecondTabWithAddComponentAtIndex_selectionNotChanged() {
+    void addSecondTabWithAddComponentAtIndex_selectionNotChanged() {
         tabs = new Tabs();
         addSelectedChangeListener(tabs);
 
         tabs.addTabAtIndex(0, tab1);
         tabs.addTabAtIndex(0, tab2);
 
-        Assert.assertEquals(
-                "Unexpected selected index after adding the first tab.", 1,
-                tabs.getSelectedIndex());
-        Assert.assertEquals(
-                "Expected the first added tab to be automatically selected.",
-                tab1, tabs.getSelectedTab());
-        Assert.assertEquals(
-                "Expected no selection event after adding the second tab.", 1,
-                eventCount);
+        Assertions.assertEquals(1, tabs.getSelectedIndex(),
+                "Unexpected selected index after adding the first tab.");
+        Assertions.assertEquals(tab1, tabs.getSelectedTab(),
+                "Expected the first added tab to be automatically selected.");
+        Assertions.assertEquals(1, eventCount,
+                "Expected no selection event after adding the second tab.");
     }
 
     @Test
-    public void disableAutoSelect_addFirstTabWithAddComponentAtIndex_noAutoselect() {
+    void disableAutoSelect_addFirstTabWithAddComponentAtIndex_noAutoselect() {
         tabs = new Tabs(false);
         addSelectedChangeListener(tabs);
 
         tabs.addTabAtIndex(0, tab1);
 
-        Assert.assertEquals(
-                "Unexpected selected index after adding the first tab.", -1,
-                tabs.getSelectedIndex());
-        Assert.assertNull("Expected no tab to be automatically selected.",
-                tabs.getSelectedTab());
-        Assert.assertEquals("Expected no selection event fired.", 0,
-                eventCount);
+        Assertions.assertEquals(-1, tabs.getSelectedIndex(),
+                "Unexpected selected index after adding the first tab.");
+        Assertions.assertNull(tabs.getSelectedTab(),
+                "Expected no tab to be automatically selected.");
+        Assertions.assertEquals(0, eventCount,
+                "Expected no selection event fired.");
     }
 
 }

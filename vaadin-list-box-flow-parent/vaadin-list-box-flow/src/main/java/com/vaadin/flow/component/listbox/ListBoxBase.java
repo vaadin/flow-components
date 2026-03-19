@@ -110,7 +110,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
-        DataViewUtils.checkNoActiveItemsBinding(this);
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();

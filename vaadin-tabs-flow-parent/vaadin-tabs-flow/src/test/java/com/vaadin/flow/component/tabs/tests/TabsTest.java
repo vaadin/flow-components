@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -33,54 +31,51 @@ import com.vaadin.flow.component.tabs.Tabs;
 /**
  * @author Vaadin Ltd.
  */
-public class TabsTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class TabsTest {
 
     @Test
-    public void createTabsInDefaultState() {
+    void createTabsInDefaultState() {
         Tabs tabs = new Tabs();
 
-        Assert.assertEquals("Initial tab count is invalid", 0,
-                tabs.getTabCount());
-        Assert.assertEquals("Initial orientation is invalid",
-                Tabs.Orientation.HORIZONTAL, tabs.getOrientation());
-        Assert.assertEquals("Initial selected index is invalid", -1,
-                tabs.getSelectedIndex());
-        Assert.assertNull("Initial child count is invalid",
-                tabs.getSelectedTab());
+        Assertions.assertEquals(0, tabs.getTabCount(),
+                "Initial tab count is invalid");
+        Assertions.assertEquals(Tabs.Orientation.HORIZONTAL,
+                tabs.getOrientation(), "Initial orientation is invalid");
+        Assertions.assertEquals(-1, tabs.getSelectedIndex(),
+                "Initial selected index is invalid");
+        Assertions.assertNull(tabs.getSelectedTab(),
+                "Initial child count is invalid");
     }
 
     @Test
-    public void createTabsWithChildren() {
+    void createTabsWithChildren() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Tab three");
         Tabs tabs = new Tabs(tab1, tab2, tab3);
 
-        Assert.assertEquals("Initial tab count is invalid", 3,
-                tabs.getTabCount());
-        Assert.assertEquals("Initial orientation is invalid",
-                Tabs.Orientation.HORIZONTAL, tabs.getOrientation());
-        Assert.assertEquals("Initial selected tab is invalid", tab1,
-                tabs.getSelectedTab());
-        Assert.assertEquals("Initial selected index is invalid", 0,
-                tabs.getSelectedIndex());
+        Assertions.assertEquals(3, tabs.getTabCount(),
+                "Initial tab count is invalid");
+        Assertions.assertEquals(Tabs.Orientation.HORIZONTAL,
+                tabs.getOrientation(), "Initial orientation is invalid");
+        Assertions.assertEquals(tab1, tabs.getSelectedTab(),
+                "Initial selected tab is invalid");
+        Assertions.assertEquals(0, tabs.getSelectedIndex(),
+                "Initial selected index is invalid");
     }
 
     @Test
-    public void setOrientation() {
+    void setOrientation() {
         Tabs tabs = new Tabs();
 
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
 
-        Assert.assertEquals("Orientation is invalid", Tabs.Orientation.VERTICAL,
-                tabs.getOrientation());
+        Assertions.assertEquals(Tabs.Orientation.VERTICAL,
+                tabs.getOrientation(), "Orientation is invalid");
     }
 
     @Test
-    public void selectTabByReference() {
+    void selectTabByReference() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Tab three");
@@ -88,14 +83,14 @@ public class TabsTest {
 
         tabs.setSelectedTab(tab2);
 
-        Assert.assertEquals("Selected tab is invalid", tab2,
-                tabs.getSelectedTab());
-        Assert.assertEquals("Selected index is invalid", 1,
-                tabs.getSelectedIndex());
+        Assertions.assertEquals(tab2, tabs.getSelectedTab(),
+                "Selected tab is invalid");
+        Assertions.assertEquals(1, tabs.getSelectedIndex(),
+                "Selected index is invalid");
     }
 
     @Test
-    public void selectTabByIndex() {
+    void selectTabByIndex() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Tab three");
@@ -103,30 +98,30 @@ public class TabsTest {
 
         tabs.setSelectedIndex(2);
 
-        Assert.assertEquals("Selected tab is invalid", tab3,
-                tabs.getSelectedTab());
-        Assert.assertEquals("Selected index is invalid", 2,
-                tabs.getSelectedIndex());
+        Assertions.assertEquals(tab3, tabs.getSelectedTab(),
+                "Selected tab is invalid");
+        Assertions.assertEquals(2, tabs.getSelectedIndex(),
+                "Selected index is invalid");
     }
 
     @Test
-    public void selectInvalidIndex_previousIndexIsReverted() {
+    void selectInvalidIndex_previousIndexIsReverted() {
         Tab tab = new Tab("Tab");
         Tabs tabs = new Tabs(tab);
 
         // Select index out of range
         tabs.setSelectedIndex(10);
-        Assert.assertEquals(0, tabs.getSelectedIndex());
+        Assertions.assertEquals(0, tabs.getSelectedIndex());
 
         // Deselect the active tab
         tabs.setSelectedIndex(-1);
         // Select index out of range
         tabs.setSelectedIndex(10);
-        Assert.assertEquals(-1, tabs.getSelectedIndex());
+        Assertions.assertEquals(-1, tabs.getSelectedIndex());
     }
 
     @Test
-    public void selectInvalidIndex_warningIsShown() {
+    void selectInvalidIndex_warningIsShown() {
         Tab tab = new Tab("Tab");
         Tabs tabs = new Tabs(tab);
 
@@ -145,21 +140,20 @@ public class TabsTest {
     }
 
     @Test
-    public void shouldThrowWhenTabToSelectIsNotChild() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Tab to select must be a child: Tab{orphan}");
+    void shouldThrowWhenTabToSelectIsNotChild() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("orphan");
         Tabs tabs = new Tabs(tab1, tab2);
 
-        tabs.setSelectedTab(tab3);
-
-        // Exception expected - nothing to assert
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> tabs.setSelectedTab(tab3));
+        Assertions.assertEquals("Tab to select must be a child: Tab{orphan}",
+                exception.getMessage());
     }
 
     @Test
-    public void setFlexGrowForEnclosedTabs() {
+    void setFlexGrowForEnclosedTabs() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Tab three");
@@ -167,27 +161,26 @@ public class TabsTest {
 
         tabs.setFlexGrowForEnclosedTabs(1.5);
 
-        Assert.assertEquals("flexGrow of tab1 is invalid", 1.5,
-                tab1.getFlexGrow(), 0.0);
-        Assert.assertEquals("flexGrow of tab2 is invalid", 1.5,
-                tab2.getFlexGrow(), 0.0);
-        Assert.assertEquals("flexGrow of tab3 is invalid", 1.5,
-                tab3.getFlexGrow(), 0.0);
+        Assertions.assertEquals(1.5, tab1.getFlexGrow(), 0.0,
+                "flexGrow of tab1 is invalid");
+        Assertions.assertEquals(1.5, tab2.getFlexGrow(), 0.0,
+                "flexGrow of tab2 is invalid");
+        Assertions.assertEquals(1.5, tab3.getFlexGrow(), 0.0,
+                "flexGrow of tab3 is invalid");
     }
 
     @Test
-    public void shouldThrowOnNegativeFlexGrow() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Flex grow property must not be negative");
+    void shouldThrowOnNegativeFlexGrow() {
         Tabs tabs = new Tabs();
 
-        tabs.setFlexGrowForEnclosedTabs(-1);
-
-        // Exception expected - nothing to assert
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> tabs.setFlexGrowForEnclosedTabs(-1));
+        Assertions.assertEquals("Flex grow property must not be negative",
+                exception.getMessage());
     }
 
     @Test
-    public void selectTab_tabIsSelected() {
+    void selectTab_tabIsSelected() {
         Tabs tabs = new Tabs();
         Tab tab1 = new Tab("foo");
         Tab tab2 = new Tab("foo");
@@ -195,33 +188,33 @@ public class TabsTest {
 
         tabs.setSelectedTab(tab2);
 
-        Assert.assertFalse(tab1.isSelected());
-        Assert.assertTrue(tab2.isSelected());
+        Assertions.assertFalse(tab1.isSelected());
+        Assertions.assertTrue(tab2.isSelected());
     }
 
     @Test
-    public void tabsAutoselectConstructor() {
+    void tabsAutoselectConstructor() {
         Tabs tabs1 = new Tabs(true);
         tabs1.add(new Tab("Tab"));
-        Assert.assertEquals(0, tabs1.getSelectedIndex());
+        Assertions.assertEquals(0, tabs1.getSelectedIndex());
 
         Tabs tabs2 = new Tabs(false);
         tabs2.add(new Tab("Tab"));
-        Assert.assertEquals(-1, tabs2.getSelectedIndex());
+        Assertions.assertEquals(-1, tabs2.getSelectedIndex());
     }
 
     @Test
-    public void tabsWithoutAutomaticSelection() {
+    void tabsWithoutAutomaticSelection() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tabs tabs2 = new Tabs(false, tab1, tab2);
 
-        Assert.assertNull(tabs2.getSelectedTab());
-        Assert.assertEquals(-1, tabs2.getSelectedIndex());
+        Assertions.assertNull(tabs2.getSelectedTab());
+        Assertions.assertEquals(-1, tabs2.getSelectedIndex());
     }
 
     @Test
-    public void removeTabInTabsWithoutAutomaticSelection() {
+    void removeTabInTabsWithoutAutomaticSelection() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Tab three");
@@ -230,28 +223,28 @@ public class TabsTest {
         tabs.setSelectedTab(tab2);
         tabs.remove(tab1);
 
-        Assert.assertEquals("should not change selected tab",
-                tabs.getSelectedTab(), tab2);
+        Assertions.assertEquals(tabs.getSelectedTab(), tab2,
+                "should not change selected tab");
 
         tabs.remove(tab2);
-        Assert.assertNull("should not select other tab if current tab removed",
-                tabs.getSelectedTab());
+        Assertions.assertNull(tabs.getSelectedTab(),
+                "should not select other tab if current tab removed");
     }
 
     @Test
-    public void removeTabInTabsWithoutSelection() {
+    void removeTabInTabsWithoutSelection() {
         Tab tab1 = new Tab("Tab one");
         Tabs tabs = new Tabs(tab1);
 
         tabs.setSelectedTab(null);
         tabs.remove(tab1);
 
-        Assert.assertNull("should not change selected tab",
-                tabs.getSelectedTab());
+        Assertions.assertNull(tabs.getSelectedTab(),
+                "should not change selected tab");
     }
 
     @Test
-    public void addTabsAsComponentArray_noClassCastExceptionIsThrown() {
+    void addTabsAsComponentArray_noClassCastExceptionIsThrown() {
         Tabs tabs = new Tabs();
         Component[] tabsArray = { new Tab(), new Tab() };
 
@@ -259,11 +252,11 @@ public class TabsTest {
         tabs.add(tabsArray);
 
         // assertion here just to make sure tabs were really set
-        Assert.assertNotNull(tabs.getSelectedTab());
+        Assertions.assertNotNull(tabs.getSelectedTab());
     }
 
     @Test
-    public void addTabsToDisabledContainer_reEnable_tabsShouldBeEnabled() {
+    void addTabsToDisabledContainer_reEnable_tabsShouldBeEnabled() {
         var container = new Div();
         var tabs = new Tabs();
         container.add(tabs);
@@ -274,12 +267,12 @@ public class TabsTest {
         tabs.add(tab1, tab2);
         container.setEnabled(true);
 
-        Assert.assertTrue(tab1.isEnabled());
-        Assert.assertTrue(tab2.isEnabled());
+        Assertions.assertTrue(tab1.isEnabled());
+        Assertions.assertTrue(tab2.isEnabled());
     }
 
     @Test
-    public void addTabsToDisabledContainer_reEnable_shouldHaveSelectedTab() {
+    void addTabsToDisabledContainer_reEnable_shouldHaveSelectedTab() {
         var container = new Div();
         var tabs = new Tabs();
         container.add(tabs);
@@ -290,11 +283,11 @@ public class TabsTest {
         tabs.add(tab1, tab2);
         container.setEnabled(true);
 
-        Assert.assertEquals(tab1, tabs.getSelectedTab());
+        Assertions.assertEquals(tab1, tabs.getSelectedTab());
     }
 
     @Test
-    public void addDisabledTab_shouldNotHaveSelectedTab() {
+    void addDisabledTab_shouldNotHaveSelectedTab() {
         var tabs = new Tabs();
         var tab1 = new Tab("Tab one");
 
@@ -302,11 +295,12 @@ public class TabsTest {
         tabs.add(tab1);
         tabs.setSelectedIndex(0);
 
-        Assert.assertEquals(null, tabs.getSelectedTab());
+        Assertions.assertEquals(null, tabs.getSelectedTab());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Tabs.class));
+    void implementsHasThemeVariant() {
+        Assertions
+                .assertTrue(HasThemeVariant.class.isAssignableFrom(Tabs.class));
     }
 }
