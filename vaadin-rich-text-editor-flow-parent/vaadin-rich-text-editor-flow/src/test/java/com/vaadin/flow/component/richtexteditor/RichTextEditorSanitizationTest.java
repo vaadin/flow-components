@@ -8,39 +8,40 @@
  */
 package com.vaadin.flow.component.richtexteditor;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class RichTextEditorSanitizationTest {
+class RichTextEditorSanitizationTest {
     // Decoration group sanitization
 
     @Test
-    public void sanitizeStrongTag_StrongTagPersist() {
-        Assert.assertEquals("<strong>Foo</strong>",
+    void sanitizeStrongTag_StrongTagPersist() {
+        Assertions.assertEquals("<strong>Foo</strong>",
                 RichTextEditor.sanitize("<strong>Foo</strong>"));
     }
 
     @Test
-    public void sanitizeEmTag_EmTagPersist() {
-        Assert.assertEquals("<em>Foo</em>",
+    void sanitizeEmTag_EmTagPersist() {
+        Assertions.assertEquals("<em>Foo</em>",
                 RichTextEditor.sanitize("<em>Foo</em>"));
     }
 
     @Test
-    public void sanitizeUTag_UTagPersist() {
-        Assert.assertEquals("<u>Foo</u>",
+    void sanitizeUTag_UTagPersist() {
+        Assertions.assertEquals("<u>Foo</u>",
                 RichTextEditor.sanitize("<u>Foo</u>"));
     }
 
     @Test
-    public void sanitizeSTag_STagPersist() {
-        Assert.assertEquals("<s>Foo</s>",
+    void sanitizeSTag_STagPersist() {
+        Assertions.assertEquals("<s>Foo</s>",
                 RichTextEditor.sanitize("<s>Foo</s>"));
     }
 
     @Test
-    public void sanitizeCombinedDecorationTags_AllTagsPersist() {
-        Assert.assertEquals("<strong><em><s><u>123123</u></s></em></strong>",
+    void sanitizeCombinedDecorationTags_AllTagsPersist() {
+        Assertions.assertEquals(
+                "<strong><em><s><u>123123</u></s></em></strong>",
                 RichTextEditor.sanitize(
                         "<strong><em><s><u>123123</u></s></em></strong>"));
     }
@@ -48,36 +49,36 @@ public class RichTextEditorSanitizationTest {
     // Headers group sanitization
 
     @Test
-    public void sanitizeH1Tag_H1TagPersist() {
-        Assert.assertEquals("<h1>Foo</h1>",
+    void sanitizeH1Tag_H1TagPersist() {
+        Assertions.assertEquals("<h1>Foo</h1>",
                 RichTextEditor.sanitize("<h1>Foo</h1>"));
     }
 
     @Test
-    public void sanitizeH2Tag_H2TagPersist() {
-        Assert.assertEquals("<h2>Foo</h2>",
+    void sanitizeH2Tag_H2TagPersist() {
+        Assertions.assertEquals("<h2>Foo</h2>",
                 RichTextEditor.sanitize("<h2>Foo</h2>"));
     }
 
     @Test
-    public void sanitizeH3Tag_H3TagPersist() {
-        Assert.assertEquals("<h3>Foo</h3>",
+    void sanitizeH3Tag_H3TagPersist() {
+        Assertions.assertEquals("<h3>Foo</h3>",
                 RichTextEditor.sanitize("<h3>Foo</h3>"));
     }
 
     // Style group sanitization
 
     @Test
-    public void sanitizeStyleColor_StyleColorPersist() {
-        Assert.assertEquals(
+    void sanitizeStyleColor_StyleColorPersist() {
+        Assertions.assertEquals(
                 "<p><span style=\"color: rgb(230, 0, 0);\">Foo</span></p>",
                 RichTextEditor.sanitize(
                         "<p><span style=\"color: rgb(230, 0, 0);\">Foo</span></p>"));
     }
 
     @Test
-    public void sanitizeStyleBackgroundColor_StyleBackgroundColorPersist() {
-        Assert.assertEquals(
+    void sanitizeStyleBackgroundColor_StyleBackgroundColorPersist() {
+        Assertions.assertEquals(
                 "<p><span style=\"background-color: rgb(230, 0, 0);\">Foo</span></p>",
                 RichTextEditor.sanitize(
                         "<p><span style=\"background-color: rgb(230, 0, 0);\">Foo</span></p>"));
@@ -86,42 +87,42 @@ public class RichTextEditorSanitizationTest {
     // Super - / Sub - scripts group sanitization
 
     @Test
-    public void sanitizeSupTag_SupTagPersist() {
-        Assert.assertEquals("<sup>Foo</sup>",
+    void sanitizeSupTag_SupTagPersist() {
+        Assertions.assertEquals("<sup>Foo</sup>",
                 RichTextEditor.sanitize("<sup>Foo</sup>"));
     }
 
     @Test
-    public void sanitizeSubTag_SubTagPersist() {
-        Assert.assertEquals("<sub>Foo</sub>",
+    void sanitizeSubTag_SubTagPersist() {
+        Assertions.assertEquals("<sub>Foo</sub>",
                 RichTextEditor.sanitize("<sub>Foo</sub>"));
     }
 
     // Lists group sanitization
 
     @Test
-    public void sanitizeOrderedListTag_OrderedListTagPersist() {
-        Assert.assertEquals("<ol>\n Foo\n</ol>",
+    void sanitizeOrderedListTag_OrderedListTagPersist() {
+        Assertions.assertEquals("<ol>\n Foo\n</ol>",
                 RichTextEditor.sanitize("<ol>\n Foo\n</ol>"));
     }
 
     @Test
-    public void sanitizeBulletListTag_BulletListTagPersist() {
-        Assert.assertEquals("<ul>\n Foo\n</ul>",
+    void sanitizeBulletListTag_BulletListTagPersist() {
+        Assertions.assertEquals("<ul>\n Foo\n</ul>",
                 RichTextEditor.sanitize("<ul>\n Foo\n</ul>"));
     }
 
     @Test
-    public void sanitizeListElementTag_listElementTagPersist() {
-        Assert.assertEquals("<li>Foo</li>",
+    void sanitizeListElementTag_listElementTagPersist() {
+        Assertions.assertEquals("<li>Foo</li>",
                 RichTextEditor.sanitize("<li>Foo</li>"));
     }
 
     // Alignment group sanitization
 
     @Test
-    public void sanitizeStyleTextAlign_StyleTextAlignPersist() {
-        Assert.assertEquals("<p style=\"text-align: center\">Foo</p>",
+    void sanitizeStyleTextAlign_StyleTextAlignPersist() {
+        Assertions.assertEquals("<p style=\"text-align: center\">Foo</p>",
                 RichTextEditor
                         .sanitize("<p style=\"text-align: center\">Foo</p>"));
     }
@@ -129,34 +130,34 @@ public class RichTextEditorSanitizationTest {
     // Script sanitization
 
     @Test
-    public void sanitizeScriptTag_scriptTagRemoved() {
-        Assert.assertEquals("",
+    void sanitizeScriptTag_scriptTagRemoved() {
+        Assertions.assertEquals("",
                 RichTextEditor.sanitize("<script>alert('Foo')</script>"));
     }
 
     // Image sanitization
 
     @Test
-    public void sanitizeImgTagWithHttpSource_srcAttributeRemoved() {
-        Assert.assertEquals("<img>",
+    void sanitizeImgTagWithHttpSource_srcAttributeRemoved() {
+        Assertions.assertEquals("<img>",
                 RichTextEditor.sanitize("<img src='http://vaadin.com'>"));
     }
 
     @Test
-    public void sanitizeImgTagWithHttpsSource_srcAttributeRemoved() {
-        Assert.assertEquals("<img>",
+    void sanitizeImgTagWithHttpsSource_srcAttributeRemoved() {
+        Assertions.assertEquals("<img>",
                 RichTextEditor.sanitize("<img src='https://vaadin.com'>"));
     }
 
     @Test
-    public void sanitizeImgTagWithHttpsSource_onloadAttributeRemoved() {
-        Assert.assertEquals("<img>",
+    void sanitizeImgTagWithHttpsSource_onloadAttributeRemoved() {
+        Assertions.assertEquals("<img>",
                 RichTextEditor.sanitize("<img onload='https://vaadin.com'>"));
     }
 
     @Test
-    public void sanitizeImgTagWithDataSource_srcAttributePersist() {
-        Assert.assertEquals(
+    void sanitizeImgTagWithDataSource_srcAttributePersist() {
+        Assertions.assertEquals(
                 "<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">",
                 RichTextEditor.sanitize(
                         "<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\">"));
@@ -165,22 +166,22 @@ public class RichTextEditorSanitizationTest {
     // Blockquote sanitization
 
     @Test
-    public void sanitizeBlockquoteTag_blockquoteTagPersist() {
-        Assert.assertEquals("<blockquote>\n Foo\n</blockquote>",
+    void sanitizeBlockquoteTag_blockquoteTagPersist() {
+        Assertions.assertEquals("<blockquote>\n Foo\n</blockquote>",
                 RichTextEditor.sanitize("<blockquote>\n Foo\n</blockquote>"));
     }
 
     // Code block sanitization
 
     @Test
-    public void sanitizePreTag_preTagPersist() {
-        Assert.assertEquals("<pre>Foo</pre>",
+    void sanitizePreTag_preTagPersist() {
+        Assertions.assertEquals("<pre>Foo</pre>",
                 RichTextEditor.sanitize("<pre>Foo</pre>"));
     }
 
     @Test
-    public void sanitizeWhiteSpacesNotRemoved() {
+    void sanitizeWhiteSpacesNotRemoved() {
         var testHtml = "<p><strong>Line 1</strong></p>\n<p>        Indent 1</p>\n<p>         Indent 2</p>\n<p>Last line with extra     spaces and a\ttab</p>";
-        Assert.assertEquals(testHtml, RichTextEditor.sanitize(testHtml));
+        Assertions.assertEquals(testHtml, RichTextEditor.sanitize(testHtml));
     }
 }
