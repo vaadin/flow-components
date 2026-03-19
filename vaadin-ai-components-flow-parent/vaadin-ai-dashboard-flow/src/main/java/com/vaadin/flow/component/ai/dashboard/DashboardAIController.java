@@ -72,7 +72,6 @@ public class DashboardAIController implements AIController {
     private final Map<String, DatabaseProvider> databaseProviders;
     private final DashboardTools dashboardTools;
 
-    private final Map<String, Chart> chartMap = new LinkedHashMap<>();
     private final ChartRegistry chartRegistry;
     private final DataConverter dataConverter = new DefaultDataConverter();
     private final ChartConfigurationApplier configurationApplier = new ChartConfigurationApplier();
@@ -121,8 +120,8 @@ public class DashboardAIController implements AIController {
         this.databaseProviders = new LinkedHashMap<>(databaseProviders);
         this.dashboardTools = new DashboardTools(dashboard);
         this.chartRegistry = new ChartRegistry(
-                id -> chartMap.get(id),
-                () -> Set.copyOf(chartMap.keySet()));
+                this::findChartById,
+                this::getChartWidgetIds);
     }
 
     /**
@@ -269,13 +268,12 @@ public class DashboardAIController implements AIController {
             List<String> queries = null;
             String configuration = null;
 
-            if (chartMap.containsKey(widgetId)) {
+            if (widget.getContent() instanceof Chart chart) {
                 type = "chart";
                 ChartEntry entry = chartRegistry.getEntries().get(widgetId);
                 if (entry != null && !entry.getQueries().isEmpty()) {
                     queries = entry.getQueries();
                     try {
-                        Chart chart = chartMap.get(widgetId);
                         String configJson = ChartSerialization
                                 .toJSON(chart.getConfiguration());
                         ObjectNode configNode = (ObjectNode) JacksonUtils
@@ -315,7 +313,6 @@ public class DashboardAIController implements AIController {
     public void restoreState(DashboardState state) {
         dashboard.getUI().ifPresent(ui -> ui.access(() -> {
             dashboard.removeAll();
-            chartMap.clear();
             gridToolsMap.clear();
             widgetDataSourceMap.clear();
             dashboardTools.clearSelectionCheckboxes();
@@ -331,7 +328,8 @@ public class DashboardAIController implements AIController {
                                 .getEntry(ws.widgetId());
                         entry.setQueries(ws.queries());
                         try {
-                            renderChart(chartMap.get(ws.widgetId()),
+                            renderChart(
+                                    chartRegistry.getChart(ws.widgetId()),
                                     ws.queries(), ws.configuration(),
                                     ws.dataSource());
                         } catch (Exception e) {
@@ -388,7 +386,6 @@ public class DashboardAIController implements AIController {
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
 
-        chartMap.put(widgetId, chart);
         widgetDataSourceMap.put(widgetId, resolveDataSourceName(dataSource));
         dashboardTools.addSelectionCheckbox(widget);
 
@@ -431,6 +428,29 @@ public class DashboardAIController implements AIController {
             return databaseProviders.keySet().iterator().next();
         }
         return dataSource;
+    }
+
+    // ===== Chart Resolution =====
+
+    private Chart findChartById(String widgetId) {
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getId().isPresent()
+                    && widget.getId().get().equals(widgetId)
+                    && widget.getContent() instanceof Chart chart) {
+                return chart;
+            }
+        }
+        return null;
+    }
+
+    private Set<String> getChartWidgetIds() {
+        var ids = new java.util.LinkedHashSet<String>();
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Chart) {
+                widget.getId().ifPresent(ids::add);
+            }
+        }
+        return ids;
     }
 
     // ===== Rendering =====
@@ -805,7 +825,6 @@ public class DashboardAIController implements AIController {
                         dashboard.remove(toRemove);
                     });
 
-                    chartMap.remove(widgetId);
                     gridToolsMap.remove(widgetId);
                     widgetDataSourceMap.remove(widgetId);
 

@@ -69,11 +69,9 @@ public class AIChartDemoPage extends HorizontalLayout {
                     + state.queries());
         });
 
-        // Create LLM provider via OpenRouter
-        var apiKey = System.getenv("OPENROUTER_API_KEY");
+        var apiKey = System.getenv("OPENAI_API_KEY");
         var model = OpenAiStreamingChatModel.builder().apiKey(apiKey)
-                .baseUrl("https://openrouter.ai/api/v1")
-                .modelName("anthropic/claude-sonnet-4").build();
+                .modelName("gpt-5.4-mini").build();
         var provider = new LangChain4JLLMProvider(model);
 
         // Create orchestrator with controller
