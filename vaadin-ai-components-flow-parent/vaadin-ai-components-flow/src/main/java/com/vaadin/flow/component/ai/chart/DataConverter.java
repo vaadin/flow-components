@@ -25,10 +25,15 @@ import com.vaadin.flow.component.charts.model.Series;
  * Converts tabular data into chart {@link Series} for rendering. The input is a
  * list of rows, where each row is a column-name-to-value map.
  * <p>
- * Implementations may return one or more series depending on the data.
+ * Implementations may return one or more series depending on the data. The
+ * {@link DefaultDataConverter} provides automatic chart type detection based on
+ * column names and supports multi-series grouping via a {@code series} column.
+ * Custom implementations can apply any conversion logic appropriate for their
+ * use case.
  * </p>
  *
  * @author Vaadin Ltd
+ * @see DefaultDataConverter
  */
 public interface DataConverter extends Serializable {
 
