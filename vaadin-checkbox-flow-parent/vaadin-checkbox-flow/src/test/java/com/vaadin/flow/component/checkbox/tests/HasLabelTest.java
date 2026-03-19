@@ -15,25 +15,25 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 
-public class HasLabelTest {
+class HasLabelTest {
 
     @Test
-    public void checkbox() {
+    void checkbox() {
         Checkbox c = new Checkbox();
-        Assert.assertTrue(c instanceof HasLabel);
+        Assertions.assertTrue(c instanceof HasLabel);
     }
 
     @Test
-    public void checkboxGroup() {
+    void checkboxGroup() {
         CheckboxGroup<String> c = new CheckboxGroup<>();
-        Assert.assertTrue(c instanceof HasLabel);
+        Assertions.assertTrue(c instanceof HasLabel);
     }
 
 }
