@@ -841,6 +841,150 @@ class LangChain4JLLMProviderTest {
         provider.stream(request).blockFirst();
     }
 
+    // --- Explicit tools tests ---
+
+    @Test
+    void stream_withExplicitTool_executesTool() {
+        var toolResult = "tool executed";
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"}},\"required\":[\"query\"]}",
+                args -> toolResult);
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        // Verify tool spec was included in the first request
+        var firstRequest = captor.getAllValues().get(0);
+        Assertions.assertFalse(firstRequest.toolSpecifications().isEmpty());
+        Assertions.assertEquals("myTool",
+                firstRequest.toolSpecifications().getFirst().name());
+
+        // Verify tool was executed and result was in second request
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals(toolResult, toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitTool_passesArgumentsToExecutor() {
+        var receivedArgs = new ArrayList<String>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "result for " + args;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var toolArgs = "{\"city\":\"Helsinki\"}";
+        var response1 = mockSimpleResponseWithTool("myTool", toolArgs);
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size(),
+                "Tool executor should have been called once");
+        Assertions.assertEquals(toolArgs, receivedArgs.getFirst(),
+                "Tool executor should receive the arguments from the LLM response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("result for " + toolArgs,
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_createsToolWithoutParameters() {
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var spec = captor.getValue().toolSpecifications().getFirst();
+        Assertions.assertEquals("simpleTool", spec.name());
+        Assertions.assertEquals("A simple tool", spec.description());
+        Assertions.assertNull(spec.parameters());
+    }
+
+    @Test
+    void stream_withBothVendorAndExplicitTools_allConfigured() {
+        var vendorTool = new SampleToolsClass();
+        var explicitTool = createExplicitTool("explicitTool", "Explicit", null,
+                args -> "result");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tools", null,
+                Collections.emptyList(), new Object[] { vendorTool },
+                List.of(explicitTool));
+
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var specs = captor.getValue().toolSpecifications();
+        // 2 from SampleToolsClass + 1 explicit
+        Assertions.assertEquals(3, specs.size());
+        var names = specs.stream()
+                .map(dev.langchain4j.agent.tool.ToolSpecification::name)
+                .toList();
+        Assertions.assertTrue(names.contains("explicitTool"));
+        Assertions.assertTrue(names.contains("getTemperature"));
+        Assertions.assertTrue(names.contains("getHumidity"));
+    }
+
+    private static LLMProvider.ToolSpec createExplicitTool(String name,
+            String description, String parametersSchema,
+            java.util.function.Function<String, String> executor) {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return parametersSchema;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return executor.apply(arguments);
+            }
+        };
+    }
+
     private static List<ToolExecutionResultMessage> getToolExecutionResults(
             ChatRequest request) {
         return request.messages().stream()
@@ -862,12 +1006,17 @@ class LangChain4JLLMProviderTest {
     }
 
     private static ChatResponse mockSimpleResponseWithTool(String toolName) {
+        return mockSimpleResponseWithTool(toolName, "{}");
+    }
+
+    private static ChatResponse mockSimpleResponseWithTool(String toolName,
+            String arguments) {
         var aiMessage1 = Mockito.mock(AiMessage.class);
         Mockito.when(aiMessage1.text()).thenReturn("");
         Mockito.when(aiMessage1.hasToolExecutionRequests()).thenReturn(true);
         var toolRequest = Mockito.mock(ToolExecutionRequest.class);
         Mockito.when(toolRequest.name()).thenReturn(toolName);
-        Mockito.when(toolRequest.arguments()).thenReturn("{}");
+        Mockito.when(toolRequest.arguments()).thenReturn(arguments);
         Mockito.when(aiMessage1.toolExecutionRequests())
                 .thenReturn(List.of(toolRequest));
         var response1 = Mockito.mock(ChatResponse.class);
@@ -887,6 +1036,11 @@ class LangChain4JLLMProviderTest {
     private record TestLLMRequest(String userMessage, String systemPrompt,
             List<AIAttachment> attachments,
             Object[] tools) implements LLMRequest {
+    }
+
+    private record TestLLMRequestWithExplicitTools(String userMessage,
+            String systemPrompt, List<AIAttachment> attachments, Object[] tools,
+            List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
     }
 
     private static class SampleToolsClass {

@@ -825,6 +825,136 @@ class SpringAILLMProviderTest {
                 new Object[0]);
     }
 
+    // --- Explicit tools tests ---
+
+    @Test
+    void stream_withExplicitTools_toolCallbacksConfigured() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"}}}",
+                args -> "result");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var chatOptions = capturePrompt().getOptions();
+        Assertions.assertNotNull(chatOptions);
+        var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
+                .getToolCallbacks();
+        Assertions.assertNotNull(toolCallbacks);
+        Assertions.assertEquals(1, toolCallbacks.size());
+        Assertions.assertEquals("myTool",
+                toolCallbacks.getFirst().getToolDefinition().name());
+    }
+
+    @Test
+    void stream_withExplicitTool_passesArgumentsToCallback() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<String>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "result for " + args;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var chatOptions = capturePrompt().getOptions();
+        var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
+                .getToolCallbacks();
+        Assertions.assertEquals(1, toolCallbacks.size());
+
+        // Call the callback directly to verify arguments are forwarded
+        var toolArgs = "{\"city\":\"Helsinki\"}";
+        var result = toolCallbacks.getFirst().call(toolArgs);
+        Assertions.assertEquals(1, receivedArgs.size(),
+                "Tool executor should have been called once");
+        Assertions.assertEquals(toolArgs, receivedArgs.getFirst(),
+                "Tool executor should receive the arguments passed to the callback");
+        Assertions.assertEquals("result for " + toolArgs, result);
+    }
+
+    @Test
+    void stream_withBothVendorAndExplicitTools_allConfigured() {
+        provider.setStreaming(false);
+        var vendorTool = new SampleToolsClass();
+        var explicitTool = createExplicitTool("explicitTool", "Explicit", null,
+                args -> "result");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tools", null,
+                Collections.emptyList(), new Object[] { vendorTool },
+                List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var chatOptions = capturePrompt().getOptions();
+        Assertions.assertNotNull(chatOptions);
+        var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
+                .getToolCallbacks();
+        Assertions.assertNotNull(toolCallbacks);
+        // 2 from SampleToolsClass + 1 explicit
+        Assertions.assertEquals(3, toolCallbacks.size());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_usesEmptySchema() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var chatOptions = capturePrompt().getOptions();
+        Assertions.assertNotNull(chatOptions);
+        var toolCallbacks = ((ToolCallingChatOptions) chatOptions)
+                .getToolCallbacks();
+        Assertions.assertEquals(1, toolCallbacks.size());
+        var toolDef = toolCallbacks.getFirst().getToolDefinition();
+        Assertions.assertEquals("simpleTool", toolDef.name());
+        Assertions.assertEquals("A simple tool", toolDef.description());
+        // Should have a default empty schema
+        Assertions.assertNotNull(toolDef.inputSchema());
+    }
+
+    private static LLMProvider.ToolSpec createExplicitTool(String name,
+            String description, String parametersSchema,
+            java.util.function.Function<String, String> executor) {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return parametersSchema;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return executor.apply(arguments);
+            }
+        };
+    }
+
     private Prompt capturePrompt() {
         return getPromptCaptor(1).getValue();
     }
@@ -839,6 +969,11 @@ class SpringAILLMProviderTest {
     private record TestLLMRequest(String userMessage, String systemPrompt,
             List<AIAttachment> attachments,
             Object[] tools) implements LLMRequest {
+    }
+
+    private record TestLLMRequestWithExplicitTools(String userMessage,
+            String systemPrompt, List<AIAttachment> attachments, Object[] tools,
+            List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
     }
 
     private static class SampleToolsClass {

@@ -10,18 +10,18 @@ package com.vaadin.flow.component.spreadsheet.tests;
 
 import static org.mockito.Mockito.*;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ComponentEventBus;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetHandlerImpl;
 
-public class CustomHandlerTest {
+class CustomHandlerTest {
 
     @Test
-    public void singleOriginalSpreadsheetEventIsRegistered() {
+    void singleOriginalSpreadsheetEventIsRegistered() {
         var originalHandler = mock(SpreadsheetHandlerImpl.class);
 
         var spreadsheet = new Spreadsheet() {
@@ -38,7 +38,7 @@ public class CustomHandlerTest {
 
         var activeListeners = spreadsheet.getEventBus()
                 .getListeners(Spreadsheet.SpreadsheetEvent.class);
-        Assert.assertEquals(1, activeListeners.size());
+        Assertions.assertEquals(1, activeListeners.size());
 
         // Mock spreadsheet event to trigger the original handler
         var spreadsheetEvent = mock(Spreadsheet.SpreadsheetEvent.class);
@@ -52,7 +52,7 @@ public class CustomHandlerTest {
     }
 
     @Test
-    public void newCustomHandlerOverridesOriginal() {
+    void newCustomHandlerOverridesOriginal() {
         var originalHandler = mock(SpreadsheetHandlerImpl.class);
         var newHandler = mock(SpreadsheetHandlerImpl.class);
 
@@ -72,7 +72,7 @@ public class CustomHandlerTest {
 
         var activeListeners = spreadsheet.getEventBus()
                 .getListeners(Spreadsheet.SpreadsheetEvent.class);
-        Assert.assertEquals(1, activeListeners.size());
+        Assertions.assertEquals(1, activeListeners.size());
 
         // Mock spreadsheet event to trigger the new handler
         var spreadsheetEvent = mock(Spreadsheet.SpreadsheetEvent.class);
