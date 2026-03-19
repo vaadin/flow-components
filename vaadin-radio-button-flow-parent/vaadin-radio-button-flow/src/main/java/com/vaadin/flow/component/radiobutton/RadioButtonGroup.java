@@ -103,7 +103,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.1.0-rc1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T> implements
@@ -866,6 +866,9 @@ public class RadioButtonGroup<T>
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
             rebuild();
+            // Re-sync the presentation value so the element property uses the
+            // new key matching the rebuilt radio buttons.
+            setPresentationValue(getValue());
         }
     }
 

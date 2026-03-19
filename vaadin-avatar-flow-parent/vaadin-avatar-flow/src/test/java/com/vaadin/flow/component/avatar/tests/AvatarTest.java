@@ -15,86 +15,87 @@
  */
 package com.vaadin.flow.component.avatar.tests;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 
-public class AvatarTest {
+class AvatarTest {
 
     private Avatar avatar;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         avatar = new Avatar();
     }
 
     @Test
-    public void shouldCreateEmptyAvatarWithDefaultState() {
-        Assert.assertNull("Initial name is null", avatar.getName());
-        Assert.assertNull("Initial abbreviation is null",
-                avatar.getAbbreviation());
-        Assert.assertNull("Initial image is null", avatar.getImage());
+    void shouldCreateEmptyAvatarWithDefaultState() {
+        Assertions.assertNull(avatar.getName(), "Initial name is null");
+        Assertions.assertNull(avatar.getAbbreviation(),
+                "Initial abbreviation is null");
+        Assertions.assertNull(avatar.getImage(), "Initial image is null");
     }
 
     @Test
-    public void setName_getName() {
+    void setName_getName() {
         avatar.setName("foo");
-        Assert.assertEquals(avatar.getName(), "foo");
+        Assertions.assertEquals("foo", avatar.getName());
     }
 
     @Test
-    public void setAbbr_getAbbr() {
+    void setAbbr_getAbbr() {
         avatar.setAbbreviation("fb");
-        Assert.assertEquals(avatar.getAbbreviation(), "fb");
+        Assertions.assertEquals("fb", avatar.getAbbreviation());
     }
 
     @Test
-    public void setImgLink_getImgLink() {
+    void setImgLink_getImgLink() {
         avatar.setImage("https://vaadin.com/");
-        Assert.assertEquals(avatar.getImage(), "https://vaadin.com/");
+        Assertions.assertEquals("https://vaadin.com/", avatar.getImage());
     }
 
     @Test
-    public void constructAvatarWithName() {
+    void constructAvatarWithName() {
         Avatar avatar = new Avatar("foo");
-        Assert.assertEquals(avatar.getName(), "foo");
+        Assertions.assertEquals("foo", avatar.getName());
     }
 
     @Test
-    public void constructAvatarWithNameAndImage() {
+    void constructAvatarWithNameAndImage() {
         Avatar avatar = new Avatar("foo", "https://vaadin.com/");
 
-        Assert.assertEquals(avatar.getName(), "foo");
-        Assert.assertEquals(avatar.getImage(), "https://vaadin.com/");
+        Assertions.assertEquals("foo", avatar.getName());
+        Assertions.assertEquals("https://vaadin.com/", avatar.getImage());
     }
 
     @Test
-    public void setI18n() {
+    void setI18n() {
         Avatar.AvatarI18n i18n = new Avatar.AvatarI18n()
                 .setAnonymous("anonyymi");
 
         avatar.setI18n(i18n);
-        Assert.assertEquals(i18n, avatar.getI18n());
+        Assertions.assertEquals(i18n, avatar.getI18n());
     }
 
     @Test
-    public void setTooltipEnabled_isTooltipEnabled() {
+    void setTooltipEnabled_isTooltipEnabled() {
         avatar.setTooltipEnabled(true);
-        Assert.assertEquals(avatar.isTooltipEnabled(), true);
-        Assert.assertTrue(
+        Assertions.assertEquals(true, avatar.isTooltipEnabled());
+        Assertions.assertTrue(
                 avatar.getElement().getProperty("withTooltip", false));
 
         avatar.setTooltipEnabled(false);
-        Assert.assertEquals(avatar.isTooltipEnabled(), false);
-        Assert.assertFalse(
+        Assertions.assertEquals(false, avatar.isTooltipEnabled());
+        Assertions.assertFalse(
                 avatar.getElement().getProperty("withTooltip", false));
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Avatar.class));
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Avatar.class));
     }
 }

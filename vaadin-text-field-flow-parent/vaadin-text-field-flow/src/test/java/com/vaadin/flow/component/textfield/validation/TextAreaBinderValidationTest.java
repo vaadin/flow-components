@@ -20,7 +20,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public class TextAreaBinderValidationTest
+class TextAreaBinderValidationTest
         extends AbstractBinderValidationTest<String, TextArea> {
 
     @Override

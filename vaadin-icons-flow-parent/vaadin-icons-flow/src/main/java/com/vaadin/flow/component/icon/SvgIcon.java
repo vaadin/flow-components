@@ -331,9 +331,10 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Binds the given signal to the symbol of the SVG icon.
      * <p>
-     * When a signal is bound, the symbol is kept synchronized with the signal
-     * value while the component is attached. When the component is detached,
-     * signal value changes have no effect.
+     * The symbol is set immediately with the current signal value when the
+     * binding is created, and is kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the symbol manually through
      * {@link #setSymbol(String)} throws a

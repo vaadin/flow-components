@@ -77,7 +77,7 @@ public class EditorBeanTest {
         ui.fakeClientCommunication();
 
         Assert.assertNotNull(binder.getBean());
-        Assert.assertEquals(nameField.getValue(), "foo");
+        Assert.assertEquals("foo", nameField.getValue());
     }
 
     @Test
@@ -95,7 +95,7 @@ public class EditorBeanTest {
         ui.fakeClientCommunication();
 
         Assert.assertNull(binder.getBean());
-        Assert.assertEquals(nameField.getValue(), "foo");
+        Assert.assertEquals("foo", nameField.getValue());
     }
 
     @Test
@@ -112,6 +112,6 @@ public class EditorBeanTest {
         ui.fakeClientCommunication();
 
         Assert.assertNull(binder.getBean());
-        Assert.assertEquals(nameField.getValue(), "foo");
+        Assert.assertEquals("foo", nameField.getValue());
     }
 }

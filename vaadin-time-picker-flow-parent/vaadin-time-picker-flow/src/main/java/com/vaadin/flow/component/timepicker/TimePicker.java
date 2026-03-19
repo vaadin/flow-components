@@ -111,7 +111,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.1.0-rc1")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -819,9 +819,10 @@ public class TimePicker
      * Binds the given signal to the minimum time allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the minimum time is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The minimum time is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum time manually
      * through {@link #setMin(LocalTime)} throws a
@@ -847,9 +848,10 @@ public class TimePicker
      * Binds the given signal to the maximum time allowed to be selected for
      * this field.
      * <p>
-     * When a signal is bound, the maximum time is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The maximum time is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum time manually
      * through {@link #setMax(LocalTime)} throws a

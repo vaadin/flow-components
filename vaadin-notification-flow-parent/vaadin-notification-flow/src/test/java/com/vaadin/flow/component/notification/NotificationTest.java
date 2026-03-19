@@ -355,12 +355,12 @@ public class NotificationTest {
     public void setAssertive_isAssertive() {
         Notification notification = new Notification();
         notification.setAssertive(true);
-        Assert.assertEquals(notification.isAssertive(), true);
+        Assert.assertEquals(true, notification.isAssertive());
         Assert.assertTrue(
                 notification.getElement().getProperty("assertive", false));
 
         notification.setAssertive(false);
-        Assert.assertEquals(notification.isAssertive(), false);
+        Assert.assertEquals(false, notification.isAssertive());
         Assert.assertFalse(
                 notification.getElement().getProperty("assertive", false));
     }

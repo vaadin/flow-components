@@ -11,7 +11,7 @@ package com.vaadin.flow.component.charts;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
 import com.vaadin.flow.component.charts.events.internal.DataAddedEvent;
@@ -35,7 +35,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * Unit tests for {@link ProxyChangeForwarder} verifying that calls to
  * {@code callJsFunction} are forwarded with correct function names.
  */
-public class ProxyChangeForwarderTest {
+class ProxyChangeForwarderTest {
 
     private static class TestChart extends Chart {
         private final Element element;
@@ -52,7 +52,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void dataAdded_itemSerializedAsJson() {
+    void dataAdded_itemSerializedAsJson() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         DataSeries series = new DataSeries();
@@ -74,7 +74,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void dataRemoved_indexPassedToPointFunction() {
+    void dataRemoved_indexPassedToPointFunction() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         DataSeries series = new DataSeries();
@@ -89,7 +89,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void dataUpdated_valueNumberSerialized() {
+    void dataUpdated_valueNumberSerialized() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         DataSeries series = new DataSeries();
@@ -104,7 +104,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void dataUpdated_itemSerializedWhenValueNull() {
+    void dataUpdated_itemSerializedWhenValueNull() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         DataSeries series = new DataSeries();
@@ -121,7 +121,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void seriesStateChanged_showHideBasedOnEnabledFlag() {
+    void seriesStateChanged_showHideBasedOnEnabledFlag() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         DataSeries series = new DataSeries();
@@ -141,7 +141,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void axisRescaled_serializesMinMaxAndFlags() {
+    void axisRescaled_serializesMinMaxAndFlags() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         conf.addxAxis(new XAxis());
@@ -156,7 +156,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void itemSliced_argumentsForwardedCorrectly() {
+    void itemSliced_argumentsForwardedCorrectly() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         DataSeries series = new DataSeries();
@@ -172,7 +172,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void seriesAdded_seriesSerializedToJson() {
+    void seriesAdded_seriesSerializedToJson() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         ListSeries series = new ListSeries("name", 1, 2, 3);
@@ -190,7 +190,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void seriesChanged_seriesSerializedToJson() {
+    void seriesChanged_seriesSerializedToJson() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         ListSeries series = new ListSeries("name", 1, 2, 3);
@@ -208,7 +208,7 @@ public class ProxyChangeForwarderTest {
     }
 
     @Test
-    public void resetZoom_clearsAllAxes() {
+    void resetZoom_clearsAllAxes() {
         TestChart chart = new TestChart();
         Configuration conf = chart.getConfiguration();
         conf.addxAxis(new XAxis());

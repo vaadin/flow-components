@@ -81,8 +81,8 @@ public class DialogTest {
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(0, children.size());
 
-        Assert.assertEquals(dialog.getWidth(), "200px");
-        Assert.assertEquals(dialog.getHeight(), "100px");
+        Assert.assertEquals("200px", dialog.getWidth());
+        Assert.assertEquals("100px", dialog.getHeight());
     }
 
     @Test(expected = IllegalStateException.class)

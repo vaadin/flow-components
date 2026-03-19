@@ -67,7 +67,7 @@ public class GridProTest {
     @Test
     public void setEnterNextRow_getEnterNextRow() {
         grid.setEnterNextRow(true);
-        Assert.assertEquals(grid.getEnterNextRow(), true);
+        Assert.assertEquals(true, grid.getEnterNextRow());
     }
 
     @Test

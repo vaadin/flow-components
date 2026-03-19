@@ -8,8 +8,8 @@
  */
 package com.vaadin.flow.component.charts;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.events.HasItem;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -21,9 +21,9 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.model.TreeSeriesItem;
 
-public class HasItemTest {
+class HasItemTest {
     @Test
-    public void getSeries() {
+    void getSeries() {
         Chart chart = new Chart();
         DataSeries series = new DataSeries();
         chart.getConfiguration().addSeries(series);
@@ -31,11 +31,11 @@ public class HasItemTest {
         HasItem hasItem = new HasItemTestImpl(chart, 0, 0);
         Series result = hasItem.getSeries();
 
-        Assert.assertEquals(series, result);
+        Assertions.assertEquals(series, result);
     }
 
     @Test
-    public void getItemWithDataSeries() {
+    void getItemWithDataSeries() {
         Chart chart = new Chart();
         DataSeriesItem item = new DataSeriesItem(5, 10);
         DataSeries series = new DataSeries(item);
@@ -44,11 +44,11 @@ public class HasItemTest {
         HasItem hasItem = new HasItemTestImpl(chart, 0, 0);
         DataSeriesItem result = hasItem.getItem();
 
-        Assert.assertEquals(item, result);
+        Assertions.assertEquals(item, result);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getItemWithNodeSeriesThrowsUnsupportedOperationException() {
+    @Test
+    void getItemWithNodeSeriesThrowsUnsupportedOperationException() {
         Chart chart = new Chart();
         Node node1 = new Node("Node1");
         Node node2 = new Node("Node2");
@@ -57,21 +57,23 @@ public class HasItemTest {
         chart.getConfiguration().addSeries(series);
 
         HasItem hasItem = new HasItemTestImpl(chart, 0, 0);
-        hasItem.getItem();
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> hasItem.getItem());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getItemWithListSeriesThrowsUnsupportedOperationException() {
+    @Test
+    void getItemWithListSeriesThrowsUnsupportedOperationException() {
         Chart chart = new Chart();
         ListSeries series = new ListSeries(1, 2, 3);
         chart.getConfiguration().addSeries(series);
 
         HasItem hasItem = new HasItemTestImpl(chart, 0, 0);
-        hasItem.getItem();
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> hasItem.getItem());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getItemWithTreeSeriesThrowsUnsupportedOperationException() {
+    @Test
+    void getItemWithTreeSeriesThrowsUnsupportedOperationException() {
         Chart chart = new Chart();
         TreeSeriesItem item = new TreeSeriesItem("1", "1");
         TreeSeries series = new TreeSeries();
@@ -79,7 +81,8 @@ public class HasItemTest {
         chart.getConfiguration().addSeries(series);
 
         HasItem hasItem = new HasItemTestImpl(chart, 0, 0);
-        hasItem.getItem();
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> hasItem.getItem());
     }
 
     private static class HasItemTestImpl implements HasItem {

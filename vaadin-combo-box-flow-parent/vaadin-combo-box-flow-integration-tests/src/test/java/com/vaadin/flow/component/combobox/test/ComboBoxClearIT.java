@@ -33,7 +33,7 @@ public class ComboBoxClearIT extends AbstractComboBoxIT {
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
         box = $(ComboBoxElement.class).first();
-        Assert.assertEquals(box.getSelectedText(), "Eight");
+        Assert.assertEquals("Eight", box.getSelectedText());
         box.clear();
         Assert.assertTrue(box.getSelectedText().isEmpty());
     }
