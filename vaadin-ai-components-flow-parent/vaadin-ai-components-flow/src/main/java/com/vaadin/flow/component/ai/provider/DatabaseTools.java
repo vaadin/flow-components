@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Factory for creating reusable database {@link LLMProvider.ToolDefinition}
+ * Factory for creating reusable database {@link LLMProvider.ToolSpec}
  * instances. These tools are not chart-specific and can be used by any
  * controller that works with a {@link DatabaseProvider}.
  *
@@ -45,10 +45,10 @@ public final class DatabaseTools {
      *            the database provider, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolDefinition getDatabaseSchema(
+    public static LLMProvider.ToolSpec getDatabaseSchema(
             DatabaseProvider provider) {
         Objects.requireNonNull(provider, "provider must not be null");
-        return new LLMProvider.ToolDefinition() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "get_database_schema";
@@ -79,7 +79,7 @@ public final class DatabaseTools {
      *            the database provider, not {@code null}
      * @return a list of all database tools, never {@code null}
      */
-    public static List<LLMProvider.ToolDefinition> createAll(
+    public static List<LLMProvider.ToolSpec> createAll(
             DatabaseProvider provider) {
         return List.of(getDatabaseSchema(provider));
     }

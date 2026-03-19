@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,10 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.content.Media;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.definition.DefaultToolDefinition;
+import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.MimeType;
 
@@ -208,11 +210,11 @@ public class SpringAILLMProvider implements LLMProvider {
             promptSpec = promptSpec.tools(tools);
         }
         var explicitTools = request.explicitTools();
-        if (explicitTools != null && explicitTools.length > 0) {
-            var callbacks = Arrays.stream(explicitTools)
+        if (explicitTools != null && !explicitTools.isEmpty()) {
+            var callbacks = explicitTools.stream()
                     .map(SpringAILLMProvider::toToolCallback)
-                    .toArray(org.springframework.ai.tool.ToolCallback[]::new);
-            promptSpec = promptSpec.tools((Object[]) callbacks);
+                    .toArray(ToolCallback[]::new);
+            promptSpec = promptSpec.toolCallbacks(callbacks);
         }
         return promptSpec;
     }
@@ -268,24 +270,25 @@ public class SpringAILLMProvider implements LLMProvider {
                 .data(formattedText).build();
     }
 
-    private static org.springframework.ai.tool.ToolCallback toToolCallback(
-            LLMProvider.ToolDefinition tool) {
-        var inputSchema = tool.getParametersSchema();
-        var toolDef = org.springframework.ai.tool.definition.ToolDefinition
-                .builder().name(tool.getName())
-                .description(tool.getDescription())
-                .inputSchema(inputSchema != null ? inputSchema
-                        : "{\"type\":\"object\",\"properties\":{}}")
-                .build();
-        return new org.springframework.ai.tool.ToolCallback() {
+    private static ToolCallback toToolCallback(LLMProvider.ToolSpec tool) {
+        return new ToolCallback() {
             @Override
-            public org.springframework.ai.tool.definition.ToolDefinition getToolDefinition() {
-                return toolDef;
+            public ToolDefinition getToolDefinition() {
+                var schema = tool.getParametersSchema();
+                return DefaultToolDefinition.builder().name(tool.getName())
+                        .description(tool.getDescription())
+                        .inputSchema(schema != null ? schema
+                                : "{\"type\":\"object\",\"properties\":{}}")
+                        .build();
             }
 
             @Override
             public String call(String arguments) {
-                return tool.execute(arguments);
+                try {
+                    return tool.execute(arguments);
+                } catch (Exception e) {
+                    return "Error executing tool: " + e.getMessage();
+                }
             }
         };
     }

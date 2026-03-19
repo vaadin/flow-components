@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -36,7 +36,7 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -54,9 +54,9 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 
-public class LangChain4JLLMProviderTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class LangChain4JLLMProviderTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private ChatModel mockChatModel;
     private StreamingChatModel mockStreamingChatModel;
@@ -64,8 +64,8 @@ public class LangChain4JLLMProviderTest {
     private LangChain4JLLMProvider provider;
     private LangChain4JLLMProvider streamingProvider;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         mockStreamingChatModel = Mockito.mock(StreamingChatModel.class);
         provider = new LangChain4JLLMProvider(mockChatModel);
@@ -73,33 +73,33 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
-    public void stream_withNullRequest_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void stream_withNullRequest_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.stream(null).blockFirst());
     }
 
     @Test
-    public void stream_withNullUserMessage_throwsNullPointerException() {
+    void stream_withNullUserMessage_throwsNullPointerException() {
         var request = new TestLLMRequest(null, null, Collections.emptyList(),
                 new Object[0]);
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.stream(request).blockFirst());
     }
 
     @Test
-    public void constructor_withNullChatModel_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void constructor_withNullChatModel_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new LangChain4JLLMProvider((ChatModel) null));
     }
 
     @Test
-    public void constructor_withNullStreamingChatModel_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void constructor_withNullStreamingChatModel_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new LangChain4JLLMProvider((StreamingChatModel) null));
     }
 
     @Test
-    public void chatMemory_retainsHistory() {
+    void chatMemory_retainsHistory() {
         var response1 = mockSimpleResponse("Response 1");
         var response2 = mockSimpleResponse("Response 2");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
@@ -112,11 +112,11 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
 
         var secondRequestMessages = captor.getAllValues().get(1).messages();
-        Assert.assertEquals(3, secondRequestMessages.size());
+        Assertions.assertEquals(3, secondRequestMessages.size());
     }
 
     @Test
-    public void stream_withStreamingModel_returnsStreamedTokens() {
+    void stream_withStreamingModel_returnsStreamedTokens() {
         var request = createSimpleRequest("Hello");
         var tokens = List.of("Hello", " ", "World");
 
@@ -134,54 +134,54 @@ public class LangChain4JLLMProviderTest {
                 Mockito.any(StreamingChatResponseHandler.class));
 
         var results = streamingProvider.stream(request).collectList().block();
-        Assert.assertEquals(tokens, results);
+        Assertions.assertEquals(tokens, results);
     }
 
     @Test
-    public void stream_withNonStreamingModel_returnsResponse() {
+    void stream_withNonStreamingModel_returnsResponse() {
         var request = createSimpleRequest("Hello");
         mockSimpleChat(request, "Full response");
 
         var results = provider.stream(request).collectList().block();
 
-        Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals("Full response", results.getFirst());
+        Assertions.assertNotNull(results);
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals("Full response", results.getFirst());
     }
 
     @Test
-    public void stream_chatModelThrowsException_propagatesError() {
+    void stream_chatModelThrowsException_propagatesError() {
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenThrow(new RuntimeException("API error"));
-        Assert.assertThrows(RuntimeException.class,
+        Assertions.assertThrows(RuntimeException.class,
                 () -> provider.stream(request).blockFirst());
     }
 
     @Test
-    public void stream_emptyTextResponse_returnsEmpty() {
+    void stream_emptyTextResponse_returnsEmpty() {
         var request = createSimpleRequest("Hello");
         var response = mockSimpleResponse("");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
         var results = provider.stream(request).collectList().block();
-        Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
     }
 
     @Test
-    public void stream_nullTextResponse_returnsEmpty() {
+    void stream_nullTextResponse_returnsEmpty() {
         var request = createSimpleRequest("Hello");
         var response = mockSimpleResponse(null);
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
         var results = provider.stream(request).collectList().block();
-        Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
     }
 
     @Test
-    public void stream_withSystemPromptInRequest_usesRequestPrompt() {
+    void stream_withSystemPromptInRequest_usesRequestPrompt() {
         var request = new TestLLMRequest("Hello", "You are a helpful assistant",
                 Collections.emptyList(), new Object[0]);
 
@@ -191,12 +191,13 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel).chat(captor.capture());
 
         var messages = captor.getValue().messages();
-        Assert.assertTrue("Should contain system message",
-                messages.stream().anyMatch(SystemMessage.class::isInstance));
+        Assertions.assertTrue(
+                messages.stream().anyMatch(SystemMessage.class::isInstance),
+                "Should contain system message");
     }
 
     @Test
-    public void stream_withNullSystemPrompt_noSystemMessage() {
+    void stream_withNullSystemPrompt_noSystemMessage() {
         var request = createSimpleRequest("Hello");
 
         mockSimpleChat(request, "Response");
@@ -205,12 +206,13 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel).chat(captor.capture());
 
         var messages = captor.getValue().messages();
-        Assert.assertFalse("Should not contain system message",
-                messages.stream().anyMatch(SystemMessage.class::isInstance));
+        Assertions.assertFalse(
+                messages.stream().anyMatch(SystemMessage.class::isInstance),
+                "Should not contain system message");
     }
 
     @Test
-    public void stream_withEmptySystemPrompt_noSystemMessage() {
+    void stream_withEmptySystemPrompt_noSystemMessage() {
         var request = new TestLLMRequest("Hello", "   ",
                 Collections.emptyList(), new Object[0]);
 
@@ -220,12 +222,13 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel).chat(captor.capture());
 
         var messages = captor.getValue().messages();
-        Assert.assertFalse("Should not contain system message",
-                messages.stream().anyMatch(SystemMessage.class::isInstance));
+        Assertions.assertFalse(
+                messages.stream().anyMatch(SystemMessage.class::isInstance),
+                "Should not contain system message");
     }
 
     @Test
-    public void stream_preservesChatHistoryAcrossRequests() {
+    void stream_preservesChatHistoryAcrossRequests() {
         var request1 = createSimpleRequest("Hello");
         var response1 = mockSimpleResponse("Hi there");
         var request2 = createSimpleRequest("How are you?");
@@ -239,15 +242,14 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
 
         var allMessages = captor.getAllValues();
-        Assert.assertEquals("First call should have 1 user message", 1,
-                allMessages.get(0).messages().size());
-        Assert.assertEquals(
-                "Second call should have 3 messages (user1, ai1, user2)", 3,
-                allMessages.get(1).messages().size());
+        Assertions.assertEquals(1, allMessages.get(0).messages().size(),
+                "First call should have 1 user message");
+        Assertions.assertEquals(3, allMessages.get(1).messages().size(),
+                "Second call should have 3 messages (user1, ai1, user2)");
     }
 
     @Test
-    public void stream_withNullAiMessage_returnsEmptyMessage() {
+    void stream_withNullAiMessage_returnsEmptyMessage() {
         var request = createSimpleRequest("Hello");
 
         var response = Mockito.mock(ChatResponse.class);
@@ -257,12 +259,12 @@ public class LangChain4JLLMProviderTest {
 
         var results = provider.stream(request).collectList().block();
 
-        Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
     }
 
     @Test
-    public void stream_withMaxMessagesLimit_dropsOldestMessages() {
+    void stream_withMaxMessagesLimit_dropsOldestMessages() {
         var requestCount = 20;
 
         // Each request adds 2 messages: UserMessage and AiMessage
@@ -277,21 +279,26 @@ public class LangChain4JLLMProviderTest {
 
         var lastRequest = captor.getAllValues().get(requestCount - 1);
         var messageCount = lastRequest.messages().size();
-        Assert.assertTrue("Message count should not exceed memory limit, got: "
-                + messageCount, messageCount <= 30);
+        Assertions.assertTrue(messageCount <= 30,
+                "Message count should not exceed memory limit, got: "
+                        + messageCount);
 
         var userMessageTextContents = getUserMessageContents(lastRequest,
                 TextContent.class).stream().map(TextContent::text).toList();
-        Assert.assertFalse("Should not contain very old messages",
+        Assertions.assertFalse(
                 userMessageTextContents.stream()
-                        .anyMatch(text -> text.contains("Message 0")));
-        Assert.assertTrue("Should contain recent messages",
-                userMessageTextContents.stream().anyMatch(text -> text
-                        .contains("Message " + (requestCount - 1))));
+                        .anyMatch(text -> text.contains("Message 0")),
+                "Should not contain very old messages");
+        Assertions
+                .assertTrue(
+                        userMessageTextContents.stream()
+                                .anyMatch(text -> text.contains(
+                                        "Message " + (requestCount - 1))),
+                        "Should contain recent messages");
     }
 
     @Test
-    public void stream_withImageAttachment_convertsToBase64() {
+    void stream_withImageAttachment_convertsToBase64() {
         var imageData = "fake-image-data".getBytes();
         var attachment = new AIAttachment("test.png", "image/png", imageData);
         var request = new TestLLMRequest("Describe this image", null,
@@ -304,12 +311,12 @@ public class LangChain4JLLMProviderTest {
 
         var userMessageContents = getUserMessageContents(captor.getValue(),
                 ImageContent.class);
-        Assert.assertFalse("Should contain image content",
-                userMessageContents.isEmpty());
+        Assertions.assertFalse(userMessageContents.isEmpty(),
+                "Should contain image content");
     }
 
     @Test
-    public void stream_withTextAttachment_usesUTF8Encoding() {
+    void stream_withTextAttachment_usesUTF8Encoding() {
         var textContent = "Test UTF-8: é à ü";
         var attachment = new AIAttachment("test.txt", "text/plain",
                 textContent.getBytes(StandardCharsets.UTF_8));
@@ -328,19 +335,19 @@ public class LangChain4JLLMProviderTest {
                 .map(TextContent.class::cast).map(TextContent::text)
                 .anyMatch(text -> text.contains(textContent));
 
-        Assert.assertTrue(textContentPreserved);
+        Assertions.assertTrue(textContentPreserved);
     }
 
     @Test
-    public void stream_withNullAttachments_returnsResponse() {
+    void stream_withNullAttachments_returnsResponse() {
         var request = new TestLLMRequest("Hello", null, null, new Object[0]);
         mockSimpleChat(request, "Hi");
         var result = provider.stream(request).blockFirst();
-        Assert.assertEquals("Hi", result);
+        Assertions.assertEquals("Hi", result);
     }
 
     @Test
-    public void stream_withNullAttachmentInList_throwsNullPointerException() {
+    void stream_withNullAttachmentInList_throwsNullPointerException() {
         var attachment = new AIAttachment("test.txt", "text/plain",
                 "Test".getBytes(StandardCharsets.UTF_8));
         var attachments = new ArrayList<AIAttachment>();
@@ -353,12 +360,12 @@ public class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.stream(request).blockFirst());
     }
 
     @Test
-    public void stream_withUnsupportedAttachmentType_ignoresAttachment() {
+    void stream_withUnsupportedAttachmentType_ignoresAttachment() {
         var attachment = new AIAttachment("file.bin",
                 "application/octet-stream", "data".getBytes());
         var request = new TestLLMRequest("Process this", null,
@@ -370,7 +377,7 @@ public class LangChain4JLLMProviderTest {
     }
 
     @Test
-    public void stream_withPdfAttachment_handlesPdf() {
+    void stream_withPdfAttachment_handlesPdf() {
         var pdfData = "PDF binary content".getBytes(StandardCharsets.UTF_8);
         var attachment = new AIAttachment("document.pdf", "application/pdf",
                 pdfData);
@@ -387,12 +394,12 @@ public class LangChain4JLLMProviderTest {
                 .filter(PdfFileContent.class::isInstance).findFirst()
                 .orElse(null);
 
-        Assert.assertNotNull("Should include PDF content as PdfFileContent",
-                pdfContent);
+        Assertions.assertNotNull(pdfContent,
+                "Should include PDF content as PdfFileContent");
     }
 
     @Test
-    public void stream_withBinaryPdfData_handlesBinaryPdf() {
+    void stream_withBinaryPdfData_handlesBinaryPdf() {
         // Binary PDF data should be handled correctly with base64 encoding
         var binaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46, (byte) 0xFF,
                 (byte) 0xFE, (byte) 0x00, (byte) 0x80 };
@@ -411,11 +418,11 @@ public class LangChain4JLLMProviderTest {
                 .filter(PdfFileContent.class::isInstance).findFirst()
                 .orElse(null);
 
-        Assert.assertNotNull("Should handle binary PDF data", pdfContent);
+        Assertions.assertNotNull(pdfContent, "Should handle binary PDF data");
     }
 
     @Test
-    public void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
+    void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
         var imageAttachment = new AIAttachment("photo.jpg", "image/jpeg",
                 "fake-image".getBytes());
         var textAttachment = new AIAttachment("doc.txt", "text/plain",
@@ -436,11 +443,11 @@ public class LangChain4JLLMProviderTest {
         var messages = captor.getValue().messages();
         var userMessage = (UserMessage) messages.getFirst();
 
-        Assert.assertEquals(4, userMessage.contents().size());
+        Assertions.assertEquals(4, userMessage.contents().size());
     }
 
     @Test
-    public void stream_withNullToolExecutor_addsToolNotFoundMessageToRequest() {
+    void stream_withNullToolExecutor_addsToolNotFoundMessageToRequest() {
         var request = new TestLLMRequest("Call unknown tool", null,
                 Collections.emptyList(), new Object[0]);
 
@@ -456,13 +463,13 @@ public class LangChain4JLLMProviderTest {
 
         var secondRequest = captor.getAllValues().get(1);
         var toolResults = getToolExecutionResults(secondRequest);
-        Assert.assertEquals(1, toolResults.size());
-        Assert.assertTrue(
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertTrue(
                 toolResults.getFirst().text().contains("Tool not found"));
     }
 
     @Test
-    public void stream_withStreamingModelAndTool_executesTool() {
+    void stream_withStreamingModelAndTool_executesTool() {
         var toolObject = new SampleToolsClass();
         var request = new TestLLMRequest("Get temperature", null,
                 Collections.emptyList(), new Object[] { toolObject });
@@ -489,8 +496,9 @@ public class LangChain4JLLMProviderTest {
 
         var results = streamingProvider.stream(request).collectList().block();
 
-        Assert.assertNotNull(results);
-        Assert.assertEquals("Should have streamed tokens", 3, results.size());
+        Assertions.assertNotNull(results);
+        Assertions.assertEquals(3, results.size(),
+                "Should have streamed tokens");
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockStreamingChatModel, Mockito.times(2)).chat(
@@ -499,13 +507,13 @@ public class LangChain4JLLMProviderTest {
 
         var secondRequest = captor.getAllValues().get(1);
         var toolResults = getToolExecutionResults(secondRequest);
-        Assert.assertEquals(1, toolResults.size());
-        Assert.assertEquals(toolResults.getFirst().text(),
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals(toolResults.getFirst().text(),
                 toolObject.getTemperature());
     }
 
     @Test
-    public void stream_withMultipleToolCalls_executesTools() {
+    void stream_withMultipleToolCalls_executesTools() {
         var toolObject = new SampleToolsClass();
         var request = new TestLLMRequest("Get temperature and humidity", null,
                 Collections.emptyList(), new Object[] { toolObject });
@@ -537,15 +545,16 @@ public class LangChain4JLLMProviderTest {
         var secondRequest = captor.getAllValues().get(1);
         var toolResults = getToolExecutionResults(secondRequest);
 
-        Assert.assertEquals(2, toolResults.size());
+        Assertions.assertEquals(2, toolResults.size());
         var resultTexts = toolResults.stream()
                 .map(ToolExecutionResultMessage::text).toList();
-        Assert.assertTrue(resultTexts.contains(toolObject.getTemperature()));
-        Assert.assertTrue(resultTexts.contains(toolObject.getHumidity()));
+        Assertions
+                .assertTrue(resultTexts.contains(toolObject.getTemperature()));
+        Assertions.assertTrue(resultTexts.contains(toolObject.getHumidity()));
     }
 
     @Test
-    public void stream_withToolError_addsErrorMessageToRequest() {
+    void stream_withToolError_addsErrorMessageToRequest() {
         var toolObject = new ErrorThrowingToolClass();
         var request = new TestLLMRequest("Call error tool", null,
                 Collections.emptyList(), new Object[] { toolObject });
@@ -563,13 +572,13 @@ public class LangChain4JLLMProviderTest {
         var secondRequest = captor.getAllValues().get(1);
         var toolResultMessages = getToolExecutionResults(secondRequest);
 
-        Assert.assertEquals(1, toolResultMessages.size());
-        Assert.assertEquals(toolObject.getErrorMessage(),
+        Assertions.assertEquals(1, toolResultMessages.size());
+        Assertions.assertEquals(toolObject.getErrorMessage(),
                 toolResultMessages.getFirst().text());
     }
 
     @Test
-    public void stream_withStreamingModelAndPushDisabled_logsWarning() {
+    void stream_withStreamingModelAndPushDisabled_logsWarning() {
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
@@ -594,14 +603,14 @@ public class LangChain4JLLMProviderTest {
             streamingProvider.stream(request).collectList().block();
 
             var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assert.assertTrue(errContent.contains("Push is not enabled"));
+            Assertions.assertTrue(errContent.contains("Push is not enabled"));
         } finally {
             System.setErr(originalErr);
         }
     }
 
     @Test
-    public void stream_withNonStreamingModelAndPushDisabled_doesNotLogWarning() {
+    void stream_withNonStreamingModelAndPushDisabled_doesNotLogWarning() {
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
         var originalErr = System.err;
@@ -616,14 +625,14 @@ public class LangChain4JLLMProviderTest {
             provider.stream(request).collectList().block();
 
             var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assert.assertFalse(errContent.contains("Push is not enabled"));
+            Assertions.assertFalse(errContent.contains("Push is not enabled"));
         } finally {
             System.setErr(originalErr);
         }
     }
 
     @Test
-    public void setHistory_restoresConversation() {
+    void setHistory_restoresConversation() {
         var history = List.of(
                 new ChatMessage(ChatMessage.Role.USER, "Previous question",
                         null, null),
@@ -643,16 +652,16 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel).chat(captor.capture());
         var messages = captor.getValue().messages();
         // Should contain: Previous question, Previous answer, Follow-up
-        Assert.assertTrue(messages.stream()
+        Assertions.assertTrue(messages.stream()
                 .anyMatch(msg -> msg instanceof UserMessage userMsg
                         && userMsg.singleText().equals("Previous question")));
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 messages.stream().anyMatch(msg -> msg instanceof AiMessage ai
                         && ai.text().equals("Previous answer")));
     }
 
     @Test
-    public void setHistory_clearsExistingHistory() {
+    void setHistory_clearsExistingHistory() {
         var response = mockSimpleResponse("Old response");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -676,22 +685,22 @@ public class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel, Mockito.atLeast(2))
                 .chat(captor.capture());
         var lastMessages = captor.getAllValues().getLast().messages();
-        Assert.assertFalse(lastMessages.stream()
+        Assertions.assertFalse(lastMessages.stream()
                 .anyMatch(msg -> msg instanceof UserMessage userMsg
                         && userMsg.singleText().equals("Old message")));
-        Assert.assertTrue(lastMessages.stream()
+        Assertions.assertTrue(lastMessages.stream()
                 .anyMatch(msg -> msg instanceof UserMessage userMsg
                         && userMsg.singleText().equals("New question")));
     }
 
     @Test
-    public void setHistory_withNullHistory_throwsNullPointerException() {
-        Assert.assertThrows(NullPointerException.class,
+    void setHistory_withNullHistory_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.setHistory(null, Collections.emptyMap()));
     }
 
     @Test
-    public void setHistory_exceedingMaxMessages_evictsOldest() {
+    void setHistory_exceedingMaxMessages_evictsOldest() {
         var history = new ArrayList<ChatMessage>();
         for (int i = 0; i < 20; i++) {
             history.add(new ChatMessage(ChatMessage.Role.USER, "Question " + i,
@@ -699,7 +708,7 @@ public class LangChain4JLLMProviderTest {
             history.add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                     "Answer " + i, null, null));
         }
-        Assert.assertEquals(40, history.size());
+        Assertions.assertEquals(40, history.size());
 
         provider.setHistory(history, Collections.emptyMap());
 
@@ -716,17 +725,17 @@ public class LangChain4JLLMProviderTest {
         var chatMessages = messages.stream().filter(
                 msg -> msg instanceof UserMessage || msg instanceof AiMessage)
                 .toList();
-        Assert.assertTrue(chatMessages.size() <= 30);
-        Assert.assertTrue(chatMessages.stream()
+        Assertions.assertTrue(chatMessages.size() <= 30);
+        Assertions.assertTrue(chatMessages.stream()
                 .anyMatch(msg -> msg instanceof UserMessage userMsg
                         && userMsg.singleText().equals("Question 19")));
-        Assert.assertFalse(chatMessages.stream()
+        Assertions.assertFalse(chatMessages.stream()
                 .anyMatch(msg -> msg instanceof UserMessage userMsg
                         && userMsg.singleText().equals("Question 0")));
     }
 
     @Test
-    public void setHistory_withAttachments_restoresUserMessageWithImageContent() {
+    void setHistory_withAttachments_restoresUserMessageWithImageContent() {
         var imageData = "fake-image-data".getBytes();
         var attachment = new AIAttachment("photo.png", "image/png", imageData);
         var history = List.of(
@@ -758,12 +767,12 @@ public class LangChain4JLLMProviderTest {
                 .findFirst().orElseThrow();
 
         // Should have TextContent + ImageContent
-        Assert.assertTrue(restoredUserMsg.contents().stream()
+        Assertions.assertTrue(restoredUserMsg.contents().stream()
                 .anyMatch(ImageContent.class::isInstance));
     }
 
     @Test
-    public void setHistory_withAttachments_assistantMessageIgnoresAttachments() {
+    void setHistory_withAttachments_assistantMessageIgnoresAttachments() {
         var attachment = new AIAttachment("file.txt", "text/plain",
                 "content".getBytes());
         var history = List.of(new ChatMessage(ChatMessage.Role.ASSISTANT,
@@ -783,21 +792,21 @@ public class LangChain4JLLMProviderTest {
 
         // Assistant message should be AiMessage (text-only), not have
         // attachments
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 messages.stream().anyMatch(msg -> msg instanceof AiMessage ai
                         && ai.text().equals("Hello")));
     }
 
     @Test
-    public void setHistory_withAttachments_nullAttachmentMapThrows() {
+    void setHistory_withAttachments_nullAttachmentMapThrows() {
         var history = List.of(
                 new ChatMessage(ChatMessage.Role.USER, "Hello", null, null));
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> provider.setHistory(history, null));
     }
 
     @Test
-    public void setHistory_withEmptyAttachmentMap_behavesLikeTextOnly() {
+    void setHistory_withEmptyAttachmentMap_behavesLikeTextOnly() {
         var history = List.of(
                 new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
                 new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi", null, null));
@@ -820,8 +829,9 @@ public class LangChain4JLLMProviderTest {
                         .anyMatch(c -> c instanceof TextContent tc
                                 && tc.text().equals("Hello")))
                 .findFirst().orElseThrow();
-        Assert.assertEquals(1, userMsg.contents().size());
-        Assert.assertTrue(userMsg.contents().getFirst() instanceof TextContent);
+        Assertions.assertEquals(1, userMsg.contents().size());
+        Assertions.assertTrue(
+                userMsg.contents().getFirst() instanceof TextContent);
     }
 
     private void mockSimpleChat(LLMRequest request, String responseText) {
@@ -829,6 +839,150 @@ public class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
         provider.stream(request).blockFirst();
+    }
+
+    // --- Explicit tools tests ---
+
+    @Test
+    void stream_withExplicitTool_executesTool() {
+        var toolResult = "tool executed";
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"}},\"required\":[\"query\"]}",
+                args -> toolResult);
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        // Verify tool spec was included in the first request
+        var firstRequest = captor.getAllValues().get(0);
+        Assertions.assertFalse(firstRequest.toolSpecifications().isEmpty());
+        Assertions.assertEquals("myTool",
+                firstRequest.toolSpecifications().getFirst().name());
+
+        // Verify tool was executed and result was in second request
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals(toolResult, toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitTool_passesArgumentsToExecutor() {
+        var receivedArgs = new ArrayList<String>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "result for " + args;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var toolArgs = "{\"city\":\"Helsinki\"}";
+        var response1 = mockSimpleResponseWithTool("myTool", toolArgs);
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size(),
+                "Tool executor should have been called once");
+        Assertions.assertEquals(toolArgs, receivedArgs.getFirst(),
+                "Tool executor should receive the arguments from the LLM response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("result for " + toolArgs,
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_createsToolWithoutParameters() {
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var spec = captor.getValue().toolSpecifications().getFirst();
+        Assertions.assertEquals("simpleTool", spec.name());
+        Assertions.assertEquals("A simple tool", spec.description());
+        Assertions.assertNull(spec.parameters());
+    }
+
+    @Test
+    void stream_withBothVendorAndExplicitTools_allConfigured() {
+        var vendorTool = new SampleToolsClass();
+        var explicitTool = createExplicitTool("explicitTool", "Explicit", null,
+                args -> "result");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tools", null,
+                Collections.emptyList(), new Object[] { vendorTool },
+                List.of(explicitTool));
+
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var specs = captor.getValue().toolSpecifications();
+        // 2 from SampleToolsClass + 1 explicit
+        Assertions.assertEquals(3, specs.size());
+        var names = specs.stream()
+                .map(dev.langchain4j.agent.tool.ToolSpecification::name)
+                .toList();
+        Assertions.assertTrue(names.contains("explicitTool"));
+        Assertions.assertTrue(names.contains("getTemperature"));
+        Assertions.assertTrue(names.contains("getHumidity"));
+    }
+
+    private static LLMProvider.ToolSpec createExplicitTool(String name,
+            String description, String parametersSchema,
+            java.util.function.Function<String, String> executor) {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return parametersSchema;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return executor.apply(arguments);
+            }
+        };
     }
 
     private static List<ToolExecutionResultMessage> getToolExecutionResults(
@@ -852,12 +1006,17 @@ public class LangChain4JLLMProviderTest {
     }
 
     private static ChatResponse mockSimpleResponseWithTool(String toolName) {
+        return mockSimpleResponseWithTool(toolName, "{}");
+    }
+
+    private static ChatResponse mockSimpleResponseWithTool(String toolName,
+            String arguments) {
         var aiMessage1 = Mockito.mock(AiMessage.class);
         Mockito.when(aiMessage1.text()).thenReturn("");
         Mockito.when(aiMessage1.hasToolExecutionRequests()).thenReturn(true);
         var toolRequest = Mockito.mock(ToolExecutionRequest.class);
         Mockito.when(toolRequest.name()).thenReturn(toolName);
-        Mockito.when(toolRequest.arguments()).thenReturn("{}");
+        Mockito.when(toolRequest.arguments()).thenReturn(arguments);
         Mockito.when(aiMessage1.toolExecutionRequests())
                 .thenReturn(List.of(toolRequest));
         var response1 = Mockito.mock(ChatResponse.class);
@@ -877,6 +1036,11 @@ public class LangChain4JLLMProviderTest {
     private record TestLLMRequest(String userMessage, String systemPrompt,
             List<AIAttachment> attachments,
             Object[] tools) implements LLMRequest {
+    }
+
+    private record TestLLMRequestWithExplicitTools(String userMessage,
+            String systemPrompt, List<AIAttachment> attachments, Object[] tools,
+            List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
     }
 
     private static class SampleToolsClass {

@@ -21,11 +21,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -40,18 +38,16 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewJUnit6Test;
 import com.vaadin.tests.dataprovider.CustomInMemoryDataProvider;
 
-public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
+class ComboBoxDataViewTest extends AbstractComponentDataViewJUnit6Test {
 
     private ComboBox<String> comboBox;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void init() {
+    @BeforeEach
+    @Override
+    protected void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         dataProvider = new CustomInMemoryDataProvider<>(items);
         comboBox = getComponent();
@@ -60,14 +56,14 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
     }
 
     @Test
-    public void dataViewWithItems_getItem_returnsCorrectItem() {
-        Assert.assertEquals(items.get(0), dataView.getItem(0));
-        Assert.assertEquals(items.get(1), dataView.getItem(1));
-        Assert.assertEquals(items.get(2), dataView.getItem(2));
+    void dataViewWithItems_getItem_returnsCorrectItem() {
+        Assertions.assertEquals(items.get(0), dataView.getItem(0));
+        Assertions.assertEquals(items.get(1), dataView.getItem(1));
+        Assertions.assertEquals(items.get(2), dataView.getItem(2));
     }
 
     @Test
-    public void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
+    void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
         Item first = new Item(1L, "first");
         Item second = new Item(2L, "middle");
 
@@ -121,11 +117,11 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         DataKeyMapper<Item> keyMapper = dataCommunicator.getKeyMapper();
         items.forEach(keyMapper::key);
 
-        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
-        Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertTrue(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(IdentifierProvider.identity());
-        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertFalse(keyMapper.has(new Item(1L, "non-present")));
 
         // In-memory combo box data view
         dataCommunicator.setDataProvider(DataProvider.ofCollection(items),
@@ -136,16 +132,16 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         // We need to repopulate the keyMapper after setting a new data provider
         items.forEach(keyMapper::key);
 
-        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
-        Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertTrue(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(IdentifierProvider.identity());
-        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertFalse(keyMapper.has(new Item(1L, "non-present")));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void getItem_itemRequested_dataCommunicatorInvoked() {
+    void getItem_itemRequested_dataCommunicatorInvoked() {
         // Open the comboBox explicitly, because it is not initialized
         // eagerly with in-memory data provider
         comboBox.setOpened(true);
@@ -160,7 +156,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
     }
 
     @Test
-    public void setInMemoryDataProvider_convertsToGenericDataProviderAndAppliesFilterCorrectly() {
+    void setInMemoryDataProvider_convertsToGenericDataProviderAndAppliesFilterCorrectly() {
         final String[] items = { "bar", "banana", "iguana" };
 
         ComboBox<String> comboBox = Mockito.spy(new ComboBox<>());
@@ -172,7 +168,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
             @Override
             public int size(
                     Query<String, SerializablePredicate<String>> query) {
-                Assert.assertTrue(query.getFilter().isPresent());
+                Assertions.assertTrue(query.getFilter().isPresent());
                 return (int) Stream.of(items).filter(query.getFilter().get())
                         .count();
             }
@@ -180,7 +176,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
             @Override
             public Stream<String> fetch(
                     Query<String, SerializablePredicate<String>> query) {
-                Assert.assertTrue(query.getFilter().isPresent());
+                Assertions.assertTrue(query.getFilter().isPresent());
                 return Stream.of(items).filter(query.getFilter().get());
             }
 
@@ -232,11 +228,11 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         comboBox.setOpened(true);
 
         // Verify the predicate filter always returns true and passes all items
-        Assert.assertArrayEquals(items, dataView.getItems().toArray());
+        Assertions.assertArrayEquals(items, dataView.getItems().toArray());
 
         // Now set the predicate and verify it goes to query parameter
         inMemoryDataProvider.setFilter(item -> item.length() == 6);
-        Assert.assertArrayEquals(new String[] { "banana", "iguana" },
+        Assertions.assertArrayEquals(new String[] { "banana", "iguana" },
                 dataView.getItems().toArray());
 
         // Finally set the text filter to the ComboBox and fetch the items
@@ -249,22 +245,22 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
 
         // The result should contain an intersection of two filters (text and
         // predicate), so the result should start with 'ba' and contain 6 chars.
-        Assert.assertEquals(1, filteredItems.size());
-        Assert.assertEquals("banana", filteredItems.get(0));
+        Assertions.assertEquals(1, filteredItems.size());
+        Assertions.assertEquals("banana", filteredItems.get(0));
     }
 
     @Test
-    public void setInMemoryDataProviderWithNoConverter_throws() {
-        expectedException.expect(UnsupportedOperationException.class);
-        expectedException
-                .expectMessage(String.format("ComboBox does not support "
-                        + "setting a custom in-memory data provider without "
-                        + "knowledge of the rules on how to convert internal text filter "
-                        + "into a predicate applied to the data provider. Please use%n"
-                        + "setItems(InMemoryDataProvider<T>, SerializableFunction<String, "
-                        + "SerializablePredicate<T>>)"
-                        + "%noverloaded method instead"));
-        component.setItems(dataProvider);
+    void setInMemoryDataProviderWithNoConverter_throws() {
+        var exception = Assertions.assertThrows(
+                UnsupportedOperationException.class,
+                () -> component.setItems(dataProvider));
+        Assertions.assertEquals(String.format("ComboBox does not support "
+                + "setting a custom in-memory data provider without "
+                + "knowledge of the rules on how to convert internal text filter "
+                + "into a predicate applied to the data provider. Please use%n"
+                + "setItems(InMemoryDataProvider<T>, SerializableFunction<String, "
+                + "SerializablePredicate<T>>)" + "%noverloaded method instead"),
+                exception.getMessage());
     }
 
     @Override

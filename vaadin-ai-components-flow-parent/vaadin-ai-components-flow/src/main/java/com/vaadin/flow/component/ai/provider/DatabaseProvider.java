@@ -20,81 +20,75 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Interface for database access providers.
+ * Provider for database schema information and SQL query execution on behalf of
+ * an LLM. This interface enables AI-powered components to interact with
+ * application databases for features.
  * <p>
- * Implementations of this interface provide access to database schemas and
- * query execution capabilities for AI-based components.
+ * Applications implement this interface with their own database connection. The
+ * provider exposes the schema so the LLM can generate valid SQL, and executes
+ * the resulting queries.
  * </p>
  * <p>
- * <strong>Security Notice:</strong> Always use read-only database credentials
- * with access restricted to only necessary tables and views. Never use
- * credentials with write, update, or delete permissions.
+ * <b>Note:</b> For security, the implementation should use a database account
+ * with read-only access limited to the relevant tables or views. This prevents
+ * the LLM from inadvertently modifying or deleting data.
  * </p>
+ *
+ * <pre>
+ * public class MyDatabaseProvider implements DatabaseProvider {
+ *
+ *     private final DataSource readOnlyDataSource;
+ *
+ *     public MyDatabaseProvider(DataSource readOnlyDataSource) {
+ *         this.readOnlyDataSource = readOnlyDataSource;
+ *     }
+ *
+ *     &#064;Override
+ *     public String getSchema() {
+ *         return "Tables: employees(id INT, name VARCHAR, dept VARCHAR), "
+ *                 + "departments(id INT, name VARCHAR). Dialect: PostgreSQL.";
+ *     }
+ *
+ *     &#064;Override
+ *     public List&lt;Map&lt;String, Object&gt;&gt; executeQuery(String sql) {
+ *         try (var connection = readOnlyDataSource.getConnection();
+ *                 var statement = connection.prepareStatement(sql);
+ *                 var resultSet = statement.executeQuery()) {
+ *             // Convert to List&lt;Map&lt;String, Object&gt;&gt;
+ *         }
+ *     }
+ * }
+ * </pre>
  *
  * @author Vaadin Ltd
  */
 public interface DatabaseProvider extends Serializable {
 
     /**
-     * Retrieves the database schema information.
-     * <p>
-     * The schema should include table names, column names, data types, and
-     * relationships that are relevant for generating queries.
-     * </p>
+     * Returns a text description of the database schema available to the LLM.
+     * The description should include table names, column names with their
+     * types, and optionally the SQL dialect (e.g., PostgreSQL, MySQL). The LLM
+     * uses this information to generate valid SQL queries.
      *
-     * @return a string representation of the database schema
+     * @return a text description of the database schema, never {@code null}
      */
     String getSchema();
 
     /**
-     * Returns an LLM tool definition that retrieves the database schema.
+     * Executes the given SQL query and returns the results. Each row is
+     * represented as a map from column name to column value.
      * <p>
-     * This tool can be used by any controller that needs to expose database
-     * schema information to the LLM.
+     * Implementations should ensure that only read-only queries are executed.
      * </p>
      *
-     * @return a tool definition for retrieving the schema
-     */
-    default LLMProvider.ToolDefinition getSchemaTool() {
-        return new LLMProvider.ToolDefinition() {
-            @Override
-            public String getName() {
-                return "getSchema";
-            }
-
-            @Override
-            public String getDescription() {
-                return "Retrieves the database schema including tables, columns, and data types. Takes no parameters.";
-            }
-
-            @Override
-            public String getParametersSchema() {
-                return null;
-            }
-
-            @Override
-            public String execute(String arguments) {
-                return getSchema();
-            }
-        };
-    }
-
-    /**
-     * Executes a SQL query and returns the results.
-     * <p>
-     * <strong>Security Notice:</strong> This method should only execute SELECT
-     * queries. Implementations must validate that the query is read-only and
-     * reject any attempts to modify data.
-     * </p>
-     *
-     * @param query
-     *            the SQL query to execute
-     * @return a list of rows, where each row is represented as a map of column
-     *         names to values
+     * @param sql
+     *            the SQL query to execute, not {@code null}
+     * @return the query results as a list of column-name-to-value maps, never
+     *         {@code null} but may be empty
+     * @throws NullPointerException
+     *             if the query is {@code null}
      * @throws IllegalArgumentException
-     *             if the query is not a valid SELECT query
-     * @throws RuntimeException
-     *             if query execution fails
+     *             if the query is invalid
      */
-    List<Map<String, Object>> executeQuery(String query);
+    List<Map<String, Object>> executeQuery(String sql);
 }

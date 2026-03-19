@@ -9,9 +9,9 @@
 package com.vaadin.flow.component.charts;
 
 import static com.vaadin.flow.component.charts.util.ChartSerialization.toJSON;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
 import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
@@ -36,10 +36,10 @@ import com.vaadin.flow.component.charts.model.style.SolidColor;
  * Tests for the JSON serialization in {@link Configuration}
  *
  */
-public class ConfigurationJSONSerializationTest {
+class ConfigurationJSONSerializationTest {
 
     @Test
-    public void configurationJSONSerialization_configurationSerializedWithChangeListener_changeListenerNotSerialized() {
+    void configurationJSONSerialization_configurationSerializedWithChangeListener_changeListenerNotSerialized() {
         Configuration conf = new Configuration();
         conf.addChangeListener(new ConfigurationChangeListener() {
 
@@ -103,7 +103,7 @@ public class ConfigurationJSONSerializationTest {
     }
 
     @Test
-    public void configurationJSONSerialization_configurationSerializedWithYAxis_yAxisConfigurationNotSerialized() {
+    void configurationJSONSerialization_configurationSerializedWithYAxis_yAxisConfigurationNotSerialized() {
         Configuration conf = new Configuration();
         YAxis axis = new YAxis();
         conf.addyAxis(axis);
@@ -113,7 +113,7 @@ public class ConfigurationJSONSerializationTest {
     }
 
     @Test
-    public void configurationJSONSerialization_configurationSerializedStyledMode_styledModeSerialized() {
+    void configurationJSONSerialization_configurationSerializedStyledMode_styledModeSerialized() {
         Configuration conf = new Configuration();
         conf.getChart().setStyledMode(true);
         assertEquals(
@@ -122,7 +122,7 @@ public class ConfigurationJSONSerializationTest {
     }
 
     @Test
-    public void configurationJSONSerialization_setSeriesAddSeries_noExceptions() {
+    void configurationJSONSerialization_setSeriesAddSeries_noExceptions() {
         Configuration conf = new Configuration();
         conf.setSeries(new ListSeries(), new ListSeries());
         conf.addSeries(new ListSeries());
@@ -132,7 +132,7 @@ public class ConfigurationJSONSerializationTest {
     }
 
     @Test
-    public void configurationJSONSerialization_setOptionsWithInactiveState_inactiveStatesSerialized() {
+    void configurationJSONSerialization_setOptionsWithInactiveState_inactiveStatesSerialized() {
         Configuration conf = new Configuration();
         PlotOptionsPie options = new PlotOptionsPie();
         States states = options.getStates();
@@ -150,7 +150,7 @@ public class ConfigurationJSONSerializationTest {
     }
 
     @Test
-    public void configurationJSONSerialization_addLabel_labelSerialized() {
+    void configurationJSONSerialization_addLabel_labelSerialized() {
         Configuration conf = new Configuration();
         AnnotationItemLabel label = new AnnotationItemLabel("Sample");
         label.setPoint(new AnnotationItemLabelPoint(100, 100));

@@ -26,10 +26,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -52,68 +51,67 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
 
-public class CheckboxGroupTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class CheckboxGroupTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void hasEmptySetAsDefaultValue() {
+    void hasEmptySetAsDefaultValue() {
         Set<Object> value = new CheckboxGroup<>().getValue();
-        Assert.assertNotNull(value);
-        Assert.assertTrue(value.isEmpty());
+        Assertions.assertNotNull(value);
+        Assertions.assertTrue(value.isEmpty());
     }
 
     @Test
-    public void setValueNull_throws() {
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage("Use the clear-method");
-        new CheckboxGroup<>().setValue(null);
+    void setValueNull_throws() {
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class,
+                () -> new CheckboxGroup<>().setValue(null));
+        Assertions.assertTrue(
+                exception.getMessage().contains("Use the clear-method"));
     }
 
     @Test
-    public void setReadOnlyCheckboxGroup_groupIsReadOnly() {
+    void setReadOnlyCheckboxGroup_groupIsReadOnly() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("foo", "bar");
         group.setReadOnly(true);
-        Assert.assertTrue(group.isReadOnly());
+        Assertions.assertTrue(group.isReadOnly());
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assertions.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("readonly"));
     }
 
     @Test
-    public void setReadOnlyDisabledCheckboxGroup_groupIsDisabledAndReadonly() {
+    void setReadOnlyDisabledCheckboxGroup_groupIsDisabledAndReadonly() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setEnabled(false);
         group.setReadOnly(true);
 
-        Assert.assertTrue(group.isReadOnly());
-        Assert.assertFalse(group.isEnabled());
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assertions.assertTrue(group.isReadOnly());
+        Assertions.assertFalse(group.isEnabled());
+        Assertions.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("disabled"));
     }
 
     @Test
-    public void unsetReadOnlyDisabledCheckboxGroup_groupIsDisabledAndNotReadonly() {
+    void unsetReadOnlyDisabledCheckboxGroup_groupIsDisabledAndNotReadonly() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setEnabled(false);
         group.setReadOnly(false);
 
-        Assert.assertFalse(group.isReadOnly());
-        Assert.assertFalse(group.isEnabled());
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assertions.assertFalse(group.isReadOnly());
+        Assertions.assertFalse(group.isEnabled());
+        Assertions.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("disabled"));
     }
 
     @Test
-    public void unsetReadOnlyEnabledCheckboxGroup_groupIsEnabled() {
+    void unsetReadOnlyEnabledCheckboxGroup_groupIsEnabled() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setEnabled(false);
         group.setReadOnly(true);
@@ -121,13 +119,13 @@ public class CheckboxGroupTest {
 
         group.setReadOnly(false);
 
-        Assert.assertTrue(group.isEnabled());
-        Assert.assertEquals(Boolean.FALSE.toString(),
+        Assertions.assertTrue(group.isEnabled());
+        Assertions.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
     }
 
     @Test
-    public void selectDisabledItem_noRedundantEvent() {
+    void selectDisabledItem_noRedundantEvent() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("enabled", "disabled");
         group.setItemEnabledProvider("enabled"::equals);
@@ -145,25 +143,27 @@ public class CheckboxGroupTest {
         array.add(disabledKey);
 
         group.getElement().setPropertyJson("value", array);
-        Assert.assertTrue("Group value should be empty",
-                group.getValue().isEmpty());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertTrue(group.getValue().isEmpty(),
+                "Group value should be empty");
+        Assertions.assertTrue(events.isEmpty());
 
         array = JacksonUtils.createArrayNode();
         array.add(enabledKey);
 
         group.getElement().setPropertyJson("value", array);
-        Assert.assertEquals(Collections.singleton("enabled"), group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(Collections.singleton("enabled"),
+                group.getValue());
+        Assertions.assertEquals(1, events.size());
 
         ValueChangeEvent<Set<String>> event = events.get(0);
-        Assert.assertTrue("Event old value should be empty",
-                event.getOldValue().isEmpty());
-        Assert.assertEquals(Collections.singleton("enabled"), event.getValue());
+        Assertions.assertTrue(event.getOldValue().isEmpty(),
+                "Event old value should be empty");
+        Assertions.assertEquals(Collections.singleton("enabled"),
+                event.getValue());
     }
 
     @Test
-    public void changeItems_selectionIsReset() {
+    void changeItems_selectionIsReset() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("Foo", "Bar");
 
@@ -173,21 +173,21 @@ public class CheckboxGroupTest {
 
         checkboxGroup.setValue(Collections.singleton("Foo"));
 
-        Assert.assertEquals(Collections.singleton("Foo"), capture.get());
+        Assertions.assertEquals(Collections.singleton("Foo"), capture.get());
 
-        Assert.assertEquals(Collections.singleton("Foo"),
+        Assertions.assertEquals(Collections.singleton("Foo"),
                 checkboxGroup.getValue());
 
         checkboxGroup.setItems("Foo", "Baz");
 
-        Assert.assertTrue("Checkbox group value should be empty",
-                checkboxGroup.getValue().isEmpty());
-        Assert.assertTrue("Captured value should be empty",
-                capture.get().isEmpty());
+        Assertions.assertTrue(checkboxGroup.getValue().isEmpty(),
+                "Checkbox group value should be empty");
+        Assertions.assertTrue(capture.get().isEmpty(),
+                "Captured value should be empty");
     }
 
     @Test
-    public void deselectAll_selectionIsReset() {
+    void deselectAll_selectionIsReset() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("Foo", "Bar");
 
@@ -197,21 +197,21 @@ public class CheckboxGroupTest {
 
         checkboxGroup.setValue(Collections.singleton("Foo"));
 
-        Assert.assertEquals(Collections.singleton("Foo"), capture.get());
+        Assertions.assertEquals(Collections.singleton("Foo"), capture.get());
 
-        Assert.assertEquals(Collections.singleton("Foo"),
+        Assertions.assertEquals(Collections.singleton("Foo"),
                 checkboxGroup.getValue());
 
         checkboxGroup.deselectAll();
 
-        Assert.assertTrue("Checkbox group value should be empty",
-                checkboxGroup.getValue().isEmpty());
-        Assert.assertTrue("Captured value should be empty",
-                capture.get().isEmpty());
+        Assertions.assertTrue(checkboxGroup.getValue().isEmpty(),
+                "Checkbox group value should be empty");
+        Assertions.assertTrue(capture.get().isEmpty(),
+                "Captured value should be empty");
     }
 
     @Test
-    public void updateSelection_checkboxesUpdated() {
+    void updateSelection_checkboxesUpdated() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("Foo", "Bar");
 
@@ -219,16 +219,16 @@ public class CheckboxGroupTest {
                 .map(Checkbox.class::cast).collect(Collectors.toList());
 
         checkboxGroup.select("Foo");
-        Assert.assertTrue(checkboxes.get(0).getValue());
-        Assert.assertFalse(checkboxes.get(1).getValue());
+        Assertions.assertTrue(checkboxes.get(0).getValue());
+        Assertions.assertFalse(checkboxes.get(1).getValue());
 
         checkboxGroup.deselectAll();
-        Assert.assertFalse(checkboxes.get(0).getValue());
-        Assert.assertFalse(checkboxes.get(1).getValue());
+        Assertions.assertFalse(checkboxes.get(0).getValue());
+        Assertions.assertFalse(checkboxes.get(1).getValue());
     }
 
     @Test
-    public void singleDataRefreshEvent() {
+    void singleDataRefreshEvent() {
         Wrapper item1 = new Wrapper(1, "foo");
         Wrapper item2 = new Wrapper(2, "bar");
 
@@ -249,7 +249,7 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void singleDataRefreshEvent_overrideDataProviderGetId() {
+    void singleDataRefreshEvent_overrideDataProviderGetId() {
         Wrapper item1 = new Wrapper(1, "foo");
         Wrapper item2 = new Wrapper(2, "bar");
 
@@ -270,7 +270,7 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void allDataRefreshEvent() {
+    void allDataRefreshEvent() {
         Wrapper item1 = new Wrapper(1, "foo");
         Wrapper item2 = new Wrapper(2, "bar");
 
@@ -291,79 +291,79 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+    void selectItem_setItemLabelGenerator_selectionIsRetained() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
 
         checkboxGroup.setValue(Set.of("foo"));
-        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+        Assertions.assertEquals(Set.of("foo"), checkboxGroup.getValue());
 
         checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
 
-        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+        Assertions.assertEquals(Set.of("foo"), checkboxGroup.getValue());
     }
 
     @Test
-    public void setItemLabelGenerator_labelIsUpdated() {
+    void setItemLabelGenerator_labelIsUpdated() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
 
         Checkbox cb = (Checkbox) checkboxGroup.getChildren().findFirst().get();
-        Assert.assertEquals("foo", cb.getLabel());
+        Assertions.assertEquals("foo", cb.getLabel());
 
         checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
 
-        Assert.assertEquals("foo (Updated)", cb.getLabel());
+        Assertions.assertEquals("foo (Updated)", cb.getLabel());
     }
 
     @Test
-    public void setItemLabelGenerator_removesItemRenderer() {
+    void setItemLabelGenerator_removesItemRenderer() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
         checkboxGroup.setRenderer(new TextRenderer<>());
 
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 checkboxGroup.getItemRenderer() instanceof TextRenderer);
 
         checkboxGroup.setItemLabelGenerator(item -> item);
 
-        Assert.assertNull(checkboxGroup.getItemRenderer());
+        Assertions.assertNull(checkboxGroup.getItemRenderer());
     }
 
     @Test
-    public void addSelectionListener_selectionEventIsFired() {
+    void addSelectionListener_selectionEventIsFired() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
 
         AtomicReference<MultiSelectionEvent<CheckboxGroup<String>, String>> eventCapture = new AtomicReference<>();
         checkboxGroup.addSelectionListener(event -> {
-            Assert.assertNull(eventCapture.get());
+            Assertions.assertNull(eventCapture.get());
             eventCapture.set(event);
         });
 
         checkboxGroup.setValue(Collections.singleton("bar"));
 
-        Assert.assertNotNull(eventCapture.get());
-        Assert.assertEquals(Collections.emptySet(),
+        Assertions.assertNotNull(eventCapture.get());
+        Assertions.assertEquals(Collections.emptySet(),
                 eventCapture.get().getOldValue());
-        Assert.assertEquals(Collections.singleton("bar"),
+        Assertions.assertEquals(Collections.singleton("bar"),
                 eventCapture.get().getValue());
 
         eventCapture.set(null);
 
         checkboxGroup.select("foo", "bar");
-        Assert.assertNotNull(eventCapture.get());
-        Assert.assertEquals(Collections.singleton("bar"),
+        Assertions.assertNotNull(eventCapture.get());
+        Assertions.assertEquals(Collections.singleton("bar"),
                 eventCapture.get().getOldSelection());
-        Assert.assertEquals(2, eventCapture.get().getValue().size());
+        Assertions.assertEquals(2, eventCapture.get().getValue().size());
 
         Set<String> newSelection = eventCapture.get().getValue();
-        Assert.assertTrue(newSelection.contains("foo"));
-        Assert.assertTrue(newSelection.contains("bar"));
+        Assertions.assertTrue(newSelection.contains("foo"));
+        Assertions.assertTrue(newSelection.contains("bar"));
     }
 
     @Test // https://github.com/vaadin/vaadin-checkbox-flow/issues/81
-    public void disableParent_detachParent_notThrowing() {
+    void disableParent_detachParent_notThrowing() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
 
@@ -377,7 +377,7 @@ public class CheckboxGroupTest {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-checkbox-group");
         ArrayNode array = JacksonUtils.createArrayNode();
         array.add("foo");
@@ -393,18 +393,12 @@ public class CheckboxGroupTest {
         CheckboxGroup field = Component.from(element, CheckboxGroup.class);
         ArrayNode propertyValue = (ArrayNode) field.getElement()
                 .getPropertyRaw("value");
-        Assert.assertEquals(1, propertyValue.size());
-        Assert.assertEquals("foo", propertyValue.get(0).asString());
+        Assertions.assertEquals(1, propertyValue.size());
+        Assertions.assertEquals("foo", propertyValue.get(0).asString());
     }
 
     @Test
-    public void dataViewForFaultyDataProvider_throwsException() {
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(
-                "CheckboxGroupListDataView only supports 'ListDataProvider' "
-                        + "or it's subclasses, but was given a "
-                        + "'AbstractBackEndDataProvider'");
-
+    void dataViewForFaultyDataProvider_throwsException() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         final CheckboxGroupListDataView<String> listDataView = checkboxGroup
                 .setItems(Arrays.asList("one", "two"));
@@ -414,11 +408,17 @@ public class CheckboxGroupTest {
 
         checkboxGroup.setItems(dataProvider);
 
-        checkboxGroup.getListDataView();
+        IllegalStateException exception = Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> checkboxGroup.getListDataView());
+        Assertions.assertTrue(exception.getMessage().contains(
+                "CheckboxGroupListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'"));
     }
 
     @Test
-    public void setIdentifierProvider_setItemsWithIdentifierOnly_shouldSelectCorrectItem() {
+    void setIdentifierProvider_setItemsWithIdentifierOnly_shouldSelectCorrectItem() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -434,13 +434,13 @@ public class CheckboxGroupTest {
 
         checkboxGroup.setValue(Collections.singleton(new CustomItem(1L)));
 
-        Assert.assertNotNull(
+        Assertions.assertNotNull(
                 checkboxGroup.getSelectedItems().stream().findFirst().get());
-        Assert.assertEquals("First", checkboxGroup.getSelectedItems().stream()
-                .map(CustomItem::getName).findFirst().get());
+        Assertions.assertEquals("First", checkboxGroup.getSelectedItems()
+                .stream().map(CustomItem::getName).findFirst().get());
         long[] selectedIds = checkboxGroup.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 1L }, selectedIds);
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -455,11 +455,11 @@ public class CheckboxGroupTest {
 
         selectedIds = checkboxGroup.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 2L }, selectedIds);
     }
 
     @Test
-    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+    void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -475,13 +475,13 @@ public class CheckboxGroupTest {
 
         checkboxGroup.setValue(Collections.singleton(new CustomItem(1L)));
 
-        Assert.assertNotNull(
+        Assertions.assertNotNull(
                 checkboxGroup.getSelectedItems().stream().findFirst().get());
-        Assert.assertEquals("First", checkboxGroup.getSelectedItems().stream()
-                .map(CustomItem::getName).findFirst().get());
+        Assertions.assertEquals("First", checkboxGroup.getSelectedItems()
+                .stream().map(CustomItem::getName).findFirst().get());
         long[] selectedIds = checkboxGroup.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 1L }, selectedIds);
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -497,11 +497,11 @@ public class CheckboxGroupTest {
 
         selectedIds = checkboxGroup.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 3L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 3L }, selectedIds);
     }
 
     @Test
-    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+    void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -515,16 +515,16 @@ public class CheckboxGroupTest {
         checkboxGroup.setValue(
                 Collections.singleton(new CustomItem(null, "Second")));
 
-        Assert.assertNotNull(checkboxGroup.getValue());
+        Assertions.assertNotNull(checkboxGroup.getValue());
 
         long[] selectedIds = checkboxGroup.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
 
-        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 2L }, selectedIds);
     }
 
     @Test
-    public void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
+    void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -540,12 +540,12 @@ public class CheckboxGroupTest {
 
         checkboxGroup
                 .setValue(Collections.singleton(new CustomItem(null, "First")));
-        Assert.assertNull(checkboxGroup.getSelectedItems().stream().findFirst()
-                .get().getId());
+        Assertions.assertNull(checkboxGroup.getSelectedItems().stream()
+                .findFirst().get().getId());
     }
 
     @Test
-    public void setItems_createsLabelValueEventAndItems() {
+    void setItems_createsLabelValueEventAndItems() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -554,17 +554,18 @@ public class CheckboxGroupTest {
         CheckboxGroup<CustomItem> checkboxGroup = new CheckboxGroup<>("label",
                 capture::set, first, second, third);
 
-        Assert.assertEquals("Invalid number of items", 3,
-                checkboxGroup.getChildren().count());
+        Assertions.assertEquals(3, checkboxGroup.getChildren().count(),
+                "Invalid number of items");
 
-        Assert.assertEquals("Invalid label for checkbox group ", "label",
-                checkboxGroup.getElement().getProperty("label"));
+        Assertions.assertEquals("label",
+                checkboxGroup.getElement().getProperty("label"),
+                "Invalid label for checkbox group ");
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
-        Assert.assertTrue(group instanceof HasTooltip);
+        Assertions.assertTrue(group instanceof HasTooltip);
     }
 
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(
@@ -589,58 +590,59 @@ public class CheckboxGroupTest {
             String firstLabel, String secondLabel) {
         List<Component> components = checkboxGroup.getChildren()
                 .collect(Collectors.toList());
-        Assert.assertEquals(2, components.size());
-        Assert.assertEquals(firstLabel,
+        Assertions.assertEquals(2, components.size());
+        Assertions.assertEquals(firstLabel,
                 ((Checkbox) components.get(0)).getLabel());
-        Assert.assertEquals(secondLabel,
+        Assertions.assertEquals(secondLabel,
                 ((Checkbox) components.get(1)).getLabel());
     }
 
     @Test
-    public void implementHasAriaLabel() {
-        Assert.assertTrue(
+    void implementHasAriaLabel() {
+        Assertions.assertTrue(
                 HasAriaLabel.class.isAssignableFrom(CheckboxGroup.class));
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setAriaLabel("aria-label");
 
-        Assert.assertTrue(group.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", group.getAriaLabel().get());
+        Assertions.assertTrue(group.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", group.getAriaLabel().get());
 
         group.setAriaLabel(null);
-        Assert.assertTrue(group.getAriaLabel().isEmpty());
+        Assertions.assertTrue(group.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setAriaLabelledBy("aria-labelledby");
 
-        Assert.assertTrue(group.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", group.getAriaLabelledBy().get());
+        Assertions.assertTrue(group.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                group.getAriaLabelledBy().get());
 
         group.setAriaLabelledBy(null);
-        Assert.assertTrue(group.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(group.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         CheckboxGroup<String> field = new CheckboxGroup<String>();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<String>, Set<String>>, Set<String>>);
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(CheckboxGroup.class));
     }
 
     @Test
-    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+    void discardSelectionOnDataChange_noExtraChangeEventsFired() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -653,17 +655,17 @@ public class CheckboxGroupTest {
 
         String selectedItem = items.get(0);
         group.select(selectedItem);
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertEquals(1, events.size());
         events.clear();
 
         group.getDataProvider().refreshAll();
-        Assert.assertTrue(group.getSelectedItems().isEmpty());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertTrue(group.getSelectedItems().isEmpty());
+        Assertions.assertEquals(1, events.size());
     }
 
     @Test
-    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+    void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -677,27 +679,27 @@ public class CheckboxGroupTest {
 
         String selectedItem = items.get(0);
         group.select(selectedItem);
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertEquals(1, events.size());
         events.clear();
 
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(items.get(1));
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(selectedItem);
         group.getDataProvider().refreshAll();
-        Assert.assertTrue(group.getSelectedItems().isEmpty());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertTrue(group.getSelectedItems().isEmpty());
+        Assertions.assertEquals(1, events.size());
     }
 
     @Test
-    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+    void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -711,27 +713,27 @@ public class CheckboxGroupTest {
 
         String selectedItem = items.get(0);
         group.select(selectedItem);
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertEquals(1, events.size());
         events.clear();
 
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(items.get(1));
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(selectedItem);
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(Set.of(selectedItem), group.getValue());
+        Assertions.assertTrue(events.isEmpty());
     }
 
     @Test
-    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+    void refreshItem_selectFromClient_valueContainsUpdatedItem() {
         CheckboxGroup<CustomItem> group = new CheckboxGroup<>();
         CheckboxGroupListDataView<CustomItem> dataView = group.setItems(
                 new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
@@ -751,9 +753,9 @@ public class CheckboxGroupTest {
         selection.add(itemKey);
         group.getElement().setPropertyJson("value", selection);
 
-        Assert.assertEquals("updated",
+        Assertions.assertEquals("updated",
                 selectedItems.get().stream().findFirst().orElseThrow().name);
-        Assert.assertEquals("updated",
+        Assertions.assertEquals("updated",
                 group.getValue().stream().findFirst().orElseThrow().name);
     }
 

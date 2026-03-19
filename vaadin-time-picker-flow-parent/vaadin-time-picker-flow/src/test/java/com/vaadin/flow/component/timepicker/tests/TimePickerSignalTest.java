@@ -17,32 +17,32 @@ package com.vaadin.flow.component.timepicker.tests;
 
 import java.time.LocalTime;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class TimePickerSignalTest extends AbstractSignalsUnitTest {
+class TimePickerSignalTest extends AbstractSignalsJUnit6Test {
 
     private TimePicker timePicker;
     private ValueSignal<LocalTime> minSignal;
     private ValueSignal<LocalTime> maxSignal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         timePicker = new TimePicker();
         minSignal = new ValueSignal<>(LocalTime.of(9, 0));
         maxSignal = new ValueSignal<>(LocalTime.of(17, 0));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (timePicker != null && timePicker.isAttached()) {
             timePicker.removeFromParent();
         }
@@ -51,126 +51,130 @@ public class TimePickerSignalTest extends AbstractSignalsUnitTest {
     // ===== MIN BINDING TESTS =====
 
     @Test
-    public void bindMin_signalBound_minSynchronizedWhenAttached() {
+    void bindMin_signalBound_minSynchronizedWhenAttached() {
         timePicker.bindMin(minSignal);
         UI.getCurrent().add(timePicker);
 
-        Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
+        Assertions.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
 
         minSignal.set(LocalTime.of(10, 0));
-        Assert.assertEquals(LocalTime.of(10, 0), timePicker.getMin());
+        Assertions.assertEquals(LocalTime.of(10, 0), timePicker.getMin());
 
         minSignal.set(LocalTime.of(8, 30));
-        Assert.assertEquals(LocalTime.of(8, 30), timePicker.getMin());
+        Assertions.assertEquals(LocalTime.of(8, 30), timePicker.getMin());
     }
 
     @Test
-    public void bindMin_signalBound_noEffectWhenDetached() {
+    void bindMin_signalBound_noEffectWhenDetached() {
         timePicker.bindMin(minSignal);
         // Not attached to UI
 
         LocalTime initialMin = timePicker.getMin();
         minSignal.set(LocalTime.of(10, 0));
-        Assert.assertEquals(initialMin, timePicker.getMin());
+        Assertions.assertEquals(initialMin, timePicker.getMin());
     }
 
     @Test
-    public void bindMin_signalBound_detachAndReattach() {
+    void bindMin_signalBound_detachAndReattach() {
         timePicker.bindMin(minSignal);
         UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
+        Assertions.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
 
         // Detach
         timePicker.removeFromParent();
         minSignal.set(LocalTime.of(10, 0));
-        Assert.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
+        Assertions.assertEquals(LocalTime.of(9, 0), timePicker.getMin());
 
         // Reattach
         UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(10, 0), timePicker.getMin());
+        Assertions.assertEquals(LocalTime.of(10, 0), timePicker.getMin());
 
         minSignal.set(LocalTime.of(11, 0));
-        Assert.assertEquals(LocalTime.of(11, 0), timePicker.getMin());
+        Assertions.assertEquals(LocalTime.of(11, 0), timePicker.getMin());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMin_setMinWhileBound_throwsException() {
+    @Test
+    void bindMin_setMinWhileBound_throwsException() {
         timePicker.bindMin(minSignal);
         UI.getCurrent().add(timePicker);
 
-        timePicker.setMin(LocalTime.of(10, 0));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> timePicker.setMin(LocalTime.of(10, 0)));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMin_bindAgainWhileBound_throwsException() {
+    @Test
+    void bindMin_bindAgainWhileBound_throwsException() {
         timePicker.bindMin(minSignal);
         UI.getCurrent().add(timePicker);
 
         ValueSignal<LocalTime> anotherSignal = new ValueSignal<>(
                 LocalTime.of(12, 0));
-        timePicker.bindMin(anotherSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> timePicker.bindMin(anotherSignal));
     }
 
     // ===== MAX BINDING TESTS =====
 
     @Test
-    public void bindMax_signalBound_maxSynchronizedWhenAttached() {
+    void bindMax_signalBound_maxSynchronizedWhenAttached() {
         timePicker.bindMax(maxSignal);
         UI.getCurrent().add(timePicker);
 
-        Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
+        Assertions.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
 
         maxSignal.set(LocalTime.of(18, 0));
-        Assert.assertEquals(LocalTime.of(18, 0), timePicker.getMax());
+        Assertions.assertEquals(LocalTime.of(18, 0), timePicker.getMax());
 
         maxSignal.set(LocalTime.of(16, 30));
-        Assert.assertEquals(LocalTime.of(16, 30), timePicker.getMax());
+        Assertions.assertEquals(LocalTime.of(16, 30), timePicker.getMax());
     }
 
     @Test
-    public void bindMax_signalBound_noEffectWhenDetached() {
+    void bindMax_signalBound_noEffectWhenDetached() {
         timePicker.bindMax(maxSignal);
         // Not attached to UI
 
         LocalTime initialMax = timePicker.getMax();
         maxSignal.set(LocalTime.of(18, 0));
-        Assert.assertEquals(initialMax, timePicker.getMax());
+        Assertions.assertEquals(initialMax, timePicker.getMax());
     }
 
     @Test
-    public void bindMax_signalBound_detachAndReattach() {
+    void bindMax_signalBound_detachAndReattach() {
         timePicker.bindMax(maxSignal);
         UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
+        Assertions.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
 
         // Detach
         timePicker.removeFromParent();
         maxSignal.set(LocalTime.of(18, 0));
-        Assert.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
+        Assertions.assertEquals(LocalTime.of(17, 0), timePicker.getMax());
 
         // Reattach
         UI.getCurrent().add(timePicker);
-        Assert.assertEquals(LocalTime.of(18, 0), timePicker.getMax());
+        Assertions.assertEquals(LocalTime.of(18, 0), timePicker.getMax());
 
         maxSignal.set(LocalTime.of(19, 0));
-        Assert.assertEquals(LocalTime.of(19, 0), timePicker.getMax());
+        Assertions.assertEquals(LocalTime.of(19, 0), timePicker.getMax());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMax_setMaxWhileBound_throwsException() {
+    @Test
+    void bindMax_setMaxWhileBound_throwsException() {
         timePicker.bindMax(maxSignal);
         UI.getCurrent().add(timePicker);
 
-        timePicker.setMax(LocalTime.of(18, 0));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> timePicker.setMax(LocalTime.of(18, 0)));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMax_bindAgainWhileBound_throwsException() {
+    @Test
+    void bindMax_bindAgainWhileBound_throwsException() {
         timePicker.bindMax(maxSignal);
         UI.getCurrent().add(timePicker);
 
         ValueSignal<LocalTime> anotherSignal = new ValueSignal<>(
                 LocalTime.of(20, 0));
-        timePicker.bindMax(anotherSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> timePicker.bindMax(anotherSignal));
     }
 }

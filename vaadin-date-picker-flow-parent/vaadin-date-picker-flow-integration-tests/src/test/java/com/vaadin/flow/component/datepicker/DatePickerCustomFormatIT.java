@@ -202,9 +202,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testSetLocaleAfterFormatShouldFormatWithCustomFormat() {
-        Assert.assertEquals(getInputValue(
-                DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER),
-                "2018/05/13");
+        Assert.assertEquals("2018/05/13", getInputValue(
+                DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER));
     }
 
     @Test
@@ -221,9 +220,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testSetFormatAfterSetLocaleShouldFormatWithCustomFormat() {
-        Assert.assertEquals(getInputValue(
-                DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER),
-                "2018/05/13");
+        Assert.assertEquals("2018/05/13", getInputValue(
+                DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER));
     }
 
     @Test

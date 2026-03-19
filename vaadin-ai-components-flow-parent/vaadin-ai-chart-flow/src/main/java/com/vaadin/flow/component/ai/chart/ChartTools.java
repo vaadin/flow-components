@@ -29,7 +29,7 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Factory for creating reusable chart {@link LLMProvider.ToolDefinition}
+ * Factory for creating reusable chart {@link LLMProvider.ToolSpec}
  * instances that operate on a {@link ChartRegistry}. These tools are not tied
  * to any specific controller and can be used by both
  * {@link ChartAIController} and {@code DashboardAIController}.
@@ -314,10 +314,10 @@ public final class ChartTools {
      *            the chart registry to read from, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolDefinition getChartState(
+    public static LLMProvider.ToolSpec getChartState(
             ChartRegistry registry) {
         Objects.requireNonNull(registry, "registry must not be null");
-        return new LLMProvider.ToolDefinition() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "get_chart_state";
@@ -375,10 +375,10 @@ public final class ChartTools {
      *            the chart registry to update, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolDefinition updateChartConfiguration(
+    public static LLMProvider.ToolSpec updateChartConfiguration(
             ChartRegistry registry) {
         Objects.requireNonNull(registry, "registry must not be null");
-        return new LLMProvider.ToolDefinition() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "update_chart_configuration";
@@ -431,10 +431,10 @@ public final class ChartTools {
      *            the chart registry to update, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolDefinition updateChartDataSource(
+    public static LLMProvider.ToolSpec updateChartDataSource(
             ChartRegistry registry) {
         Objects.requireNonNull(registry, "registry must not be null");
-        return new LLMProvider.ToolDefinition() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "update_chart_data_source";
@@ -534,7 +534,7 @@ public final class ChartTools {
      *            the chart registry, not {@code null}
      * @return a list of all chart tools, never {@code null}
      */
-    public static List<LLMProvider.ToolDefinition> createAll(
+    public static List<LLMProvider.ToolSpec> createAll(
             ChartRegistry registry) {
         return List.of(getChartState(registry),
                 updateChartConfiguration(registry),

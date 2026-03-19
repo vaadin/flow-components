@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -34,7 +34,7 @@ import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
 @SuppressWarnings("unchecked")
-public class MenuManagerTest {
+class MenuManagerTest {
 
     private MenuManager<ContextMenu, MenuItem, SubMenu> manager;
     private ContextMenu menu = Mockito.mock(ContextMenu.class);
@@ -62,8 +62,8 @@ public class MenuManagerTest {
 
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent) {
             @Override
@@ -74,19 +74,19 @@ public class MenuManagerTest {
     }
 
     @Test
-    public void addItem_text_createItemUsingFactory_setText_addToItem() {
+    void addItem_text_createItemUsingFactory_setText_addToItem() {
         MenuItem item = Mockito.mock(MenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         manager.addItem("foo");
 
         Mockito.verify(item).setText("foo");
 
-        Assert.assertEquals(addedComponents.size(), 1);
-        Assert.assertEquals(item, addedComponents.get(0));
+        Assertions.assertEquals(1, addedComponents.size());
+        Assertions.assertEquals(item, addedComponents.get(0));
     }
 
     @Test
-    public void addItem_component_createItemUsingFactory_addComponent_addToItem() {
+    void addItem_component_createItemUsingFactory_addComponent_addToItem() {
         MenuItem item = Mockito.mock(MenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         Component component = Mockito.mock(Component.class);
@@ -94,12 +94,12 @@ public class MenuManagerTest {
 
         Mockito.verify(item).add(component);
 
-        Assert.assertEquals(addedComponents.size(), 1);
-        Assert.assertEquals(item, addedComponents.get(0));
+        Assertions.assertEquals(1, addedComponents.size());
+        Assertions.assertEquals(item, addedComponents.get(0));
     }
 
     @Test
-    public void addItem_textWithListener_createItemUsingFactory_setText_addToItemAndAddListener() {
+    void addItem_textWithListener_createItemUsingFactory_setText_addToItemAndAddListener() {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         ComponentEventListener listener = Mockito
@@ -109,12 +109,12 @@ public class MenuManagerTest {
         Mockito.verify(item).setText("foo");
         Mockito.verify(item).addListener(ClickEvent.class, listener);
 
-        Assert.assertEquals(addedComponents.size(), 1);
-        Assert.assertEquals(item, addedComponents.get(0));
+        Assertions.assertEquals(1, addedComponents.size());
+        Assertions.assertEquals(item, addedComponents.get(0));
     }
 
     @Test
-    public void addItem_textNullListener_createItemUsingFactory_setText_addToItemAndNoListenerAdded() {
+    void addItem_textNullListener_createItemUsingFactory_setText_addToItemAndNoListenerAdded() {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         manager.addItem("foo", null);
@@ -122,12 +122,12 @@ public class MenuManagerTest {
         Mockito.verify(item).setText("foo");
         Mockito.verifyNoMoreInteractions(item);
 
-        Assert.assertEquals(addedComponents.size(), 1);
-        Assert.assertEquals(item, addedComponents.get(0));
+        Assertions.assertEquals(1, addedComponents.size());
+        Assertions.assertEquals(item, addedComponents.get(0));
     }
 
     @Test
-    public void addItem_componentWithListener_createItemUsingFactory_addComponent_addToItemAndAddListener() {
+    void addItem_componentWithListener_createItemUsingFactory_addComponent_addToItemAndAddListener() {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         Component component = Mockito.mock(Component.class);
@@ -138,12 +138,12 @@ public class MenuManagerTest {
         Mockito.verify(item).add(component);
         Mockito.verify(item).addListener(ClickEvent.class, listener);
 
-        Assert.assertEquals(addedComponents.size(), 1);
-        Assert.assertEquals(item, addedComponents.get(0));
+        Assertions.assertEquals(1, addedComponents.size());
+        Assertions.assertEquals(item, addedComponents.get(0));
     }
 
     @Test
-    public void addItem_componentNullListener_createItemUsingFactory_addComponent_addToItemAndAddListener() {
+    void addItem_componentNullListener_createItemUsingFactory_addComponent_addToItemAndAddListener() {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         Component component = Mockito.mock(Component.class);
@@ -152,12 +152,12 @@ public class MenuManagerTest {
         Mockito.verify(item).add(component);
         Mockito.verifyNoMoreInteractions(item);
 
-        Assert.assertEquals(addedComponents.size(), 1);
-        Assert.assertEquals(item, addedComponents.get(0));
+        Assertions.assertEquals(1, addedComponents.size());
+        Assertions.assertEquals(item, addedComponents.get(0));
     }
 
     @Test
-    public void addComponents_componentsAreAdded_resetIsCalled() {
+    void addComponents_componentsAreAdded_resetIsCalled() {
         Component component1 = Mockito.mock(Component.class);
         Component component2 = Mockito.mock(Component.class);
 
@@ -169,24 +169,25 @@ public class MenuManagerTest {
         List<Component> children = manager.getChildren()
                 .collect(Collectors.toList());
 
-        Assert.assertEquals(2, children.size());
-        Assert.assertEquals(component1, children.get(0));
-        Assert.assertEquals(component2, children.get(1));
+        Assertions.assertEquals(2, children.size());
+        Assertions.assertEquals(component1, children.get(0));
+        Assertions.assertEquals(component2, children.get(1));
 
         Mockito.verify(reset).run();
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void addComponents_parentIsCheckable_throws() {
+    @Test
+    void addComponents_parentIsCheckable_throws() {
         Mockito.when(parent.isCheckable()).thenReturn(true);
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent);
 
-        manager.addComponent(Mockito.mock(Component.class));
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> manager.addComponent(Mockito.mock(Component.class)));
     }
 
     @Test
-    public void removeComponents_componentsAreRemoved_resetIsCalled() {
+    void removeComponents_componentsAreRemoved_resetIsCalled() {
         Component component1 = Mockito.mock(Component.class);
         Component component2 = Mockito.mock(Component.class);
 
@@ -200,24 +201,25 @@ public class MenuManagerTest {
         List<Component> children = manager.getChildren()
                 .collect(Collectors.toList());
 
-        Assert.assertTrue(children.isEmpty());
+        Assertions.assertTrue(children.isEmpty());
 
         // one from add , one from remove
         Mockito.verify(reset, Mockito.times(2)).run();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void removeComponents_componentIsNotChild_resetIsNotCalled() {
+    @Test
+    void removeComponents_componentIsNotChild_resetIsNotCalled() {
         Component component1 = Mockito.mock(Component.class);
 
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent);
 
-        manager.remove(component1);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> manager.remove(component1));
     }
 
     @Test
-    public void removeAll_componentsAreRemoved_resetIsCalled() {
+    void removeAll_componentsAreRemoved_resetIsCalled() {
         Component component1 = Mockito.mock(Component.class);
         Component component2 = Mockito.mock(Component.class);
 
@@ -231,14 +233,14 @@ public class MenuManagerTest {
         List<Component> children = manager.getChildren()
                 .collect(Collectors.toList());
 
-        Assert.assertTrue(children.isEmpty());
+        Assertions.assertTrue(children.isEmpty());
 
         // one from add , one from remove
         Mockito.verify(reset, Mockito.times(2)).run();
     }
 
     @Test
-    public void addComponentAtIndex_componentInserted_resetIsCalled() {
+    void addComponentAtIndex_componentInserted_resetIsCalled() {
         Component component1 = Mockito.mock(Component.class);
         Component component2 = Mockito.mock(Component.class);
         Component component3 = Mockito.mock(Component.class);
@@ -252,16 +254,16 @@ public class MenuManagerTest {
         List<Component> children = manager.getChildren()
                 .collect(Collectors.toList());
 
-        Assert.assertEquals(3, children.size());
-        Assert.assertEquals(component1, children.get(0));
-        Assert.assertEquals(component3, children.get(1));
-        Assert.assertEquals(component2, children.get(2));
+        Assertions.assertEquals(3, children.size());
+        Assertions.assertEquals(component1, children.get(0));
+        Assertions.assertEquals(component3, children.get(1));
+        Assertions.assertEquals(component2, children.get(2));
 
         Mockito.verify(reset, Mockito.times(2)).run();
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void addComponentAtIndex_parentIsCheckable_throws() {
+    @Test
+    void addComponentAtIndex_parentIsCheckable_throws() {
         Component component = Mockito.mock(Component.class);
 
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
@@ -269,19 +271,21 @@ public class MenuManagerTest {
 
         Mockito.when(parent.isCheckable()).thenReturn(true);
 
-        manager.addComponentAtIndex(0, component);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addComponentAtIndex_negariveIndex_throws() {
-        manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
-                factory, MenuItem.class, parent);
-
-        manager.addComponentAtIndex(-1, Mockito.mock(Component.class));
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> manager.addComponentAtIndex(0, component));
     }
 
     @Test
-    public void getItems_onlyItemsAreReturned() {
+    void addComponentAtIndex_negariveIndex_throws() {
+        manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
+                factory, MenuItem.class, parent);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> manager
+                .addComponentAtIndex(-1, Mockito.mock(Component.class)));
+    }
+
+    @Test
+    void getItems_onlyItemsAreReturned() {
         Component component = Mockito.mock(Component.class);
 
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
@@ -294,7 +298,7 @@ public class MenuManagerTest {
         manager.addComponent(component);
         manager.addItem("bar");
 
-        Assert.assertEquals(2, manager.getItems().size());
+        Assertions.assertEquals(2, manager.getItems().size());
     }
 
 }

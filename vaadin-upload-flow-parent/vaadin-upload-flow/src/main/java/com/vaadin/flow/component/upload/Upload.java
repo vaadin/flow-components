@@ -21,7 +21,9 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -61,7 +63,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/upload", version = "25.1.0-rc1")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
@@ -83,6 +85,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     private boolean uploading;
 
     private UploadI18N i18n;
+
+    // Accepted file type restrictions (used for both client hints and
+    // server-side validation)
+    private List<String> acceptedMimeTypes = List.of();
+    private List<String> acceptedFileExtensions = List.of();
 
     private Component uploadButton;
     private Component defaultUploadButton;
@@ -339,6 +346,144 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     }
 
     /**
+     * Sets the accepted MIME types for uploads. Only files matching these MIME
+     * types will be accepted. Wildcard patterns like {@code "image/*"} are
+     * supported.
+     * <p>
+     * MIME types are used as a client-side hint (to filter the file picker).
+     * When an {@link com.vaadin.flow.server.streams.UploadHandler
+     * UploadHandler} is used (set via
+     * {@link #setUploadHandler(UploadHandler)}), they are also validated
+     * server-side. Note that server-side MIME type validation only checks the
+     * content type reported by the client, which can be spoofed. For stronger
+     * protection, also use {@link #setAcceptedFileExtensions(String...)} in
+     * combination with MIME types.
+     * <p>
+     * If both MIME types and file extensions are configured, a file must match
+     * at least one of each (AND logic).
+     * <p>
+     * This method requires an
+     * {@link com.vaadin.flow.server.streams.UploadHandler UploadHandler} to be
+     * used for server-side validation. It cannot be used with the deprecated
+     * {@link #setReceiver(Receiver)} API. Use
+     * {@link #setAcceptedFileTypes(String...)} for client-side-only hints with
+     * a Receiver.
+     *
+     * @param mimeTypes
+     *            the accepted MIME types, e.g. {@code "image/*"},
+     *            {@code "application/pdf"}; or {@code null} to clear
+     * @throws IllegalArgumentException
+     *             if any value is null, blank, or does not contain a {@code /}
+     *             character
+     * @throws IllegalStateException
+     *             if a {@link Receiver} is currently set, or if
+     *             {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
+     */
+    public void setAcceptedMimeTypes(String... mimeTypes) {
+        if (mimeTypes != null && mimeTypes.length > 0) {
+            checkNoReceiverSet("setAcceptedMimeTypes");
+            checkNoDeprecatedFileTypes("setAcceptedMimeTypes");
+        }
+        if (mimeTypes == null || mimeTypes.length == 0) {
+            acceptedMimeTypes = List.of();
+        } else {
+            for (var mimeType : mimeTypes) {
+                if (mimeType == null || mimeType.isBlank()) {
+                    throw new IllegalArgumentException(
+                            "MIME types cannot contain null or blank values");
+                }
+                if (!mimeType.contains("/")) {
+                    throw new IllegalArgumentException(
+                            "MIME type must contain a ‘/’ character: "
+                                    + mimeType);
+                }
+            }
+            acceptedMimeTypes = List.of(mimeTypes);
+        }
+        updateAcceptProperty();
+    }
+
+    /**
+     * Gets the list of accepted MIME types for upload.
+     *
+     * @return a list of accepted MIME types, never {@code null}
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
+     */
+    public List<String> getAcceptedMimeTypes() {
+        checkNoDeprecatedFileTypes("getAcceptedMimeTypes");
+        return acceptedMimeTypes;
+    }
+
+    /**
+     * Sets the accepted file extensions for uploads. Only files with matching
+     * extensions will be accepted. Extensions must start with a dot, e.g.
+     * {@code ".pdf"}, {@code ".txt"}.
+     * <p>
+     * File extensions are used as a client-side hint. When an
+     * {@link com.vaadin.flow.server.streams.UploadHandler UploadHandler} is
+     * used (set via {@link #setUploadHandler(UploadHandler)}), they are also
+     * validated server-side.
+     * <p>
+     * If both MIME types and file extensions are configured, a file must match
+     * at least one of each (AND logic).
+     * <p>
+     * This method requires an
+     * {@link com.vaadin.flow.server.streams.UploadHandler UploadHandler} to be
+     * used for server-side validation. It cannot be used with the deprecated
+     * {@link #setReceiver(Receiver)} API. Use
+     * {@link #setAcceptedFileTypes(String...)} for client-side-only hints with
+     * a Receiver.
+     *
+     * @param extensions
+     *            the accepted file extensions, each starting with a dot; or
+     *            {@code null} to clear
+     * @throws IllegalArgumentException
+     *             if any value is null, blank, or does not start with a dot
+     * @throws IllegalStateException
+     *             if a {@link Receiver} is currently set, or if
+     *             {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
+     */
+    public void setAcceptedFileExtensions(String... extensions) {
+        if (extensions != null && extensions.length > 0) {
+            checkNoReceiverSet("setAcceptedFileExtensions");
+            checkNoDeprecatedFileTypes("setAcceptedFileExtensions");
+        }
+        if (extensions == null || extensions.length == 0) {
+            acceptedFileExtensions = List.of();
+        } else {
+            for (var ext : extensions) {
+                if (ext == null || ext.isBlank()) {
+                    throw new IllegalArgumentException(
+                            "File extensions cannot contain null or blank values");
+                }
+                if (!ext.startsWith(".")) {
+                    throw new IllegalArgumentException(
+                            "File extension must start with ‘.’: " + ext);
+                }
+            }
+            acceptedFileExtensions = List.of(extensions);
+        }
+        updateAcceptProperty();
+    }
+
+    /**
+     * Gets the list of accepted file extensions for upload.
+     *
+     * @return a list of accepted file extensions, never {@code null}
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedFileTypes(String...)} is configured, as
+     *             mixing the deprecated and new APIs is not supported
+     */
+    public List<String> getAcceptedFileExtensions() {
+        checkNoDeprecatedFileTypes("getAcceptedFileExtensions");
+        return acceptedFileExtensions;
+    }
+
+    /**
      * Specify the types of files that the Upload web-component accepts. Syntax:
      * a MIME type pattern (wildcards are allowed) or file extensions. Notice
      * that MIME types are widely supported, while file extensions are only
@@ -347,37 +492,80 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * Example: <code>"video/*","image/tiff"</code> or
      * <code>".pdf","audio/mp3"</code>
      * <p>
-     * File format restrictions are checked only on the client side (browser).
-     * They indicate the hints for users as to what file types to upload. Using
-     * this method won’t restrict the uploaded file’s format on the server side.
-     * If required, it’s the responsibility of the application developer to
-     * implement application-specific restrictions on the server side in one or
-     * more of the Upload component’s event listeners (e.g., in
-     * {@link #addSucceededListener}).
+     * File format restrictions are checked only on the client side (browser)
+     * when this method is used. They indicate the hints for users as to what
+     * file types to upload. If server-side validation is required, use
+     * {@link #setAcceptedMimeTypes(String...)} and
+     * {@link #setAcceptedFileExtensions(String...)} instead.
      *
      * @param acceptedFileTypes
      *            the allowed file types to be uploaded, or <code>null</code> to
      *            clear any restrictions
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedMimeTypes(String...)} or
+     *             {@link #setAcceptedFileExtensions(String...)} are configured,
+     *             as mixing the deprecated and new APIs is not supported
+     * @deprecated Use {@link #setAcceptedMimeTypes(String...)} and
+     *             {@link #setAcceptedFileExtensions(String...)} instead for
+     *             separate control of MIME types and file extensions with
+     *             server-side validation.
      */
+    @Deprecated(since = "25.2")
     public void setAcceptedFileTypes(String... acceptedFileTypes) {
-        String accepted = "";
-        if (acceptedFileTypes != null) {
-            accepted = String.join(",", acceptedFileTypes);
+        if (!acceptedMimeTypes.isEmpty() || !acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot use setAcceptedFileTypes when "
+                            + "setAcceptedMimeTypes or "
+                            + "setAcceptedFileExtensions are configured. "
+                            + "Mixing the deprecated and new APIs is not "
+                            + "supported.");
         }
-        getElement().setProperty("accept", accepted);
+        if (acceptedFileTypes == null || acceptedFileTypes.length == 0) {
+            getElement().setProperty("accept", "");
+        } else {
+            getElement().setProperty("accept", Stream.of(acceptedFileTypes)
+                    .filter(Objects::nonNull).collect(Collectors.joining(",")));
+        }
     }
 
     /**
      * Get the list of accepted file types for upload.
      *
      * @return a list of allowed file types, never <code>null</code>.
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedMimeTypes(String...)} or
+     *             {@link #setAcceptedFileExtensions(String...)} are configured,
+     *             as mixing the deprecated and new APIs is not supported
+     * @deprecated Use {@link #getAcceptedMimeTypes()} and
+     *             {@link #getAcceptedFileExtensions()} instead.
      */
+    @Deprecated(since = "25.2")
     public List<String> getAcceptedFileTypes() {
+        if (!acceptedMimeTypes.isEmpty() || !acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot use getAcceptedFileTypes when "
+                            + "setAcceptedMimeTypes or "
+                            + "setAcceptedFileExtensions are configured. "
+                            + "Use getAcceptedMimeTypes() and "
+                            + "getAcceptedFileExtensions() instead.");
+        }
         String accepted = getElement().getProperty("accept");
         if (accepted == null) {
             return Collections.emptyList();
         }
         return List.of(accepted.split(","));
+    }
+
+    /**
+     * Derives and sets the client-side {@code accept} property from the
+     * configured MIME types and file extensions.
+     */
+    private void updateAcceptProperty() {
+        var accept = Stream
+                .concat(acceptedMimeTypes.stream(),
+                        acceptedFileExtensions.stream())
+                .collect(Collectors.joining(","));
+        getElement().setProperty("accept", accept);
     }
 
     /**
@@ -719,14 +907,34 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * <p>
      * Note! If the receiver doesn't implement {@link MultiFileReceiver} then
      * the upload will be automatically set to only accept one file.
+     * <p>
+     * A Receiver cannot be used together with the server-side file type
+     * validation provided by {@link #setAcceptedMimeTypes(String...)} and
+     * {@link #setAcceptedFileExtensions(String...)}. If those are configured,
+     * this method throws. Use {@link #setAcceptedFileTypes(String...)} for
+     * client-side-only hints with a Receiver.
      *
      * @param receiver
      *            receiver to use for file reception
+     * @throws IllegalStateException
+     *             if {@link #setAcceptedMimeTypes(String...)} or
+     *             {@link #setAcceptedFileExtensions(String...)} have been
+     *             configured with non-empty values
      * @see #setUploadHandler(UploadHandler)
      * @deprecated use {@link #setUploadHandler(UploadHandler)} instead
      */
     @Deprecated(since = "24.8", forRemoval = true)
     public void setReceiver(Receiver receiver) {
+        if (!acceptedMimeTypes.isEmpty() || !acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot set a Receiver when setAcceptedMimeTypes or "
+                            + "setAcceptedFileExtensions are configured. "
+                            + "These APIs require an UploadHandler for "
+                            + "server-side validation. Use "
+                            + "setAcceptedFileTypes for client-side-only "
+                            + "hints with a Receiver, or switch to "
+                            + "setUploadHandler.");
+        }
         Receiver oldReceiver = this.receiver;
         this.receiver = receiver;
 
@@ -783,8 +991,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         if (!(handler instanceof FailFastUploadHandler)) {
             handlerExplicitlyConfigured = true;
         }
+        var validatingHandler = UploadHelper.wrapHandlerWithFileTypeValidation(
+                handler, () -> acceptedMimeTypes, () -> acceptedFileExtensions);
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                handler, this.getElement()) {
+                validatingHandler, this.getElement()) {
             @Override
             public String getName() {
                 return targetName;
@@ -802,6 +1012,28 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
     private boolean isMultiFileReceiver(Receiver receiver) {
         return receiver instanceof MultiFileReceiver;
+    }
+
+    private void checkNoDeprecatedFileTypes(String methodName) {
+        var accept = getElement().getProperty("accept", "");
+        if (!accept.isEmpty() && acceptedMimeTypes.isEmpty()
+                && acceptedFileExtensions.isEmpty()) {
+            throw new IllegalStateException("Cannot use " + methodName
+                    + " when setAcceptedFileTypes is configured. "
+                    + "Mixing the deprecated and new APIs is not "
+                    + "supported.");
+        }
+    }
+
+    private void checkNoReceiverSet(String methodName) {
+        if (receiver != null) {
+            throw new IllegalStateException(
+                    methodName + " cannot be used when a Receiver is set. "
+                            + "Server-side file type validation requires an "
+                            + "UploadHandler. Use setAcceptedFileTypes for "
+                            + "client-side-only hints with a Receiver, or "
+                            + "switch to setUploadHandler.");
+        }
     }
 
     /**

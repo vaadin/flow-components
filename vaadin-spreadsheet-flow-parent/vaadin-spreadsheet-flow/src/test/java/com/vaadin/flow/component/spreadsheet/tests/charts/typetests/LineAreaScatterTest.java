@@ -8,8 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests.charts.typetests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -22,10 +22,10 @@ import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
-public class LineAreaScatterTest extends ChartTestBase {
+class LineAreaScatterTest extends ChartTestBase {
 
     @Test
-    public void lineChartWithOrWithoutMarker() throws Exception {
+    void lineChartWithOrWithoutMarker() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Line.xlsx",
                 "I10").getConfiguration();
 
@@ -54,16 +54,17 @@ public class LineAreaScatterTest extends ChartTestBase {
     }
 
     private void assertLineSeriesDash(DashStyle actual, DashStyle expected) {
-        Assert.assertEquals("Wrong dash for line", expected, actual);
+        Assertions.assertEquals(expected, actual, "Wrong dash for line");
     }
 
     private void assertLineSeriesMarker(MarkerSymbol foundSymbol,
             MarkerSymbolEnum expectedSymbol) {
-        Assert.assertEquals("Wrong marker symbol", expectedSymbol, foundSymbol);
+        Assertions.assertEquals(expectedSymbol, foundSymbol,
+                "Wrong marker symbol");
     }
 
     @Test
-    public void areaChart() throws Exception {
+    void areaChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Area.xlsx",
                 "A7").getConfiguration();
 
@@ -74,7 +75,7 @@ public class LineAreaScatterTest extends ChartTestBase {
     }
 
     @Test
-    public void area100StackChart() throws Exception {
+    void area100StackChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Area.xlsx",
                 "O7").getConfiguration();
 
@@ -84,7 +85,7 @@ public class LineAreaScatterTest extends ChartTestBase {
     }
 
     @Test
-    public void areaStackChart() throws Exception {
+    void areaStackChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Area.xlsx",
                 "H7").getConfiguration();
 
@@ -94,7 +95,7 @@ public class LineAreaScatterTest extends ChartTestBase {
     }
 
     @Test
-    public void scatterChartWithOrWithoutMarkerAndLine() throws Exception {
+    void scatterChartWithOrWithoutMarkerAndLine() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Scatter.xlsx",
                 "A3").getConfiguration();
 

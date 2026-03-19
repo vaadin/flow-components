@@ -134,7 +134,7 @@ public class DashboardTools implements Serializable {
      *
      * @return list of tool definitions
      */
-    public List<LLMProvider.ToolDefinition> getTools() {
+    public List<LLMProvider.ToolSpec> getTools() {
         return List.of(createGetDashboardStateTool(),
                 createUpdateWidgetTool(), createReorderWidgetsTool());
     }
@@ -150,8 +150,8 @@ public class DashboardTools implements Serializable {
 
     // ===== Tool Implementations =====
 
-    private LLMProvider.ToolDefinition createGetDashboardStateTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createGetDashboardStateTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "getDashboardState";
@@ -210,8 +210,8 @@ public class DashboardTools implements Serializable {
         };
     }
 
-    private LLMProvider.ToolDefinition createUpdateWidgetTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createUpdateWidgetTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "updateWidget";
@@ -307,8 +307,8 @@ public class DashboardTools implements Serializable {
         };
     }
 
-    private LLMProvider.ToolDefinition createReorderWidgetsTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createReorderWidgetsTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "reorderWidgets";

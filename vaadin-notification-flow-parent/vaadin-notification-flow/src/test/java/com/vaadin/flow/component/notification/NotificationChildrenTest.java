@@ -169,9 +169,8 @@ public class NotificationChildrenTest {
         notification.getElement().setProperty("virtualChildNodeIds", "[-1]");
 
         newParent.remove(child);
-        Assert.assertEquals(
-                notification.getElement().getProperty("virtualChildNodeIds"),
-                "[-1]");
+        Assert.assertEquals("[-1]",
+                notification.getElement().getProperty("virtualChildNodeIds"));
     }
 
     private void assertVirtualChildren(Component... components) {

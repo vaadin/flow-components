@@ -20,9 +20,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
@@ -32,21 +32,21 @@ import com.vaadin.flow.component.html.Span;
 /**
  * Unit tests for SubMenu.
  */
-public class SubMenuTest {
+class SubMenuTest {
 
     private ContextMenu contextMenu;
     private MenuItem parentItem;
     private SubMenu subMenu;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         contextMenu = new ContextMenu();
         parentItem = contextMenu.addItem("parent");
         subMenu = parentItem.getSubMenu();
     }
 
     @Test
-    public void addAndRemoveChildren_getChildrenReturnsChildren() {
+    void addAndRemoveChildren_getChildrenReturnsChildren() {
         Span span1 = new Span("Text 1");
         Span span2 = new Span("Text 2");
         Span span3 = new Span("Text 3");
@@ -68,13 +68,13 @@ public class SubMenuTest {
     }
 
     @Test
-    public void addItem_getChildren_returnsMenuItem() {
+    void addItem_getChildren_returnsMenuItem() {
         MenuItem foo = subMenu.addItem("foo");
         verifyChildren(subMenu, foo);
     }
 
     @Test
-    public void addSeparatorAddsHr() {
+    void addSeparatorAddsHr() {
         MenuItem foo = subMenu.addItem("foo");
         subMenu.addSeparator();
         Hr separator = (Hr) subMenu.getChildren().skip(1).findFirst().get();
@@ -83,13 +83,13 @@ public class SubMenuTest {
     }
 
     @Test
-    public void addItem_getItems_returnsMenuItem() {
+    void addItem_getItems_returnsMenuItem() {
         MenuItem foo = subMenu.addItem("foo");
         verifyItems(subMenu, foo);
     }
 
     @Test
-    public void addItem_remove_noChildrenNorItems() {
+    void addItem_remove_noChildrenNorItems() {
         MenuItem foo = subMenu.addItem("foo");
         subMenu.remove(foo);
         verifyChildren(subMenu);
@@ -97,7 +97,7 @@ public class SubMenuTest {
     }
 
     @Test
-    public void addItemsAndComponents_getChildrenReturnsAllInOrder() {
+    void addItemsAndComponents_getChildrenReturnsAllInOrder() {
         MenuItem item1 = subMenu.addItem("foo");
 
         Span span1 = new Span("foo");
@@ -112,7 +112,7 @@ public class SubMenuTest {
     }
 
     @Test
-    public void addItemsAndComponents_getItemsReturnsItemsOnly() {
+    void addItemsAndComponents_getItemsReturnsItemsOnly() {
         MenuItem item1 = subMenu.addItem("foo");
 
         Span span1 = new Span("foo");
@@ -127,62 +127,66 @@ public class SubMenuTest {
     }
 
     @Test
-    public void addItem_notIncludedInContextMenuItemsNorComponents() {
+    void addItem_notIncludedInContextMenuItemsNorComponents() {
         subMenu.addItem("foo");
 
-        Assert.assertEquals(1, contextMenu.getChildren().count());
-        Assert.assertSame(parentItem,
+        Assertions.assertEquals(1, contextMenu.getChildren().count());
+        Assertions.assertSame(parentItem,
                 contextMenu.getChildren().findFirst().get());
 
-        Assert.assertEquals(1, contextMenu.getItems().size());
-        Assert.assertSame(parentItem, contextMenu.getItems().get(0));
+        Assertions.assertEquals(1, contextMenu.getItems().size());
+        Assertions.assertSame(parentItem, contextMenu.getItems().get(0));
     }
 
     @Test
-    public void menuItem_isParentItem_returnsTrueOnlyWhenSubMenuHasContent() {
-        Assert.assertFalse(parentItem.isParentItem());
+    void menuItem_isParentItem_returnsTrueOnlyWhenSubMenuHasContent() {
+        Assertions.assertFalse(parentItem.isParentItem());
 
         subMenu.addItem("foo");
-        Assert.assertTrue(parentItem.isParentItem());
+        Assertions.assertTrue(parentItem.isParentItem());
         subMenu.removeAll();
-        Assert.assertFalse(parentItem.isParentItem());
+        Assertions.assertFalse(parentItem.isParentItem());
 
         subMenu.addComponent(new Span());
-        Assert.assertTrue(parentItem.isParentItem());
+        Assertions.assertTrue(parentItem.isParentItem());
         subMenu.removeAll();
-        Assert.assertFalse(parentItem.isParentItem());
+        Assertions.assertFalse(parentItem.isParentItem());
     }
 
     @Test
-    public void subMenuItem_getContextMenu_returnsContextMenu() {
+    void subMenuItem_getContextMenu_returnsContextMenu() {
         MenuItem foo = subMenu.addItem("foo");
-        Assert.assertEquals(contextMenu, foo.getContextMenu());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addComponentAtIndex_negativeIndex_throws() {
-        subMenu.addComponentAtIndex(-1, new Div());
-    }
-
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void addComponentAtIndex_indexIsBiggerThanChildrenCount_throws() {
-        subMenu.addComponentAtIndex(1, new Div());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setParentItemCheckable_throws() {
-        subMenu.addItem("foo");
-        parentItem.setCheckable(true);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setParentItemKeepOpen_throws() {
-        subMenu.addItem("foo");
-        parentItem.setKeepOpen(true);
+        Assertions.assertEquals(contextMenu, foo.getContextMenu());
     }
 
     @Test
-    public void addToCheckableItemSubMenu_throws() {
+    void addComponentAtIndex_negativeIndex_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> subMenu.addComponentAtIndex(-1, new Div()));
+    }
+
+    @Test
+    void addComponentAtIndex_indexIsBiggerThanChildrenCount_throws() {
+        Assertions.assertThrows(IndexOutOfBoundsException.class,
+                () -> subMenu.addComponentAtIndex(1, new Div()));
+    }
+
+    @Test
+    void setParentItemCheckable_throws() {
+        subMenu.addItem("foo");
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> parentItem.setCheckable(true));
+    }
+
+    @Test
+    void setParentItemKeepOpen_throws() {
+        subMenu.addItem("foo");
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> parentItem.setKeepOpen(true));
+    }
+
+    @Test
+    void addToCheckableItemSubMenu_throws() {
         parentItem.setCheckable(true);
 
         Stream<Consumer<SubMenu>> addOperations = Stream.of(
@@ -198,7 +202,7 @@ public class SubMenuTest {
         addOperations.forEach(operation -> {
             try {
                 operation.accept(subMenu);
-                Assert.fail(
+                Assertions.fail(
                         "Should throw IllegalStateException when adding content "
                                 + "to a sub menu with a checkable parent item.");
             } catch (IllegalStateException e) {
@@ -208,22 +212,22 @@ public class SubMenuTest {
     }
 
     @Test
-    public void getSubMenu_returnsAlwaysSameInstance() {
+    void getSubMenu_returnsAlwaysSameInstance() {
         subMenu.addItem("foo");
-        Assert.assertSame(subMenu, parentItem.getSubMenu());
+        Assertions.assertSame(subMenu, parentItem.getSubMenu());
     }
 
     private void verifyChildren(SubMenu subMenu,
             Component... expectedChildren) {
         List<Component> children = subMenu.getChildren()
                 .collect(Collectors.toList());
-        Assert.assertArrayEquals(expectedChildren,
+        Assertions.assertArrayEquals(expectedChildren,
                 children.toArray(new Component[children.size()]));
     }
 
     private void verifyItems(SubMenu subMenu, MenuItem... expectedItems) {
         List<MenuItem> items = subMenu.getItems();
-        Assert.assertArrayEquals(expectedItems,
+        Assertions.assertArrayEquals(expectedItems,
                 items.toArray(new MenuItem[items.size()]));
     }
 

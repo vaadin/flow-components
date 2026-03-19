@@ -34,7 +34,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/progress-bar", version = "25.1.0-rc1")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {
@@ -122,9 +122,10 @@ public class ProgressBar extends Component
      * binding so that the property is updated when the signal's value is
      * updated.
      * <p>
-     * When a signal is bound, the value is kept synchronized with the signal
-     * value while the component is attached. When the component is detached,
-     * signal value changes have no effect.
+     * The value is set immediately with the current signal value when the
+     * binding is created, and is kept synchronized with any subsequent signal
+     * value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the value manually through
      * {@link #setValue(double)} throws a
@@ -185,9 +186,10 @@ public class ProgressBar extends Component
     /**
      * Binds the given signal to the minimum bound of the progressbar.
      * <p>
-     * When a signal is bound, the minimum bound is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The minimum bound is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum bound manually
      * through {@link #setMin(double)} throws a
@@ -210,9 +212,10 @@ public class ProgressBar extends Component
     /**
      * Binds the given signal to the maximum bound of the progressbar.
      * <p>
-     * When a signal is bound, the maximum bound is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The maximum bound is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum bound manually
      * through {@link #setMax(double)} throws a

@@ -77,7 +77,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/number-field", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/number-field", version = "25.1.0-rc1")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -289,9 +289,10 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     /**
      * Binds the given signal to the minimum value for this field.
      * <p>
-     * When a signal is bound, the minimum value is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The minimum value is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the minimum value manually
      * through {@link #setMin(double)} throws a
@@ -312,9 +313,10 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     /**
      * Binds the given signal to the maximum value for this field.
      * <p>
-     * When a signal is bound, the maximum value is kept synchronized with the
-     * signal value while the component is attached. When the component is
-     * detached, signal value changes have no effect.
+     * The maximum value is set immediately with the current signal value when
+     * the binding is created, and is kept synchronized with any subsequent
+     * signal value changes while the component is in attached state. When the
+     * component is in detached state, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to set the maximum value manually
      * through {@link #setMax(double)} throws a

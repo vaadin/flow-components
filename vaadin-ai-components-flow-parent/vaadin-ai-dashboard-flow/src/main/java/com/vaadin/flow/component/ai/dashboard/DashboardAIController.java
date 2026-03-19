@@ -37,7 +37,7 @@ import com.vaadin.flow.component.ai.provider.DatabaseTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
@@ -177,8 +177,8 @@ public class DashboardAIController implements AIController {
     }
 
     @Override
-    public List<LLMProvider.ToolDefinition> getTools() {
-        List<LLMProvider.ToolDefinition> tools = new ArrayList<>();
+    public List<LLMProvider.ToolSpec> getTools() {
+        List<LLMProvider.ToolSpec> tools = new ArrayList<>();
 
         // Database schema tools
         if (databaseProviders.size() == 1) {
@@ -207,7 +207,7 @@ public class DashboardAIController implements AIController {
         for (Map.Entry<String, GridTools> entry : gridToolsMap.entrySet()) {
             String widgetId = entry.getKey();
             GridTools gridTools = entry.getValue();
-            for (LLMProvider.ToolDefinition tool : gridTools.getTools()) {
+            for (LLMProvider.ToolSpec tool : gridTools.getTools()) {
                 tools.add(prefixTool(tool, widgetId));
             }
         }
@@ -487,12 +487,12 @@ public class DashboardAIController implements AIController {
         chart.getUI().ifPresentOrElse(ui -> {
             ui.access(() -> {
                 Configuration config = chart.getConfiguration();
-                List<DataSeries> allSeries = new ArrayList<>();
+                List<Series> allSeries = new ArrayList<>();
                 for (String query : queries) {
                     var results = provider.executeQuery(query);
-                    allSeries.add(dataConverter.convertToDataSeries(results));
+                    allSeries.addAll(dataConverter.convertToSeries(results));
                 }
-                config.setSeries(allSeries.toArray(new DataSeries[0]));
+                config.setSeries(allSeries.toArray(new Series[0]));
                 configurationApplier.applyConfiguration(chart, configJson);
                 chart.drawChart();
             });
@@ -504,8 +504,8 @@ public class DashboardAIController implements AIController {
 
     // ===== Tool Factory Methods =====
 
-    private LLMProvider.ToolDefinition createAddChartWidgetTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createAddChartWidgetTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "addChartWidget";
@@ -658,8 +658,8 @@ public class DashboardAIController implements AIController {
         };
     }
 
-    private LLMProvider.ToolDefinition createAddGridWidgetTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createAddGridWidgetTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "addGridWidget";
@@ -765,8 +765,8 @@ public class DashboardAIController implements AIController {
         };
     }
 
-    private LLMProvider.ToolDefinition createRemoveWidgetTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createRemoveWidgetTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "removeWidget";
@@ -840,9 +840,9 @@ public class DashboardAIController implements AIController {
 
     // ===== Schema Tools =====
 
-    private LLMProvider.ToolDefinition createNamedSchemaTool(String name,
+    private LLMProvider.ToolSpec createNamedSchemaTool(String name,
             DatabaseProvider provider) {
-        return new LLMProvider.ToolDefinition() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "get_database_schema_" + name;
@@ -870,9 +870,9 @@ public class DashboardAIController implements AIController {
 
     // ===== Tool Prefixing (for GridTools) =====
 
-    private LLMProvider.ToolDefinition prefixTool(
-            LLMProvider.ToolDefinition original, String widgetId) {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec prefixTool(
+            LLMProvider.ToolSpec original, String widgetId) {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return original.getName() + "_" + widgetId;

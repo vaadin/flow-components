@@ -33,13 +33,13 @@ public class DetachReattachIT extends AbstractComponentIT {
         clickButton("valueA");
         clickButton("addGroup");
         clickButton("getValueTemplate");
-        Assert.assertEquals(valueBlock.getText(), "A");
+        Assert.assertEquals("A", valueBlock.getText());
 
         clickButton("removeGroup");
         clickButton("valueB");
         clickButton("addGroup");
         clickButton("getValueTemplate");
-        Assert.assertEquals(valueBlock.getText(), "B");
+        Assert.assertEquals("B", valueBlock.getText());
     }
 
     @Test

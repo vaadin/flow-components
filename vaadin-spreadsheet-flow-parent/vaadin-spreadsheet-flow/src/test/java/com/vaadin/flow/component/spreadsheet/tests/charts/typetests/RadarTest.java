@@ -8,8 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests.charts.typetests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -17,7 +17,7 @@ import com.vaadin.flow.component.charts.model.DashStyle;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
-public class RadarTest extends ChartTestBase {
+class RadarTest extends ChartTestBase {
 
     private Number[][] chartData = {
             { 0, 0, 0, 0, 0, 0, 0, 1500, 5000, 8500, 3500, 500 },
@@ -30,26 +30,26 @@ public class RadarTest extends ChartTestBase {
     };
 
     @Test
-    public void notFilledRadar() throws Exception {
+    void notFilledRadar() throws Exception {
         Configuration conf = getChartFromSampleFile("Type Sample - Radar.xlsx",
                 "G14").getConfiguration();
         assertSeriesType(conf.getSeries(), ChartType.AREA);
         assertData(conf.getSeries(), chartData);
-        Assert.assertTrue(conf.getChart().getPolar());
-        Assert.assertNotNull(
+        Assertions.assertTrue(conf.getChart().getPolar());
+        Assertions.assertNotNull(
                 (((PlotOptionsArea) conf.getSeries().get(0).getPlotOptions())
                         .getFillColor() != null));
     }
 
     @Test
-    public void filledRadar() throws Exception {
+    void filledRadar() throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "Type Sample - Filled Radar.xlsx", "G14").getConfiguration();
 
         assertSeriesType(conf.getSeries(), ChartType.AREA);
         assertDashStyle(conf.getSeries(), DashStyle.SOLID);
-        Assert.assertTrue(conf.getChart().getPolar());
-        Assert.assertNull(
+        Assertions.assertTrue(conf.getChart().getPolar());
+        Assertions.assertNull(
                 ((PlotOptionsArea) conf.getSeries().get(0).getPlotOptions())
                         .getFillColor());
 

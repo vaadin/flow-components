@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,6 +73,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * <li>LLM integration</li>
  * <li>Component wiring (input, message list, file receiver)</li>
  * <li>Tool execution coordination</li>
+ * <li>Controller-based feature composition via {@link AIController}</li>
  * <li>Programmatic invocation via {@link #prompt(String)}</li>
  * </ul>
  * <p>
@@ -137,7 +139,7 @@ public class AIOrchestrator implements Serializable {
     private AIInput input;
     private AIFileReceiver fileReceiver;
     private transient Object[] tools = new Object[0];
-    private final List<AIController> controllers = new ArrayList<>();
+    private transient List<AIController> controllers = new ArrayList<>();
     private String userName;
     private String assistantName;
     private AttachmentSubmitListener attachmentSubmitListener;
@@ -389,7 +391,9 @@ public class AIOrchestrator implements Serializable {
             effectiveSystemPrompt = systemPrompt.trim();
         }
         final var finalSystemPrompt = effectiveSystemPrompt;
-        var controllerTools = collectControllerTools();
+        var controllerTools = controllers.stream().map(AIController::getTools)
+                .filter(Objects::nonNull).flatMap(List::stream).toList();
+        warnDuplicateToolNames(controllerTools);
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -413,7 +417,7 @@ public class AIOrchestrator implements Serializable {
             }
 
             @Override
-            public LLMProvider.ToolDefinition[] explicitTools() {
+            public List<LLMProvider.ToolSpec> explicitTools() {
                 return controllerTools;
             }
         };
@@ -421,21 +425,7 @@ public class AIOrchestrator implements Serializable {
                 attachments.size());
         streamResponseToMessage(request, assistantMessage, ui);
     }
-
-    private LLMProvider.ToolDefinition[] collectControllerTools() {
-        if (controllers.isEmpty()) {
-            return new LLMProvider.ToolDefinition[0];
-        }
-        var allTools = new ArrayList<LLMProvider.ToolDefinition>();
-        for (var controller : controllers) {
-            var controllerTools = controller.getTools();
-            if (controllerTools != null) {
-                allTools.addAll(controllerTools);
-            }
-        }
-        return allTools.toArray(new LLMProvider.ToolDefinition[0]);
-    }
-
+    
     private void notifyControllersRequestCompleted() {
         for (var controller : controllers) {
             try {
@@ -454,6 +444,25 @@ public class AIOrchestrator implements Serializable {
                                 responseText));
             } catch (Exception e) {
                 LOGGER.error("Error in response complete listener", e);
+            }
+        }
+        for (var controller : controllers) {
+            try {
+                controller.onRequestCompleted();
+            } catch (Exception e) {
+                LOGGER.error("Error in controller onRequestCompleted", e);
+            }
+        }
+    }
+
+    private static void warnDuplicateToolNames(
+            List<LLMProvider.ToolSpec> tools) {
+        var seen = new HashSet<String>();
+        for (var tool : tools) {
+            if (!seen.add(tool.getName())) {
+                LOGGER.warn(
+                        "Duplicate tool name '{}': previous tool will be replaced",
+                        tool.getName());
             }
         }
     }
@@ -475,8 +484,9 @@ public class AIOrchestrator implements Serializable {
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        // Initialize tools to empty array
+        // Initialize transient fields to safe defaults
         tools = new Object[0];
+        controllers = List.of();
     }
 
     /**
@@ -501,6 +511,7 @@ public class AIOrchestrator implements Serializable {
         private final AIOrchestrator orchestrator;
         private final LLMProvider provider;
         private Object[] tools;
+        private List<AIController> controllers;
         private Map<String, List<AIAttachment>> attachmentsByMessageId;
 
         private Reconnector(AIOrchestrator orchestrator, LLMProvider provider) {
@@ -518,6 +529,19 @@ public class AIOrchestrator implements Serializable {
          */
         public Reconnector withTools(Object... tools) {
             this.tools = tools;
+            return this;
+        }
+
+        /**
+         * Sets the controllers to use after reconnection, replacing any
+         * controllers that were deserialized with the orchestrator.
+         *
+         * @param controllers
+         *            the controllers to use
+         * @return this reconnector
+         */
+        public Reconnector withControllers(AIController... controllers) {
+            this.controllers = List.of(controllers);
             return this;
         }
 
@@ -563,6 +587,9 @@ public class AIOrchestrator implements Serializable {
             if (tools != null) {
                 orchestrator.tools = tools;
             }
+            if (controllers != null) {
+                orchestrator.controllers = controllers;
+            }
             if (!orchestrator.conversationHistory.isEmpty()) {
                 provider.setHistory(
                         List.copyOf(orchestrator.conversationHistory),
@@ -596,6 +623,9 @@ public class AIOrchestrator implements Serializable {
      * <li>{@link #withTools(Object...)} – registers objects containing
      * vendor-specific tool-annotated methods (e.g. LangChain4j's {@code @Tool}
      * or Spring AI's {@code @Tool}) that the LLM can invoke.</li>
+     * <li>{@link #withController(AIController)} – adds a controller that
+     * provides framework-agnostic tools and lifecycle hooks. Multiple
+     * controllers can be added.</li>
      * <li>{@link #withUserName(String)} – sets the display name for user
      * messages (defaults to "You").</li>
      * <li>{@link #withAssistantName(String)} – sets the display name for
@@ -761,17 +791,15 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
-         * Adds a controller to extend the orchestrator with additional
-         * capabilities.
-         * <p>
-         * Controllers provide framework-agnostic tools and can perform
-         * deferred operations after LLM request completion. Multiple
-         * controllers can be added and they will all be active simultaneously.
-         * </p>
+         * Adds a controller that provides framework-agnostic tools and
+         * lifecycle hooks to the orchestrator. Multiple controllers can be
+         * added; their tools are collected before each LLM request.
          *
          * @param controller
          *            the controller to add, not {@code null}
          * @return this builder
+         * @throws NullPointerException
+         *             if controller is {@code null}
          */
         public Builder withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
@@ -920,6 +948,7 @@ public class AIOrchestrator implements Serializable {
             orchestrator.input = input;
             orchestrator.fileReceiver = fileReceiver;
             orchestrator.tools = tools == null ? new Object[0] : tools;
+            orchestrator.controllers = List.copyOf(controllers);
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
@@ -945,13 +974,15 @@ public class AIOrchestrator implements Serializable {
                 orchestrator.restoreHistory(history, historyAttachments);
             }
 
-            LOGGER.debug("Built AIOrchestrator with messageList={}, input={}, "
-                    + "fileReceiver={}, tools={}, userName={}, assistantName={}",
+            LOGGER.debug(
+                    "Built AIOrchestrator with messageList={}, input={}, "
+                            + "fileReceiver={}, tools={}, controllers={}, "
+                            + "userName={}, assistantName={}",
                     orchestrator.messageList != null,
                     orchestrator.input != null,
                     orchestrator.fileReceiver != null,
-                    orchestrator.tools.length, orchestrator.userName,
-                    orchestrator.assistantName);
+                    orchestrator.tools.length, orchestrator.controllers.size(),
+                    orchestrator.userName, orchestrator.assistantName);
 
             return orchestrator;
         }

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -26,13 +24,19 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * providing tools that the LLM can use.
  * <p>
  * Controllers provide domain-specific tools and functionality to the AI
- * orchestrator. Tools are functions that the AI can call to perform actions like
- * querying databases, creating visualizations, filling forms, etc.
+ * orchestrator. Tools are functions that the AI can call to perform actions
+ * like querying databases, creating visualizations, filling forms, etc.
+ * </p>
+ * <p>
+ * Controllers are <b>not serialized</b> with the orchestrator. After
+ * deserialization, restore controllers via
+ * {@link AIOrchestrator#reconnect(com.vaadin.flow.component.ai.provider.LLMProvider)
+ * reconnect(provider)}{@code .withControllers(controller).apply()}.
  * </p>
  *
  * @author Vaadin Ltd
  */
-public interface AIController extends Serializable {
+public interface AIController {
 
     /**
      * Returns the tools this controller provides to the LLM.
@@ -43,8 +47,8 @@ public interface AIController extends Serializable {
      *
      * @return list of tools, or empty list if controller provides no tools
      */
-    default List<LLMProvider.ToolDefinition> getTools() {
-        return Collections.emptyList();
+    default List<LLMProvider.ToolSpec> getTools() {
+        return List.of();
     }
 
     /**
@@ -55,11 +59,8 @@ public interface AIController extends Serializable {
      * can use this callback to perform deferred operations, such as rendering
      * UI updates or committing state changes.
      * </p>
-     * <p>
-     * The default implementation does nothing.
-     * </p>
+     *
      */
     default void onRequestCompleted() {
-        // Default: do nothing
     }
 }

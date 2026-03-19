@@ -49,7 +49,7 @@ public class PopoverTest {
     @Test
     public void setFor_getFor() {
         popover.setFor("target-id");
-        Assert.assertEquals(popover.getFor(), "target-id");
+        Assert.assertEquals("target-id", popover.getFor());
     }
 
     @Test

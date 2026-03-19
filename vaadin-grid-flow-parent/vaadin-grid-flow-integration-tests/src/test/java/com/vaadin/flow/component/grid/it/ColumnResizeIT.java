@@ -60,8 +60,8 @@ public class ColumnResizeIT extends AbstractComponentIT {
                 By.id(ColumnResizeEventPage.WIDTHS_COLUMN_VALUES_MESSAGE));
         String[] colWidths = colWidthsMessage.getText().split("\\|");
 
-        Assert.assertEquals("Expected 3 column widths from the event.",
-                colWidths.length, 3);
+        Assert.assertEquals("Expected 3 column widths from the event.", 3,
+                colWidths.length);
 
         for (String colWidth : colWidths) {
             Assert.assertTrue(

@@ -53,12 +53,16 @@ import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * LangChain4j implementation of {@link LLMProvider}.
@@ -95,6 +99,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             .getLogger(LangChain4JLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
@@ -191,30 +196,28 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
         var tools = request.tools();
-        if (tools == null) {
-            return Collections.emptyMap();
-        }
+        var explicitTools = request.explicitTools();
         var toolExecutors = new HashMap<String, ToolExecutor>();
         // Add tools from LangChain4j @Tool annotated methods. Create executors
         // for each annotated method including private methods.
-        for (var toolObject : tools) {
-            Arrays.stream(toolObject.getClass().getDeclaredMethods())
-                    .filter(method -> method.isAnnotationPresent(Tool.class))
-                    .forEach(method -> {
-                        var toolExecutorKey = ToolSpecifications
-                                .toolSpecificationFrom(method).name();
-                        var toolExecutor = getToolExecutor(toolObject, method);
-                        toolExecutors.put(toolExecutorKey, toolExecutor);
-                    });
-        }
-        // Add explicit tools from controllers
-        var explicitTools = request.explicitTools();
-        if (explicitTools != null) {
-            for (var tool : explicitTools) {
-                toolExecutors.put(tool.getName(),
-                        (toolExecRequest, memoryId) -> tool
-                                .execute(toolExecRequest.arguments()));
+        if (tools != null) {
+            for (var toolObject : tools) {
+                Arrays.stream(toolObject.getClass().getDeclaredMethods())
+                        .filter(method -> method
+                                .isAnnotationPresent(Tool.class))
+                        .forEach(method -> {
+                            var toolExecutorKey = ToolSpecifications
+                                    .toolSpecificationFrom(method).name();
+                            var toolExecutor = getToolExecutor(toolObject,
+                                    method);
+                            toolExecutors.put(toolExecutorKey, toolExecutor);
+                        });
             }
+        }
+        // Add explicit (framework-agnostic) tools
+        for (var tool : explicitTools) {
+            toolExecutors.put(tool.getName(),
+                    (execReq, memoryId) -> tool.execute(execReq.arguments()));
         }
         return toolExecutors;
     }
@@ -232,18 +235,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     .map(ToolSpecifications::toolSpecificationsFrom)
                     .flatMap(List::stream).forEach(specs::add);
         }
-        // Add explicit tools from controllers
-        var explicitTools = request.explicitTools();
-        if (explicitTools != null) {
-            for (var tool : explicitTools) {
-                specs.add(convertToToolSpecification(tool));
-            }
-        }
+        request.explicitTools().stream()
+                .map(LangChain4JLLMProvider::toToolSpecification)
+                .forEach(specs::add);
         return specs;
     }
 
-    private static ToolSpecification convertToToolSpecification(
-            LLMProvider.ToolDefinition tool) {
+    private static ToolSpecification toToolSpecification(
+            LLMProvider.ToolSpec tool) {
         var builder = ToolSpecification.builder().name(tool.getName())
                 .description(tool.getDescription());
         var schema = tool.getParametersSchema();
@@ -253,36 +252,28 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return builder.build();
     }
 
-    private static dev.langchain4j.model.chat.request.json.JsonObjectSchema parseParametersSchema(
-            String schemaJson) {
+    private static JsonObjectSchema parseParametersSchema(String schemaJson) {
         try {
-            var root = new tools.jackson.databind.json.JsonMapper()
-                    .readTree(schemaJson);
-            var schemaBuilder = dev.langchain4j.model.chat.request.json.JsonObjectSchema
-                    .builder();
-            if (root.has("properties") && root.get("properties").isObject()) {
-                var propsIter = root.get("properties").properties().iterator();
-                while (propsIter.hasNext()) {
-                    var entry = propsIter.next();
-                    schemaBuilder.addProperty(entry.getKey(),
-                            dev.langchain4j.model.chat.request.json.JsonRawSchema
-                                    .from(entry.getValue().toString()));
+            JsonNode root = OBJECT_MAPPER.readTree(schemaJson);
+            var schemaBuilder = JsonObjectSchema.builder();
+            if (root.has("properties")) {
+                JsonNode props = root.get("properties");
+                for (String name : props.propertyNames()) {
+                    schemaBuilder.addProperty(name,
+                            JsonRawSchema.from(props.get(name).toString()));
                 }
             }
-            if (root.has("required") && root.get("required").isArray()) {
+            if (root.has("required")) {
                 var required = new ArrayList<String>();
-                for (var r : root.get("required")) {
-                    required.add(r.asString());
-                }
+                root.get("required")
+                        .forEach(e -> required.add(e.stringValue()));
                 schemaBuilder.required(required);
             }
             return schemaBuilder.build();
         } catch (Exception e) {
-            LOGGER.warn(
-                    "Failed to parse tool parameters schema, using empty schema",
-                    e);
-            return dev.langchain4j.model.chat.request.json.JsonObjectSchema
-                    .builder().build();
+            LOGGER.warn("Failed to parse tool parameters schema, "
+                    + "using empty schema", e);
+            return JsonObjectSchema.builder().build();
         }
     }
 

@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -48,19 +48,19 @@ import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 
 import tools.jackson.databind.node.ArrayNode;
 
-public class SideNavItemTest {
+class SideNavItemTest {
 
     private SideNavItem sideNavItem;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         sideNavItem = new SideNavItem("Item", "path");
     }
 
     // CONSTRUCTOR TESTS
 
     @Test
-    public void allConstructorsArePresent() {
+    void allConstructorsArePresent() {
         sideNavItem = new SideNavItem("Label");
         sideNavItem = new SideNavItem("Label", "path");
         sideNavItem = new SideNavItem("Label", "path", new Div());
@@ -77,69 +77,69 @@ public class SideNavItemTest {
     // LABEL TESTS
 
     @Test
-    public void returnsExpectedLabel() {
-        Assert.assertEquals("Item", sideNavItem.getLabel());
+    void returnsExpectedLabel() {
+        Assertions.assertEquals("Item", sideNavItem.getLabel());
     }
 
     @Test
-    public void changeLabel_labelChanged() {
+    void changeLabel_labelChanged() {
         sideNavItem.setLabel("Item Changed");
-        Assert.assertEquals("Item Changed", sideNavItem.getLabel());
+        Assertions.assertEquals("Item Changed", sideNavItem.getLabel());
     }
 
     @Test
-    public void setLabelToNull_labelElementRemoved() {
+    void setLabelToNull_labelElementRemoved() {
         sideNavItem.setLabel(null);
 
-        Assert.assertNull(sideNavItem.getLabel());
-        Assert.assertFalse(sideNavItemHasLabelElement());
+        Assertions.assertNull(sideNavItem.getLabel());
+        Assertions.assertFalse(sideNavItemHasLabelElement());
     }
 
     @Test
-    public void setEmptyLabel_labelIsEmpty() {
+    void setEmptyLabel_labelIsEmpty() {
         sideNavItem.setLabel("");
 
-        Assert.assertEquals("", sideNavItem.getLabel());
+        Assertions.assertEquals("", sideNavItem.getLabel());
     }
 
     // PATH AND ALIAS TESTS
 
     @Test
-    public void returnsExpectedPathAndAliases() {
+    void returnsExpectedPathAndAliases() {
         assertPath("path");
         assertPathAliases(Collections.emptySet());
     }
 
     @Test
-    public void createWithNoPath_pathNotSet() {
+    void createWithNoPath_pathNotSet() {
         sideNavItem = new SideNavItem("Test");
 
         assertPath(null);
     }
 
     @Test
-    public void setNullStringPath_pathAttributeRemoved() {
+    void setNullStringPath_pathAttributeRemoved() {
         sideNavItem.setPath((String) null);
 
         assertPath(null);
     }
 
     @Test
-    public void setNullComponentPath_pathAttributeRemoved() {
+    void setNullComponentPath_pathAttributeRemoved() {
         sideNavItem.setPath((Class<? extends Component>) null);
 
         assertPath(null);
     }
 
     @Test
-    public void setEmptyPath_returnsEmptyPath() {
+    void setEmptyPath_returnsEmptyPath() {
         sideNavItem.setPath("");
 
         assertPath("");
     }
 
     @Test
-    public void setPathWithoutAliasesAsComponent_onlyPathUpdated() {
+    void setPathWithoutAliasesAsComponent_onlyPathUpdated() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRoute.class);
 
@@ -149,7 +149,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponent_pathIsSet() {
+    void createFromComponent_pathIsSet() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test", TestRoute.class);
             assertPath("foo/bar");
@@ -157,21 +157,21 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setEmptyStringAsPathAlias_pathAliasAdded() {
+    void setEmptyStringAsPathAlias_pathAliasAdded() {
         sideNavItem.setPathAliases(Set.of(""));
 
         assertPathAliases(Set.of(""));
     }
 
     @Test
-    public void setMultiplePathAliases_pathAliasesAdded() {
+    void setMultiplePathAliases_pathAliasesAdded() {
         sideNavItem.setPathAliases(Set.of("alias1", "alias2"));
 
         assertPathAliases(Set.of("alias1", "alias2"));
     }
 
     @Test
-    public void setMultiplePathAliases_setEmptyPathAliases_pathAliasesEmpty() {
+    void setMultiplePathAliases_setEmptyPathAliases_pathAliasesEmpty() {
         sideNavItem.setPathAliases(Set.of("alias1", "alias2"));
         sideNavItem.setPathAliases(Collections.emptySet());
 
@@ -179,7 +179,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setMultiplePathAliases_setPathAliasesNull_pathAliasesEmpty() {
+    void setMultiplePathAliases_setPathAliasesNull_pathAliasesEmpty() {
         sideNavItem.setPathAliases(Set.of("alias1", "alias2"));
         sideNavItem.setPathAliases(null);
 
@@ -187,7 +187,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAsComponent_setOtherPathAsComponent_pathAndAliasesUpdated() {
+    void setPathAsComponent_setOtherPathAsComponent_pathAndAliasesUpdated() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class);
             sideNavItem.setPath(OtherTestRouteWithAliases.class);
@@ -198,7 +198,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAsComponent_setNullAsComponent_pathAndAliasesRemoved() {
+    void setPathAsComponent_setNullAsComponent_pathAndAliasesRemoved() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class);
             sideNavItem.setPath((Class<Component>) null);
@@ -209,240 +209,250 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createWithPathAndPrefix_pathAndPrefixIsSet() {
+    void createWithPathAndPrefix_pathAndPrefixIsSet() {
         final Div prefixComponent = new Div();
         sideNavItem = new SideNavItem("Test item", "test-path",
                 prefixComponent);
 
         assertPath("test-path");
-        Assert.assertEquals(prefixComponent, sideNavItem.getPrefixComponent());
+        Assertions.assertEquals(prefixComponent,
+                sideNavItem.getPrefixComponent());
     }
 
     // TOOLTIP TESTS
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         sideNavItem = new SideNavItem("Test item", "test-path");
-        Assert.assertTrue(sideNavItem instanceof HasTooltip);
+        Assertions.assertTrue(sideNavItem instanceof HasTooltip);
     }
 
     @Test
-    public void tooltipTextIsSet() {
+    void tooltipTextIsSet() {
         sideNavItem = new SideNavItem("Test item", "test-path");
         sideNavItem.setTooltipText("Test tooltip text");
-        Assert.assertNotNull(sideNavItem.getTooltip());
-        Assert.assertEquals("Test tooltip text",
+        Assertions.assertNotNull(sideNavItem.getTooltip());
+        Assertions.assertEquals("Test tooltip text",
                 sideNavItem.getTooltip().getText());
     }
 
     // EXPAND AND COLLAPSE TESTS
 
     @Test
-    public void isCollapsedByDefault() {
-        Assert.assertFalse(sideNavItem.isExpanded());
+    void isCollapsedByDefault() {
+        Assertions.assertFalse(sideNavItem.isExpanded());
     }
 
     @Test
-    public void setExpanded_isExpanded() {
+    void setExpanded_isExpanded() {
         sideNavItem.setExpanded(true);
 
-        Assert.assertTrue(sideNavItem.isExpanded());
+        Assertions.assertTrue(sideNavItem.isExpanded());
     }
 
     @Test
-    public void expandAndCollapse_isCollapsed() {
+    void expandAndCollapse_isCollapsed() {
         sideNavItem.setExpanded(true);
         sideNavItem.setExpanded(false);
 
-        Assert.assertFalse(sideNavItem.isExpanded());
+        Assertions.assertFalse(sideNavItem.isExpanded());
     }
 
     // CHILDREN TESTS
 
     @Test
-    public void hasCorrectNumberOfChildren() {
+    void hasCorrectNumberOfChildren() {
         // one child for the label element
-        Assert.assertEquals(1, sideNavItem.getElement().getChildCount());
+        Assertions.assertEquals(1, sideNavItem.getElement().getChildCount());
     }
 
     @Test
-    public void addSingleItem_itemAdded() {
+    void addSingleItem_itemAdded() {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItem(testItem);
 
-        Assert.assertEquals(2, sideNavItem.getElement().getChildCount());
-        Assert.assertEquals("children",
+        Assertions.assertEquals(2, sideNavItem.getElement().getChildCount());
+        Assertions.assertEquals("children",
                 sideNavItem.getElement().getChild(1).getAttribute("slot"));
-        Assert.assertEquals(1, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem, sideNavItem.getItems().get(0));
+        Assertions.assertEquals(1, sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem, sideNavItem.getItems().get(0));
     }
 
     @Test
-    public void addTwoItemsAtOnce_itemsAdded() {
+    void addTwoItemsAtOnce_itemsAdded() {
         final SideNavItem testItem1 = new SideNavItem("testItem1");
         final SideNavItem testItem2 = new SideNavItem("testItem2");
 
         sideNavItem.addItem(testItem1, testItem2);
 
-        Assert.assertEquals(2, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem1, sideNavItem.getItems().get(0));
-        Assert.assertEquals(testItem2, sideNavItem.getItems().get(1));
+        Assertions.assertEquals(2, sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem1, sideNavItem.getItems().get(0));
+        Assertions.assertEquals(testItem2, sideNavItem.getItems().get(1));
     }
 
     @Test
-    public void addItemAsFirst_itemIsAdded() {
+    void addItemAsFirst_itemIsAdded() {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAsFirst(testItem);
 
-        Assert.assertEquals(1, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem, sideNavItem.getItems().get(0));
+        Assertions.assertEquals(1, sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem, sideNavItem.getItems().get(0));
     }
 
     @Test
-    public void multipleItems_addItemAsFirst_itemIsFirst() {
+    void multipleItems_addItemAsFirst_itemIsFirst() {
         List<SideNavItem> initialItems = setupItems();
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAsFirst(testItem);
 
-        Assert.assertEquals(initialItems.size() + 1,
+        Assertions.assertEquals(initialItems.size() + 1,
                 sideNavItem.getItems().size());
-        Assert.assertEquals(testItem, sideNavItem.getItems().get(0));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addItemAtNegativeIndex_throws() {
-        sideNavItem.addItemAtIndex(-1, new SideNavItem("testItem"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void noItems_addItemAtTooHighIndex_throws() {
-        sideNavItem.addItemAtIndex(1, new SideNavItem("testItem"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addItemAtTooHighIndex_throws() {
-        final List<SideNavItem> items = setupItems();
-
-        sideNavItem.addItemAtIndex(items.size() + 1,
-                new SideNavItem("testItem"));
+        Assertions.assertEquals(testItem, sideNavItem.getItems().get(0));
     }
 
     @Test
-    public void noItems_addItemAtIndexZero_itemIsAdded() {
+    void addItemAtNegativeIndex_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> sideNavItem.addItemAtIndex(-1,
+                        new SideNavItem("testItem")));
+    }
+
+    @Test
+    void noItems_addItemAtTooHighIndex_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> sideNavItem.addItemAtIndex(1,
+                        new SideNavItem("testItem")));
+    }
+
+    @Test
+    void addItemAtTooHighIndex_throws() {
+        final List<SideNavItem> items = setupItems();
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> sideNavItem.addItemAtIndex(items.size() + 1,
+                        new SideNavItem("testItem")));
+    }
+
+    @Test
+    void noItems_addItemAtIndexZero_itemIsAdded() {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(0, testItem);
 
-        Assert.assertEquals(1, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem, sideNavItem.getItems().get(0));
+        Assertions.assertEquals(1, sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem, sideNavItem.getItems().get(0));
     }
 
     @Test
-    public void multipleItems_addItemAtIndex_itemIsAdded() {
+    void multipleItems_addItemAtIndex_itemIsAdded() {
         final List<SideNavItem> items = setupItems();
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
-        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem, sideNavItem.getItems().get(2));
+        Assertions.assertEquals(items.size() + 1,
+                sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem, sideNavItem.getItems().get(2));
     }
 
     @Test
-    public void multipleItems_addItemAtIndex_itemHasCorrectSlot() {
+    void multipleItems_addItemAtIndex_itemHasCorrectSlot() {
         setupItems();
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
-        Assert.assertEquals("children",
+        Assertions.assertEquals("children",
                 testItem.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void multipleItemsPrefixAndSuffix_addItemAtIndex_addedItemHasCorrectPosition() {
+    void multipleItemsPrefixAndSuffix_addItemAtIndex_addedItemHasCorrectPosition() {
         final List<SideNavItem> items = setupItemsPrefixAndSuffix();
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
-        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem, sideNavItem.getItems().get(2));
+        Assertions.assertEquals(items.size() + 1,
+                sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem, sideNavItem.getItems().get(2));
     }
 
     @Test
-    public void multipleItemsPrefixAndSuffix_addItemAtHigherIndex_addedItemHasCorrectPosition() {
+    void multipleItemsPrefixAndSuffix_addItemAtHigherIndex_addedItemHasCorrectPosition() {
         final List<SideNavItem> items = setupItemsPrefixAndSuffix();
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(3, testItem);
 
-        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem, sideNavItem.getItems().get(3));
+        Assertions.assertEquals(items.size() + 1,
+                sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem, sideNavItem.getItems().get(3));
     }
 
     @Test
-    public void multipleItems_addItemAtLastIndex_itemIsAppended() {
+    void multipleItems_addItemAtLastIndex_itemIsAppended() {
         final List<SideNavItem> items = setupItems();
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(sideNavItem.getItems().size(), testItem);
 
-        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
-        Assert.assertEquals(testItem,
+        Assertions.assertEquals(items.size() + 1,
+                sideNavItem.getItems().size());
+        Assertions.assertEquals(testItem,
                 sideNavItem.getItems().get(sideNavItem.getItems().size() - 1));
     }
 
     @Test
-    public void multipleItems_removeAll_onlyItemsRemoved() {
+    void multipleItems_removeAll_onlyItemsRemoved() {
         setupItemsPrefixAndSuffix();
 
         sideNavItem.removeAll();
 
-        Assert.assertTrue(sideNavItem.getItems().isEmpty());
-        Assert.assertNotNull(sideNavItem.getLabel());
-        Assert.assertNotNull(sideNavItem.getPrefixComponent());
-        Assert.assertNotNull(sideNavItem.getSuffixComponent());
+        Assertions.assertTrue(sideNavItem.getItems().isEmpty());
+        Assertions.assertNotNull(sideNavItem.getLabel());
+        Assertions.assertNotNull(sideNavItem.getPrefixComponent());
+        Assertions.assertNotNull(sideNavItem.getSuffixComponent());
     }
 
     @Test
-    public void removeSingleItem_itemRemoved() {
+    void removeSingleItem_itemRemoved() {
         final List<SideNavItem> sideNavItems = setupItems();
 
         sideNavItem.remove(sideNavItems.get(2));
 
-        Assert.assertEquals(sideNavItems.size() - 1,
+        Assertions.assertEquals(sideNavItems.size() - 1,
                 sideNavItem.getItems().size());
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 sideNavItem.getItems().contains(sideNavItems.get(2)));
     }
 
     @Test
-    public void removeTwoItems_bothItemsRemoved() {
+    void removeTwoItems_bothItemsRemoved() {
         final List<SideNavItem> sideNavItems = setupItems();
 
         sideNavItem.remove(sideNavItems.get(1), sideNavItems.get(2));
 
-        Assert.assertEquals(sideNavItems.size() - 2,
+        Assertions.assertEquals(sideNavItems.size() - 2,
                 sideNavItem.getItems().size());
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 sideNavItem.getItems().contains(sideNavItems.get(1)));
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 sideNavItem.getItems().contains(sideNavItems.get(2)));
     }
 
     @Test
-    public void removeUnknownItem_nothingHappens() {
+    void removeUnknownItem_nothingHappens() {
         final List<SideNavItem> sideNavItems = setupItems();
 
         sideNavItem.remove(new SideNavItem("Foreign item"));
 
-        Assert.assertEquals(sideNavItem.getItems(), sideNavItems);
+        Assertions.assertEquals(sideNavItem.getItems(), sideNavItems);
     }
 
     // QUERY PARAMETERS TESTS
 
     @Test
-    public void setQueryParameters_pathContainsParameters() {
+    void setQueryParameters_pathContainsParameters() {
         QueryParameters queryParameters = new QueryParameters(Map.of("k1",
                 List.of("v11", "v12"), "k2", List.of("v21", "v22")));
         sideNavItem.setQueryParameters(queryParameters);
@@ -451,7 +461,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponent_setQueryParameters_pathContainsParameters() {
+    void createFromComponent_setQueryParameters_pathContainsParameters() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test", TestRoute.class);
 
@@ -464,7 +474,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setQueryParameters_updateQueryParameters_pathIsUpdated() {
+    void setQueryParameters_updateQueryParameters_pathIsUpdated() {
         sideNavItem.setQueryParameters(
                 new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
 
@@ -476,7 +486,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setQueryParameters_setQueryParametersNull_parametersRemovedFromPath() {
+    void setQueryParameters_setQueryParametersNull_parametersRemovedFromPath() {
         sideNavItem.setQueryParameters(
                 new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
 
@@ -486,7 +496,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponent_setQueryParameters_updateQueryParameters_pathIsUpdated() {
+    void createFromComponent_setQueryParameters_updateQueryParameters_pathIsUpdated() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test", TestRoute.class);
             sideNavItem.setQueryParameters(
@@ -501,7 +511,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponent_setQueryParameters_setQueryParametersNull_parametersRemovedFromPath() {
+    void createFromComponent_setQueryParameters_setQueryParametersNull_parametersRemovedFromPath() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test", TestRoute.class);
             sideNavItem.setQueryParameters(
@@ -514,7 +524,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAlias_setQueryParameters_pathAliasDoesNotContainParameters() {
+    void setPathAlias_setQueryParameters_pathAliasDoesNotContainParameters() {
         sideNavItem.setPathAliases(Set.of("pathAlias"));
 
         QueryParameters queryParameters = new QueryParameters(Map.of("k1",
@@ -525,7 +535,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAsComponent_setQueryParameters_pathAliasDoesNotContainParameters() {
+    void setPathAsComponent_setQueryParameters_pathAliasDoesNotContainParameters() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class);
 
@@ -540,7 +550,7 @@ public class SideNavItemTest {
     // ROUTE PARAMETERS TESTS
 
     @Test
-    public void createFromComponentWithRouteParameters_pathContainsParameters() {
+    void createFromComponentWithRouteParameters_pathContainsParameters() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test",
                     TestRouteWithRouteParams.class,
@@ -551,7 +561,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAndRouteParametersAsComponent_pathContainsParameters() {
+    void setPathAndRouteParametersAsComponent_pathContainsParameters() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithRouteParams.class,
                     new RouteParameters(Map.of("k1", "v1", "k2", "v2")));
@@ -561,7 +571,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAndRouteParametersAsComponent_aliasesWithMatchingParamsUpdated() {
+    void setPathAndRouteParametersAsComponent_aliasesWithMatchingParamsUpdated() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class, new RouteParameters(
                     Map.of("key1", "value1", "key2", "value2")));
@@ -572,7 +582,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponentWithRouteParameters_aliasesWithMatchingParamsUpdated() {
+    void createFromComponentWithRouteParameters_aliasesWithMatchingParamsUpdated() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test", TestRouteWithAliases.class,
                     new RouteParameters(
@@ -584,7 +594,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAndRouteParametersAsComponent_aliasWithMissingParamNotAdded() {
+    void setPathAndRouteParametersAsComponent_aliasWithMissingParamNotAdded() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class,
                     new RouteParameters(Map.of("key1", "value1")));
@@ -595,7 +605,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponentWithRouteParameters_aliasWithMissingParamNotAdded() {
+    void createFromComponentWithRouteParameters_aliasWithMissingParamNotAdded() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test", TestRouteWithAliases.class,
                     new RouteParameters(Map.of("key1", "value1")));
@@ -605,16 +615,17 @@ public class SideNavItemTest {
         }, TestRouteWithAliases.class);
     }
 
-    @Test(expected = NotFoundException.class)
-    public void setPathAsComponentWithMissingRouteParameter_throws() {
-        runWithMockRouter(() -> {
-            sideNavItem.setPath(TestRouteWithRouteParams.class,
-                    new RouteParameters(Map.of("k1", "v1")));
-        }, TestRouteWithRouteParams.class);
+    @Test
+    void setPathAsComponentWithMissingRouteParameter_throws() {
+        Assertions.assertThrows(NotFoundException.class,
+                () -> runWithMockRouter(() -> {
+                    sideNavItem.setPath(TestRouteWithRouteParams.class,
+                            new RouteParameters(Map.of("k1", "v1")));
+                }, TestRouteWithRouteParams.class));
     }
 
     @Test
-    public void setPathAsComponent_aliasWithMissingParameterNotAdded() {
+    void setPathAsComponent_aliasWithMissingParameterNotAdded() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class);
 
@@ -624,7 +635,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponentWithHasUrlParameter_pathContainsParameters() {
+    void createFromComponentWithHasUrlParameter_pathContainsParameters() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test",
                     TestRouteWithHasUrlParameter.class, "bar/baz");
@@ -634,7 +645,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAsComponentWithHasUrlParameter_pathContainsParameters() {
+    void setPathAsComponentWithHasUrlParameter_pathContainsParameters() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithHasUrlParameter.class, "bar/baz");
 
@@ -643,72 +654,72 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setTarget_hasTarget() {
+    void setTarget_hasTarget() {
         sideNavItem.setTarget("_blank");
-        Assert.assertEquals("_blank",
+        Assertions.assertEquals("_blank",
                 sideNavItem.getElement().getProperty("target"));
-        Assert.assertEquals("_blank", sideNavItem.getTarget());
+        Assertions.assertEquals("_blank", sideNavItem.getTarget());
     }
 
     @Test
-    public void targetDefined_setToNull_noTarget() {
+    void targetDefined_setToNull_noTarget() {
         sideNavItem.setTarget("_blank");
         sideNavItem.setTarget(null);
-        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
-        Assert.assertNull(sideNavItem.getTarget());
+        Assertions.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assertions.assertNull(sideNavItem.getTarget());
     }
 
     @Test
-    public void isMatchNested_falseByDefault() {
-        Assert.assertFalse(sideNavItem.isMatchNested());
+    void isMatchNested_falseByDefault() {
+        Assertions.assertFalse(sideNavItem.isMatchNested());
     }
 
     @Test
-    public void setMatchNested_isMatchNested() {
+    void setMatchNested_isMatchNested() {
         sideNavItem.setMatchNested(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 sideNavItem.getElement().getProperty("matchNested", false));
-        Assert.assertTrue(sideNavItem.isMatchNested());
+        Assertions.assertTrue(sideNavItem.isMatchNested());
 
         sideNavItem.setMatchNested(false);
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 sideNavItem.getElement().getProperty("matchNested", false));
-        Assert.assertFalse(sideNavItem.isMatchNested());
+        Assertions.assertFalse(sideNavItem.isMatchNested());
     }
 
     @Test
-    public void isRouterIgnore_falseByDefault() {
-        Assert.assertFalse(sideNavItem.isRouterIgnore());
+    void isRouterIgnore_falseByDefault() {
+        Assertions.assertFalse(sideNavItem.isRouterIgnore());
     }
 
     @Test
-    public void setRouterIgnore_hasRouterIgnore() {
+    void setRouterIgnore_hasRouterIgnore() {
         sideNavItem.setRouterIgnore(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 sideNavItem.getElement().getProperty("routerIgnore", false));
-        Assert.assertTrue(sideNavItem.isRouterIgnore());
+        Assertions.assertTrue(sideNavItem.isRouterIgnore());
 
         sideNavItem.setRouterIgnore(false);
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 sideNavItem.getElement().getProperty("routerIgnore", false));
-        Assert.assertFalse(sideNavItem.isRouterIgnore());
+        Assertions.assertFalse(sideNavItem.isRouterIgnore());
     }
 
     @Test
-    public void setOpenInNewBrowserTab_targetBlankDefinedOnProperty() {
+    void setOpenInNewBrowserTab_targetBlankDefinedOnProperty() {
         // call setOpenInNewTab and check that getTarget returns "_blank"
         sideNavItem.setOpenInNewBrowserTab(true);
-        Assert.assertEquals("_blank",
+        Assertions.assertEquals("_blank",
                 sideNavItem.getElement().getProperty("target"));
-        Assert.assertTrue(sideNavItem.isOpenInNewBrowserTab());
+        Assertions.assertTrue(sideNavItem.isOpenInNewBrowserTab());
     }
 
     @Test
-    public void openInNewBrowserTabDefined_setOpenInNewBrowserTabToFalse() {
+    void openInNewBrowserTabDefined_setOpenInNewBrowserTabToFalse() {
         sideNavItem.setOpenInNewBrowserTab(true);
         sideNavItem.setOpenInNewBrowserTab(false);
-        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
-        Assert.assertFalse(sideNavItem.isOpenInNewBrowserTab());
+        Assertions.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assertions.assertFalse(sideNavItem.isOpenInNewBrowserTab());
     }
 
     private boolean sideNavItemHasLabelElement() {
@@ -779,29 +790,30 @@ public class SideNavItemTest {
 
     private void assertPath(String expectedPath) {
         if (expectedPath == null) {
-            Assert.assertNull(sideNavItem.getPath());
-            Assert.assertFalse(sideNavItem.getElement().hasAttribute("path"));
+            Assertions.assertNull(sideNavItem.getPath());
+            Assertions
+                    .assertFalse(sideNavItem.getElement().hasAttribute("path"));
         } else {
-            Assert.assertEquals(expectedPath, sideNavItem.getPath());
-            Assert.assertEquals(expectedPath,
+            Assertions.assertEquals(expectedPath, sideNavItem.getPath());
+            Assertions.assertEquals(expectedPath,
                     sideNavItem.getElement().getAttribute("path"));
         }
     }
 
     private void assertPathAliases(Set<String> expectedAliases) {
-        Assert.assertEquals(expectedAliases, sideNavItem.getPathAliases());
+        Assertions.assertEquals(expectedAliases, sideNavItem.getPathAliases());
         if (expectedAliases.isEmpty()) {
-            Assert.assertFalse(
+            Assertions.assertFalse(
                     sideNavItem.getElement().hasProperty("pathAliases"));
         } else {
             ArrayNode actualAliasesArray = (ArrayNode) sideNavItem.getElement()
                     .getPropertyRaw("pathAliases");
-            Assert.assertNotNull(actualAliasesArray);
+            Assertions.assertNotNull(actualAliasesArray);
             Set<String> actualAliasesSet = new HashSet<>();
             for (int i = 0; i < actualAliasesArray.size(); i++) {
                 actualAliasesSet.add(actualAliasesArray.get(i).asString());
             }
-            Assert.assertEquals(expectedAliases, actualAliasesSet);
+            Assertions.assertEquals(expectedAliases, actualAliasesSet);
         }
     }
 

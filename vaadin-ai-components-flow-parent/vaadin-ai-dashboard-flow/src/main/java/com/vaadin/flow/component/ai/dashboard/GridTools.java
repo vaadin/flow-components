@@ -104,7 +104,7 @@ public class GridTools implements Serializable {
      *
      * @return list of tool definitions
      */
-    public List<LLMProvider.ToolDefinition> getTools() {
+    public List<LLMProvider.ToolSpec> getTools() {
         return List.of(createGetCurrentStateTool(), createUpdateDataTool());
     }
 
@@ -196,8 +196,8 @@ public class GridTools implements Serializable {
 
     // ===== Tool Implementations =====
 
-    private LLMProvider.ToolDefinition createGetCurrentStateTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createGetCurrentStateTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "getGridCurrentState";
@@ -224,8 +224,8 @@ public class GridTools implements Serializable {
         };
     }
 
-    private LLMProvider.ToolDefinition createUpdateDataTool() {
-        return new LLMProvider.ToolDefinition() {
+    private LLMProvider.ToolSpec createUpdateDataTool() {
+        return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
                 return "updateGridData";
