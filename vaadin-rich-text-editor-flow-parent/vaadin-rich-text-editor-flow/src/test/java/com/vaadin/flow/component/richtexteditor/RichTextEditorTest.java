@@ -8,14 +8,13 @@
  */
 package com.vaadin.flow.component.richtexteditor;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -24,160 +23,162 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Tests for the {@link RichTextEditor}.
  */
-public class RichTextEditorTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class RichTextEditorTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void setValueNull() {
+    void setValueNull() {
         RichTextEditor rte = new RichTextEditor();
-        assertEquals("Value should be an empty string", "", rte.getValue());
+        assertEquals("", rte.getValue(), "Value should be an empty string");
 
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage("Null value is not supported");
-
-        rte.setValue(null);
+        NullPointerException ex = Assertions.assertThrows(
+                NullPointerException.class, () -> rte.setValue(null));
+        Assertions.assertEquals("Null value is not supported", ex.getMessage());
     }
 
     @Test
-    public void initialValuePropertyValue() {
+    void initialValuePropertyValue() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals(rte.getEmptyValue(),
+        Assertions.assertEquals(rte.getEmptyValue(),
                 rte.getElement().getProperty("htmlValue"));
     }
 
     @Test
-    public void initialAsHtmlValue() {
+    void initialAsHtmlValue() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals(rte.asHtml().getEmptyValue(),
+        Assertions.assertEquals(rte.asHtml().getEmptyValue(),
                 rte.asHtml().getValue());
     }
 
     @Test
-    public void initialAsDeltaValue() {
+    void initialAsDeltaValue() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertEquals(rte.asDelta().getEmptyValue(),
+        Assertions.assertEquals(rte.asDelta().getEmptyValue(),
                 rte.asDelta().getValue());
-        Assert.assertEquals(rte.asDelta().getEmptyValue(),
+        Assertions.assertEquals(rte.asDelta().getEmptyValue(),
                 rte.getElement().getProperty("value"));
     }
 
     @Test
-    public void setValueStartingWithJsonArray_throws() {
+    void setValueStartingWithJsonArray_throws() {
         RichTextEditor rte = new RichTextEditor();
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("The value starts with either '[' or '{'");
-
-        rte.setValue("[{\"insert\":\"Foo\"}]");
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> rte.setValue("[{\"insert\":\"Foo\"}]"));
+        Assertions.assertTrue(
+                ex.getMessage()
+                        .contains("The value starts with either '[' or '{'"),
+                ex.getMessage());
     }
 
     @Test
-    public void setValueStartingWithJsonObject_throws() {
+    void setValueStartingWithJsonObject_throws() {
         RichTextEditor rte = new RichTextEditor();
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("The value starts with either '[' or '{'");
-
-        rte.setValue("{\"insert\":\"Foo\"}");
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> rte.setValue("{\"insert\":\"Foo\"}"));
+        Assertions.assertTrue(
+                ex.getMessage()
+                        .contains("The value starts with either '[' or '{'"),
+                ex.getMessage());
     }
 
     // asHtml
 
     @Test
-    public void asHtml_setValue_getValue() {
+    void asHtml_setValue_getValue() {
         HasValue<ValueChangeEvent<String>, String> rteAsHtml = new RichTextEditor()
                 .asHtml();
         String htmlValue = "<strong>Foo</strong>";
         rteAsHtml.setValue(htmlValue);
-        Assert.assertEquals("Should get the same value as it was set",
-                htmlValue, rteAsHtml.getValue());
+        Assertions.assertEquals(htmlValue, rteAsHtml.getValue(),
+                "Should get the same value as it was set");
     }
 
     @Test
-    public void asHtml_setReadOnly_rteIsReadonly() {
+    void asHtml_setReadOnly_rteIsReadonly() {
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> rteAsHtml = rte.asHtml();
         rteAsHtml.setReadOnly(true);
-        Assert.assertTrue("Should be possible to set readonly on asHtml",
-                rte.isReadOnly());
+        Assertions.assertTrue(rte.isReadOnly(),
+                "Should be possible to set readonly on asHtml");
     }
 
     @Test
-    public void asHtml_setRequiredIndicatorVisible_rteRequiredIndicatorVisible() {
+    void asHtml_setRequiredIndicatorVisible_rteRequiredIndicatorVisible() {
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> rteAsHtml = rte.asHtml();
         rteAsHtml.setRequiredIndicatorVisible(true);
-        Assert.assertTrue(
-                "Should be possible to set required indicator to be visible on asHtml",
-                rte.isRequiredIndicatorVisible());
+        Assertions.assertTrue(rte.isRequiredIndicatorVisible(),
+                "Should be possible to set required indicator to be visible on asHtml");
     }
 
     @Test
-    public void asHtml_setValueStartingWithJson_noException() {
+    void asHtml_setValueStartingWithJson_noException() {
         RichTextEditor rte = new RichTextEditor();
 
         String value = "[{\"insert\":\"Foo\"}]";
         rte.asHtml().setValue(value);
-        Assert.assertEquals(value, rte.getValue());
+        Assertions.assertEquals(value, rte.getValue());
 
         value = "{\"insert\":\"Foo\"}";
         rte.asHtml().setValue(value);
-        Assert.assertEquals(value, rte.getValue());
+        Assertions.assertEquals(value, rte.getValue());
     }
 
     // asDelta
 
     @Test
-    public void asDelta_setValue_getValue() {
+    void asDelta_setValue_getValue() {
         String deltaValue = "[{\"insert\":\"Foo\"}]";
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
         asDelta.setValue(deltaValue);
 
-        Assert.assertEquals("Should set value property", deltaValue,
-                rte.getElement().getProperty("value"));
-        Assert.assertEquals("Should get the same value as it was set",
-                deltaValue, asDelta.getValue());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void asDelta_setNull_throws() {
-        new RichTextEditor().asDelta().setValue(null);
+        Assertions.assertEquals(deltaValue,
+                rte.getElement().getProperty("value"),
+                "Should set value property");
+        Assertions.assertEquals(deltaValue, asDelta.getValue(),
+                "Should get the same value as it was set");
     }
 
     @Test
-    public void asDelta_setReadOnly_rteIsReadonly() {
+    void asDelta_setNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new RichTextEditor().asDelta().setValue(null));
+    }
+
+    @Test
+    void asDelta_setReadOnly_rteIsReadonly() {
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
         asDelta.setReadOnly(true);
-        Assert.assertTrue("Should be possible to set readonly on asDelta",
-                rte.isReadOnly());
+        Assertions.assertTrue(rte.isReadOnly(),
+                "Should be possible to set readonly on asDelta");
     }
 
     @Test
-    public void asDelta_setRequiredIndicatorVisible_rteRequiredIndicatorVisible() {
+    void asDelta_setRequiredIndicatorVisible_rteRequiredIndicatorVisible() {
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
         asDelta.setRequiredIndicatorVisible(true);
-        Assert.assertTrue(
-                "Should be possible to set required indicator to be visible on asDelta",
-                rte.isRequiredIndicatorVisible());
+        Assertions.assertTrue(rte.isRequiredIndicatorVisible(),
+                "Should be possible to set required indicator to be visible on asDelta");
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void asDelta_addChangeListener() {
+    void asDelta_addChangeListener() {
         String deltaValue = "[{\"insert\":\"Foo\"}]";
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
@@ -193,7 +194,7 @@ public class RichTextEditorTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void asDelta_noChangeEventForSameValue() {
+    void asDelta_noChangeEventForSameValue() {
         String deltaValue = "[{\"insert\":\"Foo\"}]";
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
@@ -214,7 +215,7 @@ public class RichTextEditorTest {
     }
 
     @Test
-    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-rich-text-editor");
 
         element.setProperty("value", "foo");
@@ -228,39 +229,40 @@ public class RichTextEditorTest {
                 .thenAnswer(invocation -> new RichTextEditor());
 
         RichTextEditor field = Component.from(element, RichTextEditor.class);
-        Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
+        Assertions.assertEquals("foo",
+                field.getElement().getPropertyRaw("value"));
     }
 
     @Test
-    public void setColorOptions_propertyIsUpdated() {
+    void setColorOptions_propertyIsUpdated() {
         RichTextEditor rte = new RichTextEditor();
         rte.setColorOptions(
                 List.of("#000000", "#0066cc", "#008a00", "#e60000"));
         ArrayNode jsonArray = (ArrayNode) rte.getElement()
                 .getPropertyRaw("colorOptions");
-        Assert.assertEquals(4, jsonArray.size());
-        Assert.assertEquals("#000000", jsonArray.get(0).asString());
-        Assert.assertEquals("#0066cc", jsonArray.get(1).asString());
-        Assert.assertEquals("#008a00", jsonArray.get(2).asString());
-        Assert.assertEquals("#e60000", jsonArray.get(3).asString());
+        Assertions.assertEquals(4, jsonArray.size());
+        Assertions.assertEquals("#000000", jsonArray.get(0).asString());
+        Assertions.assertEquals("#0066cc", jsonArray.get(1).asString());
+        Assertions.assertEquals("#008a00", jsonArray.get(2).asString());
+        Assertions.assertEquals("#e60000", jsonArray.get(3).asString());
     }
 
     @Test
-    public void setColorOptions_getColorOptions() {
+    void setColorOptions_getColorOptions() {
         RichTextEditor rte = new RichTextEditor();
         rte.setColorOptions(
                 List.of("#000000", "#0066cc", "#008a00", "#e60000"));
         List<String> options = rte.getColorOptions();
-        Assert.assertEquals(4, options.size());
-        Assert.assertEquals("#000000", options.get(0));
-        Assert.assertEquals("#0066cc", options.get(1));
-        Assert.assertEquals("#008a00", options.get(2));
-        Assert.assertEquals("#e60000", options.get(3));
+        Assertions.assertEquals(4, options.size());
+        Assertions.assertEquals("#000000", options.get(0));
+        Assertions.assertEquals("#0066cc", options.get(1));
+        Assertions.assertEquals("#008a00", options.get(2));
+        Assertions.assertEquals("#e60000", options.get(3));
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(RichTextEditor.class));
     }
 }
