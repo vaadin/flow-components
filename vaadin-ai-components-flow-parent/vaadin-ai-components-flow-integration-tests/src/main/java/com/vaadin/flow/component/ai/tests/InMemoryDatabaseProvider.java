@@ -212,7 +212,11 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
 
             schema.append("NOTES:\n");
             schema.append(
+                    "- This is an H2 database. Reserved words like MONTH, VALUE, etc. must be quoted with double quotes when used as identifiers\n");
+            schema.append(
                     "- Use \"MONTH\" with quotes when querying the sales table (reserved word)\n");
+            schema.append(
+                    "- Do NOT use reserved words like VALUE, KEY, ORDER, etc. as column aliases. Use descriptive names instead (e.g. total_revenue, sale_count)\n");
             schema.append(
                     "- All tables support standard SQL SELECT queries\n");
 

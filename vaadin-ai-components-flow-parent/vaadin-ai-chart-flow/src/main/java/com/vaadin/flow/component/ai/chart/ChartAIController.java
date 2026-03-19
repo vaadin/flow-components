@@ -86,8 +86,10 @@ public class ChartAIController implements AIController {
         this.dataConverter = new DefaultDataConverter();
         this.configurationApplier = new ChartConfigurationApplier();
         this.registry = new ChartRegistry(
-                id -> DEFAULT_CHART_ID.equals(id) ? chart : null,
+                id -> chart,
                 () -> Set.of(DEFAULT_CHART_ID));
+        // TODO: Why is this necessary in ChartAIController but not in DashboardAIController?
+        this.registry.setQueryValidator(databaseProvider::executeQuery);
     }
 
     /**

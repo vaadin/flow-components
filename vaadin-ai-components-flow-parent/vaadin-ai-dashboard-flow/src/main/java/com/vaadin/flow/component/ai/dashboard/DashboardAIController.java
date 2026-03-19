@@ -122,6 +122,8 @@ public class DashboardAIController implements AIController {
         this.chartRegistry = new ChartRegistry(
                 this::findChartById,
                 this::getChartWidgetIds);
+        this.chartRegistry.setQueryValidator(q -> databaseProviders.values()
+                .iterator().next().executeQuery(q));
     }
 
     /**

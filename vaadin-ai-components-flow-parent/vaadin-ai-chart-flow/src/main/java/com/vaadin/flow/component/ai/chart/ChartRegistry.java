@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -46,6 +47,7 @@ public class ChartRegistry implements Serializable {
     private final Map<String, ChartEntry> entries = new LinkedHashMap<>();
     private final Function<String, Chart> chartResolver;
     private final Supplier<Set<String>> chartIdsSupplier;
+    private Consumer<String> queryValidator;
 
     /**
      * Creates a new chart registry.
@@ -64,6 +66,34 @@ public class ChartRegistry implements Serializable {
                 "chartResolver must not be null");
         this.chartIdsSupplier = Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
+    }
+
+    /**
+     * Sets a query validator that tests SQL queries before they are accepted
+     * by tools. If the query is invalid, the validator should throw an
+     * exception.
+     *
+     * @param queryValidator
+     *            a consumer that validates a SQL query, or {@code null} to
+     *            disable validation
+     */
+    public void setQueryValidator(Consumer<String> queryValidator) {
+        this.queryValidator = queryValidator;
+    }
+
+    /**
+     * Validates a SQL query using the configured validator, if any. Does
+     * nothing if no validator is set.
+     *
+     * @param query
+     *            the SQL query to validate
+     * @throws RuntimeException
+     *             if the query is invalid
+     */
+    public void validateQuery(String query) {
+        if (queryValidator != null) {
+            queryValidator.accept(query);
+        }
     }
 
     /**

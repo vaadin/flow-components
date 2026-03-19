@@ -49,10 +49,9 @@ public final class ChartTools {
               "properties": {
                 "chartId": {
                   "type": "string",
-                  "description": "The ID of the chart to get the state for"
+                  "description": "The ID of the chart. Optional when there is only one chart."
                 }
-              },
-              "required": ["chartId"]
+              }
             }""";
 
     private static final String UPDATE_CHART_CONFIGURATION_SCHEMA = """
@@ -61,7 +60,7 @@ public final class ChartTools {
               "properties": {
                 "chartId": {
                   "type": "string",
-                  "description": "The ID of the chart to update"
+                  "description": "The ID of the chart. Optional when there is only one chart."
                 },
                 "configuration": {
                   "type": "object",
@@ -204,7 +203,7 @@ public final class ChartTools {
                   }
                 }
               },
-              "required": ["chartId", "configuration"]
+              "required": ["configuration"]
             }""";
 
     private static final String UPDATE_CHART_DATA_SOURCE_SCHEMA = """
@@ -213,7 +212,7 @@ public final class ChartTools {
               "properties": {
                 "chartId": {
                   "type": "string",
-                  "description": "The ID of the chart to update"
+                  "description": "The ID of the chart. Optional when there is only one chart."
                 },
                 "queries": {
                   "type": "array",
@@ -221,10 +220,30 @@ public final class ChartTools {
                   "description": "SQL queries to execute against the database, one per chart series"
                 }
               },
-              "required": ["chartId", "queries"]
+              "required": ["queries"]
             }""";
 
     private ChartTools() {
+    }
+
+    /**
+     * Resolves the chart ID from the tool arguments. If {@code chartId} is not
+     * provided and the registry contains exactly one chart, that chart's ID is
+     * used as the default.
+     */
+    private static String resolveChartId(JsonNode args,
+            ChartRegistry registry) {
+        JsonNode idNode = args.get("chartId");
+        if (idNode != null && !idNode.isNull()) {
+            return idNode.asString();
+        }
+        var ids = registry.getChartIds();
+        if (ids.size() == 1) {
+            return ids.iterator().next();
+        }
+        throw new IllegalArgumentException(
+                "chartId is required when multiple charts exist. "
+                        + "Available chart IDs: " + ids);
     }
 
     /**
@@ -320,7 +339,7 @@ public final class ChartTools {
             @Override
             public String execute(String arguments) {
                 JsonNode args = JacksonUtils.readTree(arguments);
-                String chartId = args.get("chartId").asString();
+                String chartId = resolveChartId(args, registry);
 
                 Chart chart = registry.getChart(chartId);
                 ChartEntry entry = registry.getEntry(chartId);
@@ -389,7 +408,7 @@ public final class ChartTools {
             @Override
             public String execute(String arguments) {
                 JsonNode args = JacksonUtils.readTree(arguments);
-                String chartId = args.get("chartId").asString();
+                String chartId = resolveChartId(args, registry);
 
                 registry.getChart(chartId);
                 ChartEntry entry = registry.getEntry(chartId);
@@ -480,20 +499,30 @@ public final class ChartTools {
 
             @Override
             public String execute(String arguments) {
-                JsonNode args = JacksonUtils.readTree(arguments);
-                String chartId = args.get("chartId").asString();
+                try {
+                    JsonNode args = JacksonUtils.readTree(arguments);
+                    String chartId = resolveChartId(args, registry);
 
-                registry.getChart(chartId);
-                ChartEntry entry = registry.getEntry(chartId);
+                    registry.getChart(chartId);
+                    ChartEntry entry = registry.getEntry(chartId);
 
-                List<String> queries = new ArrayList<>();
-                for (JsonNode q : args.get("queries")) {
-                    queries.add(q.asString());
+                    List<String> queries = new ArrayList<>();
+                    for (JsonNode q : args.get("queries")) {
+                        queries.add(q.asString());
+                    }
+
+                    for (String q : queries) {
+                        registry.validateQuery(q);
+                    }
+
+                    entry.setPendingQueries(queries);
+
+                    return "Chart '" + chartId
+                            + "' data source updated. Changes will be applied when the request completes.";
+                } catch (Exception e) {
+                    return "Error updating chart data: "
+                            + e.getMessage();
                 }
-                entry.setPendingQueries(queries);
-
-                return "Chart '" + chartId
-                        + "' data source updated. Changes will be applied when the request completes.";
             }
         };
     }
