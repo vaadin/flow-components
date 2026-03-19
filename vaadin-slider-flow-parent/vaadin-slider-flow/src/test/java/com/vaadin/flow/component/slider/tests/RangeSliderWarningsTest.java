@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.slider.tests;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -27,21 +27,21 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
-import com.vaadin.tests.EnableFeatureFlagRule;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
-public class RangeSliderWarningsTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-    @Rule
-    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+class RangeSliderWarningsTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
     private Logger mockedLogger;
     private MockedStatic<LoggerFactory> mockLoggerFactoryStatic;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         mockedLogger = Mockito.mock(Logger.class);
         Mockito.when(mockedLogger.isWarnEnabled()).thenReturn(true);
 
@@ -51,13 +51,13 @@ public class RangeSliderWarningsTest {
                 .thenReturn(mockedLogger);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         mockLoggerFactoryStatic.close();
     }
 
     @Test
-    public void setMinGreaterThanMax_warnsMinGreaterThanMax() {
+    void setMinGreaterThanMax_warnsMinGreaterThanMax() {
         RangeSlider slider = new RangeSlider();
         ui.add(slider);
         ui.fakeClientCommunication();
@@ -71,7 +71,7 @@ public class RangeSliderWarningsTest {
     }
 
     @Test
-    public void setMaxLessThanMin_warnsMinGreaterThanMax() {
+    void setMaxLessThanMin_warnsMinGreaterThanMax() {
         RangeSlider slider = new RangeSlider();
         ui.add(slider);
         ui.fakeClientCommunication();
@@ -85,7 +85,7 @@ public class RangeSliderWarningsTest {
     }
 
     @Test
-    public void setValueOutOfRange_warnsValueOutOfRange() {
+    void setValueOutOfRange_warnsValueOutOfRange() {
         RangeSlider slider = new RangeSlider(0, 100);
         ui.add(slider);
         ui.fakeClientCommunication();
@@ -101,7 +101,7 @@ public class RangeSliderWarningsTest {
     }
 
     @Test
-    public void setValueNotAlignedWithStep_warnsValueNotAligned() {
+    void setValueNotAlignedWithStep_warnsValueNotAligned() {
         RangeSlider slider = new RangeSlider(0, 100);
         slider.setStep(10);
         ui.add(slider);
@@ -118,7 +118,7 @@ public class RangeSliderWarningsTest {
     }
 
     @Test
-    public void setConsistentProperties_noWarnings() {
+    void setConsistentProperties_noWarnings() {
         RangeSlider slider = new RangeSlider(0, 100);
         slider.setStep(10);
         ui.add(slider);
@@ -133,7 +133,7 @@ public class RangeSliderWarningsTest {
     }
 
     @Test
-    public void setMultipleProperties_onlyOneCheckPerResponseCycle() {
+    void setMultipleProperties_onlyOneCheckPerResponseCycle() {
         RangeSlider slider = new RangeSlider(0, 100);
         ui.add(slider);
         ui.fakeClientCommunication();

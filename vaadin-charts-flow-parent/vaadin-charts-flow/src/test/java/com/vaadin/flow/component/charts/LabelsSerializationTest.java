@@ -8,48 +8,48 @@
  */
 package com.vaadin.flow.component.charts;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.model.Labels;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 import tools.jackson.databind.ObjectMapper;
 
-public class LabelsSerializationTest {
+class LabelsSerializationTest {
 
     private ObjectMapper objectMapper;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         objectMapper = ChartSerialization.createObjectMapper();
     }
 
     @Test
-    public void testRotation_isParsableAsNumber_serializedAsNumber() {
+    void testRotation_isParsableAsNumber_serializedAsNumber() {
         Labels labels = new Labels();
         labels.setRotation("90");
         String json = objectMapper.writeValueAsString(labels);
-        Assert.assertTrue("Rotation should be serialized as a number",
-                json.contains("\"rotation\":90.0"));
+        Assertions.assertTrue(json.contains("\"rotation\":90.0"),
+                "Rotation should be serialized as a number");
     }
 
     @Test
-    public void testRotation_isNotParsableAsNumber_serializedAsString() {
+    void testRotation_isNotParsableAsNumber_serializedAsString() {
         Labels labels = new Labels();
         labels.setRotation("auto");
         String json = objectMapper.writeValueAsString(labels);
-        Assert.assertTrue("Rotation should be serialized as a string",
-                json.contains("\"rotation\":\"auto\""));
+        Assertions.assertTrue(json.contains("\"rotation\":\"auto\""),
+                "Rotation should be serialized as a string");
     }
 
     @Test
-    public void testRotation_isNull_notSerialized() {
+    void testRotation_isNull_notSerialized() {
         Labels labels = new Labels();
         labels.setRotation((String) null);
         String json = objectMapper.writeValueAsString(labels);
-        Assert.assertFalse("Rotation should not be serialized",
-                json.contains("\"rotation\""));
+        Assertions.assertFalse(json.contains("\"rotation\""),
+                "Rotation should not be serialized");
     }
 }

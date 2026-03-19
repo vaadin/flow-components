@@ -8,7 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,15 +19,15 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
  * Tests are performed with pure POI and Spreadsheet to find differences and bugs
  */
-public class SpreadsheetReadWriteTest {
+class SpreadsheetReadWriteTest {
 
     @Test
-    public void openAndSaveFileWithPOI_emptyXLSXFile_openAndSaveWorks()
+    void openAndSaveFileWithPOI_emptyXLSXFile_openAndSaveWorks()
             throws IOException {
         File testSheetFIle = TestHelper.getTestSheetFile("empty.xlsx");
 
@@ -44,8 +44,7 @@ public class SpreadsheetReadWriteTest {
     }
 
     @Test
-    public void openAndSaveFile_emptyXLSXFile_openAndSaveWorks()
-            throws IOException {
+    void openAndSaveFile_emptyXLSXFile_openAndSaveWorks() throws IOException {
         var sheet = TestHelper.createSpreadsheet("empty.xlsx");
 
         File tempFile = File.createTempFile("resultEmptyFile", "xlsx");
@@ -58,7 +57,7 @@ public class SpreadsheetReadWriteTest {
     }
 
     @Test
-    public void writeFileMultipleTimes() throws IOException {
+    void writeFileMultipleTimes() throws IOException {
         var sheet = TestHelper.createSpreadsheet("empty.xlsx");
 
         // Write the file
@@ -71,7 +70,7 @@ public class SpreadsheetReadWriteTest {
     }
 
     @Test
-    public void openAndSaveFile_emptyXLSXFile_FileDoesNotContainAdditionalDrawing()
+    void openAndSaveFile_emptyXLSXFile_FileDoesNotContainAdditionalDrawing()
             throws IOException {
         var sheet = TestHelper.createSpreadsheet("empty.xlsx");
 
@@ -86,8 +85,9 @@ public class SpreadsheetReadWriteTest {
         ZipEntry entry = zipInputStream.getNextEntry();
         do {
             String entryName = entry.getName();
-            assertFalse("Empty XLSX contains drawing after import/export: "
-                    + entryName, entryName.contains("drawing"));
+            assertFalse(entryName.contains("drawing"),
+                    "Empty XLSX contains drawing after import/export: "
+                            + entryName);
             entry = zipInputStream.getNextEntry();
         } while (entry != null);
 
@@ -96,7 +96,7 @@ public class SpreadsheetReadWriteTest {
     }
 
     @Test
-    public void openAndSaveFileWithPOI_emptyXLSXFile_FileDoesNotContainAdditionalDrawing()
+    void openAndSaveFileWithPOI_emptyXLSXFile_FileDoesNotContainAdditionalDrawing()
             throws IOException {
         File testSheetFIle = TestHelper.getTestSheetFile("empty.xlsx");
 
@@ -115,8 +115,9 @@ public class SpreadsheetReadWriteTest {
         ZipEntry entry = zipInputStream.getNextEntry();
         do {
             String entryName = entry.getName();
-            assertFalse("Empty XLSX contains drawing after import/export: "
-                    + entryName, entryName.contains("drawing"));
+            assertFalse(entryName.contains("drawing"),
+                    "Empty XLSX contains drawing after import/export: "
+                            + entryName);
             entry = zipInputStream.getNextEntry();
         } while (entry != null);
 

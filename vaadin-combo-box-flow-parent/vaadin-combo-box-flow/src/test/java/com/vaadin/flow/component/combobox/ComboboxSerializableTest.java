@@ -20,11 +20,11 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class ComboboxSerializableTest extends ClassesSerializableTest {
+class ComboboxSerializableTest extends ClassesSerializableTest {
 
     @Override
     protected Stream<String> getExcludedPatterns() {
@@ -33,8 +33,7 @@ public class ComboboxSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    public void setItems_callSetViewportRange_comboBoxSerializable()
-            throws Throwable {
+    void setItems_callSetViewportRange_comboBoxSerializable() throws Throwable {
         final ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems(List.of("Item 1", "Item 2"));
         callSetViewportRange(comboBox, 0, 2, "");

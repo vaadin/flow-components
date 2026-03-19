@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
@@ -25,52 +25,52 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
-public class ConfirmDialogTest {
+class ConfirmDialogTest {
 
     @Test
-    public void setAriaDescribedBy() {
+    void setAriaDescribedBy() {
         var confirmDialog = new ConfirmDialog();
         confirmDialog.setAriaDescribedBy("aria-describedby");
 
-        Assert.assertTrue(confirmDialog.getAriaDescribedBy().isPresent());
-        Assert.assertEquals("aria-describedby",
+        Assertions.assertTrue(confirmDialog.getAriaDescribedBy().isPresent());
+        Assertions.assertEquals("aria-describedby",
                 confirmDialog.getAriaDescribedBy().get());
 
         confirmDialog.setAriaDescribedBy(null);
-        Assert.assertTrue(confirmDialog.getAriaDescribedBy().isEmpty());
+        Assertions.assertTrue(confirmDialog.getAriaDescribedBy().isEmpty());
     }
 
     @Test
-    public void setWidth_getWidth() {
+    void setWidth_getWidth() {
         var confirmDialog = new ConfirmDialog();
         confirmDialog.setWidth("100px");
 
-        Assert.assertEquals("100px", confirmDialog.getWidth());
-        Assert.assertEquals("100px",
+        Assertions.assertEquals("100px", confirmDialog.getWidth());
+        Assertions.assertEquals("100px",
                 confirmDialog.getElement().getProperty("width"));
 
         confirmDialog.setWidth(null);
-        Assert.assertNull(confirmDialog.getWidth());
-        Assert.assertNull(confirmDialog.getElement().getProperty("width"));
+        Assertions.assertNull(confirmDialog.getWidth());
+        Assertions.assertNull(confirmDialog.getElement().getProperty("width"));
     }
 
     @Test
-    public void setHeight_getHeight() {
+    void setHeight_getHeight() {
         var confirmDialog = new ConfirmDialog();
         confirmDialog.setHeight("100px");
 
-        Assert.assertEquals("100px", confirmDialog.getHeight());
-        Assert.assertEquals("100px",
+        Assertions.assertEquals("100px", confirmDialog.getHeight());
+        Assertions.assertEquals("100px",
                 confirmDialog.getElement().getProperty("height"));
 
         confirmDialog.setHeight(null);
-        Assert.assertNull(confirmDialog.getHeight());
-        Assert.assertNull(confirmDialog.getElement().getProperty("height"));
+        Assertions.assertNull(confirmDialog.getHeight());
+        Assertions.assertNull(confirmDialog.getElement().getProperty("height"));
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void addClosedListener_listenerInvokedOnClose() {
+    void addClosedListener_listenerInvokedOnClose() {
         ConfirmDialog dialog = new ConfirmDialog();
         ComponentEventListener<ConfirmDialog.ClosedEvent> listener = Mockito
                 .mock(ComponentEventListener.class);

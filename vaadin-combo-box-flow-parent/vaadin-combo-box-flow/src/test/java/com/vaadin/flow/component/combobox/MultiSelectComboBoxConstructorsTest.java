@@ -20,56 +20,56 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.provider.ListDataProvider;
 
-public class MultiSelectComboBoxConstructorsTest {
+class MultiSelectComboBoxConstructorsTest {
 
     private HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<String>, Set<String>>> valueChangeListener;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         valueChangeListener = Mockito.mock(HasValue.ValueChangeListener.class);
     }
 
     @Test
-    public void initializeWithPageSize() {
+    void initializeWithPageSize() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(42);
-        Assert.assertEquals(42, comboBox.getPageSize());
+        Assertions.assertEquals(42, comboBox.getPageSize());
     }
 
     @Test
-    public void initializeWithLabel() {
+    void initializeWithLabel() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Test label");
-        Assert.assertEquals("Test label", comboBox.getLabel());
+        Assertions.assertEquals("Test label", comboBox.getLabel());
     }
 
     @Test
-    public void initializeWithLabelAndCollection() {
+    void initializeWithLabelAndCollection() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Test label", List.of("foo", "bar", "baz"));
-        Assert.assertEquals("Test label", comboBox.getLabel());
+        Assertions.assertEquals("Test label", comboBox.getLabel());
         assertDataProviderItems(comboBox, "foo", "bar", "baz");
     }
 
     @Test
-    public void initializeWithLabelAndItems() {
+    void initializeWithLabelAndItems() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Test label", "foo", "bar", "baz");
-        Assert.assertEquals("Test label", comboBox.getLabel());
+        Assertions.assertEquals("Test label", comboBox.getLabel());
         assertDataProviderItems(comboBox, "foo", "bar", "baz");
     }
 
     @Test
-    public void initializeWithValueChangeListener() {
+    void initializeWithValueChangeListener() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 valueChangeListener);
         comboBox.setItems("foo", "bar", "baz");
@@ -79,10 +79,10 @@ public class MultiSelectComboBoxConstructorsTest {
     }
 
     @Test
-    public void initializeWithLabelAndValueChangeListener() {
+    void initializeWithLabelAndValueChangeListener() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Test label", valueChangeListener);
-        Assert.assertEquals("Test label", comboBox.getLabel());
+        Assertions.assertEquals("Test label", comboBox.getLabel());
 
         comboBox.setItems("foo", "bar", "baz");
         comboBox.setValue(Set.of("foo"));
@@ -91,10 +91,10 @@ public class MultiSelectComboBoxConstructorsTest {
     }
 
     @Test
-    public void initializeWithLabelAndValueChangeListenerAndItems() {
+    void initializeWithLabelAndValueChangeListenerAndItems() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Test label", valueChangeListener, "foo", "bar", "baz");
-        Assert.assertEquals("Test label", comboBox.getLabel());
+        Assertions.assertEquals("Test label", comboBox.getLabel());
         assertDataProviderItems(comboBox, "foo", "bar", "baz");
 
         comboBox.setValue(Set.of("foo"));
@@ -109,7 +109,8 @@ public class MultiSelectComboBoxConstructorsTest {
         ListDataProvider<String> dataProvider = (ListDataProvider<String>) comboBox
                 .getDataProvider();
         Collection<String> dataProviderItems = dataProvider.getItems();
-        Assert.assertEquals(items.length, dataProviderItems.size());
-        Assert.assertTrue(dataProviderItems.containsAll(Arrays.asList(items)));
+        Assertions.assertEquals(items.length, dataProviderItems.size());
+        Assertions.assertTrue(
+                dataProviderItems.containsAll(Arrays.asList(items)));
     }
 }

@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.slider.validation;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 
-public class RangeSliderBinderValidationTest {
+class RangeSliderBinderValidationTest {
     private static final String VALIDATION_ERROR_MESSAGE = "End value must be at least 50";
 
     private RangeSlider rangeSlider;
@@ -42,8 +42,8 @@ public class RangeSliderBinderValidationTest {
         }
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         rangeSlider = new RangeSlider();
         binder = new Binder<>(Bean.class);
         binder.forField(rangeSlider)
@@ -53,33 +53,33 @@ public class RangeSliderBinderValidationTest {
     }
 
     @Test
-    public void setValue_validatorPasses_noValidationError() {
+    void setValue_validatorPasses_noValidationError() {
         rangeSlider.setValue(new RangeSliderValue(0, 50));
 
         BindingValidationStatus<?> status = binder.validate()
                 .getFieldValidationStatuses().get(0);
 
-        Assert.assertFalse(status.isError());
+        Assertions.assertFalse(status.isError());
     }
 
     @Test
-    public void setValue_validatorFails_hasValidationError() {
+    void setValue_validatorFails_hasValidationError() {
         rangeSlider.setValue(new RangeSliderValue(0, 49));
 
         BindingValidationStatus<?> status = binder.validate()
                 .getFieldValidationStatuses().get(0);
 
-        Assert.assertTrue(status.isError());
-        Assert.assertEquals(VALIDATION_ERROR_MESSAGE,
+        Assertions.assertTrue(status.isError());
+        Assertions.assertEquals(VALIDATION_ERROR_MESSAGE,
                 status.getMessage().orElse(""));
     }
 
     @Test
-    public void readBean_null_setsEmptyValue() {
+    void readBean_null_setsEmptyValue() {
         rangeSlider.setValue(new RangeSliderValue(25, 75));
         binder.readBean(null);
 
-        Assert.assertEquals(new RangeSliderValue(rangeSlider.getMin(),
+        Assertions.assertEquals(new RangeSliderValue(rangeSlider.getMin(),
                 rangeSlider.getMax()), rangeSlider.getValue());
     }
 }

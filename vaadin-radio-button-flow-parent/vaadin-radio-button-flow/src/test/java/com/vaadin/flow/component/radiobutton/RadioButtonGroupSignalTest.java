@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,10 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
@@ -90,83 +86,10 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
                 buttons.get(2).isEnabled());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setDataProvider(
-                DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup
-                .setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithInMemoryDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems(DataProvider
-                .ofCollection(Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithListDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems(new ListDataProvider<>(
-                Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithCollection_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems(Arrays.asList("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithVarargs_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems("New Item 1", "New Item 2");
-    }
-
     @SuppressWarnings("unchecked")
     private List<RadioButton<String>> getRadioButtons() {
         return group.getChildren().filter(RadioButton.class::isInstance)
                 .map(child -> (RadioButton<String>) child)
                 .collect(Collectors.toList());
-    }
-
-    private RadioButtonGroup<String> createRadioButtonGroupWithBoundItems() {
-        var radioButtonGroup = new RadioButtonGroup<String>();
-        var itemsSignal = new ListSignal<String>();
-        itemsSignal.insertLast("Item 1");
-        itemsSignal.insertLast("Item 2");
-        radioButtonGroup.bindItems(itemsSignal);
-        ui.add(radioButtonGroup);
-        return radioButtonGroup;
-    }
-
-    @Test
-    public void signalConstructor_setsItemsFromSignal() {
-        var listSignal = new ListSignal<String>();
-        listSignal.insertLast("One");
-        listSignal.insertLast("Two");
-
-        RadioButtonGroup<String> group = new RadioButtonGroup<>("Options",
-                listSignal);
-        UI.getCurrent().add(group);
-
-        List<String> items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals("One", items.get(0));
-        Assert.assertEquals("Two", items.get(1));
-        Assert.assertEquals("Options", group.getLabel());
-
-        listSignal.insertLast("Three");
-
-        items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(3, items.size());
-        Assert.assertEquals("Three", items.get(2));
     }
 }

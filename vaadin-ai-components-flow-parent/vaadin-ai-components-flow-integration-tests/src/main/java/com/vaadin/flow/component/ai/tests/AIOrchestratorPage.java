@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.html.Div;
@@ -34,6 +36,7 @@ import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.UploadFileListVariant;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 
 import reactor.core.publisher.Flux;
 
@@ -45,7 +48,10 @@ import reactor.core.publisher.Flux;
 @Route("vaadin-ai/orchestrator")
 public class AIOrchestratorPage extends UploadDropZone {
 
-    private final AIOrchestrator orchestrator;
+    private static final String HISTORY_SESSION_KEY = "ai-orchestrator-history";
+    private static final String ATTACHMENTS_SESSION_KEY = "ai-orchestrator-attachments";
+
+    private AIOrchestrator orchestrator;
 
     // Attachment storage keyed by message ID
     private final Map<String, List<AIAttachment>> attachmentStorage = new HashMap<>();
@@ -53,6 +59,7 @@ public class AIOrchestratorPage extends UploadDropZone {
     // Displays info about the last clicked attachment
     private final Span clickedAttachmentInfo = new Span();
 
+    @SuppressWarnings("unchecked")
     public AIOrchestratorPage() {
         setHeightFull();
 
@@ -74,7 +81,7 @@ public class AIOrchestratorPage extends UploadDropZone {
 
         clickedAttachmentInfo.setId("clicked-attachment-info");
 
-        orchestrator = AIOrchestrator.builder(new EchoLLMProvider(), null)
+        var builder = AIOrchestrator.builder(new EchoLLMProvider(), null)
                 .withMessageList(messageList).withInput(messageInput)
                 .withFileReceiver(uploadManager)
                 .withAttachmentSubmitListener(event -> {
@@ -89,7 +96,28 @@ public class AIOrchestratorPage extends UploadDropZone {
                         clickedAttachmentInfo.setText(attachment.name() + " | "
                                 + attachment.mimeType());
                     }
-                }).build();
+                }).withResponseCompleteListener(event -> {
+                    VaadinSession.getCurrent().setAttribute(HISTORY_SESSION_KEY,
+                            orchestrator.getHistory());
+                    VaadinSession.getCurrent().setAttribute(
+                            ATTACHMENTS_SESSION_KEY,
+                            new HashMap<>(attachmentStorage));
+                });
+
+        var savedHistory = (List<ChatMessage>) VaadinSession.getCurrent()
+                .getAttribute(HISTORY_SESSION_KEY);
+        if (savedHistory != null) {
+            var savedAttachments = (Map<String, List<AIAttachment>>) VaadinSession
+                    .getCurrent().getAttribute(ATTACHMENTS_SESSION_KEY);
+            if (savedAttachments != null) {
+                attachmentStorage.putAll(savedAttachments);
+            }
+            builder.withHistory(savedHistory,
+                    savedAttachments != null ? savedAttachments
+                            : Collections.emptyMap());
+        }
+
+        orchestrator = builder.build();
 
         var promptButton = new NativeButton("Send Hello",
                 e -> orchestrator.prompt("Hello from button"));
@@ -116,6 +144,12 @@ public class AIOrchestratorPage extends UploadDropZone {
         public Flux<String> stream(LLMRequest request) {
             var response = "Echo: " + request.userMessage();
             return Flux.fromArray(response.split(" ")).map(word -> word + " ");
+        }
+
+        @Override
+        public void setHistory(List<ChatMessage> history,
+                Map<String, List<AIAttachment>> attachmentsByMessageId) {
+            // No-op for testing
         }
     }
 }

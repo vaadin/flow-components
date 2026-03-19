@@ -17,7 +17,6 @@ package com.vaadin.flow.component.select;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,7 +73,6 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.signals.Signal;
 
 /**
  * Select allows users to choose a single value from a list of options presented
@@ -297,27 +295,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             T... items) {
         this(label, listener);
         setItems(items);
-    }
-
-    /**
-     * Creates a select with the defined label and bound to the given list
-     * signal.
-     * <p>
-     * The select will automatically update its items when the signal changes.
-     *
-     * @param label
-     *            the label describing the select
-     * @param itemsSignal
-     *            the signal providing the list of items, not {@code null}
-     * @see #setItems(Collection)
-     * @see #setLabel(String)
-     * @since 25.1
-     */
-    public Select(String label,
-            Signal<? extends List<? extends Signal<T>>> itemsSignal) {
-        this();
-        setLabel(label);
-        bindItems(itemsSignal);
     }
 
     private static <T> T presentationToModel(Select<T> select,
@@ -653,7 +630,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        DataViewUtils.checkNoActiveItemsBinding(this);
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
