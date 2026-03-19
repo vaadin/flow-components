@@ -238,8 +238,8 @@ public interface LLMProvider {
     interface ToolSpec {
 
         /**
-         * Gets the unique name of this tool. To avoid name collisions, use
-         * a namespaced name such as {@code "MyController_updateConfig"}.
+         * Gets the unique name of this tool. To avoid name collisions, use a
+         * namespaced name such as {@code "MyController_updateConfig"}.
          *
          * @return the tool name, never {@code null}
          */
