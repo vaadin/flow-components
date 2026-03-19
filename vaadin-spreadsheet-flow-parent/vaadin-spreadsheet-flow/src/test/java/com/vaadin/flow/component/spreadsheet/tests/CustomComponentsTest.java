@@ -10,21 +10,21 @@ package com.vaadin.flow.component.spreadsheet.tests;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetComponentFactory;
 
-public class CustomComponentsTest {
+class CustomComponentsTest {
     private Spreadsheet spreadsheet;
     private Component customComponent;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         customComponent = new Span("Custom component");
 
         spreadsheet = new Spreadsheet();
@@ -61,20 +61,20 @@ public class CustomComponentsTest {
     }
 
     @Test
-    public void initialScroll_customComponentAttached() {
+    void initialScroll_customComponentAttached() {
         // The custom component should be attached as the spreadsheet's
         // (virtual) child.
-        Assert.assertEquals(spreadsheet, customComponent.getParent().get());
+        Assertions.assertEquals(spreadsheet, customComponent.getParent().get());
     }
 
     @Test
-    public void scrollAway_customComponentDetached() {
+    void scrollAway_customComponentDetached() {
         // Scroll away from the cell with the custom component.
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
                 "[10, 10, 20, 20]");
 
         // The custom component should be detached.
-        Assert.assertFalse(customComponent.getParent().isPresent());
+        Assertions.assertFalse(customComponent.getParent().isPresent());
     }
 
 }

@@ -8,20 +8,20 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.FormulaFormatter;
 
-public class FormulaFormatterTest {
+class FormulaFormatterTest {
 
     @Test
-    public void cellFormulaLocalizationInput_formulaWithFinnishLocale_formulaFormattedCorrectly() {
+    void cellFormulaLocalizationInput_formulaWithFinnishLocale_formulaFormattedCorrectly() {
         Locale locale = new Locale("fi", "FI");
         FormulaFormatter manager = new FormulaFormatter();
 
@@ -41,7 +41,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulaLocalizationInput_formulaWithItalianLocale_formulaFormattedCorrectly() {
+    void cellFormulaLocalizationInput_formulaWithItalianLocale_formulaFormattedCorrectly() {
         Locale locale = new Locale("it", "IT");
         FormulaFormatter manager = new FormulaFormatter();
 
@@ -61,7 +61,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulaLocalizationInput_formulaWithUSLocale_formulaFormattedCorrectly() {
+    void cellFormulaLocalizationInput_formulaWithUSLocale_formulaFormattedCorrectly() {
         Locale locale = new Locale("en", "US");
         FormulaFormatter manager = new FormulaFormatter();
 
@@ -70,7 +70,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulaLocalizationOutput_formulaWithFinnishLocale_formulaFormattedCorrectly() {
+    void cellFormulaLocalizationOutput_formulaWithFinnishLocale_formulaFormattedCorrectly() {
         Locale locale = new Locale("fi", "FI");
         FormulaFormatter manager = new FormulaFormatter();
 
@@ -90,7 +90,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulaLocalizationOutput_formulaWithItalianLocale_formulaFormattedCorrectly() {
+    void cellFormulaLocalizationOutput_formulaWithItalianLocale_formulaFormattedCorrectly() {
         Locale locale = new Locale("it", "IT");
         FormulaFormatter manager = new FormulaFormatter();
 
@@ -110,7 +110,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulaLocalizationOutput_formulaWithUSLocale_formulaFormattedCorrectly() {
+    void cellFormulaLocalizationOutput_formulaWithUSLocale_formulaFormattedCorrectly() {
         Locale locale = new Locale("en", "US");
         FormulaFormatter manager = new FormulaFormatter();
 
@@ -119,7 +119,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulaFormatter_numberWithCommaAsSeparator() {
+    void cellFormulaFormatter_numberWithCommaAsSeparator() {
         Locale locale = new Locale("it", "IT");
         FormulaFormatter manager = new FormulaFormatter();
 
@@ -151,7 +151,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulationValidation_validInputFormulasWithFinnishLocale_formulaValid() {
+    void cellFormulationValidation_validInputFormulasWithFinnishLocale_formulaValid() {
         final FormulaFormatter formulaFormatter = new FormulaFormatter();
         Locale locale = new Locale("fi", "FI");
 
@@ -168,7 +168,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulationValidation_validInputFormulasWithItalianLocale_formulaValid() {
+    void cellFormulationValidation_validInputFormulasWithItalianLocale_formulaValid() {
         final FormulaFormatter formulaFormatter = new FormulaFormatter();
         Locale locale = new Locale("it", "IT");
 
@@ -185,7 +185,7 @@ public class FormulaFormatterTest {
     }
 
     @Test
-    public void cellFormulationValidation_inputWithInvalidDecimalSeparator_formulaNotValid() {
+    void cellFormulationValidation_inputWithInvalidDecimalSeparator_formulaNotValid() {
         final FormulaFormatter formulaFormatter = new FormulaFormatter();
         Locale locale = new Locale("it", "IT");
 

@@ -11,24 +11,24 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class LocaleTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class LocaleTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Spreadsheet spreadsheet;
 
     private Locale testLocale;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         // Choose a test locale that differs from the system locale to ensure
         // we're actually testing that the UI locale is used, not the system
         // locale
@@ -42,28 +42,30 @@ public class LocaleTest {
     }
 
     @Test
-    public void default_getLocale_equalsUILocale() {
-        Assert.assertEquals(testLocale, spreadsheet.getLocale());
+    void default_getLocale_equalsUILocale() {
+        Assertions.assertEquals(testLocale, spreadsheet.getLocale());
     }
 
     @Test
-    public void default_getCellValueManagerDecimalSymbols_equalsUILocale() {
+    void default_getCellValueManagerDecimalSymbols_equalsUILocale() {
         var cellValueManagerDecimalSymbols = spreadsheet.getCellValueManager()
                 .getOriginalValueDecimalFormat().getDecimalFormatSymbols();
         var expectedSymbols = DecimalFormatSymbols.getInstance(testLocale);
 
-        Assert.assertEquals(expectedSymbols, cellValueManagerDecimalSymbols);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setNullLocale_throws() {
-        spreadsheet.setLocale(null);
+        Assertions.assertEquals(expectedSymbols,
+                cellValueManagerDecimalSymbols);
     }
 
     @Test
-    public void setLocale_getLocale() {
+    void setNullLocale_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> spreadsheet.setLocale(null));
+    }
+
+    @Test
+    void setLocale_getLocale() {
         spreadsheet.setLocale(Locale.ITALIAN);
-        Assert.assertEquals(Locale.ITALIAN, spreadsheet.getLocale());
+        Assertions.assertEquals(Locale.ITALIAN, spreadsheet.getLocale());
     }
 
 }

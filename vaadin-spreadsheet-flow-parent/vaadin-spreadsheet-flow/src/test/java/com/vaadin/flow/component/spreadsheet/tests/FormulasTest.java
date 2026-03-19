@@ -10,24 +10,24 @@ package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.FormulaValueChangeEvent;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class FormulasTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class FormulasTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Spreadsheet spreadsheet;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         spreadsheet = new Spreadsheet();
 
         // onSheetScroll must be invoked once, otherwise cell comments are not
@@ -37,32 +37,32 @@ public class FormulasTest {
     }
 
     @Test
-    public void createFormulaCell_createsMissingRowsAndCols() {
-        Assert.assertNull(spreadsheet.getActiveSheet().getRow(300));
+    void createFormulaCell_createsMissingRowsAndCols() {
+        Assertions.assertNull(spreadsheet.getActiveSheet().getRow(300));
 
         spreadsheet.createFormulaCell(300, 100, "1+1");
 
         var row = spreadsheet.getActiveSheet().getRow(300);
-        Assert.assertNotNull(row);
-        Assert.assertNotNull(row.getCell(100));
+        Assertions.assertNotNull(row);
+        Assertions.assertNotNull(row.getCell(100));
     }
 
     @Test
-    public void createFormulaCell_overWritesExistingCellValue() {
+    void createFormulaCell_overWritesExistingCellValue() {
         var cell = spreadsheet.createCell(0, 0, "foo");
 
         spreadsheet.createFormulaCell(0, 0, "1+1");
 
         spreadsheet.refreshCells(cell);
 
-        Assert.assertThrows(IllegalStateException.class,
+        Assertions.assertThrows(IllegalStateException.class,
                 cell::getStringCellValue);
-        Assert.assertEquals(2, cell.getNumericCellValue(), 0);
-        Assert.assertEquals("1+1", cell.getCellFormula());
+        Assertions.assertEquals(2, cell.getNumericCellValue(), 0);
+        Assertions.assertEquals("1+1", cell.getCellFormula());
     }
 
     @Test
-    public void formulaValueChangeListener_invokedOnFormulaValueChange() {
+    void formulaValueChangeListener_invokedOnFormulaValueChange() {
         // Add a formula value change listener
         var event = new AtomicReference<FormulaValueChangeEvent>();
         spreadsheet.addFormulaValueChangeListener(e -> event.set(e));
@@ -78,26 +78,26 @@ public class FormulasTest {
         spreadsheet.refreshCells(A1, A2);
 
         // Check that the event was fired with the correct values
-        Assert.assertEquals(1, event.get().getChangedCells().size());
-        Assert.assertEquals("Sheet1!A1", event.get().getChangedCells()
+        Assertions.assertEquals(1, event.get().getChangedCells().size());
+        Assertions.assertEquals("Sheet1!A1", event.get().getChangedCells()
                 .iterator().next().formatAsString());
         // Sanity check for the formula cell effective value
-        Assert.assertEquals(2.0, A1.getNumericCellValue(), 0.0);
+        Assertions.assertEquals(2.0, A1.getNumericCellValue(), 0.0);
     }
 
-    @Ignore("Test ignored since it always passes locally but randomly fails on CI")
+    @Disabled("Test ignored since it always passes locally but randomly fails on CI")
     @Test
-    public void setInvalidFormula_invalidFormulaCellsSet() {
+    void setInvalidFormula_invalidFormulaCellsSet() {
         // Create a formula cell with an invalid formula
         var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");
         spreadsheet.refreshCells(A1);
 
-        Assert.assertEquals("[\"col1 row1\"]",
+        Assertions.assertEquals("[\"col1 row1\"]",
                 spreadsheet.getElement().getProperty("invalidFormulaCells"));
     }
 
     @Test
-    public void setInvalidFormula_deleteSelectedCell_invalidFormulaCellsCleared() {
+    void setInvalidFormula_deleteSelectedCell_invalidFormulaCellsCleared() {
         // Create a formula cell with an invalid formula
         var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");
         spreadsheet.refreshCells(A1);
@@ -106,12 +106,12 @@ public class FormulasTest {
         spreadsheet.setSelection("A1");
         spreadsheet.getCellValueManager().onDeleteSelectedCells();
 
-        Assert.assertEquals("[]",
+        Assertions.assertEquals("[]",
                 spreadsheet.getElement().getProperty("invalidFormulaCells"));
     }
 
     @Test
-    public void setInvalidFormula_deleteSelectedCells_invalidFormulaCellsCleared() {
+    void setInvalidFormula_deleteSelectedCells_invalidFormulaCellsCleared() {
         // Create a formula cell with an invalid formula
         var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");
         spreadsheet.refreshCells(A1);
@@ -120,35 +120,35 @@ public class FormulasTest {
         spreadsheet.setSelection("A1:A2");
         spreadsheet.getCellValueManager().onDeleteSelectedCells();
 
-        Assert.assertEquals("[]",
+        Assertions.assertEquals("[]",
                 spreadsheet.getElement().getProperty("invalidFormulaCells"));
     }
 
     @Test
-    public void setInvalidFormulaErrorMessage_invalidFormulaErrorMessageSet() {
+    void setInvalidFormulaErrorMessage_invalidFormulaErrorMessageSet() {
         spreadsheet.setInvalidFormulaErrorMessage("foo");
-        Assert.assertEquals("foo", spreadsheet.getElement()
+        Assertions.assertEquals("foo", spreadsheet.getElement()
                 .getProperty("invalidFormulaErrorMessage"));
     }
 
-    @Ignore
+    @Disabled
     @Test
-    public void createFormulaCell_updateCellValue() {
+    void createFormulaCell_updateCellValue() {
         spreadsheet.setSelection("A1");
         var A1 = spreadsheet.createFormulaCell(0, 0, "1+1");
-        Assert.assertEquals("2", spreadsheet.getCellValue(A1));
+        Assertions.assertEquals("2", spreadsheet.getCellValue(A1));
 
         spreadsheet.getCellValueManager().onCellValueChange(1, 1, "foo");
-        Assert.assertEquals("foo", spreadsheet.getCellValue(A1));
+        Assertions.assertEquals("foo", spreadsheet.getCellValue(A1));
     }
 
     @Test
-    public void createFormulaCellWithCircularReference_updateCellValue() {
+    void createFormulaCellWithCircularReference_updateCellValue() {
         spreadsheet.setSelection("A1");
         var A1 = spreadsheet.createFormulaCell(0, 0, "A1");
-        Assert.assertEquals("~CIRCULAR~REF~", spreadsheet.getCellValue(A1));
+        Assertions.assertEquals("~CIRCULAR~REF~", spreadsheet.getCellValue(A1));
 
         spreadsheet.getCellValueManager().onCellValueChange(1, 1, "foo");
-        Assert.assertEquals("foo", spreadsheet.getCellValue(A1));
+        Assertions.assertEquals("foo", spreadsheet.getCellValue(A1));
     }
 }

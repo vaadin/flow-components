@@ -11,25 +11,25 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class CustomDataFormatterTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class CustomDataFormatterTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     Spreadsheet spreadsheet;
     Cell fourPartDataFormatCell;
     Cell threePartDataFormatCell;
     Cell generalFormatCell;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         ui.setLocale(Locale.US);
 
         spreadsheet = new Spreadsheet();
@@ -67,65 +67,65 @@ public class CustomDataFormatterTest {
     }
 
     @Test
-    public void fourPartDataFormatCellWithPositiveNumber_getCellValue_formatIsCorrect() {
+    void fourPartDataFormatCellWithPositiveNumber_getCellValue_formatIsCorrect() {
         fourPartDataFormatCell.setCellValue(12345);
-        Assert.assertEquals("12,345",
+        Assertions.assertEquals("12,345",
                 spreadsheet.getCellValue(fourPartDataFormatCell));
     }
 
     @Test
-    public void fourPartDataFormatCellWithNegativeNumber_getCellValue_formatIsCorrect() {
+    void fourPartDataFormatCellWithNegativeNumber_getCellValue_formatIsCorrect() {
         fourPartDataFormatCell.setCellValue(-12345);
-        Assert.assertEquals("(12,345)",
+        Assertions.assertEquals("(12,345)",
                 spreadsheet.getCellValue(fourPartDataFormatCell));
     }
 
     @Test
-    public void fourPartDataFormatCellWithNumberZero_getCellValue_formatIsCorrect() {
+    void fourPartDataFormatCellWithNumberZero_getCellValue_formatIsCorrect() {
         fourPartDataFormatCell.setCellValue(0);
-        Assert.assertEquals("\"-\"",
+        Assertions.assertEquals("\"-\"",
                 spreadsheet.getCellValue(fourPartDataFormatCell).trim());
     }
 
     @Test
-    public void fourPartDataFormatCellTextValue_getCellValue_sameTextIsReturned() {
+    void fourPartDataFormatCellTextValue_getCellValue_sameTextIsReturned() {
         fourPartDataFormatCell.setCellValue("text");
-        Assert.assertEquals("text",
+        Assertions.assertEquals("text",
                 spreadsheet.getCellValue(fourPartDataFormatCell).trim());
     }
 
     @Test
-    public void threePartDataFormatCellWithPositiveNumber_getCellValue_formatIsCorrect() {
+    void threePartDataFormatCellWithPositiveNumber_getCellValue_formatIsCorrect() {
         threePartDataFormatCell.setCellValue(12345.6789);
-        Assert.assertEquals("12,345.7",
+        Assertions.assertEquals("12,345.7",
                 spreadsheet.getCellValue(threePartDataFormatCell));
     }
 
     @Test
-    public void threePartDataFormatCellWithNegativeNumber_getCellValue_formatIsCorrect() {
+    void threePartDataFormatCellWithNegativeNumber_getCellValue_formatIsCorrect() {
         threePartDataFormatCell.setCellValue(-12345.6789);
-        Assert.assertEquals("-12,345.7",
+        Assertions.assertEquals("-12,345.7",
                 spreadsheet.getCellValue(threePartDataFormatCell));
     }
 
     @Test
-    public void threePartDataFormatCellWithNumberZero_getCellValue_formatIsCorrect() {
+    void threePartDataFormatCellWithNumberZero_getCellValue_formatIsCorrect() {
         threePartDataFormatCell.setCellValue(0);
-        Assert.assertEquals("\"-\"",
+        Assertions.assertEquals("\"-\"",
                 spreadsheet.getCellValue(threePartDataFormatCell).trim());
     }
 
     @Test
-    public void threePartDataFormatCellTextValue_getCellValue_sameTextIsReturned() {
+    void threePartDataFormatCellTextValue_getCellValue_sameTextIsReturned() {
         threePartDataFormatCell.setCellValue("text");
-        Assert.assertEquals("text",
+        Assertions.assertEquals("text",
                 spreadsheet.getCellValue(threePartDataFormatCell).trim());
     }
 
     @Test
-    public void generalFormatCellTextValue_getCellValue_textIsReturned() {
+    void generalFormatCellTextValue_getCellValue_textIsReturned() {
         generalFormatCell.setCellValue("text");
-        Assert.assertEquals("text",
+        Assertions.assertEquals("text",
                 spreadsheet.getCellValue(generalFormatCell).trim());
     }
 }

@@ -14,25 +14,25 @@ import java.util.Locale;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class BuiltinFormatsTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class BuiltinFormatsTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     Cell cell;
     Spreadsheet spreadsheet;
     CellStyle cellStyle;
     DataFormat dataFormat;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         setupWithLocale(Locale.US);
     }
 
@@ -49,139 +49,141 @@ public class BuiltinFormatsTest {
     }
 
     @Test
-    public void cellWithNumberValue_testNumberFormats() {
+    void cellWithNumberValue_testNumberFormats() {
         cell.setCellValue(12345);
 
         cellStyle.setDataFormat(dataFormat.getFormat("# ##0"));
-        Assert.assertEquals("12 345", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12 345", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("0"));
-        Assert.assertEquals("12345", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12345", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("0.00"));
-        Assert.assertEquals("12345.00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12345.00", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345.67);
         cellStyle.setDataFormat(dataFormat.getFormat("0.00"));
-        Assert.assertEquals("12345.67", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12345.67", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345);
         cellStyle.setDataFormat(dataFormat.getFormat("#,##0"));
-        Assert.assertEquals("12,345", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12,345", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("#,##0.00"));
-        Assert.assertEquals("12,345.00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12,345.00", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("$#,##0_);($#,##0)"));
-        Assert.assertEquals("$12,345", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("$12,345", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(-12345);
         cellStyle.setDataFormat(dataFormat.getFormat("$#,##0_);($#,##0)"));
-        Assert.assertEquals("($12,345)", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("($12,345)", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345);
         cellStyle.setDataFormat(dataFormat.getFormat("$#,##0_);[Red]($#,##0)"));
-        Assert.assertEquals("$12,345", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("$12,345", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(-12345);
         cellStyle.setDataFormat(dataFormat.getFormat("$#,##0_);[Red]($#,##0)"));
-        Assert.assertEquals("($12,345)", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("($12,345)", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345);
         cellStyle
                 .setDataFormat(dataFormat.getFormat("$#,##0.00_);($#,##0.00)"));
-        Assert.assertEquals("$12,345.00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("$12,345.00", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(-12345);
         cellStyle
                 .setDataFormat(dataFormat.getFormat("$#,##0.00_);($#,##0.00)"));
-        Assert.assertEquals("($12,345.00)", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("($12,345.00)", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345);
         cellStyle.setDataFormat(
                 dataFormat.getFormat("$#,##0.00_);[Red]($#,##0.00)"));
-        Assert.assertEquals("$12,345.00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("$12,345.00", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(-12345);
         cellStyle.setDataFormat(
                 dataFormat.getFormat("$#,##0.00_);[Red]($#,##0.00)"));
-        Assert.assertEquals("($12,345.00)", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("($12,345.00)", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(.7525);
         cellStyle.setDataFormat(dataFormat.getFormat("0%"));
-        Assert.assertEquals("75%", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("75%", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("0.00%"));
-        Assert.assertEquals("75.25%", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("75.25%", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345);
         cellStyle.setDataFormat(dataFormat.getFormat("0.00E+00"));
-        Assert.assertEquals("1.23E+04", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("1.23E+04", spreadsheet.getCellValue(cell));
     }
 
     @Test
-    public void cellWithDateValue_testDateFormats() {
+    void cellWithDateValue_testDateFormats() {
         cell.setCellValue(LocalDateTime.of(2022, 10, 31, 12, 0));
 
         cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy"));
-        Assert.assertEquals("10/31/22", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("10/31/22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("d-mmm-yy"));
-        Assert.assertEquals("31-Oct-22", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("31-Oct-22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("d-mmm"));
-        Assert.assertEquals("31-Oct", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("31-Oct", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("mmm-yy"));
-        Assert.assertEquals("Oct-22", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("Oct-22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm AM/PM"));
-        Assert.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss AM/PM"));
-        Assert.assertEquals("12:00:00 PM", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00:00 PM", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm"));
-        Assert.assertEquals("12:00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss"));
-        Assert.assertEquals("12:00:00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00:00", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy h:mm"));
-        Assert.assertEquals("10/31/22 12:00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("10/31/22 12:00",
+                spreadsheet.getCellValue(cell));
     }
 
     @Test
-    public void cellWithDateValue_withGermanLocale_testDateFormats() {
+    void cellWithDateValue_withGermanLocale_testDateFormats() {
         setupWithLocale(Locale.GERMAN);
 
         cell.setCellValue(LocalDateTime.of(2022, 10, 31, 12, 0));
 
         cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy"));
-        Assert.assertEquals("10/31/22", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("10/31/22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("d-mmm-yy"));
-        Assert.assertEquals("31-Okt.-22", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("31-Okt.-22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("d-mmm"));
-        Assert.assertEquals("31-Okt.", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("31-Okt.", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("mmm-yy"));
-        Assert.assertEquals("Okt.-22", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("Okt.-22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm AM/PM"));
-        Assert.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss AM/PM"));
-        Assert.assertEquals("12:00:00 PM", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00:00 PM", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm"));
-        Assert.assertEquals("12:00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss"));
-        Assert.assertEquals("12:00:00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("12:00:00", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy h:mm"));
-        Assert.assertEquals("10/31/22 12:00", spreadsheet.getCellValue(cell));
+        Assertions.assertEquals("10/31/22 12:00",
+                spreadsheet.getCellValue(cell));
     }
 }
