@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ import java.util.Collections;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -35,7 +35,7 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.Action.Handler;
 
-public class ContextMenuManagerTest {
+class ContextMenuManagerTest {
 
     private ContextMenuManager contextMenuManager;
 
@@ -50,8 +50,8 @@ public class ContextMenuManagerTest {
 
     private SelectionChangeEvent mockSelectionEvent;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         contextMenuManager = new ContextMenuManager(mockSpreadsheet);
 
@@ -67,24 +67,24 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void hasActionHandlers_withNoHandlers_shouldReturnFalse() {
+    void hasActionHandlers_withNoHandlers_shouldReturnFalse() {
         assertFalse(contextMenuManager.hasActionHandlers());
     }
 
     @Test
-    public void hasActionHandlers_withHandler_shouldReturnTrue() {
+    void hasActionHandlers_withHandler_shouldReturnTrue() {
         contextMenuManager.addActionHandler(mockHandler);
         assertTrue(contextMenuManager.hasActionHandlers());
     }
 
     @Test
-    public void addActionHandler_nullHandler_shouldNotAddHandler() {
+    void addActionHandler_nullHandler_shouldNotAddHandler() {
         contextMenuManager.addActionHandler(null);
         assertFalse(contextMenuManager.hasActionHandlers());
     }
 
     @Test
-    public void addActionHandler_sameHandlerTwice_shouldAddOnlyOnce() {
+    void addActionHandler_sameHandlerTwice_shouldAddOnlyOnce() {
         contextMenuManager.addActionHandler(mockHandler);
         contextMenuManager.addActionHandler(mockHandler);
 
@@ -94,7 +94,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void removeActionHandler_existingHandler_shouldRemoveHandler() {
+    void removeActionHandler_existingHandler_shouldRemoveHandler() {
         contextMenuManager.addActionHandler(mockHandler);
         assertTrue(contextMenuManager.hasActionHandlers());
 
@@ -103,7 +103,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForSelection_withValidCaption_shouldCreateActionDetails()
+    void createActionsListForSelection_withValidCaption_shouldCreateActionDetails()
             throws Exception {
         String caption = "Test Action";
         Action action = new Action(caption);
@@ -131,7 +131,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForSelection_withNullCaption_shouldUseSanitizedEmptyString()
+    void createActionsListForSelection_withNullCaption_shouldUseSanitizedEmptyString()
             throws Exception {
         Action action = new Action(null);
         Action[] actions = { action };
@@ -157,7 +157,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForSelection_withHTMLCaption_shouldSanitizeHTML()
+    void createActionsListForSelection_withHTMLCaption_shouldSanitizeHTML()
             throws Exception {
         String htmlCaption = "<script>alert('xss')</script><b>Bold Text</b><p>Paragraph</p>";
         Action action = new Action(htmlCaption);
@@ -187,13 +187,13 @@ public class ContextMenuManagerTest {
                                                                          // expected
 
         assertEquals(expectedNormalized, normalizedCaption);
-        assertFalse("Should not contain script tags",
-                details.caption.contains("script"));
+        assertFalse(details.caption.contains("script"),
+                "Should not contain script tags");
         assertEquals(0, details.type); // CELL type
     }
 
     @Test
-    public void createActionsListForSelection_withMaliciousHTML_shouldRemoveDangerousContent()
+    void createActionsListForSelection_withMaliciousHTML_shouldRemoveDangerousContent()
             throws Exception {
         String maliciousCaption = "<script>document.cookie='stolen'</script>"
                 + "<img src='x' onerror='alert(1)'>"
@@ -225,7 +225,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForRow_shouldCreateCorrectActionType()
+    void createActionsListForRow_shouldCreateCorrectActionType()
             throws Exception {
         String caption = "Row Action";
         Action action = new Action(caption);
@@ -251,7 +251,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForColumn_shouldCreateCorrectActionType()
+    void createActionsListForColumn_shouldCreateCorrectActionType()
             throws Exception {
         String caption = "Column Action";
         Action action = new Action(caption);
@@ -277,7 +277,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForColumn_withHTMLCaption_shouldSanitizeHTML()
+    void createActionsListForColumn_withHTMLCaption_shouldSanitizeHTML()
             throws Exception {
         String htmlCaption = "<em>Emphasized</em><script>alert('bad')</script>";
         String expectedSanitized = "<em>Emphasized</em>"; // Script removed, em
@@ -305,7 +305,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForRow_withHTMLCaption_shouldSanitizeHTML()
+    void createActionsListForRow_withHTMLCaption_shouldSanitizeHTML()
             throws Exception {
         String htmlCaption = "<strong>Strong</strong><iframe src='evil.com'></iframe>";
         String expectedSanitized = "<strong>Strong</strong>"; // iframe removed,
@@ -333,7 +333,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForSelection_withNullActions_shouldReturnEmptyList()
+    void createActionsListForSelection_withNullActions_shouldReturnEmptyList()
             throws Exception {
         contextMenuManager.addActionHandler(mockHandler);
         Mockito.when(
@@ -353,7 +353,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForSelection_withEmptyActions_shouldReturnEmptyList()
+    void createActionsListForSelection_withEmptyActions_shouldReturnEmptyList()
             throws Exception {
         Action[] emptyActions = {};
 
@@ -375,7 +375,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void createActionsListForSelection_withMultipleActions_shouldCreateMultipleDetails()
+    void createActionsListForSelection_withMultipleActions_shouldCreateMultipleDetails()
             throws Exception {
         Action action1 = new Action("Action 1");
         Action action2 = new Action("<b>Action 2</b>");
@@ -403,7 +403,7 @@ public class ContextMenuManagerTest {
     }
 
     @Test
-    public void iconVirtualChildLifecycle_rowAction_addedAndRemovedOnClose()
+    void iconVirtualChildLifecycle_rowAction_addedAndRemovedOnClose()
             throws Exception {
         // Use a real Spreadsheet instance to verify virtual child lifecycle
         var realSpreadsheet = new Spreadsheet();
@@ -425,8 +425,8 @@ public class ContextMenuManagerTest {
                 .invoke(contextMenuManager, 3);
 
         assertEquals(1, result.size());
-        assertNotNull("Icon node id should be set",
-                icon.getElement().getParent());
+        assertNotNull(icon.getElement().getParent(),
+                "Icon node id should be set");
 
         // Close context menu simulation
         contextMenuManager.onContextMenuClosed();

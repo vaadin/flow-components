@@ -19,9 +19,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Focusable;
@@ -38,7 +38,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
 /**
@@ -46,107 +46,113 @@ import com.vaadin.tests.dataprovider.DataProviderListenersTest;
  * Their respective test classes should extend from this class to run tests for
  * both components
  */
-public abstract class ComboBoxBaseTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+abstract class ComboBoxBaseTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     protected abstract <TItem> ComboBoxBase<?, TItem, ?> createComboBox(
             Class<TItem> itemClass);
 
     @Test
-    public void implementsFocusable() {
-        Assert.assertTrue("ComboBox should be focusable", Focusable.class
-                .isAssignableFrom(createComboBox(String.class).getClass()));
+    void implementsFocusable() {
+        Assertions.assertTrue(
+                Focusable.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()),
+                "ComboBox should be focusable");
     }
 
     @Test
-    public void implementsHasLabel() {
-        Assert.assertTrue("ComboBox should support setting a label",
+    void implementsHasLabel() {
+        Assertions.assertTrue(
                 HasLabel.class.isAssignableFrom(
-                        createComboBox(String.class).getClass()));
+                        createComboBox(String.class).getClass()),
+                "ComboBox should support setting a label");
     }
 
     @Test
-    public void implementsHasAriaLabel() {
-        Assert.assertTrue(
-                "ComboBox should support setting aria-label and aria-labelledby",
+    void implementsHasAriaLabel() {
+        Assertions.assertTrue(
                 HasAriaLabel.class.isAssignableFrom(
-                        createComboBox(String.class).getClass()));
+                        createComboBox(String.class).getClass()),
+                "ComboBox should support setting aria-label and aria-labelledby");
     }
 
     @Test
-    public void implementsHasAllowedCharPattern() {
-        Assert.assertTrue("ComboBox should support allowed char pattern",
+    void implementsHasAllowedCharPattern() {
+        Assertions.assertTrue(
                 HasAllowedCharPattern.class.isAssignableFrom(
-                        createComboBox(String.class).getClass()));
+                        createComboBox(String.class).getClass()),
+                "ComboBox should support allowed char pattern");
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue("ComboBox should support setting a tooltip",
+    void implementsHasTooltip() {
+        Assertions.assertTrue(
                 HasTooltip.class.isAssignableFrom(
-                        createComboBox(String.class).getClass()));
+                        createComboBox(String.class).getClass()),
+                "ComboBox should support setting a tooltip");
     }
 
     @Test
-    public void implementsHasPlaceholder() {
-        Assert.assertTrue("ComboBox should support setting a placeholder",
+    void implementsHasPlaceholder() {
+        Assertions.assertTrue(
                 HasPlaceholder.class.isAssignableFrom(
-                        createComboBox(String.class).getClass()));
+                        createComboBox(String.class).getClass()),
+                "ComboBox should support setting a placeholder");
     }
 
     @Test
-    public void setAutoOpenDisabled() {
+    void setAutoOpenDisabled() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        Assert.assertTrue(comboBox.isAutoOpen());
+        Assertions.assertTrue(comboBox.isAutoOpen());
         comboBox.setAutoOpen(false);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 comboBox.getElement().getProperty("autoOpenDisabled", false));
-        Assert.assertFalse(comboBox.isAutoOpen());
+        Assertions.assertFalse(comboBox.isAutoOpen());
     }
 
     @Test
-    public void setEnabled() {
+    void setEnabled() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.setEnabled(true);
-        Assert.assertTrue(comboBox.isEnabled());
+        Assertions.assertTrue(comboBox.isEnabled());
         comboBox.setEnabled(false);
-        Assert.assertFalse(comboBox.isEnabled());
+        Assertions.assertFalse(comboBox.isEnabled());
     }
 
     @Test
-    public void addCustomValueSetListener_customValueIsAllowed() {
+    void addCustomValueSetListener_customValueIsAllowed() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.addCustomValueSetListener(e -> {
         });
-        Assert.assertTrue(comboBox.isAllowCustomValue());
+        Assertions.assertTrue(comboBox.isAllowCustomValue());
     }
 
     @Test
-    public void addCustomValueSetListener_removeListener_customValueIsDisallowed() {
+    void addCustomValueSetListener_removeListener_customValueIsDisallowed() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         Registration registration = comboBox.addCustomValueSetListener(e -> {
         });
         registration.remove();
-        Assert.assertFalse(comboBox.isAllowCustomValue());
+        Assertions.assertFalse(comboBox.isAllowCustomValue());
     }
 
     @Test
-    public void addCustomValueSetListener_disableCustomValue_customValueIsDisallowed() {
+    void addCustomValueSetListener_disableCustomValue_customValueIsDisallowed() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         Registration registration = comboBox.addCustomValueSetListener(e -> {
         });
 
         comboBox.setAllowCustomValue(false);
-        Assert.assertFalse(comboBox.isAllowCustomValue());
+        Assertions.assertFalse(comboBox.isAllowCustomValue());
 
         // nothing has changed when the listener is removed
         registration.remove();
-        Assert.assertFalse(comboBox.isAllowCustomValue());
+        Assertions.assertFalse(comboBox.isAllowCustomValue());
     }
 
     @Test
-    public void addCustomValueSetListener_addTwoListeners_removeListenerSeveralTimes_customValueIsAllowed() {
+    void addCustomValueSetListener_addTwoListeners_removeListenerSeveralTimes_customValueIsAllowed() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         Registration registration = comboBox.addCustomValueSetListener(e -> {
         });
@@ -154,15 +160,15 @@ public abstract class ComboBoxBaseTest {
         });
         // remove the first listener
         registration.remove();
-        Assert.assertTrue(comboBox.isAllowCustomValue());
+        Assertions.assertTrue(comboBox.isAllowCustomValue());
 
         // removes the fist listener one more time which is no-op
         registration.remove();
-        Assert.assertTrue(comboBox.isAllowCustomValue());
+        Assertions.assertTrue(comboBox.isAllowCustomValue());
     }
 
     @Test
-    public void addCustomValueSetListener_addTwoListeners_removeListeners_customValueIsDisallowed() {
+    void addCustomValueSetListener_addTwoListeners_removeListeners_customValueIsDisallowed() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         Registration registration1 = comboBox.addCustomValueSetListener(e -> {
         });
@@ -170,100 +176,103 @@ public abstract class ComboBoxBaseTest {
         });
         // remove the first listener
         registration1.remove();
-        Assert.assertTrue(comboBox.isAllowCustomValue());
+        Assertions.assertTrue(comboBox.isAllowCustomValue());
 
         // removes the second listener
         registration2.remove();
-        Assert.assertFalse(comboBox.isAllowCustomValue());
+        Assertions.assertFalse(comboBox.isAllowCustomValue());
     }
 
     @Test
-    public void getPageSize_default50() {
+    void getPageSize_default50() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        Assert.assertEquals(50, comboBox.getPageSize());
+        Assertions.assertEquals(50, comboBox.getPageSize());
     }
 
     @Test
-    public void setPageSize_getPageSize() {
+    void setPageSize_getPageSize() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.setPageSize(111);
-        Assert.assertEquals(111, comboBox.getPageSize());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setPageSizeZero_throws() {
-        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        comboBox.setPageSize(0);
+        Assertions.assertEquals(111, comboBox.getPageSize());
     }
 
     @Test
-    public void clearWithoutItems_doesNotThrow() {
+    void setPageSizeZero_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> comboBox.setPageSize(0));
+    }
+
+    @Test
+    void clearWithoutItems_doesNotThrow() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.clear();
     }
 
     @Test
-    public void setClearButtonVisible_isClearButtonVisible() {
+    void setClearButtonVisible_isClearButtonVisible() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        Assert.assertFalse("Clear button should not be visible by default",
-                comboBox.isClearButtonVisible());
+        Assertions.assertFalse(comboBox.isClearButtonVisible(),
+                "Clear button should not be visible by default");
         comboBox.setClearButtonVisible(true);
-        Assert.assertTrue("Getter should reflect the set value.",
-                comboBox.isClearButtonVisible());
+        Assertions.assertTrue(comboBox.isClearButtonVisible(),
+                "Getter should reflect the set value.");
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void setItems_createsListDataProvider() {
+    void setItems_createsListDataProvider() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.setItems(Arrays.asList("foo", "bar"));
 
         ListDataProvider<String> dataProvider = (ListDataProvider<String>) comboBox
                 .getDataProvider();
         Collection<String> items = dataProvider.getItems();
-        Assert.assertEquals(2, items.size());
-        Assert.assertTrue(items.contains("foo"));
-        Assert.assertTrue(items.contains("bar"));
+        Assertions.assertEquals(2, items.size());
+        Assertions.assertTrue(items.contains("foo"));
+        Assertions.assertTrue(items.contains("bar"));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setNullDataProvider_throws() {
+    @Test
+    void setNullDataProvider_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         DataProvider<String, String> dp = null;
-        comboBox.setItems(dp);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> comboBox.setItems(dp));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setNullItemLabelGenerator_throws() {
+    @Test
+    void setNullItemLabelGenerator_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        comboBox.setItemLabelGenerator(null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> comboBox.setItemLabelGenerator(null));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void itemLabelGeneratorReturnsNull_throws() {
+    @Test
+    void itemLabelGeneratorReturnsNull_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
 
-        comboBox.getDataGenerator().generateData("foo",
-                JacksonUtils.createObjectNode());
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> comboBox.getDataGenerator().generateData("foo",
+                        JacksonUtils.createObjectNode()));
     }
 
     @Test
-    public void dataCommunicator_newComboBoxCreated_dataCommunicatorWithEmptyDataProviderCreated() {
+    void dataCommunicator_newComboBoxCreated_dataCommunicatorWithEmptyDataProviderCreated() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         DataProvider<String, ?> dataProvider = comboBox.getDataProvider();
 
-        Assert.assertNotNull(
+        Assertions.assertNotNull(dataProvider,
                 "Data Communicator and Data Provider should be created "
-                        + "within combo box constructor",
-                dataProvider);
-        Assert.assertEquals(DataCommunicator.EmptyDataProvider.class,
+                        + "within combo box constructor");
+        Assertions.assertEquals(DataCommunicator.EmptyDataProvider.class,
                 dataProvider.getClass());
     }
 
     @Test
-    public void setDataProvider_inMemoryDataProvider_fetchesEagerly() {
+    void setDataProvider_inMemoryDataProvider_fetchesEagerly() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         ui.add(comboBox);
 
@@ -289,17 +298,16 @@ public abstract class ComboBoxBaseTest {
         comboBox.setItems(dataProvider);
 
         // Verify that the data communicator and data provider have been created
-        Assert.assertNotNull(
+        Assertions.assertNotNull(comboBox.getDataProvider(),
                 "Data Communicator and Data Provider should be created "
-                        + "within setDataProvider()",
-                comboBox.getDataProvider());
+                        + "within setDataProvider()");
 
         ui.fakeClientCommunication();
         Mockito.verify(dataProvider).size(Mockito.any());
     }
 
     @Test
-    public void setDataProvider_backendDataProvider_fetchesOnOpened() {
+    void setDataProvider_backendDataProvider_fetchesOnOpened() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         ui.add(comboBox);
 
@@ -308,10 +316,9 @@ public abstract class ComboBoxBaseTest {
 
         comboBox.setItems(dataProvider);
         // Verify that the data communicator and data provider have been created
-        Assert.assertNotNull(
+        Assertions.assertNotNull(comboBox.getDataProvider(),
                 "Data Communicator and Data Provider should be created "
-                        + "within setDataProvider()",
-                comboBox.getDataProvider());
+                        + "within setDataProvider()");
 
         ui.fakeClientCommunication();
         Mockito.verify(dataProvider, Mockito.times(0)).size(Mockito.any());
@@ -325,7 +332,7 @@ public abstract class ComboBoxBaseTest {
     }
 
     @Test
-    public void setItems_withItemFilterAndArrayOfItems_shouldReturnMutableListDataView() {
+    void setItems_withItemFilterAndArrayOfItems_shouldReturnMutableListDataView() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         ComboBox.ItemFilter<String> itemFilter = (item, filter) -> true;
         ComboBoxListDataView<String> listDataView = comboBox
@@ -333,11 +340,11 @@ public abstract class ComboBoxBaseTest {
         listDataView.addItem("Fourth");
         listDataView.removeItem("First");
         listDataView.removeItem("Third");
-        Assert.assertEquals(2L, listDataView.getItemCount());
+        Assertions.assertEquals(2L, listDataView.getItemCount());
     }
 
     @Test
-    public void dataProviderListeners_comboBoxAttachedAndDetached_oldDataProviderListenerRemoved() {
+    void dataProviderListeners_comboBoxAttachedAndDetached_oldDataProviderListenerRemoved() {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         createComboBox(Object.class), 2, 2, new int[] { 1, 3 },
@@ -345,27 +352,27 @@ public abstract class ComboBoxBaseTest {
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
 
         comboBox.setAriaLabel("aria-label");
-        Assert.assertTrue(comboBox.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", comboBox.getAriaLabel().get());
+        Assertions.assertTrue(comboBox.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", comboBox.getAriaLabel().get());
 
         comboBox.setAriaLabel(null);
-        Assert.assertTrue(comboBox.getAriaLabel().isEmpty());
+        Assertions.assertTrue(comboBox.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
 
         comboBox.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(comboBox.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby",
+        Assertions.assertTrue(comboBox.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
                 comboBox.getAriaLabelledBy().get());
 
         comboBox.setAriaLabelledBy(null);
-        Assert.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
     }
 }
