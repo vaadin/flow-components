@@ -19,10 +19,10 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class ComboBoxSpringDataTest {
+class ComboBoxSpringDataTest {
     public static class Person implements Serializable {
         private String name;
         private final int born;
@@ -36,7 +36,7 @@ public class ComboBoxSpringDataTest {
             return name;
         }
 
-        public void setName(String name) {
+        void setName(String name) {
             this.name = name;
         }
 
@@ -49,7 +49,7 @@ public class ComboBoxSpringDataTest {
             new Person("Jane", 1923), new Person("Homer", 1956));
 
     @Test
-    public void setItemsPageableNoCountNoFilter() {
+    void setItemsPageableNoCountNoFilter() {
         AtomicInteger pageSize = new AtomicInteger(-1);
         AtomicInteger pageNumber = new AtomicInteger(-1);
         ComboBox<Person> comboBox = new ComboBox<>();
@@ -65,14 +65,14 @@ public class ComboBoxSpringDataTest {
         });
 
         List<Person> items = comboBox.getLazyDataView().getItems().toList();
-        Assert.assertEquals(3, items.size());
-        Assert.assertEquals(0, pageNumber.get());
-        Assert.assertTrue(pageSize.get() > 0);
-        Assert.assertEquals("Homer", items.get(2).getName());
+        Assertions.assertEquals(3, items.size());
+        Assertions.assertEquals(0, pageNumber.get());
+        Assertions.assertTrue(pageSize.get() > 0);
+        Assertions.assertEquals("Homer", items.get(2).getName());
     }
 
     @Test
-    public void setItemsPageableNoCountFilter() {
+    void setItemsPageableNoCountFilter() {
         AtomicInteger pageSize = new AtomicInteger(-1);
         AtomicInteger pageNumber = new AtomicInteger(-1);
         ComboBox<Person> comboBox = new ComboBox<>();
@@ -89,14 +89,14 @@ public class ComboBoxSpringDataTest {
         comboBox.getDataController().setViewportRange(0, 50, "J");
 
         List<Person> items = comboBox.getLazyDataView().getItems().toList();
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals(0, pageNumber.get());
-        Assert.assertTrue(pageSize.get() > 0);
-        Assert.assertEquals("Jane", items.get(1).getName());
+        Assertions.assertEquals(2, items.size());
+        Assertions.assertEquals(0, pageNumber.get());
+        Assertions.assertTrue(pageSize.get() > 0);
+        Assertions.assertEquals("Jane", items.get(1).getName());
     }
 
     @Test
-    public void setItemsPageableWithCount() {
+    void setItemsPageableWithCount() {
         AtomicInteger pageSize = new AtomicInteger(-1);
         AtomicInteger pageNumber = new AtomicInteger(-1);
         ComboBox<Person> comboBox = new ComboBox<>();
@@ -113,10 +113,10 @@ public class ComboBoxSpringDataTest {
 
         List<Person> items = comboBox.getLazyDataView().getItems().toList();
 
-        Assert.assertEquals(3, items.size());
-        Assert.assertEquals(0, pageNumber.get());
-        Assert.assertTrue(pageSize.get() > 0);
-        Assert.assertEquals("Jane", items.get(1).getName());
+        Assertions.assertEquals(3, items.size());
+        Assertions.assertEquals(0, pageNumber.get());
+        Assertions.assertTrue(pageSize.get() > 0);
+        Assertions.assertEquals("Jane", items.get(1).getName());
     }
 
     private static List<Person> filteredData(String filterString) {

@@ -52,7 +52,7 @@ public abstract class AbstractComponentDataViewJUnit6Test {
     protected HasDataView<String, ?, ? extends DataView<String>> component;
 
     @BeforeEach
-    void init() {
+    protected void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         dataProvider = new CustomInMemoryDataProvider<>(items);
         component = getVerifiedComponent();
