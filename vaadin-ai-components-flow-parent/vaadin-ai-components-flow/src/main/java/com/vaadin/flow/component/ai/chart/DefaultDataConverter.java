@@ -118,9 +118,6 @@ public class DefaultDataConverter implements DataConverter {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DefaultDataConverter.class);
 
-    private static final List<String> X_COLUMN_NAMES = List.of("x", "date",
-            "time", "timestamp", "datetime");
-
     @Override
     public List<Series> convertToSeries(List<Map<String, Object>> data) {
         Objects.requireNonNull(data, "Data must not be null");
@@ -202,7 +199,6 @@ public class DefaultDataConverter implements DataConverter {
         if (!hasColumns(columns, "open", "high", "low", "close")) {
             return Optional.empty();
         }
-        var xCol = findXColumn(columns);
         var series = new DataSeries();
         for (var i = 0; i < data.size(); i++) {
             var row = data.get(i);
@@ -213,7 +209,7 @@ public class DefaultDataConverter implements DataConverter {
             if (open == null && high == null && low == null && close == null) {
                 continue;
             }
-            var x = resolveX(row, columnMapping, xCol, i);
+            var x = resolveX(row, columnMapping, "x", i);
             var item = new OhlcItem(x, open, high, low, close);
             applyColor(item, row, columnMapping, columns);
             series.add(item);
@@ -309,11 +305,10 @@ public class DefaultDataConverter implements DataConverter {
         if (!hasColumns(columns, "low", "high") || hasBoxPlotColumns(columns)) {
             return Optional.empty();
         }
-        var xCol = findXColumn(columns);
         var series = new DataSeries();
         for (var i = 0; i < data.size(); i++) {
             var row = data.get(i);
-            var x = resolveX(row, columnMapping, xCol, i);
+            var x = resolveX(row, columnMapping, "x", i);
             var low = getNumber(row, columnMapping, "low");
             var high = getNumber(row, columnMapping, "high");
             if (low == null && high == null) {
@@ -331,7 +326,6 @@ public class DefaultDataConverter implements DataConverter {
         if (!hasColumns(columns, "y", "target")) {
             return Optional.empty();
         }
-        var xCol = findXColumn(columns);
         var series = new DataSeries();
         for (var row : data) {
             var y = getNumber(row, columnMapping, "y");
@@ -339,9 +333,10 @@ public class DefaultDataConverter implements DataConverter {
             if (y == null && target == null) {
                 continue;
             }
+
             DataSeriesItemBullet item;
-            if (xCol != null) {
-                var x = getNumber(row, columnMapping, xCol);
+            if (columns.contains("x")) {
+                var x = getNumber(row, columnMapping, "x");
                 item = new DataSeriesItemBullet(x, y, target);
             } else {
                 item = new DataSeriesItemBullet(y, target);
@@ -389,7 +384,6 @@ public class DefaultDataConverter implements DataConverter {
         if (!hasColumns(columns, "name", "label", "description")) {
             return Optional.empty();
         }
-        var xCol = findXColumn(columns);
         var series = new DataSeries();
         for (var row : data) {
             var name = getText(row, columnMapping, "name");
@@ -399,8 +393,8 @@ public class DefaultDataConverter implements DataConverter {
                 continue;
             }
             DataSeriesItemTimeline item;
-            if (xCol != null) {
-                var x = getNumber(row, columnMapping, xCol);
+            if (columns.contains("x")) {
+                var x = getNumber(row, columnMapping, "x");
                 item = new DataSeriesItemTimeline(x, name, label, description);
             } else {
                 item = new DataSeriesItemTimeline(name, label, description);
@@ -416,11 +410,10 @@ public class DefaultDataConverter implements DataConverter {
         if (!hasColumns(columns, "title") || columns.contains("parent")) {
             return Optional.empty();
         }
-        var xCol = findXColumn(columns);
         var series = new DataSeries();
         for (var i = 0; i < data.size(); i++) {
             var row = data.get(i);
-            var x = resolveX(row, columnMapping, xCol, i);
+            var x = resolveX(row, columnMapping, "x", i);
             var title = getText(row, columnMapping, "title");
             if (title == null) {
                 continue;
@@ -763,11 +756,6 @@ public class DefaultDataConverter implements DataConverter {
     private static boolean hasBoxPlotColumns(Set<String> columns) {
         return columns.contains("q1") || columns.contains("median")
                 || columns.contains("q3");
-    }
-
-    private static String findXColumn(Set<String> columns) {
-        return X_COLUMN_NAMES.stream().filter(columns::contains).findFirst()
-                .orElse(null);
     }
 
     /**

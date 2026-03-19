@@ -143,22 +143,6 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(5, item.getLow());
             Assertions.assertEquals(12, item.getClose());
         }
-
-        @Test
-        void withoutXColumn_usesRowIndex() {
-            var data = List
-                    .of(row("open", 10, "high", 15, "low", 5, "close", 12));
-            var result = (DataSeries) convertSingle(data);
-            Assertions.assertEquals(0, result.getData().getFirst().getX());
-        }
-
-        @Test
-        void withDateColumn_usesDateAsX() {
-            var data = List.of(row("date", 1000, "open", 10, "high", 15, "low",
-                    5, "close", 12));
-            var result = (DataSeries) convertSingle(data);
-            Assertions.assertEquals(1000, result.getData().getFirst().getX());
-        }
     }
 
     // --- BoxPlot ---
@@ -519,13 +503,6 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(5, item.getLow());
             Assertions.assertEquals(15, item.getHigh());
         }
-
-        @Test
-        void withoutXColumn_usesRowIndex() {
-            var data = List.of(row("low", 5, "high", 15));
-            var result = (DataSeries) convertSingle(data);
-            Assertions.assertEquals(0, result.getData().getFirst().getX());
-        }
     }
 
     // --- Bullet ---
@@ -770,36 +747,6 @@ class DefaultDataConverterTest {
                     "end", 1706745600000L));
             var gs = (GanttSeries) convertSingle(data);
             Assertions.assertEquals(1, gs.size());
-        }
-    }
-
-    // --- X column alternatives ---
-
-    @Nested
-    class XColumnAlternativesTests {
-
-        @Test
-        void timestampColumnUsedAsX() {
-            var data = List.of(row("timestamp", 5000, "open", 10, "high", 15,
-                    "low", 5, "close", 12));
-            var result = (DataSeries) convertSingle(data);
-            Assertions.assertEquals(5000, result.getData().getFirst().getX());
-        }
-
-        @Test
-        void timeColumnUsedAsX() {
-            var data = List.of(row("time", 5000, "open", 10, "high", 15, "low",
-                    5, "close", 12));
-            var result = (DataSeries) convertSingle(data);
-            Assertions.assertEquals(5000, result.getData().getFirst().getX());
-        }
-
-        @Test
-        void datetimeColumnUsedAsX() {
-            var data = List.of(row("datetime", 5000, "open", 10, "high", 15,
-                    "low", 5, "close", 12));
-            var result = (DataSeries) convertSingle(data);
-            Assertions.assertEquals(5000, result.getData().getFirst().getX());
         }
     }
 
