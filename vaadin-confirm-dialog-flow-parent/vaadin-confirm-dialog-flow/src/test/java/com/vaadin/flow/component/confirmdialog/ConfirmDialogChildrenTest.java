@@ -15,78 +15,82 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.html.Div;
 
-public class ConfirmDialogChildrenTest {
+class ConfirmDialogChildrenTest {
 
     private ConfirmDialog dialog;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         dialog = new ConfirmDialog();
     }
 
     @Test
-    public void add_removeAll_componentIsRemoved() {
+    void add_removeAll_componentIsRemoved() {
         Div div = new Div();
         dialog.add(div);
 
         dialog.removeAll();
 
-        Assert.assertNull(div.getElement().getParent());
+        Assertions.assertNull(div.getElement().getParent());
     }
 
     @Test
-    public void setText_removeAll_componentIsRemoved() {
+    void setText_removeAll_componentIsRemoved() {
         Div div = new Div();
         dialog.setText(div);
 
         dialog.removeAll();
 
-        Assert.assertNull(div.getElement().getParent());
+        Assertions.assertNull(div.getElement().getParent());
     }
 
     @Test
-    public void setHeader_removeAll_componentIsNotRemoved() {
+    void setHeader_removeAll_componentIsNotRemoved() {
         Div div = new Div();
         dialog.setHeader(div);
 
         dialog.removeAll();
 
-        Assert.assertEquals(dialog.getElement(), div.getElement().getParent());
+        Assertions.assertEquals(dialog.getElement(),
+                div.getElement().getParent());
     }
 
     @Test
-    public void setConfirmButton_removeAll_componentIsNotRemoved() {
+    void setConfirmButton_removeAll_componentIsNotRemoved() {
         Div div = new Div();
         dialog.setConfirmButton(div);
 
         dialog.removeAll();
 
-        Assert.assertEquals(dialog.getElement(), div.getElement().getParent());
+        Assertions.assertEquals(dialog.getElement(),
+                div.getElement().getParent());
     }
 
     @Test
-    public void setCancelButton_removeAll_componentIsNotRemoved() {
+    void setCancelButton_removeAll_componentIsNotRemoved() {
         Div div = new Div();
         dialog.setCancelButton(div);
 
         dialog.removeAll();
 
-        Assert.assertEquals(dialog.getElement(), div.getElement().getParent());
+        Assertions.assertEquals(dialog.getElement(),
+                div.getElement().getParent());
     }
 
     @Test
-    public void setRejectButton_removeAll_componentIsNotRemoved() {
+    void setRejectButton_removeAll_componentIsNotRemoved() {
         Div div = new Div();
         dialog.setRejectButton(div);
 
         dialog.removeAll();
 
-        Assert.assertEquals(dialog.getElement(), div.getElement().getParent());
+        Assertions.assertEquals(dialog.getElement(),
+                div.getElement().getParent());
     }
 }
