@@ -74,10 +74,8 @@ class RichTextEditorTest {
         IllegalArgumentException ex = Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> rte.setValue("[{\"insert\":\"Foo\"}]"));
-        Assertions.assertTrue(
-                ex.getMessage()
-                        .contains("The value starts with either '[' or '{'"),
-                ex.getMessage());
+        Assertions.assertTrue(ex.getMessage()
+                .contains("The value starts with either '[' or '{'"));
     }
 
     @Test
@@ -87,10 +85,8 @@ class RichTextEditorTest {
         IllegalArgumentException ex = Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> rte.setValue("{\"insert\":\"Foo\"}"));
-        Assertions.assertTrue(
-                ex.getMessage()
-                        .contains("The value starts with either '[' or '{'"),
-                ex.getMessage());
+        Assertions.assertTrue(ex.getMessage()
+                .contains("The value starts with either '[' or '{'"));
     }
 
     // asHtml
