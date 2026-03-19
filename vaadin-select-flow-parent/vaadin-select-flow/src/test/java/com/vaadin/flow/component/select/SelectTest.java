@@ -703,8 +703,7 @@ class SelectTest {
 
         Mockito.when(instantiator.createComponent(Select.class))
                 .thenAnswer(invocation -> new Select());
-        Assertions.assertDoesNotThrow(
-                () -> Component.from(element, Select.class));
+        Component.from(element, Select.class);
     }
 
     @Test
