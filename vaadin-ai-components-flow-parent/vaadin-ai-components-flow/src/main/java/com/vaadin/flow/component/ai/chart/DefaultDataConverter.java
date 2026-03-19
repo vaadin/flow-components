@@ -104,10 +104,11 @@ import com.vaadin.flow.component.charts.util.Util;
  * those columns.
  * </p>
  * <p>
- * If the data contains a {@code series} column, rows are automatically grouped
+ * If the data contains a {@code _series} column, rows are automatically grouped
  * by that column's value and each group is converted into a separate named
- * series. The {@code series} column is removed before pattern matching so it
- * does not interfere with chart type detection.
+ * series. The {@code _series} column is removed before pattern matching so it
+ * does not interfere with chart type detection. The underscore prefix avoids
+ * collisions with real data columns.
  * </p>
  *
  * @author Vaadin Ltd
@@ -131,7 +132,7 @@ public class DefaultDataConverter implements DataConverter {
         var columnMapping = buildColumnMapping(data.getFirst());
         var columns = columnMapping.keySet();
 
-        if (columns.contains("series")) {
+        if (columns.contains("_series")) {
             return convertGrouped(data, columnMapping);
         }
 
@@ -166,7 +167,7 @@ public class DefaultDataConverter implements DataConverter {
      */
     private List<Series> convertGrouped(List<Map<String, Object>> data,
             Map<String, String> columnMapping) {
-        var originalSeriesKey = columnMapping.get("series");
+        var originalSeriesKey = columnMapping.get("_series");
         var groups = new LinkedHashMap<String, List<Map<String, Object>>>();
         for (var row : data) {
             var groupName = toText(row.get(originalSeriesKey));
