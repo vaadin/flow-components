@@ -49,6 +49,7 @@ import reactor.core.publisher.Flux;
 public class AIOrchestratorPage extends UploadDropZone {
 
     private static final String HISTORY_SESSION_KEY = "ai-orchestrator-history";
+    private static final String ATTACHMENTS_SESSION_KEY = "ai-orchestrator-attachments";
 
     private AIOrchestrator orchestrator;
 
@@ -95,15 +96,25 @@ public class AIOrchestratorPage extends UploadDropZone {
                         clickedAttachmentInfo.setText(attachment.name() + " | "
                                 + attachment.mimeType());
                     }
-                })
-                .withResponseCompleteListener(event -> VaadinSession
-                        .getCurrent().setAttribute(HISTORY_SESSION_KEY,
-                                orchestrator.getHistory()));
+                }).withResponseCompleteListener(event -> {
+                    VaadinSession.getCurrent().setAttribute(HISTORY_SESSION_KEY,
+                            orchestrator.getHistory());
+                    VaadinSession.getCurrent().setAttribute(
+                            ATTACHMENTS_SESSION_KEY,
+                            new HashMap<>(attachmentStorage));
+                });
 
         var savedHistory = (List<ChatMessage>) VaadinSession.getCurrent()
                 .getAttribute(HISTORY_SESSION_KEY);
         if (savedHistory != null) {
-            builder.withHistory(savedHistory, Collections.emptyMap());
+            var savedAttachments = (Map<String, List<AIAttachment>>) VaadinSession
+                    .getCurrent().getAttribute(ATTACHMENTS_SESSION_KEY);
+            if (savedAttachments != null) {
+                attachmentStorage.putAll(savedAttachments);
+            }
+            builder.withHistory(savedHistory,
+                    savedAttachments != null ? savedAttachments
+                            : Collections.emptyMap());
         }
 
         orchestrator = builder.build();
