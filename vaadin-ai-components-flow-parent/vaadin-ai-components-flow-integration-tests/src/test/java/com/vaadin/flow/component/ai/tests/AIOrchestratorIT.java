@@ -80,6 +80,23 @@ public class AIOrchestratorIT extends AbstractComponentIT {
     }
 
     @Test
+    public void submitMessage_refreshPage_historyRestored() {
+        messageInput.submit("Hello");
+        waitUntil(driver -> getMessageCount() >= 2, 5);
+        Assert.assertEquals(2, getMessageCount());
+
+        // Refresh the page - history should be auto-restored from session
+        open();
+        messageList = $(MessageListElement.class).single();
+
+        waitUntil(driver -> getMessageCount() >= 2, 5);
+        var messages = messageList.getMessageElements();
+        Assert.assertEquals(2, messages.size());
+        Assert.assertTrue(messages.get(0).getText().contains("Hello"));
+        Assert.assertTrue(messages.get(1).getText().contains("Echo: Hello"));
+    }
+
+    @Test
     public void uploadFile_submitMessage_clickAttachment_infoDisplayed()
             throws Exception {
         uploadFile("report.txt");

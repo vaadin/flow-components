@@ -21,24 +21,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBoxBase;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerJUnit6Test;
 
-public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
+class ComboBoxListDataViewTest extends AbstractListDataViewListenerJUnit6Test {
     private List<String> items;
     private ComboBoxListDataView<String> dataView;
     private ComboBox<String> component;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         component = new ComboBox<>();
         ui.add(component);
@@ -47,14 +47,14 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     }
 
     @Test
-    public void getItems_noFiltersSet_allItemsObtained() {
+    void getItems_noFiltersSet_allItemsObtained() {
         Stream<String> allItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set", items.toArray(),
-                allItems.toArray());
+        Assertions.assertArrayEquals(items.toArray(), allItems.toArray(),
+                "Unexpected data set");
     }
 
     @Test
-    public void getItems_withInMemoryAndTextFilter_itemsFilteredWithOnlyInMemoryFilter() {
+    void getItems_withInMemoryAndTextFilter_itemsFilteredWithOnlyInMemoryFilter() {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
@@ -67,32 +67,32 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
         // Check that the client filter does not affect the item handling API
         // in data view
-        Assert.assertArrayEquals("The client filter shouldn't impact the items",
-                new String[] { "foo", "bar", "banana" },
-                filteredItems.toArray());
+        Assertions.assertArrayEquals(new String[] { "foo", "bar", "banana" },
+                filteredItems.toArray(),
+                "The client filter shouldn't impact the items");
 
         dataView.setFilter(item -> item.length() == 3);
         filteredItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set after in-memory filter",
-                new String[] { "foo", "bar" }, filteredItems.toArray());
+        Assertions.assertArrayEquals(new String[] { "foo", "bar" },
+                filteredItems.toArray(),
+                "Unexpected data set after in-memory filter");
 
         // Remove the filters
         dataView.removeFilters();
         filteredItems = dataView.getItems();
-        Assert.assertArrayEquals(
-                "Unexpected data set after removing in-memory filter",
-                new String[] { "foo", "bar", "banana" },
-                filteredItems.toArray());
+        Assertions.assertArrayEquals(new String[] { "foo", "bar", "banana" },
+                filteredItems.toArray(),
+                "Unexpected data set after removing in-memory filter");
     }
 
     @Test
-    public void getItemCount_noFilters_totalItemsCountObtained() {
-        Assert.assertEquals("Unexpected size for data", items.size(),
-                dataView.getItemCount());
+    void getItemCount_noFilters_totalItemsCountObtained() {
+        Assertions.assertEquals(items.size(), dataView.getItemCount(),
+                "Unexpected size for data");
     }
 
     @Test
-    public void getItemCount_withInMemoryAndTextFilter_itemsFilteredWithOnlyInMemoryFilter() {
+    void getItemCount_withInMemoryAndTextFilter_itemsFilteredWithOnlyInMemoryFilter() {
         items = Arrays.asList("foo", "bar", "banana");
         dataView = component.setItems(items);
 
@@ -104,25 +104,23 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         int itemCount = dataView.getItemCount();
 
         // Check that the client filter does not affect the item count
-        Assert.assertEquals(
-                "The client filter shouldn't impact the items count", 3,
-                itemCount);
+        Assertions.assertEquals(3, itemCount,
+                "The client filter shouldn't impact the items count");
 
         dataView.setFilter(item -> item.length() == 3);
         itemCount = dataView.getItemCount();
-        Assert.assertEquals("Unexpected item count after server side filter", 2,
-                itemCount);
+        Assertions.assertEquals(2, itemCount,
+                "Unexpected item count after server side filter");
 
         // Remove the filters
         dataView.removeFilters();
         itemCount = dataView.getItemCount();
-        Assert.assertEquals(
-                "Unexpected item count after removing server side filter", 3,
-                itemCount);
+        Assertions.assertEquals(3, itemCount,
+                "Unexpected item count after removing server side filter");
     }
 
     @Test
-    public void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
+    void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
         Item first = new Item(1L, "first");
         Item second = new Item(2L, "middle");
 
@@ -140,9 +138,9 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         DataKeyMapper<Item> keyMapper = dataCommunicator.getKeyMapper();
         items.forEach(keyMapper::key);
 
-        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
-        Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+        Assertions.assertTrue(keyMapper.has(new Item(1L, "non-present")));
     }
 
     @Override

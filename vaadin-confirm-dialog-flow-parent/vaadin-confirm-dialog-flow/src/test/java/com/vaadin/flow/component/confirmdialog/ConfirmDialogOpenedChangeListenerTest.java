@@ -15,26 +15,26 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class ConfirmDialogOpenedChangeListenerTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class ConfirmDialogOpenedChangeListenerTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private ConfirmDialog dialog;
     private ComponentEventListener<ConfirmDialog.OpenedChangeEvent> mockListener;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         dialog = new ConfirmDialog();
 
         mockListener = Mockito.mock(ComponentEventListener.class);
@@ -42,7 +42,7 @@ public class ConfirmDialogOpenedChangeListenerTest {
     }
 
     @Test
-    public void open() {
+    void open() {
         dialog.open();
         assertEventFired(true, false);
 
@@ -52,7 +52,7 @@ public class ConfirmDialogOpenedChangeListenerTest {
     }
 
     @Test
-    public void close() {
+    void close() {
         dialog.open();
         resetMock();
 
@@ -65,7 +65,7 @@ public class ConfirmDialogOpenedChangeListenerTest {
     }
 
     @Test
-    public void closeFromClient() {
+    void closeFromClient() {
         dialog.open();
         resetMock();
 
@@ -78,7 +78,7 @@ public class ConfirmDialogOpenedChangeListenerTest {
     }
 
     @Test
-    public void noInitialEvent() {
+    void noInitialEvent() {
         syncOpenedFromClient(false);
         assertNoEventFired();
     }
