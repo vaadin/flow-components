@@ -15,20 +15,22 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ConfirmDialogHasStyleTest {
+class ConfirmDialogHasStyleTest {
 
     private ConfirmDialog dialog;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         dialog = new ConfirmDialog();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getStyle_unsupported() {
-        dialog.getStyle();
+    @Test
+    void getStyle_unsupported() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> dialog.getStyle());
     }
 }
