@@ -195,8 +195,6 @@ public class ChartTestBase {
                         .getDashStyle();
             }
 
-            System.out.println("Dash style is " + actualDashStyle);
-
             Assertions.assertEquals(
                     dashStyles[Math.min(dashStyles.length - 1, index++)],
                     actualDashStyle, "Dash style is wrong for series "
