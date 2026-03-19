@@ -85,6 +85,36 @@ public void throwsException() {
 
 Only place the `assertThrows` call around the statement that is expected to throw, not multiple statements.
 
+## No expected exceptions (assertDoesNotThrow)
+
+SonarCloud flags test methods that contain no assertions. For tests that only verify code runs without throwing, add `Assertions.assertDoesNotThrow` to make the intent explicit and satisfy static analysis.
+
+**Detection:** A @Test method that has:
+- No Assert.* / Assertions.* calls
+- No @Test(expected = ...) — those are handled separately
+- A body that executes production code (not just setup/config)
+
+Only wrap the statement(s) that represent the "act" step of the 
+test — not setup code, not variable declarations.
+
+```java
+// Before
+@Test
+public void validInput() {
+    var parser = new Parser();          // setup — do NOT wrap
+    parser.parse("valid input");        // act — wrap this
+}
+```
+
+```java
+// After
+@Test
+void validInput() {
+    var parser = new Parser();
+    Assertions.assertDoesNotThrow(() -> parser.parse("valid input"));
+}
+```
+
 ## @Ignore -> @Disabled
 
 ```java
