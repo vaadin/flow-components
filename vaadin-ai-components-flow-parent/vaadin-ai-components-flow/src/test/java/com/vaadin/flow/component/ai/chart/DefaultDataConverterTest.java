@@ -856,10 +856,10 @@ class DefaultDataConverterTest {
 
         @Test
         void groupsBySeriesColumn() {
-            var data = List.of(row("series", "Revenue", "x", 2020, "y", 100),
-                    row("series", "Revenue", "x", 2021, "y", 120),
-                    row("series", "Cost", "x", 2020, "y", 80),
-                    row("series", "Cost", "x", 2021, "y", 90));
+            var data = List.of(row("_series", "Revenue", "x", 2020, "y", 100),
+                    row("_series", "Revenue", "x", 2021, "y", 120),
+                    row("_series", "Cost", "x", 2020, "y", 80),
+                    row("_series", "Cost", "x", 2021, "y", 90));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
             Assertions.assertEquals("Revenue", result.getFirst().getName());
@@ -881,8 +881,8 @@ class DefaultDataConverterTest {
 
         @Test
         void seriesColumnRemovedFromFallbackPatternMatching() {
-            var data = List.of(row("series", "A", "x", 1, "y", 10),
-                    row("series", "B", "x", 2, "y", 20));
+            var data = List.of(row("_series", "A", "x", 1, "y", 10),
+                    row("_series", "B", "x", 2, "y", 20));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
             var seriesA = (DataSeries) result.getFirst();
@@ -893,9 +893,9 @@ class DefaultDataConverterTest {
         @Test
         void seriesColumnRemovedFromNamedPatternMatching() {
             var data = List.of(
-                    row("series", "Flow A", "from", "X", "to", "Y", "weight",
+                    row("_series", "Flow A", "from", "X", "to", "Y", "weight",
                             10),
-                    row("series", "Flow B", "from", "A", "to", "B", "weight",
+                    row("_series", "Flow B", "from", "A", "to", "B", "weight",
                             20));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
@@ -906,9 +906,9 @@ class DefaultDataConverterTest {
 
         @Test
         void preservesGroupInsertionOrder() {
-            var data = List.of(row("series", "C", "x", 1, "y", 1),
-                    row("series", "A", "x", 2, "y", 2),
-                    row("series", "B", "x", 3, "y", 3));
+            var data = List.of(row("_series", "C", "x", 1, "y", 1),
+                    row("_series", "A", "x", 2, "y", 2),
+                    row("_series", "B", "x", 3, "y", 3));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals("C", result.getFirst().getName());
             Assertions.assertEquals("A", result.get(1).getName());
@@ -917,7 +917,7 @@ class DefaultDataConverterTest {
 
         @Test
         void caseInsensitiveSeriesColumn() {
-            var data = List.of(row("SERIES", "Group A", "x", 1, "y", 10));
+            var data = List.of(row("_SERIES", "Group A", "x", 1, "y", 10));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(1, result.size());
             Assertions.assertEquals("Group A", result.getFirst().getName());
@@ -926,12 +926,13 @@ class DefaultDataConverterTest {
         @Test
         void categoryAndValueWithSeriesColumn() {
             var data = List.of(
-                    row("series", "2023", "department", "Sales", "revenue",
+                    row("_series", "2023", "department", "Sales", "revenue",
                             1000),
-                    row("series", "2023", "department", "Eng", "revenue", 2000),
-                    row("series", "2024", "department", "Sales", "revenue",
+                    row("_series", "2023", "department", "Eng", "revenue",
+                            2000),
+                    row("_series", "2024", "department", "Sales", "revenue",
                             1200),
-                    row("series", "2024", "department", "Eng", "revenue",
+                    row("_series", "2024", "department", "Eng", "revenue",
                             2500));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
