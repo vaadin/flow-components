@@ -29,7 +29,7 @@ import com.vaadin.flow.component.ai.provider.DatabaseTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -165,8 +165,8 @@ public class ChartAIController implements AIController {
     }
 
     @Override
-    public List<LLMProvider.ToolDefinition> getTools() {
-        List<LLMProvider.ToolDefinition> tools = new ArrayList<>();
+    public List<LLMProvider.ToolSpec> getTools() {
+        List<LLMProvider.ToolSpec> tools = new ArrayList<>();
         tools.addAll(DatabaseTools.createAll(databaseProvider));
         tools.addAll(ChartTools.createAll(registry));
         return tools;
@@ -263,12 +263,12 @@ public class ChartAIController implements AIController {
         chart.getUI().ifPresentOrElse(currentUI -> {
             currentUI.access(() -> {
                 Configuration config = chart.getConfiguration();
-                List<DataSeries> allSeries = new ArrayList<>();
+                List<Series> allSeries = new ArrayList<>();
                 for (String query : queries) {
                     var results = databaseProvider.executeQuery(query);
-                    allSeries.add(dataConverter.convertToDataSeries(results));
+                    allSeries.addAll(dataConverter.convertToSeries(results));
                 }
-                config.setSeries(allSeries.toArray(new DataSeries[0]));
+                config.setSeries(allSeries.toArray(new Series[0]));
                 configurationApplier.applyConfiguration(chart, configJson);
                 chart.drawChart();
             });

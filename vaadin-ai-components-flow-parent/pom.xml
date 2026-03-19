@@ -12,8 +12,6 @@
     <description>Vaadin AI Components Parent</description>
     <modules>
         <module>vaadin-ai-components-flow</module>
-        <module>vaadin-ai-chart-flow</module>
-        <module>vaadin-ai-dashboard-flow</module>
     </modules>
     <dependencies/>
     <profiles>

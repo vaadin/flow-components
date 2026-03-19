@@ -27,6 +27,7 @@ import com.vaadin.flow.component.charts.model.DataSeriesItemBullet;
 import com.vaadin.flow.component.charts.model.DataSeriesItemSankey;
 import com.vaadin.flow.component.charts.model.DataSeriesItemXrange;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Default implementation of DataConverter that handles common data conversion
@@ -41,13 +42,13 @@ import com.vaadin.flow.component.charts.model.OhlcItem;
 public class DefaultDataConverter implements DataConverter {
 
     @Override
-    public DataSeries convertToDataSeries(
-            List<Map<String, Object>> queryResults) {
-        if (queryResults == null || queryResults.isEmpty()) {
-            return new DataSeries();
+    public List<Series> convertToSeries(
+            List<Map<String, Object>> data) {
+        if (data == null || data.isEmpty()) {
+            return List.of(new DataSeries());
         }
 
-        Map<String, Object> firstRow = queryResults.get(0);
+        Map<String, Object> firstRow = data.get(0);
         List<String> columnNames = new ArrayList<>(firstRow.keySet());
 
         if (columnNames.isEmpty()) {
@@ -55,14 +56,14 @@ public class DefaultDataConverter implements DataConverter {
                     "Query results must have at least 1 column");
         }
 
-        return switch (columnNames.size()) {
-        case 1 -> convertSingleColumn(queryResults, columnNames);
-        case 2 -> convertTwoColumns(queryResults, columnNames);
-        case 3 -> convertThreeColumns(queryResults, columnNames);
-        case 4 -> convertTwoColumns(queryResults, columnNames.subList(0, 2));
-        case 5 -> convertFiveColumns(queryResults, columnNames);
-        default -> convertTwoColumns(queryResults, columnNames.subList(0, 2));
-        };
+        return List.of(switch (columnNames.size()) {
+        case 1 -> convertSingleColumn(data, columnNames);
+        case 2 -> convertTwoColumns(data, columnNames);
+        case 3 -> convertThreeColumns(data, columnNames);
+        case 4 -> convertTwoColumns(data, columnNames.subList(0, 2));
+        case 5 -> convertFiveColumns(data, columnNames);
+        default -> convertTwoColumns(data, columnNames.subList(0, 2));
+        });
     }
 
     private DataSeries convertSingleColumn(

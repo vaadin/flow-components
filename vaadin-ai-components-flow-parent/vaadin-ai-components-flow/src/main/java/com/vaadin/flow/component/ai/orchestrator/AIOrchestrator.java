@@ -446,13 +446,6 @@ public class AIOrchestrator implements Serializable {
                 LOGGER.error("Error in response complete listener", e);
             }
         }
-        for (var controller : controllers) {
-            try {
-                controller.onRequestCompleted();
-            } catch (Exception e) {
-                LOGGER.error("Error in controller onRequestCompleted", e);
-            }
-        }
     }
 
     private static void warnDuplicateToolNames(
@@ -952,7 +945,6 @@ public class AIOrchestrator implements Serializable {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
-            orchestrator.controllers.addAll(controllers);
             orchestrator.attachmentSubmitListener = attachmentSubmitListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
             orchestrator.responseCompleteListener = responseCompleteListener;
