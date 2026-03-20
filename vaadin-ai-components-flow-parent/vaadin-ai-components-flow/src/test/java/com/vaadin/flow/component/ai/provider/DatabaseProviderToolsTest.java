@@ -67,8 +67,8 @@ class DatabaseProviderToolsTest {
         var tool = DatabaseProviderTools.getDatabaseSchema(provider);
         Assertions.assertNotNull(tool.getParametersSchema());
         Assertions.assertTrue(tool.getParametersSchema().contains("\"type\""));
-        Assertions.assertTrue(
-                tool.getParametersSchema().contains("\"object\""));
+        Assertions
+                .assertTrue(tool.getParametersSchema().contains("\"object\""));
     }
 
     @Test
@@ -81,7 +81,6 @@ class DatabaseProviderToolsTest {
     void createAll_returnsListContainingDatabaseSchemaTool() {
         var tools = DatabaseProviderTools.createAll(provider);
         Assertions.assertEquals(1, tools.size());
-        Assertions.assertEquals("get_database_schema",
-                tools.get(0).getName());
+        Assertions.assertEquals("get_database_schema", tools.get(0).getName());
     }
 }
