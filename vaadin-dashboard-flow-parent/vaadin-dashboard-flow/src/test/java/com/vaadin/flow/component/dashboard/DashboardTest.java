@@ -16,20 +16,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 
-public class DashboardTest extends DashboardTestBase {
+class DashboardTest extends DashboardTestBase {
     private Dashboard dashboard;
 
-    @Before
+    @BeforeEach
     @Override
-    public void setup() {
+    void setup() {
         super.setup();
         dashboard = getNewDashboard();
         ui.add(dashboard);
@@ -37,7 +37,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetInArray_widgetIsAdded() {
+    void addWidgetInArray_widgetIsAdded() {
         var widget1 = getNewWidget();
         var widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
@@ -46,7 +46,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetInCollection_widgetIsAdded() {
+    void addWidgetInCollection_widgetIsAdded() {
         var widget1 = getNewWidget();
         var widget2 = getNewWidget();
         dashboard.add(List.of(widget1, widget2));
@@ -55,19 +55,19 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addNullWidget_exceptionIsThrown() {
-        Assert.assertThrows(NullPointerException.class,
+    void addNullWidget_exceptionIsThrown() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.add((DashboardWidget) null));
     }
 
     @Test
-    public void addNullCollection_exceptionIsThrown() {
-        Assert.assertThrows(NullPointerException.class,
+    void addNullCollection_exceptionIsThrown() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.add((Collection<DashboardWidget>) null));
     }
 
     @Test
-    public void addNullWidgetInArray_noWidgetIsAdded() {
+    void addNullWidgetInArray_noWidgetIsAdded() {
         DashboardWidget widget = getNewWidget();
         try {
             dashboard.add(widget, null);
@@ -79,7 +79,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addNullWidgetInCollection_noWidgetIsAdded() {
+    void addNullWidgetInCollection_noWidgetIsAdded() {
         var widgets = new ArrayList<DashboardWidget>();
         widgets.add(getNewWidget());
         widgets.add(null);
@@ -93,7 +93,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAtIndex_widgetIsCorrectlyAdded() {
+    void addWidgetAtIndex_widgetIsCorrectlyAdded() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         DashboardWidget widget3 = getNewWidget();
@@ -105,34 +105,34 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAtInvalidIndex_exceptionIsThrown() {
+    void addWidgetAtInvalidIndex_exceptionIsThrown() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1);
         ui.fakeClientCommunication();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> dashboard.addWidgetAtIndex(2, widget2));
         ui.fakeClientCommunication();
         assertChildComponents(dashboard, widget1);
     }
 
     @Test
-    public void addWidgetAtNegativeIndex_exceptionIsThrown() {
+    void addWidgetAtNegativeIndex_exceptionIsThrown() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> dashboard.addWidgetAtIndex(-1, widget));
         ui.fakeClientCommunication();
         assertChildComponents(dashboard);
     }
 
     @Test
-    public void addNullWidgetAtIndex_exceptionIsThrown() {
-        Assert.assertThrows(NullPointerException.class,
+    void addNullWidgetAtIndex_exceptionIsThrown() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.addWidgetAtIndex(0, null));
     }
 
     @Test
-    public void addWidgetAfter_rootLevelWidget_widgetIsAddedAfter() {
+    void addWidgetAfter_rootLevelWidget_widgetIsAddedAfter() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         DashboardWidget widget3 = getNewWidget();
@@ -144,7 +144,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAfter_lastRootLevelWidget_widgetIsAddedAtEnd() {
+    void addWidgetAfter_lastRootLevelWidget_widgetIsAddedAtEnd() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         DashboardWidget widget3 = getNewWidget();
@@ -156,7 +156,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAfter_sectionWidget_widgetIsAddedInSameSection() {
+    void addWidgetAfter_sectionWidget_widgetIsAddedInSameSection() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -170,7 +170,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAfter_lastSectionWidget_widgetIsAddedAtEndOfSection() {
+    void addWidgetAfter_lastSectionWidget_widgetIsAddedAtEndOfSection() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -184,33 +184,33 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAfter_nullReferenceWidget_exceptionIsThrown() {
+    void addWidgetAfter_nullReferenceWidget_exceptionIsThrown() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.addWidgetAfter(null, widget));
     }
 
     @Test
-    public void addWidgetAfter_nullNewWidget_exceptionIsThrown() {
+    void addWidgetAfter_nullNewWidget_exceptionIsThrown() {
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         ui.fakeClientCommunication();
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.addWidgetAfter(widget, null));
     }
 
     @Test
-    public void addWidgetAfter_referenceWidgetNotFound_exceptionIsThrown() {
+    void addWidgetAfter_referenceWidgetNotFound_exceptionIsThrown() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1);
         ui.fakeClientCommunication();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> dashboard.addWidgetAfter(widget2, getNewWidget()));
     }
 
     @Test
-    public void addWidgetAfter_widgetWithExistingParent_widgetIsMovedAfterReference() {
+    void addWidgetAfter_widgetWithExistingParent_widgetIsMovedAfterReference() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         DashboardWidget widget3 = getNewWidget();
@@ -222,26 +222,26 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAfterInSection_nullReferenceWidget_exceptionIsThrown() {
+    void addWidgetAfterInSection_nullReferenceWidget_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> section.addWidgetAfter(null, widget));
     }
 
     @Test
-    public void addWidgetAfterInSection_referenceWidgetNotFound_exceptionIsThrown() {
+    void addWidgetAfterInSection_referenceWidgetNotFound_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         section.add(widget1);
         ui.fakeClientCommunication();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> section.addWidgetAfter(widget2, getNewWidget()));
     }
 
     @Test
-    public void removeWidgetInArray_widgetIsRemoved() {
+    void removeWidgetInArray_widgetIsRemoved() {
         var widget1 = getNewWidget();
         var widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
@@ -252,7 +252,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeWidgetInCollection_widgetIsRemoved() {
+    void removeWidgetInCollection_widgetIsRemoved() {
         var widget1 = getNewWidget();
         var widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
@@ -263,19 +263,19 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeNullWidget_exceptionIsThrown() {
-        Assert.assertThrows(NullPointerException.class,
+    void removeNullWidget_exceptionIsThrown() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.remove((DashboardWidget) null));
     }
 
     @Test
-    public void removeNullWidgetCollection_exceptionIsThrown() {
-        Assert.assertThrows(NullPointerException.class,
+    void removeNullWidgetCollection_exceptionIsThrown() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.remove((Collection<DashboardWidget>) null));
     }
 
     @Test
-    public void removeAllWidgets_widgetsAreRemoved() {
+    void removeAllWidgets_widgetsAreRemoved() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
@@ -286,7 +286,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeWidgetFromParent_widgetIsRemoved() {
+    void removeWidgetFromParent_widgetIsRemoved() {
         DashboardWidget widget1 = getNewWidget();
         dashboard.add(widget1);
         ui.fakeClientCommunication();
@@ -296,7 +296,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addMultipleWidgets_removeOneFromParent_widgetIsRemoved() {
+    void addMultipleWidgets_removeOneFromParent_widgetIsRemoved() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
@@ -307,7 +307,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetsSeparately_removeOneFromParent_widgetIsRemoved() {
+    void addWidgetsSeparately_removeOneFromParent_widgetIsRemoved() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1);
@@ -319,7 +319,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetFromLayoutToDashboard_widgetIsMoved() {
+    void addWidgetFromLayoutToDashboard_widgetIsMoved() {
         Div parent = new Div();
         ui.add(parent);
         DashboardWidget widget = getNewWidget();
@@ -327,12 +327,12 @@ public class DashboardTest extends DashboardTestBase {
         ui.fakeClientCommunication();
         dashboard.add(widget);
         ui.fakeClientCommunication();
-        Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
+        Assertions.assertTrue(parent.getChildren().noneMatch(widget::equals));
         assertChildComponents(dashboard, widget);
     }
 
     @Test
-    public void addWidgetFromDashboardToLayout_widgetIsMoved() {
+    void addWidgetFromDashboardToLayout_widgetIsMoved() {
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         ui.fakeClientCommunication();
@@ -341,11 +341,11 @@ public class DashboardTest extends DashboardTestBase {
         parent.add(widget);
         ui.fakeClientCommunication();
         assertChildComponents(dashboard);
-        Assert.assertTrue(parent.getChildren().anyMatch(widget::equals));
+        Assertions.assertTrue(parent.getChildren().anyMatch(widget::equals));
     }
 
     @Test
-    public void addWidgetToAnotherDashboard_widgetIsMoved() {
+    void addWidgetToAnotherDashboard_widgetIsMoved() {
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         ui.fakeClientCommunication();
@@ -358,7 +358,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addSectionWithoutTitle_sectionIsAdded() {
+    void addSectionWithoutTitle_sectionIsAdded() {
         DashboardSection section1 = dashboard.addSection();
         DashboardSection section2 = dashboard.addSection();
         ui.fakeClientCommunication();
@@ -366,7 +366,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addSectionWithNullTitle_sectionIsAdded() {
+    void addSectionWithNullTitle_sectionIsAdded() {
         DashboardSection section1 = dashboard.addSection((String) null);
         DashboardSection section2 = dashboard.addSection((String) null);
         ui.fakeClientCommunication();
@@ -374,7 +374,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addSectionWithTitle_sectionIsAdded() {
+    void addSectionWithTitle_sectionIsAdded() {
         DashboardSection section1 = dashboard.addSection("Section 1");
         DashboardSection section2 = dashboard.addSection("Section 2");
         ui.fakeClientCommunication();
@@ -382,7 +382,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void createAndAddSectionWithoutTitle_sectionIsAdded() {
+    void createAndAddSectionWithoutTitle_sectionIsAdded() {
         DashboardSection section1 = new DashboardSection();
         DashboardSection section2 = new DashboardSection();
         dashboard.addSection(section1);
@@ -392,7 +392,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void createAndAddSectionWithNullTitle_sectionIsAdded() {
+    void createAndAddSectionWithNullTitle_sectionIsAdded() {
         DashboardSection section1 = new DashboardSection(null);
         DashboardSection section2 = new DashboardSection(null);
         dashboard.addSection(section1);
@@ -402,7 +402,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void createAndAddSectionWithTitle_sectionIsAdded() {
+    void createAndAddSectionWithTitle_sectionIsAdded() {
         DashboardSection section1 = new DashboardSection("Section 1");
         DashboardSection section2 = new DashboardSection("Section 2");
         dashboard.addSection(section1);
@@ -412,13 +412,13 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addNullSection_exceptionIsThrown() {
-        Assert.assertThrows(NullPointerException.class,
+    void addNullSection_exceptionIsThrown() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.addSection((DashboardSection) null));
     }
 
     @Test
-    public void removeSection_sectionIsRemoved() {
+    void removeSection_sectionIsRemoved() {
         DashboardSection section1 = dashboard.addSection();
         DashboardSection section2 = dashboard.addSection();
         ui.fakeClientCommunication();
@@ -428,13 +428,13 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeNullSection_exceptionIsThrown() {
-        Assert.assertThrows(NullPointerException.class,
+    void removeNullSection_exceptionIsThrown() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> dashboard.remove((DashboardSection) null));
     }
 
     @Test
-    public void removeAllSections_sectionsAreRemoved() {
+    void removeAllSections_sectionsAreRemoved() {
         dashboard.addSection();
         dashboard.addSection();
         ui.fakeClientCommunication();
@@ -444,7 +444,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeSectionFromParent_sectionIsRemoved() {
+    void removeSectionFromParent_sectionIsRemoved() {
         DashboardSection section = dashboard.addSection();
         ui.fakeClientCommunication();
         section.removeFromParent();
@@ -453,7 +453,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addMultipleSections_removeOneFromParent_sectionIsRemoved() {
+    void addMultipleSections_removeOneFromParent_sectionIsRemoved() {
         DashboardSection section1 = dashboard.addSection();
         DashboardSection section2 = dashboard.addSection();
         ui.fakeClientCommunication();
@@ -463,7 +463,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setTitleOnExistingSection_itemsAreUpdatedWithCorrectTitles() {
+    void setTitleOnExistingSection_itemsAreUpdatedWithCorrectTitles() {
         DashboardSection section = dashboard.addSection("Section");
         ui.fakeClientCommunication();
         section.setTitle("New title");
@@ -472,19 +472,19 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addSectionWithWidget_removeWidgetFromDashboard_throwsException() {
+    void addSectionWithWidget_removeWidgetFromDashboard_throwsException() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
         section.add(widget);
         ui.fakeClientCommunication();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> dashboard.remove(widget));
         ui.fakeClientCommunication();
         assertChildComponents(dashboard, section);
     }
 
     @Test
-    public void addSection_addWidgetToSection_widgetIsAdded() {
+    void addSection_addWidgetToSection_widgetIsAdded() {
         DashboardSection section = dashboard.addSection();
         ui.fakeClientCommunication();
         DashboardWidget widget = getNewWidget();
@@ -494,7 +494,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addSectionAndWidget_removeWidget_widgetRemoved() {
+    void addSectionAndWidget_removeWidget_widgetRemoved() {
         DashboardSection section = dashboard.addSection();
         section.add(getNewWidget());
         DashboardWidget widget = getNewWidget();
@@ -506,7 +506,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addSectionAndWidget_removeSection_sectionRemoved() {
+    void addSectionAndWidget_removeSection_sectionRemoved() {
         DashboardSection section = dashboard.addSection();
         section.add(getNewWidget());
         DashboardWidget widget = getNewWidget();
@@ -518,7 +518,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addSectionAndWidget_removeAll_widgetAndSectionRemoved() {
+    void addSectionAndWidget_removeAll_widgetAndSectionRemoved() {
         DashboardSection section = dashboard.addSection();
         section.add(getNewWidget());
         DashboardWidget widget = getNewWidget();
@@ -530,7 +530,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetToSection_widgetIsAdded() {
+    void addWidgetToSection_widgetIsAdded() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -542,16 +542,16 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addNullWidgetToSection_exceptionIsThrown() {
+    void addNullWidgetToSection_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> section.add((DashboardWidget) null));
         ui.fakeClientCommunication();
         assertChildComponents(dashboard, section);
     }
 
     @Test
-    public void addNullWidgetInArrayToSection_noWidgetIsAdded() {
+    void addNullWidgetInArrayToSection_noWidgetIsAdded() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
         try {
@@ -565,7 +565,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAtIndexToSection_widgetIsCorrectlyAdded() {
+    void addWidgetAtIndexToSection_widgetIsCorrectlyAdded() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -579,13 +579,13 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAtInvalidIndexToSection_exceptionIsThrown() {
+    void addWidgetAtInvalidIndexToSection_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         section.add(widget1);
         ui.fakeClientCommunication();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> section.addWidgetAtIndex(2, widget2));
         ui.fakeClientCommunication();
         assertSectionWidgets(section, widget1);
@@ -593,10 +593,10 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetAtNegativeIndexToSection_exceptionIsThrown() {
+    void addWidgetAtNegativeIndexToSection_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> section.addWidgetAtIndex(-1, widget));
         ui.fakeClientCommunication();
         assertSectionWidgets(section);
@@ -604,16 +604,16 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addNullWidgetAtIndexToSection_exceptionIsThrown() {
+    void addNullWidgetAtIndexToSection_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
         ui.fakeClientCommunication();
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> section.addWidgetAtIndex(0, null));
         assertChildComponents(dashboard, section);
     }
 
     @Test
-    public void removeWidgetFromSection_widgetIsRemoved() {
+    void removeWidgetFromSection_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -626,16 +626,16 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeNullWidgetFromSection_exceptionIsThrown() {
+    void removeNullWidgetFromSection_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
         ui.fakeClientCommunication();
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> section.remove((DashboardWidget) null));
         assertChildComponents(dashboard, section);
     }
 
     @Test
-    public void removeAllWidgetsFromSection_widgetsAreRemoved() {
+    void removeAllWidgetsFromSection_widgetsAreRemoved() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -648,7 +648,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeWidgetInSectionFromParent_widgetIsRemoved() {
+    void removeWidgetInSectionFromParent_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         section.add(widget1);
@@ -660,7 +660,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addMultipleWidgetsToSection_removeOneFromParent_widgetIsRemoved() {
+    void addMultipleWidgetsToSection_removeOneFromParent_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -673,7 +673,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetsSeparatelyToSection_removeOneFromParent_widgetIsRemoved() {
+    void addWidgetsSeparatelyToSection_removeOneFromParent_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
@@ -687,7 +687,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidgetFromLayoutToSection_widgetIsMoved() {
+    void addWidgetFromLayoutToSection_widgetIsMoved() {
         DashboardSection section = dashboard.addSection();
         Div parent = new Div();
         ui.add(parent);
@@ -696,13 +696,13 @@ public class DashboardTest extends DashboardTestBase {
         ui.fakeClientCommunication();
         section.add(widget);
         ui.fakeClientCommunication();
-        Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
+        Assertions.assertTrue(parent.getChildren().noneMatch(widget::equals));
         assertSectionWidgets(section, widget);
         assertChildComponents(dashboard, section);
     }
 
     @Test
-    public void addWidgetFromSectionToLayout_widgetIsMoved() {
+    void addWidgetFromSectionToLayout_widgetIsMoved() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
         section.add(widget);
@@ -712,12 +712,12 @@ public class DashboardTest extends DashboardTestBase {
         parent.add(widget);
         ui.fakeClientCommunication();
         assertSectionWidgets(section);
-        Assert.assertTrue(parent.getChildren().anyMatch(widget::equals));
+        Assertions.assertTrue(parent.getChildren().anyMatch(widget::equals));
         assertChildComponents(dashboard, section);
     }
 
     @Test
-    public void addWidgetToAnotherSection_widgetIsMoved() {
+    void addWidgetToAnotherSection_widgetIsMoved() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
         section.add(widget);
@@ -731,46 +731,46 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setMaximumColumnCount_valueIsCorrectlySet() {
+    void setMaximumColumnCount_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-col-max-count";
         int valueToSet = 5;
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
         dashboard.setMaximumColumnCount(valueToSet);
-        Assert.assertEquals(String.valueOf(valueToSet),
+        Assertions.assertEquals(String.valueOf(valueToSet),
                 dashboard.getStyle().get(propertyName));
         dashboard.setMaximumColumnCount(null);
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setMaximumColumnCountNull_propertyIsRemoved() {
+    void setMaximumColumnCountNull_propertyIsRemoved() {
         dashboard.setMaximumColumnCount(5);
         dashboard.setMaximumColumnCount(null);
-        Assert.assertNull(
+        Assertions.assertNull(
                 dashboard.getStyle().get("--vaadin-dashboard-col-max-count"));
     }
 
     @Test
-    public void defaultMaximumColumnCountValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getMaximumColumnCount());
+    void defaultMaximumColumnCountValueIsCorrectlyRetrieved() {
+        Assertions.assertNull(dashboard.getMaximumColumnCount());
     }
 
     @Test
-    public void setMaximumColumnCount_valueIsCorrectlyRetrieved() {
+    void setMaximumColumnCount_valueIsCorrectlyRetrieved() {
         Integer valueToSet = 5;
         dashboard.setMaximumColumnCount(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getMaximumColumnCount());
+        Assertions.assertEquals(valueToSet, dashboard.getMaximumColumnCount());
     }
 
     @Test
-    public void setMaximumColumnCountNull_valueIsCorrectlyRetrieved() {
+    void setMaximumColumnCountNull_valueIsCorrectlyRetrieved() {
         dashboard.setMaximumColumnCount(5);
         dashboard.setMaximumColumnCount(null);
-        Assert.assertNull(dashboard.getMaximumColumnCount());
+        Assertions.assertNull(dashboard.getMaximumColumnCount());
     }
 
     @Test
-    public void setWidgetsWithDifferentColspans_itemsAreGeneratedWithCorrectColspans() {
+    void setWidgetsWithDifferentColspans_itemsAreGeneratedWithCorrectColspans() {
         DashboardWidget widget1 = getNewWidget();
         DashboardWidget widget2 = getNewWidget();
         widget2.setColspan(2);
@@ -780,7 +780,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setColspanOnExistingWidget_itemsAreUpdatedWithCorrectColspans() {
+    void setColspanOnExistingWidget_itemsAreUpdatedWithCorrectColspans() {
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         ui.fakeClientCommunication();
@@ -790,232 +790,238 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setMaximumColumnWidth_valueIsCorrectlySet() {
+    void setMaximumColumnWidth_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-col-max-width";
         String valueToSet = "50px";
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
         dashboard.setMaximumColumnWidth(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        Assertions.assertEquals(valueToSet,
+                dashboard.getStyle().get(propertyName));
         dashboard.setMaximumColumnWidth(null);
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setMaximumColumnWidthNull_propertyIsRemoved() {
+    void setMaximumColumnWidthNull_propertyIsRemoved() {
         dashboard.setMaximumColumnWidth("50px");
         dashboard.setMaximumColumnWidth(null);
-        Assert.assertNull(
+        Assertions.assertNull(
                 dashboard.getStyle().get("--vaadin-dashboard-col-max-width"));
     }
 
     @Test
-    public void defaultMaximumColumnWidthValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getMaximumColumnWidth());
+    void defaultMaximumColumnWidthValueIsCorrectlyRetrieved() {
+        Assertions.assertNull(dashboard.getMaximumColumnWidth());
     }
 
     @Test
-    public void setMaximumColumnWidth_valueIsCorrectlyRetrieved() {
+    void setMaximumColumnWidth_valueIsCorrectlyRetrieved() {
         String valueToSet = "50px";
         dashboard.setMaximumColumnWidth(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getMaximumColumnWidth());
+        Assertions.assertEquals(valueToSet, dashboard.getMaximumColumnWidth());
     }
 
     @Test
-    public void setMaximumColumnWidthNull_valueIsCorrectlyRetrieved() {
+    void setMaximumColumnWidthNull_valueIsCorrectlyRetrieved() {
         dashboard.setMaximumColumnWidth("50px");
         dashboard.setMaximumColumnWidth(null);
-        Assert.assertNull(dashboard.getMaximumColumnWidth());
+        Assertions.assertNull(dashboard.getMaximumColumnWidth());
     }
 
     @Test
-    public void setMinimumColumnWidth_valueIsCorrectlySet() {
+    void setMinimumColumnWidth_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-col-min-width";
         String valueToSet = "50px";
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
         dashboard.setMinimumColumnWidth(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        Assertions.assertEquals(valueToSet,
+                dashboard.getStyle().get(propertyName));
         dashboard.setMinimumColumnWidth(null);
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setMinimumColumnWidthNull_propertyIsRemoved() {
+    void setMinimumColumnWidthNull_propertyIsRemoved() {
         dashboard.setMinimumColumnWidth("50px");
         dashboard.setMinimumColumnWidth(null);
-        Assert.assertNull(
+        Assertions.assertNull(
                 dashboard.getStyle().get("--vaadin-dashboard-col-min-width"));
     }
 
     @Test
-    public void defaultMinimumColumnWidthValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getMinimumColumnWidth());
+    void defaultMinimumColumnWidthValueIsCorrectlyRetrieved() {
+        Assertions.assertNull(dashboard.getMinimumColumnWidth());
     }
 
     @Test
-    public void setMinimumColumnWidth_valueIsCorrectlyRetrieved() {
+    void setMinimumColumnWidth_valueIsCorrectlyRetrieved() {
         String valueToSet = "50px";
         dashboard.setMinimumColumnWidth(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getMinimumColumnWidth());
+        Assertions.assertEquals(valueToSet, dashboard.getMinimumColumnWidth());
     }
 
     @Test
-    public void setMinimumColumnWidthNull_valueIsCorrectlyRetrieved() {
+    void setMinimumColumnWidthNull_valueIsCorrectlyRetrieved() {
         dashboard.setMinimumColumnWidth("50px");
         dashboard.setMinimumColumnWidth(null);
-        Assert.assertNull(dashboard.getMinimumColumnWidth());
+        Assertions.assertNull(dashboard.getMinimumColumnWidth());
     }
 
     @Test
-    public void setMinimumRowHeight_valueIsCorrectlySet() {
+    void setMinimumRowHeight_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-row-min-height";
         String valueToSet = "200px";
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
         dashboard.setMinimumRowHeight(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        Assertions.assertEquals(valueToSet,
+                dashboard.getStyle().get(propertyName));
         dashboard.setMinimumRowHeight(null);
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setMinimumRowHeightNull_propertyIsRemoved() {
+    void setMinimumRowHeightNull_propertyIsRemoved() {
         dashboard.setMinimumRowHeight("200px");
         dashboard.setMinimumRowHeight(null);
-        Assert.assertNull(
+        Assertions.assertNull(
                 dashboard.getStyle().get("--vaadin-dashboard-row-min-height"));
     }
 
     @Test
-    public void defaultMinimumRowHeightValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getMinimumRowHeight());
+    void defaultMinimumRowHeightValueIsCorrectlyRetrieved() {
+        Assertions.assertNull(dashboard.getMinimumRowHeight());
     }
 
     @Test
-    public void setMinimumRowHeight_valueIsCorrectlyRetrieved() {
+    void setMinimumRowHeight_valueIsCorrectlyRetrieved() {
         String valueToSet = "200px";
         dashboard.setMinimumRowHeight(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getMinimumRowHeight());
+        Assertions.assertEquals(valueToSet, dashboard.getMinimumRowHeight());
     }
 
     @Test
-    public void setMinimumRowHeightNull_valueIsCorrectlyRetrieved() {
+    void setMinimumRowHeightNull_valueIsCorrectlyRetrieved() {
         dashboard.setMinimumRowHeight("200px");
         dashboard.setMinimumRowHeight(null);
-        Assert.assertNull(dashboard.getMinimumRowHeight());
+        Assertions.assertNull(dashboard.getMinimumRowHeight());
     }
 
     @Test
-    public void setGap_valueIsCorrectlySet() {
+    void setGap_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-gap";
         String valueToSet = "10px";
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
         dashboard.setGap(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        Assertions.assertEquals(valueToSet,
+                dashboard.getStyle().get(propertyName));
         dashboard.setGap(null);
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setGapNull_propertyIsRemoved() {
+    void setGapNull_propertyIsRemoved() {
         dashboard.setGap("10px");
         dashboard.setGap(null);
-        Assert.assertNull(dashboard.getStyle().get("--vaadin-dashboard-gap"));
+        Assertions
+                .assertNull(dashboard.getStyle().get("--vaadin-dashboard-gap"));
     }
 
     @Test
-    public void defaultGapValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getGap());
+    void defaultGapValueIsCorrectlyRetrieved() {
+        Assertions.assertNull(dashboard.getGap());
     }
 
     @Test
-    public void setGap_valueIsCorrectlyRetrieved() {
+    void setGap_valueIsCorrectlyRetrieved() {
         String valueToSet = "10px";
         dashboard.setGap(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getGap());
+        Assertions.assertEquals(valueToSet, dashboard.getGap());
     }
 
     @Test
-    public void setGapNull_valueIsCorrectlyRetrieved() {
+    void setGapNull_valueIsCorrectlyRetrieved() {
         dashboard.setGap("10px");
         dashboard.setGap(null);
-        Assert.assertNull(dashboard.getGap());
+        Assertions.assertNull(dashboard.getGap());
     }
 
     @Test
-    public void setPadding_valueIsCorrectlySet() {
+    void setPadding_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-padding";
         String valueToSet = "10px";
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
         dashboard.setPadding(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        Assertions.assertEquals(valueToSet,
+                dashboard.getStyle().get(propertyName));
         dashboard.setPadding(null);
-        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setPaddingNull_propertyIsRemoved() {
+    void setPaddingNull_propertyIsRemoved() {
         dashboard.setPadding("10px");
         dashboard.setPadding(null);
-        Assert.assertNull(
+        Assertions.assertNull(
                 dashboard.getStyle().get("--vaadin-dashboard-padding"));
     }
 
     @Test
-    public void defaultPaddingValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getPadding());
+    void defaultPaddingValueIsCorrectlyRetrieved() {
+        Assertions.assertNull(dashboard.getPadding());
     }
 
     @Test
-    public void setPadding_valueIsCorrectlyRetrieved() {
+    void setPadding_valueIsCorrectlyRetrieved() {
         String valueToSet = "10px";
         dashboard.setPadding(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getPadding());
+        Assertions.assertEquals(valueToSet, dashboard.getPadding());
     }
 
     @Test
-    public void setPaddingNull_valueIsCorrectlyRetrieved() {
+    void setPaddingNull_valueIsCorrectlyRetrieved() {
         dashboard.setPadding("10px");
         dashboard.setPadding(null);
-        Assert.assertNull(dashboard.getPadding());
+        Assertions.assertNull(dashboard.getPadding());
     }
 
     @Test
-    public void dashboardIsNotEditableByDefault() {
-        Assert.assertFalse(dashboard.isEditable());
+    void dashboardIsNotEditableByDefault() {
+        Assertions.assertFalse(dashboard.isEditable());
     }
 
     @Test
-    public void setEditableFalse_valueIsCorrectlyRetrieved() {
+    void setEditableFalse_valueIsCorrectlyRetrieved() {
         dashboard.setEditable(false);
-        Assert.assertFalse(dashboard.isEditable());
+        Assertions.assertFalse(dashboard.isEditable());
     }
 
     @Test
-    public void setEditableTrue_valueIsCorrectlyRetrieved() {
+    void setEditableTrue_valueIsCorrectlyRetrieved() {
         dashboard.setEditable(false);
         dashboard.setEditable(true);
-        Assert.assertTrue(dashboard.isEditable());
+        Assertions.assertTrue(dashboard.isEditable());
     }
 
     @Test
-    public void dashboardIsNotDenseLayoutByDefault() {
-        Assert.assertFalse(dashboard.isDenseLayout());
+    void dashboardIsNotDenseLayoutByDefault() {
+        Assertions.assertFalse(dashboard.isDenseLayout());
     }
 
     @Test
-    public void setDenseLayoutFalse_valueIsCorrectlyRetrieved() {
+    void setDenseLayoutFalse_valueIsCorrectlyRetrieved() {
         dashboard.setDenseLayout(false);
-        Assert.assertFalse(dashboard.isDenseLayout());
+        Assertions.assertFalse(dashboard.isDenseLayout());
     }
 
     @Test
-    public void setDenseLayoutTrue_valueIsCorrectlyRetrieved() {
+    void setDenseLayoutTrue_valueIsCorrectlyRetrieved() {
         dashboard.setDenseLayout(false);
         dashboard.setDenseLayout(true);
-        Assert.assertTrue(dashboard.isDenseLayout());
+        Assertions.assertTrue(dashboard.isDenseLayout());
     }
 
     @Test
-    public void addWidget_detachDashboard_widgetIsRetained() {
+    void addWidget_detachDashboard_widgetIsRetained() {
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         ui.fakeClientCommunication();
@@ -1025,7 +1031,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void detachDashboard_addWidget_reattachDashboard_widgetIsAdded() {
+    void detachDashboard_addWidget_reattachDashboard_widgetIsAdded() {
         ui.remove(dashboard);
         ui.fakeClientCommunication();
         DashboardWidget widget = getNewWidget();
@@ -1035,7 +1041,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void dashboardNotEditable_removeWidget_widgetIsNotRemoved() {
+    void dashboardNotEditable_removeWidget_widgetIsNotRemoved() {
         DashboardWidget widgetToRemove = getNewWidget();
         dashboard.add(widgetToRemove);
         ui.fakeClientCommunication();
@@ -1043,15 +1049,16 @@ public class DashboardTest extends DashboardTestBase {
         int expectedNodeId = widgetToRemove.getElement().getNode().getId();
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard,
                 expectedNodeId);
-        Assert.assertEquals(expectedWidgetCount, dashboard.getWidgets().size());
+        Assertions.assertEquals(expectedWidgetCount,
+                dashboard.getWidgets().size());
         Set<Integer> actualNodeIds = dashboard.getWidgets().stream()
                 .map(widget -> widget.getElement().getNode().getId())
                 .collect(Collectors.toSet());
-        Assert.assertTrue(actualNodeIds.contains(expectedNodeId));
+        Assertions.assertTrue(actualNodeIds.contains(expectedNodeId));
     }
 
     @Test
-    public void setDashboardEditable_removeWidget_widgetIsRemoved() {
+    void setDashboardEditable_removeWidget_widgetIsRemoved() {
         DashboardWidget widgetToRemove = getNewWidget();
         dashboard.add(widgetToRemove);
         dashboard.setEditable(true);
@@ -1060,15 +1067,16 @@ public class DashboardTest extends DashboardTestBase {
         int nodeIdToBeRemoved = widgetToRemove.getElement().getNode().getId();
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard,
                 nodeIdToBeRemoved);
-        Assert.assertEquals(expectedWidgetCount, dashboard.getWidgets().size());
+        Assertions.assertEquals(expectedWidgetCount,
+                dashboard.getWidgets().size());
         Set<Integer> actualNodeIds = dashboard.getWidgets().stream()
                 .map(widget -> widget.getElement().getNode().getId())
                 .collect(Collectors.toSet());
-        Assert.assertFalse(actualNodeIds.contains(nodeIdToBeRemoved));
+        Assertions.assertFalse(actualNodeIds.contains(nodeIdToBeRemoved));
     }
 
     @Test
-    public void setDashboardEditable_removeWidget_clientUpdate() {
+    void setDashboardEditable_removeWidget_clientUpdate() {
         DashboardWidget widgetToRemove = getNewWidget();
         dashboard.add(widgetToRemove);
         dashboard.setEditable(true);
@@ -1080,11 +1088,11 @@ public class DashboardTest extends DashboardTestBase {
                 nodeIdToBeRemoved);
         ui.fakeClientCommunication();
 
-        Assert.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
+        Assertions.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test
-    public void setDashboardEditable_removeWidget_eventCorrectlyFired() {
+    void setDashboardEditable_removeWidget_eventCorrectlyFired() {
         dashboard.setEditable(true);
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
@@ -1098,7 +1106,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setDashboardEditable_removeSection_eventCorrectlyFired() {
+    void setDashboardEditable_removeSection_eventCorrectlyFired() {
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
         ui.fakeClientCommunication();
@@ -1111,7 +1119,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setDashboardEditable_removeWidgetInSection_eventCorrectlyFired() {
+    void setDashboardEditable_removeWidgetInSection_eventCorrectlyFired() {
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
@@ -1126,7 +1134,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void dashboardNotEditable_removeWidget_eventNotFired() {
+    void dashboardNotEditable_removeWidget_eventNotFired() {
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         ui.fakeClientCommunication();
@@ -1135,7 +1143,7 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setItemRemoveHandler_widgetNotRemovedAutomatically() {
+    void setItemRemoveHandler_widgetNotRemovedAutomatically() {
         dashboard.setEditable(true);
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
@@ -1147,12 +1155,12 @@ public class DashboardTest extends DashboardTestBase {
         int nodeId = widget.getElement().getNode().getId();
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard, nodeId);
 
-        Assert.assertEquals(1, dashboard.getWidgets().size());
-        Assert.assertTrue(dashboard.getWidgets().contains(widget));
+        Assertions.assertEquals(1, dashboard.getWidgets().size());
+        Assertions.assertTrue(dashboard.getWidgets().contains(widget));
     }
 
     @Test
-    public void setItemRemoveHandler_callRemoveItem_widgetRemoved() {
+    void setItemRemoveHandler_callRemoveItem_widgetRemoved() {
         dashboard.setEditable(true);
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
@@ -1165,13 +1173,13 @@ public class DashboardTest extends DashboardTestBase {
         int nodeId = widget.getElement().getNode().getId();
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard, nodeId);
 
-        Assert.assertEquals(0, dashboard.getWidgets().size());
-        Assert.assertNotNull(removedEvent.get());
-        Assert.assertEquals(widget, removedEvent.get().getItem());
+        Assertions.assertEquals(0, dashboard.getWidgets().size());
+        Assertions.assertNotNull(removedEvent.get());
+        Assertions.assertEquals(widget, removedEvent.get().getItem());
     }
 
     @Test
-    public void setItemRemoveHandler_callRemoveItem_sectionRemoved() {
+    void setItemRemoveHandler_callRemoveItem_sectionRemoved() {
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
         ui.fakeClientCommunication();
@@ -1183,13 +1191,13 @@ public class DashboardTest extends DashboardTestBase {
         int nodeId = section.getElement().getNode().getId();
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard, nodeId);
 
-        Assert.assertEquals(0, dashboard.getChildren().count());
-        Assert.assertNotNull(removedEvent.get());
-        Assert.assertEquals(section, removedEvent.get().getItem());
+        Assertions.assertEquals(0, dashboard.getChildren().count());
+        Assertions.assertNotNull(removedEvent.get());
+        Assertions.assertEquals(section, removedEvent.get().getItem());
     }
 
     @Test
-    public void setItemRemoveHandler_callRemoveItem_clientUpdate() {
+    void setItemRemoveHandler_callRemoveItem_clientUpdate() {
         DashboardWidget widgetToRemove = getNewWidget();
         dashboard.add(widgetToRemove);
         dashboard.setEditable(true);
@@ -1203,11 +1211,11 @@ public class DashboardTest extends DashboardTestBase {
                 nodeIdToBeRemoved);
         ui.fakeClientCommunication();
 
-        Assert.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
+        Assertions.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test
-    public void setItemRemoveHandler_widgetAndSectionProvidedInEvent() {
+    void setItemRemoveHandler_widgetAndSectionProvidedInEvent() {
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
@@ -1223,9 +1231,9 @@ public class DashboardTest extends DashboardTestBase {
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard, widgetNodeId,
                 sectionNodeId);
 
-        Assert.assertNotNull(capturedEvent.get());
-        Assert.assertEquals(widget, capturedEvent.get().getItem());
-        Assert.assertEquals(section,
+        Assertions.assertNotNull(capturedEvent.get());
+        Assertions.assertEquals(widget, capturedEvent.get().getItem());
+        Assertions.assertEquals(section,
                 capturedEvent.get().getSection().orElse(null));
 
         // Removing the section
@@ -1233,13 +1241,13 @@ public class DashboardTest extends DashboardTestBase {
 
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard, sectionNodeId);
 
-        Assert.assertNotNull(capturedEvent.get());
-        Assert.assertEquals(section, capturedEvent.get().getItem());
-        Assert.assertTrue(capturedEvent.get().getSection().isEmpty());
+        Assertions.assertNotNull(capturedEvent.get());
+        Assertions.assertEquals(section, capturedEvent.get().getItem());
+        Assertions.assertTrue(capturedEvent.get().getSection().isEmpty());
     }
 
     @Test
-    public void setItemRemoveHandler_removeHandler_defaultBehaviorRestored() {
+    void setItemRemoveHandler_removeHandler_defaultBehaviorRestored() {
         dashboard.setEditable(true);
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
@@ -1252,52 +1260,52 @@ public class DashboardTest extends DashboardTestBase {
         int nodeId = widget.getElement().getNode().getId();
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard, nodeId);
 
-        Assert.assertEquals(0, dashboard.getWidgets().size());
+        Assertions.assertEquals(0, dashboard.getWidgets().size());
     }
 
     @Test
-    public void getItemRemoveHandler_returnsSetHandler() {
-        Assert.assertNull(dashboard.getItemRemoveHandler());
+    void getItemRemoveHandler_returnsSetHandler() {
+        Assertions.assertNull(dashboard.getItemRemoveHandler());
 
         DashboardItemRemoveHandler handler = event -> {
         };
         dashboard.setItemRemoveHandler(handler);
-        Assert.assertEquals(handler, dashboard.getItemRemoveHandler());
+        Assertions.assertEquals(handler, dashboard.getItemRemoveHandler());
 
         dashboard.setItemRemoveHandler(null);
-        Assert.assertNull(dashboard.getItemRemoveHandler());
+        Assertions.assertNull(dashboard.getItemRemoveHandler());
     }
 
     @Test
-    public void setDashboardVisibility_exceptionIsThrown() {
-        Assert.assertThrows(UnsupportedOperationException.class,
+    void setDashboardVisibility_exceptionIsThrown() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> dashboard.setVisible(false));
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> dashboard.setVisible(true));
     }
 
     @Test
-    public void setDashboardSectionVisibility_exceptionIsThrown() {
+    void setDashboardSectionVisibility_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> section.setVisible(false));
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> section.setVisible(true));
     }
 
     @Test
-    public void getDashboardVisibility_returnsTrue() {
-        Assert.assertTrue(dashboard.isVisible());
+    void getDashboardVisibility_returnsTrue() {
+        Assertions.assertTrue(dashboard.isVisible());
     }
 
     @Test
-    public void getSectionVisibility_returnsTrue() {
+    void getSectionVisibility_returnsTrue() {
         DashboardSection section = dashboard.addSection();
-        Assert.assertTrue(section.isVisible());
+        Assertions.assertTrue(section.isVisible());
     }
 
     @Test
-    public void changeWidgetSelectedState_eventCorrectlyFired() {
+    void changeWidgetSelectedState_eventCorrectlyFired() {
         DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         assertItemSelectedChangedEventCorrectlyFired(widget, true);
@@ -1305,14 +1313,14 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void changeSectionSelectedState_eventCorrectlyFired() {
+    void changeSectionSelectedState_eventCorrectlyFired() {
         DashboardSection section = dashboard.addSection();
         assertItemSelectedChangedEventCorrectlyFired(section, true);
         assertItemSelectedChangedEventCorrectlyFired(section, false);
     }
 
     @Test
-    public void changeWidgetInSectionSelectedState_eventCorrectlyFired() {
+    void changeWidgetInSectionSelectedState_eventCorrectlyFired() {
         DashboardSection section = dashboard.addSection();
         DashboardWidget widget = getNewWidget();
         section.add(widget);
@@ -1321,28 +1329,28 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setRootHeadingLevel_elementPropertyIsUpdated() {
+    void setRootHeadingLevel_elementPropertyIsUpdated() {
         var rootHeadingLevel = 1;
         dashboard.setRootHeadingLevel(rootHeadingLevel);
-        Assert.assertEquals(rootHeadingLevel,
+        Assertions.assertEquals(rootHeadingLevel,
                 dashboard.getElement().getProperty("rootHeadingLevel", -1));
         rootHeadingLevel = 7;
         dashboard.setRootHeadingLevel(rootHeadingLevel);
-        Assert.assertEquals(rootHeadingLevel,
+        Assertions.assertEquals(rootHeadingLevel,
                 dashboard.getElement().getProperty("rootHeadingLevel", -1));
     }
 
     @Test
-    public void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
+    void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
         dashboard.setRootHeadingLevel(1);
         dashboard.setRootHeadingLevel(null);
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 dashboard.getElement().hasProperty("rootHeadingLevel"));
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Dashboard.class));
     }
 
@@ -1359,9 +1367,9 @@ public class DashboardTest extends DashboardTestBase {
         });
         DashboardTestHelper.fireItemSelectedChangedEvent(dashboard,
                 item.getElement().getNode().getId(), selected);
-        Assert.assertEquals(1, listenerInvokedCount.get());
-        Assert.assertEquals(item, eventItem.get());
-        Assert.assertEquals(selected, eventIsSelected.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(item, eventItem.get());
+        Assertions.assertEquals(selected, eventIsSelected.get());
     }
 
     private void assertItemRemoveEventCorrectlyFired(int nodeIdToRemove,
@@ -1378,11 +1386,12 @@ public class DashboardTest extends DashboardTestBase {
         });
         DashboardTestHelper.fireItemBeforeRemoveEvent(dashboard,
                 nodeIdToRemove);
-        Assert.assertEquals(expectedListenerInvokedCount,
+        Assertions.assertEquals(expectedListenerInvokedCount,
                 listenerInvokedCount.get());
         if (expectedListenerInvokedCount > 0) {
-            Assert.assertEquals(expectedRemovedItem, eventRemovedItem.get());
-            Assert.assertEquals(expectedItems, eventItems.get());
+            Assertions.assertEquals(expectedRemovedItem,
+                    eventRemovedItem.get());
+            Assertions.assertEquals(expectedItems, eventItems.get());
         }
     }
 }
