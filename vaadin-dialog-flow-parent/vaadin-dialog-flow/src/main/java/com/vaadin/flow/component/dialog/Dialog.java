@@ -80,7 +80,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.0-rc1")
+@NpmPackage(value = "@vaadin/dialog", version = "25.2.0-alpha1")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -333,7 +333,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * This method is inherited from {@link HasSize} and is marked as deprecated
      * to indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException} when called.
-     * 
+     *
      * @param widthSignal
      *            the signal to bind, not <code>null</code>
      * @return a {@link SignalBinding} that can be used to register
