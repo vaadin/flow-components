@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 
 import com.vaadin.flow.component.ai.chart.ChartEntry;
 import com.vaadin.flow.component.ai.chart.ChartTools;
+import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.grid.GridTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -60,7 +61,6 @@ public class DashboardTools {
     private final Consumer<String> queryValidator;
     private final WidgetCreator chartWidgetCreator;
     private final WidgetCreator gridWidgetCreator;
-    private final Map<String, GridTools> gridToolsMap;
     private final Map<String, Checkbox> widgetCheckboxes = new LinkedHashMap<>();
     private int widgetCounter = 0;
 
@@ -75,14 +75,10 @@ public class DashboardTools {
      *            creates chart widgets, not {@code null}
      * @param gridWidgetCreator
      *            creates grid widgets, not {@code null}
-     * @param gridToolsMap
-     *            shared map of grid widget ID to {@link GridTools}, not
-     *            {@code null}
      */
     DashboardTools(Dashboard dashboard, Consumer<String> queryValidator,
             WidgetCreator chartWidgetCreator,
-            WidgetCreator gridWidgetCreator,
-            Map<String, GridTools> gridToolsMap) {
+            WidgetCreator gridWidgetCreator) {
         this.dashboard = Objects.requireNonNull(dashboard,
                 "dashboard must not be null");
         this.queryValidator = Objects.requireNonNull(queryValidator,
@@ -91,8 +87,6 @@ public class DashboardTools {
                 "chartWidgetCreator must not be null");
         this.gridWidgetCreator = Objects.requireNonNull(gridWidgetCreator,
                 "gridWidgetCreator must not be null");
-        this.gridToolsMap = Objects.requireNonNull(gridToolsMap,
-                "gridToolsMap must not be null");
     }
 
     /**
@@ -119,14 +113,11 @@ public class DashboardTools {
                 this::getChartWidgetIds,
                 queryValidator));
 
-        // Per-widget grid tools (prefixed with widget ID)
-        for (Map.Entry<String, GridTools> entry : gridToolsMap.entrySet()) {
-            String widgetId = entry.getKey();
-            GridTools gridTools = entry.getValue();
-            for (LLMProvider.ToolSpec tool : gridTools.getTools()) {
-                tools.add(prefixTool(tool, widgetId));
-            }
-        }
+        // Grid tools (shared across all grids, resolved from dashboard)
+        tools.addAll(GridTools.createAll(
+                this::findGridById,
+                this::getGridWidgetIds,
+                queryValidator));
 
         return tools;
     }
@@ -178,6 +169,34 @@ public class DashboardTools {
         for (DashboardWidget widget : dashboard.getWidgets()) {
             if (widget.getContent() instanceof Chart chart) {
                 ChartEntry entry = ChartEntry.get(chart);
+                if (entry != null) {
+                    ids.add(entry.getId());
+                }
+            }
+        }
+        return ids;
+    }
+
+    // ===== Grid Resolution =====
+
+    @SuppressWarnings("unchecked")
+    private Grid<Map<String, Object>> findGridById(String gridId) {
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Grid<?> grid) {
+                GridEntry entry = GridEntry.get(grid);
+                if (entry != null && gridId.equals(entry.getId())) {
+                    return (Grid<Map<String, Object>>) grid;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Set<String> getGridWidgetIds() {
+        var ids = new LinkedHashSet<String>();
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Grid<?> grid) {
+                GridEntry entry = GridEntry.get(grid);
                 if (entry != null) {
                     ids.add(entry.getId());
                 }
@@ -659,9 +678,11 @@ public class DashboardTools {
 
                     // Queue data for deferred rendering
                     if (query != null) {
-                        GridTools gt = gridToolsMap.get(widgetId);
-                        gt.setCurrentSqlQuery(query);
-                        gt.setPendingDataQuery(query);
+                        Grid<?> grid = (Grid<?>) widget.getContent();
+                        GridEntry entry = GridEntry.getOrCreate(grid,
+                                widgetId);
+                        entry.setQuery(query);
+                        entry.setPendingDataUpdate(true);
                     }
 
                     return "{\"widgetId\":\"" + widgetId
@@ -731,8 +752,6 @@ public class DashboardTools {
                         dashboard.remove(toRemove);
                     });
 
-                    gridToolsMap.remove(widgetId);
-
                     return "Widget '" + widgetId + "' removed successfully";
                 } catch (Exception e) {
                     return "Error removing widget: " + e.getMessage();
@@ -751,31 +770,5 @@ public class DashboardTools {
             }
         }
         return null;
-    }
-
-    private LLMProvider.ToolSpec prefixTool(
-            LLMProvider.ToolSpec original, String widgetId) {
-        return new LLMProvider.ToolSpec() {
-            @Override
-            public String getName() {
-                return original.getName() + "_" + widgetId;
-            }
-
-            @Override
-            public String getDescription() {
-                return "[Widget: " + widgetId + "] "
-                        + original.getDescription();
-            }
-
-            @Override
-            public String getParametersSchema() {
-                return original.getParametersSchema();
-            }
-
-            @Override
-            public String execute(String arguments) {
-                return original.execute(arguments);
-            }
-        };
     }
 }

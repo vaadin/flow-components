@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.ai.dashboard;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +23,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.grid.GridTools;
 
 import com.vaadin.flow.component.ai.chart.ChartConfigurationApplier;
@@ -55,9 +55,10 @@ import tools.jackson.databind.node.ObjectNode;
  * </p>
  * <p>
  * Chart state ({@link ChartEntry}) is stored directly on each {@link Chart}
- * instance via {@link ChartEntry#getOrCreate(Chart, String)}, so there is no
- * separate registry to maintain. The LLM uses a {@code chartId} parameter to
- * target specific charts — chart instances are resolved dynamically from the
+ * instance via {@link ChartEntry#getOrCreate(Chart, String)}, and grid state
+ * ({@link GridEntry}) is stored directly on each {@link Grid} instance via
+ * {@link GridEntry#getOrCreate(Grid, String)}. Both use a component ID
+ * parameter to target specific instances — resolved dynamically from the
  * dashboard widgets.
  * </p>
  *
@@ -71,7 +72,6 @@ public class DashboardAIController implements AIController {
     private final Dashboard dashboard;
     private final DatabaseProvider databaseProvider;
     private final DashboardTools dashboardTools;
-    private final Map<String, GridTools> gridToolsMap = new LinkedHashMap<>();
 
     private final DataConverter dataConverter = new DefaultDataConverter();
     private final ChartConfigurationApplier configurationApplier = new ChartConfigurationApplier();
@@ -93,8 +93,7 @@ public class DashboardAIController implements AIController {
         this.dashboardTools = new DashboardTools(dashboard,
                 databaseProvider::executeQuery,
                 this::createChartWidget,
-                this::createGridWidget,
-                gridToolsMap);
+                this::createGridWidget);
     }
 
     /**
@@ -120,9 +119,9 @@ public class DashboardAIController implements AIController {
                 7. update_chart_data_source(chartId, queries) - Update chart data with SQL queries
                 8. update_chart_configuration(chartId, configuration) - Update chart configuration
 
-                For EXISTING GRID widgets (use widgetId suffix in tool names):
-                9. getGridCurrentState_{widgetId}() - Get grid's current state
-                10. updateGridData_{widgetId}(query) - Update grid data with SQL query
+                For EXISTING GRID widgets (use widgetId as gridId):
+                9. get_grid_state(gridId) - Get grid's current state
+                10. update_grid_data(gridId, query) - Update grid data with SQL query
 
                 For ALL widgets:
                 11. updateWidget(widgetId, title, colspan, rowspan) - Update widget layout properties
@@ -136,7 +135,9 @@ public class DashboardAIController implements AIController {
                 and config parameters to populate them with data immediately
                 4. Use chart tools (get_chart_state, update_chart_data_source, update_chart_configuration) \
                 with the widget ID as chartId to update existing chart widgets
-                5. Use updateWidget() to adjust layout (title, size)
+                5. Use grid tools (get_grid_state, update_grid_data) with the widget ID as gridId \
+                to update existing grid widgets
+                6. Use updateWidget() to adjust layout (title, size)
 
                 IMPORTANT: When creating a widget, ALWAYS provide the query parameter (and config \
                 for charts) so the widget is populated with data immediately. The chart and grid \
@@ -159,36 +160,32 @@ public class DashboardAIController implements AIController {
     public void onRequestCompleted() {
         // Render pending chart updates by checking each chart widget
         for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (!(widget.getContent() instanceof Chart chart)) {
-                continue;
-            }
-            ChartEntry entry = ChartEntry.get(chart);
-            if (entry == null || !entry.hasPendingState()) {
-                continue;
-            }
-            try {
-                applyPendingChartState(chart, entry);
-            } catch (Exception e) {
-                LOGGER.error("Error rendering chart for widget {}",
-                        entry.getId(), e);
-            } finally {
-                entry.clearPendingState();
-            }
-        }
-
-        // Render pending grid updates
-        for (Map.Entry<String, GridTools> entry : gridToolsMap.entrySet()) {
-            GridTools gridTools = entry.getValue();
-            if (gridTools.getPendingDataQuery() == null) {
-                continue;
-            }
-            try {
-                gridTools.renderGrid(gridTools.getPendingDataQuery());
-            } catch (Exception e) {
-                LOGGER.error("Error rendering grid for widget {}",
-                        entry.getKey(), e);
-            } finally {
-                gridTools.clearPending();
+            if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry == null || !entry.hasPendingState()) {
+                    continue;
+                }
+                try {
+                    applyPendingChartState(chart, entry);
+                } catch (Exception e) {
+                    LOGGER.error("Error rendering chart for widget {}",
+                            entry.getId(), e);
+                } finally {
+                    entry.clearPendingState();
+                }
+            } else if (widget.getContent() instanceof Grid<?> grid) {
+                GridEntry entry = GridEntry.get(grid);
+                if (entry == null || !entry.hasPendingState()) {
+                    continue;
+                }
+                try {
+                    renderGrid(grid, entry.getQuery());
+                } catch (Exception e) {
+                    LOGGER.error("Error rendering grid for widget {}",
+                            entry.getId(), e);
+                } finally {
+                    entry.clearPendingState();
+                }
             }
         }
     }
@@ -228,18 +225,19 @@ public class DashboardAIController implements AIController {
                                 widgetId, e);
                     }
                 }
-            } else {
-                widgetId = widget.getId().orElse(null);
-                if (widgetId == null
-                        || !gridToolsMap.containsKey(widgetId)) {
+            } else if (widget.getContent() instanceof Grid<?> grid) {
+                GridEntry entry = GridEntry.get(grid);
+                if (entry == null) {
                     continue;
                 }
+                widgetId = entry.getId();
                 type = "grid";
-                String sqlQuery = gridToolsMap.get(widgetId)
-                        .getCurrentSqlQuery();
+                String sqlQuery = entry.getQuery();
                 if (sqlQuery != null) {
                     queries = List.of(sqlQuery);
                 }
+            } else {
+                continue;
             }
 
             widgetStates.add(new WidgetState(widgetId, widget.getTitle(), type,
@@ -258,7 +256,6 @@ public class DashboardAIController implements AIController {
     public void restoreState(DashboardState state) {
         dashboard.getUI().ifPresent(ui -> ui.access(() -> {
             dashboard.removeAll();
-            gridToolsMap.clear();
             dashboardTools.clearSelectionCheckboxes();
 
             for (WidgetState ws : state.widgets()) {
@@ -289,10 +286,12 @@ public class DashboardAIController implements AIController {
                     dashboardTools.addSelectionCheckbox(widget);
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
-                        GridTools gt = gridToolsMap.get(ws.widgetId());
-                        gt.setCurrentSqlQuery(ws.queries().get(0));
+                        GridEntry entry = GridEntry.get(
+                                (Grid<?>) widget.getContent());
+                        entry.setQuery(ws.queries().get(0));
                         try {
-                            gt.renderGrid(ws.queries().get(0));
+                            renderGrid((Grid<?>) widget.getContent(),
+                                    ws.queries().get(0));
                         } catch (Exception e) {
                             LOGGER.error(
                                     "Failed to restore grid widget {}",
@@ -337,12 +336,11 @@ public class DashboardAIController implements AIController {
             int colspan, int rowspan) {
         Grid<Map<String, Object>> grid = new Grid<>();
         grid.setSizeFull();
+        GridEntry.getOrCreate(grid, widgetId);
         DashboardWidget widget = new DashboardWidget(title, grid);
         widget.setId(widgetId);
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
-        gridToolsMap.put(widgetId,
-                new GridTools(grid, databaseProvider));
         return widget;
     }
 
@@ -384,6 +382,33 @@ public class DashboardAIController implements AIController {
         }, () -> {
             throw new IllegalStateException(
                     "Chart is not attached to a UI");
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void renderGrid(Grid<?> grid, String sqlQuery) {
+        List<Map<String, Object>> results = databaseProvider
+                .executeQuery(sqlQuery);
+        Grid<Map<String, Object>> typedGrid = (Grid<Map<String, Object>>) grid;
+
+        grid.getUI().ifPresentOrElse(currentUI -> {
+            currentUI.access(() -> {
+                typedGrid.removeAllColumns();
+                if (!results.isEmpty()) {
+                    for (String columnName : results.get(0).keySet()) {
+                        typedGrid.addColumn(
+                                row -> row.get(columnName) != null
+                                        ? row.get(columnName).toString()
+                                        : "")
+                                .setHeader(columnName).setAutoWidth(true)
+                                .setSortable(true);
+                    }
+                }
+                typedGrid.setItems(results);
+            });
+        }, () -> {
+            throw new IllegalStateException(
+                    "Grid is not attached to a UI");
         });
     }
 }
