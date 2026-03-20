@@ -28,8 +28,6 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -65,8 +63,7 @@ public class ChartAIController implements AIController {
 
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
-    private DataConverter dataConverter;
-    private final ChartConfigurationApplier configurationApplier;
+    private final ChartRenderer chartRenderer;
     private final List<ChartStateChangeListener> stateChangeListeners = new ArrayList<>();
 
     /**
@@ -82,8 +79,7 @@ public class ChartAIController implements AIController {
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-        this.dataConverter = new DefaultDataConverter();
-        this.configurationApplier = new ChartConfigurationApplier();
+        this.chartRenderer = new ChartRenderer(databaseProvider);
     }
 
     /**
@@ -94,8 +90,7 @@ public class ChartAIController implements AIController {
      *            the data converter to use, not {@code null}
      */
     public void setDataConverter(DataConverter dataConverter) {
-        this.dataConverter = Objects.requireNonNull(dataConverter,
-                "Data converter cannot be null");
+        chartRenderer.setDataConverter(dataConverter);
     }
 
     /**
@@ -104,7 +99,7 @@ public class ChartAIController implements AIController {
      * @return the data converter
      */
     public DataConverter getDataConverter() {
-        return dataConverter;
+        return chartRenderer.getDataConverter();
     }
 
     /**
@@ -113,7 +108,7 @@ public class ChartAIController implements AIController {
      * @return the configuration applier
      */
     public ChartConfigurationApplier getConfigurationApplier() {
-        return configurationApplier;
+        return chartRenderer.getConfigurationApplier();
     }
 
     /**
@@ -153,8 +148,7 @@ public class ChartAIController implements AIController {
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
         tools.addAll(DatabaseProviderTools.createAll(databaseProvider));
-        tools.addAll(ChartTools.createAll(
-                id -> chart,
+        tools.addAll(ChartTools.createAll(id -> chart,
                 () -> Set.of(DEFAULT_CHART_ID),
                 databaseProvider::executeQuery));
         return tools;
@@ -162,17 +156,11 @@ public class ChartAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        ChartEntry entry = ChartEntry.get(chart);
-        if (entry == null || !entry.hasPendingState()) {
-            return;
-        }
         try {
-            applyPendingState(entry);
+            chartRenderer.applyPendingState(chart);
             fireStateChangeEvent();
         } catch (Exception e) {
             LOGGER.error("Error rendering chart", e);
-        } finally {
-            entry.clearPendingState();
         }
     }
 
@@ -183,13 +171,11 @@ public class ChartAIController implements AIController {
      */
     public ChartState getState() {
         ChartEntry entry = ChartEntry.get(chart);
-        List<String> queries = entry != null ? entry.getQueries()
-                : List.of();
+        List<String> queries = entry != null ? entry.getQueries() : List.of();
         if (queries.isEmpty()) {
             return null;
         }
-        String configJson = ChartSerialization
-                .toJSON(chart.getConfiguration());
+        String configJson = ChartSerialization.toJSON(chart.getConfiguration());
         try {
             ObjectNode configNode = (ObjectNode) JacksonUtils
                     .readTree(configJson);
@@ -212,7 +198,8 @@ public class ChartAIController implements AIController {
         entry.setQueries(state.queries());
         if (!state.queries().isEmpty() && state.configuration() != null) {
             try {
-                renderChart(state.queries(), state.configuration());
+                chartRenderer.renderChart(chart, state.queries(),
+                        state.configuration());
             } catch (Exception e) {
                 LOGGER.error("Failed to restore chart", e);
             }
@@ -224,51 +211,6 @@ public class ChartAIController implements AIController {
      */
     public record ChartState(List<String> queries,
             String configuration) implements java.io.Serializable {
-    }
-
-    // ===== Rendering Methods =====
-
-    private void applyPendingState(ChartEntry entry) {
-        String configJson = entry.getPendingConfigurationJson();
-        List<String> effectiveQueries = entry.getQueries();
-
-        if (!effectiveQueries.isEmpty()) {
-            String effectiveConfig = configJson != null ? configJson
-                    : ChartSerialization.toJSON(chart.getConfiguration());
-            renderChart(effectiveQueries, effectiveConfig);
-        } else if (configJson != null) {
-            applyChartConfig(configJson);
-        }
-    }
-
-    private void renderChart(List<String> queries, String configJson) {
-        chart.getUI().ifPresentOrElse(currentUI -> {
-            currentUI.access(() -> {
-                Configuration config = chart.getConfiguration();
-                List<Series> allSeries = new ArrayList<>();
-                for (String query : queries) {
-                    var results = databaseProvider.executeQuery(query);
-                    allSeries.addAll(dataConverter.convertToSeries(results));
-                }
-                config.setSeries(allSeries.toArray(new Series[0]));
-                configurationApplier.applyConfiguration(chart, configJson);
-                chart.drawChart();
-            });
-        }, () -> {
-            throw new IllegalStateException(
-                    "Chart is not attached to a UI");
-        });
-    }
-
-    private void applyChartConfig(String configJson) {
-        chart.getUI().ifPresentOrElse(currentUI -> {
-            currentUI.access(() -> {
-                configurationApplier.applyConfiguration(chart, configJson);
-            });
-        }, () -> {
-            throw new IllegalStateException(
-                    "Chart is not attached to a UI");
-        });
     }
 
     // ===== Event Firing =====

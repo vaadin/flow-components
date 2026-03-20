@@ -65,10 +65,14 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // ChartAIController — intentionally not serializable;
                 // restored via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAIController",
-                // ChartTools is a static utility class (private
+                // ChartTools/GridTools are static utility classes (private
                 // constructor, no instances); inner anonymous classes
                 // implement ToolSpec which is not Serializable
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartTools.*",
+                // ChartRenderer/GridRenderer hold DatabaseProvider which
+                // is not Serializable; they are recreated on reconnect
+                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartRenderer",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.grid\\.GridRenderer",
                 // Dashboard classes — DashboardAIController is
                 // intentionally not serializable (restored via
                 // reconnect()); inner anonymous classes implement

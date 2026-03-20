@@ -23,21 +23,17 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.ai.grid.GridEntry;
-import com.vaadin.flow.component.ai.grid.GridTools;
-
-import com.vaadin.flow.component.ai.chart.ChartConfigurationApplier;
 import com.vaadin.flow.component.ai.chart.ChartEntry;
+import com.vaadin.flow.component.ai.chart.ChartRenderer;
 import com.vaadin.flow.component.ai.chart.ChartTools;
-import com.vaadin.flow.component.ai.chart.DataConverter;
-import com.vaadin.flow.component.ai.chart.DefaultDataConverter;
+import com.vaadin.flow.component.ai.grid.GridEntry;
+import com.vaadin.flow.component.ai.grid.GridRenderer;
+import com.vaadin.flow.component.ai.grid.GridTools;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
@@ -72,9 +68,8 @@ public class DashboardAIController implements AIController {
     private final Dashboard dashboard;
     private final DatabaseProvider databaseProvider;
     private final DashboardTools dashboardTools;
-
-    private final DataConverter dataConverter = new DefaultDataConverter();
-    private final ChartConfigurationApplier configurationApplier = new ChartConfigurationApplier();
+    private final ChartRenderer chartRenderer;
+    private final GridRenderer gridRenderer;
 
     /**
      * Creates a new AI dashboard controller with a database provider.
@@ -90,9 +85,10 @@ public class DashboardAIController implements AIController {
                 "Dashboard cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
+        this.chartRenderer = new ChartRenderer(databaseProvider);
+        this.gridRenderer = new GridRenderer(databaseProvider);
         this.dashboardTools = new DashboardTools(dashboard,
-                databaseProvider::executeQuery,
-                this::createChartWidget,
+                databaseProvider::executeQuery, this::createChartWidget,
                 this::createGridWidget);
     }
 
@@ -158,33 +154,20 @@ public class DashboardAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        // Render pending chart updates by checking each chart widget
         for (DashboardWidget widget : dashboard.getWidgets()) {
             if (widget.getContent() instanceof Chart chart) {
-                ChartEntry entry = ChartEntry.get(chart);
-                if (entry == null || !entry.hasPendingState()) {
-                    continue;
-                }
                 try {
-                    applyPendingChartState(chart, entry);
+                    chartRenderer.applyPendingState(chart);
                 } catch (Exception e) {
                     LOGGER.error("Error rendering chart for widget {}",
-                            entry.getId(), e);
-                } finally {
-                    entry.clearPendingState();
+                            widget.getId().orElse("unknown"), e);
                 }
             } else if (widget.getContent() instanceof Grid<?> grid) {
-                GridEntry entry = GridEntry.get(grid);
-                if (entry == null || !entry.hasPendingState()) {
-                    continue;
-                }
                 try {
-                    renderGrid(grid, entry.getQuery());
+                    gridRenderer.applyPendingState(grid);
                 } catch (Exception e) {
                     LOGGER.error("Error rendering grid for widget {}",
-                            entry.getId(), e);
-                } finally {
-                    entry.clearPendingState();
+                            widget.getId().orElse("unknown"), e);
                 }
             }
         }
@@ -253,6 +236,7 @@ public class DashboardAIController implements AIController {
      * @param state
      *            the state to restore
      */
+    @SuppressWarnings("unchecked")
     public void restoreState(DashboardState state) {
         dashboard.getUI().ifPresent(ui -> ui.access(() -> {
             dashboard.removeAll();
@@ -260,9 +244,8 @@ public class DashboardAIController implements AIController {
 
             for (WidgetState ws : state.widgets()) {
                 if ("chart".equals(ws.type())) {
-                    DashboardWidget widget = createChartWidget(
-                            ws.widgetId(), ws.title(), ws.colspan(),
-                            ws.rowspan());
+                    DashboardWidget widget = createChartWidget(ws.widgetId(),
+                            ws.title(), ws.colspan(), ws.rowspan());
                     dashboardTools.addSelectionCheckbox(widget);
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
@@ -271,30 +254,27 @@ public class DashboardAIController implements AIController {
                                 ws.widgetId());
                         entry.setQueries(ws.queries());
                         try {
-                            renderChart(chart, ws.queries(),
+                            chartRenderer.renderChart(chart, ws.queries(),
                                     ws.configuration());
                         } catch (Exception e) {
-                            LOGGER.error(
-                                    "Failed to restore chart widget {}",
+                            LOGGER.error("Failed to restore chart widget {}",
                                     ws.widgetId(), e);
                         }
                     }
                 } else if ("grid".equals(ws.type())) {
-                    DashboardWidget widget = createGridWidget(
-                            ws.widgetId(), ws.title(), ws.colspan(),
-                            ws.rowspan());
+                    DashboardWidget widget = createGridWidget(ws.widgetId(),
+                            ws.title(), ws.colspan(), ws.rowspan());
                     dashboardTools.addSelectionCheckbox(widget);
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
-                        GridEntry entry = GridEntry.get(
-                                (Grid<?>) widget.getContent());
+                        Grid<Map<String, Object>> grid = (Grid<Map<String, Object>>) widget
+                                .getContent();
+                        GridEntry entry = GridEntry.get(grid);
                         entry.setQuery(ws.queries().get(0));
                         try {
-                            renderGrid((Grid<?>) widget.getContent(),
-                                    ws.queries().get(0));
+                            gridRenderer.renderGrid(grid, ws.queries().get(0));
                         } catch (Exception e) {
-                            LOGGER.error(
-                                    "Failed to restore grid widget {}",
+                            LOGGER.error("Failed to restore grid widget {}",
                                     ws.widgetId(), e);
                         }
                     }
@@ -342,73 +322,5 @@ public class DashboardAIController implements AIController {
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
         return widget;
-    }
-
-    // ===== Rendering =====
-
-    private void applyPendingChartState(Chart chart, ChartEntry entry) {
-        String configJson = entry.getPendingConfigurationJson();
-        List<String> effectiveQueries = entry.getQueries();
-
-        if (!effectiveQueries.isEmpty()) {
-            String effectiveConfig = configJson != null ? configJson
-                    : ChartSerialization.toJSON(chart.getConfiguration());
-            renderChart(chart, effectiveQueries, effectiveConfig);
-        } else if (configJson != null) {
-            chart.getUI().ifPresentOrElse(ui -> {
-                ui.access(() -> configurationApplier
-                        .applyConfiguration(chart, configJson));
-            }, () -> {
-                throw new IllegalStateException(
-                        "Chart is not attached to a UI");
-            });
-        }
-    }
-
-    private void renderChart(Chart chart, List<String> queries,
-            String configJson) {
-        chart.getUI().ifPresentOrElse(ui -> {
-            ui.access(() -> {
-                Configuration config = chart.getConfiguration();
-                List<Series> allSeries = new ArrayList<>();
-                for (String query : queries) {
-                    var results = databaseProvider.executeQuery(query);
-                    allSeries.addAll(dataConverter.convertToSeries(results));
-                }
-                config.setSeries(allSeries.toArray(new Series[0]));
-                configurationApplier.applyConfiguration(chart, configJson);
-                chart.drawChart();
-            });
-        }, () -> {
-            throw new IllegalStateException(
-                    "Chart is not attached to a UI");
-        });
-    }
-
-    @SuppressWarnings("unchecked")
-    private void renderGrid(Grid<?> grid, String sqlQuery) {
-        List<Map<String, Object>> results = databaseProvider
-                .executeQuery(sqlQuery);
-        Grid<Map<String, Object>> typedGrid = (Grid<Map<String, Object>>) grid;
-
-        grid.getUI().ifPresentOrElse(currentUI -> {
-            currentUI.access(() -> {
-                typedGrid.removeAllColumns();
-                if (!results.isEmpty()) {
-                    for (String columnName : results.get(0).keySet()) {
-                        typedGrid.addColumn(
-                                row -> row.get(columnName) != null
-                                        ? row.get(columnName).toString()
-                                        : "")
-                                .setHeader(columnName).setAutoWidth(true)
-                                .setSortable(true);
-                    }
-                }
-                typedGrid.setItems(results);
-            });
-        }, () -> {
-            throw new IllegalStateException(
-                    "Grid is not attached to a UI");
-        });
     }
 }
