@@ -17,11 +17,9 @@ package com.vaadin.flow.component.ai.dashboard;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,10 +55,10 @@ import tools.jackson.databind.node.ObjectNode;
  * </p>
  * <p>
  * Chart state ({@link ChartEntry}) is stored directly on each {@link Chart}
- * instance via {@link ChartEntry#getOrCreate(Chart)}, so there is no separate
- * registry to maintain. The LLM uses a {@code chartId} parameter to target
- * specific charts — chart instances are resolved dynamically from the dashboard
- * widgets.
+ * instance via {@link ChartEntry#getOrCreate(Chart, String)}, so there is no
+ * separate registry to maintain. The LLM uses a {@code chartId} parameter to
+ * target specific charts — chart instances are resolved dynamically from the
+ * dashboard widgets.
  * </p>
  *
  * @author Vaadin Ltd
@@ -73,13 +71,10 @@ public class DashboardAIController implements AIController {
     private final Dashboard dashboard;
     private final DatabaseProvider databaseProvider;
     private final DashboardTools dashboardTools;
+    private final Map<String, GridTools> gridToolsMap = new LinkedHashMap<>();
 
     private final DataConverter dataConverter = new DefaultDataConverter();
     private final ChartConfigurationApplier configurationApplier = new ChartConfigurationApplier();
-
-    private final Map<String, GridTools> gridToolsMap = new LinkedHashMap<>();
-
-    private int widgetCounter = 0;
 
     /**
      * Creates a new AI dashboard controller with a database provider.
@@ -95,7 +90,11 @@ public class DashboardAIController implements AIController {
                 "Dashboard cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-        this.dashboardTools = new DashboardTools(dashboard);
+        this.dashboardTools = new DashboardTools(dashboard,
+                databaseProvider::executeQuery,
+                this::createChartWidget,
+                this::createGridWidget,
+                gridToolsMap);
     }
 
     /**
@@ -151,33 +150,8 @@ public class DashboardAIController implements AIController {
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
-
-        // Database schema tool
         tools.add(DatabaseProviderTools.getDatabaseSchema(databaseProvider));
-
-        // Dashboard layout tools
         tools.addAll(dashboardTools.getTools());
-
-        // Widget creation/removal tools
-        tools.add(createAddChartWidgetTool());
-        tools.add(createAddGridWidgetTool());
-        tools.add(createRemoveWidgetTool());
-
-        // Chart tools (shared across all charts, resolved from dashboard)
-        tools.addAll(ChartTools.createAll(
-                this::findChartById,
-                this::getChartWidgetIds,
-                databaseProvider::executeQuery));
-
-        // Per-widget grid tools (still prefixed)
-        for (Map.Entry<String, GridTools> entry : gridToolsMap.entrySet()) {
-            String widgetId = entry.getKey();
-            GridTools gridTools = entry.getValue();
-            for (LLMProvider.ToolSpec tool : gridTools.getTools()) {
-                tools.add(prefixTool(tool, widgetId));
-            }
-        }
-
         return tools;
     }
 
@@ -289,8 +263,10 @@ public class DashboardAIController implements AIController {
 
             for (WidgetState ws : state.widgets()) {
                 if ("chart".equals(ws.type())) {
-                    DashboardWidget widget = createChartWidget(ws.widgetId(),
-                            ws.title(), ws.colspan(), ws.rowspan());
+                    DashboardWidget widget = createChartWidget(
+                            ws.widgetId(), ws.title(), ws.colspan(),
+                            ws.rowspan());
+                    dashboardTools.addSelectionCheckbox(widget);
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
                         Chart chart = (Chart) widget.getContent();
@@ -307,8 +283,10 @@ public class DashboardAIController implements AIController {
                         }
                     }
                 } else if ("grid".equals(ws.type())) {
-                    DashboardWidget widget = createGridWidget(ws.widgetId(),
-                            ws.title(), ws.colspan(), ws.rowspan());
+                    DashboardWidget widget = createGridWidget(
+                            ws.widgetId(), ws.title(), ws.colspan(),
+                            ws.rowspan());
+                    dashboardTools.addSelectionCheckbox(widget);
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
                         GridTools gt = gridToolsMap.get(ws.widgetId());
@@ -352,9 +330,6 @@ public class DashboardAIController implements AIController {
         widget.setId(widgetId);
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
-
-        dashboardTools.addSelectionCheckbox(widget);
-
         return widget;
     }
 
@@ -366,39 +341,9 @@ public class DashboardAIController implements AIController {
         widget.setId(widgetId);
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
-
-        GridTools gridTools = new GridTools(grid, databaseProvider);
-        gridToolsMap.put(widgetId, gridTools);
-        dashboardTools.addSelectionCheckbox(widget);
-
+        gridToolsMap.put(widgetId,
+                new GridTools(grid, databaseProvider));
         return widget;
-    }
-
-    // ===== Chart Resolution =====
-
-    private Chart findChartById(String chartId) {
-        for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getContent() instanceof Chart chart) {
-                ChartEntry entry = ChartEntry.get(chart);
-                if (entry != null && chartId.equals(entry.getId())) {
-                    return chart;
-                }
-            }
-        }
-        return null;
-    }
-
-    private Set<String> getChartWidgetIds() {
-        var ids = new LinkedHashSet<String>();
-        for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getContent() instanceof Chart chart) {
-                ChartEntry entry = ChartEntry.get(chart);
-                if (entry != null) {
-                    ids.add(entry.getId());
-                }
-            }
-        }
-        return ids;
     }
 
     // ===== Rendering =====
@@ -441,354 +386,4 @@ public class DashboardAIController implements AIController {
                     "Chart is not attached to a UI");
         });
     }
-
-    // ===== Tool Factory Methods =====
-
-    private LLMProvider.ToolSpec createAddChartWidgetTool() {
-        return new LLMProvider.ToolSpec() {
-            @Override
-            public String getName() {
-                return "addChartWidget";
-            }
-
-            @Override
-            public String getDescription() {
-                return """
-                    Adds a new chart widget to the dashboard, optionally populated with data.
-                    IMPORTANT: Always provide queries and config to create a widget with data immediately.
-
-                    Parameters:
-                    - title (string, optional): Widget title
-                    - queries (array of strings, optional): SQL SELECT queries to populate the chart (one per series). \
-                    Use this for multi-series charts.
-                    - query (string, optional): Single SQL SELECT query (shorthand for one-series charts). \
-                    If both query and queries are provided, queries takes precedence.
-                    - config (object, optional): Chart configuration (type, title, axes, etc.). \
-                    CRITICAL: Always include chart.type. Do NOT include 'series' - data comes from queries.
-                    - colspan (integer, optional): Column span (default: 1)
-                    - rowspan (integer, optional): Row span (default: 1)
-                    """;
-            }
-
-            @Override
-            public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {
-                            "title": { "type": "string", "description": "Widget title" },
-                            "queries": { "type": "array", "items": { "type": "string" }, "description": "SQL SELECT queries to populate the chart, one per series" },
-                            "query": { "type": "string", "description": "Single SQL SELECT query (shorthand for one-series charts)" },
-                            "config": {
-                              "type": "object",
-                              "description": "Chart configuration. CRITICAL: Always include chart.type. Do NOT include 'series'.",
-                              "properties": {
-                                "chart": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string",
-                                      "description": "REQUIRED: Chart type",
-                                      "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
-                                    }
-                                  }
-                                },
-                                "title": { "oneOf": [{ "type": "string" }, { "type": "object", "properties": { "text": { "type": "string" } } }] },
-                                "subtitle": { "oneOf": [{ "type": "string" }, { "type": "object", "properties": { "text": { "type": "string" } } }] },
-                                "xAxis": { "type": "object", "properties": { "title": { "type": "object", "properties": { "text": { "type": "string" } } } } },
-                                "yAxis": { "type": "object", "properties": { "title": { "type": "object", "properties": { "text": { "type": "string" } } } } },
-                                "tooltip": { "type": "object" },
-                                "legend": { "type": "object" },
-                                "credits": { "type": "object" }
-                              }
-                            },
-                            "colspan": { "type": "integer", "description": "Column span", "minimum": 1, "default": 1 },
-                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 }
-                          }
-                        }
-                        """;
-            }
-
-            @Override
-            public String execute(String arguments) {
-                try {
-                    String title = "Chart";
-                    int colspan = 1;
-                    int rowspan = 1;
-                    List<String> queries = null;
-                    String configJson = null;
-
-                    if (arguments != null && !arguments.isBlank()) {
-                        ObjectNode node = (ObjectNode) JacksonUtils
-                                .readTree(arguments);
-                        if (node.has("title") && !node.get("title").isNull()) {
-                            title = node.get("title").asString();
-                        }
-                        if (node.has("queries")
-                                && !node.get("queries").isNull()
-                                && node.get("queries").isArray()) {
-                            queries = new ArrayList<>();
-                            for (var q : node.get("queries")) {
-                                queries.add(q.asString());
-                            }
-                        } else if (node.has("query")
-                                && !node.get("query").isNull()) {
-                            queries = List.of(
-                                    node.get("query").asString());
-                        }
-                        if (node.has("config")
-                                && !node.get("config").isNull()) {
-                            configJson = node.get("config").toString();
-                        }
-                        if (node.has("colspan")
-                                && node.get("colspan").isNumber()) {
-                            colspan = node.get("colspan").asInt();
-                        }
-                        if (node.has("rowspan")
-                                && node.get("rowspan").isNumber()) {
-                            rowspan = node.get("rowspan").asInt();
-                        }
-                    }
-
-                    // Validate queries if provided
-                    if (queries != null) {
-                        for (String q : queries) {
-                            databaseProvider.executeQuery(q);
-                        }
-                    }
-
-                    String widgetId = "chart-" + (++widgetCounter);
-                    DashboardWidget widget = createChartWidget(widgetId, title,
-                            colspan, rowspan);
-
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> dashboard.add(widget));
-                    }, () -> {
-                        dashboard.add(widget);
-                    });
-
-                    // Queue data and config for deferred rendering
-                    if (queries != null) {
-                        Chart chart = (Chart) widget.getContent();
-                        ChartEntry entry = ChartEntry.getOrCreate(chart,
-                                widgetId);
-                        entry.setQueries(queries);
-                        entry.setPendingDataUpdate(true);
-                        if (configJson != null) {
-                            entry.setPendingConfigurationJson(configJson);
-                        }
-                    }
-
-                    return "{\"widgetId\":\"" + widgetId
-                            + "\",\"type\":\"chart\",\"title\":\""
-                            + title.replace("\"", "\\\"")
-                            + "\",\"message\":\"Chart widget added"
-                            + (queries != null ? " with data" : "")
-                            + ".\"}";
-                } catch (Exception e) {
-                    return "Error adding chart widget: " + e.getMessage();
-                }
-            }
-        };
-    }
-
-    private LLMProvider.ToolSpec createAddGridWidgetTool() {
-        return new LLMProvider.ToolSpec() {
-            @Override
-            public String getName() {
-                return "addGridWidget";
-            }
-
-            @Override
-            public String getDescription() {
-                return """
-                    Adds a new data grid widget to the dashboard, optionally populated with data.
-                    IMPORTANT: Always provide query to create a widget with data immediately.
-                    The grid automatically creates columns based on query result columns.
-                    Use SQL aliases (AS) to provide human-readable column headers.
-
-                    Parameters:
-                    - title (string, optional): Widget title
-                    - query (string, optional): SQL SELECT query to populate the grid
-                    - colspan (integer, optional): Column span (default: 1)
-                    - rowspan (integer, optional): Row span (default: 1)
-                    """;
-            }
-
-            @Override
-            public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {
-                            "title": { "type": "string", "description": "Widget title" },
-                            "query": { "type": "string", "description": "SQL SELECT query to populate the grid" },
-                            "colspan": { "type": "integer", "description": "Column span", "minimum": 1, "default": 1 },
-                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 }
-                          }
-                        }
-                        """;
-            }
-
-            @Override
-            public String execute(String arguments) {
-                try {
-                    String title = "Data Grid";
-                    int colspan = 1;
-                    int rowspan = 1;
-                    String query = null;
-
-                    if (arguments != null && !arguments.isBlank()) {
-                        ObjectNode node = (ObjectNode) JacksonUtils
-                                .readTree(arguments);
-                        if (node.has("title") && !node.get("title").isNull()) {
-                            title = node.get("title").asString();
-                        }
-                        if (node.has("query") && !node.get("query").isNull()) {
-                            query = node.get("query").asString();
-                        }
-                        if (node.has("colspan")
-                                && node.get("colspan").isNumber()) {
-                            colspan = node.get("colspan").asInt();
-                        }
-                        if (node.has("rowspan")
-                                && node.get("rowspan").isNumber()) {
-                            rowspan = node.get("rowspan").asInt();
-                        }
-                    }
-
-                    // Validate query if provided
-                    if (query != null) {
-                        databaseProvider.executeQuery(query);
-                    }
-
-                    String widgetId = "grid-" + (++widgetCounter);
-                    DashboardWidget widget = createGridWidget(widgetId, title,
-                            colspan, rowspan);
-
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> dashboard.add(widget));
-                    }, () -> {
-                        dashboard.add(widget);
-                    });
-
-                    // Queue data for deferred rendering
-                    if (query != null) {
-                        GridTools gt = gridToolsMap.get(widgetId);
-                        gt.setCurrentSqlQuery(query);
-                        gt.setPendingDataQuery(query);
-                    }
-
-                    return "{\"widgetId\":\"" + widgetId
-                            + "\",\"type\":\"grid\",\"title\":\""
-                            + title.replace("\"", "\\\"")
-                            + "\",\"message\":\"Grid widget added"
-                            + (query != null ? " with data" : "") + ".\"}";
-                } catch (Exception e) {
-                    return "Error adding grid widget: " + e.getMessage();
-                }
-            }
-        };
-    }
-
-    private LLMProvider.ToolSpec createRemoveWidgetTool() {
-        return new LLMProvider.ToolSpec() {
-            @Override
-            public String getName() {
-                return "removeWidget";
-            }
-
-            @Override
-            public String getDescription() {
-                return """
-                    Removes a widget from the dashboard.
-                    Use getDashboardState() first to get the widget IDs.
-
-                    Parameters:
-                    - widgetId (string, required): The ID of the widget to remove
-                    """;
-            }
-
-            @Override
-            public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {
-                            "widgetId": {
-                              "type": "string",
-                              "description": "The ID of the widget to remove"
-                            }
-                          },
-                          "required": ["widgetId"]
-                        }
-                        """;
-            }
-
-            @Override
-            public String execute(String arguments) {
-                try {
-                    ObjectNode node = (ObjectNode) JacksonUtils
-                            .readTree(arguments);
-                    String widgetId = node.get("widgetId").asString();
-
-                    DashboardWidget targetWidget = null;
-                    for (DashboardWidget widget : dashboard.getWidgets()) {
-                        if (widget.getId().isPresent()
-                                && widget.getId().get().equals(widgetId)) {
-                            targetWidget = widget;
-                            break;
-                        }
-                    }
-
-                    if (targetWidget == null) {
-                        return "Error: Widget with ID '" + widgetId
-                                + "' not found";
-                    }
-
-                    final DashboardWidget toRemove = targetWidget;
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> dashboard.remove(toRemove));
-                    }, () -> {
-                        dashboard.remove(toRemove);
-                    });
-
-                    gridToolsMap.remove(widgetId);
-
-                    return "Widget '" + widgetId + "' removed successfully";
-                } catch (Exception e) {
-                    return "Error removing widget: " + e.getMessage();
-                }
-            }
-        };
-    }
-
-    // ===== Tool Prefixing (for GridTools) =====
-
-    private LLMProvider.ToolSpec prefixTool(
-            LLMProvider.ToolSpec original, String widgetId) {
-        return new LLMProvider.ToolSpec() {
-            @Override
-            public String getName() {
-                return original.getName() + "_" + widgetId;
-            }
-
-            @Override
-            public String getDescription() {
-                return "[Widget: " + widgetId + "] "
-                        + original.getDescription();
-            }
-
-            @Override
-            public String getParametersSchema() {
-                return original.getParametersSchema();
-            }
-
-            @Override
-            public String execute(String arguments) {
-                return original.execute(arguments);
-            }
-        };
-    }
-
 }

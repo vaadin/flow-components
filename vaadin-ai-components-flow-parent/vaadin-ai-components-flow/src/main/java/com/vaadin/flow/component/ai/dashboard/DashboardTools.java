@@ -15,50 +15,120 @@
  */
 package com.vaadin.flow.component.ai.dashboard;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Consumer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.vaadin.flow.component.ai.chart.ChartEntry;
+import com.vaadin.flow.component.ai.chart.ChartTools;
+import com.vaadin.flow.component.ai.grid.GridTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Provides LLM tool definitions for dashboard layout operations.
- * <p>
- * This class encapsulates tools that allow an LLM to manage dashboard widgets:
- * listing widgets, updating widget properties (title, colspan, rowspan), and
- * removing widgets.
- * </p>
+ * Provides LLM tool definitions for dashboard operations: listing widgets,
+ * updating widget properties, creating and removing widgets, and managing
+ * chart/grid data tools.
  *
  * @author Vaadin Ltd
  */
-public class DashboardTools implements Serializable {
-
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(DashboardTools.class);
-
-    private final Dashboard dashboard;
-    private final Map<String, Checkbox> widgetCheckboxes = new LinkedHashMap<>();
+public class DashboardTools {
 
     /**
-     * Creates a new dashboard tools instance bound to the given dashboard.
+     * Callback for creating dashboard widgets.
+     */
+    @FunctionalInterface
+    interface WidgetCreator {
+        DashboardWidget create(String widgetId, String title, int colspan,
+                int rowspan);
+    }
+
+    private final Dashboard dashboard;
+    private final Consumer<String> queryValidator;
+    private final WidgetCreator chartWidgetCreator;
+    private final WidgetCreator gridWidgetCreator;
+    private final Map<String, GridTools> gridToolsMap;
+    private final Map<String, Checkbox> widgetCheckboxes = new LinkedHashMap<>();
+    private int widgetCounter = 0;
+
+    /**
+     * Creates a new dashboard tools instance.
      *
      * @param dashboard
      *            the dashboard component to manage, not {@code null}
+     * @param queryValidator
+     *            validates SQL queries before accepting them, not {@code null}
+     * @param chartWidgetCreator
+     *            creates chart widgets, not {@code null}
+     * @param gridWidgetCreator
+     *            creates grid widgets, not {@code null}
+     * @param gridToolsMap
+     *            shared map of grid widget ID to {@link GridTools}, not
+     *            {@code null}
      */
-    public DashboardTools(Dashboard dashboard) {
-        this.dashboard = dashboard;
+    DashboardTools(Dashboard dashboard, Consumer<String> queryValidator,
+            WidgetCreator chartWidgetCreator,
+            WidgetCreator gridWidgetCreator,
+            Map<String, GridTools> gridToolsMap) {
+        this.dashboard = Objects.requireNonNull(dashboard,
+                "dashboard must not be null");
+        this.queryValidator = Objects.requireNonNull(queryValidator,
+                "queryValidator must not be null");
+        this.chartWidgetCreator = Objects.requireNonNull(chartWidgetCreator,
+                "chartWidgetCreator must not be null");
+        this.gridWidgetCreator = Objects.requireNonNull(gridWidgetCreator,
+                "gridWidgetCreator must not be null");
+        this.gridToolsMap = Objects.requireNonNull(gridToolsMap,
+                "gridToolsMap must not be null");
+    }
+
+    /**
+     * Returns all tool definitions for dashboard operations.
+     *
+     * @return list of tool definitions
+     */
+    public List<LLMProvider.ToolSpec> getTools() {
+        List<LLMProvider.ToolSpec> tools = new ArrayList<>();
+
+        // Dashboard layout tools
+        tools.add(createGetDashboardStateTool());
+        tools.add(createUpdateWidgetTool());
+        tools.add(createReorderWidgetsTool());
+
+        // Widget creation/removal tools
+        tools.add(createAddChartWidgetTool());
+        tools.add(createAddGridWidgetTool());
+        tools.add(createRemoveWidgetTool());
+
+        // Chart tools (shared across all charts, resolved from dashboard)
+        tools.addAll(ChartTools.createAll(
+                this::findChartById,
+                this::getChartWidgetIds,
+                queryValidator));
+
+        // Per-widget grid tools (prefixed with widget ID)
+        for (Map.Entry<String, GridTools> entry : gridToolsMap.entrySet()) {
+            String widgetId = entry.getKey();
+            GridTools gridTools = entry.getValue();
+            for (LLMProvider.ToolSpec tool : gridTools.getTools()) {
+                tools.add(prefixTool(tool, widgetId));
+            }
+        }
+
+        return tools;
     }
 
     /**
@@ -69,7 +139,7 @@ public class DashboardTools implements Serializable {
      * @param widget
      *            the widget to add a checkbox to
      */
-    public void addSelectionCheckbox(DashboardWidget widget) {
+    void addSelectionCheckbox(DashboardWidget widget) {
         String widgetId = widget.getId().orElse(null);
         if (widgetId == null || widgetCheckboxes.containsKey(widgetId)) {
             return;
@@ -85,67 +155,35 @@ public class DashboardTools implements Serializable {
      * Clears all tracked selection checkboxes. Should be called when the
      * dashboard is cleared (e.g. during state restore).
      */
-    public void clearSelectionCheckboxes() {
+    void clearSelectionCheckboxes() {
         widgetCheckboxes.clear();
     }
 
-    /**
-     * Returns the recommended system prompt for dashboard management
-     * capabilities.
-     *
-     * @return the system prompt text
-     */
-    public static String getSystemPrompt() {
-        return """
-                You have access to dashboard management capabilities:
+    // ===== Chart Resolution =====
 
-                TOOLS:
-                1. getDashboardState() - Returns the current state of all widgets (id, title, type, colspan, rowspan)
-                2. updateWidget(widgetId, title, colspan, rowspan) - Updates a widget's properties
-                3. reorderWidgets(widgetIds) - Reorder widgets by providing the widget IDs in the desired order
-
-                WORKFLOW:
-                1. ALWAYS call getDashboardState() FIRST before doing anything else. \
-                Widget selections can change between requests, so you must check the \
-                current state every time.
-                2. Use updateWidget() to change widget titles, sizes, or positions
-                3. Use reorderWidgets() to change the order of widgets on the dashboard
-                4. Widget IDs are assigned when widgets are created and shown in getDashboardState()
-
-                WIDGET PROPERTIES:
-                - title: Display title shown on the widget header
-                - colspan: Number of columns the widget spans (default: 1, minimum: 1)
-                - rowspan: Number of rows the widget spans (default: 1, minimum: 1)
-                - selected: Whether the widget is currently selected by the user
-                - Larger colspan/rowspan values make the widget take more space in the dashboard grid
-
-                SELECTION:
-                - Users can select widgets in the dashboard UI
-                - getDashboardState() includes a "selected" field for each widget
-                - Selections can change at any time, so ALWAYS call getDashboardState() at the \
-                start of each request to get the current selection state
-                - When the user refers to "selected widgets", apply the action ONLY to \
-                widgets where selected=true
-                """;
+    private Chart findChartById(String chartId) {
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry != null && chartId.equals(entry.getId())) {
+                    return chart;
+                }
+            }
+        }
+        return null;
     }
 
-    /**
-     * Returns the tool definitions for dashboard operations.
-     *
-     * @return list of tool definitions
-     */
-    public List<LLMProvider.ToolSpec> getTools() {
-        return List.of(createGetDashboardStateTool(),
-                createUpdateWidgetTool(), createReorderWidgetsTool());
-    }
-
-    /**
-     * Returns the dashboard component bound to this tools instance.
-     *
-     * @return the dashboard component
-     */
-    public Dashboard getDashboard() {
-        return dashboard;
+    private Set<String> getChartWidgetIds() {
+        var ids = new LinkedHashSet<String>();
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry != null) {
+                    ids.add(entry.getId());
+                }
+            }
+        }
+        return ids;
     }
 
     // ===== Tool Implementations =====
@@ -189,9 +227,9 @@ public class DashboardTools implements Serializable {
                     sb.append(",\"colspan\":").append(widget.getColspan());
                     sb.append(",\"rowspan\":").append(widget.getRowspan());
                     String contentType = "unknown";
-                    if (widget.getContent() instanceof com.vaadin.flow.component.charts.Chart) {
+                    if (widget.getContent() instanceof Chart) {
                         contentType = "chart";
-                    } else if (widget.getContent() instanceof com.vaadin.flow.component.grid.Grid) {
+                    } else if (widget.getContent() instanceof Grid) {
                         contentType = "grid";
                     }
                     sb.append(",\"contentType\":\"").append(contentType)
@@ -386,6 +424,325 @@ public class DashboardTools implements Serializable {
         };
     }
 
+    private LLMProvider.ToolSpec createAddChartWidgetTool() {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return "addChartWidget";
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                    Adds a new chart widget to the dashboard, optionally populated with data.
+                    IMPORTANT: Always provide queries and config to create a widget with data immediately.
+
+                    Parameters:
+                    - title (string, optional): Widget title
+                    - queries (array of strings, optional): SQL SELECT queries to populate the chart (one per series). \
+                    Use this for multi-series charts.
+                    - query (string, optional): Single SQL SELECT query (shorthand for one-series charts). \
+                    If both query and queries are provided, queries takes precedence.
+                    - config (object, optional): Chart configuration (type, title, axes, etc.). \
+                    CRITICAL: Always include chart.type. Do NOT include 'series' - data comes from queries.
+                    - colspan (integer, optional): Column span (default: 1)
+                    - rowspan (integer, optional): Row span (default: 1)
+                    """;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "title": { "type": "string", "description": "Widget title" },
+                            "queries": { "type": "array", "items": { "type": "string" }, "description": "SQL SELECT queries to populate the chart, one per series" },
+                            "query": { "type": "string", "description": "Single SQL SELECT query (shorthand for one-series charts)" },
+                            "config": {
+                              "type": "object",
+                              "description": "Chart configuration. CRITICAL: Always include chart.type. Do NOT include 'series'.",
+                              "properties": {
+                                "chart": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "description": "REQUIRED: Chart type",
+                                      "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
+                                    }
+                                  }
+                                },
+                                "title": { "oneOf": [{ "type": "string" }, { "type": "object", "properties": { "text": { "type": "string" } } }] },
+                                "subtitle": { "oneOf": [{ "type": "string" }, { "type": "object", "properties": { "text": { "type": "string" } } }] },
+                                "xAxis": { "type": "object", "properties": { "title": { "type": "object", "properties": { "text": { "type": "string" } } } } },
+                                "yAxis": { "type": "object", "properties": { "title": { "type": "object", "properties": { "text": { "type": "string" } } } } },
+                                "tooltip": { "type": "object" },
+                                "legend": { "type": "object" },
+                                "credits": { "type": "object" }
+                              }
+                            },
+                            "colspan": { "type": "integer", "description": "Column span", "minimum": 1, "default": 1 },
+                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 }
+                          }
+                        }
+                        """;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    String title = "Chart";
+                    int colspan = 1;
+                    int rowspan = 1;
+                    List<String> queries = null;
+                    String configJson = null;
+
+                    if (arguments != null && !arguments.isBlank()) {
+                        ObjectNode node = (ObjectNode) JacksonUtils
+                                .readTree(arguments);
+                        if (node.has("title")
+                                && !node.get("title").isNull()) {
+                            title = node.get("title").asString();
+                        }
+                        if (node.has("queries")
+                                && !node.get("queries").isNull()
+                                && node.get("queries").isArray()) {
+                            queries = new ArrayList<>();
+                            for (var q : node.get("queries")) {
+                                queries.add(q.asString());
+                            }
+                        } else if (node.has("query")
+                                && !node.get("query").isNull()) {
+                            queries = List.of(
+                                    node.get("query").asString());
+                        }
+                        if (node.has("config")
+                                && !node.get("config").isNull()) {
+                            configJson = node.get("config").toString();
+                        }
+                        if (node.has("colspan")
+                                && node.get("colspan").isNumber()) {
+                            colspan = node.get("colspan").asInt();
+                        }
+                        if (node.has("rowspan")
+                                && node.get("rowspan").isNumber()) {
+                            rowspan = node.get("rowspan").asInt();
+                        }
+                    }
+
+                    // Validate queries if provided
+                    if (queries != null) {
+                        for (String q : queries) {
+                            queryValidator.accept(q);
+                        }
+                    }
+
+                    String widgetId = "chart-" + (++widgetCounter);
+                    DashboardWidget widget = chartWidgetCreator
+                            .create(widgetId, title, colspan, rowspan);
+                    addSelectionCheckbox(widget);
+
+                    dashboard.getUI().ifPresentOrElse(ui -> {
+                        ui.access(() -> dashboard.add(widget));
+                    }, () -> {
+                        dashboard.add(widget);
+                    });
+
+                    // Queue data and config for deferred rendering
+                    if (queries != null) {
+                        Chart chart = (Chart) widget.getContent();
+                        ChartEntry entry = ChartEntry.getOrCreate(chart,
+                                widgetId);
+                        entry.setQueries(queries);
+                        entry.setPendingDataUpdate(true);
+                        if (configJson != null) {
+                            entry.setPendingConfigurationJson(configJson);
+                        }
+                    }
+
+                    return "{\"widgetId\":\"" + widgetId
+                            + "\",\"type\":\"chart\",\"title\":\""
+                            + title.replace("\"", "\\\"")
+                            + "\",\"message\":\"Chart widget added"
+                            + (queries != null ? " with data" : "")
+                            + ".\"}";
+                } catch (Exception e) {
+                    return "Error adding chart widget: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    private LLMProvider.ToolSpec createAddGridWidgetTool() {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return "addGridWidget";
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                    Adds a new data grid widget to the dashboard, optionally populated with data.
+                    IMPORTANT: Always provide query to create a widget with data immediately.
+                    The grid automatically creates columns based on query result columns.
+                    Use SQL aliases (AS) to provide human-readable column headers.
+
+                    Parameters:
+                    - title (string, optional): Widget title
+                    - query (string, optional): SQL SELECT query to populate the grid
+                    - colspan (integer, optional): Column span (default: 1)
+                    - rowspan (integer, optional): Row span (default: 1)
+                    """;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "title": { "type": "string", "description": "Widget title" },
+                            "query": { "type": "string", "description": "SQL SELECT query to populate the grid" },
+                            "colspan": { "type": "integer", "description": "Column span", "minimum": 1, "default": 1 },
+                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 }
+                          }
+                        }
+                        """;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    String title = "Data Grid";
+                    int colspan = 1;
+                    int rowspan = 1;
+                    String query = null;
+
+                    if (arguments != null && !arguments.isBlank()) {
+                        ObjectNode node = (ObjectNode) JacksonUtils
+                                .readTree(arguments);
+                        if (node.has("title")
+                                && !node.get("title").isNull()) {
+                            title = node.get("title").asString();
+                        }
+                        if (node.has("query")
+                                && !node.get("query").isNull()) {
+                            query = node.get("query").asString();
+                        }
+                        if (node.has("colspan")
+                                && node.get("colspan").isNumber()) {
+                            colspan = node.get("colspan").asInt();
+                        }
+                        if (node.has("rowspan")
+                                && node.get("rowspan").isNumber()) {
+                            rowspan = node.get("rowspan").asInt();
+                        }
+                    }
+
+                    // Validate query if provided
+                    if (query != null) {
+                        queryValidator.accept(query);
+                    }
+
+                    String widgetId = "grid-" + (++widgetCounter);
+                    DashboardWidget widget = gridWidgetCreator
+                            .create(widgetId, title, colspan, rowspan);
+                    addSelectionCheckbox(widget);
+
+                    dashboard.getUI().ifPresentOrElse(ui -> {
+                        ui.access(() -> dashboard.add(widget));
+                    }, () -> {
+                        dashboard.add(widget);
+                    });
+
+                    // Queue data for deferred rendering
+                    if (query != null) {
+                        GridTools gt = gridToolsMap.get(widgetId);
+                        gt.setCurrentSqlQuery(query);
+                        gt.setPendingDataQuery(query);
+                    }
+
+                    return "{\"widgetId\":\"" + widgetId
+                            + "\",\"type\":\"grid\",\"title\":\""
+                            + title.replace("\"", "\\\"")
+                            + "\",\"message\":\"Grid widget added"
+                            + (query != null ? " with data" : "") + ".\"}";
+                } catch (Exception e) {
+                    return "Error adding grid widget: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    private LLMProvider.ToolSpec createRemoveWidgetTool() {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return "removeWidget";
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                    Removes a widget from the dashboard.
+                    Use getDashboardState() first to get the widget IDs.
+
+                    Parameters:
+                    - widgetId (string, required): The ID of the widget to remove
+                    """;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "widgetId": {
+                              "type": "string",
+                              "description": "The ID of the widget to remove"
+                            }
+                          },
+                          "required": ["widgetId"]
+                        }
+                        """;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    ObjectNode node = (ObjectNode) JacksonUtils
+                            .readTree(arguments);
+                    String widgetId = node.get("widgetId").asString();
+
+                    DashboardWidget targetWidget = findWidgetById(widgetId);
+
+                    if (targetWidget == null) {
+                        return "Error: Widget with ID '" + widgetId
+                                + "' not found";
+                    }
+
+                    final DashboardWidget toRemove = targetWidget;
+                    dashboard.getUI().ifPresentOrElse(ui -> {
+                        ui.access(() -> dashboard.remove(toRemove));
+                    }, () -> {
+                        dashboard.remove(toRemove);
+                    });
+
+                    gridToolsMap.remove(widgetId);
+
+                    return "Widget '" + widgetId + "' removed successfully";
+                } catch (Exception e) {
+                    return "Error removing widget: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    // ===== Helpers =====
+
     private DashboardWidget findWidgetById(String widgetId) {
         for (DashboardWidget widget : dashboard.getWidgets()) {
             if (widget.getId().isPresent()
@@ -394,5 +751,31 @@ public class DashboardTools implements Serializable {
             }
         }
         return null;
+    }
+
+    private LLMProvider.ToolSpec prefixTool(
+            LLMProvider.ToolSpec original, String widgetId) {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return original.getName() + "_" + widgetId;
+            }
+
+            @Override
+            public String getDescription() {
+                return "[Widget: " + widgetId + "] "
+                        + original.getDescription();
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return original.getParametersSchema();
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return original.execute(arguments);
+            }
+        };
     }
 }
