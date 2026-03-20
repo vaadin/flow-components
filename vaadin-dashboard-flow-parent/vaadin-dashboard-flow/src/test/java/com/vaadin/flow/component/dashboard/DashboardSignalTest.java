@@ -8,27 +8,34 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class DashboardSignalTest extends AbstractSignalsUnitTest {
-    @Test(expected = UnsupportedOperationException.class)
-    public void dashboard_bindVisible_throwsException() {
+class DashboardSignalTest extends AbstractSignalsJUnit6Test {
+    @Test
+    void dashboard_bindVisible_throwsException() {
         var dashboard = new Dashboard();
-        dashboard.bindVisible(new ValueSignal<>(false));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            dashboard.bindVisible(new ValueSignal<>(false));
+        });
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void dashboardWidget_bindVisible_throwsException() {
+    @Test
+    void dashboardWidget_bindVisible_throwsException() {
         var widget = new DashboardWidget();
-        widget.bindVisible(new ValueSignal<>(false));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            widget.bindVisible(new ValueSignal<>(false));
+        });
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void dashboardSection_bindVisible_throwsException() {
+    @Test
+    void dashboardSection_bindVisible_throwsException() {
         var section = new DashboardSection();
-        section.bindVisible(new ValueSignal<>(false));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            section.bindVisible(new ValueSignal<>(false));
+        });
     }
 }

@@ -26,11 +26,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -48,62 +47,61 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class SelectTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
+class SelectTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Select<String> select;
     private Supplier<Select> selectSupplier = () -> select;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         select = new Select<>();
     }
 
     @Test
-    public void defaults() {
-        Assert.assertNull("Default value should be null", select.getValue());
-        Assert.assertNull("Empty value should be null", select.getEmptyValue());
+    void defaults() {
+        Assertions.assertNull(select.getValue(),
+                "Default value should be null");
+        Assertions.assertNull(select.getEmptyValue(),
+                "Empty value should be null");
 
-        Assert.assertEquals("Select should not have any children by default", 0,
-                select.getChildren().count());
+        Assertions.assertEquals(0, select.getChildren().count(),
+                "Select should not have any children by default");
 
-        Assert.assertFalse("Empty selection is not allowed by default",
-                select.isEmptySelectionAllowed());
-        Assert.assertEquals(
-                "Empty selection caption is empty string by default", "",
-                select.getEmptySelectionCaption());
+        Assertions.assertFalse(select.isEmptySelectionAllowed(),
+                "Empty selection is not allowed by default");
+        Assertions.assertEquals("", select.getEmptySelectionCaption(),
+                "Empty selection caption is empty string by default");
 
-        Assert.assertNull("Default item enabled generator null",
-                select.getItemEnabledProvider());
-        Assert.assertNull("By default item label generator should not be set",
-                select.getItemLabelGenerator());
-        Assert.assertNull("Default renderer is null", select.getItemRenderer());
+        Assertions.assertNull(select.getItemEnabledProvider(),
+                "Default item enabled generator null");
+        Assertions.assertNull(select.getItemLabelGenerator(),
+                "By default item label generator should not be set");
+        Assertions.assertNull(select.getItemRenderer(),
+                "Default renderer is null");
 
-        Assert.assertNull("Default placeholder is null",
-                select.getPlaceholder());
-        Assert.assertNull("Default label is null", select.getLabel());
-        Assert.assertFalse("No autofocus by default", select.isAutofocus());
-        Assert.assertFalse("Component is in valid state by default",
-                select.isInvalid());
-        Assert.assertFalse("No required indicator by default",
-                select.isRequiredIndicatorVisible());
-        Assert.assertNull("Default error message is null",
-                select.getErrorMessage());
+        Assertions.assertNull(select.getPlaceholder(),
+                "Default placeholder is null");
+        Assertions.assertNull(select.getLabel(), "Default label is null");
+        Assertions.assertFalse(select.isAutofocus(), "No autofocus by default");
+        Assertions.assertFalse(select.isInvalid(),
+                "Component is in valid state by default");
+        Assertions.assertFalse(select.isRequiredIndicatorVisible(),
+                "No required indicator by default");
+        Assertions.assertNull(select.getErrorMessage(),
+                "Default error message is null");
 
-        Assert.assertTrue("Component is enabled by default",
-                select.isEnabled());
-        Assert.assertFalse("Component is not readonly by default",
-                select.isReadOnly());
+        Assertions.assertTrue(select.isEnabled(),
+                "Component is enabled by default");
+        Assertions.assertFalse(select.isReadOnly(),
+                "Component is not readonly by default");
     }
 
     @Test
-    public void basicProperties() {
+    void basicProperties() {
         select.setPlaceholder("placeholder");
         select.setLabel("label");
         select.setInvalid(true);
@@ -113,39 +111,39 @@ public class SelectTest {
         select.setReadOnly(true);
         select.setEnabled(false);
 
-        Assert.assertEquals("Wrong placeholder", "placeholder",
-                select.getPlaceholder());
-        Assert.assertEquals("Wrong label", "label", select.getLabel());
-        Assert.assertTrue("Autofocus not set", select.isAutofocus());
-        Assert.assertTrue("Invalid state not set", select.isInvalid());
-        Assert.assertTrue("Required indicator not set",
-                select.isRequiredIndicatorVisible());
-        Assert.assertEquals("Error message is not set", "errorMessage",
-                select.getErrorMessage());
-        Assert.assertTrue("ReadOnly not set", select.isReadOnly());
-        Assert.assertFalse("Disabled not set", select.isEnabled());
+        Assertions.assertEquals("placeholder", select.getPlaceholder(),
+                "Wrong placeholder");
+        Assertions.assertEquals("label", select.getLabel(), "Wrong label");
+        Assertions.assertTrue(select.isAutofocus(), "Autofocus not set");
+        Assertions.assertTrue(select.isInvalid(), "Invalid state not set");
+        Assertions.assertTrue(select.isRequiredIndicatorVisible(),
+                "Required indicator not set");
+        Assertions.assertEquals("errorMessage", select.getErrorMessage(),
+                "Error message is not set");
+        Assertions.assertTrue(select.isReadOnly(), "ReadOnly not set");
+        Assertions.assertFalse(select.isEnabled(), "Disabled not set");
     }
 
     @Test
-    public void defaultValue_clearSetsToNull() {
+    void defaultValue_clearSetsToNull() {
         select.setItems("foo", "bar");
         select.setValue("foo");
 
-        Assert.assertEquals("foo", select.getValue());
+        Assertions.assertEquals("foo", select.getValue());
 
         select.clear();
-        Assert.assertNull(select.getValue());
+        Assertions.assertNull(select.getValue());
     }
 
     @Test
-    public void setItems_createsItems() {
-        Assert.assertEquals("Invalid number of items", 0,
-                getListBox().getChildren().count());
+    void setItems_createsItems() {
+        Assertions.assertEquals(0, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         select = new Select<>("label", "foo", "bar", "baz");
 
-        Assert.assertEquals("Invalid number of items", 3,
-                getListBox().getChildren().count());
+        Assertions.assertEquals(3, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, true);
@@ -153,8 +151,8 @@ public class SelectTest {
 
         select.setItems("1", "2", "3", "4");
 
-        Assert.assertEquals("Invalid number of items", 4,
-                getListBox().getChildren().count());
+        Assertions.assertEquals(4, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "1", null, true);
         validateItem(1, "2", null, true);
@@ -163,7 +161,7 @@ public class SelectTest {
     }
 
     @Test
-    public void setDataProvider_dataProviderRefreshes_itemsUpdated() {
+    void setDataProvider_dataProviderRefreshes_itemsUpdated() {
         Select<Bean> select = new Select<>();
         Bean beanToUpdate = new Bean("foo");
         List<Bean> beans = Arrays.asList(beanToUpdate, new Bean("bar"),
@@ -180,8 +178,8 @@ public class SelectTest {
 
         select.setItems(dataProvider);
 
-        Assert.assertEquals("Invalid number of items", 3,
-                getListBox().getChildren().count());
+        Assertions.assertEquals(3, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo!", null, true);
         validateItem(1, "bar!", null, true);
@@ -190,8 +188,8 @@ public class SelectTest {
         beanToUpdate.setProperty("UPDATED");
         dataProvider.refreshItem(beanToUpdate);
 
-        Assert.assertEquals("Invalid number of items", 3,
-                getListBox().getChildren().count());
+        Assertions.assertEquals(3, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "UPDATED!", null, true);
         validateItem(1, "bar!", null, true);
@@ -199,7 +197,7 @@ public class SelectTest {
     }
 
     @Test
-    public void itemEnabledProvider_updatedEnabledState() {
+    void itemEnabledProvider_updatedEnabledState() {
         select.setItems("1", "2", "3");
         select.setItemEnabledProvider(item -> item.contains("1"));
 
@@ -223,7 +221,7 @@ public class SelectTest {
     }
 
     @Test
-    public void itemLabelGenerator_updatesLabelProperty() {
+    void itemLabelGenerator_updatesLabelProperty() {
         select.setItems("1", "2", "3");
         select.setItemLabelGenerator(item -> item + " LABEL");
 
@@ -243,7 +241,7 @@ public class SelectTest {
     }
 
     @Test
-    public void renderer_defaultRendererUsesToString() {
+    void renderer_defaultRendererUsesToString() {
         Select<Bean> select = new Select<>();
         select.setItems(new Bean("foo"), new Bean("bar"), new Bean("baz"));
         selectSupplier = () -> select;
@@ -254,61 +252,61 @@ public class SelectTest {
     }
 
     @Test
-    public void renderer_setRendererShorthandForString() {
+    void renderer_setRendererShorthandForString() {
         Select<Bean> select = new Select<>();
         select.setItems(new Bean("foo"), new Bean("bar"), new Bean("baz"));
         selectSupplier = () -> select;
         select.setTextRenderer(bean -> "!" + bean.getProperty());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"1\"><span>!foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"2\"><span>!bar</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"3\"><span>!baz</span></vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
     }
 
     @Test
-    public void renderer_customRendererUsed() {
+    void renderer_customRendererUsed() {
         select.setItems("foo", "bar", "baz");
         select.setRenderer(new ComponentRenderer<>(
                 (SerializableFunction<String, Span>) Span::new));
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"1\"><span>foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"2\"><span>bar</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"3\"><span>baz</span></vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
 
         select.setItems("1", "2");
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"4\"><span>1</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"5\"><span>2</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
     }
 
     @Test
-    public void renderer_itemLabelGenerator_prefersRenderer() {
+    void renderer_itemLabelGenerator_prefersRenderer() {
         select.setItems("foo");
         select.setRenderer(new ComponentRenderer<>(
                 (SerializableFunction<String, Span>) Span::new));
         select.setItemLabelGenerator(item -> "bar");
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value=\"1\" label=\"bar\"><span>foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
     }
 
     @Test
-    public void emptySelectionAllowed_emptySelectionCaptionChanged() {
+    void emptySelectionAllowed_emptySelectionCaptionChanged() {
         select.setItems("foo", "bar");
 
         validateItem(0, "foo", null, true);
@@ -317,7 +315,8 @@ public class SelectTest {
 
         // getOuterHTML jsoup interprets the property value with "" as value as
         // a boolean
-        Assert.assertEquals("<vaadin-select-item value></vaadin-select-item>",
+        Assertions.assertEquals(
+                "<vaadin-select-item value></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
 
         validateItem(0, "", null, true);
@@ -332,7 +331,7 @@ public class SelectTest {
         select.setEmptySelectionAllowed(true);
         select.setEmptySelectionCaption("EMPTY");
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "<vaadin-select-item value>EMPTY</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
 
@@ -350,7 +349,7 @@ public class SelectTest {
     }
 
     @Test
-    public void emptySelectionItem_itemEnabledProviderCanDisableIt() {
+    void emptySelectionItem_itemEnabledProviderCanDisableIt() {
         select.setItems("foo", "bar");
         select.setEmptySelectionAllowed(true);
         select.setItemEnabledProvider(Objects::nonNull);
@@ -361,7 +360,7 @@ public class SelectTest {
     }
 
     @Test
-    public void emptySelectionItem_itemLabelGeneratorCanCustomizeIt() {
+    void emptySelectionItem_itemLabelGeneratorCanCustomizeIt() {
         select.setItems("foo", "bar");
         select.setEmptySelectionAllowed(true);
         select.setItemLabelGenerator(
@@ -373,7 +372,7 @@ public class SelectTest {
     }
 
     @Test
-    public void valueProperty_convertsToPresentationAndModel() {
+    void valueProperty_convertsToPresentationAndModel() {
         Select<Bean> select = new Select<>();
         Bean foo = new Bean("foo");
         Bean bar = new Bean("bar");
@@ -383,40 +382,42 @@ public class SelectTest {
         AtomicReference<HasValue.ValueChangeEvent> capture = new AtomicReference<>();
         select.addValueChangeListener(capture::set);
 
-        Assert.assertNull("Wrong value", select.getValue());
+        Assertions.assertNull(select.getValue(), "Wrong value");
 
         select.setValue(bar);
-        Assert.assertEquals("Wrong value", bar, select.getValue());
-        Assert.assertEquals("No value change", bar, capture.get().getValue());
-        Assert.assertNull("Wrong old value", capture.get().getOldValue());
-        Assert.assertFalse("Value change should not be client based",
-                capture.get().isFromClient());
-        Assert.assertEquals("Element has incorrect value", "2",
-                select.getElement().getProperty("value"));
+        Assertions.assertEquals(bar, select.getValue(), "Wrong value");
+        Assertions.assertEquals(bar, capture.get().getValue(),
+                "No value change");
+        Assertions.assertNull(capture.get().getOldValue(), "Wrong old value");
+        Assertions.assertFalse(capture.get().isFromClient(),
+                "Value change should not be client based");
+        Assertions.assertEquals("2", select.getElement().getProperty("value"),
+                "Element has incorrect value");
 
         select.getElement().setProperty("value", "1");
-        Assert.assertEquals("Wrong value", foo, select.getValue());
-        Assert.assertEquals("No value change", foo, capture.get().getValue());
-        Assert.assertEquals("Wrong old value", bar,
-                capture.get().getOldValue());
-        Assert.assertFalse("Value change should not be client based",
-                capture.get().isFromClient());
-        Assert.assertEquals("Element has incorrect value", "1",
-                select.getElement().getProperty("value"));
+        Assertions.assertEquals(foo, select.getValue(), "Wrong value");
+        Assertions.assertEquals(foo, capture.get().getValue(),
+                "No value change");
+        Assertions.assertEquals(bar, capture.get().getOldValue(),
+                "Wrong old value");
+        Assertions.assertFalse(capture.get().isFromClient(),
+                "Value change should not be client based");
+        Assertions.assertEquals("1", select.getElement().getProperty("value"),
+                "Element has incorrect value");
 
         select.setValue(null);
-        Assert.assertNull("Wrong value", select.getValue());
-        Assert.assertNull("No value change", capture.get().getValue());
-        Assert.assertEquals("Wrong old value", foo,
-                capture.get().getOldValue());
-        Assert.assertFalse("Value change should not be client based",
-                capture.get().isFromClient());
-        Assert.assertEquals("Element has incorrect value", "",
-                select.getElement().getProperty("value"));
+        Assertions.assertNull(select.getValue(), "Wrong value");
+        Assertions.assertNull(capture.get().getValue(), "No value change");
+        Assertions.assertEquals(foo, capture.get().getOldValue(),
+                "Wrong old value");
+        Assertions.assertFalse(capture.get().isFromClient(),
+                "Value change should not be client based");
+        Assertions.assertEquals("", select.getElement().getProperty("value"),
+                "Element has incorrect value");
     }
 
     @Test
-    public void setDisabledItemAsValue_valueChangeRejected() {
+    void setDisabledItemAsValue_valueChangeRejected() {
         select.setItems("foo", "bar");
         select.setItemEnabledProvider(item -> item.equals("foo"));
 
@@ -425,35 +426,38 @@ public class SelectTest {
 
         select.setValue("foo");
 
-        Assert.assertEquals("Wrong value", "foo", select.getValue());
-        Assert.assertEquals("No value change", "foo", capture.get().getValue());
-        Assert.assertNull("Wrong old value", capture.get().getOldValue());
-        Assert.assertFalse("Value change should not be client based",
-                capture.get().isFromClient());
-        Assert.assertEquals("Element has incorrect value", "1",
-                select.getElement().getProperty("value"));
+        Assertions.assertEquals("foo", select.getValue(), "Wrong value");
+        Assertions.assertEquals("foo", capture.get().getValue(),
+                "No value change");
+        Assertions.assertNull(capture.get().getOldValue(), "Wrong old value");
+        Assertions.assertFalse(capture.get().isFromClient(),
+                "Value change should not be client based");
+        Assertions.assertEquals("1", select.getElement().getProperty("value"),
+                "Element has incorrect value");
 
         // value change will be rejected due to disabled item, even though the
         // property is changed
         select.getElement().setProperty("value", "2");
 
-        Assert.assertEquals("Wrong value", "foo", select.getValue());
-        Assert.assertEquals("No value change", "foo", capture.get().getValue());
-        Assert.assertNull("Wrong old value", capture.get().getOldValue());
-        Assert.assertFalse("Value change should not be client based",
-                capture.get().isFromClient());
+        Assertions.assertEquals("foo", select.getValue(), "Wrong value");
+        Assertions.assertEquals("foo", capture.get().getValue(),
+                "No value change");
+        Assertions.assertNull(capture.get().getOldValue(), "Wrong old value");
+        Assertions.assertFalse(capture.get().isFromClient(),
+                "Value change should not be client based");
 
-        Assert.assertEquals("Element has incorrect value", "2",
-                select.getElement().getProperty("value"));
+        Assertions.assertEquals("2", select.getElement().getProperty("value"),
+                "Element has incorrect value");
     }
 
     @Test
-    public void disable_makesElementAndItemsDisabled() {
+    void disable_makesElementAndItemsDisabled() {
         select.setItems("foo", "bar");
         select.setEnabled(false);
 
-        Assert.assertTrue("disabled property not set",
-                select.getElement().getProperty("disabled", false));
+        Assertions.assertTrue(
+                select.getElement().getProperty("disabled", false),
+                "disabled property not set");
 
         validateItem(0, "foo", null, false);
         validateItem(1, "bar", null, false);
@@ -465,15 +469,16 @@ public class SelectTest {
 
         select.setEnabled(true);
 
-        Assert.assertFalse("disabled property not removed",
-                select.getElement().getProperty("disabled", false));
+        Assertions.assertFalse(
+                select.getElement().getProperty("disabled", false),
+                "disabled property not removed");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, false);
     }
 
     @Test
-    public void clientSideValueUpdate_componentIsReadOnly_preventsValueUpdate() {
+    void clientSideValueUpdate_componentIsReadOnly_preventsValueUpdate() {
         // need to allow updating value via internal method to mock client
         // update
         final Consumer<String>[] clientSideValueUpdater = new Consumer[1];
@@ -488,51 +493,56 @@ public class SelectTest {
         select.addValueChangeListener(capture::set);
         select.setReadOnly(true);
 
-        Assert.assertTrue("readonly property not set",
-                select.getElement().getProperty("readonly", false));
+        Assertions.assertTrue(
+                select.getElement().getProperty("readonly", false),
+                "readonly property not set");
 
         clientSideValueUpdater[0].accept("foo");
 
-        Assert.assertNull("No event should be fired when in readonly",
-                capture.get());
-        Assert.assertNull("Value changed when in read only", select.getValue());
+        Assertions.assertNull(capture.get(),
+                "No event should be fired when in readonly");
+        Assertions.assertNull(select.getValue(),
+                "Value changed when in read only");
 
         // value should be changeable from server side even in readonly mode
         select.setValue("bar");
 
-        Assert.assertEquals("Wrong value", "bar", select.getValue());
-        Assert.assertEquals("No value change", "bar", capture.get().getValue());
-        Assert.assertNull("Wrong old value", capture.get().getOldValue());
-        Assert.assertFalse("Value change should not be client basedd",
-                capture.get().isFromClient());
-        Assert.assertEquals("Element has incorrect value", "2",
-                select.getElement().getProperty("value"));
+        Assertions.assertEquals("bar", select.getValue(), "Wrong value");
+        Assertions.assertEquals("bar", capture.get().getValue(),
+                "No value change");
+        Assertions.assertNull(capture.get().getOldValue(), "Wrong old value");
+        Assertions.assertFalse(capture.get().isFromClient(),
+                "Value change should not be client basedd");
+        Assertions.assertEquals("2", select.getElement().getProperty("value"),
+                "Element has incorrect value");
 
         select.setReadOnly(false);
 
-        Assert.assertFalse("readonly property not removed",
-                select.getElement().getProperty("readonly", false));
+        Assertions.assertFalse(
+                select.getElement().getProperty("readonly", false),
+                "readonly property not removed");
 
         clientSideValueUpdater[0].accept("foo");
 
-        Assert.assertEquals("Wrong value", "foo", select.getValue());
-        Assert.assertEquals("No value change", "foo", capture.get().getValue());
-        Assert.assertEquals("Wrong old value", "bar",
-                capture.get().getOldValue());
-        Assert.assertTrue("Value change should be client based",
-                capture.get().isFromClient());
+        Assertions.assertEquals("foo", select.getValue(), "Wrong value");
+        Assertions.assertEquals("foo", capture.get().getValue(),
+                "No value change");
+        Assertions.assertEquals("bar", capture.get().getOldValue(),
+                "Wrong old value");
+        Assertions.assertTrue(capture.get().isFromClient(),
+                "Value change should be client based");
         // element property value is not updated with out mock updater so it has
         // stayed the same
     }
 
     @Test
-    public void addRemoveComponents_componentsIntendedForListBox() {
+    void addRemoveComponents_componentsIntendedForListBox() {
         select.setItems("foo", "bar");
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 0,
-                select.getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(0, select.getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, true);
@@ -540,24 +550,24 @@ public class SelectTest {
         Span span = new Span("span 1");
         select.add(span);
 
-        Assert.assertEquals("Invalid number of items", 3,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 1,
-                select.getChildren().count());
+        Assertions.assertEquals(3, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(1, select.getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, true);
         validateItem(2, "span 1", null, true);
 
-        Assert.assertEquals("<span>span 1</span>",
+        Assertions.assertEquals("<span>span 1</span>",
                 getListBoxChild(2).getOuterHTML());
 
         select.remove(span);
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 0,
-                select.getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(0, select.getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, true);
@@ -566,10 +576,10 @@ public class SelectTest {
         select.addComponentAsFirst(new Span("first"));
         select.addComponentAtIndex(2, new Span("index 2"));
 
-        Assert.assertEquals("Invalid number of items", 6,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 4,
-                select.getChildren().count());
+        Assertions.assertEquals(6, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(4, select.getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "first", null, true);
         validateItem(1, "foo", null, true);
@@ -580,8 +590,8 @@ public class SelectTest {
 
         select.removeAll();
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, true);
@@ -590,15 +600,15 @@ public class SelectTest {
     }
 
     @Test
-    public void addComponentAfterBeforeItem_goesIntoCorrectPlace() {
+    void addComponentAfterBeforeItem_goesIntoCorrectPlace() {
         select.setItems("foo", "bar");
         select.addComponents("foo", new Span("after foo"));
         select.prependComponents("foo", new Span("before foo"));
 
-        Assert.assertEquals("Invalid number of items", 4,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 2,
-                select.getChildren().count());
+        Assertions.assertEquals(4, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(2, select.getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "before foo", null, true);
         validateItem(1, "foo", null, true);
@@ -607,70 +617,64 @@ public class SelectTest {
 
         select.removeAll();
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 0,
-                select.getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(0, select.getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, true);
     }
 
     @Test
-    public void setPrefixComponent_prefixComponentGoesToSelectChildren() {
+    void setPrefixComponent_prefixComponentGoesToSelectChildren() {
         select.setItems("foo", "bar");
 
         select.setPrefixComponent(new Span("prefix1"));
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 1,
-                select.getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(1, select.getChildren().count(),
+                "Invalid number of items");
 
-        Assert.assertEquals("<span slot=\"prefix\">prefix1</span>", select
+        Assertions.assertEquals("<span slot=\"prefix\">prefix1</span>", select
                 .getChildren().findFirst().get().getElement().getOuterHTML());
 
         Span span = new Span("prefix2");
         span.getElement().setAttribute("slot", "prefix");
         select.add(span);
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 2,
-                select.getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(2, select.getChildren().count(),
+                "Invalid number of items");
 
-        Assert.assertEquals("<span slot=\"prefix\">prefix1</span>", select
+        Assertions.assertEquals("<span slot=\"prefix\">prefix1</span>", select
                 .getChildren().findFirst().get().getElement().getOuterHTML());
-        Assert.assertEquals("<span slot=\"prefix\">prefix2</span>",
+        Assertions.assertEquals("<span slot=\"prefix\">prefix2</span>",
                 select.getChildren().collect(Collectors.toList()).get(1)
                         .getElement().getOuterHTML());
 
         select.remove(span);
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 1,
-                select.getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(1, select.getChildren().count(),
+                "Invalid number of items");
 
-        Assert.assertEquals("<span slot=\"prefix\">prefix1</span>", select
+        Assertions.assertEquals("<span slot=\"prefix\">prefix1</span>", select
                 .getChildren().findFirst().get().getElement().getOuterHTML());
 
         select.removeAll();
 
-        Assert.assertEquals("Invalid number of items", 2,
-                getListBox().getChildren().count());
-        Assert.assertEquals("Invalid number of items", 0,
-                select.getChildren().count());
+        Assertions.assertEquals(2, getListBox().getChildren().count(),
+                "Invalid number of items");
+        Assertions.assertEquals(0, select.getChildren().count(),
+                "Invalid number of items");
     }
 
     @Test
-    public void dataViewForFaultyDataProvider_throwsException() {
-        exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage(
-                "SelectListDataView only supports 'ListDataProvider' "
-                        + "or it's subclasses, but was given a "
-                        + "'AbstractBackEndDataProvider'");
-
+    void dataViewForFaultyDataProvider_throwsException() {
         Select<String> select = new Select<>();
         select.setItems(Arrays.asList("one", "two"));
 
@@ -679,11 +683,16 @@ public class SelectTest {
 
         select.setItems(dataProvider);
 
-        select.getListDataView();
+        IllegalStateException exception = Assertions.assertThrows(
+                IllegalStateException.class, () -> select.getListDataView());
+        Assertions.assertTrue(exception.getMessage()
+                .contains("SelectListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'"));
     }
 
     @Test
-    public void elementHasValue_wrapIntoField_doesNotThrow() {
+    void elementHasValue_wrapIntoField_doesNotThrow() {
         Element element = new Element("vaadin-select");
         element.setProperty("value", "foo");
 
@@ -694,11 +703,11 @@ public class SelectTest {
 
         Mockito.when(instantiator.createComponent(Select.class))
                 .thenAnswer(invocation -> new Select());
-        Select field = Component.from(element, Select.class);
+        Component.from(element, Select.class);
     }
 
     @Test
-    public void setIdentifierProvider_setItemWithIdentifierOnly_shouldSelectCorrectItem() {
+    void setIdentifierProvider_setItemWithIdentifierOnly_shouldSelectCorrectItem() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -713,8 +722,8 @@ public class SelectTest {
 
         select.setValue(new CustomItem(1L));
 
-        Assert.assertNotNull(select.getValue());
-        Assert.assertEquals("First", select.getValue().getName());
+        Assertions.assertNotNull(select.getValue());
+        Assertions.assertEquals("First", select.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -727,12 +736,12 @@ public class SelectTest {
         // with just the Id:
         select.setValue(new CustomItem(2L));
 
-        Assert.assertNotNull(select.getValue());
-        Assert.assertEquals(Long.valueOf(2L), select.getValue().getId());
+        Assertions.assertNotNull(select.getValue());
+        Assertions.assertEquals(Long.valueOf(2L), select.getValue().getId());
     }
 
     @Test
-    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+    void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -747,8 +756,8 @@ public class SelectTest {
 
         select.setValue(new CustomItem(1L));
 
-        Assert.assertNotNull(select.getValue());
-        Assert.assertEquals("First", select.getValue().getName());
+        Assertions.assertNotNull(select.getValue());
+        Assertions.assertEquals("First", select.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -761,12 +770,12 @@ public class SelectTest {
         // another items, should verify that <equals> method is not in use:
         select.setValue(new CustomItem(3L, "Second"));
 
-        Assert.assertNotNull(select.getValue());
-        Assert.assertEquals(Long.valueOf(3L), select.getValue().getId());
+        Assertions.assertNotNull(select.getValue());
+        Assertions.assertEquals(Long.valueOf(3L), select.getValue().getId());
     }
 
     @Test
-    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+    void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -778,12 +787,12 @@ public class SelectTest {
 
         select.setValue(new CustomItem(null, "Second"));
 
-        Assert.assertNotNull(select.getValue());
-        Assert.assertEquals(Long.valueOf(2L), select.getValue().getId());
+        Assertions.assertNotNull(select.getValue());
+        Assertions.assertEquals(Long.valueOf(2L), select.getValue().getId());
     }
 
     @Test
-    public void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
+    void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -797,96 +806,96 @@ public class SelectTest {
         listDataView.setIdentifierProvider(CustomItem::getId);
 
         select.setValue(new CustomItem(null, "First"));
-        Assert.assertNull(select.getValue().getId());
+        Assertions.assertNull(select.getValue().getId());
     }
 
     @Test
-    public void setItems_createsLabelValueEventAndItems() {
-        Assert.assertEquals("Invalid number of items", 0,
-                getListBox().getChildren().count());
+    void setItems_createsLabelValueEventAndItems() {
+        Assertions.assertEquals(0, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         AtomicReference<HasValue.ValueChangeEvent> capture = new AtomicReference<>();
         select = new Select<>("label", capture::set, "foo", "bar", "baz");
 
-        Assert.assertEquals("Invalid number of items", 3,
-                getListBox().getChildren().count());
+        Assertions.assertEquals(3, getListBox().getChildren().count(),
+                "Invalid number of items");
 
         validateItem(0, "foo", null, true);
         validateItem(1, "bar", null, true);
         validateItem(2, "baz", null, true);
 
-        Assert.assertEquals("Invalid label for select ", "label",
-                select.getElement().getProperty("label"));
+        Assertions.assertEquals("label",
+                select.getElement().getProperty("label"),
+                "Invalid label for select ");
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(select instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(select instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
-        Assert.assertTrue(
-                "Select should support aria-label and aria-labelledby",
-                HasAriaLabel.class.isAssignableFrom(Select.class));
+    void implementHasAriaLabel() {
+        Assertions.assertTrue(HasAriaLabel.class.isAssignableFrom(Select.class),
+                "Select should support aria-label and aria-labelledby");
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         Select<String> select = new Select<>();
 
         select.setAriaLabel("aria-label");
-        Assert.assertTrue(select.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", select.getAriaLabel().get());
+        Assertions.assertTrue(select.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", select.getAriaLabel().get());
 
         select.setAriaLabel(null);
-        Assert.assertTrue(select.getAriaLabel().isEmpty());
+        Assertions.assertTrue(select.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         Select<String> select = new Select<>();
 
         select.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(select.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby",
+        Assertions.assertTrue(select.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
                 select.getAriaLabelledBy().get());
 
         select.setAriaLabelledBy(null);
-        Assert.assertTrue(select.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(select.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void setNoVerticalOverlap() {
+    void setNoVerticalOverlap() {
         Select<String> select = new Select<>();
 
-        Assert.assertFalse(select.isNoVerticalOverlap());
+        Assertions.assertFalse(select.isNoVerticalOverlap());
         select.setNoVerticalOverlap(true);
-        Assert.assertTrue(select.isNoVerticalOverlap());
+        Assertions.assertTrue(select.isNoVerticalOverlap());
         select.setNoVerticalOverlap(false);
-        Assert.assertFalse(select.isNoVerticalOverlap());
+        Assertions.assertFalse(select.isNoVerticalOverlap());
     }
 
     @Test
-    public void setOverlayWidth() {
+    void setOverlayWidth() {
         Select<String> select = new Select<>();
 
         select.setOverlayWidth(null);
-        Assert.assertNull(
+        Assertions.assertNull(
                 select.getStyle().get("--vaadin-select-overlay-width"));
         select.setOverlayWidth("30em");
-        Assert.assertEquals("30em",
+        Assertions.assertEquals("30em",
                 select.getStyle().get("--vaadin-select-overlay-width"));
         select.setOverlayWidth(-1, Unit.EM);
-        Assert.assertNull(
+        Assertions.assertNull(
                 select.getStyle().get("--vaadin-select-overlay-width"));
         select.setOverlayWidth(100, Unit.PIXELS);
-        Assert.assertEquals("100.0px",
+        Assertions.assertEquals("100.0px",
                 select.getStyle().get("--vaadin-select-overlay-width"));
     }
 
     @Test
-    public void unregisterOpenedChangeListenerOnEvent() {
+    void unregisterOpenedChangeListenerOnEvent() {
         var listenerInvokedCount = new AtomicInteger(0);
         select.addOpenedChangeListener(e -> {
             listenerInvokedCount.incrementAndGet();
@@ -896,11 +905,11 @@ public class SelectTest {
         select.setOpened(true);
         select.setOpened(false);
 
-        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Test
-    public void unregisterInvalidChangeListenerOnEvent() {
+    void unregisterInvalidChangeListenerOnEvent() {
         var listenerInvokedCount = new AtomicInteger(0);
         select.addInvalidChangeListener(e -> {
             listenerInvokedCount.incrementAndGet();
@@ -910,26 +919,26 @@ public class SelectTest {
         select.setInvalid(true);
         select.setInvalid(false);
 
-        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Test
-    public void implementsInputField() {
-        Assert.assertTrue(
+    void implementsInputField() {
+        Assertions.assertTrue(
                 select instanceof InputField<AbstractField.ComponentValueChangeEvent<Select<String>, String>, String>);
     }
 
     @Test
-    public void getItemPosition_shouldReturnItemIndexIfItemExists() {
+    void getItemPosition_shouldReturnItemIndexIfItemExists() {
         select.setItems("foo", "bar", "buzz");
-        Assert.assertEquals(0, select.getItemPosition("foo"));
-        Assert.assertEquals(1, select.getItemPosition("bar"));
-        Assert.assertEquals(2, select.getItemPosition("buzz"));
-        Assert.assertEquals(-1, select.getItemPosition("does not exist"));
+        Assertions.assertEquals(0, select.getItemPosition("foo"));
+        Assertions.assertEquals(1, select.getItemPosition("bar"));
+        Assertions.assertEquals(2, select.getItemPosition("buzz"));
+        Assertions.assertEquals(-1, select.getItemPosition("does not exist"));
     }
 
     @Test
-    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+    void refreshItem_selectFromClient_valueContainsUpdatedItem() {
         Select<CustomItem> select = new Select<>();
         SelectListDataView<CustomItem> dataView = select.setItems(
                 new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
@@ -947,19 +956,19 @@ public class SelectTest {
         String itemKey = getListBoxChild(1).getProperty("value");
         select.getElement().setProperty("value", itemKey);
 
-        Assert.assertEquals("updated", selectedItem.get().name);
-        Assert.assertEquals("updated", select.getValue().name);
+        Assertions.assertEquals("updated", selectedItem.get().name);
+        Assertions.assertEquals("updated", select.getValue().name);
     }
 
     private void validateItem(int index, String textContent, String label,
             boolean enabled) {
         Element item = getListBoxChild(index);
-        Assert.assertEquals("Invalid text content for item " + index,
-                textContent, item.getText());
-        Assert.assertEquals("Invalid label for item " + index, label,
-                item.getAttribute("label"));
-        Assert.assertEquals("Invalid enabled state for item " + index, enabled,
-                item.isEnabled());
+        Assertions.assertEquals(textContent, item.getText(),
+                "Invalid text content for item " + index);
+        Assertions.assertEquals(label, item.getAttribute("label"),
+                "Invalid label for item " + index);
+        Assertions.assertEquals(enabled, item.isEnabled(),
+                "Invalid enabled state for item " + index);
     }
 
     private Element getListBoxChild(int index) {

@@ -111,7 +111,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.1.0-rc1")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.2.0-alpha1")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -423,7 +423,6 @@ public class CheckboxGroup<T>
      *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        DataViewUtils.checkNoActiveItemsBinding(this);
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         keyMapper.removeAll();

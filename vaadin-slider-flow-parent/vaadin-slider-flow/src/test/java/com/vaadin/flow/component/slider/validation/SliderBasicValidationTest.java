@@ -16,10 +16,10 @@
 package com.vaadin.flow.component.slider.validation;
 
 import com.vaadin.flow.component.slider.Slider;
-import com.vaadin.tests.validation.AbstractBasicValidationTest;
+import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
 
-public class SliderBasicValidationTest
-        extends AbstractBasicValidationTest<Slider, Double> {
+class SliderBasicValidationTest
+        extends AbstractBasicValidationJUnit6Test<Slider, Double> {
 
     @Override
     protected Slider createTestField() {

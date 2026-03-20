@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
+import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
@@ -55,6 +56,9 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory",
                 "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\..*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\..*",
+                // AIController — intentionally not serializable; restored
+                // via reconnect()
+                "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIController",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.AIComponentsFeatureFlagProvider",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Reconnector",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Builder"));
@@ -285,6 +289,71 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
 
         Mockito.verify(newProvider, Mockito.never())
                 .setHistory(Mockito.anyList(), Mockito.anyMap());
+    }
+
+    @Test
+    void reconnect_withControllers_replacesControllers() throws Throwable {
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("New Response"));
+
+        var tool1 = createToolSpec("originalTool", "Original");
+        AIController originalController = createController(tool1);
+
+        // Build without mocks (no message list) so it can serialize
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withController(originalController).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        var tool2 = createToolSpec("newTool", "New");
+        AIController newController = createController(tool2);
+
+        deserialized.reconnect(newProvider).withControllers(newController)
+                .apply();
+        deserialized.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        var explicitTools = captor.getValue().explicitTools();
+        Assertions.assertEquals(1, explicitTools.size());
+        Assertions.assertEquals("newTool", explicitTools.getFirst().getName());
+    }
+
+    private static AIController createController(
+            LLMProvider.ToolSpec... tools) {
+        return new AIController() {
+            @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of(tools);
+            }
+        };
+    }
+
+    private static LLMProvider.ToolSpec createToolSpec(String name,
+            String description) {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return "result";
+            }
+        };
     }
 
     private static class SampleTool {

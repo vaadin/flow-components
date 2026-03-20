@@ -8,17 +8,17 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand;
 
-public class SizeChangeCommandTest {
+class SizeChangeCommandTest {
 
     @Test
-    public void execute_columnWidthChange_undoRestoresOriginalWidth() {
+    void execute_columnWidthChange_undoRestoresOriginalWidth() {
         Spreadsheet spreadsheet = new Spreadsheet();
 
         int originalWidth = (int) spreadsheet.getActiveSheet()

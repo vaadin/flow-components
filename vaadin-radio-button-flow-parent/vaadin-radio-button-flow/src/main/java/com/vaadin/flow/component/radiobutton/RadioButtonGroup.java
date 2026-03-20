@@ -103,7 +103,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.1.0-rc1")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.2.0-alpha1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T> implements
@@ -379,7 +379,6 @@ public class RadioButtonGroup<T>
      *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        DataViewUtils.checkNoActiveItemsBinding(this);
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
 

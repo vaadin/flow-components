@@ -8,29 +8,29 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.CellValueFormatter;
 
-public class CellValueShorteningTest {
+class CellValueShorteningTest {
 
     private CellValueFormatter cellValueFormatter;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         cellValueFormatter = new CellValueFormatter();
         cellValueFormatter.setLocaleDecimalSymbols(
                 DecimalFormatSymbols.getInstance(Locale.US));
     }
 
     @Test
-    public void cellValueShortening_differentInputValues_InputRoundedAccordingToColumnWidth() {
+    void cellValueShortening_differentInputValues_InputRoundedAccordingToColumnWidth() {
         assertCorrectRounding("10", "10", 2);
         assertCorrectRounding("15", "15", 2);
         assertCorrectRounding("19", "19", 2);
@@ -115,9 +115,8 @@ public class CellValueShorteningTest {
                 .getScientificNotationStringForNumericCell(
                         Double.parseDouble(input), input, 1, width);
 
-        assertEquals(
+        assertEquals(expected, result,
                 String.format("Rounding of %s to %s was wrong, expected %s",
-                        input, result, expected),
-                expected, result);
+                        input, result, expected));
     }
 }

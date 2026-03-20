@@ -17,9 +17,9 @@ package com.vaadin.flow.component.contextmenu;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentUtil;
@@ -28,66 +28,68 @@ import com.vaadin.flow.component.HasAriaLabel;
 /**
  * Unit tests for MenuItem.
  */
-public class MenuItemTest {
+class MenuItemTest {
 
     private ContextMenu contextMenu;
     private MenuItem item;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         contextMenu = new ContextMenu();
         item = contextMenu.addItem("");
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void nonCheckable_setChecked_throws() {
-        item.setChecked(true);
+    @Test
+    void nonCheckable_setChecked_throws() {
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> item.setChecked(true));
     }
 
     @Test
-    public void setCheckable_setChecked_isChecked() {
+    void setCheckable_setChecked_isChecked() {
         item.setCheckable(true);
-        Assert.assertFalse(item.isChecked());
+        Assertions.assertFalse(item.isChecked());
         item.setChecked(true);
-        Assert.assertTrue(item.isChecked());
+        Assertions.assertTrue(item.isChecked());
     }
 
     @Test
-    public void checked_setUnCheckable_unChecks() {
+    void checked_setUnCheckable_unChecks() {
         item.setCheckable(true);
         item.setChecked(true);
 
         item.setCheckable(false);
-        Assert.assertFalse(item.isCheckable());
+        Assertions.assertFalse(item.isCheckable());
     }
 
     @Test
-    public void implementsHasAriaLabel() {
-        Assert.assertTrue(item instanceof HasAriaLabel);
+    void implementsHasAriaLabel() {
+        Assertions.assertTrue(item instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         item.setAriaLabel("aria-label");
-        Assert.assertTrue(item.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", item.getAriaLabel().get());
+        Assertions.assertTrue(item.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", item.getAriaLabel().get());
 
         item.setAriaLabel(null);
-        Assert.assertTrue(item.getAriaLabel().isEmpty());
+        Assertions.assertTrue(item.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         item.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(item.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", item.getAriaLabelledBy().get());
+        Assertions.assertTrue(item.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                item.getAriaLabelledBy().get());
 
         item.setAriaLabelledBy(null);
-        Assert.assertTrue(item.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(item.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void disableOnClick_click_componentIsDisabled() {
+    void disableOnClick_click_componentIsDisabled() {
         AtomicBoolean itemIsEnabled = new AtomicBoolean(true);
 
         item = contextMenu.addItem("foo",
@@ -95,16 +97,16 @@ public class MenuItemTest {
         item.setDisableOnClick(true);
         clickMenuItem(item);
 
-        Assert.assertFalse(itemIsEnabled.get());
+        Assertions.assertFalse(itemIsEnabled.get());
     }
 
     @Test
-    public void disableOnClick_clickRevertsDisabled_componentIsEnabled() {
+    void disableOnClick_clickRevertsDisabled_componentIsEnabled() {
         item = contextMenu.addItem("foo",
                 event -> event.getSource().setEnabled(true));
         item.setDisableOnClick(true);
         clickMenuItem(item);
-        Assert.assertTrue(item.isEnabled());
+        Assertions.assertTrue(item.isEnabled());
     }
 
     private static void clickMenuItem(MenuItem menuItem) {
