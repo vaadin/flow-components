@@ -189,8 +189,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       throw 'Invalid pageSize';
     }
 
-    let page = params.page;
-
     // size is controlled by the server (data communicator), so if the
     // size is zero, we know that there is no data to fetch.
     // This also prevents an empty grid getting stuck in a loading state.
@@ -203,12 +201,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    const startIndex = page * grid.pageSize;
-    if (dataProviderController.rootCache.items[startIndex] !== undefined) {
-      callback(dataProviderController.rootCache.items.slice(startIndex, startIndex + grid.pageSize));
-    } else {
-      grid.$connector.debounceRootRequest(page);
-    }
+    grid.$connector.debounceRootRequest(params.page);
   };
 
   grid.$connector.setSorterDirections = function (directions) {
