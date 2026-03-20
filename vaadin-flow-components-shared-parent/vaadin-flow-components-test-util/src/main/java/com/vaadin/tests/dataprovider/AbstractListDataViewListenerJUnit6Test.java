@@ -35,7 +35,7 @@ import com.vaadin.tests.MockUIExtension;
 
 public abstract class AbstractListDataViewListenerJUnit6Test {
     @RegisterExtension
-    MockUIExtension ui = new MockUIExtension();
+    protected MockUIExtension ui = new MockUIExtension();
 
     @Test
     void addItemCountChangeListener_itemsCountChanged_listenersAreNotified() {

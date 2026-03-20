@@ -23,8 +23,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -36,7 +36,7 @@ import com.vaadin.flow.component.shared.InputField;
 
 import tools.jackson.databind.node.ArrayNode;
 
-public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
+class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     @Override
     protected <TItem> ComboBoxBase<?, TItem, ?> createComboBox(
             Class<TItem> itemClass) {
@@ -44,51 +44,51 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
-    public void initialValue() {
+    void initialValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
-        Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getValue_returnsImmutableSet() {
-        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
-        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
-        comboBox.setValue(Set.of("foo", "bar"));
-
-        comboBox.getValue().add("baz");
+        Assertions.assertEquals(Collections.emptySet(), comboBox.getValue());
     }
 
     @Test
-    public void setValue() {
+    void getValue_returnsImmutableSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(Set.of("foo", "bar"));
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> comboBox.getValue().add("baz"));
+    }
+
+    @Test
+    void setValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue(Set.of("foo", "bar"));
 
-        Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+        Assertions.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
         // should refresh web components selectedItems property
         ArrayNode jsonArray = (ArrayNode) comboBox.getElement()
                 .getPropertyRaw("selectedItems");
-        Assert.assertEquals(2, jsonArray.size());
+        Assertions.assertEquals(2, jsonArray.size());
     }
 
     @Test
-    public void setValueNull_setsEmptyValue() {
+    void setValueNull_setsEmptyValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue(Set.of("foo", "bar"));
         comboBox.setValue((Set<String>) null);
 
         // should hold an empty set, rather than null
-        Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
+        Assertions.assertEquals(Collections.emptySet(), comboBox.getValue());
         // should refresh web components selectedItems property
         ArrayNode jsonArray = (ArrayNode) comboBox.getElement()
                 .getPropertyRaw("selectedItems");
-        Assert.assertEquals(0, jsonArray.size());
+        Assertions.assertEquals(0, jsonArray.size());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void setValue_setSameValue_doesNotTriggerChangeEvent() {
+    void setValue_setSameValue_doesNotTriggerChangeEvent() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue(Set.of("foo", "bar"));
@@ -103,44 +103,44 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
-    public void setValueWithVarArgs() {
+    void setValueWithVarArgs() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue("foo", "bar");
 
-        Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+        Assertions.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
     }
 
     @Test
-    public void setValueWithVarArgs_removesDuplicates() {
+    void setValueWithVarArgs_removesDuplicates() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue("foo", "foo", "foo");
 
-        Assert.assertEquals(Set.of("foo"), comboBox.getValue());
+        Assertions.assertEquals(Set.of("foo"), comboBox.getValue());
     }
 
     @Test
-    public void setValueAsCollection() {
+    void setValueAsCollection() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue(List.of("foo", "bar"));
 
-        Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+        Assertions.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
     }
 
     @Test
-    public void setValueAsCollection_removesDuplicates() {
+    void setValueAsCollection_removesDuplicates() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue(List.of("foo", "foo", "foo"));
 
-        Assert.assertEquals(Set.of("foo"), comboBox.getValue());
+        Assertions.assertEquals(Set.of("foo"), comboBox.getValue());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void setValueWithVarArgs_setSameValue_doesNotTriggerChangeEvent() {
+    void setValueWithVarArgs_setSameValue_doesNotTriggerChangeEvent() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue("foo", "bar");
@@ -154,30 +154,30 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
                 .valueChanged(Mockito.any());
     }
 
-    @Test()
-    public void setValueWithEmptyVarArgs_emptySelection() {
+    @Test
+    void setValueWithEmptyVarArgs_emptySelection() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue("foo", "bar");
         comboBox.setValue();
 
-        Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
+        Assertions.assertEquals(Collections.emptySet(), comboBox.getValue());
     }
 
     @Test
-    public void setValue_updateDataProvider_valueIsReset() {
+    void setValue_updateDataProvider_valueIsReset() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue(Set.of("foo", "bar"));
-        Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+        Assertions.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
 
         comboBox.setItems(Arrays.asList("foo", "bar"));
-        Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
+        Assertions.assertEquals(Collections.emptySet(), comboBox.getValue());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void setValue_triggersValueChangeListener() {
+    void setValue_triggersValueChangeListener() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         HasValue.ValueChangeListener listener = Mockito
                 .mock(HasValue.ValueChangeListener.class);
@@ -190,47 +190,48 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
         Mockito.verify(listener, Mockito.times(1))
                 .valueChanged(eventCaptor.capture());
-        Assert.assertEquals(Set.of("foo", "bar"),
+        Assertions.assertEquals(Set.of("foo", "bar"),
                 eventCaptor.getValue().getValue());
-        Assert.assertFalse(eventCaptor.getValue().isFromClient());
+        Assertions.assertFalse(eventCaptor.getValue().isFromClient());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void setValueWithoutItems_throw() {
+    @Test
+    void setValueWithoutItems_throw() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
-        comboBox.setValue(Set.of("foo", "bar"));
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> comboBox.setValue(Set.of("foo", "bar")));
     }
 
     // https://github.com/vaadin/vaadin-flow-components/issues/391
     @Test
-    public void setValueWithLazyItems_doesntThrow() {
+    void setValueWithLazyItems_doesntThrow() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(query -> Stream.of("foo", "bar", "baz"));
         comboBox.setValue(Set.of("foo", "bar"));
 
-        Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+        Assertions.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
     }
 
     @Test
-    public void setValue_disableComboBox_hasValue() {
+    void setValue_disableComboBox_hasValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar"));
         comboBox.setValue(Set.of("bar"));
         comboBox.setEnabled(false);
-        Assert.assertEquals(Set.of("bar"), comboBox.getValue());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getSelectedItems_returnsImmutableSet() {
-        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
-        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
-        comboBox.setValue(Set.of("foo", "bar"));
-
-        comboBox.getSelectedItems().add("baz");
+        Assertions.assertEquals(Set.of("bar"), comboBox.getValue());
     }
 
     @Test
-    public void changeSelection_preservesOrder() {
+    void getSelectedItems_returnsImmutableSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(Set.of("foo", "bar"));
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> comboBox.getSelectedItems().add("baz"));
+    }
+
+    @Test
+    void changeSelection_preservesOrder() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems("One", "Two", "Three", "Four", "Five", "Six", "Seven",
                 "Eight", "Nine", "Ten");
@@ -243,9 +244,9 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         comboBox.select("Four");
         value = comboBox.getValue();
         valueAsList = value.stream().collect(Collectors.toList());
-        Assert.assertEquals("Eight", valueAsList.get(0));
-        Assert.assertEquals("Two", valueAsList.get(1));
-        Assert.assertEquals("Four", valueAsList.get(2));
+        Assertions.assertEquals("Eight", valueAsList.get(0));
+        Assertions.assertEquals("Two", valueAsList.get(1));
+        Assertions.assertEquals("Four", valueAsList.get(2));
         comboBox.clear();
 
         Set<String> linkedHashSetValue = new LinkedHashSet<>(
@@ -254,126 +255,126 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue(linkedHashSetValue);
         value = comboBox.getValue();
         valueAsList = value.stream().collect(Collectors.toList());
-        Assert.assertEquals("Eight", valueAsList.get(0));
-        Assert.assertEquals("Two", valueAsList.get(1));
-        Assert.assertEquals("Four", valueAsList.get(2));
+        Assertions.assertEquals("Eight", valueAsList.get(0));
+        Assertions.assertEquals("Two", valueAsList.get(1));
+        Assertions.assertEquals("Four", valueAsList.get(2));
         comboBox.clear();
 
         comboBox.select("Eight", "Two", "Four");
         value = comboBox.getValue();
         valueAsList = value.stream().collect(Collectors.toList());
-        Assert.assertEquals("Eight", valueAsList.get(0));
-        Assert.assertEquals("Two", valueAsList.get(1));
-        Assert.assertEquals("Four", valueAsList.get(2));
+        Assertions.assertEquals("Eight", valueAsList.get(0));
+        Assertions.assertEquals("Two", valueAsList.get(1));
+        Assertions.assertEquals("Four", valueAsList.get(2));
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<String>, Set<String>>, Set<String>>);
     }
 
     @Test
-    public void setAutoExpand_propertiesAreSet() {
+    void setAutoExpand_propertiesAreSet() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
 
         // NONE
-        Assert.assertEquals(MultiSelectComboBox.AutoExpandMode.NONE,
+        Assertions.assertEquals(MultiSelectComboBox.AutoExpandMode.NONE,
                 comboBox.getAutoExpand());
-        Assert.assertFalse(comboBox.getElement()
+        Assertions.assertFalse(comboBox.getElement()
                 .getProperty("autoExpandHorizontally", false));
-        Assert.assertFalse(comboBox.getElement()
+        Assertions.assertFalse(comboBox.getElement()
                 .getProperty("autoExpandVertically", false));
 
         // HORIZONTAL
         comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.HORIZONTAL);
 
-        Assert.assertTrue(comboBox.getElement()
+        Assertions.assertTrue(comboBox.getElement()
                 .getProperty("autoExpandHorizontally", true));
-        Assert.assertFalse(comboBox.getElement()
+        Assertions.assertFalse(comboBox.getElement()
                 .getProperty("autoExpandVertically", false));
 
         // VERTICAL
         comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.VERTICAL);
 
-        Assert.assertFalse(comboBox.getElement()
+        Assertions.assertFalse(comboBox.getElement()
                 .getProperty("autoExpandHorizontally", false));
-        Assert.assertTrue(comboBox.getElement()
+        Assertions.assertTrue(comboBox.getElement()
                 .getProperty("autoExpandVertically", true));
 
         // BOTH
         comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.BOTH);
 
-        Assert.assertTrue(comboBox.getElement()
+        Assertions.assertTrue(comboBox.getElement()
                 .getProperty("autoExpandHorizontally", true));
-        Assert.assertTrue(comboBox.getElement()
+        Assertions.assertTrue(comboBox.getElement()
                 .getProperty("autoExpandVertically", true));
     }
 
     @Test
-    public void setSelectedItemsOnTop() {
+    void setSelectedItemsOnTop() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
 
-        Assert.assertFalse(comboBox.isSelectedItemsOnTop());
-        Assert.assertFalse(
+        Assertions.assertFalse(comboBox.isSelectedItemsOnTop());
+        Assertions.assertFalse(
                 comboBox.getElement().getProperty("selectedItemsOnTop", false));
 
         comboBox.setSelectedItemsOnTop(true);
 
-        Assert.assertTrue(comboBox.isSelectedItemsOnTop());
-        Assert.assertTrue(
+        Assertions.assertTrue(comboBox.isSelectedItemsOnTop());
+        Assertions.assertTrue(
                 comboBox.getElement().getProperty("selectedItemsOnTop", true));
     }
 
     @Test
-    public void setKeepFilter() {
+    void setKeepFilter() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
 
-        Assert.assertFalse(comboBox.isKeepFilter());
-        Assert.assertFalse(
+        Assertions.assertFalse(comboBox.isKeepFilter());
+        Assertions.assertFalse(
                 comboBox.getElement().getProperty("keepFilter", false));
 
         comboBox.setKeepFilter(true);
 
-        Assert.assertTrue(comboBox.isKeepFilter());
-        Assert.assertTrue(
+        Assertions.assertTrue(comboBox.isKeepFilter());
+        Assertions.assertTrue(
                 comboBox.getElement().getProperty("keepFilter", true));
     }
 
     @Test
-    public void setOverlayWidth() {
+    void setOverlayWidth() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setOverlayWidth(null);
-        Assert.assertNull(comboBox.getStyle()
+        Assertions.assertNull(comboBox.getStyle()
                 .get("--vaadin-multi-select-combo-box-overlay-width"));
         comboBox.setOverlayWidth("30em");
-        Assert.assertEquals("30em", comboBox.getStyle()
+        Assertions.assertEquals("30em", comboBox.getStyle()
                 .get("--vaadin-multi-select-combo-box-overlay-width"));
         comboBox.setOverlayWidth(-1, Unit.EM);
-        Assert.assertNull(comboBox.getStyle()
+        Assertions.assertNull(comboBox.getStyle()
                 .get("--vaadin-multi-select-combo-box-overlay-width"));
         comboBox.setOverlayWidth(100, Unit.PIXELS);
-        Assert.assertEquals("100.0px", comboBox.getStyle()
+        Assertions.assertEquals("100.0px", comboBox.getStyle()
                 .get("--vaadin-multi-select-combo-box-overlay-width"));
     }
 
     @Test
-    public void setFilterTimeout_getFilterTimeout() {
+    void setFilterTimeout_getFilterTimeout() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
-        Assert.assertEquals(500, comboBox.getFilterTimeout());
-        Assert.assertEquals(500,
+        Assertions.assertEquals(500, comboBox.getFilterTimeout());
+        Assertions.assertEquals(500,
                 comboBox.getElement().getProperty("_filterTimeout", 0));
 
         comboBox.setFilterTimeout(750);
-        Assert.assertEquals(750, comboBox.getFilterTimeout());
-        Assert.assertEquals(750,
+        Assertions.assertEquals(750, comboBox.getFilterTimeout());
+        Assertions.assertEquals(750,
                 comboBox.getElement().getProperty("_filterTimeout", 0));
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(HasThemeVariant.class
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(HasThemeVariant.class
                 .isAssignableFrom(MultiSelectComboBox.class));
     }
 }

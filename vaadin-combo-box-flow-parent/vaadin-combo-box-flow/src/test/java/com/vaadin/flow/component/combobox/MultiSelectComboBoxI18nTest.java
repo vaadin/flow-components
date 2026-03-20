@@ -15,44 +15,46 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class MultiSelectComboBoxI18nTest {
+class MultiSelectComboBoxI18nTest {
 
     MultiSelectComboBox<String> comboBox;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         comboBox = new MultiSelectComboBox<>();
     }
 
     @Test
-    public void setI18n() {
+    void setI18n() {
         MultiSelectComboBoxI18n i18n = new MultiSelectComboBoxI18n()
                 .setCleared("All entries removed");
         comboBox.setI18n(i18n);
 
-        Assert.assertEquals(i18n, comboBox.getI18n());
+        Assertions.assertEquals(i18n, comboBox.getI18n());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setI18nToNull_throws() {
-        comboBox.setI18n(null);
+    @Test
+    void setI18nToNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> comboBox.setI18n(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setTotalWithoutCountPlaceholder_throws() {
+    @Test
+    void setTotalWithoutCountPlaceholder_throws() {
         MultiSelectComboBoxI18n i18n = new MultiSelectComboBoxI18n();
-        i18n.setTotal("entries selected");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> i18n.setTotal("entries selected"));
     }
 
-    @Test()
-    public void setTotalWithCountPlaceholder_doesNotThrow() {
+    @Test
+    void setTotalWithCountPlaceholder_doesNotThrow() {
         MultiSelectComboBoxI18n i18n = new MultiSelectComboBoxI18n();
         i18n.setTotal("{count} entries selected");
 
-        Assert.assertEquals("{count} entries selected", i18n.getTotal());
+        Assertions.assertEquals("{count} entries selected", i18n.getTotal());
     }
 }
