@@ -19,22 +19,74 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Holds the data source queries and pending LLM state for a chart. Chart
- * entries do not hold a direct reference to the
- * {@link com.vaadin.flow.component.charts.Chart} instance — the chart is
- * resolved dynamically through the {@link ChartRegistry}'s resolver function,
- * so that chart lifecycle changes (e.g., removal from a dashboard) are
- * reflected automatically.
+ * entries are stored directly on the {@link Chart} instance via
+ * {@link ComponentUtil}, so their lifecycle is tied to the chart component.
  *
  * @author Vaadin Ltd
  */
 public class ChartEntry implements Serializable {
 
+    /**
+     * Gets the {@link ChartEntry} for the given chart, or {@code null} if none
+     * has been set.
+     *
+     * @param chart
+     *            the chart component, not {@code null}
+     * @return the chart entry, or {@code null}
+     */
+    public static ChartEntry get(Chart chart) {
+        return ComponentUtil.getData(chart, ChartEntry.class);
+    }
+
+    /**
+     * Gets the {@link ChartEntry} for the given chart, creating one if it does
+     * not exist.
+     *
+     * @param chart
+     *            the chart component, not {@code null}
+     * @param chartId
+     *            the chart ID to assign if a new entry is created
+     * @return the chart entry, never {@code null}
+     */
+    public static ChartEntry getOrCreate(Chart chart, String chartId) {
+        ChartEntry entry = ComponentUtil.getData(chart, ChartEntry.class);
+        if (entry == null) {
+            entry = new ChartEntry(chartId);
+            ComponentUtil.setData(chart, ChartEntry.class, entry);
+        }
+        return entry;
+    }
+
+    private final String id;
     private List<String> queries = new ArrayList<>();
+
+    /**
+     * Creates a new chart entry with the given ID.
+     *
+     * @param id
+     *            the chart ID, not {@code null}
+     */
+    public ChartEntry(String id) {
+        this.id = Objects.requireNonNull(id, "id must not be null");
+    }
+
+    /**
+     * Returns the chart ID.
+     *
+     * @return the chart ID, never {@code null}
+     */
+    public String getId() {
+        return id;
+    }
     private String pendingConfigurationJson;
-    private List<String> pendingQueries;
+    private boolean pendingDataUpdate;
 
     /**
      * Gets the current SQL queries for this chart's data series.
@@ -76,33 +128,32 @@ public class ChartEntry implements Serializable {
     }
 
     /**
-     * Gets the pending SQL queries that will replace the current ones when
-     * applied.
+     * Returns whether a data update is pending.
      *
-     * @return the pending queries, or {@code null} if none
+     * @return {@code true} if queries were changed and the chart needs
+     *         re-rendering
      */
-    public List<String> getPendingQueries() {
-        return pendingQueries;
+    public boolean isPendingDataUpdate() {
+        return pendingDataUpdate;
     }
 
     /**
-     * Sets the pending SQL queries to be applied later.
+     * Marks or clears the pending data update flag.
      *
-     * @param queries
-     *            the pending SQL queries
+     * @param pendingDataUpdate
+     *            {@code true} if the chart data needs re-rendering
      */
-    public void setPendingQueries(List<String> queries) {
-        this.pendingQueries = queries != null ? new ArrayList<>(queries)
-                : new ArrayList<>();
+    public void setPendingDataUpdate(boolean pendingDataUpdate) {
+        this.pendingDataUpdate = pendingDataUpdate;
     }
 
     /**
      * Returns whether this entry has pending state waiting to be applied.
      *
-     * @return {@code true} if there is pending configuration or queries
+     * @return {@code true} if there is pending configuration or data update
      */
     public boolean hasPendingState() {
-        return pendingConfigurationJson != null || pendingQueries != null;
+        return pendingConfigurationJson != null || pendingDataUpdate;
     }
 
     /**
@@ -110,18 +161,6 @@ public class ChartEntry implements Serializable {
      */
     public void clearPendingState() {
         pendingConfigurationJson = null;
-        pendingQueries = null;
-    }
-
-    /**
-     * Applies the pending queries to the current state and clears them. This
-     * does not apply the pending configuration — that requires deserialization
-     * and is handled externally.
-     */
-    public void applyPendingQueries() {
-        if (pendingQueries != null) {
-            queries = new ArrayList<>(pendingQueries);
-            pendingQueries = null;
-        }
+        pendingDataUpdate = false;
     }
 }

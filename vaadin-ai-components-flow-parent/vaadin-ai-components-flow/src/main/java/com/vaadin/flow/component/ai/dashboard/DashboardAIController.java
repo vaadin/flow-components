@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.dashboard;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +30,6 @@ import com.vaadin.flow.component.ai.grid.GridTools;
 
 import com.vaadin.flow.component.ai.chart.ChartConfigurationApplier;
 import com.vaadin.flow.component.ai.chart.ChartEntry;
-import com.vaadin.flow.component.ai.chart.ChartRegistry;
 import com.vaadin.flow.component.ai.chart.ChartTools;
 import com.vaadin.flow.component.ai.chart.DataConverter;
 import com.vaadin.flow.component.ai.chart.DefaultDataConverter;
@@ -56,9 +56,11 @@ import tools.jackson.databind.node.ObjectNode;
  * update widget properties, and query database data.
  * </p>
  * <p>
- * Chart tools use a {@link ChartRegistry} with dynamic chart resolution, so
- * the LLM uses a {@code chartId} parameter to target specific charts. There is
- * no need for per-widget tool prefixing for chart operations.
+ * Chart state ({@link ChartEntry}) is stored directly on each {@link Chart}
+ * instance via {@link ChartEntry#getOrCreate(Chart)}, so there is no separate
+ * registry to maintain. The LLM uses a {@code chartId} parameter to target
+ * specific charts — chart instances are resolved dynamically from the dashboard
+ * widgets.
  * </p>
  *
  * @author Vaadin Ltd
@@ -72,7 +74,6 @@ public class DashboardAIController implements AIController {
     private final DatabaseProvider databaseProvider;
     private final DashboardTools dashboardTools;
 
-    private final ChartRegistry chartRegistry;
     private final DataConverter dataConverter = new DefaultDataConverter();
     private final ChartConfigurationApplier configurationApplier = new ChartConfigurationApplier();
 
@@ -95,11 +96,6 @@ public class DashboardAIController implements AIController {
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
         this.dashboardTools = new DashboardTools(dashboard);
-        this.chartRegistry = new ChartRegistry(
-                this::findChartById,
-                this::getChartWidgetIds);
-        this.chartRegistry
-                .setQueryValidator(q -> databaseProvider.executeQuery(q));
     }
 
     /**
@@ -167,8 +163,11 @@ public class DashboardAIController implements AIController {
         tools.add(createAddGridWidgetTool());
         tools.add(createRemoveWidgetTool());
 
-        // Chart tools (shared across all charts via registry)
-        tools.addAll(ChartTools.createAll(chartRegistry));
+        // Chart tools (shared across all charts, resolved from dashboard)
+        tools.addAll(ChartTools.createAll(
+                this::findChartById,
+                this::getChartWidgetIds,
+                databaseProvider::executeQuery));
 
         // Per-widget grid tools (still prefixed)
         for (Map.Entry<String, GridTools> entry : gridToolsMap.entrySet()) {
@@ -184,21 +183,20 @@ public class DashboardAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        // Render pending chart updates via registry
-        for (var mapEntry : chartRegistry.getEntries().entrySet()) {
-            String chartId = mapEntry.getKey();
-            ChartEntry entry = mapEntry.getValue();
-            if (!entry.hasPendingState()) {
+        // Render pending chart updates by checking each chart widget
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (!(widget.getContent() instanceof Chart chart)) {
+                continue;
+            }
+            ChartEntry entry = ChartEntry.get(chart);
+            if (entry == null || !entry.hasPendingState()) {
                 continue;
             }
             try {
-                Chart chart = chartRegistry.getChart(chartId);
                 applyPendingChartState(chart, entry);
-            } catch (IllegalArgumentException e) {
-                // Chart was removed — skip silently
             } catch (Exception e) {
                 LOGGER.error("Error rendering chart for widget {}",
-                        chartId, e);
+                        entry.getId(), e);
             } finally {
                 entry.clearPendingState();
             }
@@ -229,18 +227,19 @@ public class DashboardAIController implements AIController {
     public DashboardState getState() {
         List<WidgetState> widgetStates = new ArrayList<>();
         for (DashboardWidget widget : dashboard.getWidgets()) {
-            String widgetId = widget.getId().orElse(null);
-            if (widgetId == null) {
-                continue;
-            }
+            String widgetId;
             String type;
             List<String> queries = null;
             String configuration = null;
 
             if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry == null) {
+                    continue;
+                }
+                widgetId = entry.getId();
                 type = "chart";
-                ChartEntry entry = chartRegistry.getEntries().get(widgetId);
-                if (entry != null && !entry.getQueries().isEmpty()) {
+                if (!entry.getQueries().isEmpty()) {
                     queries = entry.getQueries();
                     try {
                         String configJson = ChartSerialization
@@ -255,15 +254,18 @@ public class DashboardAIController implements AIController {
                                 widgetId, e);
                     }
                 }
-            } else if (gridToolsMap.containsKey(widgetId)) {
+            } else {
+                widgetId = widget.getId().orElse(null);
+                if (widgetId == null
+                        || !gridToolsMap.containsKey(widgetId)) {
+                    continue;
+                }
                 type = "grid";
                 String sqlQuery = gridToolsMap.get(widgetId)
                         .getCurrentSqlQuery();
                 if (sqlQuery != null) {
                     queries = List.of(sqlQuery);
                 }
-            } else {
-                continue;
             }
 
             widgetStates.add(new WidgetState(widgetId, widget.getTitle(), type,
@@ -291,13 +293,13 @@ public class DashboardAIController implements AIController {
                             ws.title(), ws.colspan(), ws.rowspan());
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
-                        ChartEntry entry = chartRegistry
-                                .getEntry(ws.widgetId());
+                        Chart chart = (Chart) widget.getContent();
+                        ChartEntry entry = ChartEntry.getOrCreate(chart,
+                                ws.widgetId());
                         entry.setQueries(ws.queries());
                         try {
-                            renderChart(
-                                    chartRegistry.getChart(ws.widgetId()),
-                                    ws.queries(), ws.configuration());
+                            renderChart(chart, ws.queries(),
+                                    ws.configuration());
                         } catch (Exception e) {
                             LOGGER.error(
                                     "Failed to restore chart widget {}",
@@ -345,6 +347,7 @@ public class DashboardAIController implements AIController {
             int colspan, int rowspan) {
         Chart chart = new Chart();
         chart.setSizeFull();
+        ChartEntry.getOrCreate(chart, widgetId);
         DashboardWidget widget = new DashboardWidget(title, chart);
         widget.setId(widgetId);
         widget.setColspan(Math.max(1, colspan));
@@ -373,22 +376,26 @@ public class DashboardAIController implements AIController {
 
     // ===== Chart Resolution =====
 
-    private Chart findChartById(String widgetId) {
+    private Chart findChartById(String chartId) {
         for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getId().isPresent()
-                    && widget.getId().get().equals(widgetId)
-                    && widget.getContent() instanceof Chart chart) {
-                return chart;
+            if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry != null && chartId.equals(entry.getId())) {
+                    return chart;
+                }
             }
         }
         return null;
     }
 
     private Set<String> getChartWidgetIds() {
-        var ids = new java.util.LinkedHashSet<String>();
+        var ids = new LinkedHashSet<String>();
         for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getContent() instanceof Chart) {
-                widget.getId().ifPresent(ids::add);
+            if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry != null) {
+                    ids.add(entry.getId());
+                }
             }
         }
         return ids;
@@ -398,8 +405,6 @@ public class DashboardAIController implements AIController {
 
     private void applyPendingChartState(Chart chart, ChartEntry entry) {
         String configJson = entry.getPendingConfigurationJson();
-
-        entry.applyPendingQueries();
         List<String> effectiveQueries = entry.getQueries();
 
         if (!effectiveQueries.isEmpty()) {
@@ -564,9 +569,11 @@ public class DashboardAIController implements AIController {
 
                     // Queue data and config for deferred rendering
                     if (queries != null) {
-                        ChartEntry entry = chartRegistry.getEntry(widgetId);
+                        Chart chart = (Chart) widget.getContent();
+                        ChartEntry entry = ChartEntry.getOrCreate(chart,
+                                widgetId);
                         entry.setQueries(queries);
-                        entry.setPendingQueries(queries);
+                        entry.setPendingDataUpdate(true);
                         if (configJson != null) {
                             entry.setPendingConfigurationJson(configJson);
                         }

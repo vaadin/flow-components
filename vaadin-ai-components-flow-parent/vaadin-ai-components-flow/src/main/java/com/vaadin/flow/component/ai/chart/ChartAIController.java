@@ -44,9 +44,9 @@ import tools.jackson.databind.node.ObjectNode;
  * visualizations based on natural language requests.
  * </p>
  * <p>
- * The chart tools are built on top of {@link ChartRegistry} and
- * {@link ChartTools}, which are reusable building blocks that can also be used
- * by other controllers (e.g., a DashboardAIController).
+ * Chart state ({@link ChartEntry}) is stored directly on the {@link Chart}
+ * instance via {@link ChartEntry#getOrCreate(Chart)}, so there is no separate
+ * registry to maintain.
  * </p>
  * <p>
  * State changes requested by the LLM through the update tools are deferred and
@@ -64,7 +64,6 @@ public class ChartAIController implements AIController {
     private static final String DEFAULT_CHART_ID = "chart";
 
     private final Chart chart;
-    private final ChartRegistry registry;
     private final DatabaseProvider databaseProvider;
     private DataConverter dataConverter;
     private final ChartConfigurationApplier configurationApplier;
@@ -85,20 +84,6 @@ public class ChartAIController implements AIController {
                 "Database provider cannot be null");
         this.dataConverter = new DefaultDataConverter();
         this.configurationApplier = new ChartConfigurationApplier();
-        this.registry = new ChartRegistry(
-                id -> chart,
-                () -> Set.of(DEFAULT_CHART_ID));
-        // TODO: Why is this necessary in ChartAIController but not in DashboardAIController?
-        this.registry.setQueryValidator(databaseProvider::executeQuery);
-    }
-
-    /**
-     * Returns the chart registry used by this controller.
-     *
-     * @return the chart registry, never {@code null}
-     */
-    public ChartRegistry getRegistry() {
-        return registry;
     }
 
     /**
@@ -168,13 +153,16 @@ public class ChartAIController implements AIController {
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
         tools.addAll(DatabaseProviderTools.createAll(databaseProvider));
-        tools.addAll(ChartTools.createAll(registry));
+        tools.addAll(ChartTools.createAll(
+                id -> chart,
+                () -> Set.of(DEFAULT_CHART_ID),
+                databaseProvider::executeQuery));
         return tools;
     }
 
     @Override
     public void onRequestCompleted() {
-        ChartEntry entry = registry.getEntries().get(DEFAULT_CHART_ID);
+        ChartEntry entry = ChartEntry.get(chart);
         if (entry == null || !entry.hasPendingState()) {
             return;
         }
@@ -194,7 +182,7 @@ public class ChartAIController implements AIController {
      * @return the current state, or {@code null} if no chart has been created
      */
     public ChartState getState() {
-        ChartEntry entry = registry.getEntries().get(DEFAULT_CHART_ID);
+        ChartEntry entry = ChartEntry.get(chart);
         List<String> queries = entry != null ? entry.getQueries()
                 : List.of();
         if (queries.isEmpty()) {
@@ -220,7 +208,7 @@ public class ChartAIController implements AIController {
      *            the state to restore
      */
     public void restoreState(ChartState state) {
-        ChartEntry entry = registry.getEntry(DEFAULT_CHART_ID);
+        ChartEntry entry = ChartEntry.getOrCreate(chart, DEFAULT_CHART_ID);
         entry.setQueries(state.queries());
         if (!state.queries().isEmpty() && state.configuration() != null) {
             try {
@@ -242,19 +230,13 @@ public class ChartAIController implements AIController {
 
     private void applyPendingState(ChartEntry entry) {
         String configJson = entry.getPendingConfigurationJson();
-        List<String> pendingQueries = entry.getPendingQueries();
-
-        // Determine effective queries
-        entry.applyPendingQueries();
         List<String> effectiveQueries = entry.getQueries();
 
         if (!effectiveQueries.isEmpty()) {
-            // We have queries — render with data
             String effectiveConfig = configJson != null ? configJson
                     : ChartSerialization.toJSON(chart.getConfiguration());
             renderChart(effectiveQueries, effectiveConfig);
         } else if (configJson != null) {
-            // Config-only update, no data
             applyChartConfig(configJson);
         }
     }

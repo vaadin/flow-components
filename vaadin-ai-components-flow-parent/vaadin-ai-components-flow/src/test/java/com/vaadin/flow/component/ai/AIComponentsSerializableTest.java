@@ -69,10 +69,6 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // constructor, no instances); inner anonymous classes
                 // implement ToolSpec which is not Serializable
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartTools.*",
-                // ChartRegistry uses non-serializable functional fields
-                // (resolver, supplier); its lifecycle is managed by
-                // the controller
-                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartRegistry",
                 // Dashboard classes — DashboardAIController is
                 // intentionally not serializable (restored via
                 // reconnect()); inner anonymous classes implement
