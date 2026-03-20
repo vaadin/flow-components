@@ -121,15 +121,15 @@ public final class GridTools {
      */
     public static LLMProvider.ToolSpec getGridState(
             Function<String, Grid<Map<String, Object>>> gridResolver,
-            Supplier<Set<String>> gridIdsSupplier) {
-        Objects.requireNonNull(gridResolver,
-                "gridResolver must not be null");
+            Supplier<Set<String>> gridIdsSupplier, String toolNamePrefix) {
+        Objects.requireNonNull(gridResolver, "gridResolver must not be null");
         Objects.requireNonNull(gridIdsSupplier,
                 "gridIdsSupplier must not be null");
+        String prefix = toolNamePrefix != null ? toolNamePrefix : "";
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
-                return "get_grid_state";
+                return prefix + "get_grid_state";
             }
 
             @Override
@@ -169,8 +169,7 @@ public final class GridTools {
                     result.put("query", query);
                 } else {
                     result.put("status", "empty");
-                    result.put("message",
-                            "No grid data has been loaded yet");
+                    result.put("message", "No grid data has been loaded yet");
                 }
                 return result.toString();
             }
@@ -179,7 +178,8 @@ public final class GridTools {
 
     /**
      * Creates a tool that updates a grid's data source query. The query is
-     * validated and stored as pending state, applied when the request completes.
+     * validated and stored as pending state, applied when the request
+     * completes.
      *
      * @param gridResolver
      *            resolves a grid ID to a {@link Grid} instance, returning
@@ -194,31 +194,31 @@ public final class GridTools {
     public static LLMProvider.ToolSpec updateGridData(
             Function<String, Grid<Map<String, Object>>> gridResolver,
             Supplier<Set<String>> gridIdsSupplier,
-            Consumer<String> queryValidator) {
-        Objects.requireNonNull(gridResolver,
-                "gridResolver must not be null");
+            Consumer<String> queryValidator, String toolNamePrefix) {
+        Objects.requireNonNull(gridResolver, "gridResolver must not be null");
         Objects.requireNonNull(gridIdsSupplier,
                 "gridIdsSupplier must not be null");
+        String prefix = toolNamePrefix != null ? toolNamePrefix : "";
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
-                return "update_grid_data";
+                return prefix + "update_grid_data";
             }
 
             @Override
             public String getDescription() {
                 return """
-                    Updates the grid data using a SQL SELECT query.
-                    The grid will automatically create columns based on the query result columns.
-                    Use SQL column aliases (AS) to provide human-readable column headers.
+                        Updates the grid data using a SQL SELECT query.
+                        The grid will automatically create columns based on the query result columns.
+                        Use SQL column aliases (AS) to provide human-readable column headers.
 
-                    Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
+                        Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
 
-                    Parameters:
-                    - gridId (string): The ID of the grid. Optional when there is only one grid.
-                    - query (string, required): SQL SELECT query to retrieve data
+                        Parameters:
+                        - gridId (string): The ID of the grid. Optional when there is only one grid.
+                        - query (string, required): SQL SELECT query to retrieve data
 
-                    Changes are applied when the request completes.""";
+                        Changes are applied when the request completes.""";
             }
 
             @Override
@@ -285,9 +285,34 @@ public final class GridTools {
             Function<String, Grid<Map<String, Object>>> gridResolver,
             Supplier<Set<String>> gridIdsSupplier,
             Consumer<String> queryValidator) {
+        return createAll(gridResolver, gridIdsSupplier, queryValidator, null);
+    }
+
+    /**
+     * Creates all grid tools for the given grid resolver with a name prefix.
+     * The prefix is prepended to each tool name to avoid collisions when
+     * multiple controllers are registered on the same orchestrator.
+     *
+     * @param gridResolver
+     *            resolves a grid ID to a {@link Grid} instance, returning
+     *            {@code null} if not found; not {@code null}
+     * @param gridIdsSupplier
+     *            supplies the set of available grid IDs; not {@code null}
+     * @param queryValidator
+     *            validates SQL queries before accepting them, or {@code null}
+     *            to skip validation
+     * @param toolNamePrefix
+     *            prefix for tool names (e.g. {@code "dashboard_"}), or
+     *            {@code null} for no prefix
+     * @return a list of all grid tools, never {@code null}
+     */
+    public static List<LLMProvider.ToolSpec> createAll(
+            Function<String, Grid<Map<String, Object>>> gridResolver,
+            Supplier<Set<String>> gridIdsSupplier,
+            Consumer<String> queryValidator, String toolNamePrefix) {
         return List.of(
-                getGridState(gridResolver, gridIdsSupplier),
-                updateGridData(gridResolver, gridIdsSupplier,
-                        queryValidator));
+                getGridState(gridResolver, gridIdsSupplier, toolNamePrefix),
+                updateGridData(gridResolver, gridIdsSupplier, queryValidator,
+                        toolNamePrefix));
     }
 }

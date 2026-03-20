@@ -96,14 +96,15 @@ public final class ChartTools {
      */
     public static LLMProvider.ToolSpec getChartState(
             Function<String, Chart> chartResolver,
-            Supplier<Set<String>> chartIdsSupplier) {
+            Supplier<Set<String>> chartIdsSupplier, String toolNamePrefix) {
         Objects.requireNonNull(chartResolver, "chartResolver must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
+        String prefix = toolNamePrefix != null ? toolNamePrefix : "";
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
-                return "get_chart_state";
+                return prefix + "get_chart_state";
             }
 
             @Override
@@ -171,14 +172,15 @@ public final class ChartTools {
      */
     public static LLMProvider.ToolSpec updateChartConfiguration(
             Function<String, Chart> chartResolver,
-            Supplier<Set<String>> chartIdsSupplier) {
+            Supplier<Set<String>> chartIdsSupplier, String toolNamePrefix) {
         Objects.requireNonNull(chartResolver, "chartResolver must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
+        String prefix = toolNamePrefix != null ? toolNamePrefix : "";
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
-                return "update_chart_configuration";
+                return prefix + "update_chart_configuration";
             }
 
             @Override
@@ -386,14 +388,15 @@ public final class ChartTools {
     public static LLMProvider.ToolSpec updateChartDataSource(
             Function<String, Chart> chartResolver,
             Supplier<Set<String>> chartIdsSupplier,
-            Consumer<String> queryValidator) {
+            Consumer<String> queryValidator, String toolNamePrefix) {
         Objects.requireNonNull(chartResolver, "chartResolver must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
+        String prefix = toolNamePrefix != null ? toolNamePrefix : "";
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
-                return "update_chart_data_source";
+                return prefix + "update_chart_data_source";
             }
 
             @Override
@@ -516,9 +519,36 @@ public final class ChartTools {
             Function<String, Chart> chartResolver,
             Supplier<Set<String>> chartIdsSupplier,
             Consumer<String> queryValidator) {
-        return List.of(getChartState(chartResolver, chartIdsSupplier),
-                updateChartConfiguration(chartResolver, chartIdsSupplier),
+        return createAll(chartResolver, chartIdsSupplier, queryValidator, null);
+    }
+
+    /**
+     * Creates all chart tools for the given chart resolver with a name prefix.
+     * The prefix is prepended to each tool name to avoid collisions when
+     * multiple controllers are registered on the same orchestrator.
+     *
+     * @param chartResolver
+     *            resolves a chart ID to a {@link Chart} instance, returning
+     *            {@code null} if not found; not {@code null}
+     * @param chartIdsSupplier
+     *            supplies the set of available chart IDs; not {@code null}
+     * @param queryValidator
+     *            validates SQL queries before accepting them, or {@code null}
+     *            to skip validation
+     * @param toolNamePrefix
+     *            prefix for tool names (e.g. {@code "dashboard_"}), or
+     *            {@code null} for no prefix
+     * @return a list of all chart tools, never {@code null}
+     */
+    public static List<LLMProvider.ToolSpec> createAll(
+            Function<String, Chart> chartResolver,
+            Supplier<Set<String>> chartIdsSupplier,
+            Consumer<String> queryValidator, String toolNamePrefix) {
+        return List.of(
+                getChartState(chartResolver, chartIdsSupplier, toolNamePrefix),
+                updateChartConfiguration(chartResolver, chartIdsSupplier,
+                        toolNamePrefix),
                 updateChartDataSource(chartResolver, chartIdsSupplier,
-                        queryValidator));
+                        queryValidator, toolNamePrefix));
     }
 }

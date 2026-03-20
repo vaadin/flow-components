@@ -77,8 +77,7 @@ public class DashboardTools {
      *            creates grid widgets, not {@code null}
      */
     DashboardTools(Dashboard dashboard, Consumer<String> queryValidator,
-            WidgetCreator chartWidgetCreator,
-            WidgetCreator gridWidgetCreator) {
+            WidgetCreator chartWidgetCreator, WidgetCreator gridWidgetCreator) {
         this.dashboard = Objects.requireNonNull(dashboard,
                 "dashboard must not be null");
         this.queryValidator = Objects.requireNonNull(queryValidator,
@@ -108,16 +107,12 @@ public class DashboardTools {
         tools.add(createRemoveWidgetTool());
 
         // Chart tools (shared across all charts, resolved from dashboard)
-        tools.addAll(ChartTools.createAll(
-                this::findChartById,
-                this::getChartWidgetIds,
-                queryValidator));
+        tools.addAll(ChartTools.createAll(this::findChartById,
+                this::getChartWidgetIds, queryValidator, "dashboard_"));
 
         // Grid tools (shared across all grids, resolved from dashboard)
-        tools.addAll(GridTools.createAll(
-                this::findGridById,
-                this::getGridWidgetIds,
-                queryValidator));
+        tools.addAll(GridTools.createAll(this::findGridById,
+                this::getGridWidgetIds, queryValidator, "dashboard_"));
 
         return tools;
     }
@@ -136,8 +131,7 @@ public class DashboardTools {
             return;
         }
         var checkbox = new Checkbox();
-        checkbox.getElement().setAttribute("title",
-                "Select for AI actions");
+        checkbox.getElement().setAttribute("title", "Select for AI actions");
         widgetCheckboxes.put(widgetId, checkbox);
         widget.setHeaderContent(checkbox);
     }
@@ -236,8 +230,9 @@ public class DashboardTools {
                     if (i > 0) {
                         sb.append(",");
                     }
-                    sb.append("{\"widgetId\":\"").append(widget.getId()
-                            .orElse("widget-" + i)).append("\"");
+                    sb.append("{\"widgetId\":\"")
+                            .append(widget.getId().orElse("widget-" + i))
+                            .append("\"");
                     sb.append(",\"title\":\"")
                             .append(widget.getTitle() != null
                                     ? widget.getTitle().replace("\"", "\\\"")
@@ -253,11 +248,10 @@ public class DashboardTools {
                     }
                     sb.append(",\"contentType\":\"").append(contentType)
                             .append("\"");
-                    boolean selected = widget.getId()
-                            .map(id -> {
-                                Checkbox cb = widgetCheckboxes.get(id);
-                                return cb != null && cb.getValue();
-                            }).orElse(false);
+                    boolean selected = widget.getId().map(id -> {
+                        Checkbox cb = widgetCheckboxes.get(id);
+                        return cb != null && cb.getValue();
+                    }).orElse(false);
                     sb.append(",\"selected\":").append(selected);
                     sb.append("}");
                 }
@@ -277,15 +271,15 @@ public class DashboardTools {
             @Override
             public String getDescription() {
                 return """
-                    Updates a dashboard widget's properties.
-                    Use getDashboardState() first to get the widget IDs.
+                        Updates a dashboard widget's properties.
+                        Use getDashboardState() first to get the widget IDs.
 
-                    Parameters:
-                    - widgetId (string, required): The ID of the widget to update
-                    - title (string, optional): New title for the widget
-                    - colspan (integer, optional): Number of columns the widget spans (minimum: 1)
-                    - rowspan (integer, optional): Number of rows the widget spans (minimum: 1)
-                    """;
+                        Parameters:
+                        - widgetId (string, required): The ID of the widget to update
+                        - title (string, optional): New title for the widget
+                        - colspan (integer, optional): Number of columns the widget spans (minimum: 1)
+                        - rowspan (integer, optional): Number of rows the widget spans (minimum: 1)
+                        """;
             }
 
             @Override
@@ -335,18 +329,15 @@ public class DashboardTools {
                         ui.access(() -> {
                             JsonNode titleNode = node.get("title");
                             if (titleNode != null && !titleNode.isNull()) {
-                                targetWidget
-                                        .setTitle(titleNode.asString());
+                                targetWidget.setTitle(titleNode.asString());
                             }
                             JsonNode colspanNode = node.get("colspan");
-                            if (colspanNode != null
-                                    && !colspanNode.isNull()) {
+                            if (colspanNode != null && !colspanNode.isNull()) {
                                 targetWidget.setColspan(
                                         Math.max(1, colspanNode.asInt()));
                             }
                             JsonNode rowspanNode = node.get("rowspan");
-                            if (rowspanNode != null
-                                    && !rowspanNode.isNull()) {
+                            if (rowspanNode != null && !rowspanNode.isNull()) {
                                 targetWidget.setRowspan(
                                         Math.max(1, rowspanNode.asInt()));
                             }
@@ -374,15 +365,15 @@ public class DashboardTools {
             @Override
             public String getDescription() {
                 return """
-                    Reorders the widgets on the dashboard. Provide the widget IDs \
-                    as a comma-separated string in the desired display order. \
-                    Use getDashboardState() first to get the current widget IDs. \
-                    Example: "grid-3,chart-1,chart-2"
+                        Reorders the widgets on the dashboard. Provide the widget IDs \
+                        as a comma-separated string in the desired display order. \
+                        Use getDashboardState() first to get the current widget IDs. \
+                        Example: "grid-3,chart-1,chart-2"
 
-                    Parameters:
-                    - widgetIds (string, required): Comma-separated widget IDs \
-                    in the desired order, e.g. "grid-3,chart-1,chart-2"
-                    """;
+                        Parameters:
+                        - widgetIds (string, required): Comma-separated widget IDs \
+                        in the desired order, e.g. "grid-3,chart-1,chart-2"
+                        """;
             }
 
             @Override
@@ -453,20 +444,20 @@ public class DashboardTools {
             @Override
             public String getDescription() {
                 return """
-                    Adds a new chart widget to the dashboard, optionally populated with data.
-                    IMPORTANT: Always provide queries and config to create a widget with data immediately.
+                        Adds a new chart widget to the dashboard, optionally populated with data.
+                        IMPORTANT: Always provide queries and config to create a widget with data immediately.
 
-                    Parameters:
-                    - title (string, optional): Widget title
-                    - queries (array of strings, optional): SQL SELECT queries to populate the chart (one per series). \
-                    Use this for multi-series charts.
-                    - query (string, optional): Single SQL SELECT query (shorthand for one-series charts). \
-                    If both query and queries are provided, queries takes precedence.
-                    - config (object, optional): Chart configuration (type, title, axes, etc.). \
-                    CRITICAL: Always include chart.type. Do NOT include 'series' - data comes from queries.
-                    - colspan (integer, optional): Column span (default: 1)
-                    - rowspan (integer, optional): Row span (default: 1)
-                    """;
+                        Parameters:
+                        - title (string, optional): Widget title
+                        - queries (array of strings, optional): SQL SELECT queries to populate the chart (one per series). \
+                        Use this for multi-series charts.
+                        - query (string, optional): Single SQL SELECT query (shorthand for one-series charts). \
+                        If both query and queries are provided, queries takes precedence.
+                        - config (object, optional): Chart configuration (type, title, axes, etc.). \
+                        CRITICAL: Always include chart.type. Do NOT include 'series' - data comes from queries.
+                        - colspan (integer, optional): Column span (default: 1)
+                        - rowspan (integer, optional): Row span (default: 1)
+                        """;
             }
 
             @Override
@@ -520,12 +511,10 @@ public class DashboardTools {
                     if (arguments != null && !arguments.isBlank()) {
                         ObjectNode node = (ObjectNode) JacksonUtils
                                 .readTree(arguments);
-                        if (node.has("title")
-                                && !node.get("title").isNull()) {
+                        if (node.has("title") && !node.get("title").isNull()) {
                             title = node.get("title").asString();
                         }
-                        if (node.has("queries")
-                                && !node.get("queries").isNull()
+                        if (node.has("queries") && !node.get("queries").isNull()
                                 && node.get("queries").isArray()) {
                             queries = new ArrayList<>();
                             for (var q : node.get("queries")) {
@@ -533,8 +522,7 @@ public class DashboardTools {
                             }
                         } else if (node.has("query")
                                 && !node.get("query").isNull()) {
-                            queries = List.of(
-                                    node.get("query").asString());
+                            queries = List.of(node.get("query").asString());
                         }
                         if (node.has("config")
                                 && !node.get("config").isNull()) {
@@ -558,8 +546,8 @@ public class DashboardTools {
                     }
 
                     String widgetId = "chart-" + (++widgetCounter);
-                    DashboardWidget widget = chartWidgetCreator
-                            .create(widgetId, title, colspan, rowspan);
+                    DashboardWidget widget = chartWidgetCreator.create(widgetId,
+                            title, colspan, rowspan);
                     addSelectionCheckbox(widget);
 
                     dashboard.getUI().ifPresentOrElse(ui -> {
@@ -584,8 +572,7 @@ public class DashboardTools {
                             + "\",\"type\":\"chart\",\"title\":\""
                             + title.replace("\"", "\\\"")
                             + "\",\"message\":\"Chart widget added"
-                            + (queries != null ? " with data" : "")
-                            + ".\"}";
+                            + (queries != null ? " with data" : "") + ".\"}";
                 } catch (Exception e) {
                     return "Error adding chart widget: " + e.getMessage();
                 }
@@ -603,17 +590,17 @@ public class DashboardTools {
             @Override
             public String getDescription() {
                 return """
-                    Adds a new data grid widget to the dashboard, optionally populated with data.
-                    IMPORTANT: Always provide query to create a widget with data immediately.
-                    The grid automatically creates columns based on query result columns.
-                    Use SQL aliases (AS) to provide human-readable column headers.
+                        Adds a new data grid widget to the dashboard, optionally populated with data.
+                        IMPORTANT: Always provide query to create a widget with data immediately.
+                        The grid automatically creates columns based on query result columns.
+                        Use SQL aliases (AS) to provide human-readable column headers.
 
-                    Parameters:
-                    - title (string, optional): Widget title
-                    - query (string, optional): SQL SELECT query to populate the grid
-                    - colspan (integer, optional): Column span (default: 1)
-                    - rowspan (integer, optional): Row span (default: 1)
-                    """;
+                        Parameters:
+                        - title (string, optional): Widget title
+                        - query (string, optional): SQL SELECT query to populate the grid
+                        - colspan (integer, optional): Column span (default: 1)
+                        - rowspan (integer, optional): Row span (default: 1)
+                        """;
             }
 
             @Override
@@ -642,12 +629,10 @@ public class DashboardTools {
                     if (arguments != null && !arguments.isBlank()) {
                         ObjectNode node = (ObjectNode) JacksonUtils
                                 .readTree(arguments);
-                        if (node.has("title")
-                                && !node.get("title").isNull()) {
+                        if (node.has("title") && !node.get("title").isNull()) {
                             title = node.get("title").asString();
                         }
-                        if (node.has("query")
-                                && !node.get("query").isNull()) {
+                        if (node.has("query") && !node.get("query").isNull()) {
                             query = node.get("query").asString();
                         }
                         if (node.has("colspan")
@@ -666,8 +651,8 @@ public class DashboardTools {
                     }
 
                     String widgetId = "grid-" + (++widgetCounter);
-                    DashboardWidget widget = gridWidgetCreator
-                            .create(widgetId, title, colspan, rowspan);
+                    DashboardWidget widget = gridWidgetCreator.create(widgetId,
+                            title, colspan, rowspan);
                     addSelectionCheckbox(widget);
 
                     dashboard.getUI().ifPresentOrElse(ui -> {
@@ -679,8 +664,7 @@ public class DashboardTools {
                     // Queue data for deferred rendering
                     if (query != null) {
                         Grid<?> grid = (Grid<?>) widget.getContent();
-                        GridEntry entry = GridEntry.getOrCreate(grid,
-                                widgetId);
+                        GridEntry entry = GridEntry.getOrCreate(grid, widgetId);
                         entry.setQuery(query);
                         entry.setPendingDataUpdate(true);
                     }
@@ -707,12 +691,12 @@ public class DashboardTools {
             @Override
             public String getDescription() {
                 return """
-                    Removes a widget from the dashboard.
-                    Use getDashboardState() first to get the widget IDs.
+                        Removes a widget from the dashboard.
+                        Use getDashboardState() first to get the widget IDs.
 
-                    Parameters:
-                    - widgetId (string, required): The ID of the widget to remove
-                    """;
+                        Parameters:
+                        - widgetId (string, required): The ID of the widget to remove
+                        """;
             }
 
             @Override

@@ -23,12 +23,10 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.ai.chart.ChartAIController;
 import com.vaadin.flow.component.ai.chart.ChartEntry;
 import com.vaadin.flow.component.ai.chart.ChartRenderer;
 import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.grid.GridRenderer;
-import com.vaadin.flow.component.ai.grid.GridTools;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
@@ -74,13 +72,13 @@ public class DashboardAIController implements AIController {
             5. removeWidget(widgetId) - Remove a widget from the dashboard
 
             For EXISTING CHART widgets (use widgetId as chartId):
-            6. get_chart_state(chartId) - Get chart's current state
-            7. update_chart_data_source(chartId, queries) - Update chart data with SQL queries
-            8. update_chart_configuration(chartId, configuration) - Update chart configuration
+            6. dashboard_get_chart_state(chartId) - Get chart's current state
+            7. dashboard_update_chart_data_source(chartId, queries) - Update chart data with SQL queries
+            8. dashboard_update_chart_configuration(chartId, configuration) - Update chart configuration
 
             For EXISTING GRID widgets (use widgetId as gridId):
-            9. get_grid_state(gridId) - Get grid's current state
-            10. update_grid_data(gridId, query) - Update grid data with SQL query
+            9. dashboard_get_grid_state(gridId) - Get grid's current state
+            10. dashboard_update_grid_data(gridId, query) - Update grid data with SQL query
 
             For ALL widgets:
             11. updateWidget(widgetId, title, colspan, rowspan) - Update widget layout properties
@@ -92,9 +90,9 @@ public class DashboardAIController implements AIController {
             2. Use get_database_schema() to understand available data
             3. Create widgets with addChartWidget() or addGridWidget() - ALWAYS provide the query \
             and config parameters to populate them with data immediately
-            4. Use chart tools (get_chart_state, update_chart_data_source, update_chart_configuration) \
+            4. Use chart tools (dashboard_get_chart_state, dashboard_update_chart_data_source, dashboard_update_chart_configuration) \
             with the widget ID as chartId to update existing chart widgets
-            5. Use grid tools (get_grid_state, update_grid_data) with the widget ID as gridId \
+            5. Use grid tools (dashboard_get_grid_state, dashboard_update_grid_data) with the widget ID as gridId \
             to update existing grid widgets
             6. Use updateWidget() to adjust layout (title, size)
 
@@ -137,8 +135,7 @@ public class DashboardAIController implements AIController {
      * @return the system prompt text
      */
     public static String getSystemPrompt() {
-        return SYSTEM_PROMPT + ChartAIController.getSystemPrompt() + "\n\n"
-                + GridTools.getSystemPrompt();
+        return SYSTEM_PROMPT;
     }
 
     @Override
