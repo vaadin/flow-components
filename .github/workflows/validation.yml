@@ -1,0 +1,41 @@
+name: Validation
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run build and tests
+        env:
+          TBLICENSE: ${{ secrets.TB_LICENSE }}
+          TBHUB: local
+          USE_MERGED_MODULE: 'true'
+        run: |
+          ./scripts/build.sh \
+            pr=${{ github.event.pull_request.number }} \
+            processors=5 \
+            parallel=2 \
+            -Dgwt.style=OBF \
+            -Dcom.vaadin.testbench.Parameters.maxAttempts=2
