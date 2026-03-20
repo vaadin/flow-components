@@ -34,13 +34,9 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.internal.JacksonUtils;
-
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * AI controller for managing a dashboard with multiple widget types.
@@ -193,20 +189,10 @@ public class DashboardAIController implements AIController {
                 }
                 widgetId = entry.getId();
                 type = "chart";
-                if (!entry.getQueries().isEmpty()) {
-                    queries = entry.getQueries();
-                    try {
-                        String configJson = ChartSerialization
-                                .toJSON(chart.getConfiguration());
-                        ObjectNode configNode = (ObjectNode) JacksonUtils
-                                .readTree(configJson);
-                        configNode.remove("series");
-                        configuration = configNode.toString();
-                    } catch (Exception e) {
-                        LOGGER.warn(
-                                "Failed to serialize chart config for widget {}",
-                                widgetId, e);
-                    }
+                ChartEntry.ChartState chartState = ChartEntry.getState(chart);
+                if (chartState != null) {
+                    queries = chartState.queries();
+                    configuration = chartState.configuration();
                 }
             } else if (widget.getContent() instanceof Grid<?> grid) {
                 GridEntry entry = GridEntry.get(grid);

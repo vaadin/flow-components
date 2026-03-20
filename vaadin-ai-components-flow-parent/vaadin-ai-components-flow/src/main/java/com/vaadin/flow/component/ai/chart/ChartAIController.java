@@ -28,10 +28,6 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.util.ChartSerialization;
-import com.vaadin.flow.internal.JacksonUtils;
-
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * AI controller for creating interactive chart visualizations from database
@@ -169,22 +165,8 @@ public class ChartAIController implements AIController {
      *
      * @return the current state, or {@code null} if no chart has been created
      */
-    public ChartState getState() {
-        ChartEntry entry = ChartEntry.get(chart);
-        List<String> queries = entry != null ? entry.getQueries() : List.of();
-        if (queries.isEmpty()) {
-            return null;
-        }
-        String configJson = ChartSerialization.toJSON(chart.getConfiguration());
-        try {
-            ObjectNode configNode = (ObjectNode) JacksonUtils
-                    .readTree(configJson);
-            configNode.remove("series");
-            configJson = configNode.toString();
-        } catch (Exception e) {
-            LOGGER.warn("Failed to remove series from config", e);
-        }
-        return new ChartState(queries, configJson);
+    public ChartEntry.ChartState getState() {
+        return ChartEntry.getState(chart);
     }
 
     /**
@@ -193,7 +175,7 @@ public class ChartAIController implements AIController {
      * @param state
      *            the state to restore
      */
-    public void restoreState(ChartState state) {
+    public void restoreState(ChartEntry.ChartState state) {
         ChartEntry entry = ChartEntry.getOrCreate(chart, DEFAULT_CHART_ID);
         entry.setQueries(state.queries());
         if (!state.queries().isEmpty() && state.configuration() != null) {
@@ -206,20 +188,13 @@ public class ChartAIController implements AIController {
         }
     }
 
-    /**
-     * State record for persistence.
-     */
-    public record ChartState(List<String> queries,
-            String configuration) implements java.io.Serializable {
-    }
-
     // ===== Event Firing =====
 
     private void fireStateChangeEvent() {
         if (stateChangeListeners.isEmpty()) {
             return;
         }
-        ChartState state = getState();
+        ChartEntry.ChartState state = getState();
         if (state != null) {
             ChartStateChangeEvent event = new ChartStateChangeEvent(this,
                     state);

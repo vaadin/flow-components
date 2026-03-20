@@ -23,6 +23,10 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Holds the data source queries and pending LLM state for a chart. Chart
@@ -85,6 +89,7 @@ public class ChartEntry implements Serializable {
     public String getId() {
         return id;
     }
+
     private String pendingConfigurationJson;
     private boolean pendingDataUpdate;
 
@@ -162,5 +167,32 @@ public class ChartEntry implements Serializable {
     public void clearPendingState() {
         pendingConfigurationJson = null;
         pendingDataUpdate = false;
+    }
+
+    /**
+     * Returns the current chart state for persistence. The state includes the
+     * data source queries and the chart configuration (without series data).
+     * Returns {@code null} if the chart has no entry or no queries.
+     *
+     * @param chart
+     *            the chart component, not {@code null}
+     * @return the current state, or {@code null}
+     */
+    public static ChartState getState(Chart chart) {
+        ChartEntry entry = get(chart);
+        if (entry == null || entry.queries.isEmpty()) {
+            return null;
+        }
+        String configJson = ChartSerialization.toJSON(chart.getConfiguration());
+        ObjectNode configNode = (ObjectNode) JacksonUtils.readTree(configJson);
+        configNode.remove("series");
+        return new ChartState(entry.getQueries(), configNode.toString());
+    }
+
+    /**
+     * State record for chart persistence.
+     */
+    public record ChartState(List<String> queries,
+            String configuration) implements Serializable {
     }
 }

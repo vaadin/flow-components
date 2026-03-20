@@ -17,7 +17,7 @@ package com.vaadin.flow.component.ai.tests;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.chart.ChartAIController;
-import com.vaadin.flow.component.ai.chart.ChartAIController.ChartState;
+import com.vaadin.flow.component.ai.chart.ChartEntry.ChartState;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LangChain4JLLMProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -65,8 +65,8 @@ public class AIChartDemoPage extends HorizontalLayout {
 
         chartController.addStateChangeListener(event -> {
             ChartState state = event.getState();
-            System.out.println("Chart state changed - Queries: "
-                    + state.queries());
+            System.out.println(
+                    "Chart state changed - Queries: " + state.queries());
         });
 
         var apiKey = System.getenv("OPENAI_API_KEY");

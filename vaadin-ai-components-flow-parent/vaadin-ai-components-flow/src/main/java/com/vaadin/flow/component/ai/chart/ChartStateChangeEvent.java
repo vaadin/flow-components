@@ -24,7 +24,7 @@ import java.util.EventObject;
  */
 public class ChartStateChangeEvent extends EventObject {
 
-    private final ChartAIController.ChartState state;
+    private final ChartEntry.ChartState state;
 
     /**
      * Creates a new chart state change event.
@@ -35,7 +35,7 @@ public class ChartStateChangeEvent extends EventObject {
      *            the new chart state
      */
     public ChartStateChangeEvent(ChartAIController source,
-            ChartAIController.ChartState state) {
+            ChartEntry.ChartState state) {
         super(source);
         this.state = state;
     }
@@ -50,7 +50,7 @@ public class ChartStateChangeEvent extends EventObject {
      *
      * @return the chart state
      */
-    public ChartAIController.ChartState getState() {
+    public ChartEntry.ChartState getState() {
         return state;
     }
 }
