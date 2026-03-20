@@ -17,9 +17,9 @@ package com.vaadin.flow.component.customfield;
 
 import java.util.function.Consumer;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -27,7 +27,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 
 @SuppressWarnings("unchecked")
-public class CustomFieldTest {
+class CustomFieldTest {
 
     private final Object value = new Object();
 
@@ -35,8 +35,8 @@ public class CustomFieldTest {
 
     private Consumer<Object> consumer;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         consumer = Mockito.mock(Consumer.class);
         systemUnderTest = new CustomField<Object>() {
             @Override
@@ -52,10 +52,10 @@ public class CustomFieldTest {
     }
 
     @Test
-    public void valuesAreUpdated() {
-        Assert.assertNull(systemUnderTest.getValue());
+    void valuesAreUpdated() {
+        Assertions.assertNull(systemUnderTest.getValue());
         systemUnderTest.setValue(value);
-        Assert.assertSame(value, systemUnderTest.getValue());
+        Assertions.assertSame(value, systemUnderTest.getValue());
         Mockito.verify(consumer).accept(value);
         Consumer<Object> listener = Mockito.mock(Consumer.class);
         systemUnderTest
@@ -63,13 +63,13 @@ public class CustomFieldTest {
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(systemUnderTest instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(systemUnderTest instanceof HasTooltip);
     }
 
     @Test
-    public void implementsInputField() {
-        Assert.assertTrue(
+    void implementsInputField() {
+        Assertions.assertTrue(
                 systemUnderTest instanceof InputField<AbstractField.ComponentValueChangeEvent<CustomField<Object>, Object>, Object>);
     }
 }
