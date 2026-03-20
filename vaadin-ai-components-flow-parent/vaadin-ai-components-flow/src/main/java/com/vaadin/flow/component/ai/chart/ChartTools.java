@@ -84,66 +84,6 @@ public final class ChartTools {
     }
 
     /**
-     * Returns the recommended system prompt for chart visualization
-     * capabilities.
-     *
-     * @return the system prompt text
-     */
-    public static String getSystemPrompt() {
-        return """
-                You have access to chart visualization capabilities:
-
-                TOOLS:
-                1. get_database_schema() - Retrieves database schema (tables, columns, types)
-                2. get_chart_state(chartId) - Returns current chart state (queries and configuration)
-                3. update_chart_data_source(chartId, queries) - Updates chart data with SQL SELECT queries
-                   - Query structure MUST match the chart type (see DATA REQUIREMENTS below)
-                4. update_chart_configuration(chartId, configuration) - Updates chart configuration (type, title, tooltip, etc.)
-                   - Supports 31 chart types: line, spline, area, areaspline, bar, column, pie, scatter,
-                     gauge, arearange, columnrange, areasplinerange, boxplot, errorbar, bubble, funnel,
-                     waterfall, pyramid, solidgauge, heatmap, treemap, polygon, candlestick, flags,
-                     timeline, ohlc, organization, sankey, xrange, gantt, bullet
-                   - Config includes: chart model (dimensions, margins, spacing, borders, background),
-                     axes (x, y, z, color), title, subtitle, tooltip, legend, credits, pane, exporting
-
-                WORKFLOW:
-                1. ALWAYS call get_chart_state() FIRST before making any changes
-                2. Use get_database_schema() if you need to understand available data
-                3. Use update_chart_data_source() to change data source
-                4. Use update_chart_configuration() to change chart appearance
-
-                DATA REQUIREMENTS BY CHART TYPE:
-                - Basic charts (line, bar, column, pie): SELECT category, value (2 columns)
-                - Scatter: SELECT x, y (2 numeric columns)
-                - Bubble: SELECT x, y, size (3 numeric columns)
-                - Bullet: SELECT category, value, target (3 columns, name third 'target')
-                - Range (arearange, columnrange): SELECT x, low, high (3 columns, name 'low'/'high')
-                - BoxPlot: SELECT low, q1, median, q3, high (5 columns with these keywords)
-                - OHLC/Candlestick: SELECT date, open, high, low, close (5 columns with these keywords)
-                - Sankey: SELECT from, to, weight (3 columns with 'from'/'to' keywords)
-                - Xrange/Gantt: SELECT start, end, y (3 columns with 'start'/'end' keywords)
-
-                Column names matter! Use descriptive names matching the patterns above for automatic detection.
-
-                IMPORTANT:
-                - ALWAYS check get_chart_state() before making any modifications
-                - This helps you understand what's already configured and make informed changes
-                - NEVER include 'series' data in update_chart_configuration() - chart data comes ONLY from update_chart_data_source()
-                - update_chart_data_source() executes SQL and populates the chart series automatically
-                - update_chart_configuration() only handles visual appearance (type, styling, labels, etc.)
-                - Chart type recommendations:
-                  * Trends over time: line, spline, area, areaspline
-                  * Comparisons: bar, column
-                  * Proportions: pie, funnel
-                  * Distributions: boxplot, errorbar
-                  * Relationships: scatter, bubble
-                  * Specialized: gauge, heatmap, treemap, waterfall, gantt, sankey
-                - When changing chart types, ensure the data query matches the new type's requirements
-                - You can update data and config independently
-                """;
-    }
-
-    /**
      * Creates a tool that retrieves the current state of a chart, including its
      * Highcharts configuration and data source queries.
      *
@@ -157,8 +97,7 @@ public final class ChartTools {
     public static LLMProvider.ToolSpec getChartState(
             Function<String, Chart> chartResolver,
             Supplier<Set<String>> chartIdsSupplier) {
-        Objects.requireNonNull(chartResolver,
-                "chartResolver must not be null");
+        Objects.requireNonNull(chartResolver, "chartResolver must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
         return new LLMProvider.ToolSpec() {
@@ -233,8 +172,7 @@ public final class ChartTools {
     public static LLMProvider.ToolSpec updateChartConfiguration(
             Function<String, Chart> chartResolver,
             Supplier<Set<String>> chartIdsSupplier) {
-        Objects.requireNonNull(chartResolver,
-                "chartResolver must not be null");
+        Objects.requireNonNull(chartResolver, "chartResolver must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
         return new LLMProvider.ToolSpec() {
@@ -246,17 +184,17 @@ public final class ChartTools {
             @Override
             public String getDescription() {
                 return """
-                    Updates the chart configuration (type, title, tooltip, etc.).
+                        Updates the chart configuration (type, title, tooltip, etc.).
 
-                    CRITICAL: ALWAYS specify the chart type in configuration.chart.type - this is essential for proper rendering.
+                        CRITICAL: ALWAYS specify the chart type in configuration.chart.type - this is essential for proper rendering.
 
-                    IMPORTANT: Do NOT include 'series' in the configuration - chart data is managed separately via update_chart_data_source tool.
+                        IMPORTANT: Do NOT include 'series' in the configuration - chart data is managed separately via update_chart_data_source tool.
 
-                    Parameters:
-                    - chartId (string, required): The ID of the chart to update
-                    - configuration (object, required): Chart configuration object
+                        Parameters:
+                        - chartId (string, required): The ID of the chart to update
+                        - configuration (object, required): Chart configuration object
 
-                    Changes are applied when the request completes.""";
+                        Changes are applied when the request completes.""";
             }
 
             @Override
@@ -449,8 +387,7 @@ public final class ChartTools {
             Function<String, Chart> chartResolver,
             Supplier<Set<String>> chartIdsSupplier,
             Consumer<String> queryValidator) {
-        Objects.requireNonNull(chartResolver,
-                "chartResolver must not be null");
+        Objects.requireNonNull(chartResolver, "chartResolver must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
         return new LLMProvider.ToolSpec() {
@@ -462,53 +399,53 @@ public final class ChartTools {
             @Override
             public String getDescription() {
                 return """
-                    Updates the chart data using SQL SELECT queries (one per series).
+                        Updates the chart data using SQL SELECT queries (one per series).
 
-                    IMPORTANT: Query structure must match the chart type:
+                        IMPORTANT: Query structure must match the chart type:
 
-                    Basic charts (line, bar, column, pie):
-                    - 2 columns: category/name, value
-                    - Example: SELECT month, revenue FROM sales
+                        Basic charts (line, bar, column, pie):
+                        - 2 columns: category/name, value
+                        - Example: SELECT month, revenue FROM sales
 
-                    Scatter plot:
-                    - 2 numeric columns: x, y
-                    - Example: SELECT temperature, sales FROM data
+                        Scatter plot:
+                        - 2 numeric columns: x, y
+                        - Example: SELECT temperature, sales FROM data
 
-                    Bubble chart:
-                    - 3 numeric columns: x, y, size
-                    - Example: SELECT gdp_per_capita, life_expectancy, population FROM countries
+                        Bubble chart:
+                        - 3 numeric columns: x, y, size
+                        - Example: SELECT gdp_per_capita, life_expectancy, population FROM countries
 
-                    Bullet chart:
-                    - 3 columns with 'target': category, value, target
-                    - Example: SELECT quarter, revenue, target FROM sales
+                        Bullet chart:
+                        - 3 columns with 'target': category, value, target
+                        - Example: SELECT quarter, revenue, target FROM sales
 
-                    Range charts (arearange, columnrange, areasplinerange):
-                    - 3 columns: x/category, low/min, high/max
-                    - Example: SELECT month, temp_low, temp_high FROM weather
+                        Range charts (arearange, columnrange, areasplinerange):
+                        - 3 columns: x/category, low/min, high/max
+                        - Example: SELECT month, temp_low, temp_high FROM weather
 
-                    BoxPlot:
-                    - 5 columns: low, q1, median, q3, high (column names should include these keywords)
-                    - Example: SELECT min_val, lower_quartile, median, upper_quartile, max_val FROM stats
+                        BoxPlot:
+                        - 5 columns: low, q1, median, q3, high (column names should include these keywords)
+                        - Example: SELECT min_val, lower_quartile, median, upper_quartile, max_val FROM stats
 
-                    OHLC/Candlestick:
-                    - 5 columns: x/date, open, high, low, close (column names must include these keywords)
-                    - Example: SELECT date, open, high, low, close FROM stock_prices
+                        OHLC/Candlestick:
+                        - 5 columns: x/date, open, high, low, close (column names must include these keywords)
+                        - Example: SELECT date, open, high, low, close FROM stock_prices
 
-                    Sankey diagram:
-                    - 3 columns: from/source, to/target, weight/value
-                    - Example: SELECT source, destination, flow FROM energy_flow
+                        Sankey diagram:
+                        - 3 columns: from/source, to/target, weight/value
+                        - Example: SELECT source, destination, flow FROM energy_flow
 
-                    Xrange/Gantt:
-                    - 3 columns: start/x, end/x2, y/category
-                    - Example: SELECT start_date, end_date, task_id FROM project_tasks
+                        Xrange/Gantt:
+                        - 3 columns: start/x, end/x2, y/category
+                        - Example: SELECT start_date, end_date, task_id FROM project_tasks
 
-                    Column names are important for automatic detection. Use descriptive names that match the patterns above.
+                        Column names are important for automatic detection. Use descriptive names that match the patterns above.
 
-                    Parameters:
-                    - chartId (string, required): The ID of the chart to update
-                    - queries (array of strings, required): SQL SELECT queries, one per series
+                        Parameters:
+                        - chartId (string, required): The ID of the chart to update
+                        - queries (array of strings, required): SQL SELECT queries, one per series
 
-                    Changes are applied when the request completes.""";
+                        Changes are applied when the request completes.""";
             }
 
             @Override
@@ -535,8 +472,7 @@ public final class ChartTools {
             public String execute(String arguments) {
                 try {
                     JsonNode args = JacksonUtils.readTree(arguments);
-                    String chartId = resolveChartId(args,
-                            chartIdsSupplier);
+                    String chartId = resolveChartId(args, chartIdsSupplier);
                     Chart chart = resolveChart(chartId, chartResolver);
                     ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
 
@@ -557,8 +493,7 @@ public final class ChartTools {
                     return "Chart '" + chartId
                             + "' data source updated. Changes will be applied when the request completes.";
                 } catch (Exception e) {
-                    return "Error updating chart data: "
-                            + e.getMessage();
+                    return "Error updating chart data: " + e.getMessage();
                 }
             }
         };
@@ -581,8 +516,7 @@ public final class ChartTools {
             Function<String, Chart> chartResolver,
             Supplier<Set<String>> chartIdsSupplier,
             Consumer<String> queryValidator) {
-        return List.of(
-                getChartState(chartResolver, chartIdsSupplier),
+        return List.of(getChartState(chartResolver, chartIdsSupplier),
                 updateChartConfiguration(chartResolver, chartIdsSupplier),
                 updateChartDataSource(chartResolver, chartIdsSupplier,
                         queryValidator));

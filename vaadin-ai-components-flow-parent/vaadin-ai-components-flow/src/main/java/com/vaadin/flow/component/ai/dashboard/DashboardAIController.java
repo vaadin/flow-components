@@ -23,9 +23,9 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.chart.ChartAIController;
 import com.vaadin.flow.component.ai.chart.ChartEntry;
 import com.vaadin.flow.component.ai.chart.ChartRenderer;
-import com.vaadin.flow.component.ai.chart.ChartTools;
 import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.grid.GridRenderer;
 import com.vaadin.flow.component.ai.grid.GridTools;
@@ -61,6 +61,49 @@ public class DashboardAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DashboardAIController.class);
 
+    private static final String SYSTEM_PROMPT = """
+            You are a dashboard assistant that helps users create and manage \
+            data visualizations. You can create widgets containing charts or \
+            data grids, update their properties, and query database data.
+
+            AVAILABLE TOOLS:
+            1. get_database_schema() - Get database schema to understand available data.
+            2. getDashboardState() - Get current dashboard state with all widgets
+            3. addChartWidget(title, query, config, colspan, rowspan) - Add a new chart widget with data
+            4. addGridWidget(title, query, colspan, rowspan) - Add a new grid widget with data
+            5. removeWidget(widgetId) - Remove a widget from the dashboard
+
+            For EXISTING CHART widgets (use widgetId as chartId):
+            6. get_chart_state(chartId) - Get chart's current state
+            7. update_chart_data_source(chartId, queries) - Update chart data with SQL queries
+            8. update_chart_configuration(chartId, configuration) - Update chart configuration
+
+            For EXISTING GRID widgets (use widgetId as gridId):
+            9. get_grid_state(gridId) - Get grid's current state
+            10. update_grid_data(gridId, query) - Update grid data with SQL query
+
+            For ALL widgets:
+            11. updateWidget(widgetId, title, colspan, rowspan) - Update widget layout properties
+            12. reorderWidgets(widgetIds) - Reorder widgets by providing IDs in the desired order
+
+            WORKFLOW:
+            1. ALWAYS call getDashboardState() FIRST before doing anything else. Widget selections \
+            can change between requests, so you must check the current state every time.
+            2. Use get_database_schema() to understand available data
+            3. Create widgets with addChartWidget() or addGridWidget() - ALWAYS provide the query \
+            and config parameters to populate them with data immediately
+            4. Use chart tools (get_chart_state, update_chart_data_source, update_chart_configuration) \
+            with the widget ID as chartId to update existing chart widgets
+            5. Use grid tools (get_grid_state, update_grid_data) with the widget ID as gridId \
+            to update existing grid widgets
+            6. Use updateWidget() to adjust layout (title, size)
+
+            IMPORTANT: When creating a widget, ALWAYS provide the query parameter (and config \
+            for charts) so the widget is populated with data immediately. The chart and grid \
+            tools are only available for widgets that already exist.
+
+            """;
+
     private final Dashboard dashboard;
     private final DatabaseProvider databaseProvider;
     private final DashboardTools dashboardTools;
@@ -94,49 +137,7 @@ public class DashboardAIController implements AIController {
      * @return the system prompt text
      */
     public static String getSystemPrompt() {
-        return """
-                You are a dashboard assistant that helps users create and manage \
-                data visualizations. You can create widgets containing charts or \
-                data grids, update their properties, and query database data.
-
-                AVAILABLE TOOLS:
-                1. get_database_schema() - Get database schema to understand available data.
-                2. getDashboardState() - Get current dashboard state with all widgets
-                3. addChartWidget(title, query, config, colspan, rowspan) - Add a new chart widget with data
-                4. addGridWidget(title, query, colspan, rowspan) - Add a new grid widget with data
-                5. removeWidget(widgetId) - Remove a widget from the dashboard
-
-                For EXISTING CHART widgets (use widgetId as chartId):
-                6. get_chart_state(chartId) - Get chart's current state
-                7. update_chart_data_source(chartId, queries) - Update chart data with SQL queries
-                8. update_chart_configuration(chartId, configuration) - Update chart configuration
-
-                For EXISTING GRID widgets (use widgetId as gridId):
-                9. get_grid_state(gridId) - Get grid's current state
-                10. update_grid_data(gridId, query) - Update grid data with SQL query
-
-                For ALL widgets:
-                11. updateWidget(widgetId, title, colspan, rowspan) - Update widget layout properties
-                12. reorderWidgets(widgetIds) - Reorder widgets by providing IDs in the desired order
-
-                WORKFLOW:
-                1. ALWAYS call getDashboardState() FIRST before doing anything else. Widget selections \
-                can change between requests, so you must check the current state every time.
-                2. Use get_database_schema() to understand available data
-                3. Create widgets with addChartWidget() or addGridWidget() - ALWAYS provide the query \
-                and config parameters to populate them with data immediately
-                4. Use chart tools (get_chart_state, update_chart_data_source, update_chart_configuration) \
-                with the widget ID as chartId to update existing chart widgets
-                5. Use grid tools (get_grid_state, update_grid_data) with the widget ID as gridId \
-                to update existing grid widgets
-                6. Use updateWidget() to adjust layout (title, size)
-
-                IMPORTANT: When creating a widget, ALWAYS provide the query parameter (and config \
-                for charts) so the widget is populated with data immediately. The chart and grid \
-                tools are only available for widgets that already exist.
-
-                """
-                + ChartTools.getSystemPrompt() + "\n\n"
+        return SYSTEM_PROMPT + ChartAIController.getSystemPrompt() + "\n\n"
                 + GridTools.getSystemPrompt();
     }
 
