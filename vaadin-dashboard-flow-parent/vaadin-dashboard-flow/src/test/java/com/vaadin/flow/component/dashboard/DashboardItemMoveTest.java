@@ -15,9 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -26,14 +26,14 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-public class DashboardItemMoveTest extends DashboardTestBase {
+class DashboardItemMoveTest extends DashboardTestBase {
     private Dashboard dashboard;
 
     private ArrayNode itemsArray;
 
-    @Before
+    @BeforeEach
     @Override
-    public void setup() {
+    void setup() {
         super.setup();
         dashboard = getNewDashboard();
         dashboard.add(getNewWidget(), getNewWidget());
@@ -47,32 +47,32 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     }
 
     @Test
-    public void moveWidget_orderIsUpdated() {
+    void moveWidget_orderIsUpdated() {
         assertRootLevelItemMoved(0, 1);
     }
 
     @Test
-    public void moveWidgetToSamePosition_orderIsNotUpdated() {
+    void moveWidgetToSamePosition_orderIsNotUpdated() {
         assertRootLevelItemMoved(0, 0);
     }
 
     @Test
-    public void moveSection_orderIsUpdated() {
+    void moveSection_orderIsUpdated() {
         assertRootLevelItemMoved(2, 1);
     }
 
     @Test
-    public void moveWidgetInSection_orderIsUpdated() {
+    void moveWidgetInSection_orderIsUpdated() {
         assertSectionWidgetMoved(2, 0, 1);
     }
 
     @Test
-    public void moveWidgetInSectionToSamePosition_orderIsNotUpdated() {
+    void moveWidgetInSectionToSamePosition_orderIsNotUpdated() {
         assertSectionWidgetMoved(2, 0, 0);
     }
 
     @Test
-    public void setDashboardNotEditable_moveWidget_orderIsNotUpdated() {
+    void setDashboardNotEditable_moveWidget_orderIsNotUpdated() {
         dashboard.setEditable(false);
         int movedWidgetNodeId = dashboard.getChildren().toList().get(0)
                 .getElement().getNode().getId();
@@ -80,22 +80,23 @@ public class DashboardItemMoveTest extends DashboardTestBase {
         moveRootLevelItem(0, 1);
         DashboardTestHelper.fireItemMovedEvent(dashboard, movedWidgetNodeId,
                 itemsArray, null);
-        Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
+        Assertions.assertEquals(expectedRootLevelNodeIds,
+                getRootLevelNodeIds());
     }
 
     @Test
-    public void moveWidget_noClientUpdate() {
+    void moveWidget_noClientUpdate() {
         ui.dumpPendingJavaScriptInvocations();
 
         assertRootLevelItemMoved(0, 1);
 
         ui.fakeClientCommunication();
 
-        Assert.assertTrue(ui.dumpPendingJavaScriptInvocations().isEmpty());
+        Assertions.assertTrue(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test
-    public void moveWidget_eventCorrectlyFired() {
+    void moveWidget_eventCorrectlyFired() {
         int initialIndex = 0;
         int finalIndex = 1;
         Component movedItem = dashboard.getChildren().toList()
@@ -114,7 +115,7 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     }
 
     @Test
-    public void moveSection_eventCorrectlyFired() {
+    void moveSection_eventCorrectlyFired() {
         int initialIndex = 2;
         int finalIndex = 1;
         Component movedItem = dashboard.getChildren().toList()
@@ -133,7 +134,7 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     }
 
     @Test
-    public void moveWidgetInSection_eventCorrectlyFired() {
+    void moveWidgetInSection_eventCorrectlyFired() {
         int sectionIndex = 2;
         int initialIndex = 0;
         int finalIndex = 1;
@@ -153,7 +154,7 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     }
 
     @Test
-    public void setDashboardNotEditable_moveWidget_eventNotFired() {
+    void setDashboardNotEditable_moveWidget_eventNotFired() {
         dashboard.setEditable(false);
         int initialIndex = 0;
         int finalIndex = 1;
@@ -169,21 +170,21 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     }
 
     @Test
-    public void changeWidgetMoveMode_eventCorrectlyFired() {
+    void changeWidgetMoveMode_eventCorrectlyFired() {
         Component movedItem = dashboard.getChildren().toList().get(0);
         assertItemMoveModeChangedEventCorrectlyFired(movedItem, true);
         assertItemMoveModeChangedEventCorrectlyFired(movedItem, false);
     }
 
     @Test
-    public void changeSectionMoveMode_eventCorrectlyFired() {
+    void changeSectionMoveMode_eventCorrectlyFired() {
         Component movedItem = dashboard.getChildren().toList().get(2);
         assertItemMoveModeChangedEventCorrectlyFired(movedItem, true);
         assertItemMoveModeChangedEventCorrectlyFired(movedItem, false);
     }
 
     @Test
-    public void changeWidgetInSectionMoveMode_eventCorrectlyFired() {
+    void changeWidgetInSectionMoveMode_eventCorrectlyFired() {
         DashboardSection section = (DashboardSection) dashboard.getChildren()
                 .toList().get(2);
         Component movedItem = section.getWidgets().get(0);
@@ -204,9 +205,9 @@ public class DashboardItemMoveTest extends DashboardTestBase {
         });
         DashboardTestHelper.fireItemMoveModeChangedEvent(dashboard,
                 item.getElement().getNode().getId(), moveMode);
-        Assert.assertEquals(1, listenerInvokedCount.get());
-        Assert.assertEquals(item, eventItem.get());
-        Assert.assertEquals(moveMode, eventIsMoveMode.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(item, eventItem.get());
+        Assertions.assertEquals(moveMode, eventIsMoveMode.get());
     }
 
     private void assertItemMovedEventCorrectlyFired(Runnable itemMoveAction,
@@ -224,12 +225,12 @@ public class DashboardItemMoveTest extends DashboardTestBase {
             e.unregisterListener();
         });
         itemMoveAction.run();
-        Assert.assertEquals(expectedListenerInvokedCount,
+        Assertions.assertEquals(expectedListenerInvokedCount,
                 listenerInvokedCount.get());
         if (expectedListenerInvokedCount > 0) {
-            Assert.assertEquals(expectedItem, eventItem.get());
-            Assert.assertEquals(expectedItems, eventItems.get());
-            Assert.assertEquals(Optional.ofNullable(expectedSection),
+            Assertions.assertEquals(expectedItem, eventItem.get());
+            Assertions.assertEquals(expectedItems, eventItems.get());
+            Assertions.assertEquals(Optional.ofNullable(expectedSection),
                     eventSection.get());
         }
     }
@@ -291,7 +292,7 @@ public class DashboardItemMoveTest extends DashboardTestBase {
                 sectionIndex, initialIndex, finalIndex);
         DashboardTestHelper.fireItemMovedEvent(dashboard, movedWidgetNodeId,
                 itemsArray, sectionNodeId);
-        Assert.assertEquals(expectedSectionWidgetNodeIds,
+        Assertions.assertEquals(expectedSectionWidgetNodeIds,
                 getSectionWidgetNodeIds(sectionIndex));
     }
 
@@ -303,7 +304,8 @@ public class DashboardItemMoveTest extends DashboardTestBase {
                 initialIndex, finalIndex);
         DashboardTestHelper.fireItemMovedEvent(dashboard, movedItemNodeId,
                 itemsArray, null);
-        Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
+        Assertions.assertEquals(expectedRootLevelNodeIds,
+                getRootLevelNodeIds());
     }
 
     private static ArrayNode moveItemInJsonArray(int initialIndex,

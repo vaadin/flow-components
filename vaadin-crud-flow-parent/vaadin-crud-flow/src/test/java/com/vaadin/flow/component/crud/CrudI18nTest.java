@@ -8,24 +8,24 @@
  */
 package com.vaadin.flow.component.crud;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class CrudI18nTest {
+class CrudI18nTest {
 
     @Test
-    public void createDefault() {
+    void createDefault() {
         CrudI18n i18n = CrudI18n.createDefault();
 
-        Assert.assertEquals("Cancel", i18n.getCancel());
-        Assert.assertEquals("Delete...", i18n.getDeleteItem());
-        Assert.assertEquals("Edit item", i18n.getEditItem());
-        Assert.assertEquals("Edit item", i18n.getEditLabel());
-        Assert.assertEquals("New item", i18n.getNewItem());
-        Assert.assertEquals("Save", i18n.getSaveItem());
-        Assert.assertEquals("Discard",
+        Assertions.assertEquals("Cancel", i18n.getCancel());
+        Assertions.assertEquals("Delete...", i18n.getDeleteItem());
+        Assertions.assertEquals("Edit item", i18n.getEditItem());
+        Assertions.assertEquals("Edit item", i18n.getEditLabel());
+        Assertions.assertEquals("New item", i18n.getNewItem());
+        Assertions.assertEquals("Save", i18n.getSaveItem());
+        Assertions.assertEquals("Discard",
                 i18n.getConfirm().getCancel().getButton().getConfirm());
-        Assert.assertEquals("Delete",
+        Assertions.assertEquals("Delete",
                 i18n.getConfirm().getDelete().getButton().getConfirm());
     }
 }

@@ -10,5 +10,5 @@ package com.vaadin.flow.component.dashboard;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class DashboardSerializableTest extends ClassesSerializableTest {
+class DashboardSerializableTest extends ClassesSerializableTest {
 }

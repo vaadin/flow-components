@@ -10,8 +10,8 @@ package com.vaadin.flow.component.crud;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -26,21 +26,24 @@ import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ObjectNode;
 
-public class CrudTest {
+class CrudTest {
 
     final Crud<Thing> systemUnderTest = new Crud<>(Thing.class,
             createFakeGrid(), new ThingEditor());
 
     @Test
-    public void itemAvailableInAllEvents() {
+    void itemAvailableInAllEvents() {
         // Assert that all these events come with an item.
         systemUnderTest
-                .addCancelListener(e -> Assert.assertNotNull(e.getItem()));
+                .addCancelListener(e -> Assertions.assertNotNull(e.getItem()));
         systemUnderTest
-                .addDeleteListener(e -> Assert.assertNotNull(e.getItem()));
-        systemUnderTest.addEditListener(e -> Assert.assertNotNull(e.getItem()));
-        systemUnderTest.addSaveListener(e -> Assert.assertNotNull(e.getItem()));
-        systemUnderTest.addNewListener(e -> Assert.assertNotNull(e.getItem()));
+                .addDeleteListener(e -> Assertions.assertNotNull(e.getItem()));
+        systemUnderTest
+                .addEditListener(e -> Assertions.assertNotNull(e.getItem()));
+        systemUnderTest
+                .addSaveListener(e -> Assertions.assertNotNull(e.getItem()));
+        systemUnderTest
+                .addNewListener(e -> Assertions.assertNotNull(e.getItem()));
 
         // A client-side Grid item.
         final ObjectNode selectedItem = JacksonUtils.createObjectNode();
@@ -61,7 +64,7 @@ public class CrudTest {
     }
 
     @Test
-    public void newItemPreFilledValueIsTheSameInEditor() {
+    void newItemPreFilledValueIsTheSameInEditor() {
         String value = "thing";
 
         systemUnderTest.addNewListener(e -> {
@@ -72,14 +75,14 @@ public class CrudTest {
         ComponentUtil.fireEvent(systemUnderTest,
                 new Crud.NewEvent<>(systemUnderTest, false, null));
 
-        Assert.assertEquals("thing",
+        Assertions.assertEquals("thing",
                 systemUnderTest.getEditor().getItem().name);
     }
 
     @Test
-    public void crudEditorIsItemEqualNewEventItem() {
+    void crudEditorIsItemEqualNewEventItem() {
         systemUnderTest.addNewListener(e -> {
-            Assert.assertEquals(systemUnderTest.getEditor().getItem(),
+            Assertions.assertEquals(systemUnderTest.getEditor().getItem(),
                     e.getItem());
         });
 
@@ -88,25 +91,25 @@ public class CrudTest {
     }
 
     @Test
-    public void getEditorPosition_defaultOVERLAY() {
-        Assert.assertEquals(CrudEditorPosition.OVERLAY,
+    void getEditorPosition_defaultOVERLAY() {
+        Assertions.assertEquals(CrudEditorPosition.OVERLAY,
                 systemUnderTest.getEditorPosition());
     }
 
     @Test
-    public void getToolbarVisible_defaultTrue() {
-        Assert.assertTrue(systemUnderTest.getToolbarVisible());
+    void getToolbarVisible_defaultTrue() {
+        Assertions.assertTrue(systemUnderTest.getToolbarVisible());
     }
 
     @Test
-    public void getToolbarVisible_setVisibleToFalse_returnsFalse() {
+    void getToolbarVisible_setVisibleToFalse_returnsFalse() {
         systemUnderTest.setToolbarVisible(false);
-        Assert.assertEquals(false, systemUnderTest.getToolbarVisible());
+        Assertions.assertEquals(false, systemUnderTest.getToolbarVisible());
     }
 
     @Test
-    public void crudHasStyle() {
-        Assert.assertTrue(systemUnderTest instanceof HasStyle);
+    void crudHasStyle() {
+        Assertions.assertTrue(systemUnderTest instanceof HasStyle);
     }
 
     private Grid<Thing> createFakeGrid() {

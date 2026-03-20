@@ -84,7 +84,7 @@
         <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.5</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
-        <spotless.plugin.version>3.3.0</spotless.plugin.version>
+        <spotless.plugin.version>3.4.0</spotless.plugin.version>
         <checkstyle.version>13.3.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
@@ -103,7 +103,7 @@
         <spring-data-commons.version>4.0.4</spring-data-commons.version>
         <reactor-core.version>3.8.4</reactor-core.version>
         <langchain4j.version>1.12.2</langchain4j.version>
-        <spring-ai.version>2.0.0-M2</spring-ai.version>
+        <spring-ai.version>2.0.0-M3</spring-ai.version>
         <junit.jupiter.version>6.0.3</junit.jupiter.version>
 
         <!-- spreadsheet -->
