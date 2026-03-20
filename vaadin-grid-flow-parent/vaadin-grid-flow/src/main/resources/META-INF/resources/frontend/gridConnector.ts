@@ -306,7 +306,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     preventUpdateVisibleRows(() => {
       grid.$connector.doSelection(items.filter((item) => item.selected));
       grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
-      itemsUpdated(items);
+
+      items.forEach((item) => {
+        if (item.detailsOpened) {
+          grid.openItemDetails(item);
+        } else {
+          grid.closeItemDetails(item);
+        }
+      })
     });
 
     grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
@@ -319,22 +326,26 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    */
   grid.$connector.updateFlatData = function (updatedItems) {
     const { rootCache } = dataProviderController;
-    const updatedIndexes = [];
 
-    for (let i = 0; i < updatedItems.length; i++) {
-      const itemContext = dataProviderController.getItemContext(updatedItems[i]);
-      if (itemContext) {
-        const { index } = itemContext;
-        rootCache.items[index] = updatedItems[i];
-        updatedIndexes.push(index);
+    updatedItems.forEach((item) => {
+      const itemContext = dataProviderController.getItemContext(item);
+      if (!itemContext) {
+        return;
       }
-    }
 
-    preventUpdateVisibleRows(() => {
-      itemsUpdated(updatedItems);
+      const { index } = itemContext;
+      rootCache.items[index] = item;
+
+      preventUpdateVisibleRows(() => {
+        if (item.detailsOpened) {
+          grid.openItemDetails(item);
+        } else {
+          grid.closeItemDetails(item);
+        }
+      });
+
+      grid.__updateVisibleRows(index, index);
     });
-
-    updatedIndexes.forEach((index) => grid.__updateVisibleRows(index, index));
   };
 
   grid.$connector.clear = function (index, length) {
