@@ -1,0 +1,53 @@
+name: Sonar Scan
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sonar-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Check for skip ci
+        id: skip-check
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          if echo "$title" | grep -q '\[skip ci\]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Check commit messages
+          git log --format=%B origin/${{ github.event.pull_request.base.ref }}..HEAD | \
+            grep -q '\[skip ci\]' && echo "skip=true" >> "$GITHUB_OUTPUT" || echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Setup JDK 21
+        if: steps.skip-check.outputs.skip != 'true'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Sonar scan
+        if: steps.skip-check.outputs.skip != 'true'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn compile org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -DskipTests \
+            -Dsonar.projectKey=vaadin_flow-components \
+            -Dsonar.organization=vaadin \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.exclusions='**/bower_components/**,**/node_modules/**,**/node/**,**/src/main/webapp/**,./pom-bower-mode.xml' \
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} \
+            -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+            -B -Psonar-cloud -U
