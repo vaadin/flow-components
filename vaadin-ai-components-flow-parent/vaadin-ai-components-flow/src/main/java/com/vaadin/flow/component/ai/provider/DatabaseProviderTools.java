@@ -20,12 +20,12 @@ import java.util.Objects;
 
 /**
  * Factory for creating reusable database {@link LLMProvider.ToolSpec}
- * instances. These tools are not chart-specific and can be used by any
- * controller that works with a {@link DatabaseProvider}.
+ * instances. These tools can be used by any controller that works with a
+ * {@link DatabaseProvider}.
  *
  * @author Vaadin Ltd
  */
-public final class DatabaseTools {
+public final class DatabaseProviderTools {
 
     private static final String GET_DATABASE_SCHEMA_SCHEMA = """
             {
@@ -34,7 +34,7 @@ public final class DatabaseTools {
               "required": []
             }""";
 
-    private DatabaseTools() {
+    private DatabaseProviderTools() {
     }
 
     /**
@@ -73,11 +73,11 @@ public final class DatabaseTools {
     }
 
     /**
-     * Creates all database tools for the given provider.
+     * Creates all database provider tools for the given provider.
      *
      * @param provider
      *            the database provider, not {@code null}
-     * @return a list of all database tools, never {@code null}
+     * @return a list of all database provider tools, never {@code null}
      */
     public static List<LLMProvider.ToolSpec> createAll(
             DatabaseProvider provider) {

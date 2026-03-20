@@ -174,7 +174,6 @@ public class AIDashboardDemoPage extends HorizontalLayout {
                     ws.queries().forEach(queriesArray::add);
                 }
                 widgetNode.put("configuration", ws.configuration());
-                widgetNode.put("dataSource", ws.dataSource());
                 widgetsArray.add(widgetNode);
             }
 
@@ -216,8 +215,7 @@ public class AIDashboardDemoPage extends HorizontalLayout {
                         node.has("colspan") ? node.get("colspan").asInt() : 1,
                         node.has("rowspan") ? node.get("rowspan").asInt() : 1,
                         queries,
-                        getStringOrNull(node, "configuration"),
-                        getStringOrNull(node, "dataSource")));
+                        getStringOrNull(node, "configuration")));
             }
 
             LOGGER.info("Dashboard state loaded from {}", STATE_FILE);

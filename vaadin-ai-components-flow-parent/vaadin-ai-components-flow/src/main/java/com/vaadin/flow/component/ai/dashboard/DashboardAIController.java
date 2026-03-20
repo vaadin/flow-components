@@ -35,7 +35,7 @@ import com.vaadin.flow.component.ai.chart.DataConverter;
 import com.vaadin.flow.component.ai.chart.DefaultDataConverter;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.ai.provider.DatabaseTools;
+import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -68,10 +68,8 @@ public class DashboardAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DashboardAIController.class);
 
-    private static final String DEFAULT_DATA_SOURCE = "default";
-
     private final Dashboard dashboard;
-    private final Map<String, DatabaseProvider> databaseProviders;
+    private final DatabaseProvider databaseProvider;
     private final DashboardTools dashboardTools;
 
     private final ChartRegistry chartRegistry;
@@ -79,12 +77,11 @@ public class DashboardAIController implements AIController {
     private final ChartConfigurationApplier configurationApplier = new ChartConfigurationApplier();
 
     private final Map<String, GridTools> gridToolsMap = new LinkedHashMap<>();
-    private final Map<String, String> widgetDataSourceMap = new LinkedHashMap<>();
 
     private int widgetCounter = 0;
 
     /**
-     * Creates a new AI dashboard controller with a single database provider.
+     * Creates a new AI dashboard controller with a database provider.
      *
      * @param dashboard
      *            the dashboard component to control
@@ -93,39 +90,16 @@ public class DashboardAIController implements AIController {
      */
     public DashboardAIController(Dashboard dashboard,
             DatabaseProvider databaseProvider) {
-        this(dashboard,
-                Map.of(DEFAULT_DATA_SOURCE, Objects.requireNonNull(
-                        databaseProvider, "Database provider cannot be null")));
-    }
-
-    /**
-     * Creates a new AI dashboard controller with multiple named database
-     * providers. Each provider represents a different data source that widgets
-     * can use.
-     *
-     * @param dashboard
-     *            the dashboard component to control
-     * @param databaseProviders
-     *            a map of data source names to database providers, must not be
-     *            empty
-     */
-    public DashboardAIController(Dashboard dashboard,
-            Map<String, DatabaseProvider> databaseProviders) {
         this.dashboard = Objects.requireNonNull(dashboard,
                 "Dashboard cannot be null");
-        Objects.requireNonNull(databaseProviders,
-                "Database providers cannot be null");
-        if (databaseProviders.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "At least one database provider is required");
-        }
-        this.databaseProviders = new LinkedHashMap<>(databaseProviders);
+        this.databaseProvider = Objects.requireNonNull(databaseProvider,
+                "Database provider cannot be null");
         this.dashboardTools = new DashboardTools(dashboard);
         this.chartRegistry = new ChartRegistry(
                 this::findChartById,
                 this::getChartWidgetIds);
-        this.chartRegistry.setQueryValidator(q -> databaseProviders.values()
-                .iterator().next().executeQuery(q));
+        this.chartRegistry
+                .setQueryValidator(q -> databaseProvider.executeQuery(q));
     }
 
     /**
@@ -142,8 +116,8 @@ public class DashboardAIController implements AIController {
                 AVAILABLE TOOLS:
                 1. get_database_schema() - Get database schema to understand available data.
                 2. getDashboardState() - Get current dashboard state with all widgets
-                3. addChartWidget(title, query, config, colspan, rowspan, dataSource) - Add a new chart widget with data
-                4. addGridWidget(title, query, colspan, rowspan, dataSource) - Add a new grid widget with data
+                3. addChartWidget(title, query, config, colspan, rowspan) - Add a new chart widget with data
+                4. addGridWidget(title, query, colspan, rowspan) - Add a new grid widget with data
                 5. removeWidget(widgetId) - Remove a widget from the dashboard
 
                 For EXISTING CHART widgets (use widgetId as chartId):
@@ -182,17 +156,8 @@ public class DashboardAIController implements AIController {
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
 
-        // Database schema tools
-        if (databaseProviders.size() == 1) {
-            tools.addAll(DatabaseTools.createAll(
-                    databaseProviders.values().iterator().next()));
-        } else {
-            for (Map.Entry<String, DatabaseProvider> entry : databaseProviders
-                    .entrySet()) {
-                tools.add(createNamedSchemaTool(entry.getKey(),
-                        entry.getValue()));
-            }
-        }
+        // Database schema tool
+        tools.add(DatabaseProviderTools.getDatabaseSchema(databaseProvider));
 
         // Dashboard layout tools
         tools.addAll(dashboardTools.getTools());
@@ -228,7 +193,7 @@ public class DashboardAIController implements AIController {
             }
             try {
                 Chart chart = chartRegistry.getChart(chartId);
-                applyPendingChartState(chart, entry, chartId);
+                applyPendingChartState(chart, entry);
             } catch (IllegalArgumentException e) {
                 // Chart was removed — skip silently
             } catch (Exception e) {
@@ -303,7 +268,7 @@ public class DashboardAIController implements AIController {
 
             widgetStates.add(new WidgetState(widgetId, widget.getTitle(), type,
                     widget.getColspan(), widget.getRowspan(), queries,
-                    configuration, widgetDataSourceMap.get(widgetId)));
+                    configuration));
         }
         return new DashboardState(widgetStates);
     }
@@ -318,14 +283,12 @@ public class DashboardAIController implements AIController {
         dashboard.getUI().ifPresent(ui -> ui.access(() -> {
             dashboard.removeAll();
             gridToolsMap.clear();
-            widgetDataSourceMap.clear();
             dashboardTools.clearSelectionCheckboxes();
 
             for (WidgetState ws : state.widgets()) {
                 if ("chart".equals(ws.type())) {
                     DashboardWidget widget = createChartWidget(ws.widgetId(),
-                            ws.title(), ws.colspan(), ws.rowspan(),
-                            ws.dataSource());
+                            ws.title(), ws.colspan(), ws.rowspan());
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
                         ChartEntry entry = chartRegistry
@@ -334,8 +297,7 @@ public class DashboardAIController implements AIController {
                         try {
                             renderChart(
                                     chartRegistry.getChart(ws.widgetId()),
-                                    ws.queries(), ws.configuration(),
-                                    ws.dataSource());
+                                    ws.queries(), ws.configuration());
                         } catch (Exception e) {
                             LOGGER.error(
                                     "Failed to restore chart widget {}",
@@ -344,8 +306,7 @@ public class DashboardAIController implements AIController {
                     }
                 } else if ("grid".equals(ws.type())) {
                     DashboardWidget widget = createGridWidget(ws.widgetId(),
-                            ws.title(), ws.colspan(), ws.rowspan(),
-                            ws.dataSource());
+                            ws.title(), ws.colspan(), ws.rowspan());
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
                         GridTools gt = gridToolsMap.get(ws.widgetId());
@@ -375,14 +336,13 @@ public class DashboardAIController implements AIController {
      */
     public record WidgetState(String widgetId, String title, String type,
             int colspan, int rowspan, List<String> queries,
-            String configuration,
-            String dataSource) implements java.io.Serializable {
+            String configuration) implements java.io.Serializable {
     }
 
     // ===== Widget Creation =====
 
     private DashboardWidget createChartWidget(String widgetId, String title,
-            int colspan, int rowspan, String dataSource) {
+            int colspan, int rowspan) {
         Chart chart = new Chart();
         chart.setSizeFull();
         DashboardWidget widget = new DashboardWidget(title, chart);
@@ -390,14 +350,13 @@ public class DashboardAIController implements AIController {
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
 
-        widgetDataSourceMap.put(widgetId, resolveDataSourceName(dataSource));
         dashboardTools.addSelectionCheckbox(widget);
 
         return widget;
     }
 
     private DashboardWidget createGridWidget(String widgetId, String title,
-            int colspan, int rowspan, String dataSource) {
+            int colspan, int rowspan) {
         Grid<Map<String, Object>> grid = new Grid<>();
         grid.setSizeFull();
         DashboardWidget widget = new DashboardWidget(title, grid);
@@ -405,33 +364,11 @@ public class DashboardAIController implements AIController {
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
 
-        DatabaseProvider provider = resolveProvider(dataSource);
-        GridTools gridTools = new GridTools(grid, provider);
+        GridTools gridTools = new GridTools(grid, databaseProvider);
         gridToolsMap.put(widgetId, gridTools);
-        widgetDataSourceMap.put(widgetId, resolveDataSourceName(dataSource));
         dashboardTools.addSelectionCheckbox(widget);
 
         return widget;
-    }
-
-    private DatabaseProvider resolveProvider(String dataSource) {
-        if (dataSource == null || dataSource.isBlank()) {
-            return databaseProviders.values().iterator().next();
-        }
-        DatabaseProvider provider = databaseProviders.get(dataSource);
-        if (provider == null) {
-            throw new IllegalArgumentException(
-                    "Unknown data source: '" + dataSource
-                            + "'. Available: " + databaseProviders.keySet());
-        }
-        return provider;
-    }
-
-    private String resolveDataSourceName(String dataSource) {
-        if (dataSource == null || dataSource.isBlank()) {
-            return databaseProviders.keySet().iterator().next();
-        }
-        return dataSource;
     }
 
     // ===== Chart Resolution =====
@@ -459,19 +396,16 @@ public class DashboardAIController implements AIController {
 
     // ===== Rendering =====
 
-    private void applyPendingChartState(Chart chart, ChartEntry entry,
-            String widgetId) {
+    private void applyPendingChartState(Chart chart, ChartEntry entry) {
         String configJson = entry.getPendingConfigurationJson();
 
         entry.applyPendingQueries();
         List<String> effectiveQueries = entry.getQueries();
 
         if (!effectiveQueries.isEmpty()) {
-            String dataSourceName = widgetDataSourceMap.get(widgetId);
             String effectiveConfig = configJson != null ? configJson
                     : ChartSerialization.toJSON(chart.getConfiguration());
-            renderChart(chart, effectiveQueries, effectiveConfig,
-                    dataSourceName);
+            renderChart(chart, effectiveQueries, effectiveConfig);
         } else if (configJson != null) {
             chart.getUI().ifPresentOrElse(ui -> {
                 ui.access(() -> configurationApplier
@@ -484,14 +418,13 @@ public class DashboardAIController implements AIController {
     }
 
     private void renderChart(Chart chart, List<String> queries,
-            String configJson, String dataSourceName) {
-        DatabaseProvider provider = resolveProvider(dataSourceName);
+            String configJson) {
         chart.getUI().ifPresentOrElse(ui -> {
             ui.access(() -> {
                 Configuration config = chart.getConfiguration();
                 List<Series> allSeries = new ArrayList<>();
                 for (String query : queries) {
-                    var results = provider.executeQuery(query);
+                    var results = databaseProvider.executeQuery(query);
                     allSeries.addAll(dataConverter.convertToSeries(results));
                 }
                 config.setSeries(allSeries.toArray(new Series[0]));
@@ -529,7 +462,6 @@ public class DashboardAIController implements AIController {
                     CRITICAL: Always include chart.type. Do NOT include 'series' - data comes from queries.
                     - colspan (integer, optional): Column span (default: 1)
                     - rowspan (integer, optional): Row span (default: 1)
-                    - dataSource (string, optional): Name of the data source to use
                     """;
             }
 
@@ -566,8 +498,7 @@ public class DashboardAIController implements AIController {
                               }
                             },
                             "colspan": { "type": "integer", "description": "Column span", "minimum": 1, "default": 1 },
-                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 },
-                            "dataSource": { "type": "string", "description": "Name of the data source to use" }
+                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 }
                           }
                         }
                         """;
@@ -581,7 +512,6 @@ public class DashboardAIController implements AIController {
                     int rowspan = 1;
                     List<String> queries = null;
                     String configJson = null;
-                    String dataSource = null;
 
                     if (arguments != null && !arguments.isBlank()) {
                         ObjectNode node = (ObjectNode) JacksonUtils
@@ -613,23 +543,18 @@ public class DashboardAIController implements AIController {
                                 && node.get("rowspan").isNumber()) {
                             rowspan = node.get("rowspan").asInt();
                         }
-                        if (node.has("dataSource")
-                                && !node.get("dataSource").isNull()) {
-                            dataSource = node.get("dataSource").asString();
-                        }
                     }
 
                     // Validate queries if provided
-                    DatabaseProvider provider = resolveProvider(dataSource);
                     if (queries != null) {
                         for (String q : queries) {
-                            provider.executeQuery(q);
+                            databaseProvider.executeQuery(q);
                         }
                     }
 
                     String widgetId = "chart-" + (++widgetCounter);
                     DashboardWidget widget = createChartWidget(widgetId, title,
-                            colspan, rowspan, dataSource);
+                            colspan, rowspan);
 
                     dashboard.getUI().ifPresentOrElse(ui -> {
                         ui.access(() -> dashboard.add(widget));
@@ -680,7 +605,6 @@ public class DashboardAIController implements AIController {
                     - query (string, optional): SQL SELECT query to populate the grid
                     - colspan (integer, optional): Column span (default: 1)
                     - rowspan (integer, optional): Row span (default: 1)
-                    - dataSource (string, optional): Name of the data source to use
                     """;
             }
 
@@ -693,8 +617,7 @@ public class DashboardAIController implements AIController {
                             "title": { "type": "string", "description": "Widget title" },
                             "query": { "type": "string", "description": "SQL SELECT query to populate the grid" },
                             "colspan": { "type": "integer", "description": "Column span", "minimum": 1, "default": 1 },
-                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 },
-                            "dataSource": { "type": "string", "description": "Name of the data source to use" }
+                            "rowspan": { "type": "integer", "description": "Row span", "minimum": 1, "default": 1 }
                           }
                         }
                         """;
@@ -707,7 +630,6 @@ public class DashboardAIController implements AIController {
                     int colspan = 1;
                     int rowspan = 1;
                     String query = null;
-                    String dataSource = null;
 
                     if (arguments != null && !arguments.isBlank()) {
                         ObjectNode node = (ObjectNode) JacksonUtils
@@ -726,21 +648,16 @@ public class DashboardAIController implements AIController {
                                 && node.get("rowspan").isNumber()) {
                             rowspan = node.get("rowspan").asInt();
                         }
-                        if (node.has("dataSource")
-                                && !node.get("dataSource").isNull()) {
-                            dataSource = node.get("dataSource").asString();
-                        }
                     }
 
                     // Validate query if provided
-                    DatabaseProvider provider = resolveProvider(dataSource);
                     if (query != null) {
-                        provider.executeQuery(query);
+                        databaseProvider.executeQuery(query);
                     }
 
                     String widgetId = "grid-" + (++widgetCounter);
                     DashboardWidget widget = createGridWidget(widgetId, title,
-                            colspan, rowspan, dataSource);
+                            colspan, rowspan);
 
                     dashboard.getUI().ifPresentOrElse(ui -> {
                         ui.access(() -> dashboard.add(widget));
@@ -830,42 +747,11 @@ public class DashboardAIController implements AIController {
                     });
 
                     gridToolsMap.remove(widgetId);
-                    widgetDataSourceMap.remove(widgetId);
 
                     return "Widget '" + widgetId + "' removed successfully";
                 } catch (Exception e) {
                     return "Error removing widget: " + e.getMessage();
                 }
-            }
-        };
-    }
-
-    // ===== Schema Tools =====
-
-    private LLMProvider.ToolSpec createNamedSchemaTool(String name,
-            DatabaseProvider provider) {
-        return new LLMProvider.ToolSpec() {
-            @Override
-            public String getName() {
-                return "get_database_schema_" + name;
-            }
-
-            @Override
-            public String getDescription() {
-                return "Gets the database schema for the '"
-                        + name
-                        + "' data source, including table names, column names "
-                        + "with their types, and the SQL dialect.";
-            }
-
-            @Override
-            public String getParametersSchema() {
-                return null;
-            }
-
-            @Override
-            public String execute(String arguments) {
-                return provider.getSchema();
             }
         };
     }
