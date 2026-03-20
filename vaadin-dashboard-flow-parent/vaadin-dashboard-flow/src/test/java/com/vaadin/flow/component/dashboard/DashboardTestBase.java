@@ -12,23 +12,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-public class DashboardTestBase {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class DashboardTestBase {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         ui.fakeClientCommunication();
     }
 
@@ -57,8 +57,8 @@ public class DashboardTestBase {
             Component... expectedChildren) {
         List<DashboardWidget> expectedWidgets = getExpectedWidgets(
                 expectedChildren);
-        Assert.assertEquals(expectedWidgets, dashboard.getWidgets());
-        Assert.assertEquals(Arrays.asList(expectedChildren),
+        Assertions.assertEquals(expectedWidgets, dashboard.getWidgets());
+        Assertions.assertEquals(Arrays.asList(expectedChildren),
                 dashboard.getChildren().toList());
     }
 
@@ -80,7 +80,7 @@ public class DashboardTestBase {
 
     protected static void assertSectionWidgets(DashboardSection section,
             DashboardWidget... expectedWidgets) {
-        Assert.assertEquals(Arrays.asList(expectedWidgets),
+        Assertions.assertEquals(Arrays.asList(expectedWidgets),
                 section.getWidgets());
     }
 

@@ -8,56 +8,56 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 
-public class DashboardWidgetTest extends DashboardTestBase {
+class DashboardWidgetTest extends DashboardTestBase {
 
     @Test
-    public void assertDefaultTitle() {
+    void assertDefaultTitle() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertNull(widget.getTitle());
+        Assertions.assertNull(widget.getTitle());
     }
 
     @Test
-    public void setTitle_returnsCorrectTitle() {
+    void setTitle_returnsCorrectTitle() {
         String valueToSet = "New title";
         DashboardWidget widget = getNewWidget();
         widget.setTitle(valueToSet);
-        Assert.assertEquals(valueToSet, widget.getTitle());
+        Assertions.assertEquals(valueToSet, widget.getTitle());
     }
 
     @Test
-    public void setTitleInConstructor_returnsCorrectTitle() {
+    void setTitleInConstructor_returnsCorrectTitle() {
         var valueToSet = "New title";
         var widget = new DashboardWidget(valueToSet);
         widget.setTitle(valueToSet);
-        Assert.assertEquals(valueToSet, widget.getTitle());
+        Assertions.assertEquals(valueToSet, widget.getTitle());
     }
 
     @Test
-    public void setTitleNull_returnsEmptyTitle() {
+    void setTitleNull_returnsEmptyTitle() {
         DashboardWidget widget = getNewWidget();
         widget.setTitle("New title");
         widget.setTitle(null);
-        Assert.assertEquals("", widget.getTitle());
+        Assertions.assertEquals("", widget.getTitle());
     }
 
     @Test
-    public void addWidgetToLayout_widgetIsAdded() {
+    void addWidgetToLayout_widgetIsAdded() {
         Div layout = new Div();
         ui.add(layout);
         DashboardWidget widget = getNewWidget();
         layout.add(widget);
         ui.fakeClientCommunication();
-        Assert.assertTrue(layout.getChildren().anyMatch(widget::equals));
+        Assertions.assertTrue(layout.getChildren().anyMatch(widget::equals));
     }
 
     @Test
-    public void removeWidgetFromLayout_widgetIsRemoved() {
+    void removeWidgetFromLayout_widgetIsRemoved() {
         Div layout = new Div();
         ui.add(layout);
         DashboardWidget widget = getNewWidget();
@@ -65,11 +65,11 @@ public class DashboardWidgetTest extends DashboardTestBase {
         ui.fakeClientCommunication();
         layout.remove(widget);
         ui.fakeClientCommunication();
-        Assert.assertTrue(layout.getChildren().noneMatch(widget::equals));
+        Assertions.assertTrue(layout.getChildren().noneMatch(widget::equals));
     }
 
     @Test
-    public void addWidgetToLayout_removeFromParent_widgetIsRemoved() {
+    void addWidgetToLayout_removeFromParent_widgetIsRemoved() {
         Div layout = new Div();
         ui.add(layout);
         DashboardWidget widget = getNewWidget();
@@ -77,11 +77,11 @@ public class DashboardWidgetTest extends DashboardTestBase {
         ui.fakeClientCommunication();
         widget.removeFromParent();
         ui.fakeClientCommunication();
-        Assert.assertTrue(layout.getChildren().noneMatch(widget::equals));
+        Assertions.assertTrue(layout.getChildren().noneMatch(widget::equals));
     }
 
     @Test
-    public void addWidgetFromLayoutToAnotherLayout_widgetIsMoved() {
+    void addWidgetFromLayoutToAnotherLayout_widgetIsMoved() {
         Div parent = new Div();
         ui.add(parent);
         DashboardWidget widget = getNewWidget();
@@ -91,200 +91,200 @@ public class DashboardWidgetTest extends DashboardTestBase {
         ui.add(newParent);
         newParent.add(widget);
         ui.fakeClientCommunication();
-        Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
-        Assert.assertTrue(newParent.getChildren().anyMatch(widget::equals));
+        Assertions.assertTrue(parent.getChildren().noneMatch(widget::equals));
+        Assertions.assertTrue(newParent.getChildren().anyMatch(widget::equals));
     }
 
     @Test
-    public void assertDefaultColspan() {
+    void assertDefaultColspan() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertEquals(1, widget.getColspan());
+        Assertions.assertEquals(1, widget.getColspan());
     }
 
     @Test
-    public void setValidColspan_returnsCorrectColspan() {
+    void setValidColspan_returnsCorrectColspan() {
         int valueToSet = 2;
         DashboardWidget widget = getNewWidget();
         widget.setColspan(valueToSet);
-        Assert.assertEquals(valueToSet, widget.getColspan());
+        Assertions.assertEquals(valueToSet, widget.getColspan());
     }
 
     @Test
-    public void setInvalidColspan_throwsIllegalArgumentException() {
+    void setInvalidColspan_throwsIllegalArgumentException() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> widget.setColspan(0));
     }
 
     @Test
-    public void assertDefaultRowspan() {
+    void assertDefaultRowspan() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertEquals(1, widget.getRowspan());
+        Assertions.assertEquals(1, widget.getRowspan());
     }
 
     @Test
-    public void setValidRowspan_returnsCorrectRowspan() {
+    void setValidRowspan_returnsCorrectRowspan() {
         int valueToSet = 2;
         DashboardWidget widget = getNewWidget();
         widget.setRowspan(valueToSet);
-        Assert.assertEquals(valueToSet, widget.getRowspan());
+        Assertions.assertEquals(valueToSet, widget.getRowspan());
     }
 
     @Test
-    public void setInvalidRowspan_throwsIllegalArgumentException() {
+    void setInvalidRowspan_throwsIllegalArgumentException() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> widget.setRowspan(0));
     }
 
     @Test
-    public void defaultContentIsNull() {
+    void defaultContentIsNull() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertNull(widget.getContent());
+        Assertions.assertNull(widget.getContent());
     }
 
     @Test
-    public void setContentToEmptyWidget_correctContentIsSet() {
+    void setContentToEmptyWidget_correctContentIsSet() {
         Div content = new Div();
         DashboardWidget widget = getNewWidget();
         widget.setContent(content);
-        Assert.assertEquals(content, widget.getContent());
+        Assertions.assertEquals(content, widget.getContent());
     }
 
     @Test
-    public void setContentInConstructor_correctContentIsSet() {
+    void setContentInConstructor_correctContentIsSet() {
         var content = new Div();
         var widget = new DashboardWidget(content);
-        Assert.assertEquals(content, widget.getContent());
+        Assertions.assertEquals(content, widget.getContent());
     }
 
     @Test
-    public void setTitleAndContentInConstructor_correctValuesAreSet() {
+    void setTitleAndContentInConstructor_correctValuesAreSet() {
         var title = "New title";
         var content = new Div();
         var widget = new DashboardWidget(title, content);
-        Assert.assertEquals(title, widget.getTitle());
-        Assert.assertEquals(content, widget.getContent());
+        Assertions.assertEquals(title, widget.getTitle());
+        Assertions.assertEquals(content, widget.getContent());
     }
 
     @Test
-    public void setAnotherContentToNonEmptyWidget_correctContentIsSet() {
+    void setAnotherContentToNonEmptyWidget_correctContentIsSet() {
         DashboardWidget widget = getNewWidget();
         widget.setContent(new Div());
         Span newContent = new Span();
         widget.setContent(newContent);
-        Assert.assertEquals(newContent, widget.getContent());
+        Assertions.assertEquals(newContent, widget.getContent());
     }
 
     @Test
-    public void setTheSameContentToNonEmptyWidget_correctContentIsSet() {
+    void setTheSameContentToNonEmptyWidget_correctContentIsSet() {
         Div content = new Div();
         DashboardWidget widget = getNewWidget();
         widget.setContent(content);
         widget.setContent(content);
-        Assert.assertEquals(content, widget.getContent());
+        Assertions.assertEquals(content, widget.getContent());
     }
 
     @Test
-    public void setNullContentToNonEmptyWidget_contentIsRemoved() {
+    void setNullContentToNonEmptyWidget_contentIsRemoved() {
         DashboardWidget widget = getNewWidget();
         widget.setContent(new Div());
         widget.setContent(null);
-        Assert.assertNull(widget.getContent());
+        Assertions.assertNull(widget.getContent());
     }
 
     @Test
-    public void defaultHeaderIsNull() {
+    void defaultHeaderIsNull() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertNull(widget.getHeaderContent());
+        Assertions.assertNull(widget.getHeaderContent());
     }
 
     @Test
-    public void setHeaderToEmptyWidget_correctHeaderIsSet() {
+    void setHeaderToEmptyWidget_correctHeaderIsSet() {
         Div header = new Div();
         DashboardWidget widget = getNewWidget();
         widget.setHeaderContent(header);
-        Assert.assertEquals(header, widget.getHeaderContent());
+        Assertions.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
-    public void setAnotherHeaderToNonEmptyWidget_correctHeaderIsSet() {
+    void setAnotherHeaderToNonEmptyWidget_correctHeaderIsSet() {
         DashboardWidget widget = getNewWidget();
         widget.setHeaderContent(new Div());
         Span newHeader = new Span();
         widget.setHeaderContent(newHeader);
-        Assert.assertEquals(newHeader, widget.getHeaderContent());
+        Assertions.assertEquals(newHeader, widget.getHeaderContent());
     }
 
     @Test
-    public void setTheSameHeaderToNonEmptyWidget_correctHeaderIsSet() {
+    void setTheSameHeaderToNonEmptyWidget_correctHeaderIsSet() {
         Div header = new Div();
         DashboardWidget widget = getNewWidget();
         widget.setHeaderContent(header);
         widget.setHeaderContent(header);
-        Assert.assertEquals(header, widget.getHeaderContent());
+        Assertions.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
-    public void setNullHeaderToNonEmptyWidget_headerIsRemoved() {
+    void setNullHeaderToNonEmptyWidget_headerIsRemoved() {
         DashboardWidget widget = getNewWidget();
         widget.setHeaderContent(new Div());
         widget.setHeaderContent(null);
-        Assert.assertNull(widget.getHeaderContent());
+        Assertions.assertNull(widget.getHeaderContent());
     }
 
     @Test
-    public void setNullHeaderToWidgetWithContent_contentIsNotRemoved() {
+    void setNullHeaderToWidgetWithContent_contentIsNotRemoved() {
         Div content = new Div();
         DashboardWidget widget = getNewWidget();
         widget.setContent(content);
         widget.setHeaderContent(null);
-        Assert.assertEquals(content, widget.getContent());
+        Assertions.assertEquals(content, widget.getContent());
     }
 
     @Test
-    public void setNullContentToWidgetWithHeader_headerIsNotRemoved() {
+    void setNullContentToWidgetWithHeader_headerIsNotRemoved() {
         Div header = new Div();
         DashboardWidget widget = getNewWidget();
         widget.setHeaderContent(header);
         widget.setContent(null);
-        Assert.assertEquals(header, widget.getHeaderContent());
+        Assertions.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
-    public void setHeaderToWidgetWithContent_contentAndHeaderCorrectlyRetrieved() {
+    void setHeaderToWidgetWithContent_contentAndHeaderCorrectlyRetrieved() {
         Div content = new Div();
         Span header = new Span();
         DashboardWidget widget = getNewWidget();
         widget.setContent(content);
         widget.setHeaderContent(header);
-        Assert.assertEquals(content, widget.getContent());
-        Assert.assertEquals(header, widget.getHeaderContent());
+        Assertions.assertEquals(content, widget.getContent());
+        Assertions.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
-    public void setContentToWidgetWithHeader_contentAndHeaderCorrectlyRetrieved() {
+    void setContentToWidgetWithHeader_contentAndHeaderCorrectlyRetrieved() {
         Div content = new Div();
         Span header = new Span();
         DashboardWidget widget = getNewWidget();
         widget.setHeaderContent(header);
         widget.setContent(content);
-        Assert.assertEquals(content, widget.getContent());
-        Assert.assertEquals(header, widget.getHeaderContent());
+        Assertions.assertEquals(content, widget.getContent());
+        Assertions.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
-    public void setWidgetVisibility_exceptionIsThrown() {
+    void setWidgetVisibility_exceptionIsThrown() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> widget.setVisible(false));
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> widget.setVisible(true));
     }
 
     @Test
-    public void getWidgetVisibility_returnsTrue() {
+    void getWidgetVisibility_returnsTrue() {
         DashboardWidget widget = getNewWidget();
-        Assert.assertTrue(widget.isVisible());
+        Assertions.assertTrue(widget.isVisible());
     }
 }
