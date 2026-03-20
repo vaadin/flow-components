@@ -276,27 +276,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  const itemsUpdated = function (items) {
-    if (!items || !Array.isArray(items)) {
-      throw 'Attempted to call itemsUpdated with an invalid value: ' + JSON.stringify(items);
-    }
-    let detailsOpenedItems = Array.from(grid.detailsOpenedItems);
-    for (let i = 0; i < items.length; ++i) {
-      const item = items[i];
-      if (!item) {
-        continue;
-      }
-      if (item.detailsOpened) {
-        if (grid._getItemIndexInArray(item, detailsOpenedItems) < 0) {
-          detailsOpenedItems.push(item);
-        }
-      } else if (grid._getItemIndexInArray(item, detailsOpenedItems) >= 0) {
-        detailsOpenedItems.splice(grid._getItemIndexInArray(item, detailsOpenedItems), 1);
-      }
-    }
-    grid.detailsOpenedItems = detailsOpenedItems;
-  };
-
   grid.$connector.set = function (startIndex, items) {
     const { rootCache } = dataProviderController;
     items.forEach((item, i) => {
@@ -313,7 +292,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         } else {
           grid.closeItemDetails(item);
         }
-      })
+      });
     });
 
     grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
