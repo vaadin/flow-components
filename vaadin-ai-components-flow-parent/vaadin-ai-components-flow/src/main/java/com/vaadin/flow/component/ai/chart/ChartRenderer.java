@@ -102,13 +102,9 @@ public class ChartRenderer {
                         : ChartSerialization.toJSON(chart.getConfiguration());
                 renderChart(chart, effectiveQueries, effectiveConfig);
             } else if (configJson != null) {
-                chart.getUI().ifPresentOrElse(ui -> {
-                    ui.access(() -> configurationApplier
-                            .applyConfiguration(chart, configJson));
-                }, () -> {
-                    throw new IllegalStateException(
-                            "Chart is not attached to a UI");
-                });
+                chart.getElement().getNode().runWhenAttached(
+                        ui -> ui.access(() -> configurationApplier
+                                .applyConfiguration(chart, configJson)));
             }
         } finally {
             entry.clearPendingState();
@@ -128,22 +124,18 @@ public class ChartRenderer {
      */
     public void renderChart(Chart chart, List<String> queries,
             String configJson) {
-        chart.getUI().ifPresentOrElse(ui -> {
-            ui.access(() -> {
-                Configuration config = chart.getConfiguration();
-                List<Series> allSeries = new ArrayList<>();
-                for (String query : queries) {
-                    var results = databaseProvider.executeQuery(query);
-                    allSeries.addAll(dataConverter.convertToSeries(results));
-                }
-                config.setSeries(allSeries.toArray(new Series[0]));
-                if (configJson != null) {
-                    configurationApplier.applyConfiguration(chart, configJson);
-                }
-                chart.drawChart();
-            });
-        }, () -> {
-            throw new IllegalStateException("Chart is not attached to a UI");
-        });
+        chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+            Configuration config = chart.getConfiguration();
+            List<Series> allSeries = new ArrayList<>();
+            for (String query : queries) {
+                var results = databaseProvider.executeQuery(query);
+                allSeries.addAll(dataConverter.convertToSeries(results));
+            }
+            config.setSeries(allSeries.toArray(new Series[0]));
+            if (configJson != null) {
+                configurationApplier.applyConfiguration(chart, configJson);
+            }
+            chart.drawChart();
+        }));
     }
 }

@@ -76,21 +76,17 @@ public class GridRenderer {
         List<Map<String, Object>> results = databaseProvider
                 .executeQuery(sqlQuery);
 
-        grid.getUI().ifPresentOrElse(ui -> {
-            ui.access(() -> {
-                grid.removeAllColumns();
-                if (!results.isEmpty()) {
-                    for (String columnName : results.get(0).keySet()) {
-                        grid.addColumn(row -> row.get(columnName) != null
-                                ? row.get(columnName).toString()
-                                : "").setHeader(columnName).setAutoWidth(true)
-                                .setSortable(true);
-                    }
+        grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+            grid.removeAllColumns();
+            if (!results.isEmpty()) {
+                for (String columnName : results.get(0).keySet()) {
+                    grid.addColumn(row -> row.get(columnName) != null
+                            ? row.get(columnName).toString()
+                            : "").setHeader(columnName).setAutoWidth(true)
+                            .setSortable(true);
                 }
-                grid.setItems(results);
-            });
-        }, () -> {
-            throw new IllegalStateException("Grid is not attached to a UI");
-        });
+            }
+            grid.setItems(results);
+        }));
     }
 }

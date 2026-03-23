@@ -325,27 +325,25 @@ public class DashboardTools {
                                 + "' not found";
                     }
 
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> {
-                            JsonNode titleNode = node.get("title");
-                            if (titleNode != null && !titleNode.isNull()) {
-                                targetWidget.setTitle(titleNode.asString());
-                            }
-                            JsonNode colspanNode = node.get("colspan");
-                            if (colspanNode != null && !colspanNode.isNull()) {
-                                targetWidget.setColspan(
-                                        Math.max(1, colspanNode.asInt()));
-                            }
-                            JsonNode rowspanNode = node.get("rowspan");
-                            if (rowspanNode != null && !rowspanNode.isNull()) {
-                                targetWidget.setRowspan(
-                                        Math.max(1, rowspanNode.asInt()));
-                            }
-                        });
-                    }, () -> {
-                        throw new IllegalStateException(
-                                "Dashboard is not attached to a UI");
-                    });
+                    dashboard.getElement().getNode()
+                            .runWhenAttached(ui -> ui.access(() -> {
+                                JsonNode titleNode = node.get("title");
+                                if (titleNode != null && !titleNode.isNull()) {
+                                    targetWidget.setTitle(titleNode.asString());
+                                }
+                                JsonNode colspanNode = node.get("colspan");
+                                if (colspanNode != null
+                                        && !colspanNode.isNull()) {
+                                    targetWidget.setColspan(
+                                            Math.max(1, colspanNode.asInt()));
+                                }
+                                JsonNode rowspanNode = node.get("rowspan");
+                                if (rowspanNode != null
+                                        && !rowspanNode.isNull()) {
+                                    targetWidget.setRowspan(
+                                            Math.max(1, rowspanNode.asInt()));
+                                }
+                            }));
 
                     return "Widget '" + widgetId + "' updated successfully";
                 } catch (Exception e) {
@@ -414,17 +412,13 @@ public class DashboardTools {
                         orderedWidgets.add(widget);
                     }
 
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> {
-                            dashboard.remove(orderedWidgets);
-                            for (DashboardWidget widget : orderedWidgets) {
-                                dashboard.add(widget);
-                            }
-                        });
-                    }, () -> {
-                        throw new IllegalStateException(
-                                "Dashboard is not attached to a UI");
-                    });
+                    dashboard.getElement().getNode()
+                            .runWhenAttached(ui -> ui.access(() -> {
+                                dashboard.remove(orderedWidgets);
+                                for (DashboardWidget widget : orderedWidgets) {
+                                    dashboard.add(widget);
+                                }
+                            }));
 
                     return "Widgets reordered successfully";
                 } catch (Exception e) {
@@ -730,11 +724,8 @@ public class DashboardTools {
                     }
 
                     final DashboardWidget toRemove = targetWidget;
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> dashboard.remove(toRemove));
-                    }, () -> {
-                        dashboard.remove(toRemove);
-                    });
+                    dashboard.getElement().getNode().runWhenAttached(
+                            ui -> ui.access(() -> dashboard.remove(toRemove)));
 
                     return "Widget '" + widgetId + "' removed successfully";
                 } catch (Exception e) {
