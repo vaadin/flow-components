@@ -37,6 +37,11 @@ import tools.jackson.databind.node.ObjectNode;
  */
 public class ChartEntry implements Serializable {
 
+    private final String id;
+    private List<String> queries = new ArrayList<>();
+    private String pendingConfigurationJson;
+    private boolean pendingDataUpdate;
+
     /**
      * Gets the {@link ChartEntry} for the given chart, or {@code null} if none
      * has been set.
@@ -68,9 +73,6 @@ public class ChartEntry implements Serializable {
         return entry;
     }
 
-    private final String id;
-    private List<String> queries = new ArrayList<>();
-
     /**
      * Creates a new chart entry with the given ID.
      *
@@ -89,9 +91,6 @@ public class ChartEntry implements Serializable {
     public String getId() {
         return id;
     }
-
-    private String pendingConfigurationJson;
-    private boolean pendingDataUpdate;
 
     /**
      * Gets the current SQL queries for this chart's data series.
