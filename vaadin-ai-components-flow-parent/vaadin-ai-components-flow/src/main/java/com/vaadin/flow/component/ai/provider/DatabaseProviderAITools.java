@@ -25,9 +25,9 @@ import java.util.Objects;
  *
  * @author Vaadin Ltd
  */
-public final class DatabaseProviderTools {
+public final class DatabaseProviderAITools {
 
-    private DatabaseProviderTools() {
+    private DatabaseProviderAITools() {
     }
 
     /**

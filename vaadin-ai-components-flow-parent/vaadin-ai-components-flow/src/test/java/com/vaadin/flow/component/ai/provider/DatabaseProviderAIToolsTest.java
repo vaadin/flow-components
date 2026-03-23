@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class DatabaseProviderToolsTest {
+class DatabaseProviderAIToolsTest {
 
     private static final String SCHEMA = "Tables: users(id INT, name VARCHAR)";
 
@@ -46,37 +46,37 @@ class DatabaseProviderToolsTest {
     @Test
     void getDatabaseSchema_nullProvider_throwsNullPointerException() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> DatabaseProviderTools.getDatabaseSchema(null));
+                () -> DatabaseProviderAITools.getDatabaseSchema(null));
     }
 
     @Test
     void getDatabaseSchema_returnsToolWithCorrectName() {
-        var tool = DatabaseProviderTools.getDatabaseSchema(provider);
+        var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         Assertions.assertEquals("get_database_schema", tool.getName());
     }
 
     @Test
     void getDatabaseSchema_returnsToolWithDescription() {
-        var tool = DatabaseProviderTools.getDatabaseSchema(provider);
+        var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         Assertions.assertNotNull(tool.getDescription());
         Assertions.assertFalse(tool.getDescription().isEmpty());
     }
 
     @Test
     void getDatabaseSchema_returnsToolWithNullParametersSchema() {
-        var tool = DatabaseProviderTools.getDatabaseSchema(provider);
+        var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         Assertions.assertNull(tool.getParametersSchema());
     }
 
     @Test
     void getDatabaseSchema_executeDelegatesToProvider() {
-        var tool = DatabaseProviderTools.getDatabaseSchema(provider);
+        var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         Assertions.assertEquals(SCHEMA, tool.execute(null));
     }
 
     @Test
     void createAll_returnsListContainingDatabaseSchemaTool() {
-        var tools = DatabaseProviderTools.createAll(provider);
+        var tools = DatabaseProviderAITools.createAll(provider);
         Assertions.assertEquals(1, tools.size());
         Assertions.assertEquals("get_database_schema", tools.get(0).getName());
     }
