@@ -18,43 +18,43 @@ package com.vaadin.flow.component.datepicker;
 import java.time.LocalDate;
 import java.util.Locale;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class DatePickerLocaleTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class DatePickerLocaleTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void newDatePicker_returnsUiLocale() {
+    void newDatePicker_returnsUiLocale() {
         Locale finnishLocale = new Locale("fi-FI");
         ui.setLocale(finnishLocale);
         DatePicker datePicker = new DatePicker();
-        Assert.assertEquals(finnishLocale, datePicker.getLocale());
+        Assertions.assertEquals(finnishLocale, datePicker.getLocale());
     }
 
     @Test
-    public void newDatePickerWithCustomLocale_returnsCustomLocale() {
+    void newDatePickerWithCustomLocale_returnsCustomLocale() {
         Locale finnishLocale = new Locale("fi-FI");
         Locale usLocale = new Locale("en-US");
         ui.setLocale(finnishLocale);
         DatePicker datePicker = new DatePicker(LocalDate.now(), usLocale);
-        Assert.assertEquals(usLocale, datePicker.getLocale());
+        Assertions.assertEquals(usLocale, datePicker.getLocale());
     }
 
     @Test
-    public void setCustomLocale_returnsCustomLocale() {
+    void setCustomLocale_returnsCustomLocale() {
         Locale finnishLocale = new Locale("fi-FI");
         Locale usLocale = new Locale("en-US");
         ui.setLocale(finnishLocale);
         DatePicker datePicker = new DatePicker();
         datePicker.setLocale(usLocale);
-        Assert.assertEquals(usLocale, datePicker.getLocale());
+        Assertions.assertEquals(usLocale, datePicker.getLocale());
     }
 }
