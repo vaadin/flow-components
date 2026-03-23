@@ -15,9 +15,12 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -86,6 +89,56 @@ public final class ChartTools {
          * @return the chart IDs, never {@code null}
          */
         Set<String> getChartIds();
+    }
+
+    // @formatter:off
+    private static final Map<String, String> COLUMN_PARAMS = Map.ofEntries(
+            Map.entry("{PREFIX}",         PREFIX),
+            Map.entry("{SERIES}",         SERIES),
+            Map.entry("{X}",              X),
+            Map.entry("{Y}",              Y),
+            Map.entry("{Z}",              Z),
+            Map.entry("{X2}",             X2),
+            Map.entry("{NAME}",           NAME),
+            Map.entry("{ID}",             ID),
+            Map.entry("{PARENT}",         PARENT),
+            Map.entry("{VALUE}",          VALUE),
+            Map.entry("{COLOR}",          COLOR),
+            Map.entry("{COLOR_VALUE}",    COLOR_VALUE),
+            Map.entry("{OPEN}",           OPEN),
+            Map.entry("{HIGH}",           HIGH),
+            Map.entry("{LOW}",            LOW),
+            Map.entry("{CLOSE}",          CLOSE),
+            Map.entry("{Q1}",             Q1),
+            Map.entry("{MEDIAN}",         MEDIAN),
+            Map.entry("{Q3}",             Q3),
+            Map.entry("{FROM}",           FROM),
+            Map.entry("{TO}",             TO),
+            Map.entry("{WEIGHT}",         WEIGHT),
+            Map.entry("{LABEL}",          LABEL),
+            Map.entry("{DESCRIPTION}",    DESCRIPTION),
+            Map.entry("{TITLE}",          TITLE),
+            Map.entry("{TEXT}",           TEXT),
+            Map.entry("{START}",          START),
+            Map.entry("{END}",            END),
+            Map.entry("{DEPENDENCY}",     DEPENDENCY),
+            Map.entry("{COMPLETED}",      COMPLETED),
+            Map.entry("{TARGET}",         TARGET),
+            Map.entry("{WATERFALL_TYPE}", WATERFALL_TYPE),
+            Map.entry("{IMAGE}",          IMAGE)
+    );
+    // @formatter:on
+
+    /**
+     * Replaces {@code {NAME}} placeholders in the template with the
+     * corresponding {@link ColumnNames} constant values.
+     */
+    private static String resolveColumnNames(String template) {
+        var result = template;
+        for (var entry : COLUMN_PARAMS.entrySet()) {
+            result = result.replace(entry.getKey(), entry.getValue());
+        }
+        return result;
     }
 
     private ChartTools() {
@@ -366,54 +419,88 @@ public final class ChartTools {
 
             @Override
             public String getDescription() {
-                return """
-                        Updates the chart data using SQL SELECT queries (one per series).
+                return resolveColumnNames(
+                        """
+                                Updates the chart data using SQL SELECT queries (one per series).
 
-                        IMPORTANT: Query structure must match the chart type:
+                                IMPORTANT: Column names control how data is mapped to series. \
+                                Use the exact aliases below (prefixed with '{PREFIX}') in your SELECT statements.
 
-                        Basic charts (line, bar, column, pie):
-                        - 2 columns: category/name, value
-                        - Example: SELECT month, revenue FROM sales
+                                Multi-series: add a {SERIES} column to group rows into separate named series. \
+                                It is removed before chart type detection.
 
-                        Scatter plot:
-                        - 2 numeric columns: x, y
-                        - Example: SELECT temperature, sales FROM data
+                                Basic charts (line, bar, column, area, spline, pie):
+                                - 2 columns: category, value (no special aliases needed)
+                                - Example: SELECT month AS category, SUM(revenue) AS value FROM sales GROUP BY month
 
-                        Bubble chart:
-                        - 3 numeric columns: x, y, size
-                        - Example: SELECT gdp_per_capita, life_expectancy, population FROM countries
+                                Scatter plot:
+                                - 2 numeric columns: {X}, {Y}
+                                - Example: SELECT temperature AS {X}, sales AS {Y} FROM data
 
-                        Bullet chart:
-                        - 3 columns with 'target': category, value, target
-                        - Example: SELECT quarter, revenue, target FROM sales
+                                Bubble chart:
+                                - 3 numeric columns: {X}, {Y}, {Z}
+                                - Example: SELECT gdp AS {X}, life_exp AS {Y}, population AS {Z} FROM countries
 
-                        Range charts (arearange, columnrange, areasplinerange):
-                        - 3 columns: x/category, low/min, high/max
-                        - Example: SELECT month, temp_low, temp_high FROM weather
+                                Bullet chart:
+                                - Columns: {Y}, {TARGET} (optionally {X})
+                                - Example: SELECT revenue AS {Y}, goal AS {TARGET} FROM sales
 
-                        BoxPlot:
-                        - 5 columns: low, q1, median, q3, high (column names should include these keywords)
-                        - Example: SELECT min_val, lower_quartile, median, upper_quartile, max_val FROM stats
+                                Range charts (arearange, columnrange, areasplinerange):
+                                - Columns: {LOW}, {HIGH} (optionally {X})
+                                - Example: SELECT temp_low AS {LOW}, temp_high AS {HIGH} FROM weather
 
-                        OHLC/Candlestick:
-                        - 5 columns: x/date, open, high, low, close (column names must include these keywords)
-                        - Example: SELECT date, open, high, low, close FROM stock_prices
+                                BoxPlot:
+                                - 5 columns: {LOW}, {Q1}, {MEDIAN}, {Q3}, {HIGH}
+                                - Example: SELECT min_val AS {LOW}, lower_q AS {Q1}, med AS {MEDIAN}, upper_q AS {Q3}, max_val AS {HIGH} FROM stats
 
-                        Sankey diagram:
-                        - 3 columns: from/source, to/target, weight/value
-                        - Example: SELECT source, destination, flow FROM energy_flow
+                                OHLC/Candlestick:
+                                - Columns: {OPEN}, {HIGH}, {LOW}, {CLOSE} (optionally {X})
+                                - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
 
-                        Xrange/Gantt:
-                        - 3 columns: start/x, end/x2, y/category
-                        - Example: SELECT start_date, end_date, task_id FROM project_tasks
+                                Sankey diagram:
+                                - 3 columns: {FROM}, {TO}, {WEIGHT}
+                                - Example: SELECT source AS {FROM}, destination AS {TO}, flow AS {WEIGHT} FROM energy_flow
 
-                        Column names are important for automatic detection. Use descriptive names that match the patterns above.
+                                Xrange:
+                                - 3 columns: {X}, {X2}, {Y}
+                                - Example: SELECT start_ts AS {X}, end_ts AS {X2}, task_id AS {Y} FROM tasks
 
-                        Parameters:
-                        - chartId (string, required): The ID of the chart to update
-                        - queries (array of strings, required): SQL SELECT queries, one per series
+                                Gantt:
+                                - Columns: {NAME}, {START}, {END} (optionally {ID}, {PARENT}, {DEPENDENCY}, {COMPLETED}, {COLOR})
+                                - {START} and {END} must be date/timestamp values
+                                - Example: SELECT task AS {NAME}, start_date AS {START}, end_date AS {END} FROM project_tasks
 
-                        Changes are applied when the request completes.""";
+                                Timeline:
+                                - Columns: {NAME}, {LABEL}, {DESCRIPTION} (optionally {X})
+                                - Example: SELECT event AS {NAME}, short AS {LABEL}, detail AS {DESCRIPTION} FROM events
+
+                                Flags:
+                                - Columns: {TITLE} (optionally {TEXT}, {X})
+                                - Example: SELECT flag_title AS {TITLE}, note AS {TEXT} FROM flags
+
+                                Organization:
+                                - Columns: {ID}, {NAME}, {PARENT}, {TITLE} (optionally {DESCRIPTION}, {IMAGE}, {COLOR})
+                                - Example: SELECT emp_id AS {ID}, full_name AS {NAME}, mgr_id AS {PARENT}, role AS {TITLE} FROM employees
+
+                                Treemap:
+                                - Columns: {ID}, {PARENT}, {VALUE} (optionally {NAME}, {COLOR_VALUE})
+                                - Example: SELECT cat_id AS {ID}, parent_id AS {PARENT}, amount AS {VALUE} FROM categories
+
+                                Heatmap:
+                                - 3 columns: {X}, {Y}, {VALUE}
+                                - Example: SELECT day AS {X}, hour AS {Y}, count AS {VALUE} FROM activity
+
+                                Waterfall:
+                                - Columns: {Y}, {WATERFALL_TYPE} (optionally {NAME}); type values: 'sum', 'intermediate', or null for data points
+                                - Example: SELECT label AS {NAME}, amount AS {Y}, wf_type AS {WATERFALL_TYPE} FROM waterfall_data
+
+                                Optional: any pattern supporting DataSeriesItem accepts a {COLOR} column for per-point coloring.
+
+                                Parameters:
+                                - chartId (string, required): The ID of the chart to update
+                                - queries (array of strings, required): SQL SELECT queries, one per series
+
+                                Changes are applied when the request completes.""");
             }
 
             @Override
