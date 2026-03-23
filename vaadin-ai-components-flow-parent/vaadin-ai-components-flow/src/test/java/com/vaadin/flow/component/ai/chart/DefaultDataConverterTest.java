@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -93,7 +95,9 @@ class DefaultDataConverterTest {
 
     @Test
     void caseInsensitive_matchesColumns() {
-        var data = List.of(row("OPEN", 10, "High", 15, "LOW", 5, "Close", 12));
+        var data = List.of(row(OPEN.toUpperCase(), 10,
+                capitalizeFirstLetter(HIGH), 15, LOW.toUpperCase(), 5,
+                capitalizeFirstLetter(CLOSE), 12));
         var result = (DataSeries) convertSingle(data);
         Assertions.assertInstanceOf(OhlcItem.class,
                 result.getData().getFirst());
@@ -114,10 +118,10 @@ class DefaultDataConverterTest {
     @Test
     void duplicateLowercaseColumnNames_firstColumnWins() {
         var row = new LinkedHashMap<String, Object>();
-        row.put("Name", "Alice");
-        row.put("NAME", "Bob");
-        row.put("label", "L");
-        row.put("description", "D");
+        row.put(capitalizeFirstLetter(NAME), "Alice");
+        row.put(NAME.toUpperCase(), "Bob");
+        row.put(LABEL, "L");
+        row.put(DESCRIPTION, "D");
         var data = List.<Map<String, Object>> of(row);
         var result = (DataSeries) convertSingle(data);
         var item = (DataSeriesItemTimeline) result.getData().getFirst();
@@ -131,9 +135,8 @@ class DefaultDataConverterTest {
 
         @Test
         void createsOhlcItems() {
-            var data = List.of(
-                    row("x", 1, "open", 10, "high", 15, "low", 5, "close", 12),
-                    row("x", 2, "open", 12, "high", 18, "low", 8, "close", 16));
+            var data = List.of(row(X, 1, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12),
+                    row(X, 2, OPEN, 12, HIGH, 18, LOW, 8, CLOSE, 16));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(2, result.getData().size());
             var item = (OhlcItem) result.getData().getFirst();
@@ -152,8 +155,7 @@ class DefaultDataConverterTest {
 
         @Test
         void createsBoxPlotItems() {
-            var data = List.of(
-                    row("low", 1, "q1", 3, "median", 5, "q3", 7, "high", 9));
+            var data = List.of(row(LOW, 1, Q1, 3, MEDIAN, 5, Q3, 7, HIGH, 9));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(1, result.getData().size());
             var item = (BoxPlotItem) result.getData().getFirst();
@@ -168,8 +170,7 @@ class DefaultDataConverterTest {
         void lowHighWithBoxPlotColumns_createsBoxPlotNotRange() {
             // low+high also match Range, but q1/median/q3 presence means
             // BoxPlot. Verifies the guard works.
-            var data = List.of(
-                    row("low", 1, "q1", 3, "median", 5, "q3", 7, "high", 9));
+            var data = List.of(row(LOW, 1, Q1, 3, MEDIAN, 5, Q3, 7, HIGH, 9));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertInstanceOf(BoxPlotItem.class,
                     result.getData().getFirst());
@@ -184,12 +185,10 @@ class DefaultDataConverterTest {
         @Test
         void createsNodeSeries() {
             var data = List.of(
-                    row("id", "ceo", "name", "Alice", "title", "CEO", "parent",
-                            null),
-                    row("id", "cto", "name", "Bob", "title", "CTO", "parent",
-                            "ceo"),
-                    row("id", "dev", "name", "Carol", "title", "Developer",
-                            "parent", "cto"));
+                    row(ID, "ceo", NAME, "Alice", TITLE, "CEO", PARENT, null),
+                    row(ID, "cto", NAME, "Bob", TITLE, "CTO", PARENT, "ceo"),
+                    row(ID, "dev", NAME, "Carol", TITLE, "Developer", PARENT,
+                            "cto"));
             var result = convertSingle(data);
             Assertions.assertInstanceOf(NodeSeries.class, result);
             var ns = (NodeSeries) result;
@@ -200,17 +199,16 @@ class DefaultDataConverterTest {
         @Test
         void skipsRowsWithNullId() {
             var data = List.of(
-                    row("id", null, "name", "X", "title", "Y", "parent", null),
-                    row("id", "a", "name", "Alice", "title", "CEO", "parent",
-                            null));
+                    row(ID, null, NAME, "X", TITLE, "Y", PARENT, null),
+                    row(ID, "a", NAME, "Alice", TITLE, "CEO", PARENT, null));
             var ns = (NodeSeries) convertSingle(data);
             Assertions.assertEquals(1, ns.getNodes().size());
         }
 
         @Test
         void parentReferencesNonExistentId_noLink() {
-            var data = List.of(row("id", "a", "name", "Alice", "title", "CEO",
-                    "parent", "nonexistent"));
+            var data = List.of(row(ID, "a", NAME, "Alice", TITLE, "CEO", PARENT,
+                    "nonexistent"));
             var ns = (NodeSeries) convertSingle(data);
             Assertions.assertEquals(1, ns.getNodes().size());
             Assertions.assertEquals(0, ns.getData().size());
@@ -218,9 +216,8 @@ class DefaultDataConverterTest {
 
         @Test
         void withDescriptionAndImage_setsFields() {
-            var data = List.of(row("id", "ceo", "name", "Alice", "title", "CEO",
-                    "parent", null, "description", "The boss", "image",
-                    "alice.png"));
+            var data = List.of(row(ID, "ceo", NAME, "Alice", TITLE, "CEO",
+                    PARENT, null, DESCRIPTION, "The boss", IMAGE, "alice.png"));
             var ns = (NodeSeries) convertSingle(data);
             var node = ns.getNodes().iterator().next();
             Assertions.assertEquals("The boss", node.getDescription());
@@ -237,8 +234,7 @@ class DefaultDataConverterTest {
         void createsGanttSeries() {
             var start = Instant.parse("2024-01-01T00:00:00Z");
             var end = Instant.parse("2024-02-01T00:00:00Z");
-            var data = List
-                    .of(row("name", "Task 1", "start", start, "end", end));
+            var data = List.of(row(NAME, "Task 1", START, start, END, end));
             var result = convertSingle(data);
             Assertions.assertInstanceOf(GanttSeries.class, result);
             var gs = (GanttSeries) result;
@@ -250,8 +246,8 @@ class DefaultDataConverterTest {
         void withIdAndParent_setsFields() {
             var start = Instant.parse("2024-01-01T00:00:00Z");
             var end = Instant.parse("2024-02-01T00:00:00Z");
-            var data = List.of(row("id", "t1", "name", "Task 1", "start", start,
-                    "end", end, "parent", "root"));
+            var data = List.of(row(ID, "t1", NAME, "Task 1", START, start, END,
+                    end, PARENT, "root"));
             var gs = (GanttSeries) convertSingle(data);
             var item = gs.get(0);
             Assertions.assertEquals("t1", item.getId());
@@ -260,9 +256,9 @@ class DefaultDataConverterTest {
 
         @Test
         void withDependencyColumn_setsDependency() {
-            var data = List.of(row("id", "t2", "name", "Task 2", "start",
-                    Instant.parse("2024-01-01T00:00:00Z"), "end",
-                    Instant.parse("2024-02-01T00:00:00Z"), "dependency", "t1"));
+            var data = List.of(row(ID, "t2", NAME, "Task 2", START,
+                    Instant.parse("2024-01-01T00:00:00Z"), END,
+                    Instant.parse("2024-02-01T00:00:00Z"), DEPENDENCY, "t1"));
             var gs = (GanttSeries) convertSingle(data);
             var deps = gs.get(0).getDependencies();
             Assertions.assertEquals(1, deps.size());
@@ -271,9 +267,9 @@ class DefaultDataConverterTest {
 
         @Test
         void withCommaSeparatedDependency_setsMultipleDependencies() {
-            var data = List.of(row("id", "t3", "name", "Task 3", "start",
-                    Instant.parse("2024-01-01T00:00:00Z"), "end",
-                    Instant.parse("2024-02-01T00:00:00Z"), "dependency",
+            var data = List.of(row(ID, "t3", NAME, "Task 3", START,
+                    Instant.parse("2024-01-01T00:00:00Z"), END,
+                    Instant.parse("2024-02-01T00:00:00Z"), DEPENDENCY,
                     "t1, t2"));
             var gs = (GanttSeries) convertSingle(data);
             var deps = gs.get(0).getDependencies();
@@ -284,9 +280,9 @@ class DefaultDataConverterTest {
 
         @Test
         void withCompletedColumn_setsCompleted() {
-            var data = List.of(row("name", "Task", "start",
-                    Instant.parse("2024-01-01T00:00:00Z"), "end",
-                    Instant.parse("2024-02-01T00:00:00Z"), "completed", 0.75));
+            var data = List.of(row(NAME, "Task", START,
+                    Instant.parse("2024-01-01T00:00:00Z"), END,
+                    Instant.parse("2024-02-01T00:00:00Z"), COMPLETED, 0.75));
             var gs = (GanttSeries) convertSingle(data);
             Assertions.assertNotNull(gs.get(0).getCompleted());
             Assertions.assertEquals(0.75, gs.get(0).getCompleted().getAmount());
@@ -296,7 +292,7 @@ class DefaultDataConverterTest {
         void stringStartEnd_doesNotMatchGantt() {
             // JDBC might return date columns as strings depending on driver.
             // Gantt requires temporal/numeric start+end values.
-            var data = List.of(row("name", "Sale", "start", "A", "end", "Z"));
+            var data = List.of(row(NAME, "Sale", START, "A", END, "Z"));
             var result = convertSingle(data);
             Assertions.assertInstanceOf(DataSeries.class, result);
         }
@@ -309,9 +305,9 @@ class DefaultDataConverterTest {
 
         @Test
         void createsTreeSeries() {
-            var data = List.of(row("id", "root", "parent", null, "value", 100),
-                    row("id", "child1", "parent", "root", "value", 60),
-                    row("id", "child2", "parent", "root", "value", 40));
+            var data = List.of(row(ID, "root", PARENT, null, VALUE, 100),
+                    row(ID, "child1", PARENT, "root", VALUE, 60),
+                    row(ID, "child2", PARENT, "root", VALUE, 40));
             var result = convertSingle(data);
             Assertions.assertInstanceOf(TreeSeries.class, result);
             var ts = (TreeSeries) result;
@@ -320,8 +316,8 @@ class DefaultDataConverterTest {
 
         @Test
         void withNameAndColorValue_setsOptionalFields() {
-            var data = List.of(row("id", "a", "parent", null, "value", 100,
-                    "name", "Root", "colorvalue", 0.5));
+            var data = List.of(row(ID, "a", PARENT, null, VALUE, 100, NAME,
+                    "Root", COLOR_VALUE, 0.5));
             var ts = (TreeSeries) convertSingle(data);
             var item = ts.getData().iterator().next();
             Assertions.assertEquals("Root", item.getName());
@@ -336,8 +332,8 @@ class DefaultDataConverterTest {
 
         @Test
         void createsSankeyItems() {
-            var data = List.of(row("from", "A", "to", "B", "weight", 10),
-                    row("from", "B", "to", "C", "weight", 5));
+            var data = List.of(row(FROM, "A", TO, "B", WEIGHT, 10),
+                    row(FROM, "B", TO, "C", WEIGHT, 5));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(2, result.getData().size());
             var item = (DataSeriesItemSankey) result.getData().getFirst();
@@ -354,9 +350,8 @@ class DefaultDataConverterTest {
 
         @Test
         void createsHeatSeries() {
-            var data = List.of(row("x", 0, "y", 0, "value", 10),
-                    row("x", 0, "y", 1, "value", 20),
-                    row("x", 1, "y", 0, "value", 30));
+            var data = List.of(row(X, 0, Y, 0, VALUE, 10),
+                    row(X, 0, Y, 1, VALUE, 20), row(X, 1, Y, 0, VALUE, 30));
             var result = convertSingle(data);
             Assertions.assertInstanceOf(HeatSeries.class, result);
             var hs = (HeatSeries) result;
@@ -368,15 +363,15 @@ class DefaultDataConverterTest {
 
         @Test
         void skipsRowsWithNullCoordinates() {
-            var data = List.of(row("x", null, "y", 0, "value", 10),
-                    row("x", 1, "y", 1, "value", 20));
+            var data = List.of(row(X, null, Y, 0, VALUE, 10),
+                    row(X, 1, Y, 1, VALUE, 20));
             var hs = (HeatSeries) convertSingle(data);
             Assertions.assertEquals(1, hs.getData().length);
         }
 
         @Test
         void nullValue_stillAddsPoint() {
-            var data = List.of(row("x", 0, "y", 0, "value", null));
+            var data = List.of(row(X, 0, Y, 0, VALUE, null));
             var hs = (HeatSeries) convertSingle(data);
             Assertions.assertEquals(1, hs.getData().length);
             Assertions.assertNull(hs.getData()[0][2]);
@@ -390,7 +385,7 @@ class DefaultDataConverterTest {
 
         @Test
         void createsXrangeItems() {
-            var data = List.of(row("x", 0, "x2", 10, "y", 1));
+            var data = List.of(row(X, 0, X2, 10, Y, 1));
             var result = (DataSeries) convertSingle(data);
             var item = (DataSeriesItemXrange) result.getData().getFirst();
             Assertions.assertEquals(0, item.getX());
@@ -407,9 +402,9 @@ class DefaultDataConverterTest {
         @Test
         void createsTimelineItems() {
             var data = List.of(
-                    row("name", "Event 1", "label", "E1", "description",
+                    row(NAME, "Event 1", LABEL, "E1", DESCRIPTION,
                             "First event"),
-                    row("name", "Event 2", "label", "E2", "description",
+                    row(NAME, "Event 2", LABEL, "E2", DESCRIPTION,
                             "Second event"));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(2, result.getData().size());
@@ -421,8 +416,8 @@ class DefaultDataConverterTest {
 
         @Test
         void withXColumn_setsX() {
-            var data = List.of(row("x", 1000, "name", "Event", "label", "E",
-                    "description", "Desc"));
+            var data = List.of(row(X, 1000, NAME, "Event", LABEL, "E",
+                    DESCRIPTION, "Desc"));
             var result = (DataSeries) convertSingle(data);
             var item = (DataSeriesItemTimeline) result.getData().getFirst();
             Assertions.assertEquals(1000, item.getX());
@@ -436,7 +431,7 @@ class DefaultDataConverterTest {
 
         @Test
         void createsBubbleItems() {
-            var data = List.of(row("x", 1, "y", 2, "z", 3));
+            var data = List.of(row(X, 1, Y, 2, Z, 3));
             var result = (DataSeries) convertSingle(data);
             var item = (DataSeriesItem3d) result.getData().getFirst();
             Assertions.assertEquals(1, item.getX());
@@ -452,8 +447,7 @@ class DefaultDataConverterTest {
 
         @Test
         void createsFlagItems() {
-            var data = List
-                    .of(row("x", 100, "title", "Flag 1", "text", "Details"));
+            var data = List.of(row(X, 100, TITLE, "Flag 1", TEXT, "Details"));
             var result = (DataSeries) convertSingle(data);
             var item = (FlagItem) result.getData().getFirst();
             Assertions.assertEquals(100, item.getX());
@@ -463,7 +457,7 @@ class DefaultDataConverterTest {
 
         @Test
         void withoutTextColumn_createsFlagsWithTitleOnly() {
-            var data = List.of(row("x", 100, "title", "Flag 1"));
+            var data = List.of(row(X, 100, TITLE, "Flag 1"));
             var result = (DataSeries) convertSingle(data);
             var item = (FlagItem) result.getData().getFirst();
             Assertions.assertEquals("Flag 1", item.getTitle());
@@ -472,16 +466,16 @@ class DefaultDataConverterTest {
         @Test
         void withParentColumn_doesNotMatchFlags() {
             // parent column signals org/treemap data, not flags
-            var data = List.of(row("id", "a", "title", "CEO", "name", "Alice",
-                    "parent", null));
+            var data = List.of(
+                    row(ID, "a", TITLE, "CEO", NAME, "Alice", PARENT, null));
             var result = convertSingle(data);
             Assertions.assertInstanceOf(NodeSeries.class, result);
         }
 
         @Test
         void nullTitle_skipsRow() {
-            var data = List.of(row("x", 100, "title", null),
-                    row("x", 200, "title", "Valid"));
+            var data = List.of(row(X, 100, TITLE, null),
+                    row(X, 200, TITLE, "Valid"));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(1, result.getData().size());
             Assertions.assertEquals(200,
@@ -496,7 +490,7 @@ class DefaultDataConverterTest {
 
         @Test
         void createsRangeItems() {
-            var data = List.of(row("x", 1, "low", 5, "high", 15));
+            var data = List.of(row(X, 1, LOW, 5, HIGH, 15));
             var result = (DataSeries) convertSingle(data);
             var item = result.getData().getFirst();
             Assertions.assertEquals(1, item.getX());
@@ -512,7 +506,7 @@ class DefaultDataConverterTest {
 
         @Test
         void createsBulletItems() {
-            var data = List.of(row("y", 275, "target", 250));
+            var data = List.of(row(Y, 275, TARGET, 250));
             var result = (DataSeries) convertSingle(data);
             var item = (DataSeriesItemBullet) result.getData().getFirst();
             Assertions.assertEquals(275, item.getY());
@@ -521,7 +515,7 @@ class DefaultDataConverterTest {
 
         @Test
         void withXColumn_setsX() {
-            var data = List.of(row("x", 0, "y", 275, "target", 250));
+            var data = List.of(row(X, 0, Y, 275, TARGET, 250));
             var result = (DataSeries) convertSingle(data);
             var item = (DataSeriesItemBullet) result.getData().getFirst();
             Assertions.assertEquals(0, item.getX());
@@ -536,12 +530,12 @@ class DefaultDataConverterTest {
         @Test
         void createsWaterfallItems() {
             var data = List.of(
-                    row("name", "Revenue", "y", 100, "waterfall_type", null),
-                    row("name", "Cost", "y", -50, "waterfall_type", null),
-                    row("name", "Subtotal", "y", null, "waterfall_type",
+                    row(NAME, "Revenue", Y, 100, WATERFALL_TYPE, null),
+                    row(NAME, "Cost", Y, -50, WATERFALL_TYPE, null),
+                    row(NAME, "Subtotal", Y, null, WATERFALL_TYPE,
                             "intermediate"),
-                    row("name", "Tax", "y", -10, "waterfall_type", null),
-                    row("name", "Total", "y", null, "waterfall_type", "sum"));
+                    row(NAME, "Tax", Y, -10, WATERFALL_TYPE, null),
+                    row(NAME, "Total", Y, null, WATERFALL_TYPE, "sum"));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(5, result.getData().size());
 
@@ -568,9 +562,8 @@ class DefaultDataConverterTest {
         @Test
         void caseInsensitiveType() {
             var data = List.of(
-                    row("name", "Sub", "y", null, "waterfall_type",
-                            "INTERMEDIATE"),
-                    row("name", "Total", "y", null, "waterfall_type", "Sum"));
+                    row(NAME, "Sub", Y, null, WATERFALL_TYPE, "INTERMEDIATE"),
+                    row(NAME, "Total", Y, null, WATERFALL_TYPE, "Sum"));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertTrue(((WaterFallSum) result.getData().getFirst())
                     .isIntermediate());
@@ -580,7 +573,7 @@ class DefaultDataConverterTest {
 
         @Test
         void withoutWaterfallTypeColumn_doesNotMatch() {
-            var data = List.of(row("name", "A", "y", 100));
+            var data = List.of(row(NAME, "A", Y, 100));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertFalse(
                     result.getData().getFirst() instanceof WaterFallSum);
@@ -653,8 +646,8 @@ class DefaultDataConverterTest {
 
         @Test
         void allNullRow_skippedForNamedPattern() {
-            var data = List.of(row("x", null, "y", null, "z", null),
-                    row("x", 1, "y", 2, "z", 3));
+            var data = List.of(row(X, null, Y, null, Z, null),
+                    row(X, 1, Y, 2, Z, 3));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(1, result.getData().size());
             Assertions.assertInstanceOf(DataSeriesItem3d.class,
@@ -678,8 +671,8 @@ class DefaultDataConverterTest {
         @Test
         void instantXValue_convertedToHighchartsTimestamp() {
             var instant = Instant.parse("2024-01-15T12:00:00Z");
-            var data = List.of(row("x", instant, "open", 10, "high", 15, "low",
-                    5, "close", 12));
+            var data = List
+                    .of(row(X, instant, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(instant.getEpochSecond() * 1000,
                     result.getData().getFirst().getX());
@@ -690,8 +683,8 @@ class DefaultDataConverterTest {
             var date = LocalDate.of(2024, 1, 15);
             var expectedMillis = date.atStartOfDay(ZoneOffset.UTC).toInstant()
                     .getEpochSecond() * 1000;
-            var data = List.of(row("x", date, "open", 10, "high", 15, "low", 5,
-                    "close", 12));
+            var data = List
+                    .of(row(X, date, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(expectedMillis,
                     result.getData().getFirst().getX());
@@ -702,8 +695,8 @@ class DefaultDataConverterTest {
             var dateTime = LocalDateTime.of(2024, 1, 15, 12, 30, 0);
             var expectedMillis = dateTime.toInstant(ZoneOffset.UTC)
                     .getEpochSecond() * 1000;
-            var data = List.of(row("x", dateTime, "open", 10, "high", 15, "low",
-                    5, "close", 12));
+            var data = List.of(
+                    row(X, dateTime, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(expectedMillis,
                     result.getData().getFirst().getX());
@@ -715,8 +708,8 @@ class DefaultDataConverterTest {
             var expectedMillis = sqlDate.toLocalDate()
                     .atStartOfDay(ZoneOffset.UTC).toInstant().getEpochSecond()
                     * 1000;
-            var data = List.of(row("x", sqlDate, "open", 10, "high", 15, "low",
-                    5, "close", 12));
+            var data = List
+                    .of(row(X, sqlDate, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(expectedMillis,
                     result.getData().getFirst().getX());
@@ -726,8 +719,8 @@ class DefaultDataConverterTest {
         void sqlTimestampXValue_convertedToHighchartsTimestamp() {
             var ts = java.sql.Timestamp.valueOf("2024-01-15 12:00:00");
             var expectedMillis = ts.toInstant().getEpochSecond() * 1000;
-            var data = List.of(row("x", ts, "open", 10, "high", 15, "low", 5,
-                    "close", 12));
+            var data = List
+                    .of(row(X, ts, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(expectedMillis,
                     result.getData().getFirst().getX());
@@ -735,16 +728,16 @@ class DefaultDataConverterTest {
 
         @Test
         void ganttWithLocalDateStartEnd() {
-            var data = List.of(row("name", "Task", "start",
-                    LocalDate.of(2024, 1, 1), "end", LocalDate.of(2024, 2, 1)));
+            var data = List.of(row(NAME, "Task", START,
+                    LocalDate.of(2024, 1, 1), END, LocalDate.of(2024, 2, 1)));
             var gs = (GanttSeries) convertSingle(data);
             Assertions.assertEquals(1, gs.size());
         }
 
         @Test
         void ganttWithNumericMillisStartEnd() {
-            var data = List.of(row("name", "Task", "start", 1704067200000L,
-                    "end", 1706745600000L));
+            var data = List.of(row(NAME, "Task", START, 1704067200000L, END,
+                    1706745600000L));
             var gs = (GanttSeries) convertSingle(data);
             Assertions.assertEquals(1, gs.size());
         }
@@ -758,24 +751,24 @@ class DefaultDataConverterTest {
         @Test
         void setsItemColor() {
             var data = List.of(row("department", "Sales", "revenue", 1000,
-                    "color", "#FF0000"));
+                    COLOR, "#FF0000"));
             var result = (DataSeries) convertSingle(data);
             assertColor("#FF0000", result.getData().getFirst().getColor());
         }
 
         @Test
         void ganttWithColor_setsItemColor() {
-            var data = List.of(row("name", "Task", "start",
-                    Instant.parse("2024-01-01T00:00:00Z"), "end",
-                    Instant.parse("2024-02-01T00:00:00Z"), "color", "#0000FF"));
+            var data = List.of(row(NAME, "Task", START,
+                    Instant.parse("2024-01-01T00:00:00Z"), END,
+                    Instant.parse("2024-02-01T00:00:00Z"), COLOR, "#0000FF"));
             var gs = (GanttSeries) convertSingle(data);
             assertColor("#0000FF", gs.get(0).getColor());
         }
 
         @Test
         void organizationWithColor_setsNodeColor() {
-            var data = List.of(row("id", "a", "name", "Alice", "title", "CEO",
-                    "parent", null, "color", "#FF0000"));
+            var data = List.of(row(ID, "a", NAME, "Alice", TITLE, "CEO", PARENT,
+                    null, COLOR, "#FF0000"));
             var ns = (NodeSeries) convertSingle(data);
             assertColor("#FF0000", ns.getNodes().iterator().next().getColor());
         }
@@ -783,7 +776,7 @@ class DefaultDataConverterTest {
         @Test
         void nullColor_doesNotSetColor() {
             var data = List.of(
-                    row("department", "Sales", "revenue", 1000, "color", null));
+                    row("department", "Sales", "revenue", 1000, COLOR, null));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertNull(result.getData().getFirst().getColor());
         }
@@ -803,10 +796,10 @@ class DefaultDataConverterTest {
 
         @Test
         void groupsBySeriesColumn() {
-            var data = List.of(row("_series", "Revenue", "x", 2020, "y", 100),
-                    row("_series", "Revenue", "x", 2021, "y", 120),
-                    row("_series", "Cost", "x", 2020, "y", 80),
-                    row("_series", "Cost", "x", 2021, "y", 90));
+            var data = List.of(row(SERIES, "Revenue", X, 2020, Y, 100),
+                    row(SERIES, "Revenue", X, 2021, Y, 120),
+                    row(SERIES, "Cost", X, 2020, Y, 80),
+                    row(SERIES, "Cost", X, 2021, Y, 90));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
             Assertions.assertEquals("Revenue", result.getFirst().getName());
@@ -828,8 +821,8 @@ class DefaultDataConverterTest {
 
         @Test
         void seriesColumnRemovedFromFallbackPatternMatching() {
-            var data = List.of(row("_series", "A", "x", 1, "y", 10),
-                    row("_series", "B", "x", 2, "y", 20));
+            var data = List.of(row(SERIES, "A", X, 1, Y, 10),
+                    row(SERIES, "B", X, 2, Y, 20));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
             var seriesA = (DataSeries) result.getFirst();
@@ -840,10 +833,8 @@ class DefaultDataConverterTest {
         @Test
         void seriesColumnRemovedFromNamedPatternMatching() {
             var data = List.of(
-                    row("_series", "Flow A", "from", "X", "to", "Y", "weight",
-                            10),
-                    row("_series", "Flow B", "from", "A", "to", "B", "weight",
-                            20));
+                    row(SERIES, "Flow A", FROM, "X", TO, "Y", WEIGHT, 10),
+                    row(SERIES, "Flow B", FROM, "A", TO, "B", WEIGHT, 20));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
             var dsA = (DataSeries) result.getFirst();
@@ -853,9 +844,8 @@ class DefaultDataConverterTest {
 
         @Test
         void preservesGroupInsertionOrder() {
-            var data = List.of(row("_series", "C", "x", 1, "y", 1),
-                    row("_series", "A", "x", 2, "y", 2),
-                    row("_series", "B", "x", 3, "y", 3));
+            var data = List.of(row(SERIES, "C", X, 1, Y, 1),
+                    row(SERIES, "A", X, 2, Y, 2), row(SERIES, "B", X, 3, Y, 3));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals("C", result.getFirst().getName());
             Assertions.assertEquals("A", result.get(1).getName());
@@ -864,7 +854,7 @@ class DefaultDataConverterTest {
 
         @Test
         void caseInsensitiveSeriesColumn() {
-            var data = List.of(row("_SERIES", "Group A", "x", 1, "y", 10));
+            var data = List.of(row("_SERIES", "Group A", X, 1, Y, 10));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(1, result.size());
             Assertions.assertEquals("Group A", result.getFirst().getName());
@@ -873,14 +863,10 @@ class DefaultDataConverterTest {
         @Test
         void categoryAndValueWithSeriesColumn() {
             var data = List.of(
-                    row("_series", "2023", "department", "Sales", "revenue",
-                            1000),
-                    row("_series", "2023", "department", "Eng", "revenue",
-                            2000),
-                    row("_series", "2024", "department", "Sales", "revenue",
-                            1200),
-                    row("_series", "2024", "department", "Eng", "revenue",
-                            2500));
+                    row(SERIES, "2023", "department", "Sales", "revenue", 1000),
+                    row(SERIES, "2023", "department", "Eng", "revenue", 2000),
+                    row(SERIES, "2024", "department", "Sales", "revenue", 1200),
+                    row(SERIES, "2024", "department", "Eng", "revenue", 2500));
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(2, result.size());
             Assertions.assertEquals("2023", result.getFirst().getName());
@@ -914,5 +900,11 @@ class DefaultDataConverterTest {
     private static void assertColor(String expected, Color actual) {
         Assertions.assertNotNull(actual, "Expected color " + expected);
         Assertions.assertEquals(expected, actual.toString());
+    }
+
+    private static String capitalizeFirstLetter(String columnName) {
+        var columnNameWithoutPrefix = columnName.replaceFirst(PREFIX, "");
+        return PREFIX + columnNameWithoutPrefix.substring(0, 1).toUpperCase()
+                + columnNameWithoutPrefix.substring(1);
     }
 }
