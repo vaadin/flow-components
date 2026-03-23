@@ -17,9 +17,9 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -30,11 +30,11 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
-public class FallbackParserValidationTest {
+class FallbackParserValidationTest {
     private DatePicker datePicker;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         datePicker = new DatePicker();
         datePicker.setFallbackParser((s) -> {
             if (s.equals("tomorrow")) {
@@ -48,83 +48,84 @@ public class FallbackParserValidationTest {
     }
 
     @Test
-    public void enterShortcutValue_isValid() {
+    void enterShortcutValue_isValid() {
         fakeClientPropertyChange(datePicker, "_inputElementValue", "tomorrow");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
-        Assert.assertFalse(datePicker.isInvalid());
-        Assert.assertEquals("", datePicker.getErrorMessage());
+        Assertions.assertFalse(datePicker.isInvalid());
+        Assertions.assertEquals("", datePicker.getErrorMessage());
     }
 
     @Test
-    public void enterShortcutValueThrowingException_isInvalidWithoutErrorMessage() {
+    void enterShortcutValueThrowingException_isInvalidWithoutErrorMessage() {
         fakeClientPropertyChange(datePicker, "_inputElementValue", "exception");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
-        Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("", datePicker.getErrorMessage());
+        Assertions.assertTrue(datePicker.isInvalid());
+        Assertions.assertEquals("", datePicker.getErrorMessage());
     }
 
     @Test
-    public void enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
+    void enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
         fakeClientPropertyChange(datePicker, "_inputElementValue", "foobar");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
-        Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("Invalid date format",
+        Assertions.assertTrue(datePicker.isInvalid());
+        Assertions.assertEquals("Invalid date format",
                 datePicker.getErrorMessage());
     }
 
     @Test
-    public void setValue_enterShortcutValue_isValid() {
+    void setValue_enterShortcutValue_isValid() {
         datePicker.setValue(LocalDate.now());
 
         fakeClientPropertyChange(datePicker, "_inputElementValue", "tomorrow");
         fakeClientPropertyChange(datePicker, "value", "");
 
-        Assert.assertFalse(datePicker.isInvalid());
-        Assert.assertEquals("", datePicker.getErrorMessage());
+        Assertions.assertFalse(datePicker.isInvalid());
+        Assertions.assertEquals("", datePicker.getErrorMessage());
     }
 
     @Test
-    public void setValue_enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
+    void setValue_enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
         datePicker.setValue(LocalDate.now());
 
         fakeClientPropertyChange(datePicker, "_inputElementValue", "foobar");
         fakeClientPropertyChange(datePicker, "value", "");
 
-        Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("Invalid date format",
+        Assertions.assertTrue(datePicker.isInvalid());
+        Assertions.assertEquals("Invalid date format",
                 datePicker.getErrorMessage());
     }
 
     @Test
-    public void setI18nErrorMessage_enterShortcutValueThrowingException_isInvalidWithI18nErrorMessage() {
+    void setI18nErrorMessage_enterShortcutValueThrowingException_isInvalidWithI18nErrorMessage() {
         datePicker.setI18n(new DatePickerI18n()
                 .setBadInputErrorMessage("I18n error message"));
 
         fakeClientPropertyChange(datePicker, "_inputElementValue", "exception");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
-        Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("I18n error message", datePicker.getErrorMessage());
+        Assertions.assertTrue(datePicker.isInvalid());
+        Assertions.assertEquals("I18n error message",
+                datePicker.getErrorMessage());
     }
 
     @Test
-    public void setI18nErrorMessage_enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
+    void setI18nErrorMessage_enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
         datePicker.setI18n(new DatePickerI18n()
                 .setBadInputErrorMessage("I18n error message"));
 
         fakeClientPropertyChange(datePicker, "_inputElementValue", "foobar");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
-        Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("Invalid date format",
+        Assertions.assertTrue(datePicker.isInvalid());
+        Assertions.assertEquals("Invalid date format",
                 datePicker.getErrorMessage());
     }
 
     @Test
-    public void setI18nErrorMessage_removeFallbackParser_enterUnparsableValue_isInvalidWithI18nErrorMessage() {
+    void setI18nErrorMessage_removeFallbackParser_enterUnparsableValue_isInvalidWithI18nErrorMessage() {
         datePicker.setI18n(new DatePickerI18n()
                 .setBadInputErrorMessage("I18n error message"));
 
@@ -133,8 +134,9 @@ public class FallbackParserValidationTest {
         fakeClientPropertyChange(datePicker, "_inputElementValue", "foobar");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
-        Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("I18n error message", datePicker.getErrorMessage());
+        Assertions.assertTrue(datePicker.isInvalid());
+        Assertions.assertEquals("I18n error message",
+                datePicker.getErrorMessage());
     }
 
     private void fakeClientDomEvent(Component component, String eventName) {

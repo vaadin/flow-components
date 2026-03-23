@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasPlaceholder;
 
-public class HasPlaceholderTest {
+class HasPlaceholderTest {
 
     @Test
-    public void datePicker() {
+    void datePicker() {
         DatePicker c = new DatePicker();
-        Assert.assertTrue(c instanceof HasPlaceholder);
+        Assertions.assertTrue(c instanceof HasPlaceholder);
     }
 
 }
