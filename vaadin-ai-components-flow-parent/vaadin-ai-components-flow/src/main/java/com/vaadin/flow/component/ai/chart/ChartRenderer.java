@@ -18,10 +18,16 @@ package com.vaadin.flow.component.ai.chart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.AxisType;
+import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.GanttSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
@@ -132,10 +138,106 @@ public class ChartRenderer {
                 allSeries.addAll(dataConverter.convertToSeries(results));
             }
             config.setSeries(allSeries.toArray(new Series[0]));
+
+            // Apply axis defaults from series data before LLM config,
+            // so that LLM-provided axis settings take priority.
+            applyAxisDefaults(config, allSeries);
+
             if (configJson != null) {
                 configurationApplier.applyConfiguration(chart, configJson);
             }
             chart.drawChart();
         }));
+    }
+
+    /**
+     * Chart types where item names are labels (e.g. pie slices, sankey nodes),
+     * not X-axis categories.
+     */
+    private static final Set<ChartType> NO_CATEGORY_AXIS_TYPES = Set.of(
+            ChartType.PIE, ChartType.SANKEY, ChartType.ORGANIZATION,
+            ChartType.TREEMAP, ChartType.TIMELINE, ChartType.FLAGS,
+            ChartType.FUNNEL, ChartType.PYRAMID);
+
+    /**
+     * Applies axis defaults inferred from the series data. Sets
+     * {@code xAxis.categories} when items have names, and
+     * {@code xAxis.type = DATETIME} when X values are epoch timestamps or a
+     * {@link GanttSeries} is present.
+     */
+    private static void applyAxisDefaults(Configuration config,
+            List<Series> allSeries) {
+        if (allSeries.isEmpty()) {
+            return;
+        }
+
+        var xAxis = config.getxAxis();
+        var chartType = config.getChart().getType();
+
+        // Gantt series always needs a datetime X-axis.
+        if (allSeries.stream().anyMatch(GanttSeries.class::isInstance)) {
+            if (xAxis.getType() == null) {
+                xAxis.setType(AxisType.DATETIME);
+            }
+            return;
+        }
+
+        // Inspect the first DataSeries for category names and datetime values.
+        if (!(allSeries.getFirst() instanceof DataSeries firstSeries)) {
+            return;
+        }
+        var items = firstSeries.getData();
+        if (items.isEmpty()) {
+            return;
+        }
+
+        // Extract category names if items have names and the chart type
+        // uses a category axis (not pie, sankey, etc.).
+        if (xAxis.getCategories() == null
+                && !NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
+            var categories = extractCategories(items);
+            if (categories != null) {
+                xAxis.setCategories(categories.toArray(new String[0]));
+            }
+        }
+
+        // Detect datetime X values (epoch ms > year 2000).
+        if (xAxis.getType() == null) {
+            if (hasDatetimeXValues(items)) {
+                xAxis.setType(AxisType.DATETIME);
+            }
+        }
+    }
+
+    /**
+     * Returns category names extracted from items, or {@code null} if items
+     * don't have names.
+     */
+    private static List<String> extractCategories(List<DataSeriesItem> items) {
+        var categories = new ArrayList<String>(items.size());
+        for (var item : items) {
+            var name = item.getName();
+            if (name == null) {
+                return null;
+            }
+            categories.add(name);
+        }
+        return categories;
+    }
+
+    /**
+     * Checks whether the first non-null X value looks like an epoch millisecond
+     * timestamp (after year 2000).
+     */
+    private static boolean hasDatetimeXValues(List<DataSeriesItem> items) {
+        // Epoch ms for 2000-01-01
+        final long EPOCH_MS_YEAR_2000 = 946_684_800_000L;
+        for (var item : items) {
+            var x = item.getX();
+            if (x != null) {
+                return x.longValue() > EPOCH_MS_YEAR_2000;
+            }
+        }
+        return false;
     }
 }
