@@ -18,44 +18,44 @@ package com.vaadin.flow.component.datetimepicker;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class DateTimePickerLocaleTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class DateTimePickerLocaleTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void newDateTimePicker_returnsUiLocale() {
+    void newDateTimePicker_returnsUiLocale() {
         Locale finnishLocale = new Locale("fi-FI");
         ui.setLocale(finnishLocale);
         DateTimePicker dateTimePicker = new DateTimePicker();
-        Assert.assertEquals(finnishLocale, dateTimePicker.getLocale());
+        Assertions.assertEquals(finnishLocale, dateTimePicker.getLocale());
     }
 
     @Test
-    public void newDateTimePickerWithCustomLocale_returnsCustomLocale() {
+    void newDateTimePickerWithCustomLocale_returnsCustomLocale() {
         Locale finnishLocale = new Locale("fi-FI");
         Locale usLocale = new Locale("en-US");
         ui.setLocale(finnishLocale);
         DateTimePicker dateTimePicker = new DateTimePicker(LocalDateTime.now(),
                 usLocale);
-        Assert.assertEquals(usLocale, dateTimePicker.getLocale());
+        Assertions.assertEquals(usLocale, dateTimePicker.getLocale());
     }
 
     @Test
-    public void setCustomLocale_returnsCustomLocale() {
+    void setCustomLocale_returnsCustomLocale() {
         Locale finnishLocale = new Locale("fi-FI");
         Locale usLocale = new Locale("en-US");
         ui.setLocale(finnishLocale);
         DateTimePicker dateTimePicker = new DateTimePicker();
         dateTimePicker.setLocale(usLocale);
-        Assert.assertEquals(usLocale, dateTimePicker.getLocale());
+        Assertions.assertEquals(usLocale, dateTimePicker.getLocale());
     }
 }
