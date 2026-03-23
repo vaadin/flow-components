@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import java.io.Serializable;
+
 /**
  * Column name constants used by {@link DefaultDataConverter} for pattern
  * matching. These names are the expected SQL column aliases that the LLM should
@@ -26,7 +28,7 @@ package com.vaadin.flow.component.ai.chart;
  *
  * @author Vaadin Ltd
  */
-public final class ColumnNames {
+public final class ColumnNames implements Serializable {
 
     private ColumnNames() {
     }
