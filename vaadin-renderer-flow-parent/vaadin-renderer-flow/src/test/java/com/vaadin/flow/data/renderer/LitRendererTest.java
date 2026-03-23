@@ -15,57 +15,61 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class LitRendererTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class LitRendererTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
-    @Test(expected = IllegalArgumentException.class)
-    public void doNotAllowFunctionNamesWithFunctions() {
-        LitRenderer.of("").withFunction("foo=0; alert(\"gotcha\"); const bar",
-                item -> {
-                });
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void doNotAllowFunctionNamesWithSpaces() {
-        LitRenderer.of("").withFunction("illegal name", item -> {
-        });
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void doNotAllowFunctionNamesWithDots() {
-        LitRenderer.of("").withFunction("illegal.name", item -> {
-        });
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void doNotAllowFunctionNamesWithParenthesis() {
-        LitRenderer.of("").withFunction("illegalname()", item -> {
-        });
+    @Test
+    void doNotAllowFunctionNamesWithFunctions() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LitRenderer.of("").withFunction(
+                        "foo=0; alert(\"gotcha\"); const bar", item -> {
+                        }));
     }
 
     @Test
-    public void allowAlphaNumericFunctionNames() {
+    void doNotAllowFunctionNamesWithSpaces() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LitRenderer.of("").withFunction("illegal name", item -> {
+                }));
+    }
+
+    @Test
+    void doNotAllowFunctionNamesWithDots() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LitRenderer.of("").withFunction("illegal.name", item -> {
+                }));
+    }
+
+    @Test
+    void doNotAllowFunctionNamesWithParenthesis() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LitRenderer.of("").withFunction("illegalname()", item -> {
+                }));
+    }
+
+    @Test
+    void allowAlphaNumericFunctionNames() {
         LitRenderer.of("<div></div>").withFunction("legalName1", item -> {
         });
     }
 
     @Test
-    public void supportGettingValueProviders() {
+    void supportGettingValueProviders() {
         LitRenderer<?> renderer = LitRenderer.of("<div></div>")
                 .withProperty("foo", item -> 1).withProperty("bar", item -> 2);
 
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 renderer.getValueProviders().keySet().contains("foo"));
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 renderer.getValueProviders().keySet().contains("bar"));
-        Assert.assertTrue(renderer.getValueProviders().size() == 2);
+        Assertions.assertTrue(renderer.getValueProviders().size() == 2);
     }
 
 }

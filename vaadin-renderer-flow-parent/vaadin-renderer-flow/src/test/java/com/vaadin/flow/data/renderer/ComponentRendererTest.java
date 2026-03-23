@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -33,7 +33,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ObjectNode;
 
-public class ComponentRendererTest {
+class ComponentRendererTest {
 
     private static class TestUIInternals extends UIInternals {
 
@@ -65,7 +65,7 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void componentRenderer_parentAttachedBeforeChild() {
+    void componentRenderer_parentAttachedBeforeChild() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
 
@@ -87,10 +87,9 @@ public class ComponentRendererTest {
                                             .createObjectNode();
                                     rendering.getDataGenerator().get()
                                             .generateData("item", value);
-                                    Assert.assertEquals(
-                                            "generateData should add one element in the jsonobject",
-                                            1,
-                                            JacksonUtils.getKeys(value).size());
+                                    Assertions.assertEquals(1,
+                                            JacksonUtils.getKeys(value).size(),
+                                            "generateData should add one element in the jsonobject");
                                 }));
 
         // attach the parent (ex: grid) before the child (ex: column)
@@ -102,7 +101,7 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void componentRenderer_childAttachedBeforeParent() {
+    void componentRenderer_childAttachedBeforeParent() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
 
@@ -124,10 +123,9 @@ public class ComponentRendererTest {
                                             .createObjectNode();
                                     rendering.getDataGenerator().get()
                                             .generateData("item", value);
-                                    Assert.assertEquals(
-                                            "generateData should add one element in the jsonobject",
-                                            1,
-                                            JacksonUtils.getKeys(value).size());
+                                    Assertions.assertEquals(1,
+                                            JacksonUtils.getKeys(value).size(),
+                                            "generateData should add one element in the jsonobject");
                                 }));
         // attach the child (ex: container) before the parent (ex: grid)
         attachElement(ui, container);
@@ -138,7 +136,7 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void nullValues() {
+    void nullValues() {
         ComponentRenderer<Component, String> renderer = new ComponentRenderer<>(
                 e -> {
                     return null;
@@ -149,14 +147,14 @@ public class ComponentRendererTest {
                 keyMapper);
 
         Component c = cdg.createComponent("foo");
-        Assert.assertNotNull(
-                "Placeholder component should be generated for null values", c);
-        Assert.assertEquals(0, c.getElement().getChildCount());
+        Assertions.assertNotNull(c,
+                "Placeholder component should be generated for null values");
+        Assertions.assertEquals(0, c.getElement().getChildCount());
 
         c = cdg.updateComponent(c, "foo");
-        Assert.assertNotNull(
-                "Placeholder component should be generated for null values", c);
-        Assert.assertEquals(0, c.getElement().getChildCount());
+        Assertions.assertNotNull(c,
+                "Placeholder component should be generated for null values");
+        Assertions.assertEquals(0, c.getElement().getChildCount());
     }
 
     private void attachElement(UI ui, Element contentTemplate) {
@@ -164,55 +162,53 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void componentFunction_invokedOnCreate() {
+    void componentFunction_invokedOnCreate() {
         AtomicInteger createInvocations = new AtomicInteger();
         ComponentRenderer<TestDiv, String> renderer = new ComponentRenderer<>(
                 item -> {
                     createInvocations.incrementAndGet();
-                    Assert.assertEquals("New item", item);
+                    Assertions.assertEquals("New item", item);
                     return new TestDiv();
                 });
 
         renderer.createComponent("New item");
 
-        Assert.assertEquals(
-                "The component creation function should have been invoked once",
-                1, createInvocations.get());
+        Assertions.assertEquals(1, createInvocations.get(),
+                "The component creation function should have been invoked once");
     }
 
     @Test
-    public void componentFunction_noUpdateFunction_invokedOnUpdate() {
+    void componentFunction_noUpdateFunction_invokedOnUpdate() {
         AtomicInteger createInvocations = new AtomicInteger();
         TestDiv div = new TestDiv();
         ComponentRenderer<TestDiv, String> renderer = new ComponentRenderer<>(
                 item -> {
                     createInvocations.incrementAndGet();
-                    Assert.assertEquals("New item", item);
+                    Assertions.assertEquals("New item", item);
                     return div;
                 });
 
         Component updatedComponent = renderer.updateComponent(div, "New item");
 
-        Assert.assertEquals(
-                "The component creation function should have been invoked once",
-                1, createInvocations.get());
+        Assertions.assertEquals(1, createInvocations.get(),
+                "The component creation function should have been invoked once");
 
-        Assert.assertEquals("The two components should be the same", div,
-                updatedComponent);
+        Assertions.assertEquals(div, updatedComponent,
+                "The two components should be the same");
     }
 
     @Test
-    public void updateFunction_invokedOnUpdate() {
+    void updateFunction_invokedOnUpdate() {
         AtomicInteger createInvocations = new AtomicInteger();
         AtomicInteger updateInvocations = new AtomicInteger();
         ComponentRenderer<TestDiv, String> renderer = new ComponentRenderer<>(
                 item -> {
                     createInvocations.incrementAndGet();
-                    Assert.assertEquals("New item", item);
+                    Assertions.assertEquals("New item", item);
                     return new TestDiv();
                 }, (component, item) -> {
                     updateInvocations.incrementAndGet();
-                    Assert.assertEquals("Updated item", item);
+                    Assertions.assertEquals("Updated item", item);
                     return component;
                 });
 
@@ -220,15 +216,13 @@ public class ComponentRendererTest {
         Component updatedComponent = renderer.updateComponent(div,
                 "Updated item");
 
-        Assert.assertEquals(
-                "The component creation function should have been invoked once",
-                1, createInvocations.get());
-        Assert.assertEquals(
-                "The component update function should have been invoked once",
-                1, updateInvocations.get());
+        Assertions.assertEquals(1, createInvocations.get(),
+                "The component creation function should have been invoked once");
+        Assertions.assertEquals(1, updateInvocations.get(),
+                "The component update function should have been invoked once");
 
-        Assert.assertEquals("The two components should be the same", div,
-                updatedComponent);
+        Assertions.assertEquals(div, updatedComponent,
+                "The two components should be the same");
     }
 
 }

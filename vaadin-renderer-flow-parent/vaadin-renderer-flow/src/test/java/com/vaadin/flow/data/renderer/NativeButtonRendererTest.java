@@ -18,8 +18,8 @@ package com.vaadin.flow.data.renderer;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.KeyMapper;
@@ -32,18 +32,18 @@ import com.vaadin.flow.shared.Registration;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-public class NativeButtonRendererTest {
+class NativeButtonRendererTest {
 
     @Test
-    public void templateRenderered_containerIsDisabled_buttonIsDisabled() {
+    void templateRenderered_containerIsDisabled_buttonIsDisabled() {
         NativeButtonRenderer<String> renderer = new NativeButtonRenderer<>(
                 "Label");
         Element container = new Element("div");
         KeyMapper<String> keyMapper = new KeyMapper<>();
         Rendering<String> rendering = renderer.render(container, keyMapper);
 
-        Assert.assertTrue("The DataGenerator should be present",
-                rendering.getDataGenerator().isPresent());
+        Assertions.assertTrue(rendering.getDataGenerator().isPresent(),
+                "The DataGenerator should be present");
         DataGenerator<String> dataGenerator = rendering.getDataGenerator()
                 .get();
 
@@ -53,19 +53,19 @@ public class NativeButtonRendererTest {
         // Find the mapped key for "disabled" property
         var keyForDisabled = JacksonUtils.getKeys(json).stream()
                 .filter(key -> key.endsWith("disabled")).findFirst().get();
-        Assert.assertFalse("The button shouldn't be disabled",
-                json.get(keyForDisabled).booleanValue());
+        Assertions.assertFalse(json.get(keyForDisabled).booleanValue(),
+                "The button shouldn't be disabled");
 
         mockDisabled(container);
 
         json = JacksonUtils.createObjectNode();
         dataGenerator.generateData("something", json);
-        Assert.assertTrue("The button should be disabled",
-                json.get(keyForDisabled).booleanValue());
+        Assertions.assertTrue(json.get(keyForDisabled).booleanValue(),
+                "The button should be disabled");
     }
 
     @Test
-    public void removeListenerInListener_shouldNotThrowException() {
+    void removeListenerInListener_shouldNotThrowException() {
         // Create a new renderer
         var renderer = new NativeButtonRenderer<String>("Label");
 
