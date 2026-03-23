@@ -107,8 +107,21 @@ public class DashboardTools {
         tools.add(createRemoveWidgetTool());
 
         // Chart tools (shared across all charts, resolved from dashboard)
-        tools.addAll(ChartTools.createAll(this::findChartById,
-                this::getChartWidgetIds, queryValidator, "dashboard_"));
+        tools.addAll(ChartTools.createAll(
+                chartId -> ChartEntry.getStateAsJson(resolveChart(chartId),
+                        chartId),
+                (chartId, configJson) -> ChartEntry
+                        .getOrCreate(resolveChart(chartId), chartId)
+                        .setPendingConfigurationJson(configJson),
+                (chartId, queries) -> {
+                    for (String q : queries) {
+                        queryValidator.accept(q);
+                    }
+                    Chart chart = resolveChart(chartId);
+                    ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
+                    entry.setQueries(queries);
+                    entry.setPendingDataUpdate(true);
+                }, this::getChartWidgetIds, "dashboard_"));
 
         // Grid tools (shared across all grids, resolved from dashboard)
         tools.addAll(GridTools.createAll(this::findGridById,
@@ -156,6 +169,15 @@ public class DashboardTools {
             }
         }
         return null;
+    }
+
+    private Chart resolveChart(String chartId) {
+        Chart chart = findChartById(chartId);
+        if (chart == null) {
+            throw new IllegalArgumentException(
+                    "No chart found with ID '" + chartId + "'");
+        }
+        return chart;
     }
 
     private Set<String> getChartWidgetIds() {

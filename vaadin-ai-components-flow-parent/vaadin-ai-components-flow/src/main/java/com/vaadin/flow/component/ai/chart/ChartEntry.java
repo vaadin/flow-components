@@ -26,6 +26,7 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 
+import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -166,6 +167,38 @@ public class ChartEntry implements Serializable {
     public void clearPendingState() {
         pendingConfigurationJson = null;
         pendingDataUpdate = false;
+    }
+
+    /**
+     * Returns the current state of the chart as a JSON string suitable for LLM
+     * tool responses. Includes the chart ID, the Highcharts configuration
+     * (without series data), and any SQL queries.
+     *
+     * @param chart
+     *            the chart component, not {@code null}
+     * @param chartId
+     *            the chart ID
+     * @return the state as a JSON string, never {@code null}
+     */
+    public static String getStateAsJson(Chart chart, String chartId) {
+        // Ensure entry exists
+        getOrCreate(chart, chartId);
+
+        ObjectNode result = JacksonUtils.createObjectNode();
+        result.put("chartId", chartId);
+
+        ChartState state = getState(chart);
+        if (state != null) {
+            result.set("configuration",
+                    JacksonUtils.readTree(state.configuration()));
+
+            if (!state.queries().isEmpty()) {
+                ArrayNode arr = result.putArray("queries");
+                state.queries().forEach(arr::add);
+            }
+        }
+
+        return result.toString();
     }
 
     /**

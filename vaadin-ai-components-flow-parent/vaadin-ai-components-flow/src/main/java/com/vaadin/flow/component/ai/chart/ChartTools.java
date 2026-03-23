@@ -19,18 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Factory for creating reusable chart {@link LLMProvider.ToolSpec} instances.
@@ -39,8 +35,9 @@ import tools.jackson.databind.node.ObjectNode;
  * <p>
  * The tools use a {@code chartId} parameter to identify which chart to operate
  * on, allowing a single set of tools to manage multiple charts (e.g., in a
- * dashboard). Chart state ({@link ChartEntry}) is stored directly on each
- * {@link Chart} instance via {@link ChartEntry#getOrCreate(Chart)}.
+ * dashboard). Callers provide functional callbacks for state retrieval and
+ * mutation, keeping this class decoupled from {@code Chart} and
+ * {@code ChartEntry}.
  * </p>
  *
  * @author Vaadin Ltd
@@ -71,33 +68,23 @@ public final class ChartTools {
     }
 
     /**
-     * Resolves a chart by ID, throwing if not found.
-     */
-    private static Chart resolveChart(String chartId,
-            Function<String, Chart> chartResolver) {
-        Chart chart = chartResolver.apply(chartId);
-        if (chart == null) {
-            throw new IllegalArgumentException(
-                    "No chart found with ID '" + chartId + "'");
-        }
-        return chart;
-    }
-
-    /**
      * Creates a tool that retrieves the current state of a chart, including its
      * Highcharts configuration and data source queries.
      *
-     * @param chartResolver
-     *            resolves a chart ID to a {@link Chart} instance, returning
-     *            {@code null} if not found; not {@code null}
+     * @param stateProvider
+     *            given a chart ID, returns the chart state as a JSON string;
+     *            should throw if the chart is not found; not {@code null}
      * @param chartIdsSupplier
      *            supplies the set of available chart IDs; not {@code null}
+     * @param toolNamePrefix
+     *            prefix for the tool name (e.g. {@code "dashboard_"}), or
+     *            {@code null} for no prefix
      * @return the tool definition, never {@code null}
      */
     public static LLMProvider.ToolSpec getChartState(
-            Function<String, Chart> chartResolver,
+            Function<String, String> stateProvider,
             Supplier<Set<String>> chartIdsSupplier, String toolNamePrefix) {
-        Objects.requireNonNull(chartResolver, "chartResolver must not be null");
+        Objects.requireNonNull(stateProvider, "stateProvider must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
         String prefix = toolNamePrefix != null ? toolNamePrefix : "";
@@ -133,26 +120,7 @@ public final class ChartTools {
             public String execute(String arguments) {
                 JsonNode args = JacksonUtils.readTree(arguments);
                 String chartId = resolveChartId(args, chartIdsSupplier);
-                Chart chart = resolveChart(chartId, chartResolver);
-                ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
-
-                ObjectNode result = JacksonUtils.createObjectNode();
-                result.put("chartId", chartId);
-
-                String configJson = ChartSerialization
-                        .toJSON(chart.getConfiguration());
-                ObjectNode configNode = (ObjectNode) JacksonUtils
-                        .readTree(configJson);
-                configNode.remove("series");
-                result.set("configuration", configNode);
-
-                List<String> queries = entry.getQueries();
-                if (!queries.isEmpty()) {
-                    ArrayNode arr = result.putArray("queries");
-                    queries.forEach(arr::add);
-                }
-
-                return result.toString();
+                return stateProvider.apply(chartId);
             }
         };
     }
@@ -163,17 +131,20 @@ public final class ChartTools {
      * diff. Changes are stored as pending state and applied when the request
      * completes.
      *
-     * @param chartResolver
-     *            resolves a chart ID to a {@link Chart} instance, returning
-     *            {@code null} if not found; not {@code null}
+     * @param configUpdater
+     *            accepts a chart ID and configuration JSON string; should throw
+     *            if the chart is not found; not {@code null}
      * @param chartIdsSupplier
      *            supplies the set of available chart IDs; not {@code null}
+     * @param toolNamePrefix
+     *            prefix for the tool name (e.g. {@code "dashboard_"}), or
+     *            {@code null} for no prefix
      * @return the tool definition, never {@code null}
      */
     public static LLMProvider.ToolSpec updateChartConfiguration(
-            Function<String, Chart> chartResolver,
+            BiConsumer<String, String> configUpdater,
             Supplier<Set<String>> chartIdsSupplier, String toolNamePrefix) {
-        Objects.requireNonNull(chartResolver, "chartResolver must not be null");
+        Objects.requireNonNull(configUpdater, "configUpdater must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
         String prefix = toolNamePrefix != null ? toolNamePrefix : "";
@@ -358,11 +329,9 @@ public final class ChartTools {
             public String execute(String arguments) {
                 JsonNode args = JacksonUtils.readTree(arguments);
                 String chartId = resolveChartId(args, chartIdsSupplier);
-                Chart chart = resolveChart(chartId, chartResolver);
-                ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
 
                 JsonNode configNode = args.get("configuration");
-                entry.setPendingConfigurationJson(configNode.toString());
+                configUpdater.accept(chartId, configNode.toString());
 
                 return "Chart '" + chartId
                         + "' configuration updated. Changes will be applied when the request completes.";
@@ -375,21 +344,21 @@ public final class ChartTools {
      * results populate one chart series. Changes are stored as pending state
      * and applied when the request completes.
      *
-     * @param chartResolver
-     *            resolves a chart ID to a {@link Chart} instance, returning
-     *            {@code null} if not found; not {@code null}
+     * @param dataUpdater
+     *            accepts a chart ID and list of SQL queries; should validate
+     *            the queries and throw if invalid or if the chart is not found;
+     *            not {@code null}
      * @param chartIdsSupplier
      *            supplies the set of available chart IDs; not {@code null}
-     * @param queryValidator
-     *            validates SQL queries before accepting them, or {@code null}
-     *            to skip validation
+     * @param toolNamePrefix
+     *            prefix for the tool name (e.g. {@code "dashboard_"}), or
+     *            {@code null} for no prefix
      * @return the tool definition, never {@code null}
      */
     public static LLMProvider.ToolSpec updateChartDataSource(
-            Function<String, Chart> chartResolver,
-            Supplier<Set<String>> chartIdsSupplier,
-            Consumer<String> queryValidator, String toolNamePrefix) {
-        Objects.requireNonNull(chartResolver, "chartResolver must not be null");
+            BiConsumer<String, List<String>> dataUpdater,
+            Supplier<Set<String>> chartIdsSupplier, String toolNamePrefix) {
+        Objects.requireNonNull(dataUpdater, "dataUpdater must not be null");
         Objects.requireNonNull(chartIdsSupplier,
                 "chartIdsSupplier must not be null");
         String prefix = toolNamePrefix != null ? toolNamePrefix : "";
@@ -476,22 +445,13 @@ public final class ChartTools {
                 try {
                     JsonNode args = JacksonUtils.readTree(arguments);
                     String chartId = resolveChartId(args, chartIdsSupplier);
-                    Chart chart = resolveChart(chartId, chartResolver);
-                    ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
 
                     List<String> queries = new ArrayList<>();
                     for (JsonNode q : args.get("queries")) {
                         queries.add(q.asString());
                     }
 
-                    if (queryValidator != null) {
-                        for (String q : queries) {
-                            queryValidator.accept(q);
-                        }
-                    }
-
-                    entry.setQueries(queries);
-                    entry.setPendingDataUpdate(true);
+                    dataUpdater.accept(chartId, queries);
 
                     return "Chart '" + chartId
                             + "' data source updated. Changes will be applied when the request completes.";
@@ -503,52 +463,59 @@ public final class ChartTools {
     }
 
     /**
-     * Creates all chart tools for the given chart resolver.
+     * Creates all chart tools for the given callbacks.
      *
-     * @param chartResolver
-     *            resolves a chart ID to a {@link Chart} instance, returning
-     *            {@code null} if not found; not {@code null}
+     * @param stateProvider
+     *            given a chart ID, returns the chart state as a JSON string;
+     *            not {@code null}
+     * @param configUpdater
+     *            accepts a chart ID and configuration JSON string; not
+     *            {@code null}
+     * @param dataUpdater
+     *            accepts a chart ID and list of SQL queries; not {@code null}
      * @param chartIdsSupplier
      *            supplies the set of available chart IDs; not {@code null}
-     * @param queryValidator
-     *            validates SQL queries before accepting them, or {@code null}
-     *            to skip validation
      * @return a list of all chart tools, never {@code null}
      */
     public static List<LLMProvider.ToolSpec> createAll(
-            Function<String, Chart> chartResolver,
-            Supplier<Set<String>> chartIdsSupplier,
-            Consumer<String> queryValidator) {
-        return createAll(chartResolver, chartIdsSupplier, queryValidator, null);
+            Function<String, String> stateProvider,
+            BiConsumer<String, String> configUpdater,
+            BiConsumer<String, List<String>> dataUpdater,
+            Supplier<Set<String>> chartIdsSupplier) {
+        return createAll(stateProvider, configUpdater, dataUpdater,
+                chartIdsSupplier, null);
     }
 
     /**
-     * Creates all chart tools for the given chart resolver with a name prefix.
-     * The prefix is prepended to each tool name to avoid collisions when
-     * multiple controllers are registered on the same orchestrator.
+     * Creates all chart tools for the given callbacks with a name prefix. The
+     * prefix is prepended to each tool name to avoid collisions when multiple
+     * controllers are registered on the same orchestrator.
      *
-     * @param chartResolver
-     *            resolves a chart ID to a {@link Chart} instance, returning
-     *            {@code null} if not found; not {@code null}
+     * @param stateProvider
+     *            given a chart ID, returns the chart state as a JSON string;
+     *            not {@code null}
+     * @param configUpdater
+     *            accepts a chart ID and configuration JSON string; not
+     *            {@code null}
+     * @param dataUpdater
+     *            accepts a chart ID and list of SQL queries; not {@code null}
      * @param chartIdsSupplier
      *            supplies the set of available chart IDs; not {@code null}
-     * @param queryValidator
-     *            validates SQL queries before accepting them, or {@code null}
-     *            to skip validation
      * @param toolNamePrefix
      *            prefix for tool names (e.g. {@code "dashboard_"}), or
      *            {@code null} for no prefix
      * @return a list of all chart tools, never {@code null}
      */
     public static List<LLMProvider.ToolSpec> createAll(
-            Function<String, Chart> chartResolver,
-            Supplier<Set<String>> chartIdsSupplier,
-            Consumer<String> queryValidator, String toolNamePrefix) {
+            Function<String, String> stateProvider,
+            BiConsumer<String, String> configUpdater,
+            BiConsumer<String, List<String>> dataUpdater,
+            Supplier<Set<String>> chartIdsSupplier, String toolNamePrefix) {
         return List.of(
-                getChartState(chartResolver, chartIdsSupplier, toolNamePrefix),
-                updateChartConfiguration(chartResolver, chartIdsSupplier,
+                getChartState(stateProvider, chartIdsSupplier, toolNamePrefix),
+                updateChartConfiguration(configUpdater, chartIdsSupplier,
                         toolNamePrefix),
-                updateChartDataSource(chartResolver, chartIdsSupplier,
-                        queryValidator, toolNamePrefix));
+                updateChartDataSource(dataUpdater, chartIdsSupplier,
+                        toolNamePrefix));
     }
 }

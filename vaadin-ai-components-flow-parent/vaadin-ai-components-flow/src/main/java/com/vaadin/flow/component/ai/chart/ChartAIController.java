@@ -196,9 +196,18 @@ public class ChartAIController implements AIController {
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
         tools.addAll(DatabaseProviderTools.createAll(databaseProvider));
-        tools.addAll(ChartTools.createAll(id -> chart,
-                () -> Set.of(DEFAULT_CHART_ID),
-                databaseProvider::executeQuery));
+        tools.addAll(ChartTools.createAll(
+                chartId -> ChartEntry.getStateAsJson(chart, chartId),
+                (chartId, configJson) -> ChartEntry.getOrCreate(chart, chartId)
+                        .setPendingConfigurationJson(configJson),
+                (chartId, queries) -> {
+                    for (String q : queries) {
+                        databaseProvider.executeQuery(q);
+                    }
+                    ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
+                    entry.setQueries(queries);
+                    entry.setPendingDataUpdate(true);
+                }, () -> Set.of(DEFAULT_CHART_ID)));
         return tools;
     }
 
