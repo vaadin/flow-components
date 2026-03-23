@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
+import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 
@@ -195,8 +195,8 @@ public class ChartAIController implements AIController {
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
-        tools.addAll(DatabaseProviderTools.createAll(databaseProvider));
-        tools.addAll(ChartTools.createAll(new ChartTools.Callbacks() {
+        tools.addAll(DatabaseProviderAITools.createAll(databaseProvider));
+        tools.addAll(ChartAITools.createAll(new ChartAITools.Callbacks() {
             @Override
             public String getState(String chartId) {
                 return ChartEntry.getStateAsJson(chart, chartId);

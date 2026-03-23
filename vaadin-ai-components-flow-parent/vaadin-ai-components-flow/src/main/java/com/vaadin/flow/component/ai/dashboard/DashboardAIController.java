@@ -29,7 +29,7 @@ import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.grid.GridRenderer;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.ai.provider.DatabaseProviderTools;
+import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dashboard.Dashboard;
@@ -104,7 +104,7 @@ public class DashboardAIController implements AIController {
 
     private final Dashboard dashboard;
     private final DatabaseProvider databaseProvider;
-    private final DashboardTools dashboardTools;
+    private final DashboardAITools dashboardTools;
     private final ChartRenderer chartRenderer;
     private final GridRenderer gridRenderer;
 
@@ -124,7 +124,7 @@ public class DashboardAIController implements AIController {
                 "Database provider cannot be null");
         this.chartRenderer = new ChartRenderer(databaseProvider);
         this.gridRenderer = new GridRenderer(databaseProvider);
-        this.dashboardTools = new DashboardTools(dashboard,
+        this.dashboardTools = new DashboardAITools(dashboard,
                 databaseProvider::executeQuery, this::createChartWidget,
                 this::createGridWidget);
     }
@@ -141,7 +141,7 @@ public class DashboardAIController implements AIController {
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
-        tools.add(DatabaseProviderTools.getDatabaseSchema(databaseProvider));
+        tools.add(DatabaseProviderAITools.getDatabaseSchema(databaseProvider));
         tools.addAll(dashboardTools.getTools());
         return tools;
     }

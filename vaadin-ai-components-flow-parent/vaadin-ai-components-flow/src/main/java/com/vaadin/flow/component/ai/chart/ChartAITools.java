@@ -43,7 +43,7 @@ import tools.jackson.databind.JsonNode;
  *
  * @author Vaadin Ltd
  */
-public final class ChartTools {
+public final class ChartAITools {
 
     /**
      * Callback interface that chart tool consumers must implement to provide
@@ -141,7 +141,7 @@ public final class ChartTools {
         return result;
     }
 
-    private ChartTools() {
+    private ChartAITools() {
     }
 
     /**

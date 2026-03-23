@@ -43,9 +43,9 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  */
-public final class GridTools {
+public final class GridAITools {
 
-    private GridTools() {
+    private GridAITools() {
     }
 
     /**

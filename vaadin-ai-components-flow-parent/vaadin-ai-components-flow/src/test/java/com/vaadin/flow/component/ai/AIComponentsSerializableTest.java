@@ -65,10 +65,10 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // ChartAIController — intentionally not serializable;
                 // restored via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAIController",
-                // ChartTools/GridTools are static utility classes (private
-                // constructor, no instances); inner anonymous classes
-                // implement ToolSpec which is not Serializable
-                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartTools.*",
+                // ChartAITools/GridAITools are static utility classes
+                // (private constructor, no instances); inner anonymous
+                // classes implement ToolSpec which is not Serializable
+                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAITools.*",
                 // ChartRenderer/GridRenderer hold DatabaseProvider which
                 // is not Serializable; they are recreated on reconnect
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartRenderer",
@@ -78,8 +78,8 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // reconnect()); inner anonymous classes implement
                 // ToolSpec which is not Serializable
                 "com\\.vaadin\\.flow\\.component\\.ai\\.dashboard\\.DashboardAIController.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.dashboard\\.DashboardTools.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.grid\\.GridTools.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.dashboard\\.DashboardAITools.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.grid\\.GridAITools.*",
                 // Grid internal classes from transitive dependency
                 "com\\.vaadin\\.flow\\.component\\.grid\\..*"));
     }

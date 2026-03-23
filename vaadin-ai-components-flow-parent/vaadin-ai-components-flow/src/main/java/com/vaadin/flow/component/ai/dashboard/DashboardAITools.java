@@ -24,10 +24,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.ai.chart.ChartAITools;
 import com.vaadin.flow.component.ai.chart.ChartEntry;
-import com.vaadin.flow.component.ai.chart.ChartTools;
+import com.vaadin.flow.component.ai.grid.GridAITools;
 import com.vaadin.flow.component.ai.grid.GridEntry;
-import com.vaadin.flow.component.ai.grid.GridTools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -46,7 +46,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  */
-public class DashboardTools {
+public class DashboardAITools {
 
     /**
      * Callback for creating dashboard widgets.
@@ -76,7 +76,7 @@ public class DashboardTools {
      * @param gridWidgetCreator
      *            creates grid widgets, not {@code null}
      */
-    DashboardTools(Dashboard dashboard, Consumer<String> queryValidator,
+    DashboardAITools(Dashboard dashboard, Consumer<String> queryValidator,
             WidgetCreator chartWidgetCreator, WidgetCreator gridWidgetCreator) {
         this.dashboard = Objects.requireNonNull(dashboard,
                 "dashboard must not be null");
@@ -107,7 +107,7 @@ public class DashboardTools {
         tools.add(createRemoveWidgetTool());
 
         // Chart tools (shared across all charts, resolved from dashboard)
-        tools.addAll(ChartTools.createAll(new ChartTools.Callbacks() {
+        tools.addAll(ChartAITools.createAll(new ChartAITools.Callbacks() {
             @Override
             public String getState(String chartId) {
                 return ChartEntry.getStateAsJson(resolveChart(chartId),
@@ -138,7 +138,7 @@ public class DashboardTools {
         }));
 
         // Grid tools (shared across all grids, resolved from dashboard)
-        tools.addAll(GridTools.createAll(this::findGridById,
+        tools.addAll(GridAITools.createAll(this::findGridById,
                 this::getGridWidgetIds, queryValidator, "dashboard_"));
 
         return tools;
