@@ -17,35 +17,35 @@ package com.vaadin.flow.component.details;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class DetailsSignalTest extends AbstractSignalsUnitTest {
+class DetailsSignalTest extends AbstractSignalsJUnit6Test {
 
     private Details details;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         details = new Details();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (details != null && details.isAttached()) {
             details.removeFromParent();
         }
     }
 
     @Test
-    public void bindChildren_addsChildrenFromSignal() {
+    void bindChildren_addsChildrenFromSignal() {
         UI.getCurrent().add(details);
 
         var textSignal1 = new ValueSignal<>("Item 1");
@@ -54,13 +54,13 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
 
         details.bindChildren(listSignal, Span::new);
 
-        Assert.assertEquals(2, details.getContent().count());
-        Assert.assertEquals("Item 1",
+        Assertions.assertEquals(2, details.getContent().count());
+        Assertions.assertEquals("Item 1",
                 details.getContent().findFirst().get().getElement().getText());
     }
 
     @Test
-    public void bindChildren_updatesChildrenWhenListSignalChanges() {
+    void bindChildren_updatesChildrenWhenListSignalChanges() {
         UI.getCurrent().add(details);
 
         var textSignal1 = new ValueSignal<>("Item 1");
@@ -68,17 +68,17 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
 
         details.bindChildren(listSignal, Span::new);
 
-        Assert.assertEquals(1, details.getContent().count());
+        Assertions.assertEquals(1, details.getContent().count());
 
         var textSignal2 = new ValueSignal<>("Item 2");
         var textSignal3 = new ValueSignal<>("Item 3");
         listSignal.set(List.of(textSignal1, textSignal2, textSignal3));
 
-        Assert.assertEquals(3, details.getContent().count());
+        Assertions.assertEquals(3, details.getContent().count());
     }
 
     @Test
-    public void bindChildren_notAttached_initialValueApplied() {
+    void bindChildren_notAttached_initialValueApplied() {
         var textSignal1 = new ValueSignal<>("Item 1");
         var textSignal2 = new ValueSignal<>("Item 2");
         var listSignal = new ValueSignal<>(List.of(textSignal1, textSignal2));
@@ -86,33 +86,36 @@ public class DetailsSignalTest extends AbstractSignalsUnitTest {
         details.bindChildren(listSignal, Span::new);
 
         // Initial value is applied immediately (effect runs on creation)
-        Assert.assertEquals(2, details.getContent().count());
+        Assertions.assertEquals(2, details.getContent().count());
 
         UI.getCurrent().add(details);
 
-        Assert.assertEquals(2, details.getContent().count());
+        Assertions.assertEquals(2, details.getContent().count());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindChildren_calledTwice_throwsException() {
+    @Test
+    void bindChildren_calledTwice_throwsException() {
         UI.getCurrent().add(details);
 
         var textSignal1 = new ValueSignal<>("Item 1");
         var listSignal = new ValueSignal<>(List.of(textSignal1));
 
         details.bindChildren(listSignal, Span::new);
-        details.bindChildren(listSignal, Span::new);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> details.bindChildren(listSignal, Span::new));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void bindChildren_nullSignal_throwsException() {
-        details.bindChildren(null, signal -> new Span("text"));
+    @Test
+    void bindChildren_nullSignal_throwsException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> details.bindChildren(null, signal -> new Span("text")));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void bindChildren_nullFactory_throwsException() {
+    @Test
+    void bindChildren_nullFactory_throwsException() {
         var textSignal = new ValueSignal<>("Item");
         var listSignal = new ValueSignal<>(List.of(textSignal));
-        details.bindChildren(listSignal, null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> details.bindChildren(listSignal, null));
     }
 }
