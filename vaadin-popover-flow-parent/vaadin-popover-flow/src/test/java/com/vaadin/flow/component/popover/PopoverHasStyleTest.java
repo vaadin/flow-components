@@ -15,20 +15,22 @@
  */
 package com.vaadin.flow.component.popover;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class PopoverHasStyleTest {
+class PopoverHasStyleTest {
 
     private Popover popover;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         popover = new Popover();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getStyle_unsupported() {
-        popover.getStyle();
+    @Test
+    void getStyle_unsupported() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> popover.getStyle());
     }
 }
