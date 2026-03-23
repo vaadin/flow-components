@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -65,29 +67,33 @@ import com.vaadin.flow.component.charts.util.Util;
  * conversion patterns for various chart types.
  * <p>
  * This converter uses column-name-based pattern matching to determine the
- * appropriate series type and data structure. Patterns are checked in priority
+ * appropriate series type and data structure. All expected column names are
+ * defined in {@link ColumnNames} and prefixed with {@value ColumnNames#PREFIX}
+ * to avoid collisions with real data columns. Patterns are checked in priority
  * order from most-specific to least-specific:
  * </p>
  * <ol>
- * <li>OHLC/Candlestick ({@code open}, {@code high}, {@code low},
- * {@code close})</li>
- * <li>BoxPlot ({@code low}, {@code q1}, {@code median}, {@code q3},
- * {@code high})</li>
- * <li>Organization ({@code id}, {@code name}, {@code parent}, {@code title};
- * optionally {@code description}, {@code image}, {@code color})</li>
- * <li>Gantt ({@code name}, {@code start}, {@code end}; optionally {@code id},
- * {@code parent}, {@code dependency}, {@code completed}, {@code color})</li>
- * <li>Treemap ({@code id}, {@code parent}, {@code value})</li>
- * <li>Sankey ({@code from}, {@code to}, {@code weight})</li>
- * <li>Heatmap ({@code x}, {@code y}, {@code value})</li>
- * <li>XRange ({@code x}, {@code x2}, {@code y})</li>
- * <li>Timeline ({@code name}, {@code label}, {@code description})</li>
- * <li>Bubble ({@code x}, {@code y}, {@code z})</li>
- * <li>Flags ({@code title}, optionally {@code text}; requires absence of
- * {@code parent} to avoid matching Organization/Treemap data)</li>
- * <li>Range ({@code low}, {@code high})</li>
- * <li>Bullet ({@code y}, {@code target})</li>
- * <li>Waterfall ({@code y}, {@code waterfall_type}; type values are
+ * <li>OHLC/Candlestick ({@code _open}, {@code _high}, {@code _low},
+ * {@code _close})</li>
+ * <li>BoxPlot ({@code _low}, {@code _q1}, {@code _median}, {@code _q3},
+ * {@code _high})</li>
+ * <li>Organization ({@code _id}, {@code _name}, {@code _parent},
+ * {@code _title}; optionally {@code _description}, {@code _image},
+ * {@code _color})</li>
+ * <li>Gantt ({@code _name}, {@code _start}, {@code _end}; optionally
+ * {@code _id}, {@code _parent}, {@code _dependency}, {@code _completed},
+ * {@code _color})</li>
+ * <li>Treemap ({@code _id}, {@code _parent}, {@code _value})</li>
+ * <li>Sankey ({@code _from}, {@code _to}, {@code _weight})</li>
+ * <li>Heatmap ({@code _x}, {@code _y}, {@code _value})</li>
+ * <li>XRange ({@code _x}, {@code _x2}, {@code _y})</li>
+ * <li>Timeline ({@code _name}, {@code _label}, {@code _description})</li>
+ * <li>Bubble ({@code _x}, {@code _y}, {@code _z})</li>
+ * <li>Flags ({@code _title}, optionally {@code _text}; requires absence of
+ * {@code _parent} to avoid matching Organization/Treemap data)</li>
+ * <li>Range ({@code _low}, {@code _high})</li>
+ * <li>Bullet ({@code _y}, {@code _target})</li>
+ * <li>Waterfall ({@code _y}, {@code _waterfall_type}; type values are
  * {@code "sum"} and {@code "intermediate"}, case-insensitive; {@code null} or
  * absent for regular data points)</li>
  * <li>Fallback: first non-numeric column as category, first numeric column as
@@ -95,8 +101,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * </ol>
  * <p>
  * Additionally, any pattern that produces a {@code DataSeriesItem} (or
- * subclass) supports an optional {@code color} column. If present, the value is
- * used to set the item's color via {@link SolidColor#SolidColor(String)}.
+ * subclass) supports an optional {@code _color} column. If present, the value
+ * is used to set the item's color via {@link SolidColor#SolidColor(String)}.
  * </p>
  * <p>
  * Column name matching is case-insensitive. Column names are determined from
@@ -107,11 +113,11 @@ import com.vaadin.flow.component.charts.util.Util;
  * If the data contains a {@code _series} column, rows are automatically grouped
  * by that column's value and each group is converted into a separate named
  * series. The {@code _series} column is removed before pattern matching so it
- * does not interfere with chart type detection. The underscore prefix avoids
- * collisions with real data columns.
+ * does not interfere with chart type detection.
  * </p>
  *
  * @author Vaadin Ltd
+ * @see ColumnNames
  */
 public class DefaultDataConverter implements DataConverter {
 
@@ -129,7 +135,7 @@ public class DefaultDataConverter implements DataConverter {
         var columnMapping = buildColumnMapping(data.getFirst());
         var columns = columnMapping.keySet();
 
-        if (columns.contains("_series")) {
+        if (columns.contains(SERIES)) {
             return convertGrouped(data, columnMapping);
         }
 
@@ -137,7 +143,7 @@ public class DefaultDataConverter implements DataConverter {
     }
 
     /**
-     * Converts a single dataset (no {@code series} column) into one series.
+     * Converts a single dataset (no {@code _series} column) into one series.
      */
     private AbstractSeries convertSingle(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
@@ -159,12 +165,12 @@ public class DefaultDataConverter implements DataConverter {
     }
 
     /**
-     * Groups rows by the {@code series} column, converts each group
+     * Groups rows by the {@code _series} column, converts each group
      * independently, and returns one named series per group.
      */
     private List<Series> convertGrouped(List<Map<String, Object>> data,
             Map<String, String> columnMapping) {
-        var originalSeriesKey = columnMapping.get("_series");
+        var originalSeriesKey = columnMapping.get(SERIES);
         var groups = new LinkedHashMap<String, List<Map<String, Object>>>();
         for (var row : data) {
             var groupName = toText(row.get(originalSeriesKey));
@@ -196,20 +202,20 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryOhlc(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "open", "high", "low", "close")) {
+        if (!hasColumns(columns, OPEN, HIGH, LOW, CLOSE)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var i = 0; i < data.size(); i++) {
             var row = data.get(i);
-            var open = getNumber(row, columnMapping, "open");
-            var high = getNumber(row, columnMapping, "high");
-            var low = getNumber(row, columnMapping, "low");
-            var close = getNumber(row, columnMapping, "close");
+            var open = getNumber(row, columnMapping, OPEN);
+            var high = getNumber(row, columnMapping, HIGH);
+            var low = getNumber(row, columnMapping, LOW);
+            var close = getNumber(row, columnMapping, CLOSE);
             if (open == null && high == null && low == null && close == null) {
                 continue;
             }
-            var x = resolveX(row, columnMapping, "x", i);
+            var x = resolveX(row, columnMapping, X, i);
             var item = new OhlcItem(x, open, high, low, close);
             applyColor(item, row, columnMapping, columns);
             series.add(item);
@@ -219,16 +225,16 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryBoxPlot(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "low", "q1", "median", "q3", "high")) {
+        if (!hasColumns(columns, LOW, Q1, MEDIAN, Q3, HIGH)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var row : data) {
-            var low = getNumber(row, columnMapping, "low");
-            var q1 = getNumber(row, columnMapping, "q1");
-            var median = getNumber(row, columnMapping, "median");
-            var q3 = getNumber(row, columnMapping, "q3");
-            var high = getNumber(row, columnMapping, "high");
+            var low = getNumber(row, columnMapping, LOW);
+            var q1 = getNumber(row, columnMapping, Q1);
+            var median = getNumber(row, columnMapping, MEDIAN);
+            var q3 = getNumber(row, columnMapping, Q3);
+            var high = getNumber(row, columnMapping, HIGH);
             if (low == null && q1 == null && median == null && q3 == null
                     && high == null) {
                 continue;
@@ -242,14 +248,14 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> trySankey(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "from", "to", "weight")) {
+        if (!hasColumns(columns, FROM, TO, WEIGHT)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var row : data) {
-            var from = getText(row, columnMapping, "from");
-            var to = getText(row, columnMapping, "to");
-            var weight = getNumber(row, columnMapping, "weight");
+            var from = getText(row, columnMapping, FROM);
+            var to = getText(row, columnMapping, TO);
+            var weight = getNumber(row, columnMapping, WEIGHT);
             if (from == null && to == null && weight == null) {
                 continue;
             }
@@ -262,14 +268,14 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryXRange(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "x", "x2", "y")) {
+        if (!hasColumns(columns, X, X2, Y)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var row : data) {
-            var x = getNumber(row, columnMapping, "x");
-            var x2 = getNumber(row, columnMapping, "x2");
-            var y = getNumber(row, columnMapping, "y");
+            var x = getNumber(row, columnMapping, X);
+            var x2 = getNumber(row, columnMapping, X2);
+            var y = getNumber(row, columnMapping, Y);
             if (x == null && x2 == null && y == null) {
                 continue;
             }
@@ -282,14 +288,14 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryBubble(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "x", "y", "z")) {
+        if (!hasColumns(columns, X, Y, Z)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var row : data) {
-            var x = getNumber(row, columnMapping, "x");
-            var y = getNumber(row, columnMapping, "y");
-            var z = getNumber(row, columnMapping, "z");
+            var x = getNumber(row, columnMapping, X);
+            var y = getNumber(row, columnMapping, Y);
+            var z = getNumber(row, columnMapping, Z);
             if (x == null && y == null && z == null) {
                 continue;
             }
@@ -302,15 +308,15 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryRange(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "low", "high") || hasBoxPlotColumns(columns)) {
+        if (!hasColumns(columns, LOW, HIGH) || hasBoxPlotColumns(columns)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var i = 0; i < data.size(); i++) {
             var row = data.get(i);
-            var x = resolveX(row, columnMapping, "x", i);
-            var low = getNumber(row, columnMapping, "low");
-            var high = getNumber(row, columnMapping, "high");
+            var x = resolveX(row, columnMapping, X, i);
+            var low = getNumber(row, columnMapping, LOW);
+            var high = getNumber(row, columnMapping, HIGH);
             if (low == null && high == null) {
                 continue;
             }
@@ -323,20 +329,20 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryBullet(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "y", "target")) {
+        if (!hasColumns(columns, Y, TARGET)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var row : data) {
-            var y = getNumber(row, columnMapping, "y");
-            var target = getNumber(row, columnMapping, "target");
+            var y = getNumber(row, columnMapping, Y);
+            var target = getNumber(row, columnMapping, TARGET);
             if (y == null && target == null) {
                 continue;
             }
 
             DataSeriesItemBullet item;
-            if (columns.contains("x")) {
-                var x = getNumber(row, columnMapping, "x");
+            if (columns.contains(X)) {
+                var x = getNumber(row, columnMapping, X);
                 item = new DataSeriesItemBullet(x, y, target);
             } else {
                 item = new DataSeriesItemBullet(y, target);
@@ -350,15 +356,15 @@ public class DefaultDataConverter implements DataConverter {
     private Optional<AbstractSeries> tryWaterfall(
             List<Map<String, Object>> data, Set<String> columns,
             Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "y", "waterfall_type")) {
+        if (!hasColumns(columns, Y, WATERFALL_TYPE)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var row : data) {
-            var name = columns.contains("name")
-                    ? getText(row, columnMapping, "name")
+            var name = columns.contains(NAME)
+                    ? getText(row, columnMapping, NAME)
                     : null;
-            var type = getText(row, columnMapping, "waterfall_type");
+            var type = getText(row, columnMapping, WATERFALL_TYPE);
             if (type != null) {
                 var sumItem = new WaterFallSum(name);
                 if ("intermediate".equalsIgnoreCase(type)) {
@@ -367,7 +373,7 @@ public class DefaultDataConverter implements DataConverter {
                 applyColor(sumItem, row, columnMapping, columns);
                 series.add(sumItem);
             } else {
-                var y = getNumber(row, columnMapping, "y");
+                var y = getNumber(row, columnMapping, Y);
                 if (name == null && y == null) {
                     continue;
                 }
@@ -381,20 +387,20 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryTimeline(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "name", "label", "description")) {
+        if (!hasColumns(columns, NAME, LABEL, DESCRIPTION)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var row : data) {
-            var name = getText(row, columnMapping, "name");
-            var label = getText(row, columnMapping, "label");
-            var description = getText(row, columnMapping, "description");
+            var name = getText(row, columnMapping, NAME);
+            var label = getText(row, columnMapping, LABEL);
+            var description = getText(row, columnMapping, DESCRIPTION);
             if (name == null && label == null && description == null) {
                 continue;
             }
             DataSeriesItemTimeline item;
-            if (columns.contains("x")) {
-                var x = getNumber(row, columnMapping, "x");
+            if (columns.contains(X)) {
+                var x = getNumber(row, columnMapping, X);
                 item = new DataSeriesItemTimeline(x, name, label, description);
             } else {
                 item = new DataSeriesItemTimeline(name, label, description);
@@ -407,20 +413,20 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryFlags(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "title") || columns.contains("parent")) {
+        if (!hasColumns(columns, TITLE) || columns.contains(PARENT)) {
             return Optional.empty();
         }
         var series = new DataSeries();
         for (var i = 0; i < data.size(); i++) {
             var row = data.get(i);
-            var x = resolveX(row, columnMapping, "x", i);
-            var title = getText(row, columnMapping, "title");
+            var x = resolveX(row, columnMapping, X, i);
+            var title = getText(row, columnMapping, TITLE);
             if (title == null) {
                 continue;
             }
             var item = new FlagItem(x, title);
-            if (columns.contains("text")) {
-                item.setText(getText(row, columnMapping, "text"));
+            if (columns.contains(TEXT)) {
+                item.setText(getText(row, columnMapping, TEXT));
             }
             applyColor(item, row, columnMapping, columns);
             series.add(item);
@@ -433,7 +439,7 @@ public class DefaultDataConverter implements DataConverter {
     private Optional<AbstractSeries> tryOrganization(
             List<Map<String, Object>> data, Set<String> columns,
             Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "id", "name", "parent", "title")) {
+        if (!hasColumns(columns, ID, NAME, PARENT, TITLE)) {
             return Optional.empty();
         }
         var series = new NodeSeries();
@@ -441,20 +447,20 @@ public class DefaultDataConverter implements DataConverter {
 
         // First pass: create all nodes.
         for (var row : data) {
-            var id = getText(row, columnMapping, "id");
+            var id = getText(row, columnMapping, ID);
             if (id == null) {
                 continue;
             }
-            var name = getText(row, columnMapping, "name");
-            var title = getText(row, columnMapping, "title");
+            var name = getText(row, columnMapping, NAME);
+            var title = getText(row, columnMapping, TITLE);
             var node = new Node(id, name, title);
-            if (columns.contains("description")) {
-                node.setDescription(getText(row, columnMapping, "description"));
+            if (columns.contains(DESCRIPTION)) {
+                node.setDescription(getText(row, columnMapping, DESCRIPTION));
             }
-            if (columns.contains("image")) {
-                node.setImage(getText(row, columnMapping, "image"));
+            if (columns.contains(IMAGE)) {
+                node.setImage(getText(row, columnMapping, IMAGE));
             }
-            var color = getText(row, columnMapping, "color");
+            var color = getText(row, columnMapping, COLOR);
             if (color != null) {
                 node.setColor(new SolidColor(color));
             }
@@ -464,8 +470,8 @@ public class DefaultDataConverter implements DataConverter {
 
         // Second pass: link children to parents.
         for (var row : data) {
-            var id = getText(row, columnMapping, "id");
-            var parentId = getText(row, columnMapping, "parent");
+            var id = getText(row, columnMapping, ID);
+            var parentId = getText(row, columnMapping, PARENT);
             if (id == null || parentId == null) {
                 continue;
             }
@@ -481,7 +487,7 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryGantt(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "name", "start", "end")) {
+        if (!hasColumns(columns, NAME, START, END)) {
             return Optional.empty();
         }
         if (!hasTemporalStartEnd(data, columnMapping)) {
@@ -489,9 +495,9 @@ public class DefaultDataConverter implements DataConverter {
         }
         var series = new GanttSeries();
         for (var row : data) {
-            var name = getText(row, columnMapping, "name");
-            var start = getInstant(row, columnMapping, "start");
-            var end = getInstant(row, columnMapping, "end");
+            var name = getText(row, columnMapping, NAME);
+            var start = getInstant(row, columnMapping, START);
+            var end = getInstant(row, columnMapping, END);
             if (name == null && start == null && end == null) {
                 continue;
             }
@@ -503,20 +509,20 @@ public class DefaultDataConverter implements DataConverter {
             if (end != null) {
                 item.setEnd(end);
             }
-            setOptionalText(item::setId, row, columnMapping, columns, "id");
+            setOptionalText(item::setId, row, columnMapping, columns, ID);
             setOptionalText(item::setParent, row, columnMapping, columns,
-                    "parent");
-            if (columns.contains("dependency")) {
-                var dep = getText(row, columnMapping, "dependency");
+                    PARENT);
+            if (columns.contains(DEPENDENCY)) {
+                var dep = getText(row, columnMapping, DEPENDENCY);
                 if (dep != null) {
                     Arrays.stream(dep.split(",")).filter(id -> !id.isBlank())
                             .map(String::trim).forEach(item::addDependency);
                 }
             }
-            if (columns.contains("completed")) {
-                item.setCompleted(getNumber(row, columnMapping, "completed"));
+            if (columns.contains(COMPLETED)) {
+                item.setCompleted(getNumber(row, columnMapping, COMPLETED));
             }
-            var color = getText(row, columnMapping, "color");
+            var color = getText(row, columnMapping, COLOR);
             if (color != null) {
                 item.setColor(new SolidColor(color));
             }
@@ -527,14 +533,14 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryTreemap(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "id", "parent", "value")) {
+        if (!hasColumns(columns, ID, PARENT, VALUE)) {
             return Optional.empty();
         }
         var series = new TreeSeries();
         for (var row : data) {
-            var id = getText(row, columnMapping, "id");
-            var parent = getText(row, columnMapping, "parent");
-            var value = getNumber(row, columnMapping, "value");
+            var id = getText(row, columnMapping, ID);
+            var parent = getText(row, columnMapping, PARENT);
+            var value = getNumber(row, columnMapping, VALUE);
             if (id == null && parent == null && value == null) {
                 continue;
             }
@@ -542,9 +548,9 @@ public class DefaultDataConverter implements DataConverter {
             item.setId(id);
             item.setParent(parent);
             item.setValue(value);
-            setOptionalText(item::setName, row, columnMapping, columns, "name");
-            if (columns.contains("colorvalue")) {
-                item.setColorValue(getNumber(row, columnMapping, "colorvalue"));
+            setOptionalText(item::setName, row, columnMapping, columns, NAME);
+            if (columns.contains(COLOR_VALUE)) {
+                item.setColorValue(getNumber(row, columnMapping, COLOR_VALUE));
             }
             series.add(item);
         }
@@ -553,14 +559,14 @@ public class DefaultDataConverter implements DataConverter {
 
     private Optional<AbstractSeries> tryHeatmap(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
-        if (!hasColumns(columns, "x", "y", "value")) {
+        if (!hasColumns(columns, X, Y, VALUE)) {
             return Optional.empty();
         }
         var series = new HeatSeries();
         for (var row : data) {
-            var x = getNumber(row, columnMapping, "x");
-            var y = getNumber(row, columnMapping, "y");
-            var value = getNumber(row, columnMapping, "value");
+            var x = getNumber(row, columnMapping, X);
+            var y = getNumber(row, columnMapping, Y);
+            var value = getNumber(row, columnMapping, VALUE);
             if (x == null || y == null) {
                 continue;
             }
@@ -733,8 +739,8 @@ public class DefaultDataConverter implements DataConverter {
 
     private static void applyColor(DataSeriesItem item, Map<String, Object> row,
             Map<String, String> columnMapping, Set<String> columns) {
-        if (columns.contains("color")) {
-            var color = getText(row, columnMapping, "color");
+        if (columns.contains(COLOR)) {
+            var color = getText(row, columnMapping, COLOR);
             if (color != null) {
                 item.setColor(new SolidColor(color));
             }
@@ -754,21 +760,21 @@ public class DefaultDataConverter implements DataConverter {
     }
 
     private static boolean hasBoxPlotColumns(Set<String> columns) {
-        return columns.contains("q1") || columns.contains("median")
-                || columns.contains("q3");
+        return columns.contains(Q1) || columns.contains(MEDIAN)
+                || columns.contains(Q3);
     }
 
     /**
      * Checks whether at least one row has a temporal or numeric value in the
-     * {@code start} or {@code end} column.
+     * {@code _start} or {@code _end} column.
      */
     private static boolean hasTemporalStartEnd(List<Map<String, Object>> data,
             Map<String, String> columnMapping) {
         for (var row : data) {
-            if (isTemporalOrNumeric(getRaw(row, columnMapping, "start"))) {
+            if (isTemporalOrNumeric(getRaw(row, columnMapping, START))) {
                 return true;
             }
-            if (isTemporalOrNumeric(getRaw(row, columnMapping, "end"))) {
+            if (isTemporalOrNumeric(getRaw(row, columnMapping, END))) {
                 return true;
             }
         }
