@@ -15,20 +15,19 @@
  */
 package com.vaadin.flow.component.radiobutton.tests;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class RadioButtonSerializableTest extends ClassesSerializableTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class RadioButtonSerializableTest extends ClassesSerializableTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void setItems_addToUI_radioButtonGroupIsSerializable()
-            throws Throwable {
+    void setItems_addToUI_radioButtonGroupIsSerializable() throws Throwable {
         var group = new RadioButtonGroup<>();
         group.setItems("Item 1", "Item 2");
 

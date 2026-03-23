@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasLabel;
 
-public class HasLabelTest {
+class HasLabelTest {
 
     @Test
-    public void radioButtonGroup() {
+    void radioButtonGroup() {
         RadioButtonGroup<String> c = new RadioButtonGroup<>();
-        Assert.assertTrue(c instanceof HasLabel);
+        Assertions.assertTrue(c instanceof HasLabel);
     }
 
 }
