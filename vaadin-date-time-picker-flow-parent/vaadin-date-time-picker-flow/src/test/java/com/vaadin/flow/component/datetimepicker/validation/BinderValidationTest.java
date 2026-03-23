@@ -17,9 +17,9 @@ package com.vaadin.flow.component.datetimepicker.validation;
 
 import java.time.LocalDateTime;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -31,7 +31,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 
-public class BinderValidationTest {
+class BinderValidationTest {
 
     private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
@@ -56,64 +56,64 @@ public class BinderValidationTest {
         }
     }
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         MockitoAnnotations.openMocks(this);
         field = new DateTimePicker();
         field.setMax(LocalDateTime.now().plusDays(1));
     }
 
     @Test
-    public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
+    void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
         attachBinderToField();
 
         field.setValue(LocalDateTime.now().plusDays(2));
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertTrue(statusCaptor.getValue().isError());
+        Assertions.assertTrue(statusCaptor.getValue().isError());
     }
 
     @Test
-    public void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
+    void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
         attachBinderToField();
 
         field.setValue(LocalDateTime.now().minusYears(1));
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertTrue(statusCaptor.getValue().isError());
-        Assert.assertEquals(BINDER_FAIL_MESSAGE,
+        Assertions.assertTrue(statusCaptor.getValue().isError());
+        Assertions.assertEquals(BINDER_FAIL_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
-    public void setRequiredOnBinder_validate_binderValidationFails() {
+    void setRequiredOnBinder_validate_binderValidationFails() {
         var binder = attachBinderToField(true);
         binder.validate();
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertTrue(statusCaptor.getValue().isError());
-        Assert.assertEquals(BINDER_REQUIRED_MESSAGE,
+        Assertions.assertTrue(statusCaptor.getValue().isError());
+        Assertions.assertEquals(BINDER_REQUIRED_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
-    public void setRequiredOnComponent_validate_binderValidationPasses() {
+    void setRequiredOnComponent_validate_binderValidationPasses() {
         var binder = attachBinderToField();
         field.setRequiredIndicatorVisible(true);
         binder.validate();
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertFalse(statusCaptor.getValue().isError());
+        Assertions.assertFalse(statusCaptor.getValue().isError());
     }
 
     @Test
-    public void elementWithConstraints_validValue_validationPasses() {
+    void elementWithConstraints_validValue_validationPasses() {
         attachBinderToField();
 
         field.setValue(LocalDateTime.now());
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertFalse(statusCaptor.getValue().isError());
+        Assertions.assertFalse(statusCaptor.getValue().isError());
 
     }
 

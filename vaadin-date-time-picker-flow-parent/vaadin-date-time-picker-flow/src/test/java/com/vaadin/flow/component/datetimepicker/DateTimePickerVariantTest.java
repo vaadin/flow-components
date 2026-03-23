@@ -15,23 +15,23 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class DateTimePickerVariantTest {
+class DateTimePickerVariantTest {
 
     private DateTimePicker dateTimePicker;
 
-    @Before
-    public void initTest() {
+    @BeforeEach
+    void initTest() {
         dateTimePicker = new DateTimePicker();
     }
 
     @Test
-    public void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
+    void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker
                 .addThemeVariants(DateTimePickerVariant.LUMO_ALIGN_CENTER);
@@ -42,28 +42,28 @@ public class DateTimePickerVariantTest {
     }
 
     @Test
-    public void addLumoAlignRightVariant_themeAttributeUpdated() {
+    void addLumoAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    public void addLumoSmallVariant_themeAttributeUpdated() {
+    void addLumoSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addLumoAlignLeftVariant_themeAttributeUpdated() {
+    void addLumoAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
     @Test
-    public void addLumoHelperAboveField_themeAttributeUpdated() {
+    void addLumoHelperAboveField_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(
                 DateTimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
@@ -71,7 +71,7 @@ public class DateTimePickerVariantTest {
     }
 
     @Test
-    public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         dateTimePicker.addThemeVariants(
@@ -84,7 +84,7 @@ public class DateTimePickerVariantTest {
     }
 
     @Test
-    public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         dateTimePicker.addThemeVariants(
@@ -94,7 +94,7 @@ public class DateTimePickerVariantTest {
     }
 
     @Test
-    public void addTwiceAndSeeIbce_themeAttributeUpdated() {
+    void addTwiceAndSeeIbce_themeAttributeUpdated() {
         assertThemeAttribute(null);
         dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
         dateTimePicker.addThemeVariants(DateTimePickerVariant.LUMO_SMALL);
@@ -103,13 +103,13 @@ public class DateTimePickerVariantTest {
 
     private void assertThemeAttribute(String expected) {
         String actual = dateTimePicker.getThemeName();
-        assertEquals("Unexpected theme attribute on date time picker", expected,
-                actual);
+        assertEquals(expected, actual,
+                "Unexpected theme attribute on date time picker");
     }
 
     private void assertThemeAttributeContains(String expected) {
         String actual = dateTimePicker.getThemeName();
-        assertTrue("Theme attribute not present on date time picker",
-                actual.contains(expected));
+        assertTrue(actual.contains(expected),
+                "Theme attribute not present on date time picker");
     }
 }
