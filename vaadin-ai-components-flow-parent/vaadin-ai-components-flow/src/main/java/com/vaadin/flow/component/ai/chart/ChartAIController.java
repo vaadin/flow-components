@@ -196,18 +196,33 @@ public class ChartAIController implements AIController {
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
         tools.addAll(DatabaseProviderTools.createAll(databaseProvider));
-        tools.addAll(ChartTools.createAll(
-                chartId -> ChartEntry.getStateAsJson(chart, chartId),
-                (chartId, configJson) -> ChartEntry.getOrCreate(chart, chartId)
-                        .setPendingConfigurationJson(configJson),
-                (chartId, queries) -> {
-                    for (String q : queries) {
-                        databaseProvider.executeQuery(q);
-                    }
-                    ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
-                    entry.setQueries(queries);
-                    entry.setPendingDataUpdate(true);
-                }, () -> Set.of(DEFAULT_CHART_ID)));
+        tools.addAll(ChartTools.createAll(new ChartTools.Callbacks() {
+            @Override
+            public String getState(String chartId) {
+                return ChartEntry.getStateAsJson(chart, chartId);
+            }
+
+            @Override
+            public void updateConfiguration(String chartId, String configJson) {
+                ChartEntry.getOrCreate(chart, chartId)
+                        .setPendingConfigurationJson(configJson);
+            }
+
+            @Override
+            public void updateData(String chartId, List<String> queries) {
+                for (String q : queries) {
+                    databaseProvider.executeQuery(q);
+                }
+                ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
+                entry.setQueries(queries);
+                entry.setPendingDataUpdate(true);
+            }
+
+            @Override
+            public Set<String> getChartIds() {
+                return Set.of(DEFAULT_CHART_ID);
+            }
+        }));
         return tools;
     }
 

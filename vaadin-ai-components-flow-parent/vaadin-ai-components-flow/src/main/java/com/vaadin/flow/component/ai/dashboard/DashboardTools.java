@@ -107,21 +107,35 @@ public class DashboardTools {
         tools.add(createRemoveWidgetTool());
 
         // Chart tools (shared across all charts, resolved from dashboard)
-        tools.addAll(ChartTools.createAll(
-                chartId -> ChartEntry.getStateAsJson(resolveChart(chartId),
-                        chartId),
-                (chartId, configJson) -> ChartEntry
-                        .getOrCreate(resolveChart(chartId), chartId)
-                        .setPendingConfigurationJson(configJson),
-                (chartId, queries) -> {
-                    for (String q : queries) {
-                        queryValidator.accept(q);
-                    }
-                    Chart chart = resolveChart(chartId);
-                    ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
-                    entry.setQueries(queries);
-                    entry.setPendingDataUpdate(true);
-                }, this::getChartWidgetIds, "dashboard_"));
+        tools.addAll(ChartTools.createAll(new ChartTools.Callbacks() {
+            @Override
+            public String getState(String chartId) {
+                return ChartEntry.getStateAsJson(resolveChart(chartId),
+                        chartId);
+            }
+
+            @Override
+            public void updateConfiguration(String chartId, String configJson) {
+                ChartEntry.getOrCreate(resolveChart(chartId), chartId)
+                        .setPendingConfigurationJson(configJson);
+            }
+
+            @Override
+            public void updateData(String chartId, List<String> queries) {
+                for (String q : queries) {
+                    queryValidator.accept(q);
+                }
+                Chart chart = resolveChart(chartId);
+                ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
+                entry.setQueries(queries);
+                entry.setPendingDataUpdate(true);
+            }
+
+            @Override
+            public Set<String> getChartIds() {
+                return getChartWidgetIds();
+            }
+        }));
 
         // Grid tools (shared across all grids, resolved from dashboard)
         tools.addAll(GridTools.createAll(this::findGridById,
