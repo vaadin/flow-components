@@ -158,6 +158,9 @@ public final class ChartAITools {
         if (ids.size() == 1) {
             return ids.iterator().next();
         }
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("No charts available.");
+        }
         throw new IllegalArgumentException(
                 "chartId is required when multiple charts exist. "
                         + "Available chart IDs: " + ids);
@@ -209,9 +212,13 @@ public final class ChartAITools {
 
             @Override
             public String execute(String arguments) {
-                JsonNode args = JacksonUtils.readTree(arguments);
-                String chartId = resolveChartId(args, callbacks);
-                return callbacks.getState(chartId);
+                try {
+                    JsonNode args = JacksonUtils.readTree(arguments);
+                    String chartId = resolveChartId(args, callbacks);
+                    return callbacks.getState(chartId);
+                } catch (Exception e) {
+                    return "Error getting chart state: " + e.getMessage();
+                }
             }
         };
     }
@@ -397,14 +404,23 @@ public final class ChartAITools {
 
             @Override
             public String execute(String arguments) {
-                JsonNode args = JacksonUtils.readTree(arguments);
-                String chartId = resolveChartId(args, callbacks);
+                try {
+                    JsonNode args = JacksonUtils.readTree(arguments);
+                    String chartId = resolveChartId(args, callbacks);
 
-                JsonNode configNode = args.get("configuration");
-                callbacks.updateConfiguration(chartId, configNode.toString());
+                    JsonNode configNode = args.get("configuration");
+                    if (configNode == null || configNode.isNull()) {
+                        return "Error updating chart configuration: 'configuration' parameter is required.";
+                    }
+                    callbacks.updateConfiguration(chartId,
+                            configNode.toString());
 
-                return "Chart '" + chartId
-                        + "' configuration updated. Changes will be applied when the request completes.";
+                    return "Chart '" + chartId
+                            + "' configuration updated. Changes will be applied when the request completes.";
+                } catch (Exception e) {
+                    return "Error updating chart configuration: "
+                            + e.getMessage();
+                }
             }
         };
     }
@@ -529,8 +545,15 @@ public final class ChartAITools {
                     JsonNode args = JacksonUtils.readTree(arguments);
                     String chartId = resolveChartId(args, callbacks);
 
+                    JsonNode queriesNode = args.get("queries");
+                    if (queriesNode == null || queriesNode.isNull()) {
+                        return "Error updating chart data: 'queries' parameter is required.";
+                    }
+                    if (!queriesNode.isArray()) {
+                        return "Error updating chart data: 'queries' must be an array.";
+                    }
                     List<String> queries = new ArrayList<>();
-                    for (JsonNode q : args.get("queries")) {
+                    for (JsonNode q : queriesNode) {
                         queries.add(q.asString());
                     }
 
