@@ -17,137 +17,143 @@ package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class DatePickerSignalTest extends AbstractSignalsUnitTest {
+class DatePickerSignalTest extends AbstractSignalsJUnit6Test {
 
     private DatePicker datePicker;
     private ValueSignal<LocalDate> signal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         datePicker = new DatePicker();
         signal = new ValueSignal<>(LocalDate.of(2023, 1, 1));
     }
 
     @Test
-    public void bindMin_synchronizedWhenAttached() {
+    void bindMin_synchronizedWhenAttached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindMin(signal);
-        Assert.assertEquals(signal.peek(), datePicker.getMin());
+        Assertions.assertEquals(signal.peek(), datePicker.getMin());
 
         signal.set(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(signal.peek(), datePicker.getMin());
+        Assertions.assertEquals(signal.peek(), datePicker.getMin());
     }
 
     @Test
-    public void bindMin_noEffectWhenDetached() {
+    void bindMin_noEffectWhenDetached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindMin(signal);
         datePicker.removeFromParent();
 
         signal.set(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMin());
+        Assertions.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMin());
 
         UI.getCurrent().add(datePicker);
-        Assert.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMin());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindMin_manualSetThrows() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMin(signal);
-        datePicker.setMin(LocalDate.of(2023, 2, 1));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindMin_rebindingThrows() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMin(signal);
-        datePicker.bindMin(new ValueSignal<>(LocalDate.of(2023, 2, 1)));
+        Assertions.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMin());
     }
 
     @Test
-    public void bindMax_synchronizedWhenAttached() {
+    void bindMin_manualSetThrows() {
+        UI.getCurrent().add(datePicker);
+        datePicker.bindMin(signal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> datePicker.setMin(LocalDate.of(2023, 2, 1)));
+    }
+
+    @Test
+    void bindMin_rebindingThrows() {
+        UI.getCurrent().add(datePicker);
+        datePicker.bindMin(signal);
+        Assertions.assertThrows(BindingActiveException.class, () -> datePicker
+                .bindMin(new ValueSignal<>(LocalDate.of(2023, 2, 1))));
+    }
+
+    @Test
+    void bindMax_synchronizedWhenAttached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindMax(signal);
-        Assert.assertEquals(signal.peek(), datePicker.getMax());
+        Assertions.assertEquals(signal.peek(), datePicker.getMax());
 
         signal.set(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(signal.peek(), datePicker.getMax());
+        Assertions.assertEquals(signal.peek(), datePicker.getMax());
     }
 
     @Test
-    public void bindMax_noEffectWhenDetached() {
+    void bindMax_noEffectWhenDetached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindMax(signal);
         datePicker.removeFromParent();
 
         signal.set(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMax());
+        Assertions.assertEquals(LocalDate.of(2023, 1, 1), datePicker.getMax());
 
         UI.getCurrent().add(datePicker);
-        Assert.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMax());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindMax_manualSetThrows() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMax(signal);
-        datePicker.setMax(LocalDate.of(2023, 2, 1));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindMax_rebindingThrows() {
-        UI.getCurrent().add(datePicker);
-        datePicker.bindMax(signal);
-        datePicker.bindMax(new ValueSignal<>(LocalDate.of(2023, 2, 1)));
+        Assertions.assertEquals(LocalDate.of(2023, 2, 1), datePicker.getMax());
     }
 
     @Test
-    public void bindInitialPosition_synchronizedWhenAttached() {
+    void bindMax_manualSetThrows() {
+        UI.getCurrent().add(datePicker);
+        datePicker.bindMax(signal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> datePicker.setMax(LocalDate.of(2023, 2, 1)));
+    }
+
+    @Test
+    void bindMax_rebindingThrows() {
+        UI.getCurrent().add(datePicker);
+        datePicker.bindMax(signal);
+        Assertions.assertThrows(BindingActiveException.class, () -> datePicker
+                .bindMax(new ValueSignal<>(LocalDate.of(2023, 2, 1))));
+    }
+
+    @Test
+    void bindInitialPosition_synchronizedWhenAttached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindInitialPosition(signal);
-        Assert.assertEquals(signal.peek(), datePicker.getInitialPosition());
+        Assertions.assertEquals(signal.peek(), datePicker.getInitialPosition());
 
         signal.set(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(signal.peek(), datePicker.getInitialPosition());
+        Assertions.assertEquals(signal.peek(), datePicker.getInitialPosition());
     }
 
     @Test
-    public void bindInitialPosition_noEffectWhenDetached() {
+    void bindInitialPosition_noEffectWhenDetached() {
         UI.getCurrent().add(datePicker);
         datePicker.bindInitialPosition(signal);
         datePicker.removeFromParent();
 
         signal.set(LocalDate.of(2023, 2, 1));
-        Assert.assertEquals(LocalDate.of(2023, 1, 1),
+        Assertions.assertEquals(LocalDate.of(2023, 1, 1),
                 datePicker.getInitialPosition());
 
         UI.getCurrent().add(datePicker);
-        Assert.assertEquals(LocalDate.of(2023, 2, 1),
+        Assertions.assertEquals(LocalDate.of(2023, 2, 1),
                 datePicker.getInitialPosition());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindInitialPosition_manualSetThrows() {
+    @Test
+    void bindInitialPosition_manualSetThrows() {
         UI.getCurrent().add(datePicker);
         datePicker.bindInitialPosition(signal);
-        datePicker.setInitialPosition(LocalDate.of(2023, 2, 1));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> datePicker.setInitialPosition(LocalDate.of(2023, 2, 1)));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindInitialPosition_rebindingThrows() {
+    @Test
+    void bindInitialPosition_rebindingThrows() {
         UI.getCurrent().add(datePicker);
         datePicker.bindInitialPosition(signal);
-        datePicker.bindInitialPosition(
-                new ValueSignal<>(LocalDate.of(2023, 2, 1)));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> datePicker.bindInitialPosition(
+                        new ValueSignal<>(LocalDate.of(2023, 2, 1))));
     }
 }

@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasLabel;
 
-public class HasLabelTest {
+class HasLabelTest {
 
     @Test
-    public void datePicker() {
+    void datePicker() {
         DatePicker c = new DatePicker();
-        Assert.assertTrue(c instanceof HasLabel);
+        Assertions.assertTrue(c instanceof HasLabel);
     }
 
 }
