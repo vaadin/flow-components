@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class OrderedLayoutSerializableTest extends ClassesSerializableTest {
+class OrderedLayoutSerializableTest extends ClassesSerializableTest {
 
     @Override
     protected Stream<String> getExcludedPatterns() {
