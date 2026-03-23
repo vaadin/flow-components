@@ -63,16 +63,13 @@ class DatabaseProviderToolsTest {
     }
 
     @Test
-    void getDatabaseSchema_returnsToolWithParametersSchema() {
+    void getDatabaseSchema_returnsToolWithNullParametersSchema() {
         var tool = DatabaseProviderTools.getDatabaseSchema(provider);
-        Assertions.assertNotNull(tool.getParametersSchema());
-        Assertions.assertTrue(tool.getParametersSchema().contains("\"type\""));
-        Assertions
-                .assertTrue(tool.getParametersSchema().contains("\"object\""));
+        Assertions.assertNull(tool.getParametersSchema());
     }
 
     @Test
-    void getDatabaseSchema_executeDelegatestoProvider() {
+    void getDatabaseSchema_executeDelegatesToProvider() {
         var tool = DatabaseProviderTools.getDatabaseSchema(provider);
         Assertions.assertEquals(SCHEMA, tool.execute(null));
     }

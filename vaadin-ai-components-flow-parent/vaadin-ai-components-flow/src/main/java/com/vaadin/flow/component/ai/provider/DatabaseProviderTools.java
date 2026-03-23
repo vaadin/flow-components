@@ -55,12 +55,7 @@ public final class DatabaseProviderTools {
 
             @Override
             public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {},
-                          "required": []
-                        }""";
+                return null;
             }
 
             @Override
