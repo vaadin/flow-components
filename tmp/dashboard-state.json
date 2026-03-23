@@ -1,48 +1,27 @@
 {
   "widgets" : [ {
-    "widgetId" : "chart-3",
-    "title" : "Revenue by Month and Region",
+    "widgetId" : "chart-2",
+    "title" : "Units Sold by Category",
     "type" : "chart",
     "colspan" : 1,
-    "rowspan" : 2,
-    "queries" : [ "SELECT \"MONTH\" AS category, SUM(REVENUE) AS total_revenue FROM SALES GROUP BY \"MONTH\" ORDER BY MIN(ID)", "SELECT REGION AS category, SUM(REVENUE) AS total_revenue FROM SALES GROUP BY REGION ORDER BY SUM(REVENUE) DESC" ],
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"column\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Revenue by Month and Region\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Category\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Revenue\"}}}",
-    "dataSource" : "default"
-  }, {
-    "widgetId" : "grid-1",
-    "title" : "Employees Overview",
-    "type" : "grid",
-    "colspan" : 1,
     "rowspan" : 1,
-    "queries" : [ "SELECT NAME AS \"Employee Name\", DEPARTMENT AS \"Department\", AGE AS \"Age\", SALARY AS \"Salary\" FROM EMPLOYEES ORDER BY SALARY DESC" ],
-    "configuration" : null,
-    "dataSource" : "default"
+    "queries" : [ "SELECT CATEGORY AS category, SUM(UNITS_SOLD) AS total_units_sold FROM PRODUCTS GROUP BY CATEGORY ORDER BY total_units_sold DESC" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"credits\":{\"enabled\":false},\"exporting\":{\"enabled\":false},\"legend\":{\"enabled\":true},\"plotOptions\":{},\"title\":{\"text\":\"Total Units Sold per Product Category\"},\"xAxis\":{\"axisIndex\":0}}"
   }, {
-    "widgetId" : "grid-2",
-    "title" : "Product Pricing and Sales",
-    "type" : "grid",
+    "widgetId" : "chart-3",
+    "title" : "Revenue and Salary by Region and Department",
+    "type" : "chart",
     "colspan" : 2,
-    "rowspan" : 1,
-    "queries" : [ "SELECT PRODUCT_NAME AS \"Product\", CATEGORY AS \"Category\", PRICE AS \"Price\", UNITS_SOLD AS \"Units Sold\" FROM PRODUCTS ORDER BY UNITS_SOLD DESC" ],
-    "configuration" : null,
-    "dataSource" : "default"
+    "rowspan" : 2,
+    "queries" : [ "SELECT REGION AS category, SUM(REVENUE) AS total_revenue FROM SALES GROUP BY REGION ORDER BY REGION", "SELECT DEPARTMENT AS category, AVG(SALARY) AS average_salary FROM EMPLOYEES GROUP BY DEPARTMENT ORDER BY DEPARTMENT" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"bar\"},\"credits\":{\"enabled\":false},\"exporting\":{\"enabled\":false},\"legend\":{\"enabled\":true},\"plotOptions\":{},\"title\":{\"text\":\"Revenue by Region and Average Salary by Department\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Region / Department\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Amount\"}}}"
   }, {
     "widgetId" : "chart-4",
-    "title" : "Units Sold by Product Category",
+    "title" : "Random Range Area Chart",
     "type" : "chart",
     "colspan" : 1,
     "rowspan" : 1,
-    "queries" : [ "SELECT CATEGORY AS category, SUM(UNITS_SOLD) AS total_units FROM PRODUCTS GROUP BY CATEGORY ORDER BY SUM(UNITS_SOLD) DESC" ],
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Units Sold by Product Category\"}}",
-    "dataSource" : "default"
-  }, {
-    "widgetId" : "chart-5",
-    "title" : "Average Salary by Department",
-    "type" : "chart",
-    "colspan" : 1,
-    "rowspan" : 2,
-    "queries" : [ "SELECT DEPARTMENT AS category, AVG(SALARY) AS avg_salary FROM EMPLOYEES GROUP BY DEPARTMENT ORDER BY AVG(SALARY) DESC" ],
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"bar\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Average Salary by Department\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Department\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Average Salary\"}}}",
-    "dataSource" : "default"
+    "queries" : [ "SELECT 1 AS _x, 10 AS _low, 20 AS _high UNION ALL SELECT 2, 15, 25 UNION ALL SELECT 3, 12, 30 UNION ALL SELECT 4, 18, 28 UNION ALL SELECT 5, 14, 22" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"arearange\"},\"credits\":{\"enabled\":false},\"exporting\":{\"enabled\":false},\"legend\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Random Range Area Chart\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"X\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Range\"}}}"
   } ]
 }
