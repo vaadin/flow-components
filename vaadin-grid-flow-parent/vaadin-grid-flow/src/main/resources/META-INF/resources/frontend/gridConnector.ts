@@ -14,8 +14,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   const dataProviderController = grid._dataProviderController;
 
-  let cache = {};
-
   const rootRequestDelay = 150;
   let rootRequestDebouncer;
 
@@ -191,8 +189,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       throw 'Invalid pageSize';
     }
 
-    let page = params.page;
-
     // size is controlled by the server (data communicator), so if the
     // size is zero, we know that there is no data to fetch.
     // This also prevents an empty grid getting stuck in a loading state.
@@ -205,11 +201,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    if (cache[page]) {
-      callback(cache[page]);
-    } else {
-      grid.$connector.debounceRootRequest(page);
-    }
+    grid.$connector.debounceRootRequest(params.page);
   };
 
   grid.$connector.setSorterDirections = function (directions) {
@@ -305,39 +297,11 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     grid.detailsOpenedItems = detailsOpenedItems;
   };
 
-  /**
-   * Updates the cache for the given page for grid or tree-grid.
-   *
-   * @param page index of the page to update
-   */
-  const updateGridCache = function (page) {
-    const { rootCache } = dataProviderController;
-
-    // Force update unless there's a callback waiting.
-    if (cache[page] && rootCache.pendingRequests[page]) {
-      return;
-    }
-
-    for (let i = 0; i < grid.pageSize; i++) {
-      const index = page * grid.pageSize + i;
-      const item = cache[page]?.[i];
-      rootCache.items[index] = item;
-    }
-  };
-
   grid.$connector.set = function (startIndex, items) {
+    const { rootCache } = dataProviderController;
     items.forEach((item, i) => {
-      const index = startIndex + i;
-      const page = Math.floor(index / grid.pageSize);
-      cache[page] ??= [];
-      cache[page][index % grid.pageSize] = item;
+      rootCache.items[startIndex + i] = item;
     });
-
-    const firstPage = Math.floor(startIndex / grid.pageSize);
-    const updatedPageCount = Math.ceil(items.length / grid.pageSize);
-    for (let i = 0; i < updatedPageCount; i++) {
-      updateGridCache(firstPage + i);
-    }
 
     preventUpdateVisibleRows(() => {
       grid.$connector.doSelection(items.filter((item) => item.selected));
@@ -348,38 +312,20 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
   };
 
-  const itemToCacheLocation = function (item) {
-    for (let page in cache) {
-      for (let index in cache[page]) {
-        if (grid.getItemId(cache[page][index]) === grid.getItemId(item)) {
-          return { page: page, index: index };
-        }
-      }
-    }
-    return null;
-  };
-
   /**
    * Updates the given items for a non-hierarchical grid.
    *
    * @param updatedItems the updated items array
    */
   grid.$connector.updateFlatData = function (updatedItems) {
+    const { rootCache } = dataProviderController;
     const updatedIndexes = [];
 
-    // update (flat) caches
     for (let i = 0; i < updatedItems.length; i++) {
-      let cacheLocation = itemToCacheLocation(updatedItems[i]);
-      if (cacheLocation) {
-        // update connector cache
-        cache[cacheLocation.page][cacheLocation.index] = updatedItems[i];
-
-        // update grid's cache
-        const index = parseInt(cacheLocation.page) * grid.pageSize + parseInt(cacheLocation.index);
-        const { rootCache } = dataProviderController;
-        if (rootCache.items[index]) {
-          rootCache.items[index] = updatedItems[i];
-        }
+      const itemContext = dataProviderController.getItemContext(updatedItems[i]);
+      if (itemContext) {
+        const { index } = itemContext;
+        rootCache.items[index] = updatedItems[i];
         updatedIndexes.push(index);
       }
     }
@@ -392,34 +338,30 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.$connector.clear = function (index, length) {
-    if (!cache || Object.keys(cache).length === 0) {
-      return;
-    }
+    const { rootCache } = dataProviderController;
+
     if (index % grid.pageSize != 0) {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
 
-    let firstPage = Math.floor(index / grid.pageSize);
-    let updatedPageCount = Math.ceil(length / grid.pageSize);
+    const items = rootCache.items.slice(index, index + length).filter(Boolean);
+    if (items.length === 0) {
+      return;
+    }
 
-    for (let i = 0; i < updatedPageCount; i++) {
-      let page = firstPage + i;
-      let items = cache[page];
-      if (items) {
-        preventUpdateVisibleRows(() => {
-          grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
-          items.forEach((item) => grid.closeItemDetails(item));
-        });
-        delete cache[page];
-        updateGridCache(page);
-      }
+    preventUpdateVisibleRows(() => {
+      grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
+      items.forEach((item) => grid.closeItemDetails(item));
+    });
+
+    for (let i = index; i < index + length; i++) {
+      rootCache.items[i] = undefined;
     }
 
     grid.__updateVisibleRows(index, index + length - 1);
   };
 
   grid.$connector.reset = function () {
-    cache = {};
     dataProviderController.clearCache();
     lastRequestedRange = [-1, -1];
     rootRequestDebouncer?.cancel();
@@ -433,15 +375,16 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.confirm = function (id) {
     // We're done applying changes from this batch, resolve pending
     // callbacks
-    const { pendingRequests } = dataProviderController.rootCache;
-    Object.entries(pendingRequests).forEach(([page, callback]) => {
+    const { rootCache } = dataProviderController;
+    Object.entries(rootCache.pendingRequests).forEach(([page, callback]) => {
       const lastAvailablePage = grid.size ? Math.ceil(grid.size / grid.pageSize) - 1 : 0;
       // It's possible that the lastRequestedRange includes a page that's beyond lastAvailablePage if the grid's size got reduced during an ongoing data request
       const lastRequestedRangeEnd = Math.min(lastRequestedRange[1], lastAvailablePage);
       // Resolve if we have data or if we don't expect to get data
-      if (cache[page]) {
+      const startIndex = page * grid.pageSize;
+      if (rootCache.items[startIndex] !== undefined) {
         // Cached data is available, resolve the callback
-        callback(cache[page]);
+        callback([]);
       } else if (page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
         // No cached data, resolve the callback with an empty array
         callback(new Array(grid.pageSize));
@@ -457,7 +400,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // for example if the server sent preloaded data while the grid had
     // already made its own requests), cancel the request debouncer to
     // prevent further unnecessary calls.
-    if (Object.keys(pendingRequests).length === 0) {
+    if (Object.keys(rootCache.pendingRequests).length === 0) {
       rootRequestDebouncer?.cancel();
       lastRequestedRange = [-1, -1];
     }

@@ -8,96 +8,96 @@
  */
 package com.vaadin.flow.component.richtexteditor;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class RichTextEditorHtmlIsEmptyTest {
+class RichTextEditorHtmlIsEmptyTest {
     private RichTextEditor editor;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         editor = new RichTextEditor();
     }
 
     @Test
-    public void initialValue_isEmpty() {
-        Assert.assertTrue(editor.isEmpty());
-        Assert.assertTrue(editor.asHtml().isEmpty());
+    void initialValue_isEmpty() {
+        Assertions.assertTrue(editor.isEmpty());
+        Assertions.assertTrue(editor.asHtml().isEmpty());
     }
 
     @Test
-    public void hasQuillDefaultHtml_isEmpty() {
+    void hasQuillDefaultHtml_isEmpty() {
         // This is the default value of the Quill editor when there is no text
         editor.setValue("<p><br></p>");
-        Assert.assertTrue(editor.isEmpty());
-        Assert.assertTrue(editor.asHtml().isEmpty());
+        Assertions.assertTrue(editor.isEmpty());
+        Assertions.assertTrue(editor.asHtml().isEmpty());
     }
 
     @Test
-    public void hasSingleLineBreak_isEmpty() {
+    void hasSingleLineBreak_isEmpty() {
         editor.setValue("<h1><br></h1>");
-        Assert.assertTrue(editor.isEmpty());
-        Assert.assertTrue(editor.asHtml().isEmpty());
+        Assertions.assertTrue(editor.isEmpty());
+        Assertions.assertTrue(editor.asHtml().isEmpty());
 
         editor.setValue("<blockquote><br></blockquote>");
-        Assert.assertTrue(editor.isEmpty());
-        Assert.assertTrue(editor.asHtml().isEmpty());
+        Assertions.assertTrue(editor.isEmpty());
+        Assertions.assertTrue(editor.asHtml().isEmpty());
 
         editor.setValue("<ul><li><br></li></ul>");
-        Assert.assertTrue(editor.isEmpty());
-        Assert.assertTrue(editor.asHtml().isEmpty());
+        Assertions.assertTrue(editor.isEmpty());
+        Assertions.assertTrue(editor.asHtml().isEmpty());
     }
 
     @Test
-    public void hasText_notEmpty() {
+    void hasText_notEmpty() {
         editor.setValue("<p>foo<br></p>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
 
         editor.setValue("<blockquote>foo<br></blockquote>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
 
         editor.setValue("<ul><li>foo<br></li></ul>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
     }
 
     @Test
-    public void hasWhitespace_notEmpty() {
+    void hasWhitespace_notEmpty() {
         // Space character
         editor.setValue("<p> <br></p>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
 
         editor.setValue("<blockquote> <br></blockquote>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
 
         editor.setValue("<ul><li> <br></li></ul>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
 
         // Multiple newlines
         editor.setValue("<p><br></p><p><br></p>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
 
         editor.setValue(
                 "<blockquote><br></blockquote><blockquote><br></blockquote>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
 
         editor.setValue("<ul><li><br></li><li><br></li></ul>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
     }
 
     @Test
-    public void hasImage_notEmpty() {
+    void hasImage_notEmpty() {
         editor.setValue("<img>");
-        Assert.assertFalse(editor.isEmpty());
-        Assert.assertFalse(editor.asHtml().isEmpty());
+        Assertions.assertFalse(editor.isEmpty());
+        Assertions.assertFalse(editor.asHtml().isEmpty());
     }
 }

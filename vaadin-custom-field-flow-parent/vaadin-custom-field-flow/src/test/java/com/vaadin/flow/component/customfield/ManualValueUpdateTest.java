@@ -15,55 +15,55 @@
  */
 package com.vaadin.flow.component.customfield;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.JacksonUtils;
 
-public class ManualValueUpdateTest {
+class ManualValueUpdateTest {
 
     private IncrementingCustomField automaticField;
     private IncrementingCustomField manualField;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         automaticField = new IncrementingCustomField(false);
         manualField = new IncrementingCustomField(true);
     }
 
     @Test
-    public void automaticValueUpdate_changeEventUpdatesValue() {
-        Assert.assertEquals(Integer.valueOf(0), automaticField.getValue());
+    void automaticValueUpdate_changeEventUpdatesValue() {
+        Assertions.assertEquals(Integer.valueOf(0), automaticField.getValue());
 
         fireChangeEvent(automaticField);
-        Assert.assertEquals(Integer.valueOf(1), automaticField.getValue());
+        Assertions.assertEquals(Integer.valueOf(1), automaticField.getValue());
 
         fireChangeEvent(automaticField);
-        Assert.assertEquals(Integer.valueOf(2), automaticField.getValue());
+        Assertions.assertEquals(Integer.valueOf(2), automaticField.getValue());
     }
 
     @Test
-    public void manualValueUpdate_changeEventDoesNotUpdateValue() {
-        Assert.assertEquals(Integer.valueOf(0), manualField.getValue());
+    void manualValueUpdate_changeEventDoesNotUpdateValue() {
+        Assertions.assertEquals(Integer.valueOf(0), manualField.getValue());
 
         fireChangeEvent(manualField);
-        Assert.assertEquals(Integer.valueOf(0), manualField.getValue());
+        Assertions.assertEquals(Integer.valueOf(0), manualField.getValue());
 
         fireChangeEvent(manualField);
-        Assert.assertEquals(Integer.valueOf(0), manualField.getValue());
+        Assertions.assertEquals(Integer.valueOf(0), manualField.getValue());
     }
 
     @Test
-    public void manualValueUpdate_manuallyUpdateValue() {
-        Assert.assertEquals(Integer.valueOf(0), manualField.getValue());
+    void manualValueUpdate_manuallyUpdateValue() {
+        Assertions.assertEquals(Integer.valueOf(0), manualField.getValue());
 
         manualField.updateValue();
-        Assert.assertEquals(Integer.valueOf(1), manualField.getValue());
+        Assertions.assertEquals(Integer.valueOf(1), manualField.getValue());
 
         manualField.updateValue();
-        Assert.assertEquals(Integer.valueOf(2), manualField.getValue());
+        Assertions.assertEquals(Integer.valueOf(2), manualField.getValue());
     }
 
     private void fireChangeEvent(CustomField<?> field) {
