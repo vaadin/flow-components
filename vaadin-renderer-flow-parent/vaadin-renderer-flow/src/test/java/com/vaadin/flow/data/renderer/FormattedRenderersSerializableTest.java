@@ -24,12 +24,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FormattedRenderersSerializableTest {
+class FormattedRenderersSerializableTest {
 
     @Test
-    public void numberRendererIsSerializable() throws IOException {
+    void numberRendererIsSerializable() throws IOException {
         NumberRenderer<?> renderer = new NumberRenderer<>(value -> 42);
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
@@ -41,7 +41,7 @@ public class FormattedRenderersSerializableTest {
     }
 
     @Test
-    public void localDateTimeRendererIsSerializable() throws IOException {
+    void localDateTimeRendererIsSerializable() throws IOException {
         LocalDateTimeRenderer<?> renderer = new LocalDateTimeRenderer<>(
                 value -> LocalDateTime.now());
         new ObjectOutputStream(new ByteArrayOutputStream())
@@ -55,7 +55,7 @@ public class FormattedRenderersSerializableTest {
     }
 
     @Test
-    public void localDateRendererIsSerializable() throws IOException {
+    void localDateRendererIsSerializable() throws IOException {
         LocalDateRenderer<?> renderer = new LocalDateRenderer<>(
                 (v) -> LocalDate.now());
         new ObjectOutputStream(new ByteArrayOutputStream())
