@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import com.vaadin.flow.component.ai.provider.LangChain4JLLMProvider;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
@@ -60,7 +62,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Route("vaadin-ai/ai-dashboard-demo")
-public class AIDashboardDemoPage extends UploadDropZone {
+public class AIDashboardDemoPage extends Div {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AIDashboardDemoPage.class);
@@ -69,13 +71,14 @@ public class AIDashboardDemoPage extends UploadDropZone {
             "dashboard-state.json");
 
     public AIDashboardDemoPage() {
-        setHeightFull();
+        setSizeFull();
 
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
 
         // Upload support
-        var uploadManager = new UploadManager(this);
-        setUploadManager(uploadManager);
+        var dropZone = new UploadDropZone();
+        var uploadManager = new UploadManager(dropZone);
+        dropZone.setUploadManager(uploadManager);
 
         var uploadButton = new UploadButton(uploadManager);
         uploadButton.setIcon(VaadinIcon.UPLOAD.create());
@@ -159,9 +162,13 @@ public class AIDashboardDemoPage extends UploadDropZone {
 
         var chatSection = new VerticalLayout(messageList, fileList,
                 inputLayout);
-        chatSection.setWidth("40%");
+        chatSection.setSizeFull();
         chatSection.setPadding(false);
         chatSection.setFlexGrow(1, messageList);
+
+        dropZone.setContent(chatSection);
+        dropZone.setWidth("40%");
+        dropZone.setHeightFull();
 
         // Create LLM provider via OpenAI
         var apiKey = System.getenv("OPENAI_API_KEY");
@@ -170,15 +177,20 @@ public class AIDashboardDemoPage extends UploadDropZone {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create orchestrator with controller
-        AIOrchestrator
+        var orchestrator = AIOrchestrator
                 .builder(provider, DashboardAIController.getSystemPrompt())
                 .withMessageList(messageList).withInput(messageInput)
                 .withFileReceiver(uploadManager)
                 .withController(dashboardController).build();
 
-        var mainLayout = new HorizontalLayout(dashboardSection, chatSection);
+        // Chart prompt buttons
+        var chartButtonBar = createChartPromptButtons(orchestrator);
+        dashboardSection.add(chartButtonBar);
+        dashboardSection.setFlexGrow(0, chartButtonBar);
+
+        var mainLayout = new HorizontalLayout(dashboardSection, dropZone);
         mainLayout.setSizeFull();
-        setContent(mainLayout);
+        add(mainLayout);
     }
 
     private static void saveStateToFile(DashboardState state) {
@@ -253,5 +265,85 @@ public class AIDashboardDemoPage extends UploadDropZone {
         return node.has(field) && !node.get(field).isNull()
                 ? node.get(field).asString()
                 : null;
+    }
+
+    private static HorizontalLayout createChartPromptButtons(
+            AIOrchestrator orchestrator) {
+        var layout = new HorizontalLayout();
+        layout.setWidthFull();
+        layout.getStyle().set("flexWrap", "wrap").set("gap", "8px")
+                .set("padding", "8px").set("alignItems", "center");
+
+        var label = new Span("Add chart:");
+        label.getStyle().set("fontWeight", "bold");
+        layout.add(label);
+
+        Map.of("Line",
+                "Show monthly revenue broken down by region as a smooth line chart with data labels and a legend at the bottom.",
+
+                "Column",
+                "Show a stacked column chart of units sold per product, grouped by category, with data labels on each segment.",
+
+                "Pie",
+                "Show revenue share by region as a donut chart with percentages and values on each slice.",
+
+                "Bar",
+                "Show employee salaries as a horizontal bar chart sorted highest to lowest, colored by department.",
+
+                "Area",
+                "Show a stacked area chart of monthly revenue by region with smooth curves.",
+
+                "Scatter",
+                "Plot employee age vs salary as a scatter chart, color-coded by department, with each point labeled by name.",
+
+                "Bubble",
+                "Show a bubble chart of products with price on one axis, units sold on the other, and total revenue as bubble size.",
+
+                "Heatmap",
+                "Show website traffic as a heatmap with days of the week vs hours of the day, using a yellow-to-red gradient.",
+
+                "Candlestick",
+                "Show ACME stock prices as a candlestick chart with a volume bar series on a secondary axis.",
+
+                "Gauge",
+                "Show the Customer Satisfaction score as a gauge with red/yellow/green bands and the target marked."
+
+        ).forEach((name, prompt) -> {
+            var button = new NativeButton(name,
+                    e -> orchestrator.prompt(prompt));
+            layout.add(button);
+        });
+
+        Map.of("Sankey",
+                "Show energy flows from sources to consumption sectors as a Sankey diagram.",
+
+                "Organization",
+                "Show the company org chart with names, titles, and team colors.",
+
+                "Treemap",
+                "Show the expense breakdown as a treemap grouped by top-level category.",
+
+                "Funnel",
+                "Show the sales pipeline as a funnel chart with counts and conversion percentages.",
+
+                "Waterfall",
+                "Show the budget as a waterfall chart from revenue through costs to net profit, with subtotals.",
+
+                "Gantt",
+                "Show the project schedule as a Gantt chart with tasks colored by phase and progress bars.",
+
+                "XRange",
+                "Show task durations as horizontal bars on a timeline, colored by project phase.",
+
+                "Timeline",
+                "Show project milestones on a timeline with task names and phases."
+
+        ).forEach((name, prompt) -> {
+            var button = new NativeButton(name,
+                    e -> orchestrator.prompt(prompt));
+            layout.add(button);
+        });
+
+        return layout;
     }
 }
