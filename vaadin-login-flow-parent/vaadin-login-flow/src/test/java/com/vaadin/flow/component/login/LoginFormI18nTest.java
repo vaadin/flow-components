@@ -15,33 +15,33 @@
  */
 package com.vaadin.flow.component.login;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class LoginFormI18nTest {
+class LoginFormI18nTest {
 
     @Test
-    public void createDefault() {
+    void createDefault() {
         LoginI18n i18n = LoginI18n.createDefault();
 
-        Assert.assertEquals("Log in", i18n.getForm().getTitle());
-        Assert.assertEquals("Username", i18n.getForm().getUsername());
-        Assert.assertEquals("Password", i18n.getForm().getPassword());
-        Assert.assertEquals("Forgot password",
+        Assertions.assertEquals("Log in", i18n.getForm().getTitle());
+        Assertions.assertEquals("Username", i18n.getForm().getUsername());
+        Assertions.assertEquals("Password", i18n.getForm().getPassword());
+        Assertions.assertEquals("Forgot password",
                 i18n.getForm().getForgotPassword());
-        Assert.assertEquals("Log in", i18n.getForm().getSubmit());
+        Assertions.assertEquals("Log in", i18n.getForm().getSubmit());
 
-        Assert.assertEquals("Incorrect username or password",
+        Assertions.assertEquals("Incorrect username or password",
                 i18n.getErrorMessage().getTitle());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "Check that you have entered the correct username and password and try again.",
                 i18n.getErrorMessage().getMessage());
 
-        Assert.assertEquals("Username is required",
+        Assertions.assertEquals("Username is required",
                 i18n.getErrorMessage().getUsername());
-        Assert.assertEquals("Password is required",
+        Assertions.assertEquals("Password is required",
                 i18n.getErrorMessage().getPassword());
 
-        Assert.assertNull(i18n.getAdditionalInformation());
+        Assertions.assertNull(i18n.getAdditionalInformation());
     }
 }
