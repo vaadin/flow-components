@@ -546,7 +546,7 @@ public final class ChartAITools {
                                 - Example: SELECT min_val AS {LOW}, lower_q AS {Q1}, med AS {MEDIAN}, upper_q AS {Q3}, max_val AS {HIGH} FROM stats
 
                                 OHLC/Candlestick:
-                                - Columns: {OPEN}, {HIGH}, {LOW}, {CLOSE} (optionally {X})
+                                - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
                                 - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
 
                                 Sankey diagram:

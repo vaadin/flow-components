@@ -146,6 +146,18 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(5, item.getLow());
             Assertions.assertEquals(12, item.getClose());
         }
+
+        @Test
+        void withoutXColumn_usesRowIndex() {
+            var data = List.of(row(OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12),
+                    row(OPEN, 12, HIGH, 18, LOW, 8, CLOSE, 16));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(2, result.getData().size());
+            Assertions.assertEquals(0,
+                    ((OhlcItem) result.getData().getFirst()).getX());
+            Assertions.assertEquals(1,
+                    ((OhlcItem) result.getData().get(1)).getX());
+        }
     }
 
     // --- BoxPlot ---
@@ -437,6 +449,38 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(1, item.getX());
             Assertions.assertEquals(2, item.getY());
             Assertions.assertEquals(3, item.getZ());
+        }
+    }
+
+    // --- Scatter ---
+
+    @Nested
+    class ScatterTests {
+
+        @Test
+        void createsScatterItems() {
+            var data = List.of(row(X, 1, Y, 2), row(X, 3, Y, 4));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(2, result.getData().size());
+            var item = result.getData().getFirst();
+            Assertions.assertEquals(1, item.getX());
+            Assertions.assertEquals(2, item.getY());
+        }
+
+        @Test
+        void columnOrderDoesNotMatter() {
+            var data = List.of(row(Y, 20, X, 10));
+            var result = (DataSeries) convertSingle(data);
+            var item = result.getData().getFirst();
+            Assertions.assertEquals(10, item.getX());
+            Assertions.assertEquals(20, item.getY());
+        }
+
+        @Test
+        void withColor_setsItemColor() {
+            var data = List.of(row(X, 1, Y, 2, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
         }
     }
 

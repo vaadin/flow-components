@@ -161,6 +161,7 @@ public class DefaultDataConverter implements DataConverter {
                 .or(() -> tryRange(data, columns, columnMapping))
                 .or(() -> tryBullet(data, columns, columnMapping))
                 .or(() -> tryWaterfall(data, columns, columnMapping))
+                .or(() -> tryScatter(data, columns, columnMapping))
                 .orElseGet(() -> convertFallback(data, columns, columnMapping));
     }
 
@@ -575,6 +576,26 @@ public class DefaultDataConverter implements DataConverter {
         return Optional.of(series);
     }
 
+    private Optional<AbstractSeries> tryScatter(List<Map<String, Object>> data,
+            Set<String> columns, Map<String, String> columnMapping) {
+        if (!hasColumns(columns, X, Y)) {
+            return Optional.empty();
+        }
+        var series = new DataSeries();
+        for (var i = 0; i < data.size(); i++) {
+            var row = data.get(i);
+            var x = getNumber(row, columnMapping, X);
+            var y = getNumber(row, columnMapping, Y);
+            if (x == null && y == null) {
+                continue;
+            }
+            var item = new DataSeriesItem(x, y);
+            applyColor(item, row, columnMapping, columns);
+            series.add(item);
+        }
+        return Optional.of(series);
+    }
+
     // --- Fallback ---
 
     private DataSeries convertFallback(List<Map<String, Object>> data,
@@ -734,7 +755,10 @@ public class DefaultDataConverter implements DataConverter {
 
     private static Number resolveX(Map<String, Object> row,
             Map<String, String> columnMapping, String xCol, int rowIndex) {
-        return xCol != null ? getNumber(row, columnMapping, xCol) : rowIndex;
+        if (columnMapping.containsKey(xCol)) {
+            return getNumber(row, columnMapping, xCol);
+        }
+        return rowIndex;
     }
 
     private static void applyColor(DataSeriesItem item, Map<String, Object> row,
