@@ -247,7 +247,8 @@ public final class ChartAITools {
                         (as returned by get_chart_state), supporting: chart (type, dimensions, \
                         margins, spacing, borders, background, inverted, polar, animation, \
                         zoomType), title, subtitle, xAxis, yAxis, zAxis, colorAxis, tooltip, \
-                        legend, credits, and pane.
+                        legend, plotOptions (series defaults, stacking, dataLabels, markers, \
+                        pie innerSize for donuts), credits, and pane.
 
                         CRITICAL: ALWAYS specify the chart type in configuration.chart.type - this is essential for proper rendering.
 
@@ -288,7 +289,7 @@ public final class ChartAITools {
                                     "borderWidth": { "type": "number", "description": "Border width in pixels" },
                                     "borderRadius": { "type": "number", "description": "Border radius in pixels" },
                                     "width": { "type": "number", "description": "Chart width in pixels" },
-                                    "height": { "type": "string", "description": "Chart height (e.g., '400px', '100%')" },
+                                    "height": { "oneOf": [{ "type": "number", "description": "Height in pixels" }, { "type": "string", "description": "Height as string (e.g., '400px', '100%')" }] },
                                     "marginTop": { "type": "number" },
                                     "marginRight": { "type": "number" },
                                     "marginBottom": { "type": "number" },
@@ -304,7 +305,7 @@ public final class ChartAITools {
                                     "polar": { "type": "boolean", "description": "Polar chart" },
                                     "animation": { "type": "boolean" },
                                     "styledMode": { "type": "boolean" },
-                                    "zoomType": { "type": "string", "enum": ["X", "Y", "XY"] }
+                                    "zoomType": { "type": "string", "enum": ["x", "y", "xy"] }
                                   }
                                 },
                                 "title": {
@@ -323,7 +324,7 @@ public final class ChartAITools {
                                   "type": "object",
                                   "description": "X-axis configuration",
                                   "properties": {
-                                    "type": { "type": "string", "description": "Axis type", "enum": ["LINEAR", "LOGARITHMIC", "DATETIME", "CATEGORY"] },
+                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
                                     "title": { "type": "object", "properties": { "text": { "type": "string" } } },
                                     "categories": { "type": "array", "items": { "type": "string" } },
                                     "min": { "type": "number" },
@@ -334,7 +335,7 @@ public final class ChartAITools {
                                   "type": "object",
                                   "description": "Y-axis configuration",
                                   "properties": {
-                                    "type": { "type": "string", "description": "Axis type", "enum": ["LINEAR", "LOGARITHMIC", "DATETIME", "CATEGORY"] },
+                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
                                     "title": { "type": "object", "properties": { "text": { "type": "string" } } },
                                     "min": { "type": "number" },
                                     "max": { "type": "number" }
@@ -342,9 +343,9 @@ public final class ChartAITools {
                                 },
                                 "zAxis": {
                                   "type": "object",
-                                  "description": "Z-axis configuration (for 3D charts)",
+                                  "description": "Z-axis configuration (for 3D and bubble charts)",
                                   "properties": {
-                                    "type": { "type": "string", "description": "Axis type", "enum": ["LINEAR", "LOGARITHMIC", "DATETIME", "CATEGORY"] },
+                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
                                     "title": { "type": "object", "properties": { "text": { "type": "string" } } },
                                     "min": { "type": "number" },
                                     "max": { "type": "number" }
@@ -376,9 +377,9 @@ public final class ChartAITools {
                                   "description": "Legend configuration",
                                   "properties": {
                                     "enabled": { "type": "boolean" },
-                                    "align": { "type": "string", "enum": ["LEFT", "CENTER", "RIGHT"] },
-                                    "verticalAlign": { "type": "string", "enum": ["TOP", "MIDDLE", "BOTTOM"] },
-                                    "layout": { "type": "string", "enum": ["HORIZONTAL", "VERTICAL"] }
+                                    "align": { "type": "string", "enum": ["left", "center", "right"] },
+                                    "verticalAlign": { "type": "string", "enum": ["top", "middle", "bottom"] },
+                                    "layout": { "type": "string", "enum": ["horizontal", "vertical"] }
                                   }
                                 },
                                 "credits": {
@@ -398,6 +399,76 @@ public final class ChartAITools {
                                     "endAngle": { "type": "number" },
                                     "center": { "type": "array", "items": { "type": "string" }, "description": "Center position ['50%', '50%']" },
                                     "size": { "type": "string", "description": "Size (e.g., '100%')" }
+                                  }
+                                },
+                                "plotOptions": {
+                                  "type": "object",
+                                  "description": "Default options for series types. Use 'series' key for options applying to all series, or a chart type key (e.g., 'pie', 'column') for type-specific options.",
+                                  "properties": {
+                                    "series": {
+                                      "type": "object",
+                                      "description": "Default options for all series types",
+                                      "properties": {
+                                        "stacking": { "type": "string", "enum": ["normal", "percent"], "description": "Stack series by value or percentage" },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string", "description": "Label format string" }
+                                          }
+                                        },
+                                        "marker": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "pie": {
+                                      "type": "object",
+                                      "description": "Default options for pie series",
+                                      "properties": {
+                                        "innerSize": { "type": "string", "description": "Inner diameter for donut charts (e.g., '50%')" },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string" }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "column": {
+                                      "type": "object",
+                                      "description": "Default options for column series",
+                                      "properties": {
+                                        "stacking": { "type": "string", "enum": ["normal", "percent"] },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string" }
+                                          }
+                                        },
+                                        "borderRadius": { "type": "number", "description": "Border radius for column corners" }
+                                      }
+                                    },
+                                    "bar": {
+                                      "type": "object",
+                                      "description": "Default options for bar series",
+                                      "properties": {
+                                        "stacking": { "type": "string", "enum": ["normal", "percent"] },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string" }
+                                          }
+                                        },
+                                        "borderRadius": { "type": "number" }
+                                      }
+                                    }
                                   }
                                 }
                               }

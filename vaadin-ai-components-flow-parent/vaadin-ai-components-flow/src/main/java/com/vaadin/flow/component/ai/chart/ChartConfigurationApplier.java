@@ -31,11 +31,18 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.ColorAxis;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Credits;
+import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.Legend;
+import com.vaadin.flow.component.charts.model.Marker;
 import com.vaadin.flow.component.charts.model.Pane;
+import com.vaadin.flow.component.charts.model.PlotOptionsBar;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsPie;
+import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
@@ -122,6 +129,10 @@ public class ChartConfigurationApplier implements Serializable {
             if (configNode.has("pane") && configNode.get("pane").isObject()) {
                 applyPaneConfig(config, configNode.get("pane"));
             }
+            if (configNode.has("plotOptions")
+                    && configNode.get("plotOptions").isObject()) {
+                applyPlotOptionsConfig(config, configNode.get("plotOptions"));
+            }
         } catch (Exception e) {
             LOGGER.error("Error applying chart config", e);
         }
@@ -188,8 +199,13 @@ public class ChartConfigurationApplier implements Serializable {
         if (chartNode.has("width") && chartNode.get("width").isNumber()) {
             chartModel.setWidth(chartNode.get("width").asInt());
         }
-        if (chartNode.has("height") && chartNode.get("height").isString()) {
-            chartModel.setHeight(chartNode.get("height").asString());
+        if (chartNode.has("height")) {
+            if (chartNode.get("height").isString()) {
+                chartModel.setHeight(chartNode.get("height").asString());
+            } else if (chartNode.get("height").isNumber()) {
+                chartModel.setHeight(
+                        String.valueOf(chartNode.get("height").asInt()));
+            }
         }
         if (chartNode.has("marginTop")
                 && chartNode.get("marginTop").isNumber()) {
@@ -425,6 +441,111 @@ public class ChartConfigurationApplier implements Serializable {
             pane.setSize(paneNode.get("size").asString());
         }
         config.addPane(pane);
+    }
+
+    private void applyPlotOptionsConfig(Configuration config,
+            JsonNode plotOptionsNode) {
+        if (plotOptionsNode.has("series")
+                && plotOptionsNode.get("series").isObject()) {
+            PlotOptionsSeries series = new PlotOptionsSeries();
+            applySeriesPlotOptions(series, plotOptionsNode.get("series"));
+            config.setPlotOptions(series);
+        }
+        if (plotOptionsNode.has("pie")
+                && plotOptionsNode.get("pie").isObject()) {
+            PlotOptionsPie pie = new PlotOptionsPie();
+            JsonNode pieNode = plotOptionsNode.get("pie");
+            applyDataLabelsConfig(pie.getDataLabels(), pieNode);
+            if (pieNode.has("innerSize")
+                    && pieNode.get("innerSize").isString()) {
+                pie.setInnerSize(pieNode.get("innerSize").asString());
+            }
+            config.setPlotOptions(pie);
+        }
+        if (plotOptionsNode.has("column")
+                && plotOptionsNode.get("column").isObject()) {
+            PlotOptionsColumn column = new PlotOptionsColumn();
+            JsonNode columnNode = plotOptionsNode.get("column");
+            applyStacking(column, columnNode);
+            applyDataLabelsConfig(column.getDataLabels(), columnNode);
+            if (columnNode.has("borderRadius")
+                    && columnNode.get("borderRadius").isNumber()) {
+                column.setBorderRadius(columnNode.get("borderRadius").asInt());
+            }
+            config.setPlotOptions(column);
+        }
+        if (plotOptionsNode.has("bar")
+                && plotOptionsNode.get("bar").isObject()) {
+            PlotOptionsBar bar = new PlotOptionsBar();
+            JsonNode barNode = plotOptionsNode.get("bar");
+            applyStacking(bar, barNode);
+            applyDataLabelsConfig(bar.getDataLabels(), barNode);
+            if (barNode.has("borderRadius")
+                    && barNode.get("borderRadius").isNumber()) {
+                bar.setBorderRadius(barNode.get("borderRadius").asInt());
+            }
+            config.setPlotOptions(bar);
+        }
+    }
+
+    private void applySeriesPlotOptions(PlotOptionsSeries options,
+            JsonNode node) {
+        applyStacking(options, node);
+        applyDataLabelsConfig(options.getDataLabels(), node);
+        if (node.has("marker") && node.get("marker").isObject()) {
+            JsonNode markerNode = node.get("marker");
+            Marker marker = new Marker();
+            if (markerNode.has("enabled")
+                    && markerNode.get("enabled").isBoolean()) {
+                marker.setEnabled(markerNode.get("enabled").asBoolean());
+            }
+            options.setMarker(marker);
+        }
+    }
+
+    private void applyStacking(PlotOptionsSeries options, JsonNode node) {
+        if (node.has("stacking") && node.get("stacking").isString()) {
+            try {
+                options.setStacking(Stacking.valueOf(
+                        node.get("stacking").asString().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // skip
+            }
+        }
+    }
+
+    private void applyStacking(PlotOptionsColumn options, JsonNode node) {
+        if (node.has("stacking") && node.get("stacking").isString()) {
+            try {
+                options.setStacking(Stacking.valueOf(
+                        node.get("stacking").asString().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // skip
+            }
+        }
+    }
+
+    private void applyStacking(PlotOptionsBar options, JsonNode node) {
+        if (node.has("stacking") && node.get("stacking").isString()) {
+            try {
+                options.setStacking(Stacking.valueOf(
+                        node.get("stacking").asString().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // skip
+            }
+        }
+    }
+
+    private void applyDataLabelsConfig(DataLabels dataLabels, JsonNode node) {
+        if (node.has("dataLabels") && node.get("dataLabels").isObject()) {
+            JsonNode dlNode = node.get("dataLabels");
+            if (dlNode.has("enabled") && dlNode.get("enabled").isBoolean()) {
+                dataLabels.setEnabled(dlNode.get("enabled").asBoolean());
+            }
+            if (dlNode.has("format") && dlNode.get("format").isString()) {
+                dataLabels.setFormat(dlNode.get("format").asString());
+            }
+        }
     }
 
 }

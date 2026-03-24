@@ -32,12 +32,19 @@ import com.vaadin.flow.component.ai.dashboard.DashboardAIController.WidgetState;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LangChain4JLLMProvider;
 import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.upload.UploadButton;
+import com.vaadin.flow.component.upload.UploadDropZone;
+import com.vaadin.flow.component.upload.UploadFileList;
+import com.vaadin.flow.component.upload.UploadFileListVariant;
+import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
@@ -53,7 +60,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Route("vaadin-ai/ai-dashboard-demo")
-public class AIDashboardDemoPage extends HorizontalLayout {
+public class AIDashboardDemoPage extends UploadDropZone {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AIDashboardDemoPage.class);
@@ -62,9 +69,18 @@ public class AIDashboardDemoPage extends HorizontalLayout {
             "dashboard-state.json");
 
     public AIDashboardDemoPage() {
-        setSizeFull();
+        setHeightFull();
 
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+
+        // Upload support
+        var uploadManager = new UploadManager(this);
+        setUploadManager(uploadManager);
+
+        var uploadButton = new UploadButton(uploadManager);
+        uploadButton.setIcon(VaadinIcon.UPLOAD.create());
+        var fileList = new UploadFileList(uploadManager);
+        fileList.addThemeVariants(UploadFileListVariant.THUMBNAILS);
 
         // Dashboard section (left)
         var dashboard = new Dashboard();
@@ -96,8 +112,8 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         var saveStateButton = new NativeButton("Save Current State");
         saveStateButton.addClickListener(e -> {
             if (dashboard.getWidgets().isEmpty()) {
-                saveStateButton.getElement().executeJs(
-                        "window.alert('No widgets to save')");
+                saveStateButton.getElement()
+                        .executeJs("window.alert('No widgets to save')");
                 return;
             }
             DashboardState state = dashboardController.getState();
@@ -135,8 +151,14 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         messageList.setMarkdown(true);
         messageList.setSizeFull();
         var messageInput = new MessageInput();
-        messageInput.setWidthFull();
-        var chatSection = new VerticalLayout(messageList, messageInput);
+        messageInput.getStyle().set("flexGrow", "1");
+
+        var inputLayout = new Div(uploadButton, messageInput);
+        inputLayout.getStyle().set("display", "flex");
+        inputLayout.setWidthFull();
+
+        var chatSection = new VerticalLayout(messageList, fileList,
+                inputLayout);
         chatSection.setWidth("40%");
         chatSection.setPadding(false);
         chatSection.setFlexGrow(1, messageList);
@@ -148,12 +170,15 @@ public class AIDashboardDemoPage extends HorizontalLayout {
         var provider = new LangChain4JLLMProvider(model);
 
         // Create orchestrator with controller
-        AIOrchestrator.builder(provider,
-                DashboardAIController.getSystemPrompt())
+        AIOrchestrator
+                .builder(provider, DashboardAIController.getSystemPrompt())
                 .withMessageList(messageList).withInput(messageInput)
+                .withFileReceiver(uploadManager)
                 .withController(dashboardController).build();
 
-        add(dashboardSection, chatSection);
+        var mainLayout = new HorizontalLayout(dashboardSection, chatSection);
+        mainLayout.setSizeFull();
+        setContent(mainLayout);
     }
 
     private static void saveStateToFile(DashboardState state) {
@@ -208,14 +233,12 @@ public class AIDashboardDemoPage extends HorizontalLayout {
                         queries.add(q.asString());
                     }
                 }
-                widgets.add(new WidgetState(
-                        getStringOrNull(node, "widgetId"),
+                widgets.add(new WidgetState(getStringOrNull(node, "widgetId"),
                         getStringOrNull(node, "title"),
                         getStringOrNull(node, "type"),
                         node.has("colspan") ? node.get("colspan").asInt() : 1,
                         node.has("rowspan") ? node.get("rowspan").asInt() : 1,
-                        queries,
-                        getStringOrNull(node, "configuration")));
+                        queries, getStringOrNull(node, "configuration")));
             }
 
             LOGGER.info("Dashboard state loaded from {}", STATE_FILE);
