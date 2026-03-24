@@ -96,8 +96,7 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
 
             try (PreparedStatement pstmt = conn.prepareStatement(
                     "INSERT INTO employees (name, department, salary, age) VALUES (?, ?, ?, ?)")) {
-                insertEmployeeRow(pstmt, "John Doe", "Engineering", 85000,
-                        32);
+                insertEmployeeRow(pstmt, "John Doe", "Engineering", 85000, 32);
                 insertEmployeeRow(pstmt, "Jane Smith", "Sales", 72000, 28);
                 insertEmployeeRow(pstmt, "Bob Johnson", "Engineering", 95000,
                         41);
@@ -114,6 +113,230 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
                 insertProductRow(pstmt, "Monitor", "Electronics", 89, 299.99);
                 insertProductRow(pstmt, "Headphones", "Accessories", 210,
                         149.99);
+            }
+
+            // Stock prices for OHLC/Candlestick charts
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS stock_prices (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        trade_date DATE NOT NULL,
+                        ticker VARCHAR(10) NOT NULL,
+                        open_price DECIMAL(10,2) NOT NULL,
+                        high_price DECIMAL(10,2) NOT NULL,
+                        low_price DECIMAL(10,2) NOT NULL,
+                        close_price DECIMAL(10,2) NOT NULL,
+                        volume INT NOT NULL
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO stock_prices (trade_date, ticker, open_price, high_price, low_price, close_price, volume) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                insertStockRow(pstmt, "2025-01-06", "ACME", 142.50, 148.20,
+                        141.00, 147.80, 52000);
+                insertStockRow(pstmt, "2025-01-07", "ACME", 147.80, 151.30,
+                        146.50, 149.10, 48000);
+                insertStockRow(pstmt, "2025-01-08", "ACME", 149.10, 152.00,
+                        147.20, 148.50, 55000);
+                insertStockRow(pstmt, "2025-01-09", "ACME", 148.50, 153.80,
+                        148.00, 153.20, 63000);
+                insertStockRow(pstmt, "2025-01-10", "ACME", 153.20, 155.50,
+                        150.00, 151.40, 47000);
+                insertStockRow(pstmt, "2025-01-13", "ACME", 151.40, 154.60,
+                        149.80, 154.00, 51000);
+                insertStockRow(pstmt, "2025-01-14", "ACME", 154.00, 156.20,
+                        152.50, 155.80, 58000);
+                insertStockRow(pstmt, "2025-01-15", "ACME", 155.80, 158.00,
+                        154.30, 157.20, 62000);
+                insertStockRow(pstmt, "2025-01-16", "ACME", 157.20, 159.40,
+                        155.80, 156.50, 45000);
+                insertStockRow(pstmt, "2025-01-17", "ACME", 156.50, 157.80,
+                        153.00, 153.90, 53000);
+            }
+
+            // Project tasks for Gantt/XRange/Timeline charts
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS project_tasks (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        task_name VARCHAR(100) NOT NULL,
+                        phase VARCHAR(50) NOT NULL,
+                        start_date DATE NOT NULL,
+                        end_date DATE NOT NULL,
+                        progress DECIMAL(3,2) NOT NULL,
+                        depends_on INT
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO project_tasks (task_name, phase, start_date, end_date, progress, depends_on) VALUES (?, ?, ?, ?, ?, ?)")) {
+                insertTaskRow(pstmt, "Requirements", "Planning", "2025-01-01",
+                        "2025-01-15", 1.0, null);
+                insertTaskRow(pstmt, "Design", "Planning", "2025-01-10",
+                        "2025-01-25", 0.8, 1);
+                insertTaskRow(pstmt, "Backend Dev", "Development", "2025-01-20",
+                        "2025-02-20", 0.5, 2);
+                insertTaskRow(pstmt, "Frontend Dev", "Development",
+                        "2025-01-25", "2025-02-25", 0.3, 2);
+                insertTaskRow(pstmt, "Testing", "QA", "2025-02-15",
+                        "2025-03-10", 0.1, null);
+                insertTaskRow(pstmt, "Deployment", "Release", "2025-03-05",
+                        "2025-03-15", 0.0, 5);
+            }
+
+            // Organization hierarchy for Organization chart
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS org_chart (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        emp_name VARCHAR(100) NOT NULL,
+                        job_title VARCHAR(100) NOT NULL,
+                        manager_id INT,
+                        team_color VARCHAR(20)
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO org_chart (emp_name, job_title, manager_id, team_color) VALUES (?, ?, ?, ?)")) {
+                insertOrgRow(pstmt, "Sarah CEO", "CEO", null, "#e74c3c");
+                insertOrgRow(pstmt, "Tom VP Eng", "VP Engineering", 1,
+                        "#3498db");
+                insertOrgRow(pstmt, "Lisa VP Sales", "VP Sales", 1, "#2ecc71");
+                insertOrgRow(pstmt, "Mike Lead", "Tech Lead", 2, "#3498db");
+                insertOrgRow(pstmt, "Anna Dev", "Developer", 4, "#3498db");
+                insertOrgRow(pstmt, "Dan Sales", "Sales Manager", 3, "#2ecc71");
+            }
+
+            // Energy flow for Sankey diagram
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS energy_flow (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        source_name VARCHAR(50) NOT NULL,
+                        target_name VARCHAR(50) NOT NULL,
+                        amount DECIMAL(10,2) NOT NULL
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO energy_flow (source_name, target_name, amount) VALUES (?, ?, ?)")) {
+                insertFlowRow(pstmt, "Solar", "Electricity", 120);
+                insertFlowRow(pstmt, "Wind", "Electricity", 80);
+                insertFlowRow(pstmt, "Coal", "Electricity", 200);
+                insertFlowRow(pstmt, "Electricity", "Residential", 180);
+                insertFlowRow(pstmt, "Electricity", "Industrial", 150);
+                insertFlowRow(pstmt, "Electricity", "Commercial", 70);
+            }
+
+            // Temperature data for heatmap (day of week x hour)
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS website_traffic (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        day_of_week INT NOT NULL,
+                        hour_of_day INT NOT NULL,
+                        visitors INT NOT NULL
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO website_traffic (day_of_week, hour_of_day, visitors) VALUES (?, ?, ?)")) {
+                int[][] traffic = { { 0, 9, 120 }, { 0, 10, 180 },
+                        { 0, 11, 220 }, { 0, 12, 150 }, { 0, 13, 200 },
+                        { 0, 14, 250 }, { 0, 15, 190 }, { 0, 16, 160 },
+                        { 1, 9, 130 }, { 1, 10, 200 }, { 1, 11, 240 },
+                        { 1, 12, 170 }, { 1, 13, 210 }, { 1, 14, 260 },
+                        { 1, 15, 200 }, { 1, 16, 170 }, { 2, 9, 110 },
+                        { 2, 10, 170 }, { 2, 11, 210 }, { 2, 12, 160 },
+                        { 2, 13, 190 }, { 2, 14, 230 }, { 2, 15, 180 },
+                        { 2, 16, 150 }, { 3, 9, 140 }, { 3, 10, 210 },
+                        { 3, 11, 250 }, { 3, 12, 180 }, { 3, 13, 220 },
+                        { 3, 14, 270 }, { 3, 15, 210 }, { 3, 16, 175 },
+                        { 4, 9, 100 }, { 4, 10, 150 }, { 4, 11, 180 },
+                        { 4, 12, 130 }, { 4, 13, 160 }, { 4, 14, 190 },
+                        { 4, 15, 140 }, { 4, 16, 110 } };
+                for (int[] row : traffic) {
+                    pstmt.setInt(1, row[0]);
+                    pstmt.setInt(2, row[1]);
+                    pstmt.setInt(3, row[2]);
+                    pstmt.executeUpdate();
+                }
+            }
+
+            // Budget data for waterfall chart
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS budget_items (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        item_name VARCHAR(100) NOT NULL,
+                        amount INT NOT NULL,
+                        item_type VARCHAR(20)
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO budget_items (item_name, amount, item_type) VALUES (?, ?, ?)")) {
+                insertBudgetRow(pstmt, "Revenue", 420000, null);
+                insertBudgetRow(pstmt, "Cost of Goods", -180000, null);
+                insertBudgetRow(pstmt, "Gross Profit", 0, "intermediate");
+                insertBudgetRow(pstmt, "Salaries", -120000, null);
+                insertBudgetRow(pstmt, "Marketing", -35000, null);
+                insertBudgetRow(pstmt, "Rent", -25000, null);
+                insertBudgetRow(pstmt, "Net Profit", 0, "sum");
+            }
+
+            // Funnel/Pyramid data (sales pipeline)
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS sales_pipeline (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        stage VARCHAR(50) NOT NULL,
+                        prospects INT NOT NULL,
+                        sort_order INT NOT NULL
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO sales_pipeline (stage, prospects, sort_order) VALUES (?, ?, ?)")) {
+                insertPipelineRow(pstmt, "Leads", 1200, 1);
+                insertPipelineRow(pstmt, "Qualified", 800, 2);
+                insertPipelineRow(pstmt, "Proposal", 450, 3);
+                insertPipelineRow(pstmt, "Negotiation", 200, 4);
+                insertPipelineRow(pstmt, "Closed Won", 120, 5);
+            }
+
+            // Monthly metrics for gauge charts
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS kpi_metrics (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        metric_name VARCHAR(50) NOT NULL,
+                        current_val DECIMAL(10,2) NOT NULL,
+                        target_val DECIMAL(10,2) NOT NULL,
+                        min_val DECIMAL(10,2) NOT NULL,
+                        max_val DECIMAL(10,2) NOT NULL
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO kpi_metrics (metric_name, current_val, target_val, min_val, max_val) VALUES (?, ?, ?, ?, ?)")) {
+                insertKpiRow(pstmt, "Customer Satisfaction", 78, 90, 0, 100);
+                insertKpiRow(pstmt, "Revenue Target %", 72, 100, 0, 100);
+                insertKpiRow(pstmt, "Server Uptime %", 99.7, 99.9, 95, 100);
+            }
+
+            // Category hierarchy for treemap
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS expense_categories (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        category_name VARCHAR(100) NOT NULL,
+                        parent_category VARCHAR(100),
+                        amount DECIMAL(10,2) NOT NULL
+                    )
+                    """);
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO expense_categories (category_name, parent_category, amount) VALUES (?, ?, ?)")) {
+                insertExpenseRow(pstmt, "Operating", null, 0);
+                insertExpenseRow(pstmt, "Salaries", "Operating", 120000);
+                insertExpenseRow(pstmt, "Rent", "Operating", 25000);
+                insertExpenseRow(pstmt, "Utilities", "Operating", 8000);
+                insertExpenseRow(pstmt, "Marketing", null, 0);
+                insertExpenseRow(pstmt, "Digital Ads", "Marketing", 18000);
+                insertExpenseRow(pstmt, "Events", "Marketing", 12000);
+                insertExpenseRow(pstmt, "Content", "Marketing", 5000);
             }
 
             initialized = true;
@@ -150,6 +373,99 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
         pstmt.executeUpdate();
     }
 
+    private void insertStockRow(PreparedStatement pstmt, String date,
+            String ticker, double open, double high, double low, double close,
+            int volume) throws SQLException {
+        pstmt.setDate(1, java.sql.Date.valueOf(date));
+        pstmt.setString(2, ticker);
+        pstmt.setDouble(3, open);
+        pstmt.setDouble(4, high);
+        pstmt.setDouble(5, low);
+        pstmt.setDouble(6, close);
+        pstmt.setInt(7, volume);
+        pstmt.executeUpdate();
+    }
+
+    private void insertTaskRow(PreparedStatement pstmt, String name,
+            String phase, String startDate, String endDate, double progress,
+            Integer dependsOn) throws SQLException {
+        pstmt.setString(1, name);
+        pstmt.setString(2, phase);
+        pstmt.setDate(3, java.sql.Date.valueOf(startDate));
+        pstmt.setDate(4, java.sql.Date.valueOf(endDate));
+        pstmt.setDouble(5, progress);
+        if (dependsOn != null) {
+            pstmt.setInt(6, dependsOn);
+        } else {
+            pstmt.setNull(6, java.sql.Types.INTEGER);
+        }
+        pstmt.executeUpdate();
+    }
+
+    private void insertOrgRow(PreparedStatement pstmt, String name,
+            String title, Integer managerId, String color) throws SQLException {
+        pstmt.setString(1, name);
+        pstmt.setString(2, title);
+        if (managerId != null) {
+            pstmt.setInt(3, managerId);
+        } else {
+            pstmt.setNull(3, java.sql.Types.INTEGER);
+        }
+        pstmt.setString(4, color);
+        pstmt.executeUpdate();
+    }
+
+    private void insertFlowRow(PreparedStatement pstmt, String source,
+            String target, double amount) throws SQLException {
+        pstmt.setString(1, source);
+        pstmt.setString(2, target);
+        pstmt.setDouble(3, amount);
+        pstmt.executeUpdate();
+    }
+
+    private void insertBudgetRow(PreparedStatement pstmt, String name,
+            int amount, String type) throws SQLException {
+        pstmt.setString(1, name);
+        pstmt.setInt(2, amount);
+        if (type != null) {
+            pstmt.setString(3, type);
+        } else {
+            pstmt.setNull(3, java.sql.Types.VARCHAR);
+        }
+        pstmt.executeUpdate();
+    }
+
+    private void insertPipelineRow(PreparedStatement pstmt, String stage,
+            int prospects, int sortOrder) throws SQLException {
+        pstmt.setString(1, stage);
+        pstmt.setInt(2, prospects);
+        pstmt.setInt(3, sortOrder);
+        pstmt.executeUpdate();
+    }
+
+    private void insertKpiRow(PreparedStatement pstmt, String name,
+            double current, double target, double min, double max)
+            throws SQLException {
+        pstmt.setString(1, name);
+        pstmt.setDouble(2, current);
+        pstmt.setDouble(3, target);
+        pstmt.setDouble(4, min);
+        pstmt.setDouble(5, max);
+        pstmt.executeUpdate();
+    }
+
+    private void insertExpenseRow(PreparedStatement pstmt, String name,
+            String parent, double amount) throws SQLException {
+        pstmt.setString(1, name);
+        if (parent != null) {
+            pstmt.setString(2, parent);
+        } else {
+            pstmt.setNull(2, java.sql.Types.VARCHAR);
+        }
+        pstmt.setDouble(3, amount);
+        pstmt.executeUpdate();
+    }
+
     @Override
     public String getSchema() {
         StringBuilder schema = new StringBuilder("DATABASE SCHEMA:\n\n");
@@ -180,8 +496,7 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
                         while (columns.next()) {
                             String columnName = columns
                                     .getString("COLUMN_NAME");
-                            String columnType = columns
-                                    .getString("TYPE_NAME");
+                            String columnType = columns.getString("TYPE_NAME");
                             int columnSize = columns.getInt("COLUMN_SIZE");
                             String isNullable = columns
                                     .getString("IS_NULLABLE");
@@ -217,8 +532,7 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
                     "- Use \"MONTH\" with quotes when querying the sales table (reserved word)\n");
             schema.append(
                     "- Do NOT use reserved words like VALUE, KEY, ORDER, etc. as column aliases. Use descriptive names instead (e.g. total_revenue, sale_count)\n");
-            schema.append(
-                    "- All tables support standard SQL SELECT queries\n");
+            schema.append("- All tables support standard SQL SELECT queries\n");
 
         } catch (SQLException e) {
             return "Error retrieving database schema: " + e.getMessage();

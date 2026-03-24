@@ -139,14 +139,16 @@ public class ChartRenderer {
             }
             config.setSeries(allSeries.toArray(new Series[0]));
 
-            // Apply axis defaults from series data before LLM config,
-            // so that LLM-provided axis settings take priority.
-            applyAxisDefaults(config, allSeries);
-
             if (configJson != null) {
                 configurationApplier.applyConfiguration(chart, configJson);
             }
-            chart.drawChart();
+
+            // Apply axis defaults from series data after LLM config,
+            // so that data-driven axis type detection (e.g. datetime)
+            // overrides any incorrect LLM-provided axis type.
+            applyAxisDefaults(config, allSeries);
+
+            chart.drawChart(true);
         }));
     }
 
@@ -193,8 +195,8 @@ public class ChartRenderer {
 
         // Extract category names if items have names and the chart type
         // uses a category axis (not pie, sankey, etc.).
-        if (xAxis.getCategories() == null
-                && !NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
+        // Always override: data-derived categories are authoritative.
+        if (!NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
             var categories = extractCategories(items);
             if (categories != null) {
                 xAxis.setCategories(categories.toArray(new String[0]));
@@ -202,10 +204,10 @@ public class ChartRenderer {
         }
 
         // Detect datetime X values (epoch ms > year 2000).
-        if (xAxis.getType() == null) {
-            if (hasDatetimeXValues(items)) {
-                xAxis.setType(AxisType.DATETIME);
-            }
+        // Always override: the data is authoritative for axis type when
+        // values are clearly timestamps (e.g. OHLC dates).
+        if (hasDatetimeXValues(items)) {
+            xAxis.setType(AxisType.DATETIME);
         }
     }
 
