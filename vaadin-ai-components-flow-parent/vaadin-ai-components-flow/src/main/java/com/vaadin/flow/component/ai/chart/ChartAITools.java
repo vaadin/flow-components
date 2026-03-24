@@ -149,6 +149,32 @@ public final class ChartAITools {
         return result;
     }
 
+    /**
+     * Parses and validates the queries array from the tool arguments. Returns
+     * an error message if validation fails, or {@code null} if all queries are
+     * valid SELECT statements.
+     */
+    private static String validateQueries(JsonNode queriesNode,
+            List<String> out) {
+        if (queriesNode == null || queriesNode.isNull()) {
+            return "Error updating chart data: 'queries' parameter is required.";
+        }
+        if (!queriesNode.isArray()) {
+            return "Error updating chart data: 'queries' must be an array.";
+        }
+        for (JsonNode q : queriesNode) {
+            if (q == null || q.isNull()) {
+                return "Error updating chart data: 'queries' must not contain null elements.";
+            }
+            String query = q.asString().strip();
+            if (query.isEmpty()) {
+                return "Error updating chart data: 'queries' must not contain empty strings.";
+            }
+            out.add(query);
+        }
+        return null;
+    }
+
     private ChartAITools() {
     }
 
@@ -255,7 +281,7 @@ public final class ChartAITools {
                         IMPORTANT: Do NOT include 'series' in the configuration - chart data is managed separately via update_chart_data_source tool.
 
                         Parameters:
-                        - chartId (string, required): The ID of the chart to update
+                        - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
                         - configuration (object, required): Highcharts configuration object (excluding series)
 
                         Changes are applied when the request completes.""";
@@ -589,7 +615,7 @@ public final class ChartAITools {
                                 Optional: any pattern supporting DataSeriesItem accepts a {COLOR} column for per-point coloring.
 
                                 Parameters:
-                                - chartId (string, required): The ID of the chart to update
+                                - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
                                 - queries (array of strings, required): SQL SELECT queries, one per series
 
                                 Changes are applied when the request completes.""");
@@ -621,16 +647,11 @@ public final class ChartAITools {
                     JsonNode args = JacksonUtils.readTree(arguments);
                     String chartId = resolveChartId(args, callbacks);
 
-                    JsonNode queriesNode = args.get("queries");
-                    if (queriesNode == null || queriesNode.isNull()) {
-                        return "Error updating chart data: 'queries' parameter is required.";
-                    }
-                    if (!queriesNode.isArray()) {
-                        return "Error updating chart data: 'queries' must be an array.";
-                    }
                     List<String> queries = new ArrayList<>();
-                    for (JsonNode q : queriesNode) {
-                        queries.add(q.asString());
+                    String validationError = validateQueries(
+                            args.get("queries"), queries);
+                    if (validationError != null) {
+                        return validationError;
                     }
 
                     callbacks.updateData(chartId, queries);

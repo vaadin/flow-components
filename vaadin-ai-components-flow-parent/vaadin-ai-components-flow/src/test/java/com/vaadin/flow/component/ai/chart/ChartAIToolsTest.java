@@ -284,7 +284,7 @@ class ChartAIToolsTest {
             callbacks.updateDataException = new RuntimeException(
                     "Invalid query");
             var result = tool.execute(
-                    "{\"chartId\": \"chart-1\", \"queries\": [\"INVALID\"]}");
+                    "{\"chartId\": \"chart-1\", \"queries\": [\"SELECT invalid\"]}");
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("Invalid query"));
         }
@@ -309,6 +309,24 @@ class ChartAIToolsTest {
                     "{\"chartId\": \"chart-1\", \"queries\": \"SELECT 1\"}");
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("must be an array"));
+        }
+
+        @Test
+        void execute_withNullQueryElement_returnsError() {
+            var result = tool
+                    .execute("{\"chartId\": \"chart-1\", \"queries\": [null]}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(
+                    result.contains("must not contain null elements"));
+        }
+
+        @Test
+        void execute_withEmptyQueryString_returnsError() {
+            var result = tool
+                    .execute("{\"chartId\": \"chart-1\", \"queries\": [\"\"]}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(
+                    result.contains("must not contain empty strings"));
         }
 
         @Test
