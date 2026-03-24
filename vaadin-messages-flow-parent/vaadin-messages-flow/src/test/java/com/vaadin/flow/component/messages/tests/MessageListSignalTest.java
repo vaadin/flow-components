@@ -17,30 +17,30 @@ package com.vaadin.flow.component.messages.tests;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
 import tools.jackson.databind.node.ArrayNode;
 
-public class MessageListSignalTest extends AbstractSignalsUnitTest {
+class MessageListSignalTest extends AbstractSignalsJUnit6Test {
 
     private MessageList messageList;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         messageList = new MessageList();
     }
 
     @Test
-    public void signalConstructor_setsItemsFromSignal() {
+    void signalConstructor_setsItemsFromSignal() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var item2Signal = new ValueSignal<>(new MessageListItem("World"));
         var listSignal = new ValueSignal<>(List.of(item1Signal, item2Signal));
@@ -48,15 +48,17 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
         messageList = new MessageList(listSignal);
         ui.add(messageList);
 
-        Assert.assertEquals(2, messageList.getItems().size());
-        Assert.assertEquals("Hello", messageList.getItems().get(0).getText());
-        Assert.assertEquals("World", messageList.getItems().get(1).getText());
+        Assertions.assertEquals(2, messageList.getItems().size());
+        Assertions.assertEquals("Hello",
+                messageList.getItems().get(0).getText());
+        Assertions.assertEquals("World",
+                messageList.getItems().get(1).getText());
 
         assertFullUpdate();
     }
 
     @Test
-    public void signalConstructor_updatesWhenSignalChanges() {
+    void signalConstructor_updatesWhenSignalChanges() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
@@ -67,23 +69,24 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
         var item2Signal = new ValueSignal<>(new MessageListItem("World"));
         listSignal.set(List.of(item1Signal, item2Signal));
 
-        Assert.assertEquals(2, messageList.getItems().size());
+        Assertions.assertEquals(2, messageList.getItems().size());
         assertFullUpdate();
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void signalConstructor_setItemsWhileBound_throws() {
+    @Test
+    void signalConstructor_setItemsWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         messageList = new MessageList(listSignal);
         ui.add(messageList);
 
-        messageList.setItems(List.of(new MessageListItem("World")));
+        Assertions.assertThrows(BindingActiveException.class, () -> messageList
+                .setItems(List.of(new MessageListItem("World"))));
     }
 
     @Test
-    public void bindItems_setsItemsFromSignal() {
+    void bindItems_setsItemsFromSignal() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var item2Signal = new ValueSignal<>(new MessageListItem("World"));
         var listSignal = new ValueSignal<>(List.of(item1Signal, item2Signal));
@@ -91,84 +94,91 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
         messageList.bindItems(listSignal);
         ui.add(messageList);
 
-        Assert.assertEquals(2, messageList.getItems().size());
-        Assert.assertEquals("Hello", messageList.getItems().get(0).getText());
-        Assert.assertEquals("World", messageList.getItems().get(1).getText());
+        Assertions.assertEquals(2, messageList.getItems().size());
+        Assertions.assertEquals("Hello",
+                messageList.getItems().get(0).getText());
+        Assertions.assertEquals("World",
+                messageList.getItems().get(1).getText());
         assertFullUpdate();
     }
 
     @Test
-    public void bindItems_updatesWhenListSignalChanges() {
+    void bindItems_updatesWhenListSignalChanges() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         messageList.bindItems(listSignal);
         ui.add(messageList);
 
-        Assert.assertEquals(1, messageList.getItems().size());
+        Assertions.assertEquals(1, messageList.getItems().size());
         assertFullUpdate();
 
         var item2Signal = new ValueSignal<>(new MessageListItem("World"));
         var item3Signal = new ValueSignal<>(new MessageListItem("Foo"));
         listSignal.set(List.of(item1Signal, item2Signal, item3Signal));
 
-        Assert.assertEquals(3, messageList.getItems().size());
-        Assert.assertEquals("Foo", messageList.getItems().get(2).getText());
+        Assertions.assertEquals(3, messageList.getItems().size());
+        Assertions.assertEquals("Foo", messageList.getItems().get(2).getText());
         assertFullUpdate();
     }
 
     @Test
-    public void bindItems_updatesWhenItemSignalChanges() {
+    void bindItems_updatesWhenItemSignalChanges() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         messageList.bindItems(listSignal);
         ui.add(messageList);
 
-        Assert.assertEquals("Hello", messageList.getItems().get(0).getText());
+        Assertions.assertEquals("Hello",
+                messageList.getItems().get(0).getText());
         assertFullUpdate();
 
         item1Signal.set(new MessageListItem("Updated Hello"));
 
-        Assert.assertEquals("Updated Hello",
+        Assertions.assertEquals("Updated Hello",
                 messageList.getItems().get(0).getText());
         assertFullUpdate();
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void setItemsWhileBound_throws() {
+    @Test
+    void setItemsWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         messageList.bindItems(listSignal);
         ui.add(messageList);
 
-        messageList.setItems(List.of(new MessageListItem("World")));
+        Assertions.assertThrows(BindingActiveException.class, () -> messageList
+                .setItems(List.of(new MessageListItem("World"))));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void addItemWhileBound_throws() {
+    @Test
+    void addItemWhileBound_throws() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         messageList.bindItems(listSignal);
         ui.add(messageList);
 
-        messageList.addItem(new MessageListItem("World"));
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> messageList.addItem(new MessageListItem("World")));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_calledTwice_throws() {
+    @Test
+    void bindItems_calledTwice_throws() {
         var item1Signal = new ValueSignal<>(new MessageListItem("Hello"));
         var listSignal = new ValueSignal<>(List.of(item1Signal));
 
         messageList.bindItems(listSignal);
-        messageList.bindItems(listSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> messageList.bindItems(listSignal));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void bindItems_nullSignal_throws() {
-        messageList.bindItems(null);
+    @Test
+    void bindItems_nullSignal_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> messageList.bindItems(null));
     }
 
     /**
@@ -179,18 +189,18 @@ public class MessageListSignalTest extends AbstractSignalsUnitTest {
     private void assertFullUpdate() {
         var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
         // Expect only one pending invocation
-        Assert.assertEquals(1, pendingInvocations.size());
+        Assertions.assertEquals(1, pendingInvocations.size());
 
         var invocation = pendingInvocations.getFirst();
         // Expect the only invocation to be setItems
-        Assert.assertTrue(invocation.getInvocation().getExpression()
+        Assertions.assertTrue(invocation.getInvocation().getExpression()
                 .contains("setItems"));
 
         // Expect the parameters to equal the items in the message list
         var parameterItems = (ArrayNode) invocation.getInvocation()
                 .getParameters().getFirst();
         var expectedItems = JacksonUtils.listToJson(messageList.getItems());
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 JacksonUtils.jsonEquals(expectedItems, parameterItems));
     }
 }
