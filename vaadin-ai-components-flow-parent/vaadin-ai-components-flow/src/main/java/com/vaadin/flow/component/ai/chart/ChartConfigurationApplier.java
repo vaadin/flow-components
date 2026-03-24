@@ -32,7 +32,6 @@ import com.vaadin.flow.component.charts.model.ColorAxis;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Credits;
 import com.vaadin.flow.component.charts.model.Dimension;
-import com.vaadin.flow.component.charts.model.Exporting;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.Legend;
@@ -122,10 +121,6 @@ public class ChartConfigurationApplier implements Serializable {
             }
             if (configNode.has("pane") && configNode.get("pane").isObject()) {
                 applyPaneConfig(config, configNode.get("pane"));
-            }
-            if (configNode.has("exporting")
-                    && configNode.get("exporting").isObject()) {
-                applyExportingConfig(config, configNode.get("exporting"));
             }
         } catch (Exception e) {
             LOGGER.error("Error applying chart config", e);
@@ -432,32 +427,4 @@ public class ChartConfigurationApplier implements Serializable {
         config.addPane(pane);
     }
 
-    private void applyExportingConfig(Configuration config,
-            JsonNode exportingNode) {
-        if (!exportingNode.isObject()) {
-            return;
-        }
-        Exporting exporting = config.getExporting();
-        if (exportingNode.has("enabled")
-                && exportingNode.get("enabled").isBoolean()) {
-            exporting.setEnabled(exportingNode.get("enabled").asBoolean());
-        }
-        if (exportingNode.has("filename")
-                && exportingNode.get("filename").isString()) {
-            exporting.setFilename(exportingNode.get("filename").asString());
-        }
-        if (exportingNode.has("sourceWidth")
-                && exportingNode.get("sourceWidth").isNumber()) {
-            exporting.setSourceWidth(exportingNode.get("sourceWidth").asInt());
-        }
-        if (exportingNode.has("sourceHeight")
-                && exportingNode.get("sourceHeight").isNumber()) {
-            exporting
-                    .setSourceHeight(exportingNode.get("sourceHeight").asInt());
-        }
-        if (exportingNode.has("scale")
-                && exportingNode.get("scale").isNumber()) {
-            exporting.setScale(exportingNode.get("scale").asInt());
-        }
-    }
 }
