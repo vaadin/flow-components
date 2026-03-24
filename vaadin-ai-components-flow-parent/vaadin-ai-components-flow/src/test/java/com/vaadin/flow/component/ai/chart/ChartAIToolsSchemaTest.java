@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.SpecificationVersion;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -67,7 +67,7 @@ import com.vaadin.flow.component.charts.model.style.SolidColor;
 class ChartAIToolsSchemaTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static JsonSchema schema;
+    private static Schema schema;
     private static JsonNode configSchemaNode;
 
     /**
@@ -95,9 +95,9 @@ class ChartAIToolsSchemaTest {
         // directly (without the wrapping "configuration" key).
         configSchemaNode = schemaNode.get("properties").get("configuration");
 
-        JsonSchemaFactory factory = JsonSchemaFactory
-                .getInstance(SpecVersion.VersionFlag.V4);
-        schema = factory.getSchema(configSchemaNode);
+        SchemaRegistry registry = SchemaRegistry
+                .withDefaultDialect(SpecificationVersion.DRAFT_4);
+        schema = registry.getSchema(configSchemaNode);
     }
 
     @Test
@@ -414,10 +414,9 @@ class ChartAIToolsSchemaTest {
             JsonNode configNode = MAPPER.readTree(json);
 
             // 1. Validate serialized JSON conforms to schema types/enums
-            Set<ValidationMessage> errors = schema.validate(configNode);
+            List<Error> errors = schema.validate(configNode);
             if (!errors.isEmpty()) {
-                String details = errors.stream()
-                        .map(ValidationMessage::getMessage)
+                String details = errors.stream().map(Error::getMessage)
                         .collect(Collectors.joining("\n  - ", "\n  - ", ""));
                 throw new AssertionError(
                         "Serialized configuration does not match schema:"
