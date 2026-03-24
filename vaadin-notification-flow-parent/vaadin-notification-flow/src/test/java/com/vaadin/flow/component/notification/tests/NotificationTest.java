@@ -15,74 +15,74 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class NotificationTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class NotificationTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Notification notification;
 
     @Test
-    public void stringAndDurationCtor() {
+    void stringAndDurationCtor() {
         notification = new Notification("foo", 4000);
-        Assert.assertEquals(4000, notification.getDuration(), 0);
-        Assert.assertEquals("bottom-start",
+        Assertions.assertEquals(4000, notification.getDuration(), 0);
+        Assertions.assertEquals("bottom-start",
                 notification.getPosition().getClientName());
     }
 
     @Test
-    public void stringDurAndPositionCtor() {
+    void stringDurAndPositionCtor() {
         notification = new Notification("fooo", 10000, Position.TOP_END);
-        Assert.assertEquals(10000, notification.getDuration(), 0);
-        Assert.assertEquals("top-end",
+        Assertions.assertEquals(10000, notification.getDuration(), 0);
+        Assertions.assertEquals("top-end",
                 notification.getPosition().getClientName());
     }
 
     @Test
-    public void stringDurationPositionAndAssertiveCtor() {
+    void stringDurationPositionAndAssertiveCtor() {
         notification = new Notification("fooo", 10000, Position.TOP_END, true);
-        Assert.assertEquals(10000, notification.getDuration(), 0);
-        Assert.assertEquals("top-end",
+        Assertions.assertEquals(10000, notification.getDuration(), 0);
+        Assertions.assertEquals("top-end",
                 notification.getPosition().getClientName());
-        Assert.assertTrue(notification.isAssertive());
+        Assertions.assertTrue(notification.isAssertive());
     }
 
     @Test
-    public void componentCtor() {
+    void componentCtor() {
         notification = new Notification(new Span(), new NativeButton());
 
         notification.setPosition(Position.BOTTOM_END);
-        Assert.assertEquals("bottom-end",
+        Assertions.assertEquals("bottom-end",
                 notification.getPosition().getClientName());
     }
 
     @Test
-    public void staticCtor() {
+    void staticCtor() {
         notification = Notification.show("fooooo", 4000, Position.BOTTOM_CENTER,
                 true);
-        Assert.assertEquals("bottom-center",
+        Assertions.assertEquals("bottom-center",
                 notification.getPosition().getClientName());
-        Assert.assertTrue(notification.isAssertive());
+        Assertions.assertTrue(notification.isAssertive());
     }
 
     @Test
-    public void setPositon() {
+    void setPositon() {
         notification = new Notification();
 
         notification.setPosition(Position.BOTTOM_STRETCH);
-        Assert.assertEquals("bottom-stretch",
+        Assertions.assertEquals("bottom-stretch",
                 notification.getPosition().getClientName());
     }
 }
