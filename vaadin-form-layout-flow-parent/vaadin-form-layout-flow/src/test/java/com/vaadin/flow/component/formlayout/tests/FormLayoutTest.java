@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.formlayout.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -27,16 +27,16 @@ import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
 
-public class FormLayoutTest {
+class FormLayoutTest {
 
     @Test
-    public void getResponsiveSteps_noInitialSteps_emptyListIsReturned() {
+    void getResponsiveSteps_noInitialSteps_emptyListIsReturned() {
         FormLayout layout = new FormLayout();
-        Assert.assertTrue(layout.getResponsiveSteps().isEmpty());
+        Assertions.assertTrue(layout.getResponsiveSteps().isEmpty());
     }
 
     @Test
-    public void create_FormLayout() {
+    void create_FormLayout() {
         // Just testing that creating form layout actually compiles and doesn't
         // throw. Test is on purpose, so that the implementation not
         // accidentally removed.
@@ -46,7 +46,7 @@ public class FormLayoutTest {
     }
 
     @Test
-    public void verifyColspanElement() {
+    void verifyColspanElement() {
         FormLayout layout = new FormLayout();
         // using layouts as components to avoid importing dependencies.
 
@@ -54,321 +54,327 @@ public class FormLayoutTest {
         FormLayout comp1 = new FormLayout();
         layout.add(comp1, 2);
         String strColspan = comp1.getElement().getAttribute("colspan");
-        Assert.assertEquals(2, Integer.parseInt(strColspan));
+        Assertions.assertEquals(2, Integer.parseInt(strColspan));
     }
 
     @Test
-    public void verifyColspanCodeBehaviour() {
+    void verifyColspanCodeBehaviour() {
         FormLayout layout = new FormLayout();
         // using layouts as components to avoid importing dependencies.
 
         // verifying normal use cases
         FormLayout comp1 = new FormLayout();
         layout.add(comp1, 2);
-        Assert.assertEquals(2, layout.getColspan(comp1));
+        Assertions.assertEquals(2, layout.getColspan(comp1));
         layout.setColspan(comp1, 1);
-        Assert.assertEquals(1, layout.getColspan(comp1));
+        Assertions.assertEquals(1, layout.getColspan(comp1));
 
         // verifying it correctly sets it to 1 if an number lower than 1 is
         // supplied
         FormLayout comp2 = new FormLayout();
         layout.add(comp2, -1);
-        Assert.assertEquals(1, layout.getColspan(comp2));
+        Assertions.assertEquals(1, layout.getColspan(comp2));
 
         // verifying it correctly gets 1 if invalid colspans are supplied
         // outside the API
         FormLayout compInvalid = new FormLayout();
         layout.add(compInvalid);
         compInvalid.getElement().setAttribute("colspan", "qsd4hdsj%f");
-        Assert.assertEquals(1, layout.getColspan(compInvalid));
+        Assertions.assertEquals(1, layout.getColspan(compInvalid));
 
         // verifying it correctly gets 1 if no colspan was set.
         FormLayout compUnset = new FormLayout();
         layout.add(compUnset);
-        Assert.assertEquals(1, layout.getColspan(compUnset));
+        Assertions.assertEquals(1, layout.getColspan(compUnset));
 
     }
 
     @Test
-    public void setResponsiveSteps_getResponsiveSteps() {
+    void setResponsiveSteps_getResponsiveSteps() {
         FormLayout formLayout = new FormLayout();
 
         formLayout.setResponsiveSteps(new ResponsiveStep(null, 1));
-        Assert.assertEquals(1, formLayout.getResponsiveSteps().size());
+        Assertions.assertEquals(1, formLayout.getResponsiveSteps().size());
 
         formLayout.setResponsiveSteps(new ResponsiveStep(null, 1),
                 new ResponsiveStep("1px", 1));
-        Assert.assertEquals(2, formLayout.getResponsiveSteps().size());
+        Assertions.assertEquals(2, formLayout.getResponsiveSteps().size());
 
         formLayout.setResponsiveSteps(new ResponsiveStep(null, 1),
                 new ResponsiveStep("1px", 1), new ResponsiveStep("1px", 1,
                         ResponsiveStep.LabelsPosition.TOP));
-        Assert.assertEquals(3, formLayout.getResponsiveSteps().size());
+        Assertions.assertEquals(3, formLayout.getResponsiveSteps().size());
     }
 
     @Test
-    public void setLabelWidth_getLabelWidth() {
+    void setLabelWidth_getLabelWidth() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 formLayout.getStyle().has("--vaadin-form-layout-label-width"));
-        Assert.assertNull(formLayout.getLabelWidth());
+        Assertions.assertNull(formLayout.getLabelWidth());
 
         formLayout.setLabelWidth("2em");
-        Assert.assertEquals("2em",
+        Assertions.assertEquals("2em",
                 formLayout.getStyle().get("--vaadin-form-layout-label-width"));
-        Assert.assertEquals("2em", formLayout.getLabelWidth());
+        Assertions.assertEquals("2em", formLayout.getLabelWidth());
 
         formLayout.setLabelWidth(160, Unit.PIXELS);
-        Assert.assertEquals("160.0px",
+        Assertions.assertEquals("160.0px",
                 formLayout.getStyle().get("--vaadin-form-layout-label-width"));
-        Assert.assertEquals("160.0px", formLayout.getLabelWidth());
+        Assertions.assertEquals("160.0px", formLayout.getLabelWidth());
 
         formLayout.setLabelWidth(null);
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 formLayout.getStyle().has("--vaadin-form-layout-label-width"));
-        Assert.assertNull(formLayout.getLabelWidth());
+        Assertions.assertNull(formLayout.getLabelWidth());
     }
 
     @Test
-    public void setLabelSpacing_getLabelSpacing() {
+    void setLabelSpacing_getLabelSpacing() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getStyle()
+        Assertions.assertFalse(formLayout.getStyle()
                 .has("--vaadin-form-layout-label-spacing"));
-        Assert.assertNull(formLayout.getLabelSpacing());
+        Assertions.assertNull(formLayout.getLabelSpacing());
 
         formLayout.setLabelSpacing("10em");
-        Assert.assertEquals("10em", formLayout.getStyle()
+        Assertions.assertEquals("10em", formLayout.getStyle()
                 .get("--vaadin-form-layout-label-spacing"));
-        Assert.assertEquals("10em", formLayout.getLabelSpacing());
+        Assertions.assertEquals("10em", formLayout.getLabelSpacing());
 
         formLayout.setLabelSpacing(160, Unit.PIXELS);
-        Assert.assertEquals("160.0px", formLayout.getStyle()
+        Assertions.assertEquals("160.0px", formLayout.getStyle()
                 .get("--vaadin-form-layout-label-spacing"));
-        Assert.assertEquals("160.0px", formLayout.getLabelSpacing());
+        Assertions.assertEquals("160.0px", formLayout.getLabelSpacing());
 
         formLayout.setLabelSpacing(null);
-        Assert.assertFalse(formLayout.getStyle()
+        Assertions.assertFalse(formLayout.getStyle()
                 .has("--vaadin-form-layout-label-spacing"));
-        Assert.assertNull(formLayout.getLabelSpacing());
+        Assertions.assertNull(formLayout.getLabelSpacing());
     }
 
     @Test
-    public void setColumnSpacing_getColumnSpacing() {
+    void setColumnSpacing_getColumnSpacing() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getStyle()
+        Assertions.assertFalse(formLayout.getStyle()
                 .has("--vaadin-form-layout-column-spacing"));
-        Assert.assertNull(formLayout.getColumnSpacing());
+        Assertions.assertNull(formLayout.getColumnSpacing());
 
         formLayout.setColumnSpacing("10em");
-        Assert.assertEquals("10em", formLayout.getStyle()
+        Assertions.assertEquals("10em", formLayout.getStyle()
                 .get("--vaadin-form-layout-column-spacing"));
-        Assert.assertEquals("10em", formLayout.getColumnSpacing());
+        Assertions.assertEquals("10em", formLayout.getColumnSpacing());
 
         formLayout.setColumnSpacing(160, Unit.PIXELS);
-        Assert.assertEquals("160.0px", formLayout.getStyle()
+        Assertions.assertEquals("160.0px", formLayout.getStyle()
                 .get("--vaadin-form-layout-column-spacing"));
-        Assert.assertEquals("160.0px", formLayout.getColumnSpacing());
+        Assertions.assertEquals("160.0px", formLayout.getColumnSpacing());
 
         formLayout.setColumnSpacing(null);
-        Assert.assertFalse(formLayout.getStyle()
+        Assertions.assertFalse(formLayout.getStyle()
                 .has("--vaadin-form-layout-column-spacing"));
-        Assert.assertNull(formLayout.getColumnSpacing());
+        Assertions.assertNull(formLayout.getColumnSpacing());
     }
 
     @Test
-    public void setRowSpacing_getRowSpacing() {
+    void setRowSpacing_getRowSpacing() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 formLayout.getStyle().has("--vaadin-form-layout-row-spacing"));
-        Assert.assertNull(formLayout.getRowSpacing());
+        Assertions.assertNull(formLayout.getRowSpacing());
 
         formLayout.setRowSpacing("10em");
-        Assert.assertEquals("10em",
+        Assertions.assertEquals("10em",
                 formLayout.getStyle().get("--vaadin-form-layout-row-spacing"));
-        Assert.assertEquals("10em", formLayout.getRowSpacing());
+        Assertions.assertEquals("10em", formLayout.getRowSpacing());
 
         formLayout.setRowSpacing(160, Unit.PIXELS);
-        Assert.assertEquals("160.0px",
+        Assertions.assertEquals("160.0px",
                 formLayout.getStyle().get("--vaadin-form-layout-row-spacing"));
-        Assert.assertEquals("160.0px", formLayout.getRowSpacing());
+        Assertions.assertEquals("160.0px", formLayout.getRowSpacing());
 
         formLayout.setRowSpacing(null);
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 formLayout.getStyle().has("--vaadin-form-layout-row-spacing"));
-        Assert.assertNull(formLayout.getRowSpacing());
+        Assertions.assertNull(formLayout.getRowSpacing());
     }
 
     @Test
-    public void setAutoResponsive_getAutoResponsive() {
+    void setAutoResponsive_getAutoResponsive() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 formLayout.getElement().hasProperty("autoResponsive"));
 
         formLayout.setAutoResponsive(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 formLayout.getElement().getProperty("autoResponsive", false));
     }
 
     @Test
-    public void setAutoRows_getAutoRows() {
+    void setAutoRows_getAutoRows() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("autoRows"));
-        Assert.assertFalse(formLayout.isAutoRows());
+        Assertions.assertFalse(formLayout.getElement().hasProperty("autoRows"));
+        Assertions.assertFalse(formLayout.isAutoRows());
 
         formLayout.setAutoRows(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 formLayout.getElement().getProperty("autoRows", false));
-        Assert.assertTrue(formLayout.isAutoRows());
+        Assertions.assertTrue(formLayout.isAutoRows());
     }
 
     @Test
-    public void setColumnWidth_getColumnWidth() {
+    void setColumnWidth_getColumnWidth() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("columnWidth"));
-        Assert.assertNull(formLayout.getColumnWidth());
+        Assertions.assertFalse(
+                formLayout.getElement().hasProperty("columnWidth"));
+        Assertions.assertNull(formLayout.getColumnWidth());
 
         formLayout.setColumnWidth("10em");
-        Assert.assertEquals("10em",
+        Assertions.assertEquals("10em",
                 formLayout.getElement().getProperty("columnWidth"));
-        Assert.assertEquals("10em", formLayout.getColumnWidth());
+        Assertions.assertEquals("10em", formLayout.getColumnWidth());
 
         formLayout.setColumnWidth(160, Unit.PIXELS);
-        Assert.assertEquals("160.0px",
+        Assertions.assertEquals("160.0px",
                 formLayout.getElement().getProperty("columnWidth"));
-        Assert.assertEquals("160.0px", formLayout.getColumnWidth());
+        Assertions.assertEquals("160.0px", formLayout.getColumnWidth());
 
         formLayout.setColumnWidth(null);
-        Assert.assertNull(formLayout.getElement().getProperty("columnWidth"));
-        Assert.assertNull(formLayout.getColumnWidth());
+        Assertions
+                .assertNull(formLayout.getElement().getProperty("columnWidth"));
+        Assertions.assertNull(formLayout.getColumnWidth());
     }
 
     @Test
-    public void setMaxColumns_getMaxColumns() {
+    void setMaxColumns_getMaxColumns() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertEquals(0, formLayout.getMaxColumns());
-        Assert.assertFalse(formLayout.getElement().hasProperty("maxColumns"));
+        Assertions.assertEquals(0, formLayout.getMaxColumns());
+        Assertions
+                .assertFalse(formLayout.getElement().hasProperty("maxColumns"));
 
         formLayout.setMaxColumns(4);
-        Assert.assertEquals(4, formLayout.getMaxColumns());
-        Assert.assertEquals(4,
+        Assertions.assertEquals(4, formLayout.getMaxColumns());
+        Assertions.assertEquals(4,
                 formLayout.getElement().getProperty("maxColumns", 0));
     }
 
     @Test
-    public void minColumnsPropertyIsEmptyByDefault() {
+    void minColumnsPropertyIsEmptyByDefault() {
         var formLayout = new FormLayout();
-        Assert.assertEquals(0, formLayout.getMinColumns());
-        Assert.assertFalse(formLayout.getElement().hasProperty("minColumns"));
+        Assertions.assertEquals(0, formLayout.getMinColumns());
+        Assertions
+                .assertFalse(formLayout.getElement().hasProperty("minColumns"));
     }
 
     @Test
-    public void setMinColumns_minColumnsIsCorrectlyUpdated() {
+    void setMinColumns_minColumnsIsCorrectlyUpdated() {
         var formLayout = new FormLayout();
         var minColumns = 4;
         formLayout.setMinColumns(minColumns);
-        Assert.assertEquals(minColumns, formLayout.getMinColumns());
-        Assert.assertEquals(minColumns,
+        Assertions.assertEquals(minColumns, formLayout.getMinColumns());
+        Assertions.assertEquals(minColumns,
                 formLayout.getElement().getProperty("minColumns", 0));
     }
 
     @Test
-    public void setExpandColumns_isExpandColumns() {
+    void setExpandColumns_isExpandColumns() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 formLayout.getElement().hasProperty("expandColumns"));
-        Assert.assertFalse(formLayout.isExpandColumns());
+        Assertions.assertFalse(formLayout.isExpandColumns());
 
         formLayout.setExpandColumns(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 formLayout.getElement().getProperty("expandColumns", false));
-        Assert.assertTrue(formLayout.isExpandColumns());
+        Assertions.assertTrue(formLayout.isExpandColumns());
     }
 
     @Test
-    public void setExpandFields_isExpandFields() {
+    void setExpandFields_isExpandFields() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("expandFields"));
-        Assert.assertFalse(formLayout.isExpandFields());
+        Assertions.assertFalse(
+                formLayout.getElement().hasProperty("expandFields"));
+        Assertions.assertFalse(formLayout.isExpandFields());
 
         formLayout.setExpandFields(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 formLayout.getElement().getProperty("expandFields", false));
-        Assert.assertTrue(formLayout.isExpandFields());
+        Assertions.assertTrue(formLayout.isExpandFields());
     }
 
     @Test
-    public void setLabelsAside_isLabelsAside() {
+    void setLabelsAside_isLabelsAside() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("labelsAside"));
-        Assert.assertFalse(formLayout.isLabelsAside());
+        Assertions.assertFalse(
+                formLayout.getElement().hasProperty("labelsAside"));
+        Assertions.assertFalse(formLayout.isLabelsAside());
 
         formLayout.setLabelsAside(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 formLayout.getElement().getProperty("labelsAside", false));
-        Assert.assertTrue(formLayout.isLabelsAside());
+        Assertions.assertTrue(formLayout.isLabelsAside());
     }
 
     @Test
-    public void addFormRow() {
+    void addFormRow() {
         FormLayout formLayout = new FormLayout();
         FormRow row = formLayout.addFormRow(new Input(), new Input());
-        Assert.assertEquals(2, row.getElement().getChildCount());
-        Assert.assertEquals(formLayout.getElement(),
+        Assertions.assertEquals(2, row.getElement().getChildCount());
+        Assertions.assertEquals(formLayout.getElement(),
                 row.getElement().getParent());
     }
 
     @Test
-    public void formRow_addFormItem() {
+    void formRow_addFormItem() {
         FormRow row = new FormRow();
         FormItem item = row.addFormItem(new Input(), "custom label");
-        Assert.assertEquals(2, item.getElement().getChildCount());
+        Assertions.assertEquals(2, item.getElement().getChildCount());
 
         Element input = item.getElement().getChild(0);
-        Assert.assertNotNull(input);
-        Assert.assertEquals("input", input.getTag());
+        Assertions.assertNotNull(input);
+        Assertions.assertEquals("input", input.getTag());
 
         Element label = item.getElement().getChild(1);
-        Assert.assertNotNull(label);
-        Assert.assertEquals("label", label.getTag());
-        Assert.assertEquals("custom label", label.getText());
+        Assertions.assertNotNull(label);
+        Assertions.assertEquals("label", label.getTag());
+        Assertions.assertEquals("custom label", label.getText());
     }
 
     @Test
-    public void formRow_addFormItemWithComponent() {
+    void formRow_addFormItemWithComponent() {
         FormRow row = new FormRow();
         FormItem item = row.addFormItem(new Input(), new Span("custom label"));
-        Assert.assertEquals(2, item.getElement().getChildCount());
+        Assertions.assertEquals(2, item.getElement().getChildCount());
 
         Element input = item.getElement().getChild(0);
-        Assert.assertNotNull(input);
-        Assert.assertEquals("input", input.getTag());
+        Assertions.assertNotNull(input);
+        Assertions.assertEquals("input", input.getTag());
 
         Element label = item.getElement().getChild(1);
-        Assert.assertNotNull(label);
-        Assert.assertEquals("span", label.getTag());
-        Assert.assertEquals("custom label", label.getText());
+        Assertions.assertNotNull(label);
+        Assertions.assertEquals("span", label.getTag());
+        Assertions.assertEquals("custom label", label.getText());
     }
 
     @Test
-    public void formRow_setColspan_getColspan() {
+    void formRow_setColspan_getColspan() {
         Input input = new Input();
         FormRow row = new FormRow();
         row.add(input);
 
-        Assert.assertEquals(1, row.getColspan(input));
+        Assertions.assertEquals(1, row.getColspan(input));
 
         row.setColspan(input, 2);
-        Assert.assertEquals(2, row.getColspan(input));
+        Assertions.assertEquals(2, row.getColspan(input));
 
         row.setColspan(input, -1);
-        Assert.assertEquals(1, row.getColspan(input));
+        Assertions.assertEquals(1, row.getColspan(input));
     }
 
     @Test
-    public void formRow_addComponentWithColspan() {
+    void formRow_addComponentWithColspan() {
         Input input = new Input();
         FormRow row = new FormRow();
         row.add(input, 2);
-        Assert.assertEquals(2, row.getColspan(input));
+        Assertions.assertEquals(2, row.getColspan(input));
     }
 }
