@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -26,70 +26,74 @@ import com.vaadin.flow.component.tabs.Tab;
 /**
  * @author Vaadin Ltd.
  */
-public class TabTest {
+class TabTest {
 
     private Tab tab = new Tab();
 
     @Test
-    public void shouldCreateEmptyTabWithDefaultState() throws Exception {
+    void shouldCreateEmptyTabWithDefaultState() throws Exception {
 
-        Assert.assertEquals("Initial label is invalid", "", tab.getLabel());
-        Assert.assertEquals("Initial flexGrow is invalid", 0.0,
-                tab.getFlexGrow(), 0.0);
+        Assertions.assertEquals("", tab.getLabel(), "Initial label is invalid");
+        Assertions.assertEquals(0.0, tab.getFlexGrow(), 0.0,
+                "Initial flexGrow is invalid");
     }
 
     @Test
-    public void shouldCreateTabWithLabel() throws Exception {
+    void shouldCreateTabWithLabel() throws Exception {
         String label = "A label";
 
         tab = new Tab(label);
 
-        Assert.assertEquals("Initial label is invalid", label, tab.getLabel());
-        Assert.assertEquals("Initial flexGrow is invalid", 0.0,
-                tab.getFlexGrow(), 0.0);
+        Assertions.assertEquals(label, tab.getLabel(),
+                "Initial label is invalid");
+        Assertions.assertEquals(0.0, tab.getFlexGrow(), 0.0,
+                "Initial flexGrow is invalid");
     }
 
     @Test
-    public void shouldSetFlexGrow() throws Exception {
+    void shouldSetFlexGrow() throws Exception {
         tab.setFlexGrow(1);
 
-        Assert.assertEquals("flexGrow is invalid", 1.0, tab.getFlexGrow(), 0.0);
+        Assertions.assertEquals(1.0, tab.getFlexGrow(), 0.0,
+                "flexGrow is invalid");
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(tab instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(tab instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
-        Assert.assertTrue(tab instanceof HasAriaLabel);
+    void implementHasAriaLabel() {
+        Assertions.assertTrue(tab instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         tab.setAriaLabel("aria label");
 
-        Assert.assertTrue(tab.getAriaLabel().isPresent());
-        Assert.assertEquals("aria label", tab.getAriaLabel().get());
+        Assertions.assertTrue(tab.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria label", tab.getAriaLabel().get());
 
         tab.setAriaLabel(null);
-        Assert.assertTrue(tab.getAriaLabel().isEmpty());
+        Assertions.assertTrue(tab.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         tab.setAriaLabelledBy("aria-labelledby");
 
-        Assert.assertTrue(tab.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", tab.getAriaLabelledBy().get());
+        Assertions.assertTrue(tab.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                tab.getAriaLabelledBy().get());
 
         tab.setAriaLabelledBy(null);
-        Assert.assertTrue(tab.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(tab.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Tab.class));
+    void implementsHasThemeVariant() {
+        Assertions
+                .assertTrue(HasThemeVariant.class.isAssignableFrom(Tab.class));
     }
 }

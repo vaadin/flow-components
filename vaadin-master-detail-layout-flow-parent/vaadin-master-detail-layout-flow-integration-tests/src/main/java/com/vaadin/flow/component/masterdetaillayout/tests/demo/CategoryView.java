@@ -43,8 +43,8 @@ public class CategoryView extends MasterDetailLayout
         addClassName("category-view");
 
         setMaster(createMasterContent());
-        setMasterMinSize("500px");
-        setDetailMinSize("300px");
+        setMasterSize("500px");
+        setDetailSize("300px");
 
         addBackdropClickListener(event -> closeDetails());
         addDetailEscapePressListener(event -> closeDetails());

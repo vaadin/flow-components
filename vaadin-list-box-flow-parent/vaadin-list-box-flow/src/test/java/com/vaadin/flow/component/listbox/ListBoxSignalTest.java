@@ -15,14 +15,8 @@
  */
 package com.vaadin.flow.component.listbox;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsUnitTest;
 
@@ -37,54 +31,5 @@ public class ListBoxSignalTest extends AbstractSignalsUnitTest {
     public void multiSelectListBox_bindRequiredIndicatorVisible_throwsException() {
         var listBox = new MultiSelectListBox<>();
         listBox.bindRequiredIndicatorVisible(new ValueSignal<>(false));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetDataProvider_throws() {
-        var listBox = createListBoxWithBoundItems();
-        listBox.setDataProvider(
-                DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithDataProvider_throws() {
-        var listBox = createListBoxWithBoundItems();
-        listBox.setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithInMemoryDataProvider_throws() {
-        var listBox = createListBoxWithBoundItems();
-        listBox.setItems(DataProvider
-                .ofCollection(Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithListDataProvider_throws() {
-        var listBox = createListBoxWithBoundItems();
-        listBox.setItems(new ListDataProvider<>(
-                Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithCollection_throws() {
-        var listBox = createListBoxWithBoundItems();
-        listBox.setItems(Arrays.asList("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithVarargs_throws() {
-        var listBox = createListBoxWithBoundItems();
-        listBox.setItems("New Item 1", "New Item 2");
-    }
-
-    private ListBox<String> createListBoxWithBoundItems() {
-        var listBox = new ListBox<String>();
-        var itemsSignal = new ListSignal<String>();
-        itemsSignal.insertLast("Item 1");
-        itemsSignal.insertLast("Item 2");
-        listBox.bindItems(itemsSignal);
-        ui.add(listBox);
-        return listBox;
     }
 }

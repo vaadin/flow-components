@@ -8,17 +8,17 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
-public class InvalidParametersForApiTest {
+class InvalidParametersForApiTest {
 
     @Test
-    public void createCell_withNullValue_noException() {
+    void createCell_withNullValue_noException() {
         Spreadsheet spreadsheet = new Spreadsheet();
         Cell cell = spreadsheet.createCell(0, 0, null);
         assertNotNull(cell);

@@ -19,18 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class MultiSelectComboBoxFilteringTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class MultiSelectComboBoxFilteringTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void filter_addAndRefreshItems_doesNotToggleClientSideFiltering() {
+    void filter_addAndRefreshItems_doesNotToggleClientSideFiltering() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         ui.add(comboBox);
 
@@ -40,14 +40,14 @@ public class MultiSelectComboBoxFilteringTest {
 
         comboBox.getDataController().setViewportRange(0, 50, "foo");
         ui.fakeClientCommunication();
-        Assert.assertFalse((Boolean) comboBox.getElement()
+        Assertions.assertFalse((Boolean) comboBox.getElement()
                 .getPropertyRaw("_clientSideFilter"));
 
         items.add("foo");
         comboBox.getDataProvider().refreshAll();
         comboBox.getDataController().setViewportRange(0, 50, "");
         ui.fakeClientCommunication();
-        Assert.assertFalse((Boolean) comboBox.getElement()
+        Assertions.assertFalse((Boolean) comboBox.getElement()
                 .getPropertyRaw("_clientSideFilter"));
     }
 }

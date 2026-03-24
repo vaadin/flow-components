@@ -8,8 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests.charts;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -19,59 +19,58 @@ import com.vaadin.flow.component.charts.model.style.GradientColor;
 import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
-public class StyleTest extends ChartTestBase {
+class StyleTest extends ChartTestBase {
 
     @Test
-    public void axisTitles_loadSampleO4_axisTitleFont() throws Exception {
+    void axisTitles_loadSampleO4_axisTitleFont() throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "FeatureSample - Axis Title Options.xlsx", "O4")
                 .getConfiguration();
 
-        Assert.assertEquals("Title below axis",
+        Assertions.assertEquals("Title below axis",
                 conf.getxAxis().getTitle().getText());
-        Assert.assertEquals("Apple Chancery",
+        Assertions.assertEquals("Apple Chancery",
                 conf.getxAxis().getTitle().getStyle().getFontFamily());
     }
 
     @Test
-    public void backgroundColor_loadSampleA2_greenBackgroundBlueBorder()
+    void backgroundColor_loadSampleA2_greenBackgroundBlueBorder()
             throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "StyleSample - Background and Border.xlsx", "A2")
                 .getConfiguration();
 
-        Assert.assertEquals("rgba(112,173,71,1.00)",
+        Assertions.assertEquals("rgba(112,173,71,1.00)",
                 conf.getChart().getBackgroundColor().toString());
-        Assert.assertEquals("rgba(46,117,182,1.00)",
+        Assertions.assertEquals("rgba(46,117,182,1.00)",
                 conf.getChart().getBorderColor().toString());
-        Assert.assertEquals(2.25d, conf.getChart().getBorderWidth());
-        Assert.assertEquals(8, conf.getChart().getBorderRadius());
+        Assertions.assertEquals(2.25d, conf.getChart().getBorderWidth());
+        Assertions.assertEquals(8, conf.getChart().getBorderRadius());
     }
 
     @Test
-    public void backgroundColor_loadSampleA17_brownBackgroundGreenBorder()
+    void backgroundColor_loadSampleA17_brownBackgroundGreenBorder()
             throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "StyleSample - Background and Border.xlsx", "A17")
                 .getConfiguration();
 
-        Assert.assertEquals("rgba(197,90,17,0.30)",
+        Assertions.assertEquals("rgba(197,90,17,0.30)",
                 conf.getChart().getBackgroundColor().toString());
-        Assert.assertEquals("rgba(84,130,53,1.00)",
+        Assertions.assertEquals("rgba(84,130,53,1.00)",
                 conf.getChart().getBorderColor().toString());
-        Assert.assertEquals(0.5d, conf.getChart().getBorderWidth());
-        Assert.assertEquals(0, conf.getChart().getBorderRadius());
+        Assertions.assertEquals(0.5d, conf.getChart().getBorderWidth());
+        Assertions.assertEquals(0, conf.getChart().getBorderRadius());
     }
 
     @Test
-    public void backgroundColor_loadSampleG17_contentIsGradient()
-            throws Exception {
+    void backgroundColor_loadSampleG17_contentIsGradient() throws Exception {
 
         Configuration conf = getChartFromSampleFile(
                 "StyleSample - Background and Border.xlsx", "G17")
                 .getConfiguration();
 
-        Assert.assertEquals(GradientColor.class,
+        Assertions.assertEquals(GradientColor.class,
                 conf.getChart().getBackgroundColor().getClass());
 
         final String correctGradientJson = "{\"color\":{\"linearGradient\":{\"x1\":0.6710100716628344,\"x2\":0.32898992833716556,\"y1\":0.03015368960704584,\"y2\":0.9698463103929542},\"stops\":[[0.35,\"rgba(145,66,13,1.00)\"],[0.45,\"rgba(157,195,230,1.00)\"],[0.51,\"rgba(169,209,142,0.38)\"]]}}";
@@ -79,12 +78,12 @@ public class StyleTest extends ChartTestBase {
         final String actualGradientJson = colorToJson(
                 conf.getChart().getBackgroundColor());
 
-        Assert.assertEquals(correctGradientJson, actualGradientJson);
+        Assertions.assertEquals(correctGradientJson, actualGradientJson);
 
-        Assert.assertEquals("rgba(255,217,102,1.00)",
+        Assertions.assertEquals("rgba(255,217,102,1.00)",
                 conf.getChart().getBorderColor().toString());
-        Assert.assertEquals(2.25d, conf.getChart().getBorderWidth());
-        Assert.assertEquals(0, conf.getChart().getBorderRadius());
+        Assertions.assertEquals(2.25d, conf.getChart().getBorderWidth());
+        Assertions.assertEquals(0, conf.getChart().getBorderRadius());
     }
 
     @SuppressWarnings("serial")
@@ -96,7 +95,7 @@ public class StyleTest extends ChartTestBase {
     }
 
     @Test
-    public void font_loadSampleC2_titleFontsAreCorrect() throws Exception {
+    void font_loadSampleC2_titleFontsAreCorrect() throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "StyleSample - Custom Font.xlsx", "C2").getConfiguration();
 
@@ -110,7 +109,7 @@ public class StyleTest extends ChartTestBase {
     }
 
     @Test
-    public void font_loadSampleC2_legendFontsAreCorrect() throws Exception {
+    void font_loadSampleC2_legendFontsAreCorrect() throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "StyleSample - Custom Font.xlsx", "C2").getConfiguration();
 
@@ -124,7 +123,7 @@ public class StyleTest extends ChartTestBase {
     }
 
     @Test
-    public void font_loadSampleC2_xAxisTitleFontsAreCorrect() throws Exception {
+    void font_loadSampleC2_xAxisTitleFontsAreCorrect() throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "StyleSample - Custom Font.xlsx", "C2").getConfiguration();
 
@@ -138,7 +137,7 @@ public class StyleTest extends ChartTestBase {
     }
 
     @Test
-    public void font_loadSampleC2_yAxisTitleFontsAreCorrect() throws Exception {
+    void font_loadSampleC2_yAxisTitleFontsAreCorrect() throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "StyleSample - Custom Font.xlsx", "C2").getConfiguration();
 
@@ -153,9 +152,9 @@ public class StyleTest extends ChartTestBase {
 
     private void assertStyle(Style style, String fontFamily,
             FontWeight fontWeight, String textColor, String fontSize) {
-        Assert.assertEquals(fontFamily, style.getFontFamily());
-        Assert.assertEquals(fontWeight, style.getFontWeight());
-        Assert.assertEquals(fontSize, style.getFontSize());
-        Assert.assertEquals(textColor, style.getColor().toString());
+        Assertions.assertEquals(fontFamily, style.getFontFamily());
+        Assertions.assertEquals(fontWeight, style.getFontWeight());
+        Assertions.assertEquals(fontSize, style.getFontSize());
+        Assertions.assertEquals(textColor, style.getColor().toString());
     }
 }

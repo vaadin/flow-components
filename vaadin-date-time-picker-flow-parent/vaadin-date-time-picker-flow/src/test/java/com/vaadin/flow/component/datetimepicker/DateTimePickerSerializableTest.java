@@ -17,6 +17,6 @@ package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class DateTimePickerSerializableTest extends ClassesSerializableTest {
+class DateTimePickerSerializableTest extends ClassesSerializableTest {
 
 }

@@ -8,29 +8,29 @@
  */
 package com.vaadin.flow.component.crud;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class CrudVariantTest {
+class CrudVariantTest {
 
     @Test
-    public void addThemeVariant_themeNamesContainsThemeVariant() {
+    void addThemeVariant_themeNamesContainsThemeVariant() {
         var crud = new Crud<>();
         crud.addThemeVariants(CrudVariant.NO_BORDER);
 
         var themeNames = crud.getThemeNames();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 themeNames.contains(CrudVariant.NO_BORDER.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         var crud = new Crud<>();
         crud.addThemeVariants(CrudVariant.NO_BORDER);
         crud.removeThemeVariants(CrudVariant.NO_BORDER);
 
         var themeNames = crud.getThemeNames();
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 themeNames.contains(CrudVariant.NO_BORDER.getVariantName()));
     }
 }

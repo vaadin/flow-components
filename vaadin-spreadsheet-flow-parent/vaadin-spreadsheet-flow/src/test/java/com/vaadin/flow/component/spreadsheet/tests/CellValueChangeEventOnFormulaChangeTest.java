@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,20 +20,20 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
  * Unit test for fix for issue https://github.com/vaadin/spreadsheet/issues/550.
  */
-public class CellValueChangeEventOnFormulaChangeTest {
+class CellValueChangeEventOnFormulaChangeTest {
 
     private Spreadsheet spreadsheet;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet();
         Row row = sheet.createRow(0);
@@ -51,7 +51,7 @@ public class CellValueChangeEventOnFormulaChangeTest {
      * previous formula.
      */
     @Test
-    public void formulaChangeResultingInSameValue() {
+    void formulaChangeResultingInSameValue() {
         AtomicReference<Set<CellReference>> changedCells = new AtomicReference<>();
 
         spreadsheet.addCellValueChangeListener(
@@ -61,14 +61,13 @@ public class CellValueChangeEventOnFormulaChangeTest {
         // B1 is 0, so the result doesn't change
         spreadsheet.getCellValueManager().onCellValueChange(3, 1, "=A1+2*B1");
 
-        assertEquals("There should be one changed cell", 1,
-                changedCells.get().size());
-        assertTrue("The changed cells should include C1 with sheet name",
-                changedCells.get().contains(new CellReference("Sheet0!C1")));
-        assertThrows(
-                "Calling contains on changedCells using a CellReference without a sheet name should result in an exception",
-                IllegalArgumentException.class,
-                () -> changedCells.get().contains(new CellReference("C1")));
+        assertEquals(1, changedCells.get().size(),
+                "There should be one changed cell");
+        assertTrue(changedCells.get().contains(new CellReference("Sheet0!C1")),
+                "The changed cells should include C1 with sheet name");
+        assertThrows(IllegalArgumentException.class,
+                () -> changedCells.get().contains(new CellReference("C1")),
+                "Calling contains on changedCells using a CellReference without a sheet name should result in an exception");
     }
 
 }

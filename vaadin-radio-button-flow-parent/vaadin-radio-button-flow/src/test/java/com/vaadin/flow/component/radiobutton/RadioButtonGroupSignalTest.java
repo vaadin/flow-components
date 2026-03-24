@@ -15,65 +15,63 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
+class RadioButtonGroupSignalTest extends AbstractSignalsJUnit6Test {
     private final RadioButtonGroup<String> group = new RadioButtonGroup<>();
     private final ValueSignal<Boolean> readonlySignal = new ValueSignal<>(
             false);
 
     @Test
-    public void bindReadOnly_elementAttached_updatesWithSignal() {
+    void bindReadOnly_elementAttached_updatesWithSignal() {
         UI.getCurrent().add(group);
         group.bindReadOnly(readonlySignal);
 
-        Assert.assertFalse(group.isReadOnly());
+        Assertions.assertFalse(group.isReadOnly());
 
         readonlySignal.set(true);
-        Assert.assertTrue(group.isReadOnly());
+        Assertions.assertTrue(group.isReadOnly());
     }
 
     @Test
-    public void bindReadOnly_elementNotAttached_initialValueApplied() {
+    void bindReadOnly_elementNotAttached_initialValueApplied() {
         readonlySignal.set(true);
         group.bindReadOnly(readonlySignal);
 
         // Initial value is applied immediately (effect runs on creation)
-        Assert.assertTrue(group.isReadOnly());
+        Assertions.assertTrue(group.isReadOnly());
 
         UI.getCurrent().add(group);
-        Assert.assertTrue(group.isReadOnly());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void setReadOnly_whileBound_throwsException() {
-        UI.getCurrent().add(group);
-        group.bindReadOnly(readonlySignal);
-        group.setReadOnly(true);
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindReadOnly_whileBound_throwsException() {
-        UI.getCurrent().add(group);
-        group.bindReadOnly(readonlySignal);
-        group.bindReadOnly(new ValueSignal<>(true));
+        Assertions.assertTrue(group.isReadOnly());
     }
 
     @Test
-    public void bindReadOnly_disablesUncheckedButtons() {
+    void setReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> group.setReadOnly(true));
+    }
+
+    @Test
+    void bindReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(group);
+        group.bindReadOnly(readonlySignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> group.bindReadOnly(new ValueSignal<>(true)));
+    }
+
+    @Test
+    void bindReadOnly_disablesUncheckedButtons() {
         group.setItems("One", "Two", "Three");
         group.setValue("One");
         group.bindReadOnly(readonlySignal);
@@ -82,52 +80,12 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
         readonlySignal.set(true);
 
         List<RadioButton<String>> buttons = getRadioButtons();
-        Assert.assertTrue("Selected button should remain enabled",
-                buttons.get(0).isEnabled());
-        Assert.assertFalse("Unchecked button should be disabled",
-                buttons.get(1).isEnabled());
-        Assert.assertFalse("Unchecked button should be disabled",
-                buttons.get(2).isEnabled());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setDataProvider(
-                DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup
-                .setItems(DataProvider.ofItems("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithInMemoryDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems(DataProvider
-                .ofCollection(Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithListDataProvider_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems(new ListDataProvider<>(
-                Arrays.asList("New Item 1", "New Item 2")));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithCollection_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems(Arrays.asList("New Item 1", "New Item 2"));
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindItems_thenSetItemsWithVarargs_throws() {
-        var radioButtonGroup = createRadioButtonGroupWithBoundItems();
-        radioButtonGroup.setItems("New Item 1", "New Item 2");
+        Assertions.assertTrue(buttons.get(0).isEnabled(),
+                "Selected button should remain enabled");
+        Assertions.assertFalse(buttons.get(1).isEnabled(),
+                "Unchecked button should be disabled");
+        Assertions.assertFalse(buttons.get(2).isEnabled(),
+                "Unchecked button should be disabled");
     }
 
     @SuppressWarnings("unchecked")
@@ -135,38 +93,5 @@ public class RadioButtonGroupSignalTest extends AbstractSignalsUnitTest {
         return group.getChildren().filter(RadioButton.class::isInstance)
                 .map(child -> (RadioButton<String>) child)
                 .collect(Collectors.toList());
-    }
-
-    private RadioButtonGroup<String> createRadioButtonGroupWithBoundItems() {
-        var radioButtonGroup = new RadioButtonGroup<String>();
-        var itemsSignal = new ListSignal<String>();
-        itemsSignal.insertLast("Item 1");
-        itemsSignal.insertLast("Item 2");
-        radioButtonGroup.bindItems(itemsSignal);
-        ui.add(radioButtonGroup);
-        return radioButtonGroup;
-    }
-
-    @Test
-    public void signalConstructor_setsItemsFromSignal() {
-        var listSignal = new ListSignal<String>();
-        listSignal.insertLast("One");
-        listSignal.insertLast("Two");
-
-        RadioButtonGroup<String> group = new RadioButtonGroup<>("Options",
-                listSignal);
-        UI.getCurrent().add(group);
-
-        List<String> items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(2, items.size());
-        Assert.assertEquals("One", items.get(0));
-        Assert.assertEquals("Two", items.get(1));
-        Assert.assertEquals("Options", group.getLabel());
-
-        listSignal.insertLast("Three");
-
-        items = group.getGenericDataView().getItems().toList();
-        Assert.assertEquals(3, items.size());
-        Assert.assertEquals("Three", items.get(2));
     }
 }

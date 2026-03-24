@@ -17,23 +17,23 @@ package com.vaadin.flow.component.contextmenu;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class ContextMenuTargetTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class ContextMenuTargetTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private final ContextMenu menu = new ContextMenu();
 
     @Test
-    public void setTarget_attachTarget_initTargetConnector() {
+    void setTarget_attachTarget_initTargetConnector() {
         var target = new Div();
         menu.setTarget(target);
 
@@ -43,7 +43,7 @@ public class ContextMenuTargetTest {
     }
 
     @Test
-    public void attachTarget_setTarget_initTargetConnector() {
+    void attachTarget_setTarget_initTargetConnector() {
         var target = new Div();
         ui.add(target);
 
@@ -53,7 +53,7 @@ public class ContextMenuTargetTest {
     }
 
     @Test
-    public void attachTarget_detachTargetInBeforeClientResponse_cancelTargetConnectorInit() {
+    void attachTarget_detachTargetInBeforeClientResponse_cancelTargetConnectorInit() {
         var target = new Div();
         menu.setTarget(target);
 
@@ -64,7 +64,7 @@ public class ContextMenuTargetTest {
     }
 
     @Test
-    public void clearTarget_removeTargetConnector() {
+    void clearTarget_removeTargetConnector() {
         var target = new Div();
         ui.add(target);
 
@@ -78,7 +78,7 @@ public class ContextMenuTargetTest {
     }
 
     @Test
-    public void replaceTarget_updateTargetConnector() {
+    void replaceTarget_updateTargetConnector() {
         var target = new Div();
         ui.add(target);
 
@@ -100,12 +100,12 @@ public class ContextMenuTargetTest {
             List<PendingJavaScriptInvocation> invocations, Component target) {
         var initInvocations = filterTargetConnectorInitInvocations(invocations);
 
-        Assert.assertEquals(1, initInvocations.size());
+        Assertions.assertEquals(1, initInvocations.size());
 
         var invocation = initInvocations.get(0);
-        Assert.assertEquals(target.getElement().getNode(),
+        Assertions.assertEquals(target.getElement().getNode(),
                 invocation.getOwner());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "return (async function() { window.Vaadin.Flow.contextMenuTargetConnector.init(this);this.$contextMenuTargetConnector.updateOpenOn($0);}).apply($1)",
                 invocation.getInvocation().getExpression());
     }
@@ -114,7 +114,7 @@ public class ContextMenuTargetTest {
             List<PendingJavaScriptInvocation> invocations) {
         var initInvocations = filterTargetConnectorInitInvocations(invocations);
 
-        Assert.assertEquals(0, initInvocations.size());
+        Assertions.assertEquals(0, initInvocations.size());
     }
 
     private void assertTargetConnectorRemove(
@@ -122,12 +122,12 @@ public class ContextMenuTargetTest {
         var removeInvocations = filterTargetConnectorRemoveInvocations(
                 invocations);
 
-        Assert.assertEquals(1, removeInvocations.size());
+        Assertions.assertEquals(1, removeInvocations.size());
 
         var invocation = removeInvocations.get(0);
-        Assert.assertEquals(target.getElement().getNode(),
+        Assertions.assertEquals(target.getElement().getNode(),
                 invocation.getOwner());
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 "return (async function() { if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }}).apply($0)",
                 invocation.getInvocation().getExpression());
     }

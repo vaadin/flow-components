@@ -47,6 +47,30 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
+    public void constructorWithSizesAndExpand() {
+        var customLayout = new MasterDetailLayout("400px", "200px",
+                MasterDetailLayout.ExpandingArea.MASTER);
+        ui.add(customLayout);
+
+        Assert.assertEquals("400px", customLayout.getMasterSize());
+        Assert.assertEquals("200px", customLayout.getDetailSize());
+        Assert.assertEquals(MasterDetailLayout.ExpandingArea.MASTER,
+                customLayout.getExpandingArea());
+    }
+
+    @Test
+    public void constructorWithSizesUnitsAndExpandingArea() {
+        var customLayout = new MasterDetailLayout(30, Unit.EM, 15, Unit.EM,
+                MasterDetailLayout.ExpandingArea.DETAIL);
+        ui.add(customLayout);
+
+        Assert.assertEquals("30.0em", customLayout.getMasterSize());
+        Assert.assertEquals("15.0em", customLayout.getDetailSize());
+        Assert.assertEquals(MasterDetailLayout.ExpandingArea.DETAIL,
+                customLayout.getExpandingArea());
+    }
+
+    @Test
     public void setMaster() {
         var master = new Div();
         layout.setMaster(master);
@@ -212,23 +236,6 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
-    public void setMasterMinSize_getMasterMinSize() {
-        String minSize = "200px";
-        layout.setMasterMinSize(minSize);
-        Assert.assertEquals(minSize, layout.getMasterMinSize());
-        Assert.assertEquals(minSize,
-                layout.getElement().getProperty("masterMinSize"));
-    }
-
-    @Test
-    public void setMasterMinSizeWithUnit_getMasterMinSize() {
-        layout.setMasterMinSize(30, Unit.EM);
-        Assert.assertEquals("30.0em", layout.getMasterMinSize());
-        Assert.assertEquals("30.0em",
-                layout.getElement().getProperty("masterMinSize"));
-    }
-
-    @Test
     public void setDetailSize_getDetailSize() {
         String size = "400px";
         layout.setDetailSize(size);
@@ -246,20 +253,27 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
-    public void setDetailMinSize_getDetailMinSize() {
-        String minSize = "250px";
-        layout.setDetailMinSize(minSize);
-        Assert.assertEquals(minSize, layout.getDetailMinSize());
-        Assert.assertEquals(minSize,
-                layout.getElement().getProperty("detailMinSize"));
+    public void setOverlaySize_getOverlaySize() {
+        String size = "500px";
+        layout.setOverlaySize(size);
+        Assert.assertEquals(size, layout.getOverlaySize());
+        Assert.assertEquals(size,
+                layout.getElement().getProperty("overlaySize"));
     }
 
     @Test
-    public void setDetailMinSizeWithUnit_getDetailMinSize() {
-        layout.setDetailMinSize(30, Unit.EM);
-        Assert.assertEquals("30.0em", layout.getDetailMinSize());
-        Assert.assertEquals("30.0em",
-                layout.getElement().getProperty("detailMinSize"));
+    public void setOverlaySize_resetToNull() {
+        layout.setOverlaySize("500px");
+        layout.setOverlaySize(null);
+        Assert.assertNull(layout.getOverlaySize());
+    }
+
+    @Test
+    public void setOverlaySizeWithUnit_getOverlaySize() {
+        layout.setOverlaySize(100, Unit.PERCENTAGE);
+        Assert.assertEquals("100.0%", layout.getOverlaySize());
+        Assert.assertEquals("100.0%",
+                layout.getElement().getProperty("overlaySize"));
     }
 
     @Test
@@ -281,34 +295,47 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
-    public void setContainment_getContainment() {
-        Assert.assertEquals(MasterDetailLayout.Containment.LAYOUT,
-                layout.getContainment());
+    public void setOverlayContainment_getOverlayContainment() {
+        Assert.assertEquals(MasterDetailLayout.OverlayContainment.LAYOUT,
+                layout.getOverlayContainment());
 
-        layout.setContainment(MasterDetailLayout.Containment.VIEWPORT);
+        layout.setOverlayContainment(
+                MasterDetailLayout.OverlayContainment.VIEWPORT);
 
-        Assert.assertEquals(MasterDetailLayout.Containment.VIEWPORT,
-                layout.getContainment());
+        Assert.assertEquals(MasterDetailLayout.OverlayContainment.VIEWPORT,
+                layout.getOverlayContainment());
         Assert.assertEquals("viewport",
-                layout.getElement().getProperty("containment"));
+                layout.getElement().getProperty("overlayContainment"));
     }
 
     @Test(expected = NullPointerException.class)
-    public void setContainmentNull_throws() {
-        layout.setContainment(null);
+    public void setOverlayContainmentNull_throws() {
+        layout.setOverlayContainment(null);
     }
 
     @Test
-    public void setForceOverlay_isForceOverlay() {
-        Assert.assertFalse(layout.isForceOverlay());
-        Assert.assertFalse(
-                layout.getElement().getProperty("forceOverlay", false));
+    public void setExpandingArea_getExpandingArea() {
+        Assert.assertEquals(MasterDetailLayout.ExpandingArea.BOTH,
+                layout.getExpandingArea());
 
-        layout.setForceOverlay(true);
+        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.MASTER);
 
-        Assert.assertTrue(layout.isForceOverlay());
-        Assert.assertTrue(
-                layout.getElement().getProperty("forceOverlay", false));
+        Assert.assertEquals(MasterDetailLayout.ExpandingArea.MASTER,
+                layout.getExpandingArea());
+        Assert.assertEquals("master",
+                layout.getElement().getProperty("expand"));
+
+        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.DETAIL);
+
+        Assert.assertEquals(MasterDetailLayout.ExpandingArea.DETAIL,
+                layout.getExpandingArea());
+        Assert.assertEquals("detail",
+                layout.getElement().getProperty("expand"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setExpandingAreaNull_throws() {
+        layout.setExpandingArea(null);
     }
 
     @Test
@@ -322,24 +349,6 @@ public class MasterDetailLayoutTest {
         Assert.assertFalse(layout.isAnimationEnabled());
         Assert.assertTrue(
                 layout.getElement().getProperty("noAnimation", false));
-    }
-
-    @Test
-    public void setOverlayMode_getOverlayMode() {
-        Assert.assertEquals(MasterDetailLayout.OverlayMode.DRAWER,
-                layout.getOverlayMode());
-
-        layout.setOverlayMode(MasterDetailLayout.OverlayMode.STACK);
-        Assert.assertEquals(MasterDetailLayout.OverlayMode.STACK,
-                layout.getOverlayMode());
-        Assert.assertTrue(
-                layout.getElement().getProperty("stackOverlay", false));
-
-        layout.setOverlayMode(MasterDetailLayout.OverlayMode.DRAWER);
-        Assert.assertEquals(MasterDetailLayout.OverlayMode.DRAWER,
-                layout.getOverlayMode());
-        Assert.assertFalse(
-                layout.getElement().getProperty("stackOverlay", false));
     }
 
     @Test
