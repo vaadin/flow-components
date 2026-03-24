@@ -52,34 +52,42 @@ public final class ChartAITools {
     public interface Callbacks extends Serializable {
 
         /**
-         * Returns the current state of the chart as a JSON string suitable for
-         * LLM tool responses. Should throw if the chart is not found.
+         * Returns the current state of a chart including its Highcharts
+         * configuration and SQL queries. The returned JSON string should
+         * contain the chart configuration and the SQL queries used to populate
+         * the chart series. Should throw if the chart is not found.
          *
          * @param chartId
          *            the chart ID
-         * @return the chart state as a JSON string
+         * @return the chart state as a JSON string containing the Highcharts
+         *         configuration and SQL queries
          */
         String getState(String chartId);
 
         /**
-         * Updates the chart's pending configuration. Should throw if the chart
-         * is not found.
+         * Updates the chart's Highcharts configuration (type, title, tooltip,
+         * axes, legend, etc.). The configuration should not include series
+         * data, as that is managed separately via
+         * {@link #updateData(String, List)}. Changes are applied when the LLM
+         * request completes. Should throw if the chart is not found.
          *
          * @param chartId
          *            the chart ID
          * @param configJson
-         *            the configuration as a JSON string
+         *            the Highcharts configuration as a JSON string, excluding
+         *            series data
          */
         void updateConfiguration(String chartId, String configJson);
 
         /**
-         * Validates and stores the chart's data source queries. Should throw if
-         * the chart is not found or if any query is invalid.
+         * Validates and executes SQL SELECT queries that populate the chart
+         * series data. Each query corresponds to one chart series. Should throw
+         * if the chart is not found or if any query is invalid.
          *
          * @param chartId
          *            the chart ID
          * @param queries
-         *            the SQL queries, one per series
+         *            SQL SELECT queries, one per chart series
          */
         void updateData(String chartId, List<String> queries);
 
@@ -234,7 +242,13 @@ public final class ChartAITools {
             @Override
             public String getDescription() {
                 return """
-                        Updates the chart configuration (type, title, tooltip, etc.).
+                        Updates the Highcharts configuration of a chart. The configuration \
+                        object follows the same structure as the Highcharts options object \
+                        (as returned by get_chart_state), supporting: chart (type, dimensions, \
+                        margins, spacing, borders, background, inverted, polar, animation, \
+                        zoomType), title, subtitle, xAxis, yAxis, zAxis, colorAxis, tooltip, \
+                        legend, plotOptions (series defaults, stacking, dataLabels, markers, \
+                        pie innerSize for donuts), credits, and pane.
 
                         CRITICAL: ALWAYS specify the chart type in configuration.chart.type - this is essential for proper rendering.
 
@@ -242,7 +256,7 @@ public final class ChartAITools {
 
                         Parameters:
                         - chartId (string, required): The ID of the chart to update
-                        - configuration (object, required): Chart configuration object
+                        - configuration (object, required): Highcharts configuration object (excluding series)
 
                         Changes are applied when the request completes.""";
             }
@@ -259,7 +273,7 @@ public final class ChartAITools {
                             },
                             "configuration": {
                               "type": "object",
-                              "description": "Chart configuration object. CRITICAL: Always include chart.type. NOTE: Do NOT include 'series' - data is managed separately via update_chart_data_source tool.",
+                              "description": "Highcharts configuration object. Follows the same structure as the Highcharts options object (as returned by get_chart_state), excluding series data which is managed via update_chart_data_source. CRITICAL: Always include chart.type.",
                               "properties": {
                                 "chart": {
                                   "type": "object",
@@ -267,7 +281,7 @@ public final class ChartAITools {
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "description": "REQUIRED: Chart type - ALWAYS specify this property. Must be inside chart object to match Vaadin Charts structure",
+                                      "description": "REQUIRED: Chart type - ALWAYS specify this property",
                                       "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
                                     },
                                     "backgroundColor": { "type": "string", "description": "Background color (e.g., '#ffffff')" },
@@ -275,7 +289,7 @@ public final class ChartAITools {
                                     "borderWidth": { "type": "number", "description": "Border width in pixels" },
                                     "borderRadius": { "type": "number", "description": "Border radius in pixels" },
                                     "width": { "type": "number", "description": "Chart width in pixels" },
-                                    "height": { "type": "string", "description": "Chart height (e.g., '400px', '100%')" },
+                                    "height": { "oneOf": [{ "type": "number", "description": "Height in pixels" }, { "type": "string", "description": "Height as string (e.g., '400px', '100%')" }] },
                                     "marginTop": { "type": "number" },
                                     "marginRight": { "type": "number" },
                                     "marginBottom": { "type": "number" },
@@ -291,7 +305,7 @@ public final class ChartAITools {
                                     "polar": { "type": "boolean", "description": "Polar chart" },
                                     "animation": { "type": "boolean" },
                                     "styledMode": { "type": "boolean" },
-                                    "zoomType": { "type": "string", "enum": ["X", "Y", "XY"] }
+                                    "zoomType": { "type": "string", "enum": ["x", "y", "xy"] }
                                   }
                                 },
                                 "title": {
@@ -310,6 +324,7 @@ public final class ChartAITools {
                                   "type": "object",
                                   "description": "X-axis configuration",
                                   "properties": {
+                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
                                     "title": { "type": "object", "properties": { "text": { "type": "string" } } },
                                     "categories": { "type": "array", "items": { "type": "string" } },
                                     "min": { "type": "number" },
@@ -320,6 +335,7 @@ public final class ChartAITools {
                                   "type": "object",
                                   "description": "Y-axis configuration",
                                   "properties": {
+                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
                                     "title": { "type": "object", "properties": { "text": { "type": "string" } } },
                                     "min": { "type": "number" },
                                     "max": { "type": "number" }
@@ -327,8 +343,9 @@ public final class ChartAITools {
                                 },
                                 "zAxis": {
                                   "type": "object",
-                                  "description": "Z-axis configuration (for 3D charts)",
+                                  "description": "Z-axis configuration (for 3D and bubble charts)",
                                   "properties": {
+                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
                                     "title": { "type": "object", "properties": { "text": { "type": "string" } } },
                                     "min": { "type": "number" },
                                     "max": { "type": "number" }
@@ -360,9 +377,9 @@ public final class ChartAITools {
                                   "description": "Legend configuration",
                                   "properties": {
                                     "enabled": { "type": "boolean" },
-                                    "align": { "type": "string", "enum": ["LEFT", "CENTER", "RIGHT"] },
-                                    "verticalAlign": { "type": "string", "enum": ["TOP", "MIDDLE", "BOTTOM"] },
-                                    "layout": { "type": "string", "enum": ["HORIZONTAL", "VERTICAL"] }
+                                    "align": { "type": "string", "enum": ["left", "center", "right"] },
+                                    "verticalAlign": { "type": "string", "enum": ["top", "middle", "bottom"] },
+                                    "layout": { "type": "string", "enum": ["horizontal", "vertical"] }
                                   }
                                 },
                                 "credits": {
@@ -384,15 +401,74 @@ public final class ChartAITools {
                                     "size": { "type": "string", "description": "Size (e.g., '100%')" }
                                   }
                                 },
-                                "exporting": {
+                                "plotOptions": {
                                   "type": "object",
-                                  "description": "Export configuration",
+                                  "description": "Default options for series types. Use 'series' key for options applying to all series, or a chart type key (e.g., 'pie', 'column') for type-specific options.",
                                   "properties": {
-                                    "enabled": { "type": "boolean" },
-                                    "filename": { "type": "string" },
-                                    "sourceWidth": { "type": "number" },
-                                    "sourceHeight": { "type": "number" },
-                                    "scale": { "type": "number" }
+                                    "series": {
+                                      "type": "object",
+                                      "description": "Default options for all series types",
+                                      "properties": {
+                                        "stacking": { "type": "string", "enum": ["normal", "percent"], "description": "Stack series by value or percentage" },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string", "description": "Label format string" }
+                                          }
+                                        },
+                                        "marker": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "pie": {
+                                      "type": "object",
+                                      "description": "Default options for pie series",
+                                      "properties": {
+                                        "innerSize": { "type": "string", "description": "Inner diameter for donut charts (e.g., '50%')" },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string" }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "column": {
+                                      "type": "object",
+                                      "description": "Default options for column series",
+                                      "properties": {
+                                        "stacking": { "type": "string", "enum": ["normal", "percent"] },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string" }
+                                          }
+                                        },
+                                        "borderRadius": { "type": "number", "description": "Border radius for column corners" }
+                                      }
+                                    },
+                                    "bar": {
+                                      "type": "object",
+                                      "description": "Default options for bar series",
+                                      "properties": {
+                                        "stacking": { "type": "string", "enum": ["normal", "percent"] },
+                                        "dataLabels": {
+                                          "type": "object",
+                                          "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "format": { "type": "string" }
+                                          }
+                                        },
+                                        "borderRadius": { "type": "number" }
+                                      }
+                                    }
                                   }
                                 }
                               }
@@ -470,7 +546,7 @@ public final class ChartAITools {
                                 - Example: SELECT min_val AS {LOW}, lower_q AS {Q1}, med AS {MEDIAN}, upper_q AS {Q3}, max_val AS {HIGH} FROM stats
 
                                 OHLC/Candlestick:
-                                - Columns: {OPEN}, {HIGH}, {LOW}, {CLOSE} (optionally {X})
+                                - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
                                 - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
 
                                 Sankey diagram:
