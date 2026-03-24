@@ -23,9 +23,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
@@ -38,310 +38,318 @@ import tools.jackson.databind.node.ArrayNode;
 /**
  * @author Vaadin Ltd.
  */
-public class PopoverTest {
+class PopoverTest {
     private Popover popover;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         popover = new Popover();
     }
 
     @Test
-    public void setFor_getFor() {
+    void setFor_getFor() {
         popover.setFor("target-id");
-        Assert.assertEquals("target-id", popover.getFor());
+        Assertions.assertEquals("target-id", popover.getFor());
     }
 
     @Test
-    public void setTarget_getTarget() {
+    void setTarget_getTarget() {
         Div target = new Div();
         popover.setTarget(target);
-        Assert.assertEquals(popover.getTarget(), target);
+        Assertions.assertEquals(popover.getTarget(), target);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setTarget_textNodeAsComponent_throws() {
+    @Test
+    void setTarget_textNodeAsComponent_throws() {
         Text textNode = new Text("Text");
-        popover.setTarget(textNode);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> popover.setTarget(textNode));
     }
 
     @Test
-    public void setPosition_getPosition() {
+    void setPosition_getPosition() {
         popover.setPosition(PopoverPosition.END);
-        Assert.assertEquals("end",
+        Assertions.assertEquals("end",
                 popover.getElement().getProperty("position"));
-        Assert.assertEquals(PopoverPosition.END, popover.getPosition());
+        Assertions.assertEquals(PopoverPosition.END, popover.getPosition());
     }
 
     @Test
-    public void defaultPosition_equalsNull() {
-        Assert.assertEquals(null, popover.getPosition());
+    void defaultPosition_equalsNull() {
+        Assertions.assertEquals(null, popover.getPosition());
     }
 
     @Test
-    public void setWidth_widthPropertyUpdated() {
+    void setWidth_widthPropertyUpdated() {
         popover.setWidth("200px");
-        Assert.assertEquals("200px",
+        Assertions.assertEquals("200px",
                 popover.getElement().getProperty("width", ""));
 
         popover.setWidth(null);
-        Assert.assertEquals("", popover.getElement().getProperty("width", ""));
+        Assertions.assertEquals("",
+                popover.getElement().getProperty("width", ""));
     }
 
     @Test
-    public void setHeight_heightPropertyUpdated() {
+    void setHeight_heightPropertyUpdated() {
         popover.setHeight("200px");
-        Assert.assertEquals("200px",
+        Assertions.assertEquals("200px",
                 popover.getElement().getProperty("height", ""));
 
         popover.setHeight(null);
-        Assert.assertEquals("", popover.getElement().getProperty("height", ""));
+        Assertions.assertEquals("",
+                popover.getElement().getProperty("height", ""));
     }
 
     @Test
-    public void setFocusDelay_getFocusDelay() {
-        Assert.assertEquals(0, popover.getFocusDelay());
+    void setFocusDelay_getFocusDelay() {
+        Assertions.assertEquals(0, popover.getFocusDelay());
 
         popover.setFocusDelay(1000);
-        Assert.assertEquals(1000, popover.getFocusDelay());
-        Assert.assertEquals(1000,
+        Assertions.assertEquals(1000, popover.getFocusDelay());
+        Assertions.assertEquals(1000,
                 popover.getElement().getProperty("focusDelay", 0));
     }
 
     @Test
-    public void setHoverDelay_getHoverDelay() {
-        Assert.assertEquals(0, popover.getHoverDelay());
+    void setHoverDelay_getHoverDelay() {
+        Assertions.assertEquals(0, popover.getHoverDelay());
 
         popover.setHoverDelay(1000);
-        Assert.assertEquals(1000, popover.getHoverDelay());
-        Assert.assertEquals(1000,
+        Assertions.assertEquals(1000, popover.getHoverDelay());
+        Assertions.assertEquals(1000,
                 popover.getElement().getProperty("hoverDelay", 0));
     }
 
     @Test
-    public void setHideDelay_getHideDelay() {
-        Assert.assertEquals(0, popover.getHideDelay());
+    void setHideDelay_getHideDelay() {
+        Assertions.assertEquals(0, popover.getHideDelay());
 
         popover.setHideDelay(1000);
-        Assert.assertEquals(1000, popover.getHideDelay());
-        Assert.assertEquals(1000,
+        Assertions.assertEquals(1000, popover.getHideDelay());
+        Assertions.assertEquals(1000,
                 popover.getElement().getProperty("hideDelay", 0));
     }
 
     @Test
-    public void isOpenOnClick_trueByDefault() {
-        Assert.assertTrue(popover.isOpenOnClick());
+    void isOpenOnClick_trueByDefault() {
+        Assertions.assertTrue(popover.isOpenOnClick());
     }
 
     @Test
-    public void isOpenOnFocus_falseByDefault() {
-        Assert.assertFalse(popover.isOpenOnFocus());
+    void isOpenOnFocus_falseByDefault() {
+        Assertions.assertFalse(popover.isOpenOnFocus());
     }
 
     @Test
-    public void isOpenOnHover_falseByDefault() {
-        Assert.assertFalse(popover.isOpenOnHover());
+    void isOpenOnHover_falseByDefault() {
+        Assertions.assertFalse(popover.isOpenOnHover());
     }
 
     @Test
-    public void setOpenOnClick_isOpenOnClick() {
+    void setOpenOnClick_isOpenOnClick() {
         popover.setOpenOnClick(false);
-        Assert.assertFalse(popover.isOpenOnClick());
+        Assertions.assertFalse(popover.isOpenOnClick());
 
         popover.setOpenOnClick(true);
-        Assert.assertTrue(popover.isOpenOnClick());
+        Assertions.assertTrue(popover.isOpenOnClick());
     }
 
     @Test
-    public void setOpenOnFocus_isOpenOnFocus() {
+    void setOpenOnFocus_isOpenOnFocus() {
         popover.setOpenOnFocus(true);
-        Assert.assertTrue(popover.isOpenOnFocus());
+        Assertions.assertTrue(popover.isOpenOnFocus());
 
         popover.setOpenOnFocus(false);
-        Assert.assertFalse(popover.isOpenOnFocus());
+        Assertions.assertFalse(popover.isOpenOnFocus());
     }
 
     @Test
-    public void setOpenOnHover_isOpenOnHover() {
+    void setOpenOnHover_isOpenOnHover() {
         popover.setOpenOnHover(true);
-        Assert.assertTrue(popover.isOpenOnHover());
+        Assertions.assertTrue(popover.isOpenOnHover());
 
         popover.setOpenOnHover(false);
-        Assert.assertFalse(popover.isOpenOnHover());
+        Assertions.assertFalse(popover.isOpenOnHover());
     }
 
     @Test
-    public void getTriggerProperty_defaultValue_click() {
+    void getTriggerProperty_defaultValue_click() {
         ArrayNode jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(1, jsonArray.size());
-        Assert.assertEquals("click", jsonArray.get(0).asString());
+        Assertions.assertEquals(1, jsonArray.size());
+        Assertions.assertEquals("click", jsonArray.get(0).asString());
     }
 
     @Test
-    public void setOpenOnClick_triggerPropertyUpdated() {
+    void setOpenOnClick_triggerPropertyUpdated() {
         popover.setOpenOnClick(false);
 
         ArrayNode jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(0, jsonArray.size());
+        Assertions.assertEquals(0, jsonArray.size());
     }
 
     @Test
-    public void setOpenOnFocus_triggerPropertyUpdated() {
+    void setOpenOnFocus_triggerPropertyUpdated() {
         popover.setOpenOnFocus(true);
 
         ArrayNode jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(2, jsonArray.size());
-        Assert.assertEquals("click", jsonArray.get(0).asString());
-        Assert.assertEquals("focus", jsonArray.get(1).asString());
+        Assertions.assertEquals(2, jsonArray.size());
+        Assertions.assertEquals("click", jsonArray.get(0).asString());
+        Assertions.assertEquals("focus", jsonArray.get(1).asString());
     }
 
     @Test
-    public void setOpenOnHover_triggerPropertyUpdated() {
+    void setOpenOnHover_triggerPropertyUpdated() {
         popover.setOpenOnHover(true);
 
         ArrayNode jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(2, jsonArray.size());
-        Assert.assertEquals("click", jsonArray.get(0).asString());
-        Assert.assertEquals("hover", jsonArray.get(1).asString());
+        Assertions.assertEquals(2, jsonArray.size());
+        Assertions.assertEquals("click", jsonArray.get(0).asString());
+        Assertions.assertEquals("hover", jsonArray.get(1).asString());
     }
 
     @Test
-    public void setAriaLabel_getAriaLabel() {
+    void setAriaLabel_getAriaLabel() {
         popover.setAriaLabel("aria-label");
-        Assert.assertTrue(popover.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", popover.getAriaLabel().get());
+        Assertions.assertTrue(popover.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", popover.getAriaLabel().get());
 
         popover.setAriaLabel(null);
-        Assert.assertTrue(popover.getAriaLabel().isEmpty());
+        Assertions.assertTrue(popover.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy_getAriaLabelledBy() {
+    void setAriaLabelledBy_getAriaLabelledBy() {
         popover.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(popover.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby",
+        Assertions.assertTrue(popover.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
                 popover.getAriaLabelledBy().get());
 
         popover.setAriaLabelledBy(null);
-        Assert.assertTrue(popover.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(popover.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void getRole_defaultDialog() {
+    void getRole_defaultDialog() {
         Popover popover = new Popover();
 
-        Assert.assertEquals("dialog", popover.getRole());
-        Assert.assertEquals("dialog", popover.getOverlayRole());
-        Assert.assertEquals("dialog", popover.getElement().getProperty("role"));
+        Assertions.assertEquals("dialog", popover.getRole());
+        Assertions.assertEquals("dialog", popover.getOverlayRole());
+        Assertions.assertEquals("dialog",
+                popover.getElement().getProperty("role"));
     }
 
     @Test
-    public void setOverlayRole_getOverlayRole() {
+    void setOverlayRole_getOverlayRole() {
         popover.setOverlayRole("alertdialog");
 
-        Assert.assertEquals("alertdialog", popover.getRole());
-        Assert.assertEquals("alertdialog", popover.getOverlayRole());
-        Assert.assertEquals("alertdialog",
+        Assertions.assertEquals("alertdialog", popover.getRole());
+        Assertions.assertEquals("alertdialog", popover.getOverlayRole());
+        Assertions.assertEquals("alertdialog",
                 popover.getElement().getProperty("role"));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setOverlayRole_null_throws() {
-        popover.setOverlayRole(null);
+    @Test
+    void setOverlayRole_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> popover.setOverlayRole(null));
     }
 
     @Test
-    public void setRole_getRole() {
+    void setRole_getRole() {
         popover.setRole("alertdialog");
 
-        Assert.assertEquals("alertdialog", popover.getRole());
-        Assert.assertEquals("alertdialog", popover.getOverlayRole());
-        Assert.assertEquals("alertdialog",
+        Assertions.assertEquals("alertdialog", popover.getRole());
+        Assertions.assertEquals("alertdialog", popover.getOverlayRole());
+        Assertions.assertEquals("alertdialog",
                 popover.getElement().getProperty("role"));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setRole_null_throws() {
-        popover.setRole(null);
+    @Test
+    void setRole_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> popover.setRole(null));
     }
 
     @Test
-    public void setModal_isModal() {
-        Assert.assertFalse(popover.isModal());
-        Assert.assertFalse(popover.getElement().getProperty("modal", false));
+    void setModal_isModal() {
+        Assertions.assertFalse(popover.isModal());
+        Assertions
+                .assertFalse(popover.getElement().getProperty("modal", false));
 
         popover.setModal(true);
-        Assert.assertTrue(popover.isModal());
-        Assert.assertTrue(popover.getElement().getProperty("modal", false));
+        Assertions.assertTrue(popover.isModal());
+        Assertions.assertTrue(popover.getElement().getProperty("modal", false));
     }
 
     @Test
-    public void setBackdropVisible_isBackdropVisible() {
-        Assert.assertFalse(popover.isBackdropVisible());
-        Assert.assertFalse(
+    void setBackdropVisible_isBackdropVisible() {
+        Assertions.assertFalse(popover.isBackdropVisible());
+        Assertions.assertFalse(
                 popover.getElement().getProperty("withBackdrop", false));
 
         popover.setBackdropVisible(true);
-        Assert.assertTrue(popover.isBackdropVisible());
-        Assert.assertTrue(
+        Assertions.assertTrue(popover.isBackdropVisible());
+        Assertions.assertTrue(
                 popover.getElement().getProperty("withBackdrop", false));
     }
 
     @Test
-    public void setModalAndBackdropVisible() {
+    void setModalAndBackdropVisible() {
         popover.setModal(true, true);
-        Assert.assertTrue(popover.isModal());
-        Assert.assertTrue(popover.isBackdropVisible());
+        Assertions.assertTrue(popover.isModal());
+        Assertions.assertTrue(popover.isBackdropVisible());
 
         popover.setModal(false, false);
-        Assert.assertFalse(popover.isModal());
-        Assert.assertFalse(popover.isBackdropVisible());
+        Assertions.assertFalse(popover.isModal());
+        Assertions.assertFalse(popover.isBackdropVisible());
     }
 
     @Test
-    public void setAutofocus_isAutofocus() {
-        Assert.assertFalse(popover.isAutofocus());
-        Assert.assertFalse(
+    void setAutofocus_isAutofocus() {
+        Assertions.assertFalse(popover.isAutofocus());
+        Assertions.assertFalse(
                 popover.getElement().getProperty("autofocus", false));
 
         popover.setAutofocus(true);
-        Assert.assertTrue(popover.isAutofocus());
-        Assert.assertTrue(popover.getElement().getProperty("autofocus", false));
+        Assertions.assertTrue(popover.isAutofocus());
+        Assertions.assertTrue(
+                popover.getElement().getProperty("autofocus", false));
     }
 
     @Test
-    public void popoverWithContent() {
+    void popoverWithContent() {
         Div content = new Div();
         Popover popoverWithContent = new Popover(content);
-        Assert.assertEquals(1, popoverWithContent.getChildren().count());
-        Assert.assertSame(content,
+        Assertions.assertEquals(1, popoverWithContent.getChildren().count());
+        Assertions.assertSame(content,
                 popoverWithContent.getChildren().findFirst().get());
     }
 
     @Test
-    public void testSetDefaultFocusDelay_threadSafety() {
+    void testSetDefaultFocusDelay_threadSafety() {
         testStaticSettersThreadsSafety(
                 () -> Popover.setDefaultFocusDelay(1000));
     }
 
     @Test
-    public void testSetDefaultHoverDelay_threadSafety() {
+    void testSetDefaultHoverDelay_threadSafety() {
         testStaticSettersThreadsSafety(
                 () -> Popover.setDefaultHoverDelay(1000));
     }
 
     @Test
-    public void testSetDefaultHideDelay_threadSafety() {
+    void testSetDefaultHideDelay_threadSafety() {
         testStaticSettersThreadsSafety(() -> Popover.setDefaultHideDelay(1000));
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Popover.class));
     }
 
