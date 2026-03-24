@@ -15,58 +15,59 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
-public class FlexComponentTest {
+class FlexComponentTest {
 
     @Test
-    public void setFlexShrink() {
+    void setFlexShrink() {
         TestComponent component = new TestComponent();
         Div div = new Div();
         component.add(div);
         component.setFlexShrink(2, div);
 
-        Assert.assertEquals("should set flex-shrink", 2,
-                component.getFlexShrink(div), 0);
+        Assertions.assertEquals(2, component.getFlexShrink(div), 0,
+                "should set flex-shrink");
     }
 
     @Test
-    public void getFlexShrink_returnOneIfNotSet() {
+    void getFlexShrink_returnOneIfNotSet() {
         TestComponent component = new TestComponent();
         Div div = new Div();
         component.add(div);
 
-        Assert.assertEquals("should return 1 if flex-shirk not set", 1,
-                component.getFlexShrink(div), 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setFlexShrink_throwExceptionIfNegative() {
-        TestComponent component = new TestComponent();
-        Div div = new Div();
-        component.add(div);
-        component.setFlexShrink(-1, div);
+        Assertions.assertEquals(1, component.getFlexShrink(div), 0,
+                "should return 1 if flex-shirk not set");
     }
 
     @Test
-    public void setFlexGrow() {
+    void setFlexShrink_throwExceptionIfNegative() {
+        TestComponent component = new TestComponent();
+        Div div = new Div();
+        component.add(div);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> component.setFlexShrink(-1, div));
+    }
+
+    @Test
+    void setFlexGrow() {
         TestComponent component = new TestComponent();
         Div div = new Div();
         component.add(div);
 
         component.setFlexGrow(2, div);
-        Assert.assertEquals(2, component.getFlexGrow(div), 0);
-        Assert.assertEquals("2.0", div.getStyle().get("flex-grow"));
+        Assertions.assertEquals(2, component.getFlexGrow(div), 0);
+        Assertions.assertEquals("2.0", div.getStyle().get("flex-grow"));
 
         component.setFlexGrow(0, div);
-        Assert.assertEquals(0, component.getFlexGrow(div), 0);
-        Assert.assertEquals("0.0", div.getStyle().get("flex-grow"));
+        Assertions.assertEquals(0, component.getFlexGrow(div), 0);
+        Assertions.assertEquals("0.0", div.getStyle().get("flex-grow"));
     }
 
     @Tag("test")
