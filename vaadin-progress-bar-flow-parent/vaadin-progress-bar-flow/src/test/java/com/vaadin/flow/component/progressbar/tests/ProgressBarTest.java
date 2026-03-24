@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.progressbar.tests;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -26,157 +24,154 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 /**
  * @author Vaadin Ltd.
  */
-public class ProgressBarTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class ProgressBarTest {
 
     @Test
-    public void defaultConstructorShouldInitializeAllFieldsToDefault() {
+    void defaultConstructorShouldInitializeAllFieldsToDefault() {
 
         ProgressBar progressBar = new ProgressBar();
 
-        Assert.assertEquals("initial min is wrong", 0.0, progressBar.getMin(),
-                0.0);
-        Assert.assertEquals("initial max is wrong", 1.0, progressBar.getMax(),
-                0.0);
-        Assert.assertEquals("initial value is wrong", 0.0,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(0.0, progressBar.getMin(), 0.0,
+                "initial min is wrong");
+        Assertions.assertEquals(1.0, progressBar.getMax(), 0.0,
+                "initial max is wrong");
+        Assertions.assertEquals(0.0, progressBar.getValue(), 0.0,
+                "initial value is wrong");
     }
 
     @Test
-    public void minMaxConstructorShouldInitializeMinAndMax() {
+    void minMaxConstructorShouldInitializeMinAndMax() {
         double min = 1.8312;
         double max = 3.1415927;
 
         ProgressBar progressBar = new ProgressBar(min, max);
 
-        Assert.assertEquals("initial min is wrong", min, progressBar.getMin(),
-                0.0);
-        Assert.assertEquals("initial max is wrong", max, progressBar.getMax(),
-                0.0);
-        Assert.assertEquals("initial value is wrong", min,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(min, progressBar.getMin(), 0.0,
+                "initial min is wrong");
+        Assertions.assertEquals(max, progressBar.getMax(), 0.0,
+                "initial max is wrong");
+        Assertions.assertEquals(min, progressBar.getValue(), 0.0,
+                "initial value is wrong");
     }
 
     @Test
-    public void fullConstructorShouldInitializeAllFields() {
+    void fullConstructorShouldInitializeAllFields() {
         double min = 1.8312;
         double max = 3.1415927;
         double value = 2.25;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
 
-        Assert.assertEquals("initial min is wrong", min, progressBar.getMin(),
-                0.0);
-        Assert.assertEquals("initial max is wrong", max, progressBar.getMax(),
-                0.0);
-        Assert.assertEquals("initial value is wrong", value,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(min, progressBar.getMin(), 0.0,
+                "initial min is wrong");
+        Assertions.assertEquals(max, progressBar.getMax(), 0.0,
+                "initial max is wrong");
+        Assertions.assertEquals(value, progressBar.getValue(), 0.0,
+                "initial value is wrong");
     }
 
     @Test
-    public void constructorShouldThrowIfMinEqualsMax() {
+    void constructorShouldThrowIfMinEqualsMax() {
         double min = 42.0;
         double max = 42.0;
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String
-                .format("min ('%s') must be less than max ('%s')", min, max));
-
-        new ProgressBar(min, max);
+        IllegalArgumentException exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> new ProgressBar(min, max));
+        Assertions.assertTrue(exception.getMessage().contains(String
+                .format("min ('%s') must be less than max ('%s')", min, max)));
     }
 
     @Test
-    public void constructorShouldThrowIfMinGreaterThanMax() {
+    void constructorShouldThrowIfMinGreaterThanMax() {
         double min = 1.01;
         double max = 1.0;
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String
-                .format("min ('%s') must be less than max ('%s')", min, max));
-
-        new ProgressBar(min, max);
+        IllegalArgumentException exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> new ProgressBar(min, max));
+        Assertions.assertTrue(exception.getMessage().contains(String
+                .format("min ('%s') must be less than max ('%s')", min, max)));
     }
 
     @Test
-    public void constructorShouldThrowIfValueLessThanMin() {
+    void constructorShouldThrowIfValueLessThanMin() {
         double min = 0.0;
         double max = 1.0;
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
-
-        new ProgressBar(min, max, -0.01);
+        IllegalArgumentException exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> new ProgressBar(min, max, -0.01));
+        Assertions.assertTrue(exception.getMessage().contains(String.format(
+                "value must be between min ('%s') and max ('%s')", min, max)));
     }
 
     @Test
-    public void constructorShouldThrowIfValueGreaterThanMax() {
+    void constructorShouldThrowIfValueGreaterThanMax() {
         double min = 0.0;
         double max = 1.0;
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(String.format(
-                "value must be between min ('%s') and max ('%s')", min, max));
-
-        new ProgressBar(min, max, 1.01);
+        IllegalArgumentException exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> new ProgressBar(min, max, 1.01));
+        Assertions.assertTrue(exception.getMessage().contains(String.format(
+                "value must be between min ('%s') and max ('%s')", min, max)));
     }
 
     @Test
-    public void setValueShouldUpdateValue() {
+    void setValueShouldUpdateValue() {
         double min = 10;
         double max = 100;
         double value = 25;
 
         ProgressBar progressBar = new ProgressBar(min, max);
-        Assert.assertEquals("initial value is wrong", min,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(min, progressBar.getValue(), 0.0,
+                "initial value is wrong");
         progressBar.setValue(value);
 
-        Assert.assertEquals("min is wrong", min, progressBar.getMin(), 0.0);
-        Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
-        Assert.assertEquals("updated value is wrong", value,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(min, progressBar.getMin(), 0.0, "min is wrong");
+        Assertions.assertEquals(max, progressBar.getMax(), 0.0, "max is wrong");
+        Assertions.assertEquals(value, progressBar.getValue(), 0.0,
+                "updated value is wrong");
     }
 
     @Test
-    public void setValueShouldUpdateValueToMin() {
+    void setValueShouldUpdateValueToMin() {
         double min = 10;
         double max = 100;
         double value = 42;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
-        Assert.assertEquals("initial value is wrong", value,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(value, progressBar.getValue(), 0.0,
+                "initial value is wrong");
         progressBar.setValue(min);
 
-        Assert.assertEquals("min is wrong", min, progressBar.getMin(), 0.0);
-        Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
-        Assert.assertEquals("updated value is wrong", min,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(min, progressBar.getMin(), 0.0, "min is wrong");
+        Assertions.assertEquals(max, progressBar.getMax(), 0.0, "max is wrong");
+        Assertions.assertEquals(min, progressBar.getValue(), 0.0,
+                "updated value is wrong");
     }
 
     @Test
-    public void setValueShouldUpdateValueToMax() {
+    void setValueShouldUpdateValueToMax() {
         double min = 1;
         double max = 99;
         double value = 66;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
-        Assert.assertEquals("initial value is wrong", value,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(value, progressBar.getValue(), 0.0,
+                "initial value is wrong");
         progressBar.setValue(max);
 
-        Assert.assertEquals("min is wrong", min, progressBar.getMin(), 0.0);
-        Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
-        Assert.assertEquals("updated value is wrong", max,
-                progressBar.getValue(), 0.0);
+        Assertions.assertEquals(min, progressBar.getMin(), 0.0, "min is wrong");
+        Assertions.assertEquals(max, progressBar.getMax(), 0.0, "max is wrong");
+        Assertions.assertEquals(max, progressBar.getValue(), 0.0,
+                "updated value is wrong");
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(ProgressBar.class));
     }
 }
