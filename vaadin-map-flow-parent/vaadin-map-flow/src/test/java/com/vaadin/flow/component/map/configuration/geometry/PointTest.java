@@ -10,38 +10,39 @@ package com.vaadin.flow.component.map.configuration.geometry;
 
 import java.beans.PropertyChangeListener;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
 
-public class PointTest {
+class PointTest {
 
     private PropertyChangeListener propertyChangeListenerMock;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         propertyChangeListenerMock = Mockito.mock(PropertyChangeListener.class);
     }
 
     @Test
-    public void defaults() {
+    void defaults() {
         Point point = new Point(new Coordinate(1, 1));
 
-        Assert.assertNotNull(point.getCoordinates());
-        Assert.assertEquals(1, point.getCoordinates().getX(), 0);
-        Assert.assertEquals(1, point.getCoordinates().getY(), 0);
+        Assertions.assertNotNull(point.getCoordinates());
+        Assertions.assertEquals(1, point.getCoordinates().getX(), 0);
+        Assertions.assertEquals(1, point.getCoordinates().getY(), 0);
     }
 
     @Test
-    public void failsWithNullValue() {
-        Assert.assertThrows(NullPointerException.class, () -> new Point(null));
+    void failsWithNullValue() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new Point(null));
     }
 
     @Test
-    public void setCoordinates() {
+    void setCoordinates() {
         TestPoint point = new TestPoint(new Coordinate());
 
         point.addPropertyChangeListener(propertyChangeListenerMock);
@@ -49,31 +50,32 @@ public class PointTest {
                 6351912.406929109);
         point.setCoordinates(coordinate);
 
-        Assert.assertEquals(coordinate.getX(), point.getCoordinates().getX(),
-                0);
-        Assert.assertEquals(coordinate.getY(), point.getCoordinates().getY(),
-                0);
+        Assertions.assertEquals(coordinate.getX(),
+                point.getCoordinates().getX(), 0);
+        Assertions.assertEquals(coordinate.getY(),
+                point.getCoordinates().getY(), 0);
         Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
                 .propertyChange(Mockito.any());
     }
 
     @Test
-    public void setCoordinates_failsWithNullValue() {
+    void setCoordinates_failsWithNullValue() {
         Point point = new Point(new Coordinate());
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> point.setCoordinates(null));
     }
 
     @Test
-    public void translate() {
+    void translate() {
         double value = 123.456;
         double delta = value * 2;
         Point point = new Point(new Coordinate(value, value * -1));
         point.translate(-1 * delta, delta);
 
-        Assert.assertEquals(value * -1, point.getCoordinates().getX(), 0.00001);
-        Assert.assertEquals(value, point.getCoordinates().getY(), 0.00001);
+        Assertions.assertEquals(value * -1, point.getCoordinates().getX(),
+                0.00001);
+        Assertions.assertEquals(value, point.getCoordinates().getY(), 0.00001);
     }
 
     private static class TestPoint extends Point {
