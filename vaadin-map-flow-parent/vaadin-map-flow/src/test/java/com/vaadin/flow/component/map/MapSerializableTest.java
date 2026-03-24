@@ -10,12 +10,12 @@ package com.vaadin.flow.component.map;
 
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class MapSerializableTest extends ClassesSerializableTest {
+class MapSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
@@ -27,11 +27,10 @@ public class MapSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    public void transientMapSerializer_recreatedAfterSerialization()
-            throws Throwable {
+    void transientMapSerializer_recreatedAfterSerialization() throws Throwable {
         Map map = new Map();
         Map deserializedMap = serializeAndDeserialize(map);
 
-        Assert.assertNotNull(deserializedMap.getSerializer());
+        Assertions.assertNotNull(deserializedMap.getSerializer());
     }
 }
