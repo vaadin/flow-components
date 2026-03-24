@@ -109,7 +109,8 @@ public class MessageList extends Component
      * the items.
      * <p>
      * The rendered messages are updated when the signal's value or any
-     * individual item signal changes.
+     * individual item signal changes. Any signal change results in a full
+     * update.
      *
      * @param <S>
      *            the type of signal holding individual items
@@ -185,7 +186,8 @@ public class MessageList extends Component
     /**
      * Binds the given signal to the items of the message list as a one-way
      * binding so that the rendered messages are updated when the signal's value
-     * or any individual item signal changes.
+     * or any individual item signal changes. Any signal change results in a
+     * full update.
      * <p>
      * When a signal is bound, the items are kept synchronized with the signal
      * value while the component is attached. When the component is detached,
