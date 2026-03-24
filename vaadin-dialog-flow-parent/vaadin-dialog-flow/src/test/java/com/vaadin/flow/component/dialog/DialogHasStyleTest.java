@@ -15,20 +15,22 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class DialogHasStyleTest {
+class DialogHasStyleTest {
 
     private Dialog dialog;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         dialog = new Dialog();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getStyle_unsupported() {
-        dialog.getStyle();
+    @Test
+    void getStyle_unsupported() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> dialog.getStyle());
     }
 }

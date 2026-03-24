@@ -15,68 +15,71 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class DialogSignalTest extends AbstractSignalsUnitTest {
+class DialogSignalTest extends AbstractSignalsJUnit6Test {
     private final Dialog dialog = new Dialog();
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void bindWidth_unsupported() {
+    @Test
+    void bindWidth_unsupported() {
         var signal = new ValueSignal<>("600px");
-        dialog.bindWidth(signal);
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void bindHeight_unsupported() {
-        var signal = new ValueSignal<>("600px");
-        dialog.bindHeight(signal);
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> dialog.bindWidth(signal));
     }
 
     @Test
-    public void bindVisible_visibilitySynchronized() {
+    void bindHeight_unsupported() {
+        var signal = new ValueSignal<>("600px");
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> dialog.bindHeight(signal));
+    }
+
+    @Test
+    void bindVisible_visibilitySynchronized() {
         var visibleSignal = new ValueSignal<>(false);
         dialog.bindVisible(visibleSignal);
         ui.add(dialog);
 
-        Assert.assertFalse(dialog.isVisible());
+        Assertions.assertFalse(dialog.isVisible());
 
         visibleSignal.set(true);
-        Assert.assertTrue(dialog.isVisible());
+        Assertions.assertTrue(dialog.isVisible());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindVisible_setVisibleWhileBound_throws() {
+    @Test
+    void bindVisible_setVisibleWhileBound_throws() {
         var visibleSignal = new ValueSignal<>(false);
         dialog.bindVisible(visibleSignal);
         ui.add(dialog);
 
-        dialog.setVisible(true);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> dialog.setVisible(true));
     }
 
     @Test
-    public void bindVisible_strictModal_updatesModality() {
+    void bindVisible_strictModal_updatesModality() {
         var visibleSignal = new ValueSignal<>(false);
         dialog.setModality(ModalityMode.STRICT);
         dialog.bindVisible(visibleSignal);
         ui.add(dialog);
         dialog.open();
 
-        Assert.assertFalse("Dialog should not be modal when invisible",
-                isServerSideModal());
+        Assertions.assertFalse(isServerSideModal(),
+                "Dialog should not be modal when invisible");
 
         visibleSignal.set(true);
-        Assert.assertTrue("Dialog should be modal when visible",
-                isServerSideModal());
+        Assertions.assertTrue(isServerSideModal(),
+                "Dialog should be modal when visible");
 
         visibleSignal.set(false);
-        Assert.assertFalse("Dialog should not be modal when invisible",
-                isServerSideModal());
+        Assertions.assertFalse(isServerSideModal(),
+                "Dialog should not be modal when invisible");
     }
 
     private boolean isServerSideModal() {
