@@ -16,12 +16,14 @@
 package com.vaadin.flow.component.ai.chart;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -148,6 +150,10 @@ public class ChartRenderer {
             // overrides any incorrect LLM-provided axis type.
             applyAxisDefaults(config, allSeries);
 
+            // Name single unnamed series using the chart title so the
+            // legend shows a meaningful label instead of "Series 1".
+            nameUnnamedSeries(config, allSeries);
+
             chart.drawChart(true);
         }));
     }
@@ -184,20 +190,24 @@ public class ChartRenderer {
             return;
         }
 
-        // Inspect the first DataSeries for category names and datetime values.
-        if (!(allSeries.getFirst() instanceof DataSeries firstSeries)) {
-            return;
+        // Collect all DataSeries items for inspection.
+        var allItems = new ArrayList<DataSeriesItem>();
+        for (var series : allSeries) {
+            if (series instanceof DataSeries ds) {
+                allItems.addAll(ds.getData());
+            }
         }
-        var items = firstSeries.getData();
-        if (items.isEmpty()) {
+        if (allItems.isEmpty()) {
             return;
         }
 
         // Extract category names if items have names and the chart type
         // uses a category axis (not pie, sankey, etc.).
-        // Always override: data-derived categories are authoritative.
+        // Collects from all series to handle multi-series with different
+        // categories (e.g. stacked by region where each region has
+        // different months).
         if (!NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
-            var categories = extractCategories(items);
+            var categories = extractCategories(allItems);
             if (categories != null) {
                 xAxis.setCategories(categories.toArray(new String[0]));
             }
@@ -206,25 +216,45 @@ public class ChartRenderer {
         // Detect datetime X values (epoch ms > year 2000).
         // Always override: the data is authoritative for axis type when
         // values are clearly timestamps (e.g. OHLC dates).
-        if (hasDatetimeXValues(items)) {
+        if (hasDatetimeXValues(allItems)) {
             xAxis.setType(AxisType.DATETIME);
         }
     }
 
     /**
-     * Returns category names extracted from items, or {@code null} if items
-     * don't have names.
+     * Returns unique category names extracted from items (preserving insertion
+     * order), or {@code null} if any item has no name.
      */
     private static List<String> extractCategories(List<DataSeriesItem> items) {
-        var categories = new ArrayList<String>(items.size());
+        var seen = new LinkedHashSet<String>();
         for (var item : items) {
             var name = item.getName();
             if (name == null) {
                 return null;
             }
-            categories.add(name);
+            seen.add(name);
         }
-        return categories;
+        return new ArrayList<>(seen);
+    }
+
+    /**
+     * When there is exactly one series and it has no name, uses the chart title
+     * as the series name so the legend shows a meaningful label instead of
+     * "Series 1".
+     */
+    private static void nameUnnamedSeries(Configuration config,
+            List<Series> allSeries) {
+        if (allSeries.size() != 1) {
+            return;
+        }
+        var series = allSeries.getFirst();
+        if (series instanceof AbstractSeries abstractSeries
+                && abstractSeries.getName() == null) {
+            var title = config.getTitle();
+            if (title != null && title.getText() != null) {
+                abstractSeries.setName(title.getText());
+            }
+        }
     }
 
     /**
