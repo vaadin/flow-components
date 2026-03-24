@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
 public class ConfigurationTestUtil {
@@ -41,9 +41,8 @@ public class ConfigurationTestUtil {
         // event
         addChild.accept(configurationObject);
         configurationObject.collectChanges(changes::add);
-        Assert.assertTrue(
-                "Adding a child should mark the configuration object as dirty",
-                changes.contains(configurationObject));
+        Assertions.assertTrue(changes.contains(configurationObject),
+                "Adding a child should mark the configuration object as dirty");
         Mockito.verify(changeListener, Mockito.atLeastOnce())
                 .propertyChange(Mockito.any());
 
@@ -64,9 +63,8 @@ public class ConfigurationTestUtil {
         // change event
         removeChild.accept(configurationObject);
         configurationObject.collectChanges(changes::add);
-        Assert.assertTrue(
-                "Removing a child should mark the configuration object as dirty",
-                changes.contains(configurationObject));
+        Assertions.assertTrue(changes.contains(configurationObject),
+                "Removing a child should mark the configuration object as dirty");
         Mockito.verify(changeListener, Mockito.atLeastOnce())
                 .propertyChange(Mockito.any());
 
