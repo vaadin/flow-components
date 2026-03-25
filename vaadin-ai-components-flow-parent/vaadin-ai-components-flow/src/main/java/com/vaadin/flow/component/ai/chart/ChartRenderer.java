@@ -72,24 +72,6 @@ public class ChartRenderer {
     }
 
     /**
-     * Returns the data converter.
-     *
-     * @return the data converter
-     */
-    public DataConverter getDataConverter() {
-        return dataConverter;
-    }
-
-    /**
-     * Returns the configuration applier.
-     *
-     * @return the configuration applier
-     */
-    public ChartConfigurationApplier getConfigurationApplier() {
-        return configurationApplier;
-    }
-
-    /**
      * Applies pending state from the chart's {@link ChartEntry} if present.
      * After applying, the pending state is cleared.
      *

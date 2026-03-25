@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartRendererTest {
@@ -63,10 +65,24 @@ class ChartRendererTest {
     }
 
     @Test
-    void setDataConverter_customConverter_isUsed() {
-        DataConverter custom = data -> List.of(new DataSeries("custom-series"));
-        renderer.setDataConverter(custom);
-        Assertions.assertSame(custom, renderer.getDataConverter());
+    void setDataConverter_customConverter_isUsedDuringRendering() {
+        databaseProvider.results = List.of(row("x", 1, "y", 10));
+
+        AtomicBoolean called = new AtomicBoolean(false);
+        renderer.setDataConverter(data -> {
+            called.set(true);
+            DataSeries series = new DataSeries("custom");
+            series.add(new DataSeriesItem("A", 42));
+            return List.of(series);
+        });
+
+        renderer.renderChart(chart, List.of("SELECT 1"),
+                "{\"chart\":{\"type\":\"column\"}}");
+
+        Assertions.assertTrue(called.get(),
+                "Custom DataConverter should have been called");
+        Assertions.assertEquals("custom",
+                chart.getConfiguration().getSeries().get(0).getName());
     }
 
     @Nested
@@ -197,6 +213,22 @@ class ChartRendererTest {
             Assertions.assertEquals("Keep Me",
                     chart.getConfiguration().getTitle().getText());
         }
+
+        @Test
+        void callsDrawChart() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // drawChart(true) triggers a full redraw — verify by checking
+            // that series data is present on the configuration (drawChart
+            // would fail if configuration was inconsistent)
+            Assertions.assertFalse(
+                    chart.getConfiguration().getSeries().isEmpty());
+        }
     }
 
     @Nested
@@ -220,6 +252,42 @@ class ChartRendererTest {
         }
 
         @Test
+        void itemsWithoutNames_doesNotSetCategories() {
+            // Items with X/Y numeric data (no names) should not set categories
+            databaseProvider.results = List.of(
+                    row(ColumnNames.X, 1, ColumnNames.Y, 10),
+                    row(ColumnNames.X, 2, ColumnNames.Y, 20));
+
+            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
+                    "{\"chart\":{\"type\":\"line\"}}");
+
+            String[] categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertTrue(categories == null || categories.length == 0);
+        }
+
+        @Test
+        void mixedNamesAndNull_doesNotSetCategories() {
+            // When some items have names and some don't, categories should
+            // not be set (extractCategories returns null)
+            databaseProvider.results = List.of(row("x", 1, "y", 10));
+
+            renderer.setDataConverter(data -> {
+                DataSeries series = new DataSeries();
+                series.add(new DataSeriesItem("Jan", 100));
+                series.add(new DataSeriesItem(1, 200)); // no name
+                return List.of(series);
+            });
+
+            renderer.renderChart(chart, List.of("SELECT 1"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            String[] categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertTrue(categories == null || categories.length == 0);
+        }
+
+        @Test
         void pieChart_doesNotSetCategories() {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
@@ -231,6 +299,39 @@ class ChartRendererTest {
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
             Assertions.assertTrue(categories == null || categories.length == 0);
+        }
+
+        @Test
+        void emptySeries_doesNotModifyAxis() {
+            databaseProvider.results = List.of();
+
+            // Use a custom converter that returns an empty list
+            renderer.setDataConverter(data -> List.of(new DataSeries()));
+
+            chart.getConfiguration().getxAxis().setType(AxisType.LINEAR);
+
+            renderer.renderChart(chart, List.of("SELECT 1"),
+                    "{\"chart\":{\"type\":\"line\"}}");
+
+            // Axis type should remain unchanged
+            Assertions.assertEquals(AxisType.LINEAR,
+                    chart.getConfiguration().getxAxis().getType());
+        }
+
+        @Test
+        void ganttSeries_setsDatetimeAxis() {
+            // Gantt series need datetime X-axis — but we can't easily create
+            // GanttSeries from the converter, so test via the default converter
+            // with Gantt column names
+            databaseProvider.results = List
+                    .of(row(ColumnNames.NAME, "Task 1", ColumnNames.START,
+                            1704067200000L, ColumnNames.END, 1704153600000L));
+
+            renderer.renderChart(chart, List.of("SELECT name, start, end"),
+                    "{\"chart\":{\"type\":\"gantt\"}}");
+
+            Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
         }
 
         @Test
@@ -286,6 +387,20 @@ class ChartRendererTest {
                     "{\"chart\":{\"type\":\"line\"}}");
 
             Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+        }
+
+        @Test
+        void noXValues_doesNotSetDatetimeAxisType() {
+            // Items with no X values — hasDatetimeXValues should return false
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            Assertions.assertNotEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
         }
     }
