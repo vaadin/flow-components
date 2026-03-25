@@ -13,23 +13,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 
-public class VectorSourceTest {
+class VectorSourceTest {
 
     @Test
-    public void initializeWithOptions() {
+    void initializeWithOptions() {
         VectorSource.Options options = createOptions();
         VectorSource source = new VectorSource(options);
 
-        Assert.assertEquals("testProjection", source.getProjection());
-        Assert.assertEquals("testAttributions",
+        Assertions.assertEquals("testProjection", source.getProjection());
+        Assertions.assertEquals("testAttributions",
                 source.getAttributions().get(0));
-        Assert.assertFalse(source.isAttributionsCollapsible());
+        Assertions.assertFalse(source.isAttributionsCollapsible());
     }
 
     private VectorSource.Options createOptions() {
@@ -42,18 +42,18 @@ public class VectorSourceTest {
     }
 
     @Test
-    public void removeAllFeatures() throws Exception {
+    void removeAllFeatures() throws Exception {
         VectorSource.Options options = createOptions();
         VectorSource source = new VectorSource(options);
-        Assert.assertEquals(new ArrayList<>(), source.getFeatures());
+        Assertions.assertEquals(new ArrayList<>(), source.getFeatures());
         source.addFeature(new MarkerFeature());
         source.addFeature(new MarkerFeature());
         source.addFeature(new MarkerFeature());
-        Assert.assertEquals(3, source.getFeatures().size());
-        Assert.assertEquals(3, getChildren(source).size());
+        Assertions.assertEquals(3, source.getFeatures().size());
+        Assertions.assertEquals(3, getChildren(source).size());
         source.removeAllFeatures();
-        Assert.assertEquals(0, source.getFeatures().size());
-        Assert.assertEquals(0, getChildren(source).size());
+        Assertions.assertEquals(0, source.getFeatures().size());
+        Assertions.assertEquals(0, getChildren(source).size());
 
     }
 

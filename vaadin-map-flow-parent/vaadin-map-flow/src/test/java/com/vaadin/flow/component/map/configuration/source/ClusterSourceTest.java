@@ -8,63 +8,63 @@
  */
 package com.vaadin.flow.component.map.configuration.source;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.feature.PolygonFeature;
 
-public class ClusterSourceTest {
+class ClusterSourceTest {
     ClusterSource source;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         source = new ClusterSource();
     }
 
     @Test
-    public void defaultValues() {
-        Assert.assertEquals(50, source.getDistance());
-        Assert.assertEquals(50, source.getMinDistance());
-        Assert.assertEquals(Constants.OL_SOURCE_CLUSTER, source.getType());
+    void defaultValues() {
+        Assertions.assertEquals(50, source.getDistance());
+        Assertions.assertEquals(50, source.getMinDistance());
+        Assertions.assertEquals(Constants.OL_SOURCE_CLUSTER, source.getType());
     }
 
     @Test
-    public void setDistance() {
+    void setDistance() {
         source.setDistance(50);
 
-        Assert.assertEquals(50, source.getDistance());
+        Assertions.assertEquals(50, source.getDistance());
     }
 
     @Test
-    public void setMinDistance() {
+    void setMinDistance() {
         source.setMinDistance(10);
 
-        Assert.assertEquals(10, source.getMinDistance());
+        Assertions.assertEquals(10, source.getMinDistance());
     }
 
     @Test
-    public void addFeature_withMarkerFeature_succeeds() {
+    void addFeature_withMarkerFeature_succeeds() {
         MarkerFeature marker = new MarkerFeature();
 
         source.addFeature(marker);
 
-        Assert.assertEquals(1, source.getFeatures().size());
-        Assert.assertTrue(source.getFeatures().contains(marker));
+        Assertions.assertEquals(1, source.getFeatures().size());
+        Assertions.assertTrue(source.getFeatures().contains(marker));
     }
 
     @Test
-    public void addFeature_withPolygonFeature_throwsException() {
+    void addFeature_withPolygonFeature_throwsException() {
         PolygonFeature polygon = new PolygonFeature();
 
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> source.addFeature(polygon));
     }
 
     @Test
-    public void addFeature_multipleMarkerFeatures_allAdded() {
+    void addFeature_multipleMarkerFeatures_allAdded() {
         MarkerFeature marker1 = new MarkerFeature();
         MarkerFeature marker2 = new MarkerFeature();
         MarkerFeature marker3 = new MarkerFeature();
@@ -73,9 +73,9 @@ public class ClusterSourceTest {
         source.addFeature(marker2);
         source.addFeature(marker3);
 
-        Assert.assertEquals(3, source.getFeatures().size());
-        Assert.assertTrue(source.getFeatures().contains(marker1));
-        Assert.assertTrue(source.getFeatures().contains(marker2));
-        Assert.assertTrue(source.getFeatures().contains(marker3));
+        Assertions.assertEquals(3, source.getFeatures().size());
+        Assertions.assertTrue(source.getFeatures().contains(marker1));
+        Assertions.assertTrue(source.getFeatures().contains(marker2));
+        Assertions.assertTrue(source.getFeatures().contains(marker3));
     }
 }

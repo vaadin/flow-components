@@ -8,18 +8,18 @@
  */
 package com.vaadin.flow.component.map.events;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
 
-public class MapClickEventTest {
+class MapClickEventTest {
 
     @Test
-    public void create() {
+    void create() {
         Map map = new Map();
         ArrayNode coordinates = JacksonUtils.createArrayNode();
         coordinates.add(10);
@@ -30,13 +30,13 @@ public class MapClickEventTest {
         MapClickEvent event = new MapClickEvent(map, true, coordinates,
                 featureIds, layerIds, 0, 0, false, false, false, false, 0);
 
-        Assert.assertNotNull(event.getCoordinate());
-        Assert.assertEquals(10, event.getCoordinate().getX(), 0);
-        Assert.assertEquals(20, event.getCoordinate().getY(), 0);
+        Assertions.assertNotNull(event.getCoordinate());
+        Assertions.assertEquals(10, event.getCoordinate().getX(), 0);
+        Assertions.assertEquals(20, event.getCoordinate().getY(), 0);
     }
 
     @Test
-    public void createFromInvalidCoordinates_usesFallback() {
+    void createFromInvalidCoordinates_usesFallback() {
         Map map = new Map();
         ArrayNode coordinates = JacksonUtils.createArrayNode();
         coordinates.add(JacksonUtils.nullNode());
@@ -47,8 +47,8 @@ public class MapClickEventTest {
         MapClickEvent event = new MapClickEvent(map, true, coordinates,
                 featureIds, layerIds, 0, 0, false, false, false, false, 0);
 
-        Assert.assertNotNull(event.getCoordinate());
-        Assert.assertEquals(0, event.getCoordinate().getX(), 0);
-        Assert.assertEquals(0, event.getCoordinate().getY(), 0);
+        Assertions.assertNotNull(event.getCoordinate());
+        Assertions.assertEquals(0, event.getCoordinate().getX(), 0);
+        Assertions.assertEquals(0, event.getCoordinate().getY(), 0);
     }
 }

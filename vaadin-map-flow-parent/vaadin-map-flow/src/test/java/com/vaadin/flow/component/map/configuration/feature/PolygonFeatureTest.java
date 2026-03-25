@@ -10,14 +10,14 @@ package com.vaadin.flow.component.map.configuration.feature;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.Polygon;
 
-public class PolygonFeatureTest {
+class PolygonFeatureTest {
     private static final Coordinate[] outerCoordinates = { new Coordinate(0, 0),
             new Coordinate(10, 0), new Coordinate(10, 10),
             new Coordinate(0, 10), new Coordinate(0, 0) };
@@ -27,43 +27,43 @@ public class PolygonFeatureTest {
             new Coordinate(2, 2) };
 
     @Test
-    public void defaults() {
+    void defaults() {
         PolygonFeature polygonFeature = new PolygonFeature();
 
         // Test default coordinates
-        Assert.assertNotNull(polygonFeature.getCoordinates());
-        Assert.assertEquals(1,
+        Assertions.assertNotNull(polygonFeature.getCoordinates());
+        Assertions.assertEquals(1,
                 polygonFeature.getGeometry().getCoordinates().length);
-        Assert.assertEquals(1,
+        Assertions.assertEquals(1,
                 polygonFeature.getGeometry().getCoordinates()[0].length);
-        Assert.assertEquals(0,
+        Assertions.assertEquals(0,
                 polygonFeature.getGeometry().getCoordinates()[0][0].getX(), 0);
-        Assert.assertEquals(0,
+        Assertions.assertEquals(0,
                 polygonFeature.getGeometry().getCoordinates()[0][0].getY(), 0);
 
         // Test default style
-        Assert.assertNotNull(polygonFeature.getStyle());
-        Assert.assertNotNull(polygonFeature.getStyle().getStroke());
-        Assert.assertEquals("hsl(214, 100%, 48%)",
+        Assertions.assertNotNull(polygonFeature.getStyle());
+        Assertions.assertNotNull(polygonFeature.getStyle().getStroke());
+        Assertions.assertEquals("hsl(214, 100%, 48%)",
                 polygonFeature.getStyle().getStroke().getColor());
-        Assert.assertEquals(2, polygonFeature.getStyle().getStroke().getWidth(),
-                0);
+        Assertions.assertEquals(2,
+                polygonFeature.getStyle().getStroke().getWidth(), 0);
 
-        Assert.assertNotNull(polygonFeature.getStyle().getFill());
-        Assert.assertEquals("hsla(214, 100%, 60%, 0.13)",
+        Assertions.assertNotNull(polygonFeature.getStyle().getFill());
+        Assertions.assertEquals("hsla(214, 100%, 60%, 0.13)",
                 polygonFeature.getStyle().getFill().getColor());
     }
 
     @Test
-    public void individualStyleInstances() {
+    void individualStyleInstances() {
         PolygonFeature polygon1 = new PolygonFeature();
         PolygonFeature polygon2 = new PolygonFeature();
 
-        Assert.assertNotEquals(polygon1.getStyle(), polygon2.getStyle());
+        Assertions.assertNotEquals(polygon1.getStyle(), polygon2.getStyle());
     }
 
     @Test
-    public void initializeWithCoordinates() {
+    void initializeWithCoordinates() {
         List<Coordinate> coordinates = List.of(outerCoordinates);
         PolygonFeature polygonFeature = new PolygonFeature(coordinates);
 
@@ -72,7 +72,7 @@ public class PolygonFeatureTest {
     }
 
     @Test
-    public void setCoordinatesWithList() {
+    void setCoordinatesWithList() {
         PolygonFeature polygonFeature = new PolygonFeature();
         List<Coordinate> coordinates = List.of(outerCoordinates);
         polygonFeature.setCoordinates(coordinates);
@@ -82,7 +82,7 @@ public class PolygonFeatureTest {
     }
 
     @Test
-    public void setCoordinatesWithArray() {
+    void setCoordinatesWithArray() {
         PolygonFeature polygonFeature = new PolygonFeature();
         Coordinate[][] coordinatesArray = new Coordinate[][] { outerCoordinates,
                 innerCoordinates };
@@ -92,52 +92,57 @@ public class PolygonFeatureTest {
     }
 
     @Test
-    public void setGeometry() {
+    void setGeometry() {
         PolygonFeature polygonFeature = new PolygonFeature();
         List<Coordinate> coordinates = List.of(outerCoordinates);
         Polygon polygon = new Polygon(coordinates);
         polygonFeature.setGeometry(polygon);
 
-        Assert.assertSame(polygon, polygonFeature.getGeometry());
+        Assertions.assertSame(polygon, polygonFeature.getGeometry());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setGeometry_withNull_throwsException() {
+    @Test
+    void setGeometry_withNull_throwsException() {
         PolygonFeature polygonFeature = new PolygonFeature();
-        polygonFeature.setGeometry(null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> polygonFeature.setGeometry(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setGeometry_withNonPolygon_throwsException() {
+    @Test
+    void setGeometry_withNonPolygon_throwsException() {
         PolygonFeature polygonFeature = new PolygonFeature();
-        polygonFeature.setGeometry(new Point(new Coordinate(0, 0)));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> polygonFeature
+                        .setGeometry(new Point(new Coordinate(0, 0))));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setCoordinatesList_withNull_throwsException() {
+    @Test
+    void setCoordinatesList_withNull_throwsException() {
         PolygonFeature polygonFeature = new PolygonFeature();
-        polygonFeature.setCoordinates((List<Coordinate>) null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> polygonFeature.setCoordinates((List<Coordinate>) null));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setCoordinatesArray_withNull_throwsException() {
+    @Test
+    void setCoordinatesArray_withNull_throwsException() {
         PolygonFeature polygonFeature = new PolygonFeature();
-        polygonFeature.setCoordinates((Coordinate[][]) null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> polygonFeature.setCoordinates((Coordinate[][]) null));
     }
 
     private void assertCoordinates(Coordinate[][] expected,
             PolygonFeature feature) {
         Coordinate[][] actual = feature.getGeometry().getCoordinates();
 
-        Assert.assertEquals(expected.length, actual.length);
+        Assertions.assertEquals(expected.length, actual.length);
 
         for (int i = 0; i < expected.length; i++) {
-            Assert.assertEquals(expected[i].length, actual[i].length);
+            Assertions.assertEquals(expected[i].length, actual[i].length);
             for (int j = 0; j < expected[i].length; j++) {
-                Assert.assertEquals(expected[i][j].getX(), actual[i][j].getX(),
-                        0);
-                Assert.assertEquals(expected[i][j].getY(), actual[i][j].getY(),
-                        0);
+                Assertions.assertEquals(expected[i][j].getX(),
+                        actual[i][j].getX(), 0);
+                Assertions.assertEquals(expected[i][j].getY(),
+                        actual[i][j].getY(), 0);
             }
         }
     }

@@ -8,56 +8,56 @@
  */
 package com.vaadin.flow.component.map.configuration;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.component.map.configuration.style.TextStyle;
 
-public class FeatureTest {
+class FeatureTest {
 
     private Feature feature;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         feature = new TestFeature();
     }
 
     @Test
-    public void getTextStyle_nullByDefault() {
-        Assert.assertNull(feature.getTextStyle());
+    void getTextStyle_nullByDefault() {
+        Assertions.assertNull(feature.getTextStyle());
     }
 
     @Test
-    public void setTextStyle_doesNotCreateStyleIfTextStyleIsNull() {
+    void setTextStyle_doesNotCreateStyleIfTextStyleIsNull() {
         feature.setTextStyle(null);
 
-        Assert.assertNull(feature.getStyle());
-        Assert.assertNull(feature.getTextStyle());
+        Assertions.assertNull(feature.getStyle());
+        Assertions.assertNull(feature.getTextStyle());
     }
 
     @Test
-    public void setTextStyle_createsEmptyStyle() {
+    void setTextStyle_createsEmptyStyle() {
         TextStyle textStyle = new TextStyle();
         feature.setTextStyle(textStyle);
 
-        Assert.assertNotNull(feature.getStyle());
-        Assert.assertEquals(textStyle, feature.getStyle().getTextStyle());
-        Assert.assertEquals(textStyle, feature.getTextStyle());
+        Assertions.assertNotNull(feature.getStyle());
+        Assertions.assertEquals(textStyle, feature.getStyle().getTextStyle());
+        Assertions.assertEquals(textStyle, feature.getTextStyle());
     }
 
     @Test
-    public void setTextStyle_updatesExistingStyle() {
+    void setTextStyle_updatesExistingStyle() {
         Style style = new Style();
         feature.setStyle(style);
 
         TextStyle textStyle = new TextStyle();
         feature.setTextStyle(textStyle);
 
-        Assert.assertEquals(style, feature.getStyle());
-        Assert.assertEquals(textStyle, feature.getStyle().getTextStyle());
-        Assert.assertEquals(textStyle, feature.getTextStyle());
+        Assertions.assertEquals(style, feature.getStyle());
+        Assertions.assertEquals(textStyle, feature.getStyle().getTextStyle());
+        Assertions.assertEquals(textStyle, feature.getTextStyle());
     }
 
     private static class TestFeature extends Feature {

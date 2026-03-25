@@ -8,35 +8,36 @@
  */
 package com.vaadin.flow.component.map.configuration.style;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.Assets;
 
-public class IconTest {
+class IconTest {
 
     @Test
-    public void defaults() {
+    void defaults() {
         Icon.Options options = new Icon.Options();
         options.setSrc("test");
         Icon icon = new Icon(options);
 
-        Assert.assertNotNull(icon.getAnchor());
-        Assert.assertEquals(0.5, icon.getAnchor().getX(), 0);
-        Assert.assertEquals(0.5, icon.getAnchor().getY(), 0);
+        Assertions.assertNotNull(icon.getAnchor());
+        Assertions.assertEquals(0.5, icon.getAnchor().getX(), 0);
+        Assertions.assertEquals(0.5, icon.getAnchor().getY(), 0);
 
-        Assert.assertEquals(Icon.AnchorOrigin.TOP_LEFT, icon.getAnchorOrigin());
+        Assertions.assertEquals(Icon.AnchorOrigin.TOP_LEFT,
+                icon.getAnchorOrigin());
 
-        Assert.assertNull(icon.getColor());
-        Assert.assertNull(icon.getCrossOrigin());
-        Assert.assertEquals("test", icon.getSrc());
-        Assert.assertNull(icon.getImg());
-        Assert.assertNull(icon.getImgHandler());
-        Assert.assertNull(icon.getImgSize());
+        Assertions.assertNull(icon.getColor());
+        Assertions.assertNull(icon.getCrossOrigin());
+        Assertions.assertEquals("test", icon.getSrc());
+        Assertions.assertNull(icon.getImg());
+        Assertions.assertNull(icon.getImgHandler());
+        Assertions.assertNull(icon.getImgSize());
     }
 
     @Test
-    public void withOptions() {
+    void withOptions() {
         String src = "assets/custom-marker.png";
         Icon.Anchor anchor = new Icon.Anchor(0.5f, 1);
         Icon.AnchorOrigin anchorOrigin = Icon.AnchorOrigin.TOP_RIGHT;
@@ -53,26 +54,26 @@ public class IconTest {
         options.setCrossOrigin(crossOrigin);
         Icon icon = new Icon(options);
 
-        Assert.assertEquals(0.8, icon.getOpacity(), 0.001);
-        Assert.assertEquals(2, icon.getScale(), 0.001);
-        Assert.assertEquals(src, icon.getSrc());
-        Assert.assertNotNull(icon.getAnchor());
-        Assert.assertEquals(anchor.getX(), icon.getAnchor().getX(), 0);
-        Assert.assertEquals(anchor.getY(), icon.getAnchor().getY(), 0);
-        Assert.assertEquals(anchorOrigin, icon.getAnchorOrigin());
-        Assert.assertEquals(color, icon.getColor());
-        Assert.assertEquals(crossOrigin, icon.getCrossOrigin());
+        Assertions.assertEquals(0.8, icon.getOpacity(), 0.001);
+        Assertions.assertEquals(2, icon.getScale(), 0.001);
+        Assertions.assertEquals(src, icon.getSrc());
+        Assertions.assertNotNull(icon.getAnchor());
+        Assertions.assertEquals(anchor.getX(), icon.getAnchor().getX(), 0);
+        Assertions.assertEquals(anchor.getY(), icon.getAnchor().getY(), 0);
+        Assertions.assertEquals(anchorOrigin, icon.getAnchorOrigin());
+        Assertions.assertEquals(color, icon.getColor());
+        Assertions.assertEquals(crossOrigin, icon.getCrossOrigin());
     }
 
     @Test
-    public void failsWithoutSourceUrlOrImage() {
-        Assert.assertThrows(NullPointerException.class,
+    void failsWithoutSourceUrlOrImage() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new Icon(new Icon.Options()));
     }
 
     @Test
-    public void failsWithBothSourceUrlAndImage() {
-        Assert.assertThrows(IllegalStateException.class, () -> {
+    void failsWithBothSourceUrlAndImage() {
+        Assertions.assertThrows(IllegalStateException.class, () -> {
             Icon.Options options = new Icon.Options();
             options.setSrc("test");
             options.setImg(Assets.PIN.getHandler());

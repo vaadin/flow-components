@@ -11,9 +11,9 @@ package com.vaadin.flow.component.map.configuration.layer;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
@@ -21,53 +21,55 @@ import com.vaadin.flow.component.map.configuration.feature.PolygonFeature;
 import com.vaadin.flow.component.map.configuration.source.ClusterSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
-public class FeatureLayerTest {
+class FeatureLayerTest {
 
     private TestFeatureLayer featureLayer;
     private PropertyChangeListener propertyChangeListenerMock;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         featureLayer = new TestFeatureLayer();
         propertyChangeListenerMock = Mockito.mock(PropertyChangeListener.class);
     }
 
     @Test
-    public void defaults() {
-        Assert.assertFalse(featureLayer.isClusteringEnabled());
-        Assert.assertEquals(50, featureLayer.getClusterDistance());
-        Assert.assertEquals(50, featureLayer.getClusterMinDistance());
-        Assert.assertNotNull(featureLayer.getSource());
-        Assert.assertFalse(featureLayer.getSource() instanceof ClusterSource);
+    void defaults() {
+        Assertions.assertFalse(featureLayer.isClusteringEnabled());
+        Assertions.assertEquals(50, featureLayer.getClusterDistance());
+        Assertions.assertEquals(50, featureLayer.getClusterMinDistance());
+        Assertions.assertNotNull(featureLayer.getSource());
+        Assertions
+                .assertFalse(featureLayer.getSource() instanceof ClusterSource);
     }
 
     @Test
-    public void addFeature() {
+    void addFeature() {
         MarkerFeature markerFeature = new MarkerFeature();
         featureLayer.addPropertyChangeListener(propertyChangeListenerMock);
         featureLayer.addFeature(markerFeature);
 
-        Assert.assertEquals(1, featureLayer.getFeatures().size());
-        Assert.assertTrue(featureLayer.getFeatures().contains(markerFeature));
+        Assertions.assertEquals(1, featureLayer.getFeatures().size());
+        Assertions
+                .assertTrue(featureLayer.getFeatures().contains(markerFeature));
         Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
                 .propertyChange(Mockito.any());
     }
 
     @Test
-    public void removeFeature() {
+    void removeFeature() {
         MarkerFeature markerFeature = new MarkerFeature();
         featureLayer.addFeature(markerFeature);
 
         featureLayer.addPropertyChangeListener(propertyChangeListenerMock);
         featureLayer.removeFeature(markerFeature);
 
-        Assert.assertEquals(0, featureLayer.getFeatures().size());
+        Assertions.assertEquals(0, featureLayer.getFeatures().size());
         Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
                 .propertyChange(Mockito.any());
     }
 
     @Test
-    public void enableClustering() {
+    void enableClustering() {
         MarkerFeature feature1 = new MarkerFeature();
         MarkerFeature feature2 = new MarkerFeature();
         featureLayer.addFeature(feature1);
@@ -75,15 +77,16 @@ public class FeatureLayerTest {
 
         featureLayer.setClusteringEnabled(true);
 
-        Assert.assertTrue(featureLayer.isClusteringEnabled());
-        Assert.assertTrue(featureLayer.getSource() instanceof ClusterSource);
-        Assert.assertEquals(2, featureLayer.getFeatures().size());
-        Assert.assertTrue(featureLayer.getFeatures().contains(feature1));
-        Assert.assertTrue(featureLayer.getFeatures().contains(feature2));
+        Assertions.assertTrue(featureLayer.isClusteringEnabled());
+        Assertions
+                .assertTrue(featureLayer.getSource() instanceof ClusterSource);
+        Assertions.assertEquals(2, featureLayer.getFeatures().size());
+        Assertions.assertTrue(featureLayer.getFeatures().contains(feature1));
+        Assertions.assertTrue(featureLayer.getFeatures().contains(feature2));
     }
 
     @Test
-    public void enableClustering_copiesSourceProperties() {
+    void enableClustering_copiesSourceProperties() {
         VectorSource.Options options = new VectorSource.Options();
         options.setProjection("EPSG:4326");
         options.setAttributionsCollapsible(false);
@@ -94,16 +97,16 @@ public class FeatureLayerTest {
         featureLayer.setClusteringEnabled(true);
 
         ClusterSource clusterSource = (ClusterSource) featureLayer.getSource();
-        Assert.assertEquals(List.of("Test Attribution"),
+        Assertions.assertEquals(List.of("Test Attribution"),
                 clusterSource.getAttributions());
-        Assert.assertEquals(customSource.isAttributionsCollapsible(),
+        Assertions.assertEquals(customSource.isAttributionsCollapsible(),
                 clusterSource.isAttributionsCollapsible());
-        Assert.assertEquals(customSource.getProjection(),
+        Assertions.assertEquals(customSource.getProjection(),
                 clusterSource.getProjection());
     }
 
     @Test
-    public void disableClustering() {
+    void disableClustering() {
         MarkerFeature feature1 = new MarkerFeature();
         MarkerFeature feature2 = new MarkerFeature();
         featureLayer.setClusteringEnabled(true);
@@ -112,82 +115,88 @@ public class FeatureLayerTest {
 
         featureLayer.setClusteringEnabled(false);
 
-        Assert.assertFalse(featureLayer.isClusteringEnabled());
-        Assert.assertFalse(featureLayer.getSource() instanceof ClusterSource);
-        Assert.assertEquals(2, featureLayer.getFeatures().size());
-        Assert.assertTrue(featureLayer.getFeatures().contains(feature1));
-        Assert.assertTrue(featureLayer.getFeatures().contains(feature2));
+        Assertions.assertFalse(featureLayer.isClusteringEnabled());
+        Assertions
+                .assertFalse(featureLayer.getSource() instanceof ClusterSource);
+        Assertions.assertEquals(2, featureLayer.getFeatures().size());
+        Assertions.assertTrue(featureLayer.getFeatures().contains(feature1));
+        Assertions.assertTrue(featureLayer.getFeatures().contains(feature2));
     }
 
     @Test
-    public void setClusterDistance() {
+    void setClusterDistance() {
         featureLayer.setClusterDistance(10);
-        Assert.assertEquals(10, featureLayer.getClusterDistance());
+        Assertions.assertEquals(10, featureLayer.getClusterDistance());
 
         featureLayer.setClusteringEnabled(true);
         ClusterSource clusterSource = (ClusterSource) featureLayer.getSource();
-        Assert.assertEquals(10, clusterSource.getDistance());
+        Assertions.assertEquals(10, clusterSource.getDistance());
 
         featureLayer.setClusterDistance(100);
-        Assert.assertEquals(100, clusterSource.getDistance());
+        Assertions.assertEquals(100, clusterSource.getDistance());
     }
 
     @Test
-    public void setClusterMinDistance() {
+    void setClusterMinDistance() {
         featureLayer.setClusterMinDistance(10);
-        Assert.assertEquals(10, featureLayer.getClusterMinDistance());
+        Assertions.assertEquals(10, featureLayer.getClusterMinDistance());
 
         featureLayer.setClusteringEnabled(true);
         ClusterSource clusterSource = (ClusterSource) featureLayer.getSource();
-        Assert.assertEquals(10, clusterSource.getMinDistance());
+        Assertions.assertEquals(10, clusterSource.getMinDistance());
 
         featureLayer.setClusterMinDistance(20);
-        Assert.assertEquals(20, clusterSource.getMinDistance());
+        Assertions.assertEquals(20, clusterSource.getMinDistance());
     }
 
     @Test
-    public void clusteringEnabled_addPointFeature_succeeds() {
+    void clusteringEnabled_addPointFeature_succeeds() {
         featureLayer.setClusteringEnabled(true);
         MarkerFeature markerFeature = new MarkerFeature();
 
         featureLayer.addFeature(markerFeature);
 
-        Assert.assertEquals(1, featureLayer.getFeatures().size());
-        Assert.assertTrue(featureLayer.getFeatures().contains(markerFeature));
+        Assertions.assertEquals(1, featureLayer.getFeatures().size());
+        Assertions
+                .assertTrue(featureLayer.getFeatures().contains(markerFeature));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void clusteringEnabled_addNonPointFeature_fails() {
+    @Test
+    void clusteringEnabled_addNonPointFeature_fails() {
         featureLayer.setClusteringEnabled(true);
         PolygonFeature polygonFeature = new PolygonFeature();
 
-        featureLayer.addFeature(polygonFeature);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> featureLayer.addFeature(polygonFeature));
     }
 
     @Test
-    public void clusteringDisabled_addNonPointFeature_succeeds() {
+    void clusteringDisabled_addNonPointFeature_succeeds() {
         PolygonFeature polygonFeature = new PolygonFeature();
 
         featureLayer.addFeature(polygonFeature);
 
-        Assert.assertEquals(1, featureLayer.getFeatures().size());
-        Assert.assertTrue(featureLayer.getFeatures().contains(polygonFeature));
+        Assertions.assertEquals(1, featureLayer.getFeatures().size());
+        Assertions.assertTrue(
+                featureLayer.getFeatures().contains(polygonFeature));
     }
 
     @Test
-    public void enableClustering_removesNonPointFeatures() {
+    void enableClustering_removesNonPointFeatures() {
         MarkerFeature markerFeature = new MarkerFeature();
         PolygonFeature polygonFeature = new PolygonFeature();
         featureLayer.addFeature(markerFeature);
         featureLayer.addFeature(polygonFeature);
-        Assert.assertEquals(2, featureLayer.getFeatures().size());
+        Assertions.assertEquals(2, featureLayer.getFeatures().size());
 
         featureLayer.setClusteringEnabled(true);
 
-        Assert.assertTrue(featureLayer.isClusteringEnabled());
-        Assert.assertEquals(1, featureLayer.getFeatures().size());
-        Assert.assertTrue(featureLayer.getFeatures().contains(markerFeature));
-        Assert.assertFalse(featureLayer.getFeatures().contains(polygonFeature));
+        Assertions.assertTrue(featureLayer.isClusteringEnabled());
+        Assertions.assertEquals(1, featureLayer.getFeatures().size());
+        Assertions
+                .assertTrue(featureLayer.getFeatures().contains(markerFeature));
+        Assertions.assertFalse(
+                featureLayer.getFeatures().contains(polygonFeature));
     }
 
     private static class TestFeatureLayer extends FeatureLayer {
