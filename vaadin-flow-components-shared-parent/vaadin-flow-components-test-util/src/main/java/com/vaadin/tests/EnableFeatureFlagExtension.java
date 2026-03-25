@@ -25,10 +25,9 @@ import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 
 /**
- * JUnit 6 extension to enable a specific feature flag for the duration of a
- * test.
+ * JUnit extension to enable a specific feature flag for the duration of a test.
  * <p>
- * This is the JUnit 6 equivalent of {@link EnableFeatureFlagRule}. Usage:
+ * Usage:
  *
  * <pre>
  * &#64;RegisterExtension
