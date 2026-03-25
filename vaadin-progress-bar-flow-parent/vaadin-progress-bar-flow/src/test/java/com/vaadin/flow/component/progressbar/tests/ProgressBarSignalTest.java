@@ -24,9 +24,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class ProgressBarSignalTest extends AbstractSignalsJUnit6Test {
+class ProgressBarSignalTest extends AbstractSignalsTest {
 
     private ProgressBar progressBar;
     private ValueSignal<Double> minSignal;

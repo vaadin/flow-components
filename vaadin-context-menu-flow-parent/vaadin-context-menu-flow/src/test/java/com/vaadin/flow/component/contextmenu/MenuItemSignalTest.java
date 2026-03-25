@@ -20,9 +20,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class MenuItemSignalTest extends AbstractSignalsJUnit6Test {
+class MenuItemSignalTest extends AbstractSignalsTest {
 
     private ContextMenu contextMenu;
     private MenuItem item;

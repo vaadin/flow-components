@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * bindings are only active when components are attached, this class sets up a
  * mock UI instance for attaching components under test.
  */
-public class AbstractSignalsJUnit6Test {
+public class AbstractSignalsTest {
     @RegisterExtension
     protected MockUIExtension ui = new MockUIExtension();
 }

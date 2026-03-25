@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class RadioButtonGroupSignalTest extends AbstractSignalsJUnit6Test {
+class RadioButtonGroupSignalTest extends AbstractSignalsTest {
     private final RadioButtonGroup<String> group = new RadioButtonGroup<>();
     private final ValueSignal<Boolean> readonlySignal = new ValueSignal<>(
             false);

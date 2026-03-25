@@ -24,9 +24,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.FontIcon;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class FontIconSignalTest extends AbstractSignalsJUnit6Test {
+class FontIconSignalTest extends AbstractSignalsTest {
 
     private FontIcon fontIcon;
     private ValueSignal<String> ligatureSignal;

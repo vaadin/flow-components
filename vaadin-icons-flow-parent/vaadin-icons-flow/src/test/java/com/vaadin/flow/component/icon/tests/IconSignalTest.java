@@ -25,9 +25,9 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class IconSignalTest extends AbstractSignalsJUnit6Test {
+class IconSignalTest extends AbstractSignalsTest {
 
     private Icon icon;
     private ValueSignal<VaadinIcon> iconSignal;

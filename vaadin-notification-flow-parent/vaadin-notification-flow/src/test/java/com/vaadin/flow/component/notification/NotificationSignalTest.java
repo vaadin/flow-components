@@ -18,9 +18,9 @@ package com.vaadin.flow.component.notification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class NotificationSignalTest extends AbstractSignalsJUnit6Test {
+class NotificationSignalTest extends AbstractSignalsTest {
     private final Notification notification = new Notification();
 
     @Test
