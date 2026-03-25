@@ -192,6 +192,8 @@ public class ChartRenderer {
             var categories = extractCategories(allItems);
             if (categories != null) {
                 xAxis.setCategories(categories.toArray(new String[0]));
+            } else {
+                xAxis.setCategories();
             }
         }
 
