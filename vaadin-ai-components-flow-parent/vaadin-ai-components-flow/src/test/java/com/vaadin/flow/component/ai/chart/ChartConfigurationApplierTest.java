@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -25,8 +27,14 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
+import com.vaadin.flow.component.charts.model.PlotOptionsBar;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsPie;
+import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.tests.MockUIExtension;
 
@@ -36,44 +44,73 @@ class ChartConfigurationApplierTest {
     MockUIExtension ui = new MockUIExtension();
 
     private Chart chart;
+    private Configuration config;
     private ChartConfigurationApplier applier;
 
     @BeforeEach
     void setUp() {
         chart = new Chart();
         ui.add(chart);
+        config = chart.getConfiguration();
         applier = new ChartConfigurationApplier();
+    }
+
+    private void apply(String json) {
+        applier.applyConfiguration(chart, json);
     }
 
     @Nested
     class ChartTypeMapping {
 
         @Test
+        void allChartTypes_areSupported() {
+            // Every ChartType (except EMPTY default) must be reachable
+            var expectedTypes = Arrays.asList(ChartType.AREA, ChartType.LINE,
+                    ChartType.SPLINE, ChartType.AREASPLINE, ChartType.BULLET,
+                    ChartType.COLUMN, ChartType.BAR, ChartType.PIE,
+                    ChartType.SCATTER, ChartType.GAUGE, ChartType.AREARANGE,
+                    ChartType.COLUMNRANGE, ChartType.AREASPLINERANGE,
+                    ChartType.BOXPLOT, ChartType.ERRORBAR, ChartType.BUBBLE,
+                    ChartType.FUNNEL, ChartType.WATERFALL, ChartType.PYRAMID,
+                    ChartType.SOLIDGAUGE, ChartType.HEATMAP, ChartType.TREEMAP,
+                    ChartType.POLYGON, ChartType.CANDLESTICK, ChartType.FLAGS,
+                    ChartType.TIMELINE, ChartType.OHLC, ChartType.ORGANIZATION,
+                    ChartType.SANKEY, ChartType.XRANGE, ChartType.GANTT);
+            for (ChartType type : expectedTypes) {
+                chart = new Chart();
+                ui.add(chart);
+                applier.applyConfiguration(chart,
+                        "{\"type\":\"" + type.toString().toLowerCase() + "\"}");
+                Assertions.assertEquals(type,
+                        chart.getConfiguration().getChart().getType(),
+                        "Chart type " + type + " should be mapped");
+            }
+        }
+
+        @Test
         void topLevelType_setsChartType() {
-            applier.applyConfiguration(chart, "{\"type\":\"bar\"}");
-            Assertions.assertEquals(ChartType.BAR,
-                    chart.getConfiguration().getChart().getType());
+            apply("{\"type\":\"bar\"}");
+            Assertions.assertEquals(ChartType.BAR, config.getChart().getType());
         }
 
         @Test
         void nestedChartType_setsChartType() {
-            applier.applyConfiguration(chart, "{\"chart\":{\"type\":\"pie\"}}");
-            Assertions.assertEquals(ChartType.PIE,
-                    chart.getConfiguration().getChart().getType());
+            apply("{\"chart\":{\"type\":\"pie\"}}");
+            Assertions.assertEquals(ChartType.PIE, config.getChart().getType());
         }
 
         @Test
         void unknownType_defaultsToLine() {
-            applier.applyConfiguration(chart, "{\"type\":\"unknown_type\"}");
+            apply("{\"type\":\"unknown_type\"}");
             Assertions.assertEquals(ChartType.LINE,
-                    chart.getConfiguration().getChart().getType());
+                    config.getChart().getType());
         }
 
         @Test
         void caseInsensitiveType() {
-            applier.applyConfiguration(chart, "{\"type\":\"COLUMN\"}");
+            apply("{\"type\":\"COLUMN\"}");
             Assertions.assertEquals(ChartType.COLUMN,
-                    chart.getConfiguration().getChart().getType());
+                    config.getChart().getType());
         }
     }
 
@@ -82,32 +119,26 @@ class ChartConfigurationApplierTest {
 
         @Test
         void titleAsObject() {
-            applier.applyConfiguration(chart,
-                    "{\"title\":{\"text\":\"My Title\"}}");
-            Assertions.assertEquals("My Title",
-                    chart.getConfiguration().getTitle().getText());
+            apply("{\"title\":{\"text\":\"My Title\"}}");
+            Assertions.assertEquals("My Title", config.getTitle().getText());
         }
 
         @Test
         void titleAsString() {
-            applier.applyConfiguration(chart, "{\"title\":\"My Title\"}");
-            Assertions.assertEquals("My Title",
-                    chart.getConfiguration().getTitle().getText());
+            apply("{\"title\":\"My Title\"}");
+            Assertions.assertEquals("My Title", config.getTitle().getText());
         }
 
         @Test
         void subtitleAsObject() {
-            applier.applyConfiguration(chart,
-                    "{\"subtitle\":{\"text\":\"Sub\"}}");
-            Assertions.assertEquals("Sub",
-                    chart.getConfiguration().getSubTitle().getText());
+            apply("{\"subtitle\":{\"text\":\"Sub\"}}");
+            Assertions.assertEquals("Sub", config.getSubTitle().getText());
         }
 
         @Test
         void subtitleAsString() {
-            applier.applyConfiguration(chart, "{\"subtitle\":\"Sub\"}");
-            Assertions.assertEquals("Sub",
-                    chart.getConfiguration().getSubTitle().getText());
+            apply("{\"subtitle\":\"Sub\"}");
+            Assertions.assertEquals("Sub", config.getSubTitle().getText());
         }
     }
 
@@ -116,9 +147,11 @@ class ChartConfigurationApplierTest {
 
         @Test
         void tooltipProperties() {
-            applier.applyConfiguration(chart,
-                    "{\"tooltip\":{\"pointFormat\":\"{point.y}\",\"headerFormat\":\"<b>{series.name}</b>\",\"shared\":true,\"valueSuffix\":\" kg\",\"valuePrefix\":\"$\"}}");
-            var tooltip = chart.getConfiguration().getTooltip();
+            apply("{\"tooltip\":{\"pointFormat\":\"{point.y}\","
+                    + "\"headerFormat\":\"<b>{series.name}</b>\","
+                    + "\"shared\":true,\"valueSuffix\":\" kg\","
+                    + "\"valuePrefix\":\"$\"}}");
+            var tooltip = config.getTooltip();
             Assertions.assertEquals("{point.y}", tooltip.getPointFormat());
             Assertions.assertEquals("<b>{series.name}</b>",
                     tooltip.getHeaderFormat());
@@ -133,9 +166,9 @@ class ChartConfigurationApplierTest {
 
         @Test
         void legendProperties() {
-            applier.applyConfiguration(chart,
-                    "{\"legend\":{\"enabled\":false,\"align\":\"right\",\"verticalAlign\":\"top\",\"layout\":\"vertical\"}}");
-            var legend = chart.getConfiguration().getLegend();
+            apply("{\"legend\":{\"enabled\":false,\"align\":\"right\","
+                    + "\"verticalAlign\":\"top\",\"layout\":\"vertical\"}}");
+            var legend = config.getLegend();
             Assertions.assertFalse(legend.getEnabled());
             Assertions.assertEquals(HorizontalAlign.RIGHT, legend.getAlign());
             Assertions.assertEquals(VerticalAlign.TOP,
@@ -146,8 +179,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void invalidAlign_isIgnored() {
-            applier.applyConfiguration(chart,
-                    "{\"legend\":{\"align\":\"invalid\"}}");
+            apply("{\"legend\":{\"align\":\"invalid\"}}");
             // Should not throw, default value remains
         }
     }
@@ -157,17 +189,16 @@ class ChartConfigurationApplierTest {
 
         @Test
         void xAxisType() {
-            applier.applyConfiguration(chart,
-                    "{\"xAxis\":{\"type\":\"datetime\"}}");
+            apply("{\"xAxis\":{\"type\":\"datetime\"}}");
             Assertions.assertEquals(AxisType.DATETIME,
-                    chart.getConfiguration().getxAxis().getType());
+                    config.getxAxis().getType());
         }
 
         @Test
         void yAxisTitleAndRange() {
-            applier.applyConfiguration(chart,
-                    "{\"yAxis\":{\"title\":{\"text\":\"Revenue\"},\"min\":0,\"max\":100}}");
-            var yAxis = chart.getConfiguration().getyAxis();
+            apply("{\"yAxis\":{\"title\":{\"text\":\"Revenue\"},"
+                    + "\"min\":0,\"max\":100}}");
+            var yAxis = config.getyAxis();
             Assertions.assertEquals("Revenue", yAxis.getTitle().getText());
             Assertions.assertEquals(0.0, yAxis.getMin());
             Assertions.assertEquals(100.0, yAxis.getMax());
@@ -175,16 +206,31 @@ class ChartConfigurationApplierTest {
 
         @Test
         void xAxisCategories() {
-            applier.applyConfiguration(chart,
-                    "{\"xAxis\":{\"categories\":[\"Jan\",\"Feb\",\"Mar\"]}}");
+            apply("{\"xAxis\":{\"categories\":[\"Jan\",\"Feb\",\"Mar\"]}}");
             Assertions.assertArrayEquals(new String[] { "Jan", "Feb", "Mar" },
-                    chart.getConfiguration().getxAxis().getCategories());
+                    config.getxAxis().getCategories());
+        }
+
+        @Test
+        void zAxis_isApplied() {
+            apply("{\"zAxis\":{\"type\":\"logarithmic\","
+                    + "\"title\":{\"text\":\"Depth\"},\"min\":1,\"max\":1000}}");
+            var zAxis = config.getzAxis();
+            Assertions.assertEquals(AxisType.LOGARITHMIC, zAxis.getType());
+            Assertions.assertEquals("Depth", zAxis.getTitle().getText());
+            Assertions.assertEquals(1.0, zAxis.getMin());
+            Assertions.assertEquals(1000.0, zAxis.getMax());
         }
 
         @Test
         void invalidAxisType_isIgnored() {
-            applier.applyConfiguration(chart,
-                    "{\"xAxis\":{\"type\":\"invalid\"}}");
+            apply("{\"xAxis\":{\"type\":\"invalid\"}}");
+            // Should not throw
+        }
+
+        @Test
+        void nonObjectAxis_isIgnored() {
+            apply("{\"xAxis\":\"not_an_object\"}");
             // Should not throw
         }
     }
@@ -194,67 +240,12 @@ class ChartConfigurationApplierTest {
 
         @Test
         void creditsProperties() {
-            applier.applyConfiguration(chart,
-                    "{\"credits\":{\"enabled\":false,\"text\":\"Source\",\"href\":\"https://example.com\"}}");
-            var credits = chart.getConfiguration().getCredits();
+            apply("{\"credits\":{\"enabled\":false,\"text\":\"Source\","
+                    + "\"href\":\"https://example.com\"}}");
+            var credits = config.getCredits();
             Assertions.assertFalse(credits.getEnabled());
             Assertions.assertEquals("Source", credits.getText());
             Assertions.assertEquals("https://example.com", credits.getHref());
-        }
-    }
-
-    @Nested
-    class PlotOptionsConfig {
-
-        @Test
-        void seriesStacking() {
-            applier.applyConfiguration(chart,
-                    "{\"plotOptions\":{\"series\":{\"stacking\":\"normal\"}}}");
-            Configuration config = chart.getConfiguration();
-            var plotOptions = config.getPlotOptions();
-            Assertions.assertFalse(plotOptions.isEmpty());
-        }
-
-        @Test
-        void columnStacking() {
-            applier.applyConfiguration(chart,
-                    "{\"plotOptions\":{\"column\":{\"stacking\":\"percent\",\"borderRadius\":5}}}");
-            // Should not throw
-        }
-
-        @Test
-        void barStacking() {
-            applier.applyConfiguration(chart,
-                    "{\"plotOptions\":{\"bar\":{\"stacking\":\"normal\",\"borderRadius\":3}}}");
-            // Should not throw
-        }
-
-        @Test
-        void pieInnerSize() {
-            applier.applyConfiguration(chart,
-                    "{\"plotOptions\":{\"pie\":{\"innerSize\":\"50%\"}}}");
-            // Should not throw
-        }
-
-        @Test
-        void seriesDataLabels() {
-            applier.applyConfiguration(chart,
-                    "{\"plotOptions\":{\"series\":{\"dataLabels\":{\"enabled\":true,\"format\":\"{point.y}\"}}}}");
-            // Should not throw
-        }
-
-        @Test
-        void seriesMarker() {
-            applier.applyConfiguration(chart,
-                    "{\"plotOptions\":{\"series\":{\"marker\":{\"enabled\":false}}}}");
-            // Should not throw
-        }
-
-        @Test
-        void invalidStacking_isIgnored() {
-            applier.applyConfiguration(chart,
-                    "{\"plotOptions\":{\"series\":{\"stacking\":\"invalid_value\"}}}");
-            // Should not throw
         }
     }
 
@@ -263,34 +254,101 @@ class ChartConfigurationApplierTest {
 
         @Test
         void inverted() {
-            applier.applyConfiguration(chart,
-                    "{\"chart\":{\"inverted\":true}}");
-            Assertions.assertTrue(
-                    chart.getConfiguration().getChart().getInverted());
+            apply("{\"chart\":{\"inverted\":true}}");
+            Assertions.assertTrue(config.getChart().getInverted());
         }
 
         @Test
         void polar() {
-            applier.applyConfiguration(chart, "{\"chart\":{\"polar\":true}}");
-            Assertions
-                    .assertTrue(chart.getConfiguration().getChart().getPolar());
+            apply("{\"chart\":{\"polar\":true}}");
+            Assertions.assertTrue(config.getChart().getPolar());
         }
 
         @Test
         void dimensions() {
-            applier.applyConfiguration(chart,
-                    "{\"chart\":{\"width\":800,\"height\":\"600\"}}");
-            Assertions.assertEquals(800,
-                    chart.getConfiguration().getChart().getWidth());
-            Assertions.assertEquals("600",
-                    chart.getConfiguration().getChart().getHeight());
+            apply("{\"chart\":{\"width\":800,\"height\":\"600\"}}");
+            Assertions.assertEquals(800, config.getChart().getWidth());
+            Assertions.assertEquals("600", config.getChart().getHeight());
         }
 
         @Test
         void heightAsNumber() {
-            applier.applyConfiguration(chart, "{\"chart\":{\"height\":400}}");
-            Assertions.assertEquals("400",
-                    chart.getConfiguration().getChart().getHeight());
+            apply("{\"chart\":{\"height\":400}}");
+            Assertions.assertEquals("400", config.getChart().getHeight());
+        }
+
+        @Test
+        void backgroundColor() {
+            apply("{\"chart\":{\"backgroundColor\":\"#f0f0f0\"}}");
+            Assertions.assertNotNull(config.getChart().getBackgroundColor());
+        }
+
+        @Test
+        void borderProperties() {
+            apply("{\"chart\":{\"borderColor\":\"#333\","
+                    + "\"borderWidth\":2,\"borderRadius\":5}}");
+            var chartModel = config.getChart();
+            Assertions.assertNotNull(chartModel.getBorderColor());
+            Assertions.assertEquals(2, chartModel.getBorderWidth());
+            Assertions.assertEquals(5, chartModel.getBorderRadius());
+        }
+
+        @Test
+        void margins() {
+            apply("{\"chart\":{\"marginTop\":10,\"marginRight\":20,"
+                    + "\"marginBottom\":30,\"marginLeft\":40}}");
+            var chartModel = config.getChart();
+            Assertions.assertEquals(10, chartModel.getMarginTop());
+            Assertions.assertEquals(20, chartModel.getMarginRight());
+            Assertions.assertEquals(30, chartModel.getMarginBottom());
+            Assertions.assertEquals(40, chartModel.getMarginLeft());
+        }
+
+        @Test
+        void spacing() {
+            apply("{\"chart\":{\"spacingTop\":5,\"spacingRight\":10,"
+                    + "\"spacingBottom\":15,\"spacingLeft\":20}}");
+            var chartModel = config.getChart();
+            Assertions.assertEquals(5, chartModel.getSpacingTop());
+            Assertions.assertEquals(10, chartModel.getSpacingRight());
+            Assertions.assertEquals(15, chartModel.getSpacingBottom());
+            Assertions.assertEquals(20, chartModel.getSpacingLeft());
+        }
+
+        @Test
+        void plotBackground() {
+            apply("{\"chart\":{\"plotBackgroundColor\":\"#eee\","
+                    + "\"plotBorderColor\":\"#aaa\",\"plotBorderWidth\":1}}");
+            var chartModel = config.getChart();
+            Assertions.assertNotNull(chartModel.getPlotBackgroundColor());
+            Assertions.assertNotNull(chartModel.getPlotBorderColor());
+            Assertions.assertEquals(1, chartModel.getPlotBorderWidth());
+        }
+
+        @Test
+        void animation() {
+            apply("{\"chart\":{\"animation\":false}}");
+            Assertions.assertFalse(config.getChart().getAnimation());
+        }
+
+        @Test
+        void styledMode() {
+            apply("{\"chart\":{\"styledMode\":true}}");
+            Assertions.assertTrue(config.getChart().getStyledMode());
+        }
+
+        @SuppressWarnings("deprecation")
+        @Test
+        void zoomType() {
+            apply("{\"chart\":{\"zoomType\":\"xy\"}}");
+            Assertions.assertEquals(Dimension.XY,
+                    config.getChart().getZoomType());
+        }
+
+        @Test
+        void invalidZoomType_isIgnored() {
+            apply("{\"chart\":{\"zoomType\":\"invalid\"}}");
+            // Should not throw
         }
     }
 
@@ -299,11 +357,25 @@ class ChartConfigurationApplierTest {
 
         @Test
         void colorAxisMinMax() {
-            applier.applyConfiguration(chart,
-                    "{\"colorAxis\":{\"min\":0,\"max\":100,\"minColor\":\"#ffffff\",\"maxColor\":\"#ff0000\"}}");
-            var colorAxis = chart.getConfiguration().getColorAxis();
+            apply("{\"colorAxis\":{\"min\":0,\"max\":100}}");
+            var colorAxis = config.getColorAxis();
             Assertions.assertEquals(0.0, colorAxis.getMin());
             Assertions.assertEquals(100.0, colorAxis.getMax());
+        }
+
+        @Test
+        void colorAxisColors() {
+            apply("{\"colorAxis\":{\"minColor\":\"#ffffff\","
+                    + "\"maxColor\":\"#ff0000\"}}");
+            var colorAxis = config.getColorAxis();
+            Assertions.assertNotNull(colorAxis.getMinColor());
+            Assertions.assertNotNull(colorAxis.getMaxColor());
+        }
+
+        @Test
+        void nonObjectColorAxis_isIgnored() {
+            apply("{\"colorAxis\":\"not_an_object\"}");
+            // Should not throw
         }
     }
 
@@ -311,10 +383,96 @@ class ChartConfigurationApplierTest {
     class PaneConfig {
 
         @Test
-        void paneProperties() {
-            applier.applyConfiguration(chart,
-                    "{\"pane\":{\"startAngle\":-150,\"endAngle\":150,\"center\":[\"50%\",\"75%\"],\"size\":\"80%\"}}");
-            // Should not throw — pane is added to config
+        void paneAngles() {
+            apply("{\"pane\":{\"startAngle\":-150,\"endAngle\":150}}");
+            // addPane adds at index 0 when no panes exist yet
+            var pane = config.getPane();
+            Assertions.assertEquals(-150, pane.getStartAngle());
+            Assertions.assertEquals(150, pane.getEndAngle());
+        }
+
+        @Test
+        void paneCenterAndSize() {
+            apply("{\"pane\":{\"center\":[\"50%\",\"75%\"],"
+                    + "\"size\":\"80%\"}}");
+            var pane = config.getPane();
+            Assertions.assertArrayEquals(new String[] { "50%", "75%" },
+                    pane.getCenter());
+            Assertions.assertEquals("80%", pane.getSize());
+        }
+
+        @Test
+        void nonObjectPane_isIgnored() {
+            apply("{\"pane\":\"not_an_object\"}");
+            // Should not throw
+        }
+    }
+
+    @Nested
+    class PlotOptionsConfig {
+
+        @Test
+        void seriesStacking() {
+            apply("{\"plotOptions\":{\"series\":{\"stacking\":\"normal\"}}}");
+            var series = getPlotOption(PlotOptionsSeries.class);
+            Assertions.assertEquals(Stacking.NORMAL, series.getStacking());
+        }
+
+        @Test
+        void seriesDataLabels() {
+            apply("{\"plotOptions\":{\"series\":{\"dataLabels\":"
+                    + "{\"enabled\":true,\"format\":\"{point.y}\"}}}}");
+            var series = getPlotOption(PlotOptionsSeries.class);
+            Assertions.assertTrue(series.getDataLabels().getEnabled());
+            Assertions.assertEquals("{point.y}",
+                    series.getDataLabels().getFormat());
+        }
+
+        @Test
+        void seriesMarker() {
+            apply("{\"plotOptions\":{\"series\":{\"marker\":"
+                    + "{\"enabled\":false}}}}");
+            var series = getPlotOption(PlotOptionsSeries.class);
+            Assertions.assertFalse(series.getMarker().getEnabled());
+        }
+
+        @Test
+        void pieInnerSize() {
+            apply("{\"plotOptions\":{\"pie\":{\"innerSize\":\"50%\"}}}");
+            var pie = getPlotOption(PlotOptionsPie.class);
+            Assertions.assertEquals("50%", pie.getInnerSize());
+        }
+
+        @Test
+        void columnStacking_andBorderRadius() {
+            apply("{\"plotOptions\":{\"column\":{\"stacking\":\"percent\","
+                    + "\"borderRadius\":5}}}");
+            var column = getPlotOption(PlotOptionsColumn.class);
+            Assertions.assertEquals(Stacking.PERCENT, column.getStacking());
+            Assertions.assertEquals(5, column.getBorderRadius());
+        }
+
+        @Test
+        void barStacking_andBorderRadius() {
+            apply("{\"plotOptions\":{\"bar\":{\"stacking\":\"normal\","
+                    + "\"borderRadius\":3}}}");
+            var bar = getPlotOption(PlotOptionsBar.class);
+            Assertions.assertEquals(Stacking.NORMAL, bar.getStacking());
+            Assertions.assertEquals(3, bar.getBorderRadius());
+        }
+
+        @Test
+        void invalidStacking_isIgnored() {
+            apply("{\"plotOptions\":{\"series\":"
+                    + "{\"stacking\":\"invalid_value\"}}}");
+            // Should not throw
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> T getPlotOption(Class<T> type) {
+            return (T) config.getPlotOptions().stream().filter(type::isInstance)
+                    .findFirst().orElseThrow(() -> new RuntimeException(
+                            "No PlotOptions of type " + type.getSimpleName()));
         }
     }
 
@@ -323,30 +481,27 @@ class ChartConfigurationApplierTest {
 
         @Test
         void doubleEncodedJson_isHandled() {
-            applier.applyConfiguration(chart,
-                    "\"{\\\"title\\\":{\\\"text\\\":\\\"Decoded\\\"}}\"");
-            Assertions.assertEquals("Decoded",
-                    chart.getConfiguration().getTitle().getText());
+            apply("\"{\\\"title\\\":{\\\"text\\\":\\\"Decoded\\\"}}\"");
+            Assertions.assertEquals("Decoded", config.getTitle().getText());
         }
 
         @Test
         void invalidJson_doesNotThrow() {
-            applier.applyConfiguration(chart, "not json");
+            apply("not json");
             // Should log error but not throw
         }
 
         @Test
         void nonObjectJson_doesNotThrow() {
-            applier.applyConfiguration(chart, "[1,2,3]");
+            apply("[1,2,3]");
             // Should log warning but not throw
         }
 
         @Test
         void emptyObject_doesNotChangeConfig() {
-            chart.getConfiguration().setTitle("Original");
-            applier.applyConfiguration(chart, "{}");
-            Assertions.assertEquals("Original",
-                    chart.getConfiguration().getTitle().getText());
+            config.setTitle("Original");
+            apply("{}");
+            Assertions.assertEquals("Original", config.getTitle().getText());
         }
     }
 }

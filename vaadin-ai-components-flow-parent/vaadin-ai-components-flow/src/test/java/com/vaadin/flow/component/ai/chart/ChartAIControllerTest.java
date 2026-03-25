@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.chart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartAIControllerTest {
@@ -199,6 +202,42 @@ class ChartAIControllerTest {
 
             Assertions.assertEquals("Applied",
                     chart.getConfiguration().getTitle().getText());
+        }
+    }
+
+    @Nested
+    class SetDataConverter {
+
+        @Test
+        void customConverter_isUsedDuringRendering() {
+            databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
+
+            AtomicBoolean converterCalled = new AtomicBoolean(false);
+            controller.setDataConverter(data -> {
+                converterCalled.set(true);
+                DataSeries series = new DataSeries();
+                series.add(new DataSeriesItem("custom", 42));
+                return List.of(series);
+            });
+
+            var tools = controller.getTools();
+
+            // Set a chart type first (required for rendering)
+            tools.stream()
+                    .filter(t -> t.getName()
+                            .equals("update_chart_configuration"))
+                    .findFirst().get().execute(
+                            "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+
+            // Trigger a data update
+            tools.stream()
+                    .filter(t -> t.getName().equals("update_chart_data_source"))
+                    .findFirst().get().execute("{\"queries\":[\"SELECT 1\"]}");
+
+            controller.onRequestCompleted();
+
+            Assertions.assertTrue(converterCalled.get(),
+                    "Custom DataConverter should have been called");
         }
     }
 
