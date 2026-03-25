@@ -15,21 +15,26 @@
  */
 package com.vaadin.flow.component.listbox;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class ListBoxSignalTest extends AbstractSignalsUnitTest {
-    @Test(expected = UnsupportedOperationException.class)
-    public void listBox_bindRequiredIndicatorVisible_throwsException() {
+class ListBoxSignalTest extends AbstractSignalsJUnit6Test {
+    @Test
+    void listBox_bindRequiredIndicatorVisible_throwsException() {
         var listBox = new ListBox<>();
-        listBox.bindRequiredIndicatorVisible(new ValueSignal<>(false));
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> listBox.bindRequiredIndicatorVisible(
+                        new ValueSignal<>(false)));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void multiSelectListBox_bindRequiredIndicatorVisible_throwsException() {
+    @Test
+    void multiSelectListBox_bindRequiredIndicatorVisible_throwsException() {
         var listBox = new MultiSelectListBox<>();
-        listBox.bindRequiredIndicatorVisible(new ValueSignal<>(false));
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> listBox.bindRequiredIndicatorVisible(
+                        new ValueSignal<>(false)));
     }
 }

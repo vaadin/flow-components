@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -39,21 +39,21 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewJUnit6Test;
 
-public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
+class ListBoxDataViewTest extends AbstractComponentDataViewJUnit6Test {
 
     private static final String OUTER_HTML = "<vaadin-item><span>%s</span></vaadin-item>";
 
     @Test
-    public void getItem_dataViewWithItems_returnsCorrectItem() {
-        Assert.assertEquals(items.get(0), dataView.getItem(0));
-        Assert.assertEquals(items.get(1), dataView.getItem(1));
-        Assert.assertEquals(items.get(2), dataView.getItem(2));
+    void getItem_dataViewWithItems_returnsCorrectItem() {
+        Assertions.assertEquals(items.get(0), dataView.getItem(0));
+        Assertions.assertEquals(items.get(1), dataView.getItem(1));
+        Assertions.assertEquals(items.get(2), dataView.getItem(2));
     }
 
     @Test
-    public void setIdentifierProvider_customIdentity_itemRefreshed() {
+    void setIdentifierProvider_customIdentity_itemRefreshed() {
         Item first = new Item(1L, "first");
         Item second = new Item(2L, "middle");
 
@@ -71,12 +71,12 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
 
         dataProvider.refreshItem(new Item(1L));
 
-        Assert.assertTrue(containsLabel(component, "changed-1"));
-        Assert.assertFalse(containsLabel(component, "changed-2"));
+        Assertions.assertTrue(containsLabel(component, "changed-1"));
+        Assertions.assertFalse(containsLabel(component, "changed-2"));
     }
 
     @Test
-    public void setIdentifierProvider_customDataProviderIdentity_itemRefreshed() {
+    void setIdentifierProvider_customDataProviderIdentity_itemRefreshed() {
         Item first = new Item(1L, "first");
         Item second = new Item(2L, "middle");
 
@@ -93,12 +93,12 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
 
         customIdentityItemDataProvider.refreshItem(new Item(1L));
 
-        Assert.assertTrue(containsLabel(component, "changed-1"));
-        Assert.assertFalse(containsLabel(component, "changed-2"));
+        Assertions.assertTrue(containsLabel(component, "changed-1"));
+        Assertions.assertFalse(containsLabel(component, "changed-2"));
     }
 
     @Test
-    public void setIdentifierProvider_defaultIdentity_itemRefreshed() {
+    void setIdentifierProvider_defaultIdentity_itemRefreshed() {
         Item first = new Item(1L, "first");
         Item second = new Item(2L, "middle");
 
@@ -113,12 +113,12 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
 
         dataProvider.refreshItem(new Item(1L, "changed-1"));
 
-        Assert.assertTrue(containsLabel(component, "changed-1"));
-        Assert.assertFalse(containsLabel(component, "changed-2"));
+        Assertions.assertTrue(containsLabel(component, "changed-1"));
+        Assertions.assertFalse(containsLabel(component, "changed-2"));
     }
 
     @Test
-    public void setInMemoryDataProvider_convertsToGenericDataProvider() {
+    void setInMemoryDataProvider_convertsToGenericDataProvider() {
         ListBox<String> checkboxGroup = Mockito.spy(new ListBox<>());
 
         InMemoryDataProvider<String> inMemoryDataProvider = new InMemoryDataProvider<String>() {
@@ -128,7 +128,7 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
             @Override
             public int size(
                     Query<String, SerializablePredicate<String>> query) {
-                Assert.assertTrue(query.getFilter().isPresent());
+                Assertions.assertTrue(query.getFilter().isPresent());
                 return (int) Stream.of("foo").filter(query.getFilter().get())
                         .count();
             }
@@ -136,7 +136,7 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
             @Override
             public Stream<String> fetch(
                     Query<String, SerializablePredicate<String>> query) {
-                Assert.assertTrue(query.getFilter().isPresent());
+                Assertions.assertTrue(query.getFilter().isPresent());
                 return Stream.of("foo").filter(query.getFilter().get());
             }
 
@@ -186,11 +186,11 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
         Mockito.verify(checkboxGroup).setItems(Mockito.any(DataProvider.class));
 
         // Verify the predicate filter always returns true and passes the item
-        Assert.assertEquals("foo", dataView.getItem(0));
+        Assertions.assertEquals("foo", dataView.getItem(0));
 
         // Now set the predicate and verify it goes to query parameter
         inMemoryDataProvider.setFilter(item -> item.equals("bar"));
-        Assert.assertEquals(0, dataView.getItems().count());
+        Assertions.assertEquals(0, dataView.getItems().count());
     }
 
     @Override
