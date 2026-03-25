@@ -25,11 +25,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.html.Div;
@@ -45,7 +43,7 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 
-public class MultiSelectListBoxTest {
+class MultiSelectListBoxTest {
 
     private MultiSelectListBox<Item> listBox;
 
@@ -59,11 +57,8 @@ public class MultiSelectListBoxTest {
 
     private MultiSelectionEvent<MultiSelectListBox<Item>, Item> selectionEvent;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         listBox = new MultiSelectListBox<>();
 
         foo = new Item("foo");
@@ -83,28 +78,29 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void hasEmptySetAsDefaultValue() {
+    void hasEmptySetAsDefaultValue() {
         Set<Item> value = listBox.getValue();
-        Assert.assertNotNull(value);
-        Assert.assertTrue(value.isEmpty());
+        Assertions.assertNotNull(value);
+        Assertions.assertTrue(value.isEmpty());
     }
 
     @Test
-    public void setValueNull_throws() {
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage("Use the clear-method");
-        listBox.setValue(null);
+    void setValueNull_throws() {
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> listBox.setValue(null));
+        Assertions.assertTrue(
+                exception.getMessage().contains("Use the clear-method"));
     }
 
     @Test
-    public void setValue_refreshAll_valueCleared() {
+    void setValue_refreshAll_valueCleared() {
         listBox.setValue(createSet(foo));
         dataProvider.refreshAll();
-        Assert.assertEquals(Collections.emptySet(), listBox.getValue());
+        Assertions.assertEquals(Collections.emptySet(), listBox.getValue());
     }
 
     @Test
-    public void setValue_eventFired() {
+    void setValue_eventFired() {
         listBox.setValue(createSet(foo));
         assertValueChangeEvents(createSet(foo));
         listBox.setValue(createSet(foo, bar));
@@ -112,7 +108,7 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void setEqualSetAsValue_noEvent() {
+    void setEqualSetAsValue_noEvent() {
         listBox.setValue(createSet(foo, bar));
         assertValueChangeEvents(createSet(foo, bar));
 
@@ -121,7 +117,7 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void selectedValuesPropertyReflectsSelectedIndices() {
+    void selectedValuesPropertyReflectsSelectedIndices() {
         listBox.setValue(createSet(bar));
         assertSelectedValuesProperty(1);
         listBox.select(foo);
@@ -133,14 +129,14 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void nonItemComponentsIgnoredInSelectedIndices() {
+    void nonItemComponentsIgnoredInSelectedIndices() {
         listBox.prependComponents(bar, new Div());
         listBox.setValue(createSet(foo, bar));
         assertSelectedValuesProperty(0, 1);
     }
 
     @Test
-    public void changeData_refreshAll_itemComponentsUpdated() {
+    void changeData_refreshAll_itemComponentsUpdated() {
         foo.setName("foo updated");
         bar.setName("bar updated");
         dataView.refreshItem(foo);
@@ -149,7 +145,7 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void changeData_refreshItem_itemComponentUpdated() {
+    void changeData_refreshItem_itemComponentUpdated() {
         foo.setName("foo updated");
         bar.setName("bar updated");
         dataView.refreshItem(foo);
@@ -157,48 +153,47 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void setValue_selectionEventFired() {
+    void setValue_selectionEventFired() {
         listBox.setValue(createSet(foo));
         listBox.setValue(createSet(bar));
 
-        Assert.assertEquals(createSet(bar), selectionEvent.getAddedSelection());
-        Assert.assertEquals(createSet(foo),
+        Assertions.assertEquals(createSet(bar),
+                selectionEvent.getAddedSelection());
+        Assertions.assertEquals(createSet(foo),
                 selectionEvent.getRemovedSelection());
 
-        Assert.assertEquals(createSet(bar), selectionEvent.getValue());
-        Assert.assertEquals(createSet(bar),
+        Assertions.assertEquals(createSet(bar), selectionEvent.getValue());
+        Assertions.assertEquals(createSet(bar),
                 selectionEvent.getAllSelectedItems());
 
-        Assert.assertEquals(createSet(foo), selectionEvent.getOldSelection());
+        Assertions.assertEquals(createSet(foo),
+                selectionEvent.getOldSelection());
 
-        Assert.assertEquals(bar, selectionEvent.getFirstSelectedItem().get());
+        Assertions.assertEquals(bar,
+                selectionEvent.getFirstSelectedItem().get());
     }
 
     @Test
-    public void updateSelection_valueChangeEventFired() {
+    void updateSelection_valueChangeEventFired() {
         listBox.setValue(createSet(foo));
         listBox.updateSelection(createSet(bar), createSet(foo));
         assertValueChangeEvents(createSet(foo), createSet(bar));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getValue_modifySet_throws() {
-        listBox.getValue().add(new Item("baz"));
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getSelectedItems_modifySet_throws() {
-        listBox.getSelectedItems().add(new Item("baz"));
+    @Test
+    void getValue_modifySet_throws() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> listBox.getValue().add(new Item("baz")));
     }
 
     @Test
-    public void dataViewForFaultyDataProvider_throwsException() {
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(
-                "ListBoxListDataView only supports 'ListDataProvider' "
-                        + "or it's subclasses, but was given a "
-                        + "'AbstractBackEndDataProvider'");
+    void getSelectedItems_modifySet_throws() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> listBox.getSelectedItems().add(new Item("baz")));
+    }
 
+    @Test
+    void dataViewForFaultyDataProvider_throwsException() {
         MultiSelectListBox<String> multiSelectListBox = new MultiSelectListBox<>();
         final ListBoxListDataView<String> dataView = multiSelectListBox
                 .setItems(Arrays.asList("one", "two"));
@@ -208,11 +203,17 @@ public class MultiSelectListBoxTest {
 
         multiSelectListBox.setItems(dataProvider);
 
-        multiSelectListBox.getListDataView();
+        IllegalStateException exception = Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> multiSelectListBox.getListDataView());
+        Assertions.assertTrue(exception.getMessage().contains(
+                "ListBoxListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'"));
     }
 
     @Test
-    public void setIdentifierProvider_setItemsWithIdentifierOnly_shouldSelectCorrectItem() {
+    void setIdentifierProvider_setItemsWithIdentifierOnly_shouldSelectCorrectItem() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -230,7 +231,7 @@ public class MultiSelectListBoxTest {
 
         long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 1L }, selectedIds);
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -245,11 +246,11 @@ public class MultiSelectListBoxTest {
 
         selectedIds = multiSelectListBox.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 2L }, selectedIds);
     }
 
     @Test
-    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+    void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -267,7 +268,7 @@ public class MultiSelectListBoxTest {
 
         long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 1L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 1L }, selectedIds);
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -283,11 +284,11 @@ public class MultiSelectListBoxTest {
 
         selectedIds = multiSelectListBox.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
-        Assert.assertArrayEquals(new long[] { 3L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 3L }, selectedIds);
     }
 
     @Test
-    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+    void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -301,19 +302,16 @@ public class MultiSelectListBoxTest {
         multiSelectListBox.setValue(
                 Collections.singleton(new CustomItem(null, "Second")));
 
-        Assert.assertNotNull(multiSelectListBox.getValue());
+        Assertions.assertNotNull(multiSelectListBox.getValue());
 
         long[] selectedIds = multiSelectListBox.getSelectedItems().stream()
                 .mapToLong(CustomItem::getId).toArray();
 
-        Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
+        Assertions.assertArrayEquals(new long[] { 2L }, selectedIds);
     }
 
     @Test
-    public void setIdentifierProviderOnId_setItemWithNullId_shouldThrowException() {
-
-        thrown.expect(NullPointerException.class);
-
+    void setIdentifierProviderOnId_setItemWithNullId_shouldThrowException() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -327,115 +325,125 @@ public class MultiSelectListBoxTest {
         // independent from the CustomItem's equals method implementation:
         listDataView.setIdentifierProvider(CustomItem::getId);
 
-        multiSelectListBox.setValue(new CustomItem(null, "First"));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> multiSelectListBox
+                        .setValue(new CustomItem(null, "First")));
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(listBox instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(listBox instanceof HasTooltip);
     }
 
     @Test
-    public void implementsHasAriaLabel() {
-        Assert.assertTrue(listBox instanceof HasAriaLabel);
+    void implementsHasAriaLabel() {
+        Assertions.assertTrue(listBox instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         listBox.setAriaLabel("aria-label");
 
-        Assert.assertTrue(listBox.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", listBox.getAriaLabel().get());
+        Assertions.assertTrue(listBox.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", listBox.getAriaLabel().get());
 
         listBox.setAriaLabel(null);
 
-        Assert.assertTrue(listBox.getAriaLabel().isEmpty());
+        Assertions.assertTrue(listBox.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         listBox.setAriaLabelledBy("aria-labelledby");
 
-        Assert.assertTrue(listBox.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby",
+        Assertions.assertTrue(listBox.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
                 listBox.getAriaLabelledBy().get());
 
         listBox.setAriaLabelledBy(null);
 
-        Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(listBox.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+    void discardSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNotNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNotNull(selectionEvent);
         selectionEvent = null;
 
         listBox.getDataProvider().refreshAll();
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNotNull(selectionEvent);
+        Assertions.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assertions.assertNotNull(selectionEvent);
     }
 
     @Test
-    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+    void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionPreservationMode(
                 SelectionPreservationMode.PRESERVE_EXISTING);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNotNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNotNull(selectionEvent);
         selectionEvent = null;
 
         listBox.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNull(selectionEvent);
 
         items.remove(items.get(1));
         listBox.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNull(selectionEvent);
 
         items.remove(selectedItem);
         listBox.getDataProvider().refreshAll();
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNotNull(selectionEvent);
+        Assertions.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assertions.assertNotNull(selectionEvent);
     }
 
     @Test
-    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+    void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionPreservationMode(
                 SelectionPreservationMode.PRESERVE_ALL);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNotNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNotNull(selectionEvent);
         selectionEvent = null;
 
         listBox.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNull(selectionEvent);
 
         items.remove(items.get(1));
         listBox.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNull(selectionEvent);
 
         items.remove(selectedItem);
         listBox.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
-        Assert.assertNull(selectionEvent);
+        Assertions.assertEquals(Set.of(selectedItem),
+                listBox.getSelectedItems());
+        Assertions.assertNull(selectionEvent);
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {
-        Assert.assertEquals(expectedValues.length, eventValues.size());
+        Assertions.assertEquals(expectedValues.length, eventValues.size());
         IntStream.range(0, expectedValues.length).forEach(i -> {
-            Assert.assertEquals(expectedValues[i], eventValues.get(i));
+            Assertions.assertEquals(expectedValues[i], eventValues.get(i));
         });
     }
 
@@ -443,13 +451,11 @@ public class MultiSelectListBoxTest {
         ArrayNode selectedValues = (ArrayNode) listBox.getElement()
                 .getPropertyRaw("selectedValues");
         Set<Integer> actualIndices = jsonArrayToSet(selectedValues);
-        Assert.assertEquals(
-                "The selectedValues property had different length than expected.",
-                selectedValues.size(), indices.length);
+        Assertions.assertEquals(selectedValues.size(), indices.length,
+                "The selectedValues property had different length than expected.");
         for (int index : indices) {
-            Assert.assertTrue(
-                    "The selectedValues property didn't contain expected value.",
-                    actualIndices.contains(index));
+            Assertions.assertTrue(actualIndices.contains(index),
+                    "The selectedValues property didn't contain expected value.");
         }
     }
 
@@ -457,7 +463,7 @@ public class MultiSelectListBoxTest {
         String[] contents = listBox.getChildren()
                 .map(c -> c.getElement().getChild(0).getText())
                 .toArray(String[]::new);
-        Assert.assertArrayEquals(expected, contents);
+        Assertions.assertArrayEquals(expected, contents);
     }
 
     private <T> Set<T> createSet(T... items) {
