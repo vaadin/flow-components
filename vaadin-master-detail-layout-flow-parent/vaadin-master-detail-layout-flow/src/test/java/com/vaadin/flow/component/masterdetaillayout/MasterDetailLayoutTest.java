@@ -191,6 +191,48 @@ class MasterDetailLayoutTest {
     }
 
     @Test
+    void setDetailPlaceholder() {
+        var placeholder = new Div();
+        layout.setDetailPlaceholder(placeholder);
+
+        Assertions.assertEquals("detail-placeholder",
+                placeholder.getElement().getAttribute("slot"));
+        Assertions.assertEquals(layout.getElement(),
+                placeholder.getElement().getParent());
+    }
+
+    @Test
+    void getDetailPlaceholder() {
+        var placeholder = new Div();
+        layout.setDetailPlaceholder(placeholder);
+
+        Assertions.assertEquals(placeholder, layout.getDetailPlaceholder());
+    }
+
+    @Test
+    void setDetailPlaceholder_replacePlaceholder() {
+        var placeholder = new Div();
+        layout.setDetailPlaceholder(placeholder);
+
+        var newPlaceholder = new Div();
+        layout.setDetailPlaceholder(newPlaceholder);
+
+        Assertions.assertEquals(newPlaceholder, layout.getDetailPlaceholder());
+        Assertions.assertNull(placeholder.getElement().getParent());
+    }
+
+    @Test
+    void setDetailPlaceholderNull_removesPlaceholder() {
+        var placeholder = new Div();
+        layout.setDetailPlaceholder(placeholder);
+
+        layout.setDetailPlaceholder(null);
+
+        Assertions.assertNull(layout.getDetailPlaceholder());
+        Assertions.assertNull(placeholder.getElement().getParent());
+    }
+
+    @Test
     void showRouterLayoutContent() {
         var detail = new Div();
         layout.showRouterLayoutContent(detail);

@@ -56,6 +56,7 @@ public class MasterDetailLayout extends Component implements HasSize,
         HasThemeVariant<MasterDetailLayoutVariant>, RouterLayout {
 
     public static final String MASTER_SLOT = "";
+    public static final String DETAIL_PLACEHOLDER_SLOT = "detail-placeholder";
 
     private HasElement detail;
     private PendingJavaScriptResult pendingDetailsUpdate;
@@ -175,6 +176,34 @@ public class MasterDetailLayout extends Component implements HasSize,
      */
     public void setDetail(Component component) {
         doSetDetail(component);
+    }
+
+    /**
+     * Gets the component currently in the detail placeholder area.
+     *
+     * @return the component in the detail placeholder area, or {@code null} if
+     *         there is no component in the detail placeholder area
+     */
+    public Component getDetailPlaceholder() {
+        return SlotUtils.getElementsInSlot(this, DETAIL_PLACEHOLDER_SLOT)
+                .findFirst().flatMap(Element::getComponent).orElse(null);
+    }
+
+    /**
+     * Sets the component to be displayed in the detail placeholder area. The
+     * placeholder is shown when no detail content is set, and is hidden when
+     * the layout is in overlay mode. Unlike the detail content, the placeholder
+     * does not become an overlay when there is not enough space.
+     *
+     * @param component
+     *            the component to display in the detail placeholder area, or
+     *            {@code null} to clear the detail placeholder area
+     */
+    public void setDetailPlaceholder(Component component) {
+        SlotUtils.clearSlot(this, DETAIL_PLACEHOLDER_SLOT);
+        if (component != null) {
+            SlotUtils.addToSlot(this, DETAIL_PLACEHOLDER_SLOT, component);
+        }
     }
 
     private void doSetDetail(HasElement hasElement) {
