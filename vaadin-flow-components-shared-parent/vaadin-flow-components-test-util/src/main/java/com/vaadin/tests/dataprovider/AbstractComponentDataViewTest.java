@@ -44,7 +44,7 @@ import com.vaadin.flow.data.provider.ItemCountChangeEvent;
  * of this class should provide a particular component to be tested as a
  * {@link HasDataView} implementation.
  */
-public abstract class AbstractComponentDataViewJUnit6Test {
+public abstract class AbstractComponentDataViewTest {
 
     protected List<String> items;
     protected InMemoryDataProvider<String> dataProvider;
