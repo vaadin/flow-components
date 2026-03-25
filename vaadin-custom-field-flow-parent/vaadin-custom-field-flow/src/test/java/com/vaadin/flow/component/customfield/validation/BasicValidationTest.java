@@ -17,10 +17,10 @@ package com.vaadin.flow.component.customfield.validation;
 
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Input;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class BasicValidationTest
-        extends AbstractBasicValidationJUnit6Test<CustomField<String>, String> {
+        extends AbstractBasicValidationTest<CustomField<String>, String> {
     class TestCustomField extends CustomField<String> {
         private Input input = new Input();
 

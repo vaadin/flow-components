@@ -31,7 +31,7 @@ import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
  * An abstract class that provides tests verifying that a component correctly
  * implements the {@link HasValidation} interface.
  */
-public abstract class AbstractBasicValidationJUnit6Test<C extends AbstractField<C, V> & HasValidation, V> {
+public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> & HasValidation, V> {
     protected C testField;
 
     @BeforeEach

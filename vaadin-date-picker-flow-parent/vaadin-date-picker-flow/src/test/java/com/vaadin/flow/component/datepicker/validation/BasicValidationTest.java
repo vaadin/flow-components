@@ -24,10 +24,10 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class BasicValidationTest
-        extends AbstractBasicValidationJUnit6Test<DatePicker, LocalDate> {
+        extends AbstractBasicValidationTest<DatePicker, LocalDate> {
     @Test
     void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
         testField.addValidationStatusChangeListener(event1 -> {

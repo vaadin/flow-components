@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBoxI18n;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class MultiSelectComboBoxBasicValidationTest extends
-        AbstractBasicValidationJUnit6Test<MultiSelectComboBox<String>, Set<String>> {
+        AbstractBasicValidationTest<MultiSelectComboBox<String>, Set<String>> {
     @Test
     void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);

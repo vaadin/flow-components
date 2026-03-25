@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-class BasicValidationTest extends
-        AbstractBasicValidationJUnit6Test<RadioButtonGroup<String>, String> {
+class BasicValidationTest
+        extends AbstractBasicValidationTest<RadioButtonGroup<String>, String> {
     @Test
     void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);

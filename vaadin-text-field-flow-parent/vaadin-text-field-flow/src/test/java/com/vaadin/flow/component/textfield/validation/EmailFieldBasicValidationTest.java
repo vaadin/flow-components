@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class EmailFieldBasicValidationTest
-        extends AbstractBasicValidationJUnit6Test<EmailField, String> {
+        extends AbstractBasicValidationTest<EmailField, String> {
     private static String[] VALID_EMAILS = { "email@example.com",
             "firstname.lastname@example.com", "email@subdomain.example.com",
             "firstname+lastname@example.com", "email@123.123.123.123",
