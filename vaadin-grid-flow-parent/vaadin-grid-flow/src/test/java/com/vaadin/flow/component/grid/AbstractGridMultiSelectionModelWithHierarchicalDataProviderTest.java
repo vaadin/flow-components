@@ -19,24 +19,24 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private TreeGrid<String> treeGrid;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         treeGrid = new TreeGrid<>();
         // Data provider with only two root items, we don't need any nested
         // items for the test cases (so far)
@@ -48,139 +48,154 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     }
 
     @Test
-    public void select_updatesCheckboxStates() {
+    void select_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // select first
         treeGrid.getSelectionModel().select("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // select second, which equals all selected
         // with hierarchical data provider we can not detect whether all are
         // selected, so should still be indeterminate
         treeGrid.getSelectionModel().select("bar");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void selectFromClient_updatesCheckboxStates() {
+    void selectFromClient_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // select first
         treeGrid.getSelectionModel().selectFromClient("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // select second, which equals all selected
         // with hierarchical data provider we can not detect whether all are
         // selected, so should still be indeterminate
         treeGrid.getSelectionModel().selectFromClient("bar");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void deselect_updatesCheckboxStates() {
+    void deselect_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // start with all selected
         ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
                 .clientSelectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
         treeGrid.getSelectionModel().deselect("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect second, which equals none selected
         treeGrid.getSelectionModel().deselect("bar");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void deselectFromClient_updatesCheckboxStates() {
+    void deselectFromClient_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // start with all selected
         ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
                 .clientSelectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
         treeGrid.getSelectionModel().deselectFromClient("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect second, which equals none selected
         treeGrid.getSelectionModel().deselectFromClient("bar");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void clientSelectAll_updatesCheckboxStates() {
+    void clientSelectAll_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
                 .clientSelectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void deselectAll_updatesCheckboxStates() {
+    void deselectAll_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // start with all selected
         ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
                 .clientSelectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         treeGrid.getSelectionModel().deselectAll();
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void clientDeselectAll_updatesCheckboxStates() {
+    void clientDeselectAll_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // start with all selected
         ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
                 .clientSelectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
                 .clientDeselectAll();
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void updateSelection_updatesCheckboxStates() {
+    void updateSelection_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // Select all
@@ -188,20 +203,23 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
         // selected, so should still be indeterminate
         treeGrid.asMultiSelect().updateSelection(Set.of("foo", "bar"),
                 Set.of());
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // Deselect single
         treeGrid.asMultiSelect().updateSelection(Set.of(), Set.of("foo"));
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // Deselect all
         treeGrid.asMultiSelect().updateSelection(Set.of(), Set.of("bar"));
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 

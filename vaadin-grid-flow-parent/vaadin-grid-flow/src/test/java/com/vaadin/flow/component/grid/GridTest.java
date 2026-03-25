@@ -20,31 +20,21 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
-public class GridTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
+class GridTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void dataViewForFaultyDataProvider_throwsException() {
-        exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage(
-                "GridListDataView only supports 'ListDataProvider' "
-                        + "or it's subclasses, but was given a "
-                        + "'AbstractBackEndDataProvider'");
-
+    void dataViewForFaultyDataProvider_throwsException() {
         Grid<String> grid = new Grid<>();
         final GridListDataView<String> listDataView = grid
                 .setItems(Arrays.asList("one", "two"));
@@ -54,47 +44,52 @@ public class GridTest {
 
         grid.setItems(dataProvider);
 
-        grid.getListDataView();
+        var ex = Assertions.assertThrows(IllegalStateException.class,
+                () -> grid.getListDataView());
+        Assertions.assertTrue(ex.getMessage()
+                .contains("GridListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'"));
     }
 
     @Test
-    public void selectItem_lazyDataSet_selectionWorks() {
+    void selectItem_lazyDataSet_selectionWorks() {
         final Grid<String> grid = new Grid<>();
         grid.setItems(query -> Stream.of("foo", "bar"));
         grid.select("foo");
-        Assert.assertEquals(1, grid.getSelectedItems().size());
-        Assert.assertTrue(grid.getSelectedItems().contains("foo"));
+        Assertions.assertEquals(1, grid.getSelectedItems().size());
+        Assertions.assertTrue(grid.getSelectedItems().contains("foo"));
     }
 
     @Test
-    public void setAllRowsVisible_allRowsAreVisible() {
+    void setAllRowsVisible_allRowsAreVisible() {
         final Grid<String> grid = new Grid<>();
 
-        Assert.assertEquals(null,
+        Assertions.assertEquals(null,
                 grid.getElement().getProperty("allRowsVisible"));
 
         grid.setAllRowsVisible(true);
-        Assert.assertEquals("true",
+        Assertions.assertEquals("true",
                 grid.getElement().getProperty("allRowsVisible"));
     }
 
     @Test
-    public void setAllRowsVisibleProperty_isAllRowsVisibleWorks() {
+    void setAllRowsVisibleProperty_isAllRowsVisibleWorks() {
         final Grid<String> grid = new Grid<>();
         grid.getElement().setProperty("allRowsVisible", true);
 
-        Assert.assertTrue(grid.isAllRowsVisible());
+        Assertions.assertTrue(grid.isAllRowsVisible());
     }
 
     @Test
-    public void dataProviderListeners_gridAttachedAndDetached_oldDataProviderListenerRemoved() {
+    void dataProviderListeners_gridAttachedAndDetached_oldDataProviderListenerRemoved() {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new Grid<>(), 2, 2, new int[] { 0, 2 }, ui.getUI());
     }
 
     @Test
-    public void setSmallPageSize_callSetViewportRangeWithLengthLargerThan500_doesNotThrowException() {
+    void setSmallPageSize_callSetViewportRangeWithLengthLargerThan500_doesNotThrowException() {
         final Grid<String> grid = new Grid<>();
 
         grid.setPageSize(10);
@@ -102,7 +97,7 @@ public class GridTest {
     }
 
     @Test
-    public void setAllRowsVisible_setLargePageSize_callSetViewportRangeWithLengthLargerThan500_doesNotThrowException() {
+    void setAllRowsVisible_setLargePageSize_callSetViewportRangeWithLengthLargerThan500_doesNotThrowException() {
         final Grid<String> grid = new Grid<>();
 
         grid.setPageSize(100);
@@ -111,7 +106,7 @@ public class GridTest {
     }
 
     @Test
-    public void setAllRowsVisible_setSmallPageSize_callSetViewportRangeWithLengthSmallerThan500_doesNotThrowException() {
+    void setAllRowsVisible_setSmallPageSize_callSetViewportRangeWithLengthSmallerThan500_doesNotThrowException() {
         final Grid<String> grid = new Grid<>();
 
         grid.setPageSize(10);
@@ -120,30 +115,29 @@ public class GridTest {
     }
 
     @Test
-    public void setAllRowsVisible_setSmallPageSize_callSetViewportRangeWithLengthLargerThan500_throwsException() {
-        exceptionRule.expect(IllegalArgumentException.class);
-        exceptionRule.expectMessage(
-                "Attempted to fetch more items from server than allowed in one go");
-
+    void setAllRowsVisible_setSmallPageSize_callSetViewportRangeWithLengthLargerThan500_throwsException() {
         final Grid<String> grid = new Grid<>();
 
         grid.setPageSize(10);
         grid.setAllRowsVisible(true);
-        callSetViewportRange(grid, 0, 600);
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> callSetViewportRange(grid, 0, 600));
+        Assertions.assertTrue(ex.getMessage().contains(
+                "Attempted to fetch more items from server than allowed in one go"));
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         final Grid<String> grid = new Grid<>();
         grid.setAriaLabel("test");
-        Assert.assertTrue(grid.getAriaLabel().isPresent());
-        Assert.assertEquals("test", grid.getAriaLabel().get());
-        Assert.assertEquals("test",
+        Assertions.assertTrue(grid.getAriaLabel().isPresent());
+        Assertions.assertEquals("test", grid.getAriaLabel().get());
+        Assertions.assertEquals("test",
                 grid.getElement().getProperty("accessibleName"));
 
         grid.setAriaLabel(null);
-        Assert.assertFalse(grid.getAriaLabel().isPresent());
-        Assert.assertFalse(grid.getElement().hasProperty("accessibleName"));
+        Assertions.assertFalse(grid.getAriaLabel().isPresent());
+        Assertions.assertFalse(grid.getElement().hasProperty("accessibleName"));
     }
 
     private void callSetViewportRange(Grid<String> grid, int start,
@@ -159,7 +153,7 @@ public class GridTest {
             if (e.getCause() instanceof IllegalArgumentException) {
                 throw (IllegalArgumentException) e.getCause();
             }
-            Assert.fail("Could not call Grid.setViewportRange");
+            Assertions.fail("Could not call Grid.setViewportRange");
         }
     }
 }

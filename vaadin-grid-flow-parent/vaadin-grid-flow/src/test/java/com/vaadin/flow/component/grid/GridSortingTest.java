@@ -24,9 +24,9 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -41,7 +41,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-public class GridSortingTest {
+class GridSortingTest {
 
     public static class Person {
         private int id;
@@ -152,8 +152,8 @@ public class GridSortingTest {
 
     private TestSortListener<Person> testSortListener;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         testSortListener = new TestSortListener<>();
 
         grid = new Grid<>();
@@ -173,7 +173,7 @@ public class GridSortingTest {
     }
 
     @Test
-    public void columnComparator_comaratorHandlesNullValues() {
+    void columnComparator_comaratorHandlesNullValues() {
         nameColumn.setComparator(Person::getName);
 
         Person person = new Person();
@@ -181,11 +181,11 @@ public class GridSortingTest {
 
         SerializableComparator<Person> comparator = nameColumn
                 .getComparator(SortDirection.ASCENDING);
-        Assert.assertEquals(1, comparator.compare(new Person(), person));
+        Assertions.assertEquals(1, comparator.compare(new Person(), person));
     }
 
     @Test
-    public void in_memory_sorting_applied_correctly() {
+    void in_memory_sorting_applied_correctly() {
         setTestSorting();
         assertInMemorySorting(Comparator.comparing(Person::getName)
                 .thenComparing(Comparator.comparing(Person::getAge).reversed())
@@ -194,7 +194,7 @@ public class GridSortingTest {
     }
 
     @Test
-    public void backend_sorting_applied_correctly() {
+    void backend_sorting_applied_correctly() {
         setTestSorting();
         assertSortOrdersEquals(
                 QuerySortOrder.asc("name").thenDesc("age").thenAsc("street")
@@ -203,38 +203,37 @@ public class GridSortingTest {
     }
 
     @Test
-    public void sort_event_not_sent_for_same_data() {
-        Assert.assertEquals("Sort event list should have been empty at start.",
-                0, testSortListener.events.size());
+    void sort_event_not_sent_for_same_data() {
+        Assertions.assertEquals(0, testSortListener.events.size(),
+                "Sort event list should have been empty at start.");
         callSortersChanged(JacksonUtils.createArrayNode());
-        Assert.assertEquals(
-                "No sort event should have been fired for empty initial sort.",
-                0, testSortListener.events.size());
+        Assertions.assertEquals(0, testSortListener.events.size(),
+                "No sort event should have been fired for empty initial sort.");
         setTestSorting();
-        Assert.assertEquals("Setting sort order should have fired event", 1,
-                testSortListener.events.size());
+        Assertions.assertEquals(1, testSortListener.events.size(),
+                "Setting sort order should have fired event");
         setTestSorting();
-        Assert.assertEquals("No sort should have  fired for same sort order", 1,
-                testSortListener.events.size());
+        Assertions.assertEquals(1, testSortListener.events.size(),
+                "No sort should have  fired for same sort order");
 
     }
 
     @Test
-    public void sort_event_correct() {
-        Assert.assertEquals(0, testSortListener.events.size());
+    void sort_event_correct() {
+        Assertions.assertEquals(0, testSortListener.events.size());
         setTestSorting();
-        Assert.assertEquals(1, testSortListener.events.size());
+        Assertions.assertEquals(1, testSortListener.events.size());
 
-        Assert.assertEquals(1, testSortListener.events.size());
+        Assertions.assertEquals(1, testSortListener.events.size());
         assertSortOrdersEquals(
                 GridSortOrder.asc(nameColumn).thenDesc(ageColumn)
                         .thenAsc(templateColumn).build(),
                 testSortListener.events.get(0).getSortOrder());
-        Assert.assertTrue(testSortListener.events.get(0).isFromClient());
+        Assertions.assertTrue(testSortListener.events.get(0).isFromClient());
     }
 
     @Test
-    public void changing_sorters() {
+    void changing_sorters() {
         setTestSorting();
 
         ArrayNode secondSortersArray = JacksonUtils.createArrayNode();
@@ -242,14 +241,14 @@ public class GridSortingTest {
                 .add(createSortObject(getColumnId(nameColumn), "desc"));
         callSortersChanged(secondSortersArray);
 
-        Assert.assertEquals(2, testSortListener.events.size());
+        Assertions.assertEquals(2, testSortListener.events.size());
 
         assertSortOrdersEquals(GridSortOrder.desc(nameColumn).build(),
                 testSortListener.events.get(1).getSortOrder());
     }
 
     @Test
-    public void template_renderer_non_comparable_property() {
+    void template_renderer_non_comparable_property() {
         Column<Person> column = grid.addColumn(LitRenderer.<Person> of("")
                 .withProperty("address", Person::getAddress))
                 .setSortProperty("address");
@@ -265,73 +264,75 @@ public class GridSortingTest {
     }
 
     @Test
-    public void checkMultiSortDefaultValue() {
-        Assert.assertFalse(grid.isMultiSort());
+    void checkMultiSortDefaultValue() {
+        Assertions.assertFalse(grid.isMultiSort());
     }
 
     @Test
-    public void checkMultiSortFalse() {
+    void checkMultiSortFalse() {
         grid.setMultiSort(false);
-        Assert.assertFalse(grid.isMultiSort());
+        Assertions.assertFalse(grid.isMultiSort());
     }
 
     @Test
-    public void checkMultiSortTrue() {
+    void checkMultiSortTrue() {
         grid.setMultiSort(true);
-        Assert.assertTrue(grid.isMultiSort());
+        Assertions.assertTrue(grid.isMultiSort());
     }
 
     @Test
-    public void setMultiSortWithPriority() {
+    void setMultiSortWithPriority() {
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
 
-        Assert.assertEquals("append",
+        Assertions.assertEquals("append",
                 grid.getElement().getAttribute("multi-sort-priority"));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setMultiSortWithPriorityNull_throws() {
-        grid.setMultiSort(true, null);
+    @Test
+    void setMultiSortWithPriorityNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> grid.setMultiSort(true, null));
     }
 
     @Test
-    public void setMultiSortShiftClickOnly() {
+    void setMultiSortShiftClickOnly() {
         grid.setMultiSort(true, true);
 
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
     }
 
     @Test
-    public void setMultiSortShiftClickOnly_onlyWhenMultiSortTrue() {
+    void setMultiSortShiftClickOnly_onlyWhenMultiSortTrue() {
         grid.setMultiSort(false, true);
 
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
     }
 
     @Test
-    public void setMultiSortShiftClickOnlyFalse_whenUsingMethodWithoutOnShiftClickOnly() {
+    void setMultiSortShiftClickOnlyFalse_whenUsingMethodWithoutOnShiftClickOnly() {
         grid.setMultiSort(true, true);
         grid.setMultiSort(false);
 
-        Assert.assertFalse(
+        Assertions.assertFalse(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
     }
 
     @Test
-    public void setMultiSortShiftClickOnlyWithPriority() {
+    void setMultiSortShiftClickOnlyWithPriority() {
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND, true);
 
-        Assert.assertEquals("append",
+        Assertions.assertEquals("append",
                 grid.getElement().getAttribute("multi-sort-priority"));
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setMultiSortShiftClickOnlyWithPriorityNull_throws() {
-        grid.setMultiSort(true, null, true);
+    @Test
+    void setMultiSortShiftClickOnlyWithPriorityNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> grid.setMultiSort(true, null, true));
     }
 
     private void setTestSorting() {
@@ -351,7 +352,7 @@ public class GridSortingTest {
         } catch (NoSuchMethodException | SecurityException
                 | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
-            Assert.fail("Could not call Grid.sortersChanged");
+            Assertions.fail("Could not call Grid.sortersChanged");
         }
     }
 
@@ -368,11 +369,12 @@ public class GridSortingTest {
 
     private <T, V extends SortOrder<T>> void assertSortOrdersEquals(List<V> o1,
             List<V> o2) {
-        Assert.assertEquals(o1.size(), o2.size());
+        Assertions.assertEquals(o1.size(), o2.size());
         for (int i = 0; i < o1.size(); ++i) {
-            Assert.assertEquals(o1.get(i).getDirection(),
+            Assertions.assertEquals(o1.get(i).getDirection(),
                     o2.get(i).getDirection());
-            Assert.assertEquals(o1.get(i).getSorted(), o2.get(i).getSorted());
+            Assertions.assertEquals(o1.get(i).getSorted(),
+                    o2.get(i).getSorted());
         }
     }
 
@@ -405,6 +407,6 @@ public class GridSortingTest {
         expectedOrder.sort(comparator);
         actualOrder.sort(grid.getDataCommunicator().getInMemorySorting());
 
-        Assert.assertEquals(expectedOrder, actualOrder);
+        Assertions.assertEquals(expectedOrder, actualOrder);
     }
 }

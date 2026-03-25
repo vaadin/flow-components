@@ -17,70 +17,70 @@ package com.vaadin.flow.component.grid;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class GridScrollToIndexTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class GridScrollToIndexTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Grid<String> grid;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         grid = new Grid<>();
         grid.setPageSize(50);
     }
 
     @Test
-    public void scrollToStart_preloadOnePage() {
+    void scrollToStart_preloadOnePage() {
         grid.scrollToIndex(0);
-        Assert.assertEquals("0-50", getViewportRange(grid));
+        Assertions.assertEquals("0-50", getViewportRange(grid));
     }
 
     @Test
-    public void scrollToEnd_preloadOnePage() {
+    void scrollToEnd_preloadOnePage() {
         grid.scrollToIndex(950);
-        Assert.assertEquals("950-1000", getViewportRange(grid));
+        Assertions.assertEquals("950-1000", getViewportRange(grid));
     }
 
     @Test
-    public void scrollToStartOfPage_preloadOnePage() {
+    void scrollToStartOfPage_preloadOnePage() {
         grid.scrollToIndex(500);
-        Assert.assertEquals("500-550", getViewportRange(grid));
+        Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
-    public void scrollToSecondIndexOfPage_preloadOnePage() {
+    void scrollToSecondIndexOfPage_preloadOnePage() {
         grid.scrollToIndex(501);
-        Assert.assertEquals("500-550", getViewportRange(grid));
+        Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
-    public void scrollToSecondLastIndexOfPage_preloadTwoPages() {
+    void scrollToSecondLastIndexOfPage_preloadTwoPages() {
         grid.scrollToIndex(499);
-        Assert.assertEquals("450-550", getViewportRange(grid));
+        Assertions.assertEquals("450-550", getViewportRange(grid));
     }
 
     @Test
-    public void smallPageSize_scrollToIndex_preloadMultiplePages() {
+    void smallPageSize_scrollToIndex_preloadMultiplePages() {
         grid.setPageSize(5);
         grid.scrollToIndex(499);
-        Assert.assertEquals("495-540", getViewportRange(grid));
+        Assertions.assertEquals("495-540", getViewportRange(grid));
     }
 
     @Test
-    public void scrollToIndex_afterAttach_schedulesJsExecution() {
+    void scrollToIndex_afterAttach_schedulesJsExecution() {
         ui.add(grid);
         grid.scrollToIndex(5);
         grid.scrollToIndex(5);
@@ -89,7 +89,7 @@ public class GridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToIndex_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToIndex_beforeAttach_thenAttach_schedulesJsExecution() {
         grid.scrollToIndex(5);
         grid.scrollToIndex(5);
         ui.add(grid);
@@ -98,7 +98,7 @@ public class GridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToStart_afterAttach_schedulesJsExecution() {
+    void scrollToStart_afterAttach_schedulesJsExecution() {
         ui.add(grid);
         grid.scrollToStart();
         grid.scrollToStart();
@@ -107,7 +107,7 @@ public class GridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToStart_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToStart_beforeAttach_thenAttach_schedulesJsExecution() {
         grid.scrollToStart();
         grid.scrollToStart();
         ui.add(grid);
@@ -116,7 +116,7 @@ public class GridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToEnd_afterAttach_schedulesJsExecution() {
+    void scrollToEnd_afterAttach_schedulesJsExecution() {
         ui.add(grid);
         grid.scrollToEnd();
         grid.scrollToEnd();
@@ -125,7 +125,7 @@ public class GridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToEnd_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToEnd_beforeAttach_thenAttach_schedulesJsExecution() {
         grid.scrollToEnd();
         grid.scrollToEnd();
         ui.add(grid);
@@ -134,7 +134,7 @@ public class GridScrollToIndexTest {
     }
 
     @Test
-    public void onlyLastScrollInvocationExecuted() {
+    void onlyLastScrollInvocationExecuted() {
         grid.setItems("Item 0", "Item 1");
         ui.add(grid);
 
@@ -149,15 +149,15 @@ public class GridScrollToIndexTest {
     private void assertSingleJavaScriptScrollInvocation(
             String expectedExpression, Object... expectedParams) {
         var invocations = getJavaScriptScrollInvocations();
-        Assert.assertEquals(1, invocations.size());
+        Assertions.assertEquals(1, invocations.size());
 
         var invocation = invocations.get(0);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 invocation.getExpression().contains(expectedExpression));
 
         var params = invocation.getParameters();
         for (int i = 1; i < expectedParams.length; i++) {
-            Assert.assertEquals(expectedParams[i], params.get(i));
+            Assertions.assertEquals(expectedParams[i], params.get(i));
         }
     }
 

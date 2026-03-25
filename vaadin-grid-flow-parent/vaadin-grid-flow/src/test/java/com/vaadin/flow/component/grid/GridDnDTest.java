@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
@@ -37,13 +37,13 @@ import com.vaadin.flow.router.RouterLink;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-public class GridDnDTest {
+class GridDnDTest {
 
     private Grid<String> grid;
     private UI ui;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         ui = new UI();
 
         grid = new Grid<String>() {
@@ -55,7 +55,7 @@ public class GridDnDTest {
     }
 
     @Test
-    public void gridDnD_genericDnD_activeDragComponentAndDataSet() {
+    void gridDnD_genericDnD_activeDragComponentAndDataSet() {
         List<String> dragData = Collections.singletonList("2");
         ObjectNode object = JacksonUtils.createObjectNode();
         ArrayNode array = JacksonUtils.createArrayNode();
@@ -68,10 +68,11 @@ public class GridDnDTest {
                 grid, true, object);
         ComponentUtil.fireEvent(grid, startEvent);
 
-        Assert.assertEquals("No active drag source set", grid,
-                ui.getActiveDragSourceComponent());
-        Assert.assertEquals("No drag data set", dragData,
-                ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
+        Assertions.assertEquals(grid, ui.getActiveDragSourceComponent(),
+                "No active drag source set");
+        Assertions.assertEquals(dragData,
+                ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY),
+                "No drag data set");
 
         AtomicReference<DropEvent<RouterLink>> eventCapture = new AtomicReference<>();
         RouterLink routerLink = new RouterLink() {
@@ -88,17 +89,18 @@ public class GridDnDTest {
 
         DropEvent<RouterLink> dropEvent = eventCapture.get();
 
-        Assert.assertEquals("Incorrect drag data", dragData,
-                dropEvent.getDragData().get());
-        Assert.assertEquals("Incorrect drag source", grid,
-                dropEvent.getDragSourceComponent().get());
+        Assertions.assertEquals(dragData, dropEvent.getDragData().get(),
+                "Incorrect drag data");
+        Assertions.assertEquals(grid, dropEvent.getDragSourceComponent().get(),
+                "Incorrect drag source");
 
         ComponentUtil.fireEvent(grid, new GridDragEndEvent<>(grid, true));
 
-        Assert.assertNull("Active drag source not cleared",
-                ui.getActiveDragSourceComponent());
-        Assert.assertNull("Drag data not cleared",
-                ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
+        Assertions.assertNull(ui.getActiveDragSourceComponent(),
+                "Active drag source not cleared");
+        Assertions.assertNull(
+                ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY),
+                "Drag data not cleared");
     }
 
 }
