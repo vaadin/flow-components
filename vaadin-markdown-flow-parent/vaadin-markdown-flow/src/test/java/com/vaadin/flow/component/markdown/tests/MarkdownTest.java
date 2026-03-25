@@ -17,9 +17,9 @@ package com.vaadin.flow.component.markdown.tests;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -28,13 +28,13 @@ import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.server.VaadinSession;
 
-public class MarkdownTest {
+class MarkdownTest {
 
     private final UI ui = new UI();
     private Markdown markdown;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         markdown = new Markdown();
 
         var mockSession = Mockito.mock(VaadinSession.class);
@@ -43,103 +43,103 @@ public class MarkdownTest {
     }
 
     @Test
-    public void testInitialMarkdownContent() {
-        Assert.assertNull(markdown.getContent());
+    void testInitialMarkdownContent() {
+        Assertions.assertNull(markdown.getContent());
     }
 
     @Test
-    public void testSetContent() {
+    void testSetContent() {
         markdown.setContent("**Hello** _World_");
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
     }
 
     @Test
-    public void testGetMarkdown() {
+    void testGetMarkdown() {
         markdown.setContent("**Hello** _World_");
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     @Test
-    public void overloadedConstructor_testGetMarkdown() {
+    void overloadedConstructor_testGetMarkdown() {
         markdown = new Markdown("**Hello** _World_");
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     @Test
-    public void testAppendContent() {
+    void testAppendContent() {
         markdown.appendContent("**Hello**");
-        Assert.assertEquals("**Hello**", markdown.getContent());
+        Assertions.assertEquals("**Hello**", markdown.getContent());
         assertUpdateMarkdownCall(markdown, "**Hello**", false);
 
         markdown.appendContent(" _World_");
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
         assertUpdateMarkdownCall(markdown, " _World_", true);
     }
 
     @Test
-    public void testAppendContentWithSetContent() {
+    void testAppendContentWithSetContent() {
         markdown.setContent("**Hello**");
-        Assert.assertEquals("**Hello**", markdown.getContent());
+        Assertions.assertEquals("**Hello**", markdown.getContent());
         assertUpdateMarkdownCall(markdown, "**Hello**", false);
 
         markdown.setContent("**Hello** _World_");
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
         assertUpdateMarkdownCall(markdown, " _World_", true);
     }
 
     @Test
-    public void testReplaceMarkdown() {
+    void testReplaceMarkdown() {
         markdown.setContent("**Hello**");
-        Assert.assertEquals("**Hello**", markdown.getContent());
+        Assertions.assertEquals("**Hello**", markdown.getContent());
         assertUpdateMarkdownCall(markdown, "**Hello**", false);
 
         markdown.setContent("**Foobar**");
-        Assert.assertEquals("**Foobar**", markdown.getContent());
+        Assertions.assertEquals("**Foobar**", markdown.getContent());
         assertUpdateMarkdownCall(markdown, "**Foobar**", false);
     }
 
     @Test
-    public void testSetSameMarkdown() {
+    void testSetSameMarkdown() {
         markdown.setContent("**Hello** _World_");
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
 
         markdown.setContent("**Hello** _World_");
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
-        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals(0, getPendingJavaScriptInvocations().size());
     }
 
     @Test
-    public void testSetContentTwice() {
+    void testSetContentTwice() {
         markdown.setContent("**Foobar**");
         markdown.setContent("**Hello** _World_");
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
     }
 
     @Test
-    public void testRemoveMarkdown() {
+    void testRemoveMarkdown() {
         markdown.setContent("**Hello** _World_");
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
 
         markdown.setContent(null);
-        Assert.assertNull(markdown.getContent());
+        Assertions.assertNull(markdown.getContent());
         assertUpdateMarkdownCall(markdown, null, false);
     }
 
     @Test
-    public void testDetach_setContent_attach() {
+    void testDetach_setContent_attach() {
         markdown.removeFromParent();
 
         markdown.setContent("**Hello** _World_");
-        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+        Assertions.assertEquals(0, getPendingJavaScriptInvocations().size());
 
         ui.add(markdown);
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     @Test
-    public void testReAttachment_contentPreserved() {
+    void testReAttachment_contentPreserved() {
         // Set content while attached
         markdown.setContent("**Hello** _World_");
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
@@ -150,14 +150,14 @@ public class MarkdownTest {
         // Re-attach the component - content should be sent to client again
         ui.add(markdown);
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
-        Assert.assertEquals("**Hello** _World_", markdown.getContent());
+        Assertions.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     private void assertUpdateMarkdownCall(Component component, String content,
             boolean isAppend) {
         var pendingJavaScriptInvocations = getPendingJavaScriptInvocations();
 
-        Assert.assertEquals(1, pendingJavaScriptInvocations.size());
+        Assertions.assertEquals(1, pendingJavaScriptInvocations.size());
 
         var pendingJavaScriptInvocation = pendingJavaScriptInvocations.get(0);
         var parameters = pendingJavaScriptInvocation.getInvocation()
@@ -165,18 +165,18 @@ public class MarkdownTest {
         var element = component != null ? component.getElement() : null;
 
         if (isAppend) {
-            Assert.assertEquals(
+            Assertions.assertEquals(
                     "return (async function() { this.content += $0}).apply($1)",
                     pendingJavaScriptInvocation.getInvocation()
                             .getExpression());
         } else {
-            Assert.assertEquals(
+            Assertions.assertEquals(
                     "return (async function() { this.content = $0}).apply($1)",
                     pendingJavaScriptInvocation.getInvocation()
                             .getExpression());
         }
-        Assert.assertEquals(content, parameters.get(0));
-        Assert.assertEquals(element, parameters.get(1));
+        Assertions.assertEquals(content, parameters.get(0));
+        Assertions.assertEquals(element, parameters.get(1));
     }
 
     private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
