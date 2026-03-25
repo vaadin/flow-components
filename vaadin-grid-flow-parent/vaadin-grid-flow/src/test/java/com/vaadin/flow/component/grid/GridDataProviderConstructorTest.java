@@ -19,8 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -37,77 +37,77 @@ import com.vaadin.flow.function.SerializablePredicate;
  *
  * @author Vaadin Ltd.
  */
-public class GridDataProviderConstructorTest {
+class GridDataProviderConstructorTest {
 
     transient List<String> dummyData = Arrays.asList("item1", "item2", "item3",
             "item4");
 
     @Test
-    public void constructorBackEndDataProvider() {
+    void constructorBackEndDataProvider() {
         Grid<String> gridBackendDataProvider = new Grid<>(
                 new StringBackendDataProvider());
-        Assert.assertEquals(dummyData.get(0),
+        Assertions.assertEquals(dummyData.get(0),
                 gridBackendDataProvider.getLazyDataView().getItem(0));
-        Assert.assertEquals(dummyData.get(1),
+        Assertions.assertEquals(dummyData.get(1),
                 gridBackendDataProvider.getLazyDataView().getItem(1));
-        Assert.assertEquals(dummyData.get(2),
+        Assertions.assertEquals(dummyData.get(2),
                 gridBackendDataProvider.getLazyDataView().getItem(2));
-        Assert.assertEquals(dummyData.get(3),
+        Assertions.assertEquals(dummyData.get(3),
                 gridBackendDataProvider.getLazyDataView().getItem(3));
     }
 
     @Test
-    public void constructorGenericDataProvider() {
+    void constructorGenericDataProvider() {
         Grid<String> gridGenericDataProvider = new Grid<>(
                 new StringGenericDataProvider());
-        Assert.assertEquals(dummyData.get(0),
+        Assertions.assertEquals(dummyData.get(0),
                 gridGenericDataProvider.getGenericDataView().getItem(0));
-        Assert.assertEquals(dummyData.get(1),
+        Assertions.assertEquals(dummyData.get(1),
                 gridGenericDataProvider.getGenericDataView().getItem(1));
-        Assert.assertEquals(dummyData.get(2),
+        Assertions.assertEquals(dummyData.get(2),
                 gridGenericDataProvider.getGenericDataView().getItem(2));
-        Assert.assertEquals(dummyData.get(3),
+        Assertions.assertEquals(dummyData.get(3),
                 gridGenericDataProvider.getGenericDataView().getItem(3));
     }
 
     @Test
-    public void constructorInMemoryDataProvider() {
+    void constructorInMemoryDataProvider() {
         Grid<String> gridInMemoryDataProvider = new Grid<>(
                 new StringInMemoryDataProvider());
-        Assert.assertEquals(dummyData.get(0),
+        Assertions.assertEquals(dummyData.get(0),
                 gridInMemoryDataProvider.getGenericDataView().getItem(0));
-        Assert.assertEquals(dummyData.get(1),
+        Assertions.assertEquals(dummyData.get(1),
                 gridInMemoryDataProvider.getGenericDataView().getItem(1));
-        Assert.assertEquals(dummyData.get(2),
+        Assertions.assertEquals(dummyData.get(2),
                 gridInMemoryDataProvider.getGenericDataView().getItem(2));
-        Assert.assertEquals(dummyData.get(3),
+        Assertions.assertEquals(dummyData.get(3),
                 gridInMemoryDataProvider.getGenericDataView().getItem(3));
     }
 
     @Test
-    public void constructorListDataProvider() {
+    void constructorListDataProvider() {
         Grid<String> gridListDataProvider = new Grid<>(
                 new ListDataProvider<String>(dummyData));
-        Assert.assertEquals(dummyData.get(0),
+        Assertions.assertEquals(dummyData.get(0),
                 gridListDataProvider.getListDataView().getItem(0));
-        Assert.assertEquals(dummyData.get(1),
+        Assertions.assertEquals(dummyData.get(1),
                 gridListDataProvider.getListDataView().getItem(1));
-        Assert.assertEquals(dummyData.get(2),
+        Assertions.assertEquals(dummyData.get(2),
                 gridListDataProvider.getListDataView().getItem(2));
-        Assert.assertEquals(dummyData.get(3),
+        Assertions.assertEquals(dummyData.get(3),
                 gridListDataProvider.getListDataView().getItem(3));
     }
 
     @Test
-    public void constructorCollection() {
+    void constructorCollection() {
         Grid<String> gridCollection = new Grid<>(dummyData);
-        Assert.assertEquals(dummyData.get(0),
+        Assertions.assertEquals(dummyData.get(0),
                 gridCollection.getGenericDataView().getItem(0));
-        Assert.assertEquals(dummyData.get(1),
+        Assertions.assertEquals(dummyData.get(1),
                 gridCollection.getGenericDataView().getItem(1));
-        Assert.assertEquals(dummyData.get(2),
+        Assertions.assertEquals(dummyData.get(2),
                 gridCollection.getGenericDataView().getItem(2));
-        Assert.assertEquals(dummyData.get(3),
+        Assertions.assertEquals(dummyData.get(3),
                 gridCollection.getGenericDataView().getItem(3));
     }
 

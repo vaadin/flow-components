@@ -23,11 +23,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
@@ -37,11 +36,11 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class HeaderFooterTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class HeaderFooterTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     private static final Predicate<Element> isColumn = element -> "vaadin-grid-column"
             .equals(element.getTag());
@@ -53,11 +52,8 @@ public class HeaderFooterTest {
     Column<String> secondColumn;
     Column<String> thirdColumn;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         grid = new Grid<>();
         addColumns();
     }
@@ -69,82 +65,81 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void initGrid_noHeaderFooterRows() {
-        Assert.assertEquals("Grid should not have header rows initially", 0,
-                grid.getHeaderRows().size());
-        Assert.assertEquals("Grid should not have footer rows initially", 0,
-                grid.getFooterRows().size());
+    void initGrid_noHeaderFooterRows() {
+        Assertions.assertEquals(0, grid.getHeaderRows().size(),
+                "Grid should not have header rows initially");
+        Assertions.assertEquals(0, grid.getFooterRows().size(),
+                "Grid should not have footer rows initially");
     }
 
     @Test
-    public void initGrid_noColumnGroups() {
+    void initGrid_noColumnGroups() {
         List<List<Element>> layers = getColumnLayers();
-        Assert.assertTrue("Grid should not have column groups initially",
-                layers.size() == 1);
+        Assertions.assertTrue(layers.size() == 1,
+                "Grid should not have column groups initially");
     }
 
     @Test
-    public void setHeader_firstHeaderRowCreated() {
+    void setHeader_firstHeaderRowCreated() {
         firstColumn.setHeader("foo");
-        Assert.assertEquals(
-                "There should be one HeaderRow after setting a header for a column",
-                1, grid.getHeaderRows().size());
+        Assertions.assertEquals(1, grid.getHeaderRows().size(),
+                "There should be one HeaderRow after setting a header for a column");
         assertRowWrapsLayer(grid.getHeaderRows().get(0),
                 getColumnLayersAndAssertCount(1).get(0));
     }
 
     @Test
-    public void setHeaderText() {
+    void setHeaderText() {
         firstColumn.setHeader("foo");
 
-        Assert.assertEquals("foo", firstColumn.getHeaderText());
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo", firstColumn.getHeaderText());
+        Assertions.assertEquals("foo",
                 grid.getHeaderRows().get(0).getCell(firstColumn).getText());
     }
 
     @Test
-    public void setHeaderComponent() {
+    void setHeaderComponent() {
         TextField textField = new TextField();
         firstColumn.setHeader(textField);
 
         // Getter should return component
-        Assert.assertEquals(textField, firstColumn.getHeaderComponent());
-        Assert.assertEquals(textField, grid.getHeaderRows().get(0)
+        Assertions.assertEquals(textField, firstColumn.getHeaderComponent());
+        Assertions.assertEquals(textField, grid.getHeaderRows().get(0)
                 .getCell(firstColumn).getComponent());
         // Should be added as virtual child
         assertIsVirtualChild(textField, firstColumn);
     }
 
     @Test
-    public void setHeaderText_clearsHeaderComponent() {
+    void setHeaderText_clearsHeaderComponent() {
         TextField textField = new TextField();
 
         firstColumn.setHeader(textField);
         firstColumn.setHeader("foo");
-        Assert.assertNull(firstColumn.getHeaderComponent());
+        Assertions.assertNull(firstColumn.getHeaderComponent());
 
         firstColumn.setHeader(textField);
         firstColumn.setHeader((String) null);
-        Assert.assertNull(firstColumn.getHeaderComponent());
+        Assertions.assertNull(firstColumn.getHeaderComponent());
         // Component should be removed
         assertIsNotVirtualChild(textField);
     }
 
     @Test
-    public void setHeaderComponent_clearsHeaderText() {
+    void setHeaderComponent_clearsHeaderText() {
         TextField textField = new TextField();
 
         firstColumn.setHeader("foo");
         firstColumn.setHeader(textField);
-        Assert.assertNull(firstColumn.getHeaderText());
+        Assertions.assertNull(firstColumn.getHeaderText());
 
         firstColumn.setHeader("foo");
         firstColumn.setHeader((Component) null);
-        Assert.assertNull(firstColumn.getHeaderText());
+        Assertions.assertNull(firstColumn.getHeaderText());
     }
 
     @Test
-    public void replaceHeaderComponent_replacesVirtualChild() {
+    void replaceHeaderComponent_replacesVirtualChild() {
         TextField firstField = new TextField();
         firstColumn.setHeader(firstField);
 
@@ -156,22 +151,22 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void moveHeaderContent() {
+    void moveHeaderContent() {
         // Move text
         firstColumn.setHeader("Header");
         firstColumn.moveHeaderContent(secondColumn);
 
-        Assert.assertNull(firstColumn.getHeaderText());
-        Assert.assertEquals("Header", secondColumn.getHeaderText());
+        Assertions.assertNull(firstColumn.getHeaderText());
+        Assertions.assertEquals("Header", secondColumn.getHeaderText());
 
         // Move component
         TextField firstField = new TextField();
         firstColumn.setHeader(firstField);
         firstColumn.moveHeaderContent(secondColumn);
 
-        Assert.assertNull(firstColumn.getHeaderComponent());
-        Assert.assertNull(secondColumn.getHeaderText());
-        Assert.assertEquals(firstField, secondColumn.getHeaderComponent());
+        Assertions.assertNull(firstColumn.getHeaderComponent());
+        Assertions.assertNull(secondColumn.getHeaderText());
+        Assertions.assertEquals(firstField, secondColumn.getHeaderComponent());
         assertIsVirtualChild(firstField, secondColumn);
 
         // Replace component
@@ -186,71 +181,70 @@ public class HeaderFooterTest {
         firstColumn.setHeader("Header");
         firstColumn.moveHeaderContent(secondColumn);
 
-        Assert.assertNull(secondColumn.getHeaderComponent());
+        Assertions.assertNull(secondColumn.getHeaderComponent());
         assertIsNotVirtualChild(secondField);
     }
 
     @Test
-    public void setFooter_firstFooterRowCreated() {
+    void setFooter_firstFooterRowCreated() {
         firstColumn.setFooter("foo");
-        Assert.assertEquals(
-                "There should be one FooterRow after setting a footer for a column",
-                1, grid.getFooterRows().size());
+        Assertions.assertEquals(1, grid.getFooterRows().size(),
+                "There should be one FooterRow after setting a footer for a column");
         assertRowWrapsLayer(grid.getFooterRows().get(0),
                 getColumnLayersAndAssertCount(1).get(0));
     }
 
     @Test
-    public void setFooterText() {
+    void setFooterText() {
         firstColumn.setFooter("foo");
 
-        Assert.assertEquals("foo", firstColumn.getFooterText());
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo", firstColumn.getFooterText());
+        Assertions.assertEquals("foo",
                 grid.getFooterRows().get(0).getCell(firstColumn).getText());
     }
 
     @Test
-    public void setFooterComponent() {
+    void setFooterComponent() {
         TextField textField = new TextField();
         firstColumn.setFooter(textField);
 
         // Getter should return component
-        Assert.assertEquals(textField, firstColumn.getFooterComponent());
-        Assert.assertEquals(textField, grid.getFooterRows().get(0)
+        Assertions.assertEquals(textField, firstColumn.getFooterComponent());
+        Assertions.assertEquals(textField, grid.getFooterRows().get(0)
                 .getCell(firstColumn).getComponent());
         // Should be added as virtual child
         assertIsVirtualChild(textField, firstColumn);
     }
 
     @Test
-    public void setFooterText_clearsFooterComponent() {
+    void setFooterText_clearsFooterComponent() {
         TextField textField = new TextField();
 
         firstColumn.setFooter(textField);
         firstColumn.setFooter("foo");
-        Assert.assertNull(firstColumn.getFooterComponent());
+        Assertions.assertNull(firstColumn.getFooterComponent());
 
         firstColumn.setFooter(textField);
         firstColumn.setFooter((String) null);
-        Assert.assertNull(firstColumn.getFooterComponent());
+        Assertions.assertNull(firstColumn.getFooterComponent());
         assertIsNotVirtualChild(textField);
     }
 
     @Test
-    public void setFooterComponent_clearsFooterText() {
+    void setFooterComponent_clearsFooterText() {
         TextField textField = new TextField();
 
         firstColumn.setFooter("foo");
         firstColumn.setFooter(textField);
-        Assert.assertNull(firstColumn.getFooterText());
+        Assertions.assertNull(firstColumn.getFooterText());
 
         firstColumn.setFooter("foo");
         firstColumn.setFooter((Component) null);
-        Assert.assertNull(firstColumn.getFooterText());
+        Assertions.assertNull(firstColumn.getFooterText());
     }
 
     @Test
-    public void replaceFooterComponent_replacesVirtualChild() {
+    void replaceFooterComponent_replacesVirtualChild() {
         TextField firstField = new TextField();
         firstColumn.setFooter(firstField);
 
@@ -262,22 +256,22 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void moveFooterContent() {
+    void moveFooterContent() {
         // Move text
         firstColumn.setFooter("Footer");
         firstColumn.moveFooterContent(secondColumn);
 
-        Assert.assertNull(firstColumn.getFooterText());
-        Assert.assertEquals("Footer", secondColumn.getFooterText());
+        Assertions.assertNull(firstColumn.getFooterText());
+        Assertions.assertEquals("Footer", secondColumn.getFooterText());
 
         // Move component
         TextField firstField = new TextField();
         firstColumn.setFooter(firstField);
         firstColumn.moveFooterContent(secondColumn);
 
-        Assert.assertNull(firstColumn.getFooterComponent());
-        Assert.assertNull(secondColumn.getFooterText());
-        Assert.assertEquals(firstField, secondColumn.getFooterComponent());
+        Assertions.assertNull(firstColumn.getFooterComponent());
+        Assertions.assertNull(secondColumn.getFooterText());
+        Assertions.assertEquals(firstField, secondColumn.getFooterComponent());
         assertIsVirtualChild(firstField, secondColumn);
 
         // Replace component
@@ -292,12 +286,12 @@ public class HeaderFooterTest {
         firstColumn.setFooter("Header");
         firstColumn.moveFooterContent(secondColumn);
 
-        Assert.assertNull(secondColumn.getFooterComponent());
+        Assertions.assertNull(secondColumn.getFooterComponent());
         assertIsNotVirtualChild(secondField);
     }
 
     @Test
-    public void appendHeaderRows_firstOnTop() {
+    void appendHeaderRows_firstOnTop() {
         HeaderRow first = grid.appendHeaderRow();
         HeaderRow second = grid.appendHeaderRow();
 
@@ -307,7 +301,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void prependHeaderRows_firstOnBottom() {
+    void prependHeaderRows_firstOnBottom() {
         HeaderRow first = grid.prependHeaderRow();
         HeaderRow second = grid.prependHeaderRow();
 
@@ -317,7 +311,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void appendFooterRows_firstOnTop() {
+    void appendFooterRows_firstOnTop() {
         FooterRow first = grid.appendFooterRow();
         FooterRow second = grid.appendFooterRow();
 
@@ -327,7 +321,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void prependFooterRows_firstOnBottom() {
+    void prependFooterRows_firstOnBottom() {
         FooterRow first = grid.prependFooterRow();
         FooterRow second = grid.prependFooterRow();
 
@@ -337,7 +331,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addHeaderRows_addFooterRows_footersOnLowerLayer() {
+    void addHeaderRows_addFooterRows_footersOnLowerLayer() {
         HeaderRow h1 = grid.prependHeaderRow();
         HeaderRow h2 = grid.prependHeaderRow();
 
@@ -355,7 +349,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addFooterRows_addHeaderRows_headersOnLowerLayer() {
+    void addFooterRows_addHeaderRows_headersOnLowerLayer() {
         FooterRow f1 = grid.appendFooterRow();
         FooterRow f2 = grid.appendFooterRow();
 
@@ -373,7 +367,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addHeaderAndFooterRows_addColumns_rowsUpdatedToWrapCorrectElements() {
+    void addHeaderAndFooterRows_addColumns_rowsUpdatedToWrapCorrectElements() {
         grid = new Grid<>();
 
         HeaderRow h1 = grid.prependHeaderRow();
@@ -395,7 +389,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void joinTwoFirstHeaderCells() {
+    void joinTwoFirstHeaderCells() {
         HeaderRow bottom = grid.prependHeaderRow();
         HeaderRow top = grid.prependHeaderRow();
         HeaderCell lastCell = top.getCells().get(2);
@@ -405,19 +399,16 @@ public class HeaderFooterTest {
         assertRowWrapsLayer(bottom, layers.get(0));
         assertRowWrapsLayer(top, layers.get(1));
 
-        Assert.assertEquals(
-                "HeaderRow should have two cells after joining two of three cells",
-                2, top.getCells().size());
-        Assert.assertEquals(
-                "The joined cell should be the first cell of the row after joining two first cells",
-                joined, top.getCells().get(0));
-        Assert.assertEquals(
-                "The last cell should not be affected after joining two first cells",
-                lastCell, top.getCells().get(1));
+        Assertions.assertEquals(2, top.getCells().size(),
+                "HeaderRow should have two cells after joining two of three cells");
+        Assertions.assertEquals(joined, top.getCells().get(0),
+                "The joined cell should be the first cell of the row after joining two first cells");
+        Assertions.assertEquals(lastCell, top.getCells().get(1),
+                "The last cell should not be affected after joining two first cells");
     }
 
     @Test
-    public void joinTwoLastHeaderCells() {
+    void joinTwoLastHeaderCells() {
         HeaderRow bottom = grid.prependHeaderRow();
         HeaderRow top = grid.prependHeaderRow();
         HeaderCell firstCell = top.getCells().get(0);
@@ -427,19 +418,16 @@ public class HeaderFooterTest {
         assertRowWrapsLayer(bottom, layers.get(0));
         assertRowWrapsLayer(top, layers.get(1));
 
-        Assert.assertEquals(
-                "HeaderRow should have two cells after joining two of three cells",
-                2, top.getCells().size());
-        Assert.assertEquals(
-                "The joined cell should be the last cell of the row after joining two last cells",
-                joined, top.getCells().get(1));
-        Assert.assertEquals(
-                "The first cell should not be affected after joining two last cells",
-                firstCell, top.getCells().get(0));
+        Assertions.assertEquals(2, top.getCells().size(),
+                "HeaderRow should have two cells after joining two of three cells");
+        Assertions.assertEquals(joined, top.getCells().get(1),
+                "The joined cell should be the last cell of the row after joining two last cells");
+        Assertions.assertEquals(firstCell, top.getCells().get(0),
+                "The first cell should not be affected after joining two last cells");
     }
 
     @Test
-    public void joinTwoFirstFooterCells() {
+    void joinTwoFirstFooterCells() {
         FooterRow bottom = grid.prependFooterRow();
         FooterRow top = grid.prependFooterRow();
         FooterCell lastCell = bottom.getCells().get(2);
@@ -449,19 +437,16 @@ public class HeaderFooterTest {
         assertRowWrapsLayer(top, layers.get(0));
         assertRowWrapsLayer(bottom, layers.get(1));
 
-        Assert.assertEquals(
-                "FooterRow should have two cells after joining two of three cells",
-                2, bottom.getCells().size());
-        Assert.assertEquals(
-                "The joined cell should be the first cell of the row after joining two first cells",
-                joined, bottom.getCells().get(0));
-        Assert.assertEquals(
-                "The last cell should not be affected after joining two first cells",
-                lastCell, bottom.getCells().get(1));
+        Assertions.assertEquals(2, bottom.getCells().size(),
+                "FooterRow should have two cells after joining two of three cells");
+        Assertions.assertEquals(joined, bottom.getCells().get(0),
+                "The joined cell should be the first cell of the row after joining two first cells");
+        Assertions.assertEquals(lastCell, bottom.getCells().get(1),
+                "The last cell should not be affected after joining two first cells");
     }
 
     @Test
-    public void joinTwoLastFooterCells() {
+    void joinTwoLastFooterCells() {
         FooterRow bottom = grid.prependFooterRow();
         FooterRow top = grid.prependFooterRow();
         FooterCell firstCell = bottom.getCells().get(0);
@@ -471,19 +456,16 @@ public class HeaderFooterTest {
         assertRowWrapsLayer(top, layers.get(0));
         assertRowWrapsLayer(bottom, layers.get(1));
 
-        Assert.assertEquals(
-                "FooterRow should have two cells after joining two of three cells",
-                2, bottom.getCells().size());
-        Assert.assertEquals(
-                "The joined cell should be the last cell of the row after joining two last cells",
-                joined, bottom.getCells().get(1));
-        Assert.assertEquals(
-                "The first cell should not be affected after joining two last cells",
-                firstCell, bottom.getCells().get(0));
+        Assertions.assertEquals(2, bottom.getCells().size(),
+                "FooterRow should have two cells after joining two of three cells");
+        Assertions.assertEquals(joined, bottom.getCells().get(1),
+                "The joined cell should be the last cell of the row after joining two last cells");
+        Assertions.assertEquals(firstCell, bottom.getCells().get(0),
+                "The first cell should not be affected after joining two last cells");
     }
 
     @Test
-    public void joinTwoFirstHeaderCellsOnLowerLayer_layerMovedToTop() {
+    void joinTwoFirstHeaderCellsOnLowerLayer_layerMovedToTop() {
         grid.appendFooterRow();
         grid.prependHeaderRow();
 
@@ -501,13 +483,12 @@ public class HeaderFooterTest {
         layers = getColumnLayersAndAssertCount(3);
         assertRowWrapsLayer(footer, layers.get(1), 3);
         assertRowWrapsLayer(header, layers.get(2), 2);
-        Assert.assertEquals(
-                "The last cell should not be affected after joining two first cells",
-                lastCell, header.getCells().get(1));
+        Assertions.assertEquals(lastCell, header.getCells().get(1),
+                "The last cell should not be affected after joining two first cells");
     }
 
     @Test
-    public void joinTwoLastHeaderCellsOnLowerLayer_layerMovedToTop() {
+    void joinTwoLastHeaderCellsOnLowerLayer_layerMovedToTop() {
         grid.appendFooterRow();
         grid.prependHeaderRow();
 
@@ -525,13 +506,12 @@ public class HeaderFooterTest {
         layers = getColumnLayersAndAssertCount(3);
         assertRowWrapsLayer(footer, layers.get(1), 3);
         assertRowWrapsLayer(header, layers.get(2), 2);
-        Assert.assertEquals(
-                "The first cell should not be affected after joining two last cells",
-                firstCell, header.getCells().get(0));
+        Assertions.assertEquals(firstCell, header.getCells().get(0),
+                "The first cell should not be affected after joining two last cells");
     }
 
     @Test
-    public void joinAllHeaderCellsOnLowerLayer_layerMovedToTop() {
+    void joinAllHeaderCellsOnLowerLayer_layerMovedToTop() {
         grid.appendFooterRow();
         grid.prependHeaderRow();
 
@@ -550,7 +530,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void joinAllFooterCellsOnLowerLayer_layerMovedToTop() {
+    void joinAllFooterCellsOnLowerLayer_layerMovedToTop() {
         grid.appendFooterRow();
         grid.prependHeaderRow();
 
@@ -569,7 +549,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void joinFooters_joinHeadersForSameColumns_headersNotMoved() {
+    void joinFooters_joinHeadersForSameColumns_headersNotMoved() {
         grid.appendFooterRow();
         grid.prependHeaderRow();
 
@@ -590,7 +570,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void joinFooters_joinHeadersForMoreColumns_headersMovedToTop() {
+    void joinFooters_joinHeadersForMoreColumns_headersMovedToTop() {
         grid.appendFooterRow();
         grid.prependHeaderRow();
 
@@ -611,7 +591,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void joinFooters_joinHeadersForConflictingColumns_throws() {
+    void joinFooters_joinHeadersForConflictingColumns_throws() {
         grid.appendFooterRow();
         grid.prependHeaderRow();
 
@@ -620,14 +600,14 @@ public class HeaderFooterTest {
 
         footer.join(firstColumn, secondColumn);
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("cells can not be joined");
-
-        header.join(secondColumn, thirdColumn);
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> header.join(secondColumn, thirdColumn));
+        Assertions.assertTrue(
+                ex.getMessage().contains("cells can not be joined"));
     }
 
     @Test
-    public void joinHeaders_prependRow_newRowHasJoinedCellAlso() {
+    void joinHeaders_prependRow_newRowHasJoinedCellAlso() {
         grid.prependHeaderRow();
         HeaderRow header = grid.prependHeaderRow();
         header.join(firstColumn, secondColumn);
@@ -640,18 +620,17 @@ public class HeaderFooterTest {
 
         List<Column<?>> bottomChildColumns = topHeader.getCells().get(0)
                 .getColumn().getBottomChildColumns();
-        Assert.assertEquals(
+        Assertions.assertEquals(2, bottomChildColumns.size(),
                 "The cell prepended on top of a joined cell should be "
-                        + "a parent for the same column elements",
-                2, bottomChildColumns.size());
-        Assert.assertTrue("The child columns should contain firstColumn",
-                bottomChildColumns.contains(firstColumn));
-        Assert.assertTrue("The child columns should contain secondColumn",
-                bottomChildColumns.contains(secondColumn));
+                        + "a parent for the same column elements");
+        Assertions.assertTrue(bottomChildColumns.contains(firstColumn),
+                "The child columns should contain firstColumn");
+        Assertions.assertTrue(bottomChildColumns.contains(secondColumn),
+                "The child columns should contain secondColumn");
     }
 
     @Test
-    public void addHeaderRow_joinHeaderCells_addFooterRow_joinFooterCells_repeat() {
+    void addHeaderRow_joinHeaderCells_addFooterRow_joinFooterCells_repeat() {
         FooterRow footer0 = grid.appendFooterRow();
         HeaderRow header0 = grid.prependHeaderRow();
 
@@ -679,16 +658,16 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void joinNonAdjacentHeaderCells_throws() {
+    void joinNonAdjacentHeaderCells_throws() {
         grid.prependHeaderRow();
         HeaderRow top = grid.prependHeaderRow();
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("not adjacent");
-        top.join(firstColumn, thirdColumn);
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> top.join(firstColumn, thirdColumn));
+        Assertions.assertTrue(ex.getMessage().contains("not adjacent"));
     }
 
     @Test
-    public void getHeaderRows_orderFromTopToBottom() {
+    void getHeaderRows_orderFromTopToBottom() {
         HeaderRow row1 = grid.prependHeaderRow();
         assertHeaderRowOrder(row1);
 
@@ -705,7 +684,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void getCellByColumn_returnsCorrectCell() {
+    void getCellByColumn_returnsCorrectCell() {
         AbstractRow<?> row = grid.appendFooterRow();
         assertGettingCellsByColumns(row);
         row = grid.prependFooterRow();
@@ -719,42 +698,40 @@ public class HeaderFooterTest {
 
     private void assertGettingCellsByColumns(AbstractRow<?> row) {
         IntStream.range(0, grid.getColumns().size()).forEach(i -> {
-            Assert.assertSame("getCell(Column) returned unexpected cell",
-                    row.getCells().get(i),
-                    row.getCell(grid.getColumns().get(i)));
+            Assertions.assertSame(row.getCells().get(i),
+                    row.getCell(grid.getColumns().get(i)),
+                    "getCell(Column) returned unexpected cell");
         });
     }
 
     @Test
-    public void getJoinedCellByColumn_worksWithEachChildColumn() {
+    void getJoinedCellByColumn_worksWithEachChildColumn() {
         grid.prependHeaderRow();
         HeaderRow topRow = grid.prependHeaderRow();
         HeaderCell joined = topRow.join(secondColumn, thirdColumn);
 
-        Assert.assertSame(
-                "Joined header cell was not found by its child column", joined,
-                topRow.getCell(secondColumn));
-        Assert.assertSame(
-                "Joined header cell was not found by its child column", joined,
-                topRow.getCell(thirdColumn));
-        Assert.assertSame(
-                "getCell(Column) returned unexpected cell after joining other cells",
-                topRow.getCells().get(0), topRow.getCell(firstColumn));
+        Assertions.assertSame(joined, topRow.getCell(secondColumn),
+                "Joined header cell was not found by its child column");
+        Assertions.assertSame(joined, topRow.getCell(thirdColumn),
+                "Joined header cell was not found by its child column");
+        Assertions.assertSame(topRow.getCells().get(0),
+                topRow.getCell(firstColumn),
+                "getCell(Column) returned unexpected cell after joining other cells");
     }
 
     @Test
-    public void getCellByColumnNotBelongingToGrid_throws() {
+    void getCellByColumnNotBelongingToGrid_throws() {
         HeaderRow row = grid.prependHeaderRow();
         Column<?> mockColumn = new Column<>(new Grid<String>(), "",
                 LitRenderer.of(""));
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Cannot find a cell");
-        row.getCell(mockColumn);
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> row.getCell(mockColumn));
+        Assertions.assertTrue(ex.getMessage().contains("Cannot find a cell"));
     }
 
     @Test
-    public void getFooterRows_orderFromTopToBottom() {
+    void getFooterRows_orderFromTopToBottom() {
         FooterRow row1 = grid.prependFooterRow();
         assertFooterRowOrder(row1);
 
@@ -771,7 +748,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addHeadersAndFooters_removeColumn_cellsAreRemoved() {
+    void addHeadersAndFooters_removeColumn_cellsAreRemoved() {
         HeaderRow header = grid.prependHeaderRow();
         FooterRow footer = grid.appendFooterRow();
         grid.removeColumn(secondColumn);
@@ -787,24 +764,21 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addHeader_joinCells_removeColumn_joinedCellRemains() {
+    void addHeader_joinCells_removeColumn_joinedCellRemains() {
         HeaderRow bottomHeader = grid.prependHeaderRow();
         HeaderRow topHeader = grid.prependHeaderRow();
 
         HeaderCell joinedCell = topHeader.join(firstColumn, secondColumn);
-        Assert.assertEquals(
-                "Top row should have two cells after joining two of three", 2,
-                topHeader.getCells().size());
+        Assertions.assertEquals(2, topHeader.getCells().size(),
+                "Top row should have two cells after joining two of three");
 
         grid.removeColumn(secondColumn);
-        Assert.assertEquals(
-                "The joined header cell should remain when only one of the child columns is removed",
-                2, topHeader.getCells().size());
+        Assertions.assertEquals(2, topHeader.getCells().size(),
+                "The joined header cell should remain when only one of the child columns is removed");
 
-        Assert.assertSame(
+        Assertions.assertSame(joinedCell, topHeader.getCell(firstColumn),
                 "The joined cell should still be linked to the remaining child column, "
-                        + "after removing the other child column",
-                joinedCell, topHeader.getCell(firstColumn));
+                        + "after removing the other child column");
 
         List<List<Element>> layers = getColumnLayersAndAssertCount(2);
         assertRowWrapsLayer(bottomHeader, layers.get(0));
@@ -813,7 +787,7 @@ public class HeaderFooterTest {
 
     // https://github.com/vaadin/vaadin-grid/issues/1928
     @Test
-    public void joinHeaders_joinAlreadyJoinedCells_shouldNotThrowException() {
+    void joinHeaders_joinAlreadyJoinedCells_shouldNotThrowException() {
         grid.appendHeaderRow();
         grid.prependHeaderRow().join(firstColumn, secondColumn);
         grid.prependHeaderRow().join(firstColumn, secondColumn, thirdColumn);
@@ -821,60 +795,61 @@ public class HeaderFooterTest {
 
     // https://github.com/vaadin/vaadin-grid/issues/1928#issuecomment-659545963
     @Test
-    public void joinHeaders_joinAllCells_shouldNotThrowException() {
+    void joinHeaders_joinAllCells_shouldNotThrowException() {
         grid.appendHeaderRow();
         HeaderRow header = grid.prependHeaderRow();
         header.join(header.getCells());
     }
 
     @Test
-    public void gridHasPrependedHeaderRow_columnHasTextAlignment_prependedColumnHasSameTextAlignment() {
+    void gridHasPrependedHeaderRow_columnHasTextAlignment_prependedColumnHasSameTextAlignment() {
         firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
         var headerRow = grid.prependHeaderRow();
 
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 headerRow.getCell(firstColumn).getColumn().getTextAlign());
     }
 
     @Test
-    public void gridHasAppendedHeaderRow_columnHasTextAlignment_appendedColumnHasSameTextAlignment() {
+    void gridHasAppendedHeaderRow_columnHasTextAlignment_appendedColumnHasSameTextAlignment() {
         firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
         grid.appendHeaderRow();
 
         var parentGroup = firstColumn.getParent().map(ColumnGroup.class::cast)
                 .orElse(null);
 
-        Assert.assertNotNull(parentGroup);
-        Assert.assertEquals(ColumnTextAlign.CENTER, parentGroup.getTextAlign());
+        Assertions.assertNotNull(parentGroup);
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
+                parentGroup.getTextAlign());
     }
 
     @Test
-    public void columnsWithTextAlign_gridHeaderWithJoinedColumns_textAlignShouldNotPropagate() {
+    void columnsWithTextAlign_gridHeaderWithJoinedColumns_textAlignShouldNotPropagate() {
         firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
         secondColumn.setHeader("").setTextAlign(ColumnTextAlign.END);
 
         var headerRow = grid.prependHeaderRow();
         var joinedHeader = headerRow.join(firstColumn, secondColumn);
 
-        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+        Assertions.assertNotEquals(ColumnTextAlign.CENTER,
                 joinedHeader.getColumn().getTextAlign());
     }
 
     @Test
-    public void columnWithTextAlign_headerRowsAdded_textAlignPropagated() {
+    void columnWithTextAlign_headerRowsAdded_textAlignPropagated() {
         firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
         var firstHeaderRow = grid.prependHeaderRow();
         var secondHeaderRow = grid.prependHeaderRow();
 
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 firstHeaderRow.getCell(firstColumn).getColumn().getTextAlign());
-        Assert.assertEquals(ColumnTextAlign.CENTER, secondHeaderRow
+        Assertions.assertEquals(ColumnTextAlign.CENTER, secondHeaderRow
                 .getCell(firstColumn).getColumn().getTextAlign());
     }
 
     @Test
-    public void gridWithHeaderRows_newTextAlignSetOnColumn_headersUpdated() {
+    void gridWithHeaderRows_newTextAlignSetOnColumn_headersUpdated() {
         firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
         var prependHeaderRow = grid.prependHeaderRow();
@@ -887,65 +862,66 @@ public class HeaderFooterTest {
         var appendParentColumnGroup = firstColumn.getParent()
                 .map(ColumnGroup.class::cast).orElse(null);
 
-        Assert.assertNotNull(appendParentColumnGroup);
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertNotNull(appendParentColumnGroup);
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 prependParentColumnGroup.getTextAlign());
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 appendParentColumnGroup.getTextAlign());
 
         firstColumn.setTextAlign(ColumnTextAlign.END);
-        Assert.assertEquals(ColumnTextAlign.END,
+        Assertions.assertEquals(ColumnTextAlign.END,
                 prependParentColumnGroup.getTextAlign());
-        Assert.assertEquals(ColumnTextAlign.END,
+        Assertions.assertEquals(ColumnTextAlign.END,
                 appendParentColumnGroup.getTextAlign());
     }
 
     @Test
-    public void gridWithJoinedHeaders_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
+    void gridWithJoinedHeaders_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
         firstColumn.setHeader("");
         secondColumn.setHeader("");
         var headerRow = grid.prependHeaderRow();
 
         var joinedCell = headerRow.join(firstColumn, secondColumn);
         firstColumn.setTextAlign(ColumnTextAlign.CENTER);
-        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+        Assertions.assertNotEquals(ColumnTextAlign.CENTER,
                 joinedCell.getColumn().getTextAlign());
     }
 
     @Test
-    public void gridHasPrependFooterRow_columnHasTextAlignment_prependedColumnHasSameTextAlignment() {
+    void gridHasPrependFooterRow_columnHasTextAlignment_prependedColumnHasSameTextAlignment() {
         firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
         var footerRow = grid.prependFooterRow();
 
         var parentGroup = firstColumn.getParent().map(ColumnGroup.class::cast)
                 .orElse(null);
-        Assert.assertNotNull(parentGroup);
+        Assertions.assertNotNull(parentGroup);
 
-        Assert.assertEquals(ColumnTextAlign.CENTER, parentGroup.getTextAlign());
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
+                parentGroup.getTextAlign());
     }
 
     @Test
-    public void gridHasAppendFooterRow_columnHasTextAlignment_appendedColumnHasSameTextAlignment() {
+    void gridHasAppendFooterRow_columnHasTextAlignment_appendedColumnHasSameTextAlignment() {
         firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
         var footerRow = grid.appendFooterRow();
 
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 footerRow.getCell(firstColumn).getColumn().getTextAlign());
     }
 
     @Test
-    public void columnsWithTextAlign_gridFooterWithJoinedColumns_textAlignShouldNotPropagate() {
+    void columnsWithTextAlign_gridFooterWithJoinedColumns_textAlignShouldNotPropagate() {
         firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
         secondColumn.setFooter("").setTextAlign(ColumnTextAlign.END);
         var footer = grid.appendFooterRow();
         var joinedFooter = footer.join(firstColumn, secondColumn);
 
-        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+        Assertions.assertNotEquals(ColumnTextAlign.CENTER,
                 joinedFooter.getColumn().getTextAlign());
     }
 
     @Test
-    public void columnWithTextAlign_footerRowsAdded_textAlignPropagated() {
+    void columnWithTextAlign_footerRowsAdded_textAlignPropagated() {
         firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
 
         grid.prependFooterRow();
@@ -953,19 +929,19 @@ public class HeaderFooterTest {
 
         var firstParentGroup = firstColumn.getParent()
                 .map(ColumnGroup.class::cast).orElse(null);
-        Assert.assertNotNull(firstParentGroup);
+        Assertions.assertNotNull(firstParentGroup);
         var secondParentGroup = firstParentGroup.getParent()
                 .map(ColumnGroup.class::cast).orElse(null);
-        Assert.assertNotNull(secondParentGroup);
+        Assertions.assertNotNull(secondParentGroup);
 
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 firstParentGroup.getTextAlign());
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 secondParentGroup.getTextAlign());
     }
 
     @Test
-    public void gridWithFooterRows_newTextAlignSetOnColumn_headersUpdated() {
+    void gridWithFooterRows_newTextAlignSetOnColumn_headersUpdated() {
         firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
 
         var prependFooterRow = grid.prependFooterRow();
@@ -977,148 +953,148 @@ public class HeaderFooterTest {
                 .getColumn();
         var prependFooterColumnGroup = firstColumn.getParent()
                 .map(ColumnGroup.class::cast).orElse(null);
-        Assert.assertNotNull(prependFooterColumnGroup);
+        Assertions.assertNotNull(prependFooterColumnGroup);
 
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 prependFooterColumnGroup.getTextAlign());
-        Assert.assertEquals(ColumnTextAlign.CENTER,
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
                 appendFooterColumnGroup.getTextAlign());
 
         firstColumn.setTextAlign(ColumnTextAlign.END);
-        Assert.assertEquals(ColumnTextAlign.END,
+        Assertions.assertEquals(ColumnTextAlign.END,
                 prependFooterColumnGroup.getTextAlign());
-        Assert.assertEquals(ColumnTextAlign.END,
+        Assertions.assertEquals(ColumnTextAlign.END,
                 appendFooterColumnGroup.getTextAlign());
     }
 
     @Test
-    public void gridWithJoinedFooters_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
+    void gridWithJoinedFooters_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
         firstColumn.setFooter("");
         secondColumn.setFooter("");
         var footerRow = grid.appendFooterRow();
 
         var joinedCell = footerRow.join(firstColumn, secondColumn);
         firstColumn.setTextAlign(ColumnTextAlign.CENTER);
-        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+        Assertions.assertNotEquals(ColumnTextAlign.CENTER,
                 joinedCell.getColumn().getTextAlign());
     }
 
     @Test
-    public void columnHasNoHeaderPartName() {
-        Assert.assertEquals(null, firstColumn.getHeaderPartName());
-        Assert.assertEquals(null,
+    void columnHasNoHeaderPartName() {
+        Assertions.assertEquals(null, firstColumn.getHeaderPartName());
+        Assertions.assertEquals(null,
                 firstColumn.getElement().getProperty("headerPartName"));
     }
 
     @Test
-    public void setHeaderPartName_columnHasHeaderPartName() {
+    void setHeaderPartName_columnHasHeaderPartName() {
         firstColumn.setHeaderPartName("foo");
-        Assert.assertEquals("foo", firstColumn.getHeaderPartName());
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo", firstColumn.getHeaderPartName());
+        Assertions.assertEquals("foo",
                 firstColumn.getElement().getProperty("headerPartName"));
     }
 
     @Test
-    public void columnHasNoFooterPartName() {
-        Assert.assertEquals(null, firstColumn.getFooterPartName());
-        Assert.assertEquals(null,
+    void columnHasNoFooterPartName() {
+        Assertions.assertEquals(null, firstColumn.getFooterPartName());
+        Assertions.assertEquals(null,
                 firstColumn.getElement().getProperty("footerPartName"));
     }
 
     @Test
-    public void setFooterPartName_columnHasFooterPartName() {
+    void setFooterPartName_columnHasFooterPartName() {
         firstColumn.setFooterPartName("foo");
-        Assert.assertEquals("foo", firstColumn.getFooterPartName());
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo", firstColumn.getFooterPartName());
+        Assertions.assertEquals("foo",
                 firstColumn.getElement().getProperty("footerPartName"));
     }
 
     @Test
-    public void setHeaderPartName_setFooterPartName_isChainable() {
+    void setHeaderPartName_setFooterPartName_isChainable() {
         firstColumn.setHeaderPartName("foo").setFrozen(true);
         firstColumn.setFooterPartName("foo").setFrozen(true);
     }
 
     @Test
-    public void columnGroupHasNoHeaderPartName() {
+    void columnGroupHasNoHeaderPartName() {
         grid.appendHeaderRow();
         var headerCell = grid.prependHeaderRow().join(firstColumn,
                 secondColumn);
-        Assert.assertEquals(null, headerCell.getPartName());
-        Assert.assertEquals(null, headerCell.getColumn().getElement()
+        Assertions.assertEquals(null, headerCell.getPartName());
+        Assertions.assertEquals(null, headerCell.getColumn().getElement()
                 .getProperty("headerPartName"));
     }
 
     @Test
-    public void setHeaderPartName_columnGroupHasHeaderPartName() {
+    void setHeaderPartName_columnGroupHasHeaderPartName() {
         grid.appendHeaderRow();
         var headerCell = grid.prependHeaderRow().join(firstColumn,
                 secondColumn);
         headerCell.setPartName("foo");
-        Assert.assertEquals("foo", headerCell.getPartName());
-        Assert.assertEquals("foo", headerCell.getColumn().getElement()
+        Assertions.assertEquals("foo", headerCell.getPartName());
+        Assertions.assertEquals("foo", headerCell.getColumn().getElement()
                 .getProperty("headerPartName"));
     }
 
     @Test
-    public void columnGroupHasNoFooterPartName() {
+    void columnGroupHasNoFooterPartName() {
         grid.appendFooterRow();
         var footerCell = grid.appendFooterRow().join(firstColumn, secondColumn);
-        Assert.assertEquals(null, footerCell.getPartName());
-        Assert.assertEquals(null, footerCell.getColumn().getElement()
+        Assertions.assertEquals(null, footerCell.getPartName());
+        Assertions.assertEquals(null, footerCell.getColumn().getElement()
                 .getProperty("footerPartName"));
     }
 
     @Test
-    public void addHeaderRow_removeHeaderRow_headerRemoved() {
+    void addHeaderRow_removeHeaderRow_headerRemoved() {
         HeaderRow headerRow = grid.appendHeaderRow();
         grid.removeHeaderRow(headerRow);
-        Assert.assertEquals(0, grid.getHeaderRows().size());
+        Assertions.assertEquals(0, grid.getHeaderRows().size());
     }
 
     @Test
-    public void addFooterRow_removeFooterRow_footerRemoved() {
+    void addFooterRow_removeFooterRow_footerRemoved() {
         FooterRow footerRow = grid.appendFooterRow();
         grid.removeFooterRow(footerRow);
-        Assert.assertEquals(0, grid.getFooterRows().size());
+        Assertions.assertEquals(0, grid.getFooterRows().size());
     }
 
     @Test
-    public void addHeaderRow_removeHeaderRow_removeSameRow_throwsNoSuchElementException() {
+    void addHeaderRow_removeHeaderRow_removeSameRow_throwsNoSuchElementException() {
         HeaderRow headerRow = grid.appendHeaderRow();
         grid.removeHeaderRow(headerRow);
-        Assert.assertThrows(NoSuchElementException.class,
+        Assertions.assertThrows(NoSuchElementException.class,
                 () -> grid.removeHeaderRow(headerRow));
     }
 
     @Test
-    public void addFooterRow_removeFooterRow_removeSameRow_throwsNoSuchElementException() {
+    void addFooterRow_removeFooterRow_removeSameRow_throwsNoSuchElementException() {
         FooterRow footerRow = grid.appendFooterRow();
         grid.removeFooterRow(footerRow);
-        Assert.assertThrows(NoSuchElementException.class,
+        Assertions.assertThrows(NoSuchElementException.class,
                 () -> grid.removeFooterRow(footerRow));
     }
 
     @Test
-    public void addHeaderRow_prependAnotherHeaderRow_removeDefaultHeaderRow_throwsUnsupportedOperationException() {
+    void addHeaderRow_prependAnotherHeaderRow_removeDefaultHeaderRow_throwsUnsupportedOperationException() {
         HeaderRow defaultHeaderRow = grid.appendHeaderRow();
         grid.prependHeaderRow();
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> grid.removeHeaderRow(defaultHeaderRow));
     }
 
     @Test
-    public void addHeaderRow_setSortable_appendAnotherHeaderRow_removeLastHeaderRow_firstHeaderRowIsSortable() {
+    void addHeaderRow_setSortable_appendAnotherHeaderRow_removeLastHeaderRow_firstHeaderRowIsSortable() {
         HeaderRow defaultHeaderRow = grid.appendHeaderRow();
         grid.getColumns().forEach(col -> col.setSortable(true));
         HeaderRow newHeaderRow = grid.appendHeaderRow();
         grid.removeHeaderRow(newHeaderRow);
-        defaultHeaderRow.layer.getColumns()
-                .forEach(col -> Assert.assertTrue(col.hasSortingIndicators()));
+        defaultHeaderRow.layer.getColumns().forEach(
+                col -> Assertions.assertTrue(col.hasSortingIndicators()));
     }
 
     @Test
-    public void addTextHeaderRow_appendAnotherTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+    void addTextHeaderRow_appendAnotherTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
         String textContent = "DEFAULT";
         HeaderRow defaultHeaderRow = grid.appendHeaderRow();
         defaultHeaderRow.getCells().forEach(cell -> cell.setText(textContent));
@@ -1129,7 +1105,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addTextHeaderRow_appendComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+    void addTextHeaderRow_appendComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
         String textContent = "DEFAULT";
         grid.appendHeaderRow().getCells()
                 .forEach(cell -> cell.setText(textContent));
@@ -1141,7 +1117,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addComponentHeaderRow_appendAnotherComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+    void addComponentHeaderRow_appendAnotherComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
         HeaderRow defaultHeaderRow = grid.appendHeaderRow();
         List<? extends Component> defaultHeaderRowComponents = setComponentsToRow(
                 defaultHeaderRow);
@@ -1155,7 +1131,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addComponentHeaderRow_appendTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+    void addComponentHeaderRow_appendTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
         HeaderRow defaultHeaderRow = grid.appendHeaderRow();
         List<? extends Component> defaultHeaderRowComponents = setComponentsToRow(
                 defaultHeaderRow);
@@ -1167,7 +1143,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addTextFooterRow_prependAnotherTextFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+    void addTextFooterRow_prependAnotherTextFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
         String textContent = "DEFAULT";
         grid.appendFooterRow().getCells()
                 .forEach(cell -> cell.setText(textContent));
@@ -1178,7 +1154,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addTextFooterRow_prependComponentFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+    void addTextFooterRow_prependComponentFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
         String textContent = "DEFAULT";
         grid.appendFooterRow().getCells()
                 .forEach(cell -> cell.setText(textContent));
@@ -1190,7 +1166,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addComponentFooterRow_prependAnotherComponentFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+    void addComponentFooterRow_prependAnotherComponentFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
         FooterRow footerRow = grid.appendFooterRow();
         List<? extends Component> footerRowComponents = setComponentsToRow(
                 footerRow);
@@ -1202,7 +1178,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addComponentFooterRow_prependTextFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+    void addComponentFooterRow_prependTextFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
         FooterRow footerRow = grid.appendFooterRow();
         List<? extends Component> footerRowComponents = setComponentsToRow(
                 footerRow);
@@ -1213,115 +1189,115 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addHeaderRowsAlternatingPrependAndAppend_removeEachRowExceptDefault_rowsRemoved() {
+    void addHeaderRowsAlternatingPrependAndAppend_removeEachRowExceptDefault_rowsRemoved() {
         grid.appendHeaderRow();
         List<HeaderRow> headerRows = addMixedHeaderRows(6);
         headerRows.forEach(row -> grid.removeHeaderRow(row));
-        Assert.assertEquals(1, grid.getHeaderRows().size());
+        Assertions.assertEquals(1, grid.getHeaderRows().size());
     }
 
     @Test
-    public void addFooterRowsAlternatingPrependAndAppend_removeEachRow_rowsRemoved() {
+    void addFooterRowsAlternatingPrependAndAppend_removeEachRow_rowsRemoved() {
         List<FooterRow> footerRows = addMixedFooterRows(6);
         footerRows.forEach(row -> grid.removeFooterRow(row));
-        Assert.assertEquals(0, grid.getFooterRows().size());
+        Assertions.assertEquals(0, grid.getFooterRows().size());
     }
 
     @Test
-    public void addHeaderRowsAlternatingPrependAndAppend_removeEachRowInReverseOrder_rowsRemoved() {
+    void addHeaderRowsAlternatingPrependAndAppend_removeEachRowInReverseOrder_rowsRemoved() {
         List<HeaderRow> headerRows = addMixedHeaderRows(6);
         Collections.reverse(headerRows);
         headerRows.forEach(row -> grid.removeHeaderRow(row));
-        Assert.assertEquals(0, grid.getHeaderRows().size());
+        Assertions.assertEquals(0, grid.getHeaderRows().size());
     }
 
     @Test
-    public void addFooterRowsAlternatingPrependAndAppend_removeEachRowInReverseOrder_rowsRemoved() {
+    void addFooterRowsAlternatingPrependAndAppend_removeEachRowInReverseOrder_rowsRemoved() {
         List<FooterRow> footerRows = addMixedFooterRows(6);
         Collections.reverse(footerRows);
         footerRows.forEach(row -> grid.removeFooterRow(row));
-        Assert.assertEquals(0, grid.getFooterRows().size());
+        Assertions.assertEquals(0, grid.getFooterRows().size());
     }
 
     @Test
-    public void addHeaderRowsAlternatingPrependAndAppend_removeAllHeaderRows_rowsRemoved() {
+    void addHeaderRowsAlternatingPrependAndAppend_removeAllHeaderRows_rowsRemoved() {
         addMixedHeaderRows(6);
         grid.removeAllHeaderRows();
-        Assert.assertEquals(0, grid.getHeaderRows().size());
+        Assertions.assertEquals(0, grid.getHeaderRows().size());
     }
 
     @Test
-    public void addFooterRowsAlternatingPrependAndAppend_removeAllFooterRows_rowsRemoved() {
+    void addFooterRowsAlternatingPrependAndAppend_removeAllFooterRows_rowsRemoved() {
         addMixedFooterRows(6);
         grid.removeAllFooterRows();
-        Assert.assertEquals(0, grid.getFooterRows().size());
+        Assertions.assertEquals(0, grid.getFooterRows().size());
     }
 
     @Test
-    public void addHeaderAndFooterRows_removeAllFooterRows_onlyFooterRowsRemoved() {
+    void addHeaderAndFooterRows_removeAllFooterRows_onlyFooterRowsRemoved() {
         List<HeaderRow> headerRows = addMixedHeaderRows(2);
         addMixedFooterRows(2);
         grid.removeAllFooterRows();
-        Assert.assertEquals(headerRows.size(), grid.getHeaderRows().size());
-        Assert.assertEquals(0, grid.getFooterRows().size());
+        Assertions.assertEquals(headerRows.size(), grid.getHeaderRows().size());
+        Assertions.assertEquals(0, grid.getFooterRows().size());
     }
 
     @Test
-    public void addHeaderAndFooterRows_removeAllHeaderRows_onlyHeaderRowsRemoved() {
+    void addHeaderAndFooterRows_removeAllHeaderRows_onlyHeaderRowsRemoved() {
         List<FooterRow> footerRows = addMixedFooterRows(2);
         addMixedHeaderRows(2);
         grid.removeAllHeaderRows();
-        Assert.assertEquals(footerRows.size(), grid.getFooterRows().size());
-        Assert.assertEquals(0, grid.getHeaderRows().size());
+        Assertions.assertEquals(footerRows.size(), grid.getFooterRows().size());
+        Assertions.assertEquals(0, grid.getHeaderRows().size());
     }
 
     @Test
-    public void addHeaderAndFooterRowsInMixedOrder_removeAllHeaderAndFooters_headersAndFootersRemoved() {
+    void addHeaderAndFooterRowsInMixedOrder_removeAllHeaderAndFooters_headersAndFootersRemoved() {
         List<HeaderRow> headerRows = addMixedHeaderRows(2);
         List<FooterRow> footerRows = addMixedFooterRows(2);
         headerRows.addAll(addMixedHeaderRows(2));
         footerRows.addAll(addMixedFooterRows(2));
         grid.removeAllHeaderRows();
         grid.removeAllFooterRows();
-        Assert.assertEquals(0, grid.getHeaderRows().size());
-        Assert.assertEquals(0, grid.getFooterRows().size());
+        Assertions.assertEquals(0, grid.getHeaderRows().size());
+        Assertions.assertEquals(0, grid.getFooterRows().size());
     }
 
     @Test
-    public void addHeaderRow_removeHeaderRow_addHeaderRow_headerAdded() {
+    void addHeaderRow_removeHeaderRow_addHeaderRow_headerAdded() {
         HeaderRow headerRow = grid.appendHeaderRow();
         grid.removeHeaderRow(headerRow);
         grid.appendHeaderRow();
-        Assert.assertEquals(1, grid.getHeaderRows().size());
+        Assertions.assertEquals(1, grid.getHeaderRows().size());
     }
 
     @Test
-    public void addFooterRow_removeFooterRow_addFooterRow_footerAdded() {
+    void addFooterRow_removeFooterRow_addFooterRow_footerAdded() {
         FooterRow footerRow = grid.appendFooterRow();
         grid.removeFooterRow(footerRow);
         grid.appendFooterRow();
-        Assert.assertEquals(1, grid.getFooterRows().size());
+        Assertions.assertEquals(1, grid.getFooterRows().size());
     }
 
     @Test
-    public void addFooterRow_appendFooterRowWithJoinedCells_removeFirstFooterRow_throwsUnsupportedOperationException() {
+    void addFooterRow_appendFooterRowWithJoinedCells_removeFirstFooterRow_throwsUnsupportedOperationException() {
         var first = grid.appendFooterRow();
         var second = grid.appendFooterRow();
         var columns = grid.getColumns();
         second.join(columns.get(0), columns.get(1));
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> grid.removeFooterRow(first));
     }
 
     @Test
-    public void addHeaderRow_removeHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addHeaderRow_removeHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         var row = grid.appendHeaderRow();
         grid.removeHeaderRow(row);
         assertCannotSetValueOnRemovedRow(row);
     }
 
     @Test
-    public void addHeaderRow_prependAnotherHeaderRow_removeSecondHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addHeaderRow_prependAnotherHeaderRow_removeSecondHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         grid.appendHeaderRow();
         var second = grid.prependHeaderRow();
         grid.removeHeaderRow(second);
@@ -1329,7 +1305,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addHeaderRow_appendAnotherHeaderRow_removeSecondHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addHeaderRow_appendAnotherHeaderRow_removeSecondHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         grid.appendHeaderRow();
         var second = grid.appendHeaderRow();
         grid.removeHeaderRow(second);
@@ -1337,14 +1313,14 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addFooterRow_removeFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addFooterRow_removeFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         var row = grid.appendFooterRow();
         grid.removeFooterRow(row);
         assertCannotSetValueOnRemovedRow(row);
     }
 
     @Test
-    public void addFooterRow_prependAnotherFooterRow_removeFirstFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addFooterRow_prependAnotherFooterRow_removeFirstFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         var first = grid.appendFooterRow();
         grid.prependFooterRow();
         grid.removeFooterRow(first);
@@ -1352,7 +1328,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addFooterRow_prependAnotherFooterRow_removeSecondFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addFooterRow_prependAnotherFooterRow_removeSecondFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         grid.appendFooterRow();
         var second = grid.prependFooterRow();
         grid.removeFooterRow(second);
@@ -1360,7 +1336,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addFooterRow_appendAnotherFooterRow_removeFirstFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addFooterRow_appendAnotherFooterRow_removeFirstFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         var first = grid.appendFooterRow();
         grid.appendFooterRow();
         grid.removeFooterRow(first);
@@ -1368,7 +1344,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addFooterRow_appendAnotherFooterRow_removeSecondFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+    void addFooterRow_appendAnotherFooterRow_removeSecondFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
         grid.appendFooterRow();
         var second = grid.appendFooterRow();
         grid.removeFooterRow(second);
@@ -1376,39 +1352,37 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void setFooterPartName_columnGroupHasFooterPartName() {
+    void setFooterPartName_columnGroupHasFooterPartName() {
         grid.appendFooterRow();
         var footerCell = grid.appendFooterRow().join(firstColumn, secondColumn);
         footerCell.setPartName("foo");
-        Assert.assertEquals("foo", footerCell.getPartName());
-        Assert.assertEquals("foo", footerCell.getColumn().getElement()
+        Assertions.assertEquals("foo", footerCell.getPartName());
+        Assertions.assertEquals("foo", footerCell.getColumn().getElement()
                 .getProperty("footerPartName"));
     }
 
     private void assertHeaderRowOrder(HeaderRow... rows) {
-        Assert.assertEquals("Grid returned unexpected amount of header rows",
-                rows.length, grid.getHeaderRows().size());
+        Assertions.assertEquals(rows.length, grid.getHeaderRows().size(),
+                "Grid returned unexpected amount of header rows");
         IntStream.range(0, rows.length).forEach(i -> {
-            Assert.assertSame(
-                    "Grid did not return expected header rows in order from top to bottom",
-                    rows[i], grid.getHeaderRows().get(i));
+            Assertions.assertSame(rows[i], grid.getHeaderRows().get(i),
+                    "Grid did not return expected header rows in order from top to bottom");
         });
     }
 
     private void assertFooterRowOrder(FooterRow... rows) {
-        Assert.assertEquals("Grid returned unexpected amount of footer rows",
-                rows.length, grid.getFooterRows().size());
+        Assertions.assertEquals(rows.length, grid.getFooterRows().size(),
+                "Grid returned unexpected amount of footer rows");
         IntStream.range(0, rows.length).forEach(i -> {
-            Assert.assertSame(
-                    "Grid did not return expected footer rows in order from top to bottom",
-                    rows[i], grid.getFooterRows().get(i));
+            Assertions.assertSame(rows[i], grid.getFooterRows().get(i),
+                    "Grid did not return expected footer rows in order from top to bottom");
         });
     }
 
     private void assertRowWrapsLayer(AbstractRow<?> row, List<Element> layer,
             int expectedCellCount) {
-        Assert.assertEquals("The row contains unexpected amount of cells",
-                expectedCellCount, row.getCells().size());
+        Assertions.assertEquals(expectedCellCount, row.getCells().size(),
+                "The row contains unexpected amount of cells");
         assertRowWrapsLayer(row, layer);
     }
 
@@ -1417,14 +1391,12 @@ public class HeaderFooterTest {
                 .map(cell -> cell.getColumn().getElement())
                 .collect(Collectors.toList());
 
-        Assert.assertEquals(
-                "The row contains unexpected amount of column elements",
-                layer.size(), cellWrappedElements.size());
+        Assertions.assertEquals(layer.size(), cellWrappedElements.size(),
+                "The row contains unexpected amount of column elements");
 
         IntStream.range(0, layer.size()).forEach(i -> {
-            Assert.assertEquals(
-                    "The row is not referring to expected column elements",
-                    layer.get(i), cellWrappedElements.get(i));
+            Assertions.assertEquals(layer.get(i), cellWrappedElements.get(i),
+                    "The row is not referring to expected column elements");
         });
     }
 
@@ -1437,8 +1409,8 @@ public class HeaderFooterTest {
 
     private void assertLayerCount(List<List<Element>> layers,
             int expectedCount) {
-        Assert.assertEquals("Unexpected amount of column layers", expectedCount,
-                layers.size());
+        Assertions.assertEquals(expectedCount, layers.size(),
+                "Unexpected amount of column layers");
     }
 
     /**
@@ -1492,14 +1464,14 @@ public class HeaderFooterTest {
 
     private void assertIsVirtualChild(Component child,
             Component expectedParent) {
-        Assert.assertTrue(child.getParent().isPresent());
-        Assert.assertSame(child.getParent().get(), expectedParent);
-        Assert.assertTrue(child.getElement().isVirtualChild());
+        Assertions.assertTrue(child.getParent().isPresent());
+        Assertions.assertSame(child.getParent().get(), expectedParent);
+        Assertions.assertTrue(child.getElement().isVirtualChild());
     }
 
     private void assertIsNotVirtualChild(Component component) {
-        Assert.assertFalse(component.getParent().isPresent());
-        Assert.assertFalse(component.getElement().isVirtualChild());
+        Assertions.assertFalse(component.getParent().isPresent());
+        Assertions.assertFalse(component.getElement().isVirtualChild());
     }
 
     private List<FooterRow> addMixedFooterRows(int count) {
@@ -1519,8 +1491,8 @@ public class HeaderFooterTest {
     private void assertRowTextContent(String expectedTextContent,
             AbstractRow<? extends AbstractRow.AbstractCell> row) {
         List<? extends AbstractRow.AbstractCell> cells = row.getCells();
-        Assert.assertEquals(grid.getColumns().size(), cells.size());
-        cells.forEach(cell -> Assert.assertEquals(expectedTextContent,
+        Assertions.assertEquals(grid.getColumns().size(), cells.size());
+        cells.forEach(cell -> Assertions.assertEquals(expectedTextContent,
                 cell.getText()));
     }
 
@@ -1528,9 +1500,9 @@ public class HeaderFooterTest {
             List<? extends Component> expectedRowComponents,
             AbstractRow<? extends AbstractRow.AbstractCell> row) {
         List<? extends AbstractRow.AbstractCell> cells = row.getCells();
-        Assert.assertEquals(grid.getColumns().size(), cells.size());
+        Assertions.assertEquals(grid.getColumns().size(), cells.size());
         for (int i = 0; i < expectedRowComponents.size(); i++) {
-            Assert.assertEquals(expectedRowComponents.get(i),
+            Assertions.assertEquals(expectedRowComponents.get(i),
                     cells.get(i).getComponent());
         }
     }
@@ -1547,7 +1519,7 @@ public class HeaderFooterTest {
 
     private void assertCannotSetValueOnRemovedRow(
             AbstractRow<? extends AbstractRow.AbstractCell> row) {
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> row.getCell(grid.getColumns().get(0)).setText("TEXT"));
     }
 }

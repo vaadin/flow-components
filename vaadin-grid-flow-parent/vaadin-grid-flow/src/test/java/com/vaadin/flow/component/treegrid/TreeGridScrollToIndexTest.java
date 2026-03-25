@@ -17,50 +17,50 @@ package com.vaadin.flow.component.treegrid;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class TreeGridScrollToIndexTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class TreeGridScrollToIndexTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     private TreeGrid<String> treeGrid;
     private TreeData<String> treeData = new TreeData<>();
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         treeGrid = new TreeGrid<>();
     }
 
     @Test
-    public void nestedHierarchyFormat_scrollToIndexPath_doesNotThrow() {
+    void nestedHierarchyFormat_scrollToIndexPath_doesNotThrow() {
         treeGrid.setDataProvider(
                 new TreeDataProvider<>(treeData, HierarchyFormat.NESTED));
         treeGrid.scrollToIndex(0, 0);
     }
 
     @Test
-    public void flattenedHierarchyFormat_scrollToIndexPath_throws() {
+    void flattenedHierarchyFormat_scrollToIndexPath_throws() {
         treeGrid.setDataProvider(
                 new TreeDataProvider<>(treeData, HierarchyFormat.FLATTENED));
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> treeGrid.scrollToIndex(0, 0));
     }
 
     @Test
-    public void scrollToIndex_afterAttach_schedulesJsExecution() {
+    void scrollToIndex_afterAttach_schedulesJsExecution() {
         ui.add(treeGrid);
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToIndex(5);
@@ -69,7 +69,7 @@ public class TreeGridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToIndex_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToIndex_beforeAttach_thenAttach_schedulesJsExecution() {
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToIndex(5);
         ui.add(treeGrid);
@@ -78,7 +78,7 @@ public class TreeGridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToIndexPath_afterAttach_schedulesJsExecution() {
+    void scrollToIndexPath_afterAttach_schedulesJsExecution() {
         ui.add(treeGrid);
         treeGrid.scrollToIndex(1, 2);
         treeGrid.scrollToIndex(1, 2);
@@ -88,7 +88,7 @@ public class TreeGridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToIndexPath_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToIndexPath_beforeAttach_thenAttach_schedulesJsExecution() {
         treeGrid.scrollToIndex(1, 2);
         treeGrid.scrollToIndex(1, 2);
         ui.add(treeGrid);
@@ -98,7 +98,7 @@ public class TreeGridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToEnd_afterAttach_schedulesJsExecution() {
+    void scrollToEnd_afterAttach_schedulesJsExecution() {
         ui.add(treeGrid);
         treeGrid.scrollToEnd();
         treeGrid.scrollToEnd();
@@ -108,7 +108,7 @@ public class TreeGridScrollToIndexTest {
     }
 
     @Test
-    public void scrollToEnd_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToEnd_beforeAttach_thenAttach_schedulesJsExecution() {
         treeGrid.scrollToEnd();
         treeGrid.scrollToEnd();
         ui.add(treeGrid);
@@ -118,7 +118,7 @@ public class TreeGridScrollToIndexTest {
     }
 
     @Test
-    public void onlyLastScrollInvocationExecuted() {
+    void onlyLastScrollInvocationExecuted() {
         treeData.addRootItems("Item 0");
         treeGrid.setTreeData(treeData);
         ui.add(treeGrid);
@@ -136,15 +136,15 @@ public class TreeGridScrollToIndexTest {
     private void assertSingleJavaScriptScrollInvocation(
             String expectedExpression, Object... expectedParams) {
         var invocations = getJavaScriptScrollInvocations();
-        Assert.assertEquals(1, invocations.size());
+        Assertions.assertEquals(1, invocations.size());
 
         var invocation = invocations.get(0);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 invocation.getExpression().contains(expectedExpression));
 
         var params = invocation.getParameters();
         for (int i = 1; i < expectedParams.length; i++) {
-            Assert.assertEquals(expectedParams[i], params.get(i));
+            Assertions.assertEquals(expectedParams[i], params.get(i));
         }
     }
 

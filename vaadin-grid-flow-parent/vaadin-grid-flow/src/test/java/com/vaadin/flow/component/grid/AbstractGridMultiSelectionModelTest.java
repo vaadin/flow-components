@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
@@ -33,18 +33,18 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class AbstractGridMultiSelectionModelTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class AbstractGridMultiSelectionModelTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Set<String> selected;
     private Set<String> deselected;
     private Grid<String> grid;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         selected = new HashSet<>();
         deselected = new HashSet<>();
         grid = new Grid<String>() {
@@ -69,106 +69,106 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void select_singleItemSignature_sendToClientSide() {
+    void select_singleItemSignature_sendToClientSide() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.select("foo");
-        Assert.assertEquals(1, selected.size());
-        Assert.assertEquals("foo", selected.iterator().next());
+        Assertions.assertEquals(1, selected.size());
+        Assertions.assertEquals("foo", selected.iterator().next());
     }
 
     @Test
-    public void select_singleItemSignature_selectFormClient_dontSendToClientSide() {
+    void select_singleItemSignature_selectFormClient_dontSendToClientSide() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.getSelectionModel().selectFromClient("foo");
-        Assert.assertEquals(0, selected.size());
+        Assertions.assertEquals(0, selected.size());
     }
 
     @Test
-    public void deselect_singleItemSignature_sendToClientSide() {
+    void deselect_singleItemSignature_sendToClientSide() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.select("foo");
 
         grid.deselect("foo");
-        Assert.assertEquals(1, deselected.size());
-        Assert.assertEquals("foo", deselected.iterator().next());
+        Assertions.assertEquals(1, deselected.size());
+        Assertions.assertEquals("foo", deselected.iterator().next());
     }
 
     @Test
-    public void singleItemSignature_deselectFormClient_dontSendToClientSide() {
+    void singleItemSignature_deselectFormClient_dontSendToClientSide() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.select("foo");
 
         grid.getSelectionModel().deselectFromClient("foo");
-        Assert.assertEquals(0, deselected.size());
+        Assertions.assertEquals(0, deselected.size());
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withInMemoryDataProviderAndDefaultVisibilityMode_visible() {
+    void isSelectAllCheckboxVisible_withInMemoryDataProviderAndDefaultVisibilityMode_visible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(true, false, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndDefaultVisibilityMode_notVisible() {
+    void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndDefaultVisibilityMode_notVisible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(false, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndDefaultVisibilityMode_notVisible() {
+    void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndDefaultVisibilityMode_notVisible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(false, true, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withInMemoryDataProviderAndVisibleMode_visible() {
+    void isSelectAllCheckboxVisible_withInMemoryDataProviderAndVisibleMode_visible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(true, false, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndVisibleMode_visible() {
+    void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndVisibleMode_visible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(false, false, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndVisibleMode_notVisible() {
+    void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndVisibleMode_notVisible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(false, true, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withInMemoryDataProviderAndHiddenMode_notVisible() {
+    void isSelectAllCheckboxVisible_withInMemoryDataProviderAndHiddenMode_notVisible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(true, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndHiddenMode_notVisible() {
+    void isSelectAllCheckboxVisible_withDefinedSizeLazyDataProviderAndHiddenMode_notVisible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(false, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
     }
 
     @Test
-    public void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndHiddenMode_notVisible() {
+    void isSelectAllCheckboxVisible_withUnknownSizeLazyDataProviderAndHiddenMode_notVisible() {
         verifySelectAllCheckboxVisibilityInMultiSelectMode(false, true, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
     }
 
     @Test
-    public void selectFromClient_inMemoryDataProviderWithDefaultVisibility_updatesCheckboxState() {
+    void selectFromClient_inMemoryDataProviderWithDefaultVisibility_updatesCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 true, false, true, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
     }
 
     @Test
-    public void selectFromClient_lazyDefinedSizeDataProviderWithDefaultVisibility_skipsUpdateCheckboxState() {
+    void selectFromClient_lazyDefinedSizeDataProviderWithDefaultVisibility_skipsUpdateCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, false, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
@@ -176,7 +176,7 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void selectFromClient_lazyUnknownSizeDataProviderWithDefaultVisibility_skipsUpdateCheckboxState() {
+    void selectFromClient_lazyUnknownSizeDataProviderWithDefaultVisibility_skipsUpdateCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, true, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
@@ -184,14 +184,14 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void selectFromClient_inMemoryDataProviderWithVisible_updatesCheckboxState() {
+    void selectFromClient_inMemoryDataProviderWithVisible_updatesCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 true, false, true, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
     }
 
     @Test
-    public void selectFromClient_lazyDefinedSizeDataProviderWithVisible_updatesCheckboxState() {
+    void selectFromClient_lazyDefinedSizeDataProviderWithVisible_updatesCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, false, false, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
@@ -199,7 +199,7 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void selectFromClient_lazyUnknownSizeDataProviderWithVisible_skipsUpdateCheckboxState() {
+    void selectFromClient_lazyUnknownSizeDataProviderWithVisible_skipsUpdateCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, true, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
@@ -207,14 +207,14 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void selectFromClient_inMemoryDataProviderWithHidden_skipsUpdateCheckboxState() {
+    void selectFromClient_inMemoryDataProviderWithHidden_skipsUpdateCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 true, false, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
     }
 
     @Test
-    public void selectFromClient_lazyDefinedSizeDataProviderWithHidden_skipsUpdateCheckboxState() {
+    void selectFromClient_lazyDefinedSizeDataProviderWithHidden_skipsUpdateCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, false, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
@@ -222,52 +222,56 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void selectFromClient_lazyUnknownSizeDataProviderWithHidden_skipsUpdateCheckboxState() {
+    void selectFromClient_lazyUnknownSizeDataProviderWithHidden_skipsUpdateCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, true, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
     }
 
     @Test
-    public void select_updatesCheckboxStates() {
+    void select_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
         // select first
         grid.getSelectionModel().select("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // select second, which equals all selected
         grid.getSelectionModel().select("bar");
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void selectFromClient_updatesCheckboxStates() {
+    void selectFromClient_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
         // select first
         grid.getSelectionModel().selectFromClient("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // select second, which equals all selected
         grid.getSelectionModel().selectFromClient("bar");
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void deselect_updatesCheckboxStates() {
+    void deselect_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
@@ -275,25 +279,28 @@ public class AbstractGridMultiSelectionModelTest {
         // start with all selected
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
         grid.getSelectionModel().deselect("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect second, which equals none selected
         grid.getSelectionModel().deselect("bar");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void deselectFromClient_updatesCheckboxStates() {
+    void deselectFromClient_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
@@ -301,51 +308,56 @@ public class AbstractGridMultiSelectionModelTest {
         // start with all selected
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
         grid.getSelectionModel().deselectFromClient("foo");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect second, which equals none selected
         grid.getSelectionModel().deselectFromClient("bar");
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void selectAll_updatesCheckboxStates() {
+    void selectAll_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void clientSelectAll_updatesCheckboxStates() {
+    void clientSelectAll_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .clientSelectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void deselectAll_updatesCheckboxStates() {
+    void deselectAll_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
@@ -353,18 +365,20 @@ public class AbstractGridMultiSelectionModelTest {
         // start with all selected
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         grid.getSelectionModel().deselectAll();
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void clientDeselectAll_updatesCheckboxStates() {
+    void clientDeselectAll_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
@@ -372,112 +386,117 @@ public class AbstractGridMultiSelectionModelTest {
         // start with all selected
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectAll();
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .clientDeselectAll();
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void updateSelection_updatesCheckboxStates() {
+    void updateSelection_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
         // Select all
         grid.asMultiSelect().updateSelection(Set.of("foo", "bar"), Set.of());
-        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // Deselect single
         grid.asMultiSelect().updateSelection(Set.of(), Set.of("foo"));
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertTrue(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // Deselect all
         grid.asMultiSelect().updateSelection(Set.of(), Set.of("bar"));
-        Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
-        Assert.assertFalse(
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
-    public void setFilterUsingDataView_clientSelectAll_selectionEventContainsFilteredValues() {
+    void setFilterUsingDataView_clientSelectAll_selectionEventContainsFilteredValues() {
         grid.setSelectionMode(SelectionMode.MULTI);
         List<String> items = List.of("foo", "bar");
         ListDataView<String, ?> dataView = grid.setItems(items);
         dataView.setFilter(items.get(0)::equals);
 
         grid.addSelectionListener(e -> {
-            Assert.assertEquals(
-                    "Selected item count does not match data view item count",
-                    dataView.getItems().count(),
-                    e.getAllSelectedItems().size());
-            Assert.assertTrue("Selected items do not contain filtered item",
-                    e.getAllSelectedItems().contains(items.get(0)));
+            Assertions.assertEquals(dataView.getItems().count(),
+                    e.getAllSelectedItems().size(),
+                    "Selected item count does not match data view item count");
+            Assertions.assertTrue(
+                    e.getAllSelectedItems().contains(items.get(0)),
+                    "Selected items do not contain filtered item");
         });
 
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .clientSelectAll();
 
-        Assert.assertEquals(
-                "Selected item count does not match data view item count",
-                dataView.getItems().count(), grid.getSelectedItems().size());
-        Assert.assertTrue("Selected items do not contain filtered item",
-                grid.getSelectedItems().contains(items.get(0)));
+        Assertions.assertEquals(dataView.getItems().count(),
+                grid.getSelectedItems().size(),
+                "Selected item count does not match data view item count");
+        Assertions.assertTrue(grid.getSelectedItems().contains(items.get(0)),
+                "Selected items do not contain filtered item");
     }
 
     @Test
-    public void dragSelect_updatesColumnAttribute() {
+    void dragSelect_updatesColumnAttribute() {
         grid.setSelectionMode(SelectionMode.MULTI);
         Element columnElement = getGridSelectionColumn(grid).getElement();
 
-        Assert.assertFalse(columnElement.getProperty("dragSelect", false));
+        Assertions.assertFalse(columnElement.getProperty("dragSelect", false));
 
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .setDragSelect(true);
-        Assert.assertTrue(columnElement.getProperty("dragSelect", false));
+        Assertions.assertTrue(columnElement.getProperty("dragSelect", false));
 
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .setDragSelect(false);
-        Assert.assertFalse(columnElement.getProperty("dragSelect", false));
+        Assertions.assertFalse(columnElement.getProperty("dragSelect", false));
     }
 
     @Test
-    public void setFilterUsingDataView_serverSelectAll_selectionEventContainsFilteredValues() {
+    void setFilterUsingDataView_serverSelectAll_selectionEventContainsFilteredValues() {
         grid.setSelectionMode(SelectionMode.MULTI);
         List<String> items = List.of("foo", "bar");
         ListDataView<String, ?> dataView = grid.setItems(items);
         dataView.setFilter(items.get(0)::equals);
 
         grid.addSelectionListener(e -> {
-            Assert.assertEquals(
-                    "Selected item count does not match data view item count",
-                    dataView.getItems().count(),
-                    e.getAllSelectedItems().size());
-            Assert.assertTrue("Selected items do not contain filtered item",
-                    e.getAllSelectedItems().contains(items.get(0)));
+            Assertions.assertEquals(dataView.getItems().count(),
+                    e.getAllSelectedItems().size(),
+                    "Selected item count does not match data view item count");
+            Assertions.assertTrue(
+                    e.getAllSelectedItems().contains(items.get(0)),
+                    "Selected items do not contain filtered item");
         });
 
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectAll();
 
-        Assert.assertEquals(
-                "Selected item count does not match data view item count",
-                dataView.getItems().count(), grid.getSelectedItems().size());
-        Assert.assertTrue("Selected items do not contain filtered item",
-                grid.getSelectedItems().contains(items.get(0)));
+        Assertions.assertEquals(dataView.getItems().count(),
+                grid.getSelectedItems().size(),
+                "Selected item count does not match data view item count");
+        Assertions.assertTrue(grid.getSelectedItems().contains(items.get(0)),
+                "Selected items do not contain filtered item");
     }
 
     @Test
-    public void selectFromClient_withItemSelectableProvider_preventsSelection() {
+    void selectFromClient_withItemSelectableProvider_preventsSelection() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> !item.equals("foo"));
@@ -487,15 +506,15 @@ public class AbstractGridMultiSelectionModelTest {
 
         // prevents selection of non-selectable item
         selectionModel.selectFromClient("foo");
-        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of(), grid.getSelectedItems());
 
         // allows selection of selectable item
         selectionModel.selectFromClient("bar");
-        Assert.assertEquals(Set.of("bar"), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of("bar"), grid.getSelectedItems());
     }
 
     @Test
-    public void deselectFromClient_withItemSelectableProvider_preventsDeselection() {
+    void deselectFromClient_withItemSelectableProvider_preventsDeselection() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> !item.equals("foo"));
@@ -506,17 +525,17 @@ public class AbstractGridMultiSelectionModelTest {
         // prevents deselection of non-selectable item
         selectionModel.select("foo");
         selectionModel.deselectFromClient("foo");
-        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of("foo"), grid.getSelectedItems());
 
         // allows deselection of selectable item
         selectionModel.select("bar");
         selectionModel.deselectFromClient("bar");
-        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of("foo"), grid.getSelectedItems());
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void selectFromClient_clientItemToggleEventIsFired() {
+    void selectFromClient_clientItemToggleEventIsFired() {
         grid.setItems("Item 0", "Item 1");
         grid.setSelectionMode(SelectionMode.MULTI);
 
@@ -543,7 +562,7 @@ public class AbstractGridMultiSelectionModelTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void deselectFromClient_clientItemToggleEventIsFired() {
+    void deselectFromClient_clientItemToggleEventIsFired() {
         grid.setItems("Item 0", "Item 1");
         grid.setSelectionMode(SelectionMode.MULTI);
 
@@ -571,7 +590,7 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    public void select_withItemSelectableProvider_allowsSelection() {
+    void select_withItemSelectableProvider_allowsSelection() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> !item.equals("foo"));
@@ -581,21 +600,21 @@ public class AbstractGridMultiSelectionModelTest {
 
         // allows selection using select
         selectionModel.select("foo");
-        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of("foo"), grid.getSelectedItems());
 
         // allows selection using selectItems
         selectionModel.deselectAll();
         selectionModel.selectItems("foo", "bar");
-        Assert.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
 
         // allows selection using updateSelection
         selectionModel.deselectAll();
         selectionModel.updateSelection(Set.of("foo", "bar"), Set.of());
-        Assert.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
     }
 
     @Test
-    public void deselect_withItemSelectableProvider_allowsDeselection() {
+    void deselect_withItemSelectableProvider_allowsDeselection() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> !item.equals("foo"));
@@ -606,21 +625,21 @@ public class AbstractGridMultiSelectionModelTest {
         // allows deselection using deselect
         selectionModel.select("foo");
         selectionModel.deselect("foo");
-        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of(), grid.getSelectedItems());
 
         // allows deselection using deselectItems
         selectionModel.selectItems("foo", "bar");
         selectionModel.deselectItems("foo", "bar");
-        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of(), grid.getSelectedItems());
 
         // allows deselection using updateSelection
         selectionModel.updateSelection(Set.of("foo", "bar"), Set.of());
         selectionModel.updateSelection(Set.of(), Set.of("foo", "bar"));
-        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of(), grid.getSelectedItems());
     }
 
     @Test
-    public void selectAll_withItemSelectableProvider_works() {
+    void selectAll_withItemSelectableProvider_works() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> true);
@@ -630,11 +649,11 @@ public class AbstractGridMultiSelectionModelTest {
 
         selectionModel.selectAll();
 
-        Assert.assertEquals(2, selectionModel.getSelectedItems().size());
+        Assertions.assertEquals(2, selectionModel.getSelectedItems().size());
     }
 
     @Test
-    public void deselectAll_withItemSelectableProvider_works() {
+    void deselectAll_withItemSelectableProvider_works() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> true);
@@ -645,11 +664,11 @@ public class AbstractGridMultiSelectionModelTest {
         selectionModel.selectAll();
         selectionModel.deselectAll();
 
-        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+        Assertions.assertEquals(0, selectionModel.getSelectedItems().size());
     }
 
     @Test
-    public void clientSelectAll_withItemSelectableProvider_ignored() {
+    void clientSelectAll_withItemSelectableProvider_ignored() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> true);
@@ -659,11 +678,11 @@ public class AbstractGridMultiSelectionModelTest {
 
         selectionModel.clientSelectAll();
 
-        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+        Assertions.assertEquals(0, selectionModel.getSelectedItems().size());
     }
 
     @Test
-    public void clientDeselectAll_withItemSelectableProvider_ignored() {
+    void clientDeselectAll_withItemSelectableProvider_ignored() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItemSelectableProvider(item -> true);
@@ -674,11 +693,11 @@ public class AbstractGridMultiSelectionModelTest {
 
         selectionModel.clientSelectAll();
 
-        Assert.assertEquals(2, selectionModel.getSelectedItems().size());
+        Assertions.assertEquals(2, selectionModel.getSelectedItems().size());
     }
 
     @Test
-    public void setItemSelectableProvider_updatesSelectAllVisibility() {
+    void setItemSelectableProvider_updatesSelectAllVisibility() {
         grid.setSelectionMode(SelectionMode.MULTI);
 
         AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
@@ -687,34 +706,34 @@ public class AbstractGridMultiSelectionModelTest {
                 .getSelectionColumn();
 
         // Visible initially
-        Assert.assertFalse(selectionColumn.getElement()
+        Assertions.assertFalse(selectionColumn.getElement()
                 .getProperty("_selectAllHidden", false));
 
         // Set provider, should hide select all checkbox
         grid.setItemSelectableProvider(item -> false);
-        Assert.assertTrue(selectionColumn.getElement()
+        Assertions.assertTrue(selectionColumn.getElement()
                 .getProperty("_selectAllHidden", false));
 
         // Try to explicitly make the checkbox visible, should still be hidden
         selectionModel.setSelectAllCheckboxVisibility(
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
-        Assert.assertTrue(selectionColumn.getElement()
+        Assertions.assertTrue(selectionColumn.getElement()
                 .getProperty("_selectAllHidden", false));
 
         // Remove provider, should show select all checkbox
         grid.setItemSelectableProvider(null);
-        Assert.assertFalse(selectionColumn.getElement()
+        Assertions.assertFalse(selectionColumn.getElement()
                 .getProperty("_selectAllHidden", false));
     }
 
     @Test
-    public void setMultiSelect_removeGrid_setSingleSelect_addGrid_selectionColumnRemoved() {
+    void setMultiSelect_removeGrid_setSingleSelect_addGrid_selectionColumnRemoved() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(SelectionMode.MULTI);
         ui.remove(grid);
         grid.setSelectionMode(SelectionMode.SINGLE);
         ui.add(grid);
-        Assert.assertThrows(IllegalStateException.class,
+        Assertions.assertThrows(IllegalStateException.class,
                 () -> getGridSelectionColumn(grid));
     }
 
@@ -728,9 +747,8 @@ public class AbstractGridMultiSelectionModelTest {
         boolean selectAllCheckboxVisible = ((GridMultiSelectionModel<String>) grid
                 .getSelectionModel()).isSelectAllCheckboxVisible();
 
-        Assert.assertEquals(
-                "Unexpected select all checkbox visibility in multi-select mode",
-                expectedVisibility, selectAllCheckboxVisible);
+        Assertions.assertEquals(expectedVisibility, selectAllCheckboxVisible,
+                "Unexpected select all checkbox visibility in multi-select mode");
     }
 
     private void verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
@@ -756,7 +774,7 @@ public class AbstractGridMultiSelectionModelTest {
         Mockito.verify(dataProvider, Mockito.times(expectedSizeQuery ? 2 : 0))
                 .size(Mockito.any(Query.class));
 
-        Assert.assertEquals(expectedCheckboxStateUpdate ? "true" : "false",
+        Assertions.assertEquals(expectedCheckboxStateUpdate ? "true" : "false",
                 getGridSelectionColumn(grid).getElement()
                         .getProperty("selectAll"));
     }
@@ -801,7 +819,7 @@ public class AbstractGridMultiSelectionModelTest {
     private DataProvider<String, Void> getUnknownItemCountLazyDataProvider() {
         return DataProvider.fromCallbacks(query -> Stream.of("foo", "bar")
                 .skip(query.getOffset()).limit(query.getLimit()), query -> {
-                    Assert.fail("Unexpected size query call");
+                    Assertions.fail("Unexpected size query call");
                     return 0;
                 });
     }

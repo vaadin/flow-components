@@ -18,13 +18,13 @@ package com.vaadin.flow.component.grid;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class GridSpringDataTest {
+class GridSpringDataTest {
 
     @Test
-    public void setItemsPageableNoCount() {
+    void setItemsPageableNoCount() {
         AtomicInteger pageSize = new AtomicInteger(-1);
         AtomicInteger pageNumber = new AtomicInteger(-1);
         Grid<Person> grid = new Grid<>(Person.class);
@@ -41,13 +41,13 @@ public class GridSpringDataTest {
 
         Person item = grid.getLazyDataView().getItem(0);
 
-        Assert.assertEquals(0, pageNumber.get());
-        Assert.assertTrue(pageSize.get() > 0);
-        Assert.assertEquals("John", item.getName());
+        Assertions.assertEquals(0, pageNumber.get());
+        Assertions.assertTrue(pageSize.get() > 0);
+        Assertions.assertEquals("John", item.getName());
     }
 
     @Test
-    public void setItemsPageableWithCount() {
+    void setItemsPageableWithCount() {
         AtomicInteger pageSize = new AtomicInteger(-1);
         AtomicInteger pageNumber = new AtomicInteger(-1);
         Grid<Person> grid = new Grid<>(Person.class);
@@ -65,8 +65,8 @@ public class GridSpringDataTest {
 
         Person item = grid.getLazyDataView().getItems().toList().get(1);
 
-        Assert.assertEquals(0, pageNumber.get());
-        Assert.assertEquals(3, pageSize.get());
-        Assert.assertEquals("Jane", item.getName());
+        Assertions.assertEquals(0, pageNumber.get());
+        Assertions.assertEquals(3, pageSize.get());
+        Assertions.assertEquals("Jane", item.getName());
     }
 }

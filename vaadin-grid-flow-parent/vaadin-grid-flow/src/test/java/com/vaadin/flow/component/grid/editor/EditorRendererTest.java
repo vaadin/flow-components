@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Person;
@@ -27,7 +27,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ObjectNode;
 
-public class EditorRendererTest {
+class EditorRendererTest {
 
     private EditorRenderer<Person> renderer;
     private Editor<Person> editor;
@@ -35,8 +35,8 @@ public class EditorRendererTest {
     private Element editorContainer;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         editor = Mockito.mock(Editor.class);
         renderer = Mockito.spy(new EditorRenderer<>(editor, "col"));
         container = new Element("div");
@@ -46,7 +46,7 @@ public class EditorRendererTest {
     }
 
     @Test
-    public void setComponentFunction_editorIsOpen_componentIsRendered() {
+    void setComponentFunction_editorIsOpen_componentIsRendered() {
         Span span = new Span();
         renderer.setComponentFunction(item -> span);
         Mockito.when(editor.isOpen()).thenReturn(true);
@@ -59,16 +59,16 @@ public class EditorRendererTest {
         ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertEquals(42, object.get("_col_editor").intValue());
+        Assertions.assertEquals(42, object.get("_col_editor").intValue());
         Mockito.verify(renderer, Mockito.times(1)).getComponentNodeId(span);
 
-        Assert.assertEquals(1, editorContainer.getChildCount());
-        Assert.assertEquals(span,
+        Assertions.assertEquals(1, editorContainer.getChildCount());
+        Assertions.assertEquals(span,
                 editorContainer.getChild(0).getComponent().get());
     }
 
     @Test
-    public void setComponentFunction_editorIsClosed_nothingIsRendered() {
+    void setComponentFunction_editorIsClosed_nothingIsRendered() {
         renderer.setComponentFunction(item -> new Span());
         Mockito.when(editor.isOpen()).thenReturn(false);
 
@@ -79,12 +79,12 @@ public class EditorRendererTest {
         ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertFalse(object.has("_col_editor"));
-        Assert.assertEquals(0, editorContainer.getChildCount());
+        Assertions.assertFalse(object.has("_col_editor"));
+        Assertions.assertEquals(0, editorContainer.getChildCount());
     }
 
     @Test
-    public void setComponentFunction_functionReturnsNull_emptyIsRendered() {
+    void setComponentFunction_functionReturnsNull_emptyIsRendered() {
         renderer.setComponentFunction(item -> null);
         Mockito.when(editor.isOpen()).thenReturn(true);
 
@@ -95,8 +95,9 @@ public class EditorRendererTest {
         ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertTrue(object.has("_col_editor"));
-        Assert.assertEquals(1, editorContainer.getChildCount());
-        Assert.assertNull(editorContainer.getChild(0).getProperty("innerHTML"));
+        Assertions.assertTrue(object.has("_col_editor"));
+        Assertions.assertEquals(1, editorContainer.getChildCount());
+        Assertions.assertNull(
+                editorContainer.getChild(0).getProperty("innerHTML"));
     }
 }

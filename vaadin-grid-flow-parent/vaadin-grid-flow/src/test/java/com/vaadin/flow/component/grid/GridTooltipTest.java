@@ -18,9 +18,9 @@ package com.vaadin.flow.component.grid;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.Element;
@@ -30,157 +30,159 @@ import com.vaadin.flow.dom.Element;
  *
  * @author Vaadin Ltd.
  */
-public class GridTooltipTest {
+class GridTooltipTest {
 
     private Grid<String> grid;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         grid = new Grid<>();
         grid.addColumn(item -> item);
     }
 
     @Test
-    public void default_doesNotHaveTooltipElement() {
-        Assert.assertFalse(getTooltipElement(grid).isPresent());
+    void default_doesNotHaveTooltipElement() {
+        Assertions.assertFalse(getTooltipElement(grid).isPresent());
     }
 
     @Test
-    public void setColumnTooltipGenerator_hasTooltipElement() {
+    void setColumnTooltipGenerator_hasTooltipElement() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
-        Assert.assertTrue(getTooltipElement(grid).isPresent());
+        Assertions.assertTrue(getTooltipElement(grid).isPresent());
     }
 
     @Test
-    public void setGridTooltipGenerator_hasTooltipElement() {
+    void setGridTooltipGenerator_hasTooltipElement() {
         grid.setTooltipGenerator(item -> item);
-        Assert.assertTrue(getTooltipElement(grid).isPresent());
+        Assertions.assertTrue(getTooltipElement(grid).isPresent());
     }
 
     @Test
-    public void setColumnTooltipGenerator_hasFluidAPI() {
+    void setColumnTooltipGenerator_hasFluidAPI() {
         var column = grid.addColumn(item -> item)
                 .setTooltipGenerator(item -> item).setAutoWidth(true);
-        Assert.assertTrue(column.isAutoWidth());
+        Assertions.assertTrue(column.isAutoWidth());
     }
 
     @Test
-    public void setColumnTooltip_tooltipHasSlot() {
+    void setColumnTooltip_tooltipHasSlot() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
-        Assert.assertEquals("tooltip",
+        Assertions.assertEquals("tooltip",
                 getTooltipElement(grid).orElseThrow().getAttribute("slot"));
     }
 
     @Test
-    public void setGridTooltip_tooltipHasSlot() {
+    void setGridTooltip_tooltipHasSlot() {
         grid.setTooltipGenerator(item -> item);
-        Assert.assertEquals("tooltip",
+        Assertions.assertEquals("tooltip",
                 getTooltipElement(grid).orElseThrow().getAttribute("slot"));
     }
 
     @Test
-    public void setAnotherColumnTooltipGenerator_hasOneTooltipElement() {
+    void setAnotherColumnTooltipGenerator_hasOneTooltipElement() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
-        Assert.assertEquals(1, getTooltipElements(grid).count());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setNullColumnTooltipGenerator_throws() {
-        grid.addColumn(item -> item).setTooltipGenerator(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setNullGridTooltipGenerator_throws() {
-        grid.setTooltipGenerator(null);
+        Assertions.assertEquals(1, getTooltipElements(grid).count());
     }
 
     @Test
-    public void setTooltipPosition_hasTooltipElement() {
-        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
-        Assert.assertTrue(getTooltipElement(grid).isPresent());
+    void setNullColumnTooltipGenerator_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> grid.addColumn(item -> item).setTooltipGenerator(null));
     }
 
     @Test
-    public void setTooltipPosition_hasTooltipWithPosition() {
+    void setNullGridTooltipGenerator_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> grid.setTooltipGenerator(null));
+    }
+
+    @Test
+    void setTooltipPosition_hasTooltipElement() {
         grid.setTooltipPosition(Tooltip.TooltipPosition.START);
-        Assert.assertEquals("start",
+        Assertions.assertTrue(getTooltipElement(grid).isPresent());
+    }
+
+    @Test
+    void setTooltipPosition_hasTooltipWithPosition() {
+        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
+        Assertions.assertEquals("start",
                 getTooltipElement(grid).orElseThrow().getAttribute("position"));
 
         grid.setTooltipPosition(Tooltip.TooltipPosition.END);
-        Assert.assertEquals("end",
+        Assertions.assertEquals("end",
                 getTooltipElement(grid).orElseThrow().getAttribute("position"));
     }
 
     @Test
-    public void setTooltipPosition_throwsForNull() {
-        Assert.assertThrows(NullPointerException.class,
+    void setTooltipPosition_throwsForNull() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> grid.setTooltipPosition(null));
     }
 
     @Test
-    public void setTooltipPosition_getTooltipPosition() {
+    void setTooltipPosition_getTooltipPosition() {
         grid.setTooltipPosition(Tooltip.TooltipPosition.START);
-        Assert.assertEquals(Tooltip.TooltipPosition.START,
+        Assertions.assertEquals(Tooltip.TooltipPosition.START,
                 grid.getTooltipPosition());
 
         grid.setTooltipPosition(Tooltip.TooltipPosition.END);
-        Assert.assertEquals(Tooltip.TooltipPosition.END,
+        Assertions.assertEquals(Tooltip.TooltipPosition.END,
                 grid.getTooltipPosition());
     }
 
     @Test
-    public void getTooltipPosition_defaultTooltipPosition() {
+    void getTooltipPosition_defaultTooltipPosition() {
         // without tooltip element
-        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+        Assertions.assertEquals(Tooltip.TooltipPosition.BOTTOM,
                 grid.getTooltipPosition());
 
         // with tooltip element, unspecified position
         grid.setTooltipGenerator(item -> item);
-        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+        Assertions.assertEquals(Tooltip.TooltipPosition.BOTTOM,
                 grid.getTooltipPosition());
 
         // with tooltip element, invalid position
         getTooltipElement(grid).orElseThrow().setAttribute("position",
                 "invalid");
-        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+        Assertions.assertEquals(Tooltip.TooltipPosition.BOTTOM,
                 grid.getTooltipPosition());
     }
 
     @Test
-    public void setTooltipMarkdownEnabled_hasTooltipElement() {
+    void setTooltipMarkdownEnabled_hasTooltipElement() {
         grid.setTooltipMarkdownEnabled(true);
-        Assert.assertTrue(getTooltipElement(grid).isPresent());
+        Assertions.assertTrue(getTooltipElement(grid).isPresent());
     }
 
     @Test
-    public void setTooltipMarkdownEnabled_hasTooltipWithProperty() {
+    void setTooltipMarkdownEnabled_hasTooltipWithProperty() {
         grid.setTooltipMarkdownEnabled(true);
-        Assert.assertTrue(getTooltipElement(grid).orElseThrow()
+        Assertions.assertTrue(getTooltipElement(grid).orElseThrow()
                 .getProperty("markdown", false));
 
         grid.setTooltipMarkdownEnabled(false);
-        Assert.assertFalse(getTooltipElement(grid).orElseThrow()
+        Assertions.assertFalse(getTooltipElement(grid).orElseThrow()
                 .getProperty("markdown", false));
     }
 
     @Test
-    public void setTooltipMarkdownEnabled_isTooltipMarkdownEnabled() {
+    void setTooltipMarkdownEnabled_isTooltipMarkdownEnabled() {
         grid.setTooltipMarkdownEnabled(true);
-        Assert.assertTrue(grid.isTooltipMarkdownEnabled());
+        Assertions.assertTrue(grid.isTooltipMarkdownEnabled());
 
         grid.setTooltipMarkdownEnabled(false);
-        Assert.assertFalse(grid.isTooltipMarkdownEnabled());
+        Assertions.assertFalse(grid.isTooltipMarkdownEnabled());
     }
 
     @Test
-    public void isTooltipMarkdownEnabled_defaultValue() {
+    void isTooltipMarkdownEnabled_defaultValue() {
         // without tooltip element
-        Assert.assertFalse(grid.isTooltipMarkdownEnabled());
+        Assertions.assertFalse(grid.isTooltipMarkdownEnabled());
 
         // with tooltip element, no property value
         grid.setTooltipGenerator(item -> item);
-        Assert.assertFalse(grid.isTooltipMarkdownEnabled());
+        Assertions.assertFalse(grid.isTooltipMarkdownEnabled());
     }
 
     private Optional<Element> getTooltipElement(Grid<?> grid) {

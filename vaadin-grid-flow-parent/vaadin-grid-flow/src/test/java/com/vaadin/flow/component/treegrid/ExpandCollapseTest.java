@@ -18,21 +18,21 @@ package com.vaadin.flow.component.treegrid;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
-public class ExpandCollapseTest {
+class ExpandCollapseTest {
 
     private TreeGrid<String> treeGrid;
     private AtomicReference<ExpandEvent<String, TreeGrid<String>>> expandEvent;
     private AtomicReference<CollapseEvent<String, TreeGrid<String>>> collapseEvent;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         treeGrid = new TreeGrid<>();
         var treeData = new TreeData<String>();
         treeData.addRootItems("Item 0", "Item 1");
@@ -48,60 +48,62 @@ public class ExpandCollapseTest {
     }
 
     @Test
-    public void expand_itemExpandedCorrectly() {
+    void expand_itemExpandedCorrectly() {
         treeGrid.expand("Item 0");
-        Assert.assertTrue(treeGrid.isExpanded("Item 0"));
-        Assert.assertFalse(treeGrid.isExpanded("Item 0-0"));
-        Assert.assertEquals(List.of("Item 0"), expandEvent.get().getItems());
+        Assertions.assertTrue(treeGrid.isExpanded("Item 0"));
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0-0"));
+        Assertions.assertEquals(List.of("Item 0"),
+                expandEvent.get().getItems());
     }
 
     @Test
-    public void collapse_itemCollapsedCorrectly() {
+    void collapse_itemCollapsedCorrectly() {
         treeGrid.expand("Item 0");
         treeGrid.collapse("Item 0");
-        Assert.assertFalse(treeGrid.isExpanded("Item 0"));
-        Assert.assertEquals(List.of("Item 0"), collapseEvent.get().getItems());
-    }
-
-    @Test
-    public void expandRecursivelyWithNonMaxDepth_itemsExpandedCorrectly() {
-        treeGrid.expandRecursively(List.of("Item 0"), 1);
-        Assert.assertTrue(treeGrid.isExpanded("Item 0"));
-        Assert.assertTrue(treeGrid.isExpanded("Item 0-0"));
-        Assert.assertFalse(treeGrid.isExpanded("Item 0-0-0"));
-        Assert.assertEquals(List.of("Item 0", "Item 0-0"),
-                expandEvent.get().getItems());
-    }
-
-    @Test
-    public void expandRecursivelyWithMaxDepth_itemsExpandedCorrectly() {
-        treeGrid.expandRecursively(List.of("Item 0"), 2);
-        Assert.assertTrue(treeGrid.isExpanded("Item 0"));
-        Assert.assertTrue(treeGrid.isExpanded("Item 0-0"));
-        Assert.assertTrue(treeGrid.isExpanded("Item 0-0-0"));
-        Assert.assertEquals(List.of("Item 0", "Item 0-0", "Item 0-0-0"),
-                expandEvent.get().getItems());
-    }
-
-    @Test
-    public void collapseRecursivelyWithNonMaxDepth_itemsCollapsedCorrectly() {
-        treeGrid.expandRecursively(List.of("Item 0"), 2);
-        treeGrid.collapseRecursively(List.of("Item 0"), 1);
-        Assert.assertFalse(treeGrid.isExpanded("Item 0"));
-        Assert.assertFalse(treeGrid.isExpanded("Item 0-0"));
-        Assert.assertTrue(treeGrid.isExpanded("Item 0-0-0"));
-        Assert.assertEquals(List.of("Item 0", "Item 0-0"),
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0"));
+        Assertions.assertEquals(List.of("Item 0"),
                 collapseEvent.get().getItems());
     }
 
     @Test
-    public void collapseRecursivelyWithMaxDepth_itemsCollapsedCorrectly() {
+    void expandRecursivelyWithNonMaxDepth_itemsExpandedCorrectly() {
+        treeGrid.expandRecursively(List.of("Item 0"), 1);
+        Assertions.assertTrue(treeGrid.isExpanded("Item 0"));
+        Assertions.assertTrue(treeGrid.isExpanded("Item 0-0"));
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0-0-0"));
+        Assertions.assertEquals(List.of("Item 0", "Item 0-0"),
+                expandEvent.get().getItems());
+    }
+
+    @Test
+    void expandRecursivelyWithMaxDepth_itemsExpandedCorrectly() {
+        treeGrid.expandRecursively(List.of("Item 0"), 2);
+        Assertions.assertTrue(treeGrid.isExpanded("Item 0"));
+        Assertions.assertTrue(treeGrid.isExpanded("Item 0-0"));
+        Assertions.assertTrue(treeGrid.isExpanded("Item 0-0-0"));
+        Assertions.assertEquals(List.of("Item 0", "Item 0-0", "Item 0-0-0"),
+                expandEvent.get().getItems());
+    }
+
+    @Test
+    void collapseRecursivelyWithNonMaxDepth_itemsCollapsedCorrectly() {
+        treeGrid.expandRecursively(List.of("Item 0"), 2);
+        treeGrid.collapseRecursively(List.of("Item 0"), 1);
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0"));
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0-0"));
+        Assertions.assertTrue(treeGrid.isExpanded("Item 0-0-0"));
+        Assertions.assertEquals(List.of("Item 0", "Item 0-0"),
+                collapseEvent.get().getItems());
+    }
+
+    @Test
+    void collapseRecursivelyWithMaxDepth_itemsCollapsedCorrectly() {
         treeGrid.expandRecursively(List.of("Item 0"), 2);
         treeGrid.collapseRecursively(List.of("Item 0"), 2);
-        Assert.assertFalse(treeGrid.isExpanded("Item 0"));
-        Assert.assertFalse(treeGrid.isExpanded("Item 0-0"));
-        Assert.assertFalse(treeGrid.isExpanded("Item 0-0-0"));
-        Assert.assertEquals(List.of("Item 0", "Item 0-0", "Item 0-0-0"),
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0"));
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0-0"));
+        Assertions.assertFalse(treeGrid.isExpanded("Item 0-0-0"));
+        Assertions.assertEquals(List.of("Item 0", "Item 0-0", "Item 0-0-0"),
                 collapseEvent.get().getItems());
     }
 }
