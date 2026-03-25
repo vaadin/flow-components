@@ -18,10 +18,10 @@ package com.vaadin.flow.component.radiobutton.dataview;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.tests.dataprovider.AbstractListDataViewListenerJUnit6Test;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
 class RadioButtonGroupListDataViewTest
-        extends AbstractListDataViewListenerJUnit6Test {
+        extends AbstractListDataViewListenerTest {
 
     /*
      * ListDataView implementation is tested in AbstractListDataViewTest. No

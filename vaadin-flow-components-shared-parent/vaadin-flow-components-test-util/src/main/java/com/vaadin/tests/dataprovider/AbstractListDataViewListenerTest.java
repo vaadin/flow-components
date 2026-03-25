@@ -33,7 +33,7 @@ import com.vaadin.tests.MockUIExtension;
 // Originally from com.vaadin.flow.data.provider.AbstractListDataViewListenerTest
 // If this breaks, check there for updates
 
-public abstract class AbstractListDataViewListenerJUnit6Test {
+public abstract class AbstractListDataViewListenerTest {
     @RegisterExtension
     protected MockUIExtension ui = new MockUIExtension();
 

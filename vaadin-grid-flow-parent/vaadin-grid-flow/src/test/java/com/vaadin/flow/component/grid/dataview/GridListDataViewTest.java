@@ -26,9 +26,9 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.tests.dataprovider.AbstractListDataViewListenerJUnit6Test;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
-class GridListDataViewTest extends AbstractListDataViewListenerJUnit6Test {
+class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
     @Test
     void dataViewWithItem_rowOutsideSetRequested_exceptionThrown() {
