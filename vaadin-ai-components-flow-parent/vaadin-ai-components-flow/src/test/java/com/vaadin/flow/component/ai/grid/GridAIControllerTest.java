@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.ai.grid;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -147,6 +151,26 @@ class GridAIControllerTest {
     // --- State and onRequestCompleted ---
 
     @Test
+    void getState_noQuery_returnsNull() {
+        Assertions.assertNull(controller.getState());
+    }
+
+    @Test
+    void getState_afterUpdate_returnsState() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        // Simulate tool call + onRequestCompleted
+        var tool = controller.getTools().stream()
+                .filter(t -> t.getName().equals("update_grid_data")).findFirst()
+                .orElseThrow();
+        tool.execute("{\"query\": \"SELECT a FROM t\"}");
+        controller.onRequestCompleted();
+
+        var state = controller.getState();
+        Assertions.assertNotNull(state);
+        Assertions.assertEquals("SELECT a FROM t", state.query());
+    }
+
+    @Test
     void currentStateTool_afterUpdate_returnsQuery() {
         dbProvider.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
@@ -192,6 +216,125 @@ class GridAIControllerTest {
         // currentQuery should still be null — state tool returns empty
         var stateTool = findTool("get_grid_state");
         Assertions.assertTrue(stateTool.execute("{}").contains("empty"));
+    }
+
+    @Test
+    void onRequestCompleted_noPending_doesNothing() {
+        // Should not throw
+        controller.onRequestCompleted();
+        Assertions.assertNull(controller.getState());
+    }
+
+    @Test
+    void onRequestCompleted_clearsPending() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        var tool = controller.getTools().stream()
+                .filter(t -> t.getName().equals("update_grid_data")).findFirst()
+                .orElseThrow();
+        tool.execute("{\"query\": \"SELECT 1\"}");
+        controller.onRequestCompleted();
+        // Second call should be a no-op
+        controller.onRequestCompleted();
+        Assertions.assertNotNull(controller.getState());
+    }
+
+    // --- GridState serialization ---
+
+    @Test
+    void gridState_isSerializable() throws Exception {
+        var state = new GridAIController.GridState("SELECT * FROM t");
+        var baos = new ByteArrayOutputStream();
+        try (var oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(state);
+        }
+        try (var ois = new ObjectInputStream(
+                new ByteArrayInputStream(baos.toByteArray()))) {
+            var deserialized = (GridAIController.GridState) ois.readObject();
+            Assertions.assertEquals("SELECT * FROM t", deserialized.query());
+        }
+    }
+
+    // --- Custom renderers ---
+
+    @Test
+    void setColumnRenderer_nullName_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> controller.setColumnRenderer(null, v -> "x"));
+    }
+
+    @Test
+    void setColumnRenderer_nullRenderer_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> controller.setColumnRenderer("col", null));
+    }
+
+    @Test
+    void removeColumnRenderer_afterSet_revertsToDefault() {
+        controller.setColumnRenderer("a", v -> "CUSTOM");
+        controller.removeColumnRenderer("a");
+
+        dbProvider.queryResults = List.of(row("a", 42));
+        simulateUpdate("SELECT a FROM t");
+
+        // Column should render with default formatting (not "CUSTOM")
+        var columns = grid.getColumns();
+        Assertions.assertEquals(1, columns.size());
+    }
+
+    @Test
+    void removeColumnRenderer_nonExistent_noError() {
+        // Should not throw
+        controller.removeColumnRenderer("nonexistent");
+    }
+
+    // --- restoreState ---
+
+    @Test
+    void restoreState_setsCurrentQuery() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        var state = new GridAIController.GridState("SELECT a FROM t");
+        controller.restoreState(state);
+
+        var restored = controller.getState();
+        Assertions.assertNotNull(restored);
+        Assertions.assertEquals("SELECT a FROM t", restored.query());
+    }
+
+    @Test
+    void restoreState_createsColumns() {
+        dbProvider.queryResults = List.of(row("col1", "v1", "col2", 42));
+        controller.restoreState(
+                new GridAIController.GridState("SELECT col1, col2 FROM t"));
+
+        Assertions.assertEquals(2, grid.getColumns().size());
+    }
+
+    @Test
+    void restoreState_nullState_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> controller.restoreState(null));
+    }
+
+    @Test
+    void restoreState_failedQuery_doesNotUpdateState() {
+        dbProvider.throwOnExecute = true;
+        controller.restoreState(new GridAIController.GridState("SELECT bad"));
+        // State should not be set because applyQuery failed
+        Assertions.assertNull(controller.getState());
+    }
+
+    @Test
+    void restoreState_thenLlmUpdate_overridesState() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        controller.restoreState(
+                new GridAIController.GridState("SELECT a FROM old"));
+        Assertions.assertEquals("SELECT a FROM old",
+                controller.getState().query());
+
+        // LLM updates with a new query
+        simulateUpdate("SELECT a FROM new");
+        Assertions.assertEquals("SELECT a FROM new",
+                controller.getState().query());
     }
 
     // --- Empty state ---

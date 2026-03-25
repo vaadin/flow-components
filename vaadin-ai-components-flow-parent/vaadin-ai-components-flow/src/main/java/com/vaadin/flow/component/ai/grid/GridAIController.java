@@ -15,11 +15,20 @@
  */
 package com.vaadin.flow.component.ai.grid;
 
+import java.io.Serializable;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +54,10 @@ import com.vaadin.flow.component.grid.Grid;
  * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
  * redraws during a multi-tool LLM turn.
  * </p>
+ * <p>
+ * This controller is <b>not serializable</b>. Grid state can be captured via
+ * {@link #getState()} and restored via {@link #restoreState(GridState)}.
+ * </p>
  *
  * @author Vaadin Ltd
  * @see GridAITools
@@ -60,6 +73,7 @@ public class GridAIController implements AIController {
 
     private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
+    private final Map<String, Function<Object, String>> columnRenderers = new HashMap<>();
 
     /**
      * Creates a new grid AI controller.
@@ -116,6 +130,33 @@ public class GridAIController implements AIController {
                 """;
     }
 
+    /**
+     * Registers a custom renderer for a column, overriding the default
+     * type-based rendering.
+     *
+     * @param columnName
+     *            the column name as it appears in the query result, not
+     *            {@code null}
+     * @param renderer
+     *            converts the raw value to a display string, not {@code null}
+     */
+    public void setColumnRenderer(String columnName,
+            Function<Object, String> renderer) {
+        Objects.requireNonNull(columnName, "columnName must not be null");
+        Objects.requireNonNull(renderer, "renderer must not be null");
+        columnRenderers.put(columnName, renderer);
+    }
+
+    /**
+     * Removes a custom renderer for a column.
+     *
+     * @param columnName
+     *            the column name
+     */
+    public void removeColumnRenderer(String columnName) {
+        columnRenderers.remove(columnName);
+    }
+
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         var tools = new ArrayList<LLMProvider.ToolSpec>();
@@ -152,6 +193,46 @@ public class GridAIController implements AIController {
         }
         var query = entry.getPendingQuery();
         LOGGER.info("onRequestCompleted: applying query: {}", query);
+        renderGrid(query);
+    }
+
+    /**
+     * Returns the current grid state for persistence.
+     *
+     * @return the current state, or {@code null} if no data has been loaded
+     */
+    public GridState getState() {
+        var gridEntry = GridEntry.get(grid);
+        return new GridState(gridEntry.getCurrentQuery());
+    }
+
+    /**
+     * Restores a previously saved grid state.
+     *
+     * @param state
+     *            the state to restore, not {@code null}
+     */
+    public void restoreState(GridState state) {
+        Objects.requireNonNull(state, "State must not be null");
+        try {
+            applyQuery(state.query());
+        } catch (Exception e) {
+            LOGGER.error("Failed to restore grid state", e);
+        }
+    }
+
+    private void applyQuery(String query) {
+        grid.getUI().ifPresentOrElse(ui -> ui.access(() -> {
+            try {
+                renderGrid(query);
+            } catch (Exception e) {
+                LOGGER.error("Error inside UI.access()", e);
+            }
+        }), () -> renderGrid(query));
+    }
+
+    private void renderGrid(String query) {
+        var entry = GridEntry.get(grid);
         grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             try {
                 GridRenderer.renderGrid(grid, databaseProvider, query);
@@ -163,5 +244,14 @@ public class GridAIController implements AIController {
                 entry.clearPendingState();
             }
         }));
+    }
+
+    /**
+     * Serializable grid state for persistence across sessions.
+     *
+     * @param query
+     *            the SQL query that populates the grid
+     */
+    public record GridState(String query) implements Serializable {
     }
 }

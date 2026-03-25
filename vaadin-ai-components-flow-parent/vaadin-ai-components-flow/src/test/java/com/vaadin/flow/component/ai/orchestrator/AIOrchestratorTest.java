@@ -1658,6 +1658,35 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void onRequestCompleted_firesBeforeResponseCompleteListener() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var callOrder = new ArrayList<String>();
+        AIController controller = new AIController() {
+            @Override
+            public void onRequestCompleted() {
+                callOrder.add("controller");
+            }
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseCompleteListener(
+                        event -> callOrder.add("listener"))
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals(List.of("controller", "listener"), callOrder,
+                "onRequestCompleted should fire before responseCompleteListener");
+    }
+
+    @Test
     void builder_withNoControllers_explicitToolsIsEmpty() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),

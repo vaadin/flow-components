@@ -38,6 +38,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
+ * @see GridAIController
  */
 public final class GridAITools {
 

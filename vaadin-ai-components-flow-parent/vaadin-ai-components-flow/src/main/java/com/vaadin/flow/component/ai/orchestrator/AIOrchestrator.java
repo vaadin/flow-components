@@ -426,6 +426,16 @@ public class AIOrchestrator implements Serializable {
     }
 
     private void fireResponseCompleteListener(String responseText) {
+        // Notify controllers first so their state is applied before the
+        // response complete listener fires. This ensures that callers of
+        // getState() in the listener see the updated state.
+        for (var controller : controllers) {
+            try {
+                controller.onRequestCompleted();
+            } catch (Exception e) {
+                LOGGER.error("Error in controller onRequestCompleted", e);
+            }
+        }
         if (responseCompleteListener != null) {
             try {
                 responseCompleteListener.onResponseComplete(
@@ -433,13 +443,6 @@ public class AIOrchestrator implements Serializable {
                                 responseText));
             } catch (Exception e) {
                 LOGGER.error("Error in response complete listener", e);
-            }
-        }
-        for (var controller : controllers) {
-            try {
-                controller.onRequestCompleted();
-            } catch (Exception e) {
-                LOGGER.error("Error in controller onRequestCompleted", e);
             }
         }
     }
