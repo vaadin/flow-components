@@ -65,6 +65,7 @@ public class ChartConfigurationApplier implements Serializable {
             .getLogger(ChartConfigurationApplier.class);
 
     public void applyConfiguration(Chart chart, String configJson) {
+        resetConfiguration(chart);
         try {
             JsonNode parsedNode = JacksonUtils.getMapper().readTree(configJson);
             // Handle double-encoded JSON strings from LLM
@@ -513,6 +514,49 @@ public class ChartConfigurationApplier implements Serializable {
                 dataLabels.setFormat(dlNode.get(FORMAT).asString());
             }
         }
+    }
+
+    /**
+     * Resets chart configuration properties that may have been set by a
+     * previous render. This prevents stale settings (tooltip formats, axis
+     * types/categories, pane, color axis, plot options) from leaking across
+     * chart type switches.
+     */
+    private static void resetConfiguration(Chart chart) {
+        Configuration config = chart.getConfiguration();
+
+        // Reset tooltip to defaults
+        config.setTooltip(new Tooltip());
+
+        // Reset axes — remove and recreate to ensure categories, type,
+        // min/max, title are all null (not empty arrays that would trigger
+        // Highcharts category mode)
+        config.removexAxes();
+        config.removeyAxes();
+        config.removezAxes();
+
+        // Reset color axis
+        config.removeColorAxes();
+
+        // Reset pane properties (used by gauge/polar charts)
+        Pane pane = config.getPane();
+        pane.setStartAngle(null);
+        pane.setEndAngle(null);
+        pane.setCenter(null);
+        pane.setSize(null);
+
+        // Reset plot options
+        config.setPlotOptions();
+
+        // Reset legend to defaults
+        config.setLegend(new Legend());
+
+        // Reset chart model properties that are chart-type-specific
+        config.getChart().setInverted(false);
+        config.getChart().setPolar(false);
+
+        // Reset subtitle
+        config.setSubTitle("");
     }
 
 }

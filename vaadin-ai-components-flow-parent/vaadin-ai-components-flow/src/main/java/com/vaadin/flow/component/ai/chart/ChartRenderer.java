@@ -30,10 +30,7 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.GanttSeries;
-import com.vaadin.flow.component.charts.model.Legend;
-import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.Series;
-import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 /**
@@ -86,24 +83,22 @@ public class ChartRenderer {
         if (entry == null || !entry.hasPendingState()) {
             return;
         }
-        try {
-            String configJson = entry.getPendingConfigurationJson();
-            List<String> effectiveQueries = entry.getQueries();
+        String configJson = entry.getPendingConfigurationJson();
+        List<String> effectiveQueries = entry.getQueries();
 
-            if (!effectiveQueries.isEmpty()) {
+        if (!effectiveQueries.isEmpty()) {
+            try {
                 String effectiveConfig = configJson != null ? configJson
                         : ChartSerialization.toJSON(chart.getConfiguration());
                 renderChart(chart, effectiveQueries, effectiveConfig);
-            } else if (configJson != null) {
-                chart.getElement().getNode()
-                        .runWhenAttached(ui -> ui.access(() -> {
-                            resetConfiguration(chart);
-                            configurationApplier.applyConfiguration(chart,
-                                    configJson);
-                        }));
+            } finally {
+                entry.clearPendingState();
             }
-        } finally {
-            entry.clearPendingState();
+        } else {
+            // Config-only: no queries to render yet. Clear only the
+            // data flag but keep pendingConfigurationJson so it's used
+            // when data arrives in a later request.
+            entry.setPendingDataUpdate(false);
         }
     }
 
@@ -130,7 +125,6 @@ public class ChartRenderer {
             config.setSeries(allSeries.toArray(new Series[0]));
 
             if (configJson != null) {
-                resetConfiguration(chart);
                 configurationApplier.applyConfiguration(chart, configJson);
             }
 
@@ -148,49 +142,6 @@ public class ChartRenderer {
             // DashboardChartControllerIT).
             chart.drawChart(true);
         }));
-    }
-
-    /**
-     * Resets chart configuration properties that may have been set by a
-     * previous render. This prevents stale settings (tooltip formats, axis
-     * types/categories, pane, color axis, plot options) from leaking across
-     * chart type switches.
-     */
-    private static void resetConfiguration(Chart chart) {
-        Configuration config = chart.getConfiguration();
-
-        // Reset tooltip to defaults
-        config.setTooltip(new Tooltip());
-
-        // Reset axes — remove and recreate to ensure categories, type,
-        // min/max, title are all null (not empty arrays that would trigger
-        // Highcharts category mode)
-        config.removexAxes();
-        config.removeyAxes();
-        config.removezAxes();
-
-        // Reset color axis
-        config.removeColorAxes();
-
-        // Reset pane properties (used by gauge/polar charts)
-        Pane pane = config.getPane();
-        pane.setStartAngle(null);
-        pane.setEndAngle(null);
-        pane.setCenter(null);
-        pane.setSize(null);
-
-        // Reset plot options
-        config.setPlotOptions();
-
-        // Reset legend to defaults
-        config.setLegend(new Legend());
-
-        // Reset chart model properties that are chart-type-specific
-        config.getChart().setInverted(false);
-        config.getChart().setPolar(false);
-
-        // Reset subtitle
-        config.setSubTitle("");
     }
 
     /**
@@ -244,7 +195,7 @@ public class ChartRenderer {
         // different months).
         if (!NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
             var categories = extractCategories(allItems);
-            if (categories != null) {
+            if (!categories.isEmpty()) {
                 xAxis.setCategories(categories.toArray(new String[0]));
             }
         }
@@ -263,14 +214,14 @@ public class ChartRenderer {
 
     /**
      * Returns unique category names extracted from items (preserving insertion
-     * order), or {@code null} if any item has no name.
+     * order), or an empty list if any item has no name.
      */
     private static List<String> extractCategories(List<DataSeriesItem> items) {
         var seen = new LinkedHashSet<String>();
         for (var item : items) {
             var name = item.getName();
             if (name == null) {
-                return null;
+                return List.of();
             }
             seen.add(name);
         }
