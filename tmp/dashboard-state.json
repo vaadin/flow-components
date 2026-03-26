@@ -1,27 +1,43 @@
 {
   "widgets" : [ {
-    "widgetId" : "chart-2",
+    "widgetId" : "chart-1",
     "title" : "Units Sold by Category",
     "type" : "chart",
+    "colspan" : 2,
+    "rowspan" : 1,
+    "queries" : [ "SELECT CATEGORY AS category, SUM(UNITS_SOLD) AS units_sold FROM PRODUCTS GROUP BY CATEGORY ORDER BY units_sold DESC" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{\"pie\":{\"dataLabels\":{\"enabled\":true,\"format\":\"{point.name}: {point.y}\"}}},\"title\":{\"text\":\"Total Units Sold per Product Category\"},\"tooltip\":{\"pointFormat\":\"<b>{point.y}</b> units\"},\"xAxis\":{\"axisIndex\":0}}"
+  }, {
+    "widgetId" : "chart-6",
+    "title" : "Products Bubble Chart",
+    "type" : "chart",
     "colspan" : 1,
     "rowspan" : 1,
-    "queries" : [ "SELECT CATEGORY AS category, SUM(UNITS_SOLD) AS total_units_sold FROM PRODUCTS GROUP BY CATEGORY ORDER BY total_units_sold DESC" ],
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"credits\":{\"enabled\":false},\"exporting\":{\"enabled\":false},\"legend\":{\"enabled\":true},\"plotOptions\":{},\"title\":{\"text\":\"Total Units Sold per Product Category\"},\"xAxis\":{\"axisIndex\":0}}"
+    "queries" : [ "SELECT PRICE AS _x, UNITS_SOLD AS _y, (PRICE * UNITS_SOLD) AS _z, PRODUCT_NAME AS _name FROM PRODUCTS" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"bubble\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Products: Price vs Units Sold\"},\"tooltip\":{\"pointFormat\":\"<b>{point.name}</b><br/>Price: {point.x}<br/>Units Sold: {point.y}<br/>Revenue: {point.z}\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Price\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Units Sold\"}}}"
   }, {
     "widgetId" : "chart-3",
-    "title" : "Revenue and Salary by Region and Department",
+    "title" : "Monthly Revenue by Region",
     "type" : "chart",
     "colspan" : 2,
-    "rowspan" : 2,
-    "queries" : [ "SELECT REGION AS category, SUM(REVENUE) AS total_revenue FROM SALES GROUP BY REGION ORDER BY REGION", "SELECT DEPARTMENT AS category, AVG(SALARY) AS average_salary FROM EMPLOYEES GROUP BY DEPARTMENT ORDER BY DEPARTMENT" ],
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"bar\"},\"credits\":{\"enabled\":false},\"exporting\":{\"enabled\":false},\"legend\":{\"enabled\":true},\"plotOptions\":{},\"title\":{\"text\":\"Revenue by Region and Average Salary by Department\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Region / Department\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Amount\"}}}"
+    "rowspan" : 1,
+    "queries" : [ "SELECT \"MONTH\" AS category, SUM(CASE WHEN REGION = 'North' THEN REVENUE ELSE 0 END) AS total_revenue FROM SALES GROUP BY \"MONTH\" ORDER BY \"MONTH\"", "SELECT \"MONTH\" AS category, SUM(CASE WHEN REGION = 'South' THEN REVENUE ELSE 0 END) AS total_revenue FROM SALES GROUP BY \"MONTH\" ORDER BY \"MONTH\"", "SELECT \"MONTH\" AS category, SUM(CASE WHEN REGION = 'East' THEN REVENUE ELSE 0 END) AS total_revenue FROM SALES GROUP BY \"MONTH\" ORDER BY \"MONTH\"", "SELECT \"MONTH\" AS category, SUM(CASE WHEN REGION = 'West' THEN REVENUE ELSE 0 END) AS total_revenue FROM SALES GROUP BY \"MONTH\" ORDER BY \"MONTH\"" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"spline\"},\"exporting\":{\"enabled\":false},\"legend\":{\"enabled\":true,\"layout\":\"horizontal\",\"verticalAlign\":\"bottom\"},\"plotOptions\":{\"series\":{\"dataLabels\":{\"enabled\":true}}},\"title\":{\"text\":\"Monthly Revenue by Region\"},\"xAxis\":{\"axisIndex\":0,\"categories\":[\"April\",\"February\",\"January\",\"June\",\"March\",\"May\"],\"title\":{\"text\":\"Month\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Revenue\"}}}"
   }, {
-    "widgetId" : "chart-4",
-    "title" : "Random Range Area Chart",
+    "widgetId" : "chart-2",
+    "title" : "Revenue Share by Region",
     "type" : "chart",
     "colspan" : 1,
     "rowspan" : 1,
-    "queries" : [ "SELECT 1 AS _x, 10 AS _low, 20 AS _high UNION ALL SELECT 2, 15, 25 UNION ALL SELECT 3, 12, 30 UNION ALL SELECT 4, 18, 28 UNION ALL SELECT 5, 14, 22" ],
-    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"arearange\"},\"credits\":{\"enabled\":false},\"exporting\":{\"enabled\":false},\"legend\":{\"enabled\":false},\"plotOptions\":{},\"title\":{\"text\":\"Random Range Area Chart\"},\"xAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"X\"}},\"yAxis\":{\"axisIndex\":0,\"title\":{\"text\":\"Range\"}}}"
+    "queries" : [ "SELECT REGION AS category, SUM(REVENUE) AS total_revenue FROM SALES GROUP BY REGION ORDER BY total_revenue DESC" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"pie\"},\"exporting\":{\"enabled\":false},\"plotOptions\":{\"pie\":{\"dataLabels\":{\"enabled\":true,\"format\":\"{point.name}: {point.percentage:.1f}% ({point.y})\"},\"innerSize\":\"50%\"}},\"title\":{\"text\":\"Revenue Share by Region\"},\"tooltip\":{\"pointFormat\":\"<b>{point.y}</b> ({point.percentage:.1f}%)\"},\"xAxis\":{\"axisIndex\":0}}"
+  }, {
+    "widgetId" : "chart-4",
+    "title" : "Customer Satisfaction",
+    "type" : "chart",
+    "colspan" : 1,
+    "rowspan" : 1,
+    "queries" : [ "SELECT CURRENT_VAL AS _y, TARGET_VAL AS _target FROM KPI_METRICS WHERE METRIC_NAME = 'Customer Satisfaction'" ],
+    "configuration" : "{\"chart\":{\"styledMode\":false,\"type\":\"gauge\"},\"exporting\":{\"enabled\":false},\"pane\":{\"endAngle\":90,\"paneIndex\":0,\"startAngle\":-90},\"plotOptions\":{\"series\":{\"dataLabels\":{\"enabled\":true,\"format\":\"<span style=\\\"font-size:18px\\\">{y}%</span>\"}}},\"title\":{\"text\":\"Customer Satisfaction\"},\"tooltip\":{\"valueSuffix\":\"%\"},\"xAxis\":{\"axisIndex\":0},\"yAxis\":{\"axisIndex\":0,\"max\":100.0,\"min\":0.0,\"title\":{\"text\":\"Score\"}}}"
   } ]
 }

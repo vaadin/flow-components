@@ -142,11 +142,129 @@ public final class ChartAITools {
      * corresponding {@link ColumnNames} constant values.
      */
     private static String resolveColumnNames(String template) {
+        return resolvePlaceholders(template, COLUMN_PARAMS);
+    }
+
+    // @formatter:off
+    private static final Map<String, String> CONFIG_PARAMS = Map.ofEntries(
+            // Top-level sections
+            Map.entry("{c:CHART}",                ConfigurationKeys.CHART),
+            Map.entry("{c:TITLE}",                ConfigurationKeys.TITLE),
+            Map.entry("{c:SUBTITLE}",             ConfigurationKeys.SUBTITLE),
+            Map.entry("{c:TOOLTIP}",              ConfigurationKeys.TOOLTIP),
+            Map.entry("{c:LEGEND}",               ConfigurationKeys.LEGEND),
+            Map.entry("{c:X_AXIS}",               ConfigurationKeys.X_AXIS),
+            Map.entry("{c:Y_AXIS}",               ConfigurationKeys.Y_AXIS),
+            Map.entry("{c:Z_AXIS}",               ConfigurationKeys.Z_AXIS),
+            Map.entry("{c:COLOR_AXIS}",           ConfigurationKeys.COLOR_AXIS),
+            Map.entry("{c:CREDITS}",              ConfigurationKeys.CREDITS),
+            Map.entry("{c:PANE}",                 ConfigurationKeys.PANE),
+            Map.entry("{c:PLOT_OPTIONS}",         ConfigurationKeys.PLOT_OPTIONS),
+            // Common
+            Map.entry("{c:TYPE}",                 ConfigurationKeys.TYPE),
+            Map.entry("{c:TEXT}",                 ConfigurationKeys.TEXT),
+            Map.entry("{c:ENABLED}",              ConfigurationKeys.ENABLED),
+            Map.entry("{c:MIN}",                  ConfigurationKeys.MIN),
+            Map.entry("{c:MAX}",                  ConfigurationKeys.MAX),
+            Map.entry("{c:FORMAT}",               ConfigurationKeys.FORMAT),
+            // Chart model
+            Map.entry("{c:BACKGROUND_COLOR}",     ConfigurationKeys.BACKGROUND_COLOR),
+            Map.entry("{c:BORDER_COLOR}",         ConfigurationKeys.BORDER_COLOR),
+            Map.entry("{c:BORDER_WIDTH}",         ConfigurationKeys.BORDER_WIDTH),
+            Map.entry("{c:BORDER_RADIUS}",        ConfigurationKeys.BORDER_RADIUS),
+            Map.entry("{c:WIDTH}",                ConfigurationKeys.WIDTH),
+            Map.entry("{c:HEIGHT}",               ConfigurationKeys.HEIGHT),
+            Map.entry("{c:MARGIN_TOP}",           ConfigurationKeys.MARGIN_TOP),
+            Map.entry("{c:MARGIN_RIGHT}",         ConfigurationKeys.MARGIN_RIGHT),
+            Map.entry("{c:MARGIN_BOTTOM}",        ConfigurationKeys.MARGIN_BOTTOM),
+            Map.entry("{c:MARGIN_LEFT}",          ConfigurationKeys.MARGIN_LEFT),
+            Map.entry("{c:SPACING_TOP}",          ConfigurationKeys.SPACING_TOP),
+            Map.entry("{c:SPACING_RIGHT}",        ConfigurationKeys.SPACING_RIGHT),
+            Map.entry("{c:SPACING_BOTTOM}",       ConfigurationKeys.SPACING_BOTTOM),
+            Map.entry("{c:SPACING_LEFT}",         ConfigurationKeys.SPACING_LEFT),
+            Map.entry("{c:PLOT_BACKGROUND_COLOR}", ConfigurationKeys.PLOT_BACKGROUND_COLOR),
+            Map.entry("{c:PLOT_BORDER_COLOR}",    ConfigurationKeys.PLOT_BORDER_COLOR),
+            Map.entry("{c:PLOT_BORDER_WIDTH}",    ConfigurationKeys.PLOT_BORDER_WIDTH),
+            Map.entry("{c:INVERTED}",             ConfigurationKeys.INVERTED),
+            Map.entry("{c:POLAR}",                ConfigurationKeys.POLAR),
+            Map.entry("{c:ANIMATION}",            ConfigurationKeys.ANIMATION),
+            Map.entry("{c:STYLED_MODE}",          ConfigurationKeys.STYLED_MODE),
+            Map.entry("{c:ZOOM_TYPE}",            ConfigurationKeys.ZOOM_TYPE),
+            // Tooltip
+            Map.entry("{c:POINT_FORMAT}",         ConfigurationKeys.POINT_FORMAT),
+            Map.entry("{c:HEADER_FORMAT}",        ConfigurationKeys.HEADER_FORMAT),
+            Map.entry("{c:SHARED}",               ConfigurationKeys.SHARED),
+            Map.entry("{c:VALUE_SUFFIX}",         ConfigurationKeys.VALUE_SUFFIX),
+            Map.entry("{c:VALUE_PREFIX}",         ConfigurationKeys.VALUE_PREFIX),
+            // Legend
+            Map.entry("{c:ALIGN}",               ConfigurationKeys.ALIGN),
+            Map.entry("{c:VERTICAL_ALIGN}",      ConfigurationKeys.VERTICAL_ALIGN),
+            Map.entry("{c:LAYOUT}",              ConfigurationKeys.LAYOUT),
+            // Axis
+            Map.entry("{c:CATEGORIES}",          ConfigurationKeys.CATEGORIES),
+            // Color axis
+            Map.entry("{c:MIN_COLOR}",           ConfigurationKeys.MIN_COLOR),
+            Map.entry("{c:MAX_COLOR}",           ConfigurationKeys.MAX_COLOR),
+            // Credits
+            Map.entry("{c:HREF}",                ConfigurationKeys.HREF),
+            // Pane
+            Map.entry("{c:START_ANGLE}",         ConfigurationKeys.START_ANGLE),
+            Map.entry("{c:END_ANGLE}",           ConfigurationKeys.END_ANGLE),
+            Map.entry("{c:CENTER}",              ConfigurationKeys.CENTER),
+            Map.entry("{c:SIZE}",                ConfigurationKeys.SIZE),
+            // Plot options
+            Map.entry("{c:SERIES}",              ConfigurationKeys.SERIES),
+            Map.entry("{c:PIE}",                 ConfigurationKeys.PIE),
+            Map.entry("{c:COLUMN}",              ConfigurationKeys.COLUMN),
+            Map.entry("{c:BAR}",                 ConfigurationKeys.BAR),
+            Map.entry("{c:STACKING}",            ConfigurationKeys.STACKING),
+            Map.entry("{c:DATA_LABELS}",         ConfigurationKeys.DATA_LABELS),
+            Map.entry("{c:MARKER}",              ConfigurationKeys.MARKER),
+            Map.entry("{c:INNER_SIZE}",          ConfigurationKeys.INNER_SIZE)
+    );
+    // @formatter:on
+
+    /**
+     * Replaces {@code {c:NAME}} placeholders in the template with the
+     * corresponding {@link ConfigurationKeys} constant values.
+     */
+    private static String resolveConfigKeys(String template) {
+        return resolvePlaceholders(template, CONFIG_PARAMS);
+    }
+
+    private static String resolvePlaceholders(String template,
+            Map<String, String> params) {
         var result = template;
-        for (var entry : COLUMN_PARAMS.entrySet()) {
+        for (var entry : params.entrySet()) {
             result = result.replace(entry.getKey(), entry.getValue());
         }
         return result;
+    }
+
+    /**
+     * Parses and validates the queries array from the tool arguments. Returns
+     * an error message if validation fails, or {@code null} if all queries are
+     * valid SELECT statements.
+     */
+    private static String validateQueries(JsonNode queriesNode,
+            List<String> out) {
+        if (queriesNode == null || queriesNode.isNull()) {
+            return "Error updating chart data: 'queries' parameter is required.";
+        }
+        if (!queriesNode.isArray()) {
+            return "Error updating chart data: 'queries' must be an array.";
+        }
+        for (JsonNode q : queriesNode) {
+            if (q == null || q.isNull()) {
+                return "Error updating chart data: 'queries' must not contain null elements.";
+            }
+            String query = q.asString().strip();
+            if (query.isEmpty()) {
+                return "Error updating chart data: 'queries' must not contain empty strings.";
+            }
+            out.add(query);
+        }
+        return null;
     }
 
     private ChartAITools() {
@@ -255,7 +373,7 @@ public final class ChartAITools {
                         IMPORTANT: Do NOT include 'series' in the configuration - chart data is managed separately via update_chart_data_source tool.
 
                         Parameters:
-                        - chartId (string, required): The ID of the chart to update
+                        - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
                         - configuration (object, required): Highcharts configuration object (excluding series)
 
                         Changes are applied when the request completes.""";
@@ -263,7 +381,7 @@ public final class ChartAITools {
 
             @Override
             public String getParametersSchema() {
-                return """
+                var template = """
                         {
                           "type": "object",
                           "properties": {
@@ -275,198 +393,198 @@ public final class ChartAITools {
                               "type": "object",
                               "description": "Highcharts configuration object. Follows the same structure as the Highcharts options object (as returned by get_chart_state), excluding series data which is managed via update_chart_data_source. CRITICAL: Always include chart.type.",
                               "properties": {
-                                "chart": {
+                                "{c:CHART}": {
                                   "type": "object",
                                   "description": "Chart model options - MUST include 'type' property. Also supports dimensions, margins, spacing, borders, background",
                                   "properties": {
-                                    "type": {
+                                    "{c:TYPE}": {
                                       "type": "string",
                                       "description": "REQUIRED: Chart type - ALWAYS specify this property",
                                       "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
                                     },
-                                    "backgroundColor": { "type": "string", "description": "Background color (e.g., '#ffffff')" },
-                                    "borderColor": { "type": "string", "description": "Border color" },
-                                    "borderWidth": { "type": "number", "description": "Border width in pixels" },
-                                    "borderRadius": { "type": "number", "description": "Border radius in pixels" },
-                                    "width": { "type": "number", "description": "Chart width in pixels" },
-                                    "height": { "oneOf": [{ "type": "number", "description": "Height in pixels" }, { "type": "string", "description": "Height as string (e.g., '400px', '100%')" }] },
-                                    "marginTop": { "type": "number" },
-                                    "marginRight": { "type": "number" },
-                                    "marginBottom": { "type": "number" },
-                                    "marginLeft": { "type": "number" },
-                                    "spacingTop": { "type": "number" },
-                                    "spacingRight": { "type": "number" },
-                                    "spacingBottom": { "type": "number" },
-                                    "spacingLeft": { "type": "number" },
-                                    "plotBackgroundColor": { "type": "string" },
-                                    "plotBorderColor": { "type": "string" },
-                                    "plotBorderWidth": { "type": "number" },
-                                    "inverted": { "type": "boolean", "description": "Invert axes" },
-                                    "polar": { "type": "boolean", "description": "Polar chart" },
-                                    "animation": { "type": "boolean" },
-                                    "styledMode": { "type": "boolean" },
-                                    "zoomType": { "type": "string", "enum": ["x", "y", "xy"] }
+                                    "{c:BACKGROUND_COLOR}": { "type": "string", "description": "Background color (e.g., '#ffffff')" },
+                                    "{c:BORDER_COLOR}": { "type": "string", "description": "Border color" },
+                                    "{c:BORDER_WIDTH}": { "type": "number", "description": "Border width in pixels" },
+                                    "{c:BORDER_RADIUS}": { "type": "number", "description": "Border radius in pixels" },
+                                    "{c:WIDTH}": { "type": "number", "description": "Chart width in pixels" },
+                                    "{c:HEIGHT}": { "oneOf": [{ "type": "number", "description": "Height in pixels" }, { "type": "string", "description": "Height as string (e.g., '400px', '100%')" }] },
+                                    "{c:MARGIN_TOP}": { "type": "number" },
+                                    "{c:MARGIN_RIGHT}": { "type": "number" },
+                                    "{c:MARGIN_BOTTOM}": { "type": "number" },
+                                    "{c:MARGIN_LEFT}": { "type": "number" },
+                                    "{c:SPACING_TOP}": { "type": "number" },
+                                    "{c:SPACING_RIGHT}": { "type": "number" },
+                                    "{c:SPACING_BOTTOM}": { "type": "number" },
+                                    "{c:SPACING_LEFT}": { "type": "number" },
+                                    "{c:PLOT_BACKGROUND_COLOR}": { "type": "string" },
+                                    "{c:PLOT_BORDER_COLOR}": { "type": "string" },
+                                    "{c:PLOT_BORDER_WIDTH}": { "type": "number" },
+                                    "{c:INVERTED}": { "type": "boolean", "description": "Invert axes" },
+                                    "{c:POLAR}": { "type": "boolean", "description": "Polar chart" },
+                                    "{c:ANIMATION}": { "type": "boolean" },
+                                    "{c:STYLED_MODE}": { "type": "boolean" },
+                                    "{c:ZOOM_TYPE}": { "type": "string", "enum": ["x", "y", "xy"] }
                                   }
                                 },
-                                "title": {
+                                "{c:TITLE}": {
                                   "oneOf": [
                                     { "type": "string", "description": "Title text" },
-                                    { "type": "object", "properties": { "text": { "type": "string" } } }
+                                    { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } }
                                   ]
                                 },
-                                "subtitle": {
+                                "{c:SUBTITLE}": {
                                   "oneOf": [
                                     { "type": "string", "description": "Subtitle text" },
-                                    { "type": "object", "properties": { "text": { "type": "string" } } }
+                                    { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } }
                                   ]
                                 },
-                                "xAxis": {
+                                "{c:X_AXIS}": {
                                   "type": "object",
                                   "description": "X-axis configuration",
                                   "properties": {
-                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
-                                    "title": { "type": "object", "properties": { "text": { "type": "string" } } },
-                                    "categories": { "type": "array", "items": { "type": "string" } },
-                                    "min": { "type": "number" },
-                                    "max": { "type": "number" }
+                                    "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
+                                    "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } },
+                                    "{c:CATEGORIES}": { "type": "array", "items": { "type": "string" } },
+                                    "{c:MIN}": { "type": "number" },
+                                    "{c:MAX}": { "type": "number" }
                                   }
                                 },
-                                "yAxis": {
+                                "{c:Y_AXIS}": {
                                   "type": "object",
                                   "description": "Y-axis configuration",
                                   "properties": {
-                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
-                                    "title": { "type": "object", "properties": { "text": { "type": "string" } } },
-                                    "min": { "type": "number" },
-                                    "max": { "type": "number" }
+                                    "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
+                                    "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } },
+                                    "{c:MIN}": { "type": "number" },
+                                    "{c:MAX}": { "type": "number" }
                                   }
                                 },
-                                "zAxis": {
+                                "{c:Z_AXIS}": {
                                   "type": "object",
                                   "description": "Z-axis configuration (for 3D and bubble charts)",
                                   "properties": {
-                                    "type": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
-                                    "title": { "type": "object", "properties": { "text": { "type": "string" } } },
-                                    "min": { "type": "number" },
-                                    "max": { "type": "number" }
+                                    "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
+                                    "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } },
+                                    "{c:MIN}": { "type": "number" },
+                                    "{c:MAX}": { "type": "number" }
                                   }
                                 },
-                                "colorAxis": {
+                                "{c:COLOR_AXIS}": {
                                   "type": "object",
                                   "description": "Color axis for heatmaps",
                                   "properties": {
-                                    "min": { "type": "number" },
-                                    "max": { "type": "number" },
-                                    "minColor": { "type": "string" },
-                                    "maxColor": { "type": "string" }
+                                    "{c:MIN}": { "type": "number" },
+                                    "{c:MAX}": { "type": "number" },
+                                    "{c:MIN_COLOR}": { "type": "string" },
+                                    "{c:MAX_COLOR}": { "type": "string" }
                                   }
                                 },
-                                "tooltip": {
+                                "{c:TOOLTIP}": {
                                   "type": "object",
                                   "description": "Tooltip configuration",
                                   "properties": {
-                                    "pointFormat": { "type": "string" },
-                                    "headerFormat": { "type": "string" },
-                                    "shared": { "type": "boolean" },
-                                    "valueSuffix": { "type": "string" },
-                                    "valuePrefix": { "type": "string" }
+                                    "{c:POINT_FORMAT}": { "type": "string" },
+                                    "{c:HEADER_FORMAT}": { "type": "string" },
+                                    "{c:SHARED}": { "type": "boolean" },
+                                    "{c:VALUE_SUFFIX}": { "type": "string" },
+                                    "{c:VALUE_PREFIX}": { "type": "string" }
                                   }
                                 },
-                                "legend": {
+                                "{c:LEGEND}": {
                                   "type": "object",
                                   "description": "Legend configuration",
                                   "properties": {
-                                    "enabled": { "type": "boolean" },
-                                    "align": { "type": "string", "enum": ["left", "center", "right"] },
-                                    "verticalAlign": { "type": "string", "enum": ["top", "middle", "bottom"] },
-                                    "layout": { "type": "string", "enum": ["horizontal", "vertical"] }
+                                    "{c:ENABLED}": { "type": "boolean" },
+                                    "{c:ALIGN}": { "type": "string", "enum": ["left", "center", "right"] },
+                                    "{c:VERTICAL_ALIGN}": { "type": "string", "enum": ["top", "middle", "bottom"] },
+                                    "{c:LAYOUT}": { "type": "string", "enum": ["horizontal", "vertical"] }
                                   }
                                 },
-                                "credits": {
+                                "{c:CREDITS}": {
                                   "type": "object",
                                   "description": "Credits configuration",
                                   "properties": {
-                                    "enabled": { "type": "boolean" },
-                                    "text": { "type": "string" },
-                                    "href": { "type": "string" }
+                                    "{c:ENABLED}": { "type": "boolean" },
+                                    "{c:TEXT}": { "type": "string" },
+                                    "{c:HREF}": { "type": "string" }
                                   }
                                 },
-                                "pane": {
+                                "{c:PANE}": {
                                   "type": "object",
                                   "description": "Pane configuration (for gauges and polar charts)",
                                   "properties": {
-                                    "startAngle": { "type": "number" },
-                                    "endAngle": { "type": "number" },
-                                    "center": { "type": "array", "items": { "type": "string" }, "description": "Center position ['50%', '50%']" },
-                                    "size": { "type": "string", "description": "Size (e.g., '100%')" }
+                                    "{c:START_ANGLE}": { "type": "number" },
+                                    "{c:END_ANGLE}": { "type": "number" },
+                                    "{c:CENTER}": { "type": "array", "items": { "type": "string" }, "description": "Center position ['50%', '50%']" },
+                                    "{c:SIZE}": { "type": "string", "description": "Size (e.g., '100%')" }
                                   }
                                 },
-                                "plotOptions": {
+                                "{c:PLOT_OPTIONS}": {
                                   "type": "object",
                                   "description": "Default options for series types. Use 'series' key for options applying to all series, or a chart type key (e.g., 'pie', 'column') for type-specific options.",
                                   "properties": {
-                                    "series": {
+                                    "{c:SERIES}": {
                                       "type": "object",
                                       "description": "Default options for all series types",
                                       "properties": {
-                                        "stacking": { "type": "string", "enum": ["normal", "percent"], "description": "Stack series by value or percentage" },
-                                        "dataLabels": {
+                                        "{c:STACKING}": { "type": "string", "enum": ["normal", "percent"], "description": "Stack series by value or percentage" },
+                                        "{c:DATA_LABELS}": {
                                           "type": "object",
                                           "properties": {
-                                            "enabled": { "type": "boolean" },
-                                            "format": { "type": "string", "description": "Label format string" }
+                                            "{c:ENABLED}": { "type": "boolean" },
+                                            "{c:FORMAT}": { "type": "string", "description": "Label format string" }
                                           }
                                         },
-                                        "marker": {
+                                        "{c:MARKER}": {
                                           "type": "object",
                                           "properties": {
-                                            "enabled": { "type": "boolean" }
+                                            "{c:ENABLED}": { "type": "boolean" }
                                           }
                                         }
                                       }
                                     },
-                                    "pie": {
+                                    "{c:PIE}": {
                                       "type": "object",
                                       "description": "Default options for pie series",
                                       "properties": {
-                                        "innerSize": { "type": "string", "description": "Inner diameter for donut charts (e.g., '50%')" },
-                                        "dataLabels": {
+                                        "{c:INNER_SIZE}": { "type": "string", "description": "Inner diameter for donut charts (e.g., '50%')" },
+                                        "{c:DATA_LABELS}": {
                                           "type": "object",
                                           "properties": {
-                                            "enabled": { "type": "boolean" },
-                                            "format": { "type": "string" }
+                                            "{c:ENABLED}": { "type": "boolean" },
+                                            "{c:FORMAT}": { "type": "string" }
                                           }
                                         }
                                       }
                                     },
-                                    "column": {
+                                    "{c:COLUMN}": {
                                       "type": "object",
                                       "description": "Default options for column series",
                                       "properties": {
-                                        "stacking": { "type": "string", "enum": ["normal", "percent"] },
-                                        "dataLabels": {
+                                        "{c:STACKING}": { "type": "string", "enum": ["normal", "percent"] },
+                                        "{c:DATA_LABELS}": {
                                           "type": "object",
                                           "properties": {
-                                            "enabled": { "type": "boolean" },
-                                            "format": { "type": "string" }
+                                            "{c:ENABLED}": { "type": "boolean" },
+                                            "{c:FORMAT}": { "type": "string" }
                                           }
                                         },
-                                        "borderRadius": { "type": "number", "description": "Border radius for column corners" }
+                                        "{c:BORDER_RADIUS}": { "type": "number", "description": "Border radius for column corners" }
                                       }
                                     },
-                                    "bar": {
+                                    "{c:BAR}": {
                                       "type": "object",
                                       "description": "Default options for bar series",
                                       "properties": {
-                                        "stacking": { "type": "string", "enum": ["normal", "percent"] },
-                                        "dataLabels": {
+                                        "{c:STACKING}": { "type": "string", "enum": ["normal", "percent"] },
+                                        "{c:DATA_LABELS}": {
                                           "type": "object",
                                           "properties": {
-                                            "enabled": { "type": "boolean" },
-                                            "format": { "type": "string" }
+                                            "{c:ENABLED}": { "type": "boolean" },
+                                            "{c:FORMAT}": { "type": "string" }
                                           }
                                         },
-                                        "borderRadius": { "type": "number" }
+                                        "{c:BORDER_RADIUS}": { "type": "number" }
                                       }
                                     }
                                   }
@@ -476,6 +594,8 @@ public final class ChartAITools {
                           },
                           "required": ["configuration"]
                         }""";
+
+                return resolveConfigKeys(template);
             }
 
             @Override
@@ -589,7 +709,7 @@ public final class ChartAITools {
                                 Optional: any pattern supporting DataSeriesItem accepts a {COLOR} column for per-point coloring.
 
                                 Parameters:
-                                - chartId (string, required): The ID of the chart to update
+                                - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
                                 - queries (array of strings, required): SQL SELECT queries, one per series
 
                                 Changes are applied when the request completes.""");
@@ -621,16 +741,11 @@ public final class ChartAITools {
                     JsonNode args = JacksonUtils.readTree(arguments);
                     String chartId = resolveChartId(args, callbacks);
 
-                    JsonNode queriesNode = args.get("queries");
-                    if (queriesNode == null || queriesNode.isNull()) {
-                        return "Error updating chart data: 'queries' parameter is required.";
-                    }
-                    if (!queriesNode.isArray()) {
-                        return "Error updating chart data: 'queries' must be an array.";
-                    }
                     List<String> queries = new ArrayList<>();
-                    for (JsonNode q : queriesNode) {
-                        queries.add(q.asString());
+                    String validationError = validateQueries(
+                            args.get("queries"), queries);
+                    if (validationError != null) {
+                        return validationError;
                     }
 
                     callbacks.updateData(chartId, queries);

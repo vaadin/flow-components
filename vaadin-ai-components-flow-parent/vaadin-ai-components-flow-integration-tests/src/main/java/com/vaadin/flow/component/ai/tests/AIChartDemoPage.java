@@ -63,11 +63,11 @@ public class AIChartDemoPage extends HorizontalLayout {
         var chartController = new ChartAIController(chart,
                 new InMemoryDatabaseProvider());
 
-        chartController.addStateChangeListener(event -> {
-            ChartState state = event.getState();
-            System.out.println(
-                    "Chart state changed - Queries: " + state.queries());
-        });
+        // chartController.addStateChangeListener(event -> {
+        //     ChartState state = event.getState();
+        //     System.out.println(
+        //             "Chart state changed - Queries: " + state.queries());
+        // });
 
         var apiKey = System.getenv("OPENAI_API_KEY");
         var model = OpenAiStreamingChatModel.builder().apiKey(apiKey)
@@ -84,16 +84,16 @@ public class AIChartDemoPage extends HorizontalLayout {
         restoreStateButton.setEnabled(false);
         restoreStateButton.addClickListener(e -> {
             if (savedState != null) {
-                chartController.restoreState(savedState);
+                // chartController.restoreState(savedState);
             }
         });
 
         var saveStateButton = new NativeButton("Save Current State");
         saveStateButton.addClickListener(e -> {
-            savedState = chartController.getState();
-            if (savedState != null) {
-                restoreStateButton.setEnabled(true);
-            }
+            // savedState = chartController.getState();
+            // if (savedState != null) {
+            //     restoreStateButton.setEnabled(true);
+            // }
         });
 
         var buttonBar = new HorizontalLayout(saveStateButton,

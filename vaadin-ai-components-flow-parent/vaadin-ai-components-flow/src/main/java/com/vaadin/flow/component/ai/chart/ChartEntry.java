@@ -181,9 +181,6 @@ public class ChartEntry implements Serializable {
      * @return the state as a JSON string, never {@code null}
      */
     public static String getStateAsJson(Chart chart, String chartId) {
-        // Ensure entry exists
-        getOrCreate(chart, chartId);
-
         ObjectNode result = JacksonUtils.createObjectNode();
         result.put("chartId", chartId);
 

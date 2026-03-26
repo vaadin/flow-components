@@ -72,24 +72,6 @@ public class ChartRenderer {
     }
 
     /**
-     * Returns the data converter.
-     *
-     * @return the data converter
-     */
-    public DataConverter getDataConverter() {
-        return dataConverter;
-    }
-
-    /**
-     * Returns the configuration applier.
-     *
-     * @return the configuration applier
-     */
-    public ChartConfigurationApplier getConfigurationApplier() {
-        return configurationApplier;
-    }
-
-    /**
      * Applies pending state from the chart's {@link ChartEntry} if present.
      * After applying, the pending state is cleared.
      *
@@ -258,18 +240,22 @@ public class ChartRenderer {
     }
 
     /**
-     * Checks whether the first non-null X value looks like an epoch millisecond
-     * timestamp (after year 2000).
+     * Checks whether all non-null X values look like epoch millisecond
+     * timestamps (after year 2000).
      */
     private static boolean hasDatetimeXValues(List<DataSeriesItem> items) {
         // Epoch ms for 2000-01-01
         final long EPOCH_MS_YEAR_2000 = 946_684_800_000L;
+        boolean found = false;
         for (var item : items) {
             var x = item.getX();
             if (x != null) {
-                return x.longValue() > EPOCH_MS_YEAR_2000;
+                if (x.longValue() <= EPOCH_MS_YEAR_2000) {
+                    return false;
+                }
+                found = true;
             }
         }
-        return false;
+        return found;
     }
 }

@@ -19,9 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.UUID;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
@@ -52,13 +50,10 @@ import com.vaadin.flow.component.charts.Chart;
  */
 public class ChartAIController implements AIController {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(ChartAIController.class);
-
-    private static final String DEFAULT_CHART_ID = "chart";
+    private final String chartId = UUID.randomUUID().toString();
 
     private static final String SYSTEM_PROMPT = """
-            You have chart visualization tools. Follow this workflow:
+            You have chart visualization tools. Follow this workflow when working with Charts:
 
             1. ALWAYS call get_chart_state() FIRST before making changes
             2. Call get_database_schema() to understand available data
@@ -75,7 +70,6 @@ public class ChartAIController implements AIController {
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
     private final ChartRenderer chartRenderer;
-    private final List<ChartStateChangeListener> stateChangeListeners = new ArrayList<>();
 
     /**
      * Creates a new AI chart controller.
@@ -102,47 +96,6 @@ public class ChartAIController implements AIController {
      */
     public void setDataConverter(DataConverter dataConverter) {
         chartRenderer.setDataConverter(dataConverter);
-    }
-
-    /**
-     * Returns the data converter.
-     *
-     * @return the data converter
-     */
-    public DataConverter getDataConverter() {
-        return chartRenderer.getDataConverter();
-    }
-
-    /**
-     * Returns the configuration applier.
-     *
-     * @return the configuration applier
-     */
-    public ChartConfigurationApplier getConfigurationApplier() {
-        return chartRenderer.getConfigurationApplier();
-    }
-
-    /**
-     * Adds a listener for chart state changes.
-     *
-     * @param listener
-     *            the listener to add, not {@code null}
-     */
-    public void addStateChangeListener(ChartStateChangeListener listener) {
-        Objects.requireNonNull(listener, "Listener cannot be null");
-        stateChangeListeners.add(listener);
-    }
-
-    /**
-     * Removes a previously added state change listener.
-     *
-     * @param listener
-     *            the listener to remove
-     * @return true if the listener was found and removed
-     */
-    public boolean removeStateChangeListener(
-            ChartStateChangeListener listener) {
-        return stateChangeListeners.remove(listener);
     }
 
     /**
@@ -173,6 +126,11 @@ public class ChartAIController implements AIController {
 
             @Override
             public void updateData(String chartId, List<String> queries) {
+                // Execute queries eagerly to validate them. If a query
+                // is invalid, the exception propagates back to the LLM
+                // as an error so it can fix the query. Results are
+                // discarded here; they will be re-executed at render
+                // time in ChartRenderer.
                 for (String q : queries) {
                     databaseProvider.executeQuery(q);
                 }
@@ -183,7 +141,7 @@ public class ChartAIController implements AIController {
 
             @Override
             public Set<String> getChartIds() {
-                return Set.of(DEFAULT_CHART_ID);
+                return Set.of(chartId);
             }
         }));
         return tools;
@@ -191,59 +149,6 @@ public class ChartAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        try {
-            chartRenderer.applyPendingState(chart);
-            fireStateChangeEvent();
-        } catch (Exception e) {
-            LOGGER.error("Error rendering chart", e);
-        }
-    }
-
-    /**
-     * Gets the current chart state for persistence.
-     *
-     * @return the current state, or {@code null} if no chart has been created
-     */
-    public ChartEntry.ChartState getState() {
-        return ChartEntry.getState(chart);
-    }
-
-    /**
-     * Restores a previously saved chart state.
-     *
-     * @param state
-     *            the state to restore
-     */
-    public void restoreState(ChartEntry.ChartState state) {
-        ChartEntry entry = ChartEntry.getOrCreate(chart, DEFAULT_CHART_ID);
-        entry.setQueries(state.queries());
-        if (!state.queries().isEmpty() && state.configuration() != null) {
-            try {
-                chartRenderer.renderChart(chart, state.queries(),
-                        state.configuration());
-            } catch (Exception e) {
-                LOGGER.error("Failed to restore chart", e);
-            }
-        }
-    }
-
-    // ===== Event Firing =====
-
-    private void fireStateChangeEvent() {
-        if (stateChangeListeners.isEmpty()) {
-            return;
-        }
-        ChartEntry.ChartState state = getState();
-        if (state != null) {
-            ChartStateChangeEvent event = new ChartStateChangeEvent(this,
-                    state);
-            for (ChartStateChangeListener listener : stateChangeListeners) {
-                try {
-                    listener.onStateChange(event);
-                } catch (Exception e) {
-                    LOGGER.error("Error in state change listener", e);
-                }
-            }
-        }
+        chartRenderer.applyPendingState(chart);
     }
 }
