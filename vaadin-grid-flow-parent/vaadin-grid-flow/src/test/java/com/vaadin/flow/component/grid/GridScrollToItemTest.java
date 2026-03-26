@@ -19,55 +19,55 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class GridScrollToItemTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class GridScrollToItemTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Grid<String> grid;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         grid = new Grid<>();
         grid.setPageSize(50);
     }
 
     @Test
-    public void listDataProvider_scrollToItem_loadsCorrectRange() {
+    void listDataProvider_scrollToItem_loadsCorrectRange() {
         List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
                 .toList();
 
         grid.setItems(items);
 
         grid.scrollToItem(items.get(500));
-        Assert.assertEquals("500-550", getViewportRange(grid));
+        Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
-    public void lazyDataProvider_noItemIndexProvider_scrollToItem_throwsUnsupportedOperationException() {
+    void lazyDataProvider_noItemIndexProvider_scrollToItem_throwsUnsupportedOperationException() {
         List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
                 .toList();
 
         grid.setItems(
                 q -> items.stream().skip(q.getOffset()).limit(q.getLimit()));
-        Assert.assertThrows(UnsupportedOperationException.class,
+        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> grid.scrollToItem(items.get(500)));
     }
 
     @Test
-    public void lazyDataProvider_withItemIndexProvider_scrollToItem_loadsCorrectRange() {
+    void lazyDataProvider_withItemIndexProvider_scrollToItem_loadsCorrectRange() {
         List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
                 .toList();
 
@@ -76,22 +76,22 @@ public class GridScrollToItemTest {
                 .setItemIndexProvider((item, query) -> items.indexOf(item));
 
         grid.scrollToItem(items.get(500));
-        Assert.assertEquals("500-550", getViewportRange(grid));
+        Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
-    public void scrollToNonExistingItem_noSuchElementExceptionThrown() {
+    void scrollToNonExistingItem_noSuchElementExceptionThrown() {
         List<String> items = IntStream.range(0, 10).mapToObj(String::valueOf)
                 .toList();
 
         grid.setItems(items);
 
-        Assert.assertThrows(NoSuchElementException.class,
+        Assertions.assertThrows(NoSuchElementException.class,
                 () -> grid.scrollToItem("Not present"));
     }
 
     @Test
-    public void scrollToItem_afterAttach_schedulesJsExecution() {
+    void scrollToItem_afterAttach_schedulesJsExecution() {
         grid.setItems("Item 0", "Item 1");
         ui.add(grid);
         grid.scrollToItem("Item 0");
@@ -101,7 +101,7 @@ public class GridScrollToItemTest {
     }
 
     @Test
-    public void scrollToItem_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToItem_beforeAttach_thenAttach_schedulesJsExecution() {
         grid.setItems("Item 0", "Item 1");
         grid.scrollToItem("Item 0");
         grid.scrollToItem("Item 0");
@@ -111,7 +111,7 @@ public class GridScrollToItemTest {
     }
 
     @Test
-    public void scrollToIndex_scrollToItem_onlyScrollToItemExecuted() {
+    void scrollToIndex_scrollToItem_onlyScrollToItemExecuted() {
         grid.setItems("Item 0", "Item 1");
         ui.add(grid);
 
@@ -127,12 +127,15 @@ public class GridScrollToItemTest {
                 .key(expectedItem);
 
         var invocations = getJavaScriptScrollInvocations();
-        Assert.assertEquals(1, invocations.size());
+        Assertions.assertEquals(1, invocations.size());
 
         var invocation = invocations.get(0);
-        Assert.assertTrue(invocation.getExpression().contains("scrollToItem"));
-        Assert.assertEquals(expectedItemKey, invocation.getParameters().get(1));
-        Assert.assertEquals(expectedIndex, invocation.getParameters().get(2));
+        Assertions.assertTrue(
+                invocation.getExpression().contains("scrollToItem"));
+        Assertions.assertEquals(expectedItemKey,
+                invocation.getParameters().get(1));
+        Assertions.assertEquals(expectedIndex,
+                invocation.getParameters().get(2));
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {

@@ -19,166 +19,172 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class SvgIconTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class SvgIconTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void emptyConstructor_hasNoSrc() {
+    void emptyConstructor_hasNoSrc() {
         var icon = new SvgIcon();
-        Assert.assertNull(icon.getSrc());
-        Assert.assertNull(icon.getElement().getAttribute("src"));
+        Assertions.assertNull(icon.getSrc());
+        Assertions.assertNull(icon.getElement().getAttribute("src"));
     }
 
     @Test
-    public void sourceConstructor_hasSrc() {
+    void sourceConstructor_hasSrc() {
         var path = "path/to/file.svg";
         var icon = new SvgIcon(path);
-        Assert.assertEquals(path, icon.getSrc());
-        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assertions.assertEquals(path, icon.getSrc());
+        Assertions.assertEquals(path, icon.getElement().getAttribute("src"));
     }
 
     @Test
-    public void sourceWithSymbolConstructor_hasSrcAndSymbol() {
+    void sourceWithSymbolConstructor_hasSrcAndSymbol() {
         var path = "path/to/file.svg";
         var symbol = "symbol";
         var icon = new SvgIcon(path, symbol);
-        Assert.assertEquals(path, icon.getSrc());
-        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
-        Assert.assertEquals(symbol, icon.getSymbol());
-        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+        Assertions.assertEquals(path, icon.getSrc());
+        Assertions.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assertions.assertEquals(symbol, icon.getSymbol());
+        Assertions.assertEquals(symbol,
+                icon.getElement().getProperty("symbol"));
     }
 
     @Test
-    public void streamResourceConstructor_hasSrc() {
+    void streamResourceConstructor_hasSrc() {
         var resource = getStreamResource();
         var icon = new SvgIcon(resource);
-        Assert.assertTrue(icon.getSrc().contains("image.svg"));
-        Assert.assertTrue(
+        Assertions.assertTrue(icon.getSrc().contains("image.svg"));
+        Assertions.assertTrue(
                 icon.getElement().getAttribute("src").contains("image.svg"));
     }
 
     @Test
-    public void streamResourceConstructorWithSymbol_hasSrcAndSymbol() {
+    void streamResourceConstructorWithSymbol_hasSrcAndSymbol() {
         var resource = getStreamResource();
         var symbol = "symbol";
         var icon = new SvgIcon(resource, symbol);
-        Assert.assertTrue(icon.getSrc().contains("image.svg"));
-        Assert.assertTrue(
+        Assertions.assertTrue(icon.getSrc().contains("image.svg"));
+        Assertions.assertTrue(
                 icon.getElement().getAttribute("src").contains("image.svg"));
-        Assert.assertEquals(symbol, icon.getSymbol());
-        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+        Assertions.assertEquals(symbol, icon.getSymbol());
+        Assertions.assertEquals(symbol,
+                icon.getElement().getProperty("symbol"));
     }
 
     @Test
-    public void downloadHandlerConstructor_hasSrc() {
+    void downloadHandlerConstructor_hasSrc() {
         var resource = getDownloadHandler();
         var icon = new SvgIcon(resource);
-        Assert.assertTrue(icon.getSrc().contains("image.svg"));
-        Assert.assertTrue(
+        Assertions.assertTrue(icon.getSrc().contains("image.svg"));
+        Assertions.assertTrue(
                 icon.getElement().getAttribute("src").contains("image.svg"));
     }
 
     @Test
-    public void downloadHandlerConstructorWithSymbol_hasSrcAndSymbol() {
+    void downloadHandlerConstructorWithSymbol_hasSrcAndSymbol() {
         var resource = getDownloadHandler();
         var symbol = "symbol";
         var icon = new SvgIcon(resource, symbol);
-        Assert.assertTrue(icon.getSrc().contains("image.svg"));
-        Assert.assertTrue(
+        Assertions.assertTrue(icon.getSrc().contains("image.svg"));
+        Assertions.assertTrue(
                 icon.getElement().getAttribute("src").contains("image.svg"));
-        Assert.assertEquals(symbol, icon.getSymbol());
-        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+        Assertions.assertEquals(symbol, icon.getSymbol());
+        Assertions.assertEquals(symbol,
+                icon.getElement().getProperty("symbol"));
     }
 
     @Test
-    public void setSrc_hasSrc() {
+    void setSrc_hasSrc() {
         var icon = new SvgIcon();
         var path = "path/to/file.svg";
         icon.setSrc(path);
-        Assert.assertEquals(path, icon.getSrc());
-        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assertions.assertEquals(path, icon.getSrc());
+        Assertions.assertEquals(path, icon.getElement().getAttribute("src"));
     }
 
     @Test
-    public void setSrcWithSymbol_hasSrcAndSymbol() {
+    void setSrcWithSymbol_hasSrcAndSymbol() {
         var icon = new SvgIcon();
         var path = "path/to/file.svg";
         var symbol = "symbol";
         icon.setSrc(path, symbol);
 
-        Assert.assertEquals(path, icon.getSrc());
-        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
-        Assert.assertEquals(symbol, icon.getSymbol());
-        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+        Assertions.assertEquals(path, icon.getSrc());
+        Assertions.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assertions.assertEquals(symbol, icon.getSymbol());
+        Assertions.assertEquals(symbol,
+                icon.getElement().getProperty("symbol"));
     }
 
     @Test
-    public void hasStreamResource_setSrcWithSymbol_hasSrcAndSymbol() {
+    void hasStreamResource_setSrcWithSymbol_hasSrcAndSymbol() {
         var resource = getStreamResource();
         var symbol = "symbol";
         var icon = new SvgIcon();
         icon.setSrc(resource, symbol);
 
-        Assert.assertTrue(icon.getSrc().contains("image.svg"));
-        Assert.assertTrue(
+        Assertions.assertTrue(icon.getSrc().contains("image.svg"));
+        Assertions.assertTrue(
                 icon.getElement().getAttribute("src").contains("image.svg"));
-        Assert.assertEquals(symbol, icon.getSymbol());
-        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+        Assertions.assertEquals(symbol, icon.getSymbol());
+        Assertions.assertEquals(symbol,
+                icon.getElement().getProperty("symbol"));
     }
 
     @Test
-    public void setSymbol_hasSymbol() {
+    void setSymbol_hasSymbol() {
         var icon = new SvgIcon();
         var symbol = "symbol";
         icon.setSymbol(symbol);
-        Assert.assertEquals(symbol, icon.getSymbol());
-        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+        Assertions.assertEquals(symbol, icon.getSymbol());
+        Assertions.assertEquals(symbol,
+                icon.getElement().getProperty("symbol"));
     }
 
     @Test
-    public void modifySrc_hasModifiedSrc() {
+    void modifySrc_hasModifiedSrc() {
         var icon = new SvgIcon("path/to/file.svg");
         var newPath = "path/to/new/file.svg";
         icon.setSrc(newPath);
 
-        Assert.assertEquals(newPath, icon.getSrc());
-        Assert.assertEquals(newPath, icon.getElement().getAttribute("src"));
+        Assertions.assertEquals(newPath, icon.getSrc());
+        Assertions.assertEquals(newPath, icon.getElement().getAttribute("src"));
     }
 
     @Test
-    public void withStreamResource_setSrc_hasSrc() {
+    void withStreamResource_setSrc_hasSrc() {
         var icon = new SvgIcon();
         var resource = getStreamResource();
         icon.setSrc(resource);
-        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assertions.assertTrue(icon.getSrc().contains("image.svg"));
     }
 
     @Test
-    public void setColor_hasColor() {
+    void setColor_hasColor() {
         var icon = new SvgIcon();
         icon.setColor("red");
-        Assert.assertEquals("red", icon.getColor());
-        Assert.assertEquals("red", icon.getStyle().get("fill"));
+        Assertions.assertEquals("red", icon.getColor());
+        Assertions.assertEquals("red", icon.getStyle().get("fill"));
     }
 
     @Test
-    public void removeColor_hasNoColor() {
+    void removeColor_hasNoColor() {
         var icon = new SvgIcon();
         icon.setColor("red");
         icon.setColor(null);
-        Assert.assertNull(icon.getColor());
-        Assert.assertNull(icon.getStyle().get("fill"));
+        Assertions.assertNull(icon.getColor());
+        Assertions.assertNull(icon.getStyle().get("fill"));
     }
 
     private static StreamResource getStreamResource() {

@@ -12,10 +12,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -29,21 +29,21 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-public class MapSerializationTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class MapSerializationTest {
+    @RegisterExtension
+    public final MockUIExtension ui = new MockUIExtension();
 
     private Map map;
     private StreamResourceRegistry streamResourceRegistryMock;
     private StreamRegistration streamRegistrationMock;
 
-    @Before
-    public void setup() throws URISyntaxException {
+    @BeforeEach
+    void setup() throws URISyntaxException {
         streamResourceRegistryMock = Mockito.mock(StreamResourceRegistry.class);
         Mockito.when(ui.getSession().getResourceRegistry())
                 .thenReturn(streamResourceRegistryMock);
@@ -68,7 +68,7 @@ public class MapSerializationTest {
     }
 
     @Test
-    public void serializationSmokeTest() {
+    void serializationSmokeTest() {
         // Configure view
         map.getView().setZoom(13);
         map.getView().setCenter(new Coordinate(42, 27));
@@ -91,27 +91,27 @@ public class MapSerializationTest {
         // Verify view
         ObjectNode viewNode = findSyncedItem(syncedItems,
                 map.getView().getId());
-        Assert.assertEquals(13, viewNode.get("zoom").asInt());
+        Assertions.assertEquals(13, viewNode.get("zoom").asInt());
         ObjectNode centerNode = (ObjectNode) viewNode.get("center");
-        Assert.assertEquals(42, centerNode.get("x").asDouble(), 0.0001);
-        Assert.assertEquals(27, centerNode.get("y").asDouble(), 0.0001);
+        Assertions.assertEquals(42, centerNode.get("x").asDouble(), 0.0001);
+        Assertions.assertEquals(27, centerNode.get("y").asDouble(), 0.0001);
 
         // Verify custom source
         ObjectNode sourceNode = findSyncedItem(syncedItems, source.getId());
-        Assert.assertEquals("https://example.com",
+        Assertions.assertEquals("https://example.com",
                 sourceNode.get("url").asString());
-        Assert.assertFalse(sourceNode.get("opaque").asBoolean());
-        Assert.assertEquals("custom-cors",
+        Assertions.assertFalse(sourceNode.get("opaque").asBoolean());
+        Assertions.assertEquals("custom-cors",
                 sourceNode.get("crossOrigin").asString());
-        Assert.assertTrue(sourceNode.get("attributions").isArray());
+        Assertions.assertTrue(sourceNode.get("attributions").isArray());
         ArrayNode attributionsNode = (ArrayNode) sourceNode.get("attributions");
-        Assert.assertEquals(1, attributionsNode.size());
-        Assert.assertEquals("Custom map service",
+        Assertions.assertEquals(1, attributionsNode.size());
+        Assertions.assertEquals("Custom map service",
                 attributionsNode.get(0).asString());
     }
 
     @Test
-    public void serializeIcon_registerStreamResourceExactlyOnce() {
+    void serializeIcon_registerStreamResourceExactlyOnce() {
         // Initial sync of a marker with an icon to register stream resource
         MarkerFeature marker = setupMarker();
         ui.fakeClientCommunication();
@@ -136,7 +136,7 @@ public class MapSerializationTest {
     }
 
     @Test
-    public void detachMap_unregisterStreamResources() {
+    void detachMap_unregisterStreamResources() {
         // Sync a marker with an icon to register the stream resource
         setupMarker();
         ui.fakeClientCommunication();
@@ -148,7 +148,7 @@ public class MapSerializationTest {
     }
 
     @Test
-    public void detachMap_reattachMap_streamResourceRegisteredAgain() {
+    void detachMap_reattachMap_streamResourceRegisteredAgain() {
         // Sync a marker with an icon to register the stream resource
         setupMarker();
         ui.fakeClientCommunication();

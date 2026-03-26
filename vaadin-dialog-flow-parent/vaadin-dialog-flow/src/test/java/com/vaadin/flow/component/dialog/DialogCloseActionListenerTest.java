@@ -15,74 +15,74 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class DialogCloseActionListenerTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class DialogCloseActionListenerTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Dialog dialog;
     private ComponentEventListener<Dialog.DialogCloseActionEvent> mockListener;
 
     @SuppressWarnings({ "unchecked" })
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         dialog = new Dialog();
         mockListener = Mockito.mock(ComponentEventListener.class);
     }
 
     @Test
-    public void addListener_open_closeFromClient_staysOpen() {
+    void addListener_open_closeFromClient_staysOpen() {
         dialog.addDialogCloseActionListener(mockListener);
         dialog.open();
         dialog.handleClientClose();
 
-        Assert.assertTrue(dialog.isOpened());
+        Assertions.assertTrue(dialog.isOpened());
         assertListenerCalls(1);
     }
 
     @Test
-    public void open_addListener_closeFromClient_staysOpen() {
+    void open_addListener_closeFromClient_staysOpen() {
         dialog.open();
         dialog.addDialogCloseActionListener(mockListener);
         dialog.handleClientClose();
 
-        Assert.assertTrue(dialog.isOpened());
+        Assertions.assertTrue(dialog.isOpened());
         assertListenerCalls(1);
     }
 
     @Test
-    public void addListener_open_removeListener_closeFromClient_closes() {
+    void addListener_open_removeListener_closeFromClient_closes() {
         Registration registration = dialog
                 .addDialogCloseActionListener(mockListener);
         dialog.open();
         registration.remove();
         dialog.handleClientClose();
 
-        Assert.assertFalse(dialog.isOpened());
+        Assertions.assertFalse(dialog.isOpened());
         assertListenerCalls(0);
     }
 
     @Test
-    public void addListener_open_closeFromServer_closes() {
+    void addListener_open_closeFromServer_closes() {
         dialog.addDialogCloseActionListener(mockListener);
         dialog.open();
         dialog.close();
 
-        Assert.assertFalse(dialog.isOpened());
+        Assertions.assertFalse(dialog.isOpened());
         assertListenerCalls(0);
     }
 
     @Test
-    public void addMultipleListeners_open_removeOneListener_closeFromClient_staysOpen() {
+    void addMultipleListeners_open_removeOneListener_closeFromClient_staysOpen() {
         Registration registration = dialog
                 .addDialogCloseActionListener(mockListener);
         dialog.addDialogCloseActionListener(mockListener);
@@ -91,12 +91,12 @@ public class DialogCloseActionListenerTest {
 
         dialog.handleClientClose();
 
-        Assert.assertTrue(dialog.isOpened());
+        Assertions.assertTrue(dialog.isOpened());
         assertListenerCalls(1);
     }
 
     @Test
-    public void addMultipleListeners_open_removeAllListeners_closeFromClient_closes() {
+    void addMultipleListeners_open_removeAllListeners_closeFromClient_closes() {
         Registration registration1 = dialog
                 .addDialogCloseActionListener(mockListener);
         Registration registration2 = dialog
@@ -106,19 +106,19 @@ public class DialogCloseActionListenerTest {
         registration2.remove();
         dialog.handleClientClose();
 
-        Assert.assertFalse(dialog.isOpened());
+        Assertions.assertFalse(dialog.isOpened());
         assertListenerCalls(0);
     }
 
     @Test
-    public void addListener_openAndCloseMultipleTimes() {
+    void addListener_openAndCloseMultipleTimes() {
         Registration registration = dialog
                 .addDialogCloseActionListener(mockListener);
         dialog.open();
         dialog.handleClientClose();
 
         // Should not close automatically
-        Assert.assertTrue(dialog.isOpened());
+        Assertions.assertTrue(dialog.isOpened());
         assertListenerCalls(1);
 
         // Close manually
@@ -129,7 +129,7 @@ public class DialogCloseActionListenerTest {
         dialog.handleClientClose();
 
         // Should still stay open
-        Assert.assertTrue(dialog.isOpened());
+        Assertions.assertTrue(dialog.isOpened());
         assertListenerCalls(2);
 
         // Close manually and remove listener
@@ -141,7 +141,7 @@ public class DialogCloseActionListenerTest {
         dialog.handleClientClose();
 
         // Should close
-        Assert.assertFalse(dialog.isOpened());
+        Assertions.assertFalse(dialog.isOpened());
         assertListenerCalls(2);
     }
 

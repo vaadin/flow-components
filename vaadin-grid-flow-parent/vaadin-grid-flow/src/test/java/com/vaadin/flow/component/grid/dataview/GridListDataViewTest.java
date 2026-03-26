@@ -19,99 +19,99 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerJUnit6Test;
 
-public class GridListDataViewTest extends AbstractListDataViewListenerTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+class GridListDataViewTest extends AbstractListDataViewListenerJUnit6Test {
 
     @Test
-    public void dataViewWithItem_rowOutsideSetRequested_exceptionThrown() {
-        expectedException.expect(IndexOutOfBoundsException.class);
-        expectedException.expectMessage(
-                "Given index 7 is outside of the accepted range '0 - 3'");
-
+    void dataViewWithItem_rowOutsideSetRequested_exceptionThrown() {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems("one", "two", "three",
                 "four");
 
-        dataView.getItem(7);
+        var ex = Assertions.assertThrows(IndexOutOfBoundsException.class,
+                () -> {
+                    dataView.getItem(7);
+                });
+        Assertions.assertTrue(ex.getMessage().contains(
+                "Given index 7 is outside of the accepted range '0 - 3'"));
     }
 
     @Test
-    public void dataViewWithItem_negativeRowRequested_exceptionThrown() {
-        expectedException.expect(IndexOutOfBoundsException.class);
-        expectedException.expectMessage(
-                "Given index -7 is outside of the accepted range '0 - 3'");
-
+    void dataViewWithItem_negativeRowRequested_exceptionThrown() {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems("one", "two", "three",
                 "four");
 
-        dataView.getItem(-7);
+        var ex = Assertions.assertThrows(IndexOutOfBoundsException.class,
+                () -> {
+                    dataView.getItem(-7);
+                });
+        Assertions.assertTrue(ex.getMessage().contains(
+                "Given index -7 is outside of the accepted range '0 - 3'"));
     }
 
     @Test
-    public void dataViewWithoutItems_exceptionThrown() {
-        expectedException.expect(IndexOutOfBoundsException.class);
-        expectedException.expectMessage("Requested index 5 on empty data.");
-
+    void dataViewWithoutItems_exceptionThrown() {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid
                 .setItems(new ListDataProvider<>(new ArrayList<>()));
 
-        dataView.getItem(5);
+        var ex = Assertions.assertThrows(IndexOutOfBoundsException.class,
+                () -> {
+                    dataView.getItem(5);
+                });
+        Assertions.assertTrue(
+                ex.getMessage().contains("Requested index 5 on empty data."));
     }
 
     @Test
-    public void dataViewWithItems_returnsExpectedItemsForMethods() {
+    void dataViewWithItems_returnsExpectedItemsForMethods() {
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems(items);
 
         // Test getItem returns correct item
-        Assert.assertEquals("Wrong item returned for row", items[2],
-                dataView.getItem(2));
+        Assertions.assertEquals(items[2], dataView.getItem(2),
+                "Wrong item returned for row");
 
         // Test getNext-/-PreviousItem
-        Assert.assertEquals("Faulty next item", items[3],
-                dataView.getNextItem(items[2]).get());
-        Assert.assertEquals("Faulty previous item", items[1],
-                dataView.getPreviousItem(items[2]).get());
+        Assertions.assertEquals(items[3], dataView.getNextItem(items[2]).get(),
+                "Faulty next item");
+        Assertions.assertEquals(items[1],
+                dataView.getPreviousItem(items[2]).get(),
+                "Faulty previous item");
 
-        Assert.assertFalse("Got next item for last item",
-                dataView.getNextItem(items[3]).isPresent());
-        Assert.assertFalse("Got previous item for first index",
-                dataView.getPreviousItem(items[0]).isPresent());
+        Assertions.assertFalse(dataView.getNextItem(items[3]).isPresent(),
+                "Got next item for last item");
+        Assertions.assertFalse(dataView.getPreviousItem(items[0]).isPresent(),
+                "Got previous item for first index");
 
         // Test getItemCount
-        Assert.assertEquals("Unexpected size for data", items.length,
-                dataView.getItemCount());
+        Assertions.assertEquals(items.length, dataView.getItemCount(),
+                "Unexpected size for data");
 
         // Test containsItem
-        Assert.assertTrue("Set item was not found in the data",
-                dataView.contains(items[3]));
-        Assert.assertFalse("Non existent item found in data",
-                dataView.contains("item6"));
+        Assertions.assertTrue(dataView.contains(items[3]),
+                "Set item was not found in the data");
+        Assertions.assertFalse(dataView.contains("item6"),
+                "Non existent item found in data");
 
         // Test getItems
         Stream<String> allItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set", items,
-                allItems.toArray());
+        Assertions.assertArrayEquals(items, allItems.toArray(),
+                "Unexpected data set");
     }
 
     @Test
-    public void dataView_setFilter_methodsUseFilteredData() {
+    void dataView_setFilter_methodsUseFilteredData() {
         AtomicInteger refreshed = new AtomicInteger(0);
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();
@@ -121,54 +121,53 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         });
 
         dataView.setFilter(s -> s.endsWith("4"));
-        Assert.assertEquals("Filter change did not fire DataChangeEvent", 1,
-                refreshed.get());
+        Assertions.assertEquals(1, refreshed.get(),
+                "Filter change did not fire DataChangeEvent");
 
-        Assert.assertEquals("Filter was not applied to data size", 1,
-                dataView.getItemCount());
+        Assertions.assertEquals(1, dataView.getItemCount(),
+                "Filter was not applied to data size");
 
-        Assert.assertTrue("Expected item is missing from filtered data",
-                dataView.contains(items[3]));
-        Assert.assertFalse(
-                "Item that should be filtered out is available in the data",
-                dataView.contains(items[1]));
+        Assertions.assertTrue(dataView.contains(items[3]),
+                "Expected item is missing from filtered data");
+        Assertions.assertFalse(dataView.contains(items[1]),
+                "Item that should be filtered out is available in the data");
 
-        Assert.assertEquals("Wrong item on row for filtered data.", items[3],
-                dataView.getItem(0));
+        Assertions.assertEquals(items[3], dataView.getItem(0),
+                "Wrong item on row for filtered data.");
     }
 
     @Test
-    public void dataViewWithItems_contains_returnsCorrectItems() {
+    void dataViewWithItems_contains_returnsCorrectItems() {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems("first", "middle",
                 "last");
 
-        Assert.assertTrue("Returned false for item that should exist",
-                dataView.contains("middle"));
+        Assertions.assertTrue(dataView.contains("middle"),
+                "Returned false for item that should exist");
     }
 
     @Test
-    public void contains_itemPresentedInDataSet_itemFound() {
+    void contains_itemPresentedInDataSet_itemFound() {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems("first", "middle",
                 "last");
 
-        Assert.assertTrue("The item was not found in the data",
-                dataView.contains("first"));
+        Assertions.assertTrue(dataView.contains("first"),
+                "The item was not found in the data");
 
         dataView.setIdentifierProvider(item -> item.substring(0, 1));
 
-        Assert.assertTrue("The item was not found in the data",
-                dataView.contains("fourth"));
+        Assertions.assertTrue(dataView.contains("fourth"),
+                "The item was not found in the data");
     }
 
     @Test
-    public void contains_itemNotPresentedInDataSet_itemNotFound() {
+    void contains_itemNotPresentedInDataSet_itemNotFound() {
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems("first", "middle",
                 "last");
-        Assert.assertFalse("Non existent item found in data",
-                dataView.contains("absent item"));
+        Assertions.assertFalse(dataView.contains("absent item"),
+                "Non existent item found in data");
     }
 
     @Override

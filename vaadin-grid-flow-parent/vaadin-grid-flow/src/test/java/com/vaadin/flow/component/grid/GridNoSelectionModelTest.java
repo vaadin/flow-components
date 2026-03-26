@@ -15,19 +15,19 @@
  */
 package com.vaadin.flow.component.grid;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 
-public class GridNoSelectionModelTest {
+class GridNoSelectionModelTest {
 
     private static final Person PERSON_C = new Person("c", 3);
     private static final Person PERSON_B = new Person("b", 2);
@@ -36,8 +36,8 @@ public class GridNoSelectionModelTest {
     private Grid<Person> grid;
     private GridSelectionModel<Person> model;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         grid = new Grid<>();
         grid.setItems(PERSON_A, PERSON_B, PERSON_C);
 
@@ -45,7 +45,7 @@ public class GridNoSelectionModelTest {
     }
 
     @Test
-    public void select() {
+    void select() {
         model.select(PERSON_A);
 
         assertFalse(model.isSelected(PERSON_A));
@@ -60,7 +60,7 @@ public class GridNoSelectionModelTest {
     }
 
     @Test
-    public void changingToSingleSelectionModel() {
+    void changingToSingleSelectionModel() {
         grid.setSelectionMode(SelectionMode.SINGLE);
 
         grid.getSelectionModel().select(PERSON_B);
@@ -69,7 +69,7 @@ public class GridNoSelectionModelTest {
     }
 
     @Test
-    public void changingToMultiSelectionModel() {
+    void changingToMultiSelectionModel() {
         grid.setSelectionMode(SelectionMode.MULTI);
 
         grid.getSelectionModel().select(PERSON_B);

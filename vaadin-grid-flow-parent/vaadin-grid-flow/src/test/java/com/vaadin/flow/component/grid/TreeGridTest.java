@@ -15,25 +15,25 @@
  */
 package com.vaadin.flow.component.grid;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class TreeGridTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class TreeGridTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private TreeGrid<Item> treeGrid;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         Item item1 = new Item("key 1");
         Item item2 = new Item("key 2");
         treeGrid = new TreeGrid<>();
@@ -48,29 +48,29 @@ public class TreeGridTest {
     }
 
     @Test
-    public void uniqueKeyProviderNotSet_usesKeyMapper() {
+    void uniqueKeyProviderNotSet_usesKeyMapper() {
         ui.fakeClientCommunication();
 
-        Assert.assertNotNull(
+        Assertions.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("1"));
-        Assert.assertNotNull(
+        Assertions.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("2"));
-        Assert.assertNull(
+        Assertions.assertNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("3"));
     }
 
     @Test
-    public void uniqueKeyProviderSet_usesUniqueKeyProvider() {
+    void uniqueKeyProviderSet_usesUniqueKeyProvider() {
         treeGrid.setUniqueKeyProvider(Item::toString);
         ui.fakeClientCommunication();
 
-        Assert.assertNull(
+        Assertions.assertNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("1"));
-        Assert.assertNull(
+        Assertions.assertNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("2"));
-        Assert.assertNotNull(
+        Assertions.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 1"));
-        Assert.assertNotNull(
+        Assertions.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 2"));
     }
 

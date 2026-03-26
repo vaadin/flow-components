@@ -25,6 +25,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsJUnit6Test;
@@ -237,6 +238,310 @@ class SignalBindingUtilTest extends AbstractSignalsJUnit6Test {
                 NullPointerException.class, () -> SignalBindingUtil
                         .mapBinding(source, Color::getValue, null));
         Assertions.assertEquals("Binder function cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void effectBinding_runsEffectWithInitialValue() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+        List<String> values = new ArrayList<>();
+
+        SignalBindingUtil.effectBinding(component, "test", signal, values::add);
+
+        Assertions.assertEquals(List.of("initial"), values);
+    }
+
+    @Test
+    void effectBinding_runsEffectOnSignalChange() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+        List<String> values = new ArrayList<>();
+
+        SignalBindingUtil.effectBinding(component, "test", signal, values::add);
+
+        signal.set("updated");
+
+        Assertions.assertEquals(List.of("initial", "updated"), values);
+    }
+
+    @Test
+    void effectBinding_onChange_receivesCorrectTypedValues() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        List<String> oldValues = new ArrayList<>();
+        List<String> newValues = new ArrayList<>();
+
+        SignalBinding<String> binding = SignalBindingUtil
+                .effectBinding(component, "test", signal, v -> {
+                });
+        binding.onChange(ctx -> {
+            oldValues.add(ctx.getOldValue());
+            newValues.add(ctx.getNewValue());
+        });
+
+        signal.set("updated");
+
+        Assertions.assertEquals(List.of("initial"), oldValues);
+        Assertions.assertEquals(List.of("updated"), newValues);
+    }
+
+    @Test
+    void effectBinding_onChange_receivesElement() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        List<com.vaadin.flow.dom.Element> elements = new ArrayList<>();
+
+        SignalBinding<String> binding = SignalBindingUtil
+                .effectBinding(component, "test", signal, v -> {
+                });
+        binding.onChange(ctx -> elements.add(ctx.getElement()));
+
+        signal.set("updated");
+
+        Assertions.assertEquals(1, elements.size());
+        Assertions.assertSame(component.getElement(), elements.get(0));
+    }
+
+    @Test
+    void effectBinding_onChange_multipleCallbacksFiredInOrder() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        List<String> callOrder = new ArrayList<>();
+
+        SignalBinding<String> binding = SignalBindingUtil
+                .effectBinding(component, "test", signal, v -> {
+                });
+        binding.onChange(ctx -> callOrder.add("first"));
+        binding.onChange(ctx -> callOrder.add("second"));
+
+        signal.set("updated");
+
+        Assertions.assertEquals(List.of("first", "second"), callOrder);
+    }
+
+    @Test
+    void effectBinding_onChange_returnsBindingForFluentChaining() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        SignalBinding<String> binding = SignalBindingUtil
+                .effectBinding(component, "test", signal, v -> {
+                });
+        SignalBinding<String> returned = binding.onChange(ctx -> {
+        });
+
+        Assertions.assertSame(binding, returned);
+    }
+
+    @Test
+    void effectBinding_onChange_tracksOldAndNewAcrossMultipleChanges() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("a");
+
+        List<String> oldValues = new ArrayList<>();
+        List<String> newValues = new ArrayList<>();
+
+        SignalBinding<String> binding = SignalBindingUtil
+                .effectBinding(component, "test", signal, v -> {
+                });
+        binding.onChange(ctx -> {
+            oldValues.add(ctx.getOldValue());
+            newValues.add(ctx.getNewValue());
+        });
+
+        signal.set("b");
+        signal.set("c");
+
+        Assertions.assertEquals(List.of("a", "b"), oldValues);
+        Assertions.assertEquals(List.of("b", "c"), newValues);
+    }
+
+    @Test
+    void effectBinding_hasCallbacks_falseBeforeOnChange() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        SignalBinding<String> binding = SignalBindingUtil
+                .effectBinding(component, "test", signal, v -> {
+                });
+
+        Assertions.assertFalse(binding.hasCallbacks());
+    }
+
+    @Test
+    void effectBinding_hasCallbacks_trueAfterOnChange() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        SignalBinding<String> binding = SignalBindingUtil
+                .effectBinding(component, "test", signal, v -> {
+                });
+        binding.onChange(ctx -> {
+        });
+
+        Assertions.assertTrue(binding.hasCallbacks());
+    }
+
+    @Test
+    void effectBinding_calledTwiceWithSameType_throwsBindingActiveException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        SignalBindingUtil.effectBinding(component, "test", signal, v -> {
+        });
+
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> SignalBindingUtil.effectBinding(component, "test", signal,
+                        v -> {
+                        }));
+    }
+
+    @Test
+    void effectBinding_differentBindingTypes_doesNotThrow() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        SignalBindingUtil.effectBinding(component, "type1", signal, v -> {
+        });
+
+        Assertions.assertDoesNotThrow(() -> SignalBindingUtil
+                .effectBinding(component, "type2", signal, v -> {
+                }));
+    }
+
+    @Test
+    void effectBinding_nullOwner_throwsNullPointerException() {
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> SignalBindingUtil
+                        .effectBinding(null, "test", signal, v -> {
+                        }));
+        Assertions.assertEquals("Owner cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void effectBinding_nullBindingType_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> SignalBindingUtil
+                        .effectBinding(component, null, signal, v -> {
+                        }));
+        Assertions.assertEquals("Binding type cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void effectBinding_nullSignal_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> SignalBindingUtil
+                        .effectBinding(component, "test", null, v -> {
+                        }));
+        Assertions.assertEquals("Signal cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void effectBinding_nullEffect_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> SignalBindingUtil
+                        .effectBinding(component, "test", signal, null));
+        Assertions.assertEquals("Effect cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void throwIfBindingActive_noBinding_doesNotThrow() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        Assertions.assertDoesNotThrow(() -> SignalBindingUtil
+                .throwIfBindingActive(component, "test"));
+    }
+
+    @Test
+    void throwIfBindingActive_bindingActive_throwsBindingActiveException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+        SignalBindingUtil.effectBinding(component, "test", signal, v -> {
+        });
+
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> SignalBindingUtil.throwIfBindingActive(component,
+                        "test"));
+    }
+
+    @Test
+    void throwIfBindingActive_differentBindingType_doesNotThrow() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+        SignalBindingUtil.effectBinding(component, "type1", signal, v -> {
+        });
+
+        Assertions.assertDoesNotThrow(() -> SignalBindingUtil
+                .throwIfBindingActive(component, "type2"));
+    }
+
+    @Test
+    void throwIfBindingActive_nullComponent_throwsNullPointerException() {
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class,
+                () -> SignalBindingUtil.throwIfBindingActive(null, "test"));
+        Assertions.assertEquals("Component cannot be null",
+                exception.getMessage());
+    }
+
+    @Test
+    void throwIfBindingActive_nullBindingType_throwsNullPointerException() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
+
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class,
+                () -> SignalBindingUtil.throwIfBindingActive(component, null));
+        Assertions.assertEquals("Binding type cannot be null",
                 exception.getMessage());
     }
 }

@@ -17,26 +17,26 @@ package com.vaadin.flow.component.dialog;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class DialogOpenedChangeListenerTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class DialogOpenedChangeListenerTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Dialog dialog;
     private AtomicReference<Dialog.OpenedChangeEvent> event;
     private ComponentEventListener<Dialog.OpenedChangeEvent> mockListener;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         dialog = new Dialog();
         event = new AtomicReference<>();
         dialog.addOpenedChangeListener(event::set);
@@ -46,48 +46,48 @@ public class DialogOpenedChangeListenerTest {
     }
 
     @Test
-    public void open() {
+    void open() {
         dialog.open();
 
-        Assert.assertFalse(event.get().isFromClient());
-        Assert.assertTrue(event.get().isOpened());
+        Assertions.assertFalse(event.get().isFromClient());
+        Assertions.assertTrue(event.get().isOpened());
         assertListenerCalls(1);
 
         clearCapturedData();
         dialog.open();
-        Assert.assertNull(event.get());
+        Assertions.assertNull(event.get());
         assertListenerCalls(0);
     }
 
     @Test
-    public void close() {
+    void close() {
         dialog.open();
         clearCapturedData();
 
         dialog.close();
-        Assert.assertFalse(event.get().isFromClient());
-        Assert.assertFalse(event.get().isOpened());
+        Assertions.assertFalse(event.get().isFromClient());
+        Assertions.assertFalse(event.get().isOpened());
         assertListenerCalls(1);
 
         clearCapturedData();
         dialog.close();
-        Assert.assertNull(event.get());
+        Assertions.assertNull(event.get());
         assertListenerCalls(0);
     }
 
     @Test
-    public void closeFromClient() {
+    void closeFromClient() {
         dialog.open();
         clearCapturedData();
 
         dialog.handleClientClose();
-        Assert.assertTrue(event.get().isFromClient());
-        Assert.assertFalse(event.get().isOpened());
+        Assertions.assertTrue(event.get().isFromClient());
+        Assertions.assertFalse(event.get().isOpened());
         assertListenerCalls(1);
 
         clearCapturedData();
         dialog.handleClientClose();
-        Assert.assertNull(event.get());
+        Assertions.assertNull(event.get());
         assertListenerCalls(0);
     }
 

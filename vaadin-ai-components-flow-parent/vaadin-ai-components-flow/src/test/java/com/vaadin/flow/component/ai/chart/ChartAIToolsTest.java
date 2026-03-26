@@ -100,10 +100,18 @@ class ChartAIToolsTest {
         }
 
         @Test
-        void execute_withMultipleCharts_noChartId_throws() {
+        void execute_withMultipleCharts_noChartId_returnsError() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
-            Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> tool.execute("{}"));
+            var result = tool.execute("{}");
+            Assertions.assertTrue(result.contains("Error"));
+        }
+
+        @Test
+        void execute_withNoCharts_returnsError() {
+            callbacks.chartIds = Set.of();
+            var result = tool.execute("{}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("No charts available"));
         }
 
         @Test
@@ -113,6 +121,21 @@ class ChartAIToolsTest {
             var result = tool.execute("{\"chartId\": null}");
             Assertions.assertEquals("state", result);
             Assertions.assertEquals("only-chart", callbacks.lastGetStateId);
+        }
+
+        @Test
+        void execute_whenCallbackThrows_returnsError() {
+            callbacks.getStateException = new RuntimeException(
+                    "Chart not found");
+            var result = tool.execute("{\"chartId\": \"chart-1\"}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("Chart not found"));
+        }
+
+        @Test
+        void execute_withMalformedJson_returnsError() {
+            var result = tool.execute("not json at all");
+            Assertions.assertTrue(result.contains("Error"));
         }
     }
 
@@ -164,10 +187,35 @@ class ChartAIToolsTest {
         }
 
         @Test
-        void execute_withMultipleCharts_noChartId_throws() {
+        void execute_withMultipleCharts_noChartId_returnsError() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
-            Assertions.assertThrows(IllegalArgumentException.class, () -> tool
-                    .execute("{\"configuration\": {\"title\": \"Test\"}}"));
+            var result = tool
+                    .execute("{\"configuration\": {\"title\": \"Test\"}}");
+            Assertions.assertTrue(result.contains("Error"));
+        }
+
+        @Test
+        void execute_withMissingConfiguration_returnsError() {
+            var result = tool.execute("{\"chartId\": \"chart-1\"}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(
+                    result.contains("'configuration' parameter is required"));
+        }
+
+        @Test
+        void execute_whenCallbackThrows_returnsError() {
+            callbacks.updateConfigException = new RuntimeException(
+                    "Config rejected");
+            var result = tool.execute(
+                    "{\"chartId\": \"chart-1\", \"configuration\": {\"chart\": {\"type\": \"bar\"}}}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("Config rejected"));
+        }
+
+        @Test
+        void execute_withMalformedJson_returnsError() {
+            var result = tool.execute("not json at all");
+            Assertions.assertTrue(result.contains("Error"));
         }
     }
 
@@ -236,7 +284,7 @@ class ChartAIToolsTest {
             callbacks.updateDataException = new RuntimeException(
                     "Invalid query");
             var result = tool.execute(
-                    "{\"chartId\": \"chart-1\", \"queries\": [\"INVALID\"]}");
+                    "{\"chartId\": \"chart-1\", \"queries\": [\"SELECT invalid\"]}");
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("Invalid query"));
         }
@@ -245,6 +293,46 @@ class ChartAIToolsTest {
         void execute_withEmptyQueries_updatesData() {
             tool.execute("{\"chartId\": \"chart-1\", \"queries\": []}");
             Assertions.assertEquals(List.of(), callbacks.lastUpdateDataQueries);
+        }
+
+        @Test
+        void execute_withMissingQueries_returnsError() {
+            var result = tool.execute("{\"chartId\": \"chart-1\"}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(
+                    result.contains("'queries' parameter is required"));
+        }
+
+        @Test
+        void execute_withNonArrayQueries_returnsError() {
+            var result = tool.execute(
+                    "{\"chartId\": \"chart-1\", \"queries\": \"SELECT 1\"}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("must be an array"));
+        }
+
+        @Test
+        void execute_withNullQueryElement_returnsError() {
+            var result = tool
+                    .execute("{\"chartId\": \"chart-1\", \"queries\": [null]}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(
+                    result.contains("must not contain null elements"));
+        }
+
+        @Test
+        void execute_withEmptyQueryString_returnsError() {
+            var result = tool
+                    .execute("{\"chartId\": \"chart-1\", \"queries\": [\"\"]}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(
+                    result.contains("must not contain empty strings"));
+        }
+
+        @Test
+        void execute_withMalformedJson_returnsError() {
+            var result = tool.execute("not json at all");
+            Assertions.assertTrue(result.contains("Error"));
         }
     }
 
@@ -255,6 +343,8 @@ class ChartAIToolsTest {
 
         Set<String> chartIds = Set.of("chart-1");
         String stateToReturn = "{}";
+        RuntimeException getStateException;
+        RuntimeException updateConfigException;
         RuntimeException updateDataException;
 
         String lastGetStateId;
@@ -265,12 +355,18 @@ class ChartAIToolsTest {
 
         @Override
         public String getState(String chartId) {
+            if (getStateException != null) {
+                throw getStateException;
+            }
             lastGetStateId = chartId;
             return stateToReturn;
         }
 
         @Override
         public void updateConfiguration(String chartId, String configJson) {
+            if (updateConfigException != null) {
+                throw updateConfigException;
+            }
             lastUpdateConfigId = chartId;
             lastUpdateConfigJson = configJson;
         }

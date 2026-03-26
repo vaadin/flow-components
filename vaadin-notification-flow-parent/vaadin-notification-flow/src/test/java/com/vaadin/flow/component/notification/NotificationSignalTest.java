@@ -15,15 +15,17 @@
  */
 package com.vaadin.flow.component.notification;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsJUnit6Test;
 
-public class NotificationSignalTest extends AbstractSignalsUnitTest {
+class NotificationSignalTest extends AbstractSignalsJUnit6Test {
     private final Notification notification = new Notification();
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void bindChildren_throwsUnsupportedOperationException() {
-        notification.bindChildren(null, null);
+    @Test
+    void bindChildren_throwsUnsupportedOperationException() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> notification.bindChildren(null, null));
     }
 }

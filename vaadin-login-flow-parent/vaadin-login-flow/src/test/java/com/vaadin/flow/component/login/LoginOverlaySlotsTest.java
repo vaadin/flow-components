@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.login;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class LoginOverlaySlotsTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class LoginOverlaySlotsTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private LoginOverlay overlay;
 
@@ -34,63 +34,67 @@ public class LoginOverlaySlotsTest {
     private static class TestComponent extends Component {
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         overlay = new LoginOverlay();
         ui.add(overlay);
     }
 
     @Test
-    public void customFormArea_addBeforeOpened_componentsAreAdded() {
+    void customFormArea_addBeforeOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.getCustomFormArea().add(foo, bar);
 
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals("custom-form-area",
+        Assertions.assertEquals(foo.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals(bar.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals("custom-form-area",
                 foo.getElement().getAttribute("slot"));
-        Assert.assertEquals("custom-form-area",
+        Assertions.assertEquals("custom-form-area",
                 bar.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void customFormArea_addAfterOpened_componentsAreAdded() {
+    void customFormArea_addAfterOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.setOpened(true);
         overlay.getCustomFormArea().add(foo, bar);
 
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals("custom-form-area",
+        Assertions.assertEquals(foo.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals(bar.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals("custom-form-area",
                 foo.getElement().getAttribute("slot"));
-        Assert.assertEquals("custom-form-area",
+        Assertions.assertEquals("custom-form-area",
                 bar.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void customFormArea_removeBeforeOpened_componentsAreRemoved() {
+    void customFormArea_removeBeforeOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.getCustomFormArea().add(foo, bar);
 
         overlay.getCustomFormArea().remove(foo);
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertNotEquals("custom-form-area",
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertNotEquals("custom-form-area",
                 foo.getElement().getAttribute("slot"));
 
         overlay.getCustomFormArea().remove(bar);
-        Assert.assertEquals(null, bar.getElement().getParent());
-        Assert.assertNotEquals("custom-form-area",
+        Assertions.assertEquals(null, bar.getElement().getParent());
+        Assertions.assertNotEquals("custom-form-area",
                 bar.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void customFormArea_removeAfterOpened_componentsAreRemoved() {
+    void customFormArea_removeAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -98,13 +102,13 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getCustomFormArea().remove(foo);
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertNotEquals("custom-form-area",
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertNotEquals("custom-form-area",
                 foo.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void customFormArea_removeAllBeforeOpened_componentsAreRemoved() {
+    void customFormArea_removeAllBeforeOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -112,12 +116,12 @@ public class LoginOverlaySlotsTest {
 
         overlay.getCustomFormArea().removeAll();
 
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertEquals(null, bar.getElement().getParent());
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
-    public void customFormArea_removeAllAfterOpened_componentsAreRemoved() {
+    void customFormArea_removeAllAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -126,54 +130,63 @@ public class LoginOverlaySlotsTest {
 
         overlay.getCustomFormArea().removeAll();
 
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertEquals(null, bar.getElement().getParent());
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
-    public void footer_addBeforeOpened_componentsAreAdded() {
+    void footer_addBeforeOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.getFooter().add(foo, bar);
 
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals("footer", foo.getElement().getAttribute("slot"));
-        Assert.assertEquals("footer", bar.getElement().getAttribute("slot"));
+        Assertions.assertEquals(foo.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals(bar.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals("footer",
+                foo.getElement().getAttribute("slot"));
+        Assertions.assertEquals("footer",
+                bar.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void footer_addAfterOpened_componentsAreAdded() {
+    void footer_addAfterOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.setOpened(true);
         overlay.getFooter().add(foo, bar);
 
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals("footer", foo.getElement().getAttribute("slot"));
-        Assert.assertEquals("footer", bar.getElement().getAttribute("slot"));
+        Assertions.assertEquals(foo.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals(bar.getElement().getParent(),
+                overlay.getElement());
+        Assertions.assertEquals("footer",
+                foo.getElement().getAttribute("slot"));
+        Assertions.assertEquals("footer",
+                bar.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void footer_removeBeforeOpened_componentsAreRemoved() {
+    void footer_removeBeforeOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.getFooter().add(foo, bar);
 
         overlay.getFooter().remove(foo);
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertNotEquals("footer", foo.getElement().getAttribute("slot"));
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertNotEquals("footer",
+                foo.getElement().getAttribute("slot"));
 
         overlay.getFooter().remove(bar);
-        Assert.assertEquals(null, bar.getElement().getParent());
+        Assertions.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
-    public void footer_removeAfterOpened_componentsAreRemoved() {
+    void footer_removeAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -182,12 +195,13 @@ public class LoginOverlaySlotsTest {
 
         overlay.getFooter().remove(foo);
 
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertNotEquals("footer", foo.getElement().getAttribute("slot"));
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertNotEquals("footer",
+                foo.getElement().getAttribute("slot"));
     }
 
     @Test
-    public void footer_removeAllBeforeOpened_componentsAreRemoved() {
+    void footer_removeAllBeforeOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -195,12 +209,12 @@ public class LoginOverlaySlotsTest {
 
         overlay.getFooter().removeAll();
 
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertEquals(null, bar.getElement().getParent());
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertEquals(null, bar.getElement().getParent());
     }
 
     @Test
-    public void footer_removeAllAfterOpened_componentsAreRemoved() {
+    void footer_removeAllAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -209,7 +223,7 @@ public class LoginOverlaySlotsTest {
 
         overlay.getFooter().removeAll();
 
-        Assert.assertEquals(null, foo.getElement().getParent());
-        Assert.assertEquals(null, bar.getElement().getParent());
+        Assertions.assertEquals(null, foo.getElement().getParent());
+        Assertions.assertEquals(null, bar.getElement().getParent());
     }
 }

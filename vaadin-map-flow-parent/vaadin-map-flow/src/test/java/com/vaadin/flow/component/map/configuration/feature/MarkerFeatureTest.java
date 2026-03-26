@@ -10,60 +10,60 @@ package com.vaadin.flow.component.map.configuration.feature;
 
 import java.beans.PropertyChangeListener;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 
-public class MarkerFeatureTest {
+class MarkerFeatureTest {
     private PropertyChangeListener propertyChangeListenerMock;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         propertyChangeListenerMock = Mockito.mock(PropertyChangeListener.class);
     }
 
     @Test
-    public void defaults() {
+    void defaults() {
         MarkerFeature markerFeature = new MarkerFeature();
 
-        Assert.assertNotNull(markerFeature.getCoordinates());
-        Assert.assertEquals(0, markerFeature.getCoordinates().getX(), 0);
-        Assert.assertEquals(0, markerFeature.getCoordinates().getY(), 0);
+        Assertions.assertNotNull(markerFeature.getCoordinates());
+        Assertions.assertEquals(0, markerFeature.getCoordinates().getX(), 0);
+        Assertions.assertEquals(0, markerFeature.getCoordinates().getY(), 0);
 
-        Assert.assertNotNull(markerFeature.getIcon());
-        Assert.assertNotNull(markerFeature.getIcon().getImgHandler());
-        Assert.assertEquals(Assets.PIN.getFileName(),
+        Assertions.assertNotNull(markerFeature.getIcon());
+        Assertions.assertNotNull(markerFeature.getIcon().getImgHandler());
+        Assertions.assertEquals(Assets.PIN.getFileName(),
                 markerFeature.getIcon().getImgHandler().getUrlPostfix());
 
-        Assert.assertNotNull(markerFeature.getIcon().getImgSize());
-        Assert.assertEquals(Assets.PIN.getWidth(),
+        Assertions.assertNotNull(markerFeature.getIcon().getImgSize());
+        Assertions.assertEquals(Assets.PIN.getWidth(),
                 markerFeature.getIcon().getImgSize().getWidth());
-        Assert.assertEquals(Assets.PIN.getHeight(),
+        Assertions.assertEquals(Assets.PIN.getHeight(),
                 markerFeature.getIcon().getImgSize().getHeight());
 
-        Assert.assertNull(markerFeature.getIcon().getSrc());
+        Assertions.assertNull(markerFeature.getIcon().getSrc());
     }
 
     @Test
-    public void initializeWithCustomCoordinates() {
+    void initializeWithCustomCoordinates() {
         Coordinate coordinate = new Coordinate(1233058.1696443919,
                 6351912.406929109);
         MarkerFeature markerFeature = new MarkerFeature(coordinate);
 
-        Assert.assertNotNull(markerFeature.getCoordinates());
-        Assert.assertEquals(coordinate.getX(),
+        Assertions.assertNotNull(markerFeature.getCoordinates());
+        Assertions.assertEquals(coordinate.getX(),
                 markerFeature.getCoordinates().getX(), 0);
-        Assert.assertEquals(coordinate.getY(),
+        Assertions.assertEquals(coordinate.getY(),
                 markerFeature.getCoordinates().getY(), 0);
     }
 
     @Test
-    public void initializeWithCustomIcon() {
+    void initializeWithCustomIcon() {
         Coordinate coordinate = new Coordinate(1233058.1696443919,
                 6351912.406929109);
         Icon.Options options = new Icon.Options();
@@ -71,20 +71,20 @@ public class MarkerFeatureTest {
         Icon icon = new Icon(options);
         MarkerFeature markerFeature = new MarkerFeature(coordinate, icon);
 
-        Assert.assertNotNull(markerFeature.getIcon());
-        Assert.assertEquals(icon, markerFeature.getIcon());
+        Assertions.assertNotNull(markerFeature.getIcon());
+        Assertions.assertEquals(icon, markerFeature.getIcon());
     }
 
     @Test
-    public void constructorDoesNotAcceptNullValues() {
-        Assert.assertThrows(NullPointerException.class,
+    void constructorDoesNotAcceptNullValues() {
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new MarkerFeature(null));
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new MarkerFeature(new Coordinate(), null));
     }
 
     @Test
-    public void setIcon() {
+    void setIcon() {
         TestMarkerFeature markerFeature = new TestMarkerFeature();
         markerFeature.addPropertyChangeListener(propertyChangeListenerMock);
 
@@ -93,17 +93,17 @@ public class MarkerFeatureTest {
         Icon icon = new Icon(options);
         markerFeature.setIcon(icon);
 
-        Assert.assertEquals(icon, markerFeature.getIcon());
+        Assertions.assertEquals(icon, markerFeature.getIcon());
         // One event each for removing old icon, and adding new one
         Mockito.verify(propertyChangeListenerMock, Mockito.times(2))
                 .propertyChange(Mockito.any());
     }
 
     @Test
-    public void setIcon_failsWithNullValue() {
+    void setIcon_failsWithNullValue() {
         MarkerFeature markerFeature = new MarkerFeature();
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> markerFeature.setIcon(null));
     }
 

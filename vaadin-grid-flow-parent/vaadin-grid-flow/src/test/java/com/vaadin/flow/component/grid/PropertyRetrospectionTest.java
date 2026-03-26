@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.grid;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 
-public class PropertyRetrospectionTest {
+class PropertyRetrospectionTest {
 
     @SuppressWarnings("unused")
     public static class InnerBean {
@@ -83,7 +83,7 @@ public class PropertyRetrospectionTest {
     }
 
     @Test
-    public void testGridBeanProperties() {
+    void testGridBeanProperties() {
         Grid<BeanOne> grid1 = new Grid<>(BeanOne.class);
         assertEquals(2,
                 BeanPropertySet.get(BeanOne.class).getProperties().count());
@@ -104,7 +104,7 @@ public class PropertyRetrospectionTest {
     }
 
     @Test
-    public void testBinder() {
+    void testBinder() {
         Binder<BeanTwo> binder1 = new Binder<>(BeanTwo.class);
         assertEquals(2,
                 BeanPropertySet.get(BeanTwo.class).getProperties().count());

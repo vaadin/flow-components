@@ -62,26 +62,9 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.AIComponentsFeatureFlagProvider",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Reconnector",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Builder",
-                // ChartAIController — intentionally not serializable;
-                // restored via reconnect()
-                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAIController",
-                // ChartAITools/GridAITools are static utility classes
-                // (private constructor, no instances); inner anonymous
-                // classes implement ToolSpec which is not Serializable
-                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAITools.*",
-                // ChartRenderer/GridRenderer hold DatabaseProvider which
-                // is not Serializable; they are recreated on reconnect
-                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartRenderer",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.grid\\.GridRenderer",
-                // Dashboard classes — DashboardAIController is
-                // intentionally not serializable (restored via
-                // reconnect()); inner anonymous classes implement
-                // ToolSpec which is not Serializable
-                "com\\.vaadin\\.flow\\.component\\.ai\\.dashboard\\.DashboardAIController.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.dashboard\\.DashboardAITools.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.grid\\.GridAITools.*",
-                // Grid internal classes from transitive dependency
-                "com\\.vaadin\\.flow\\.component\\.grid\\..*"));
+                // Static utility class with anonymous ToolSpec instances —
+                // not instantiable or serializable
+                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAITools(\\$\\d+)?"));
     }
 
     @BeforeEach

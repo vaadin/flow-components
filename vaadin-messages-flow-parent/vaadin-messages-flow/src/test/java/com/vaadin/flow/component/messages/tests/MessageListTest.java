@@ -19,10 +19,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
@@ -30,191 +30,198 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 import tools.jackson.databind.JsonNode;
 
 @NotThreadSafe
-public class MessageListTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class MessageListTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private MessageList messageList;
     private MessageListItem item1;
     private MessageListItem item2;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         messageList = new MessageList();
         item1 = new MessageListItem();
         item2 = new MessageListItem();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getItems_returnsUnmodifiableList() {
-        messageList.getItems().add(new MessageListItem());
+    @Test
+    void getItems_returnsUnmodifiableList() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> messageList.getItems().add(new MessageListItem()));
     }
 
     @Test
-    public void setItemsCollection_getItems() {
+    void setItemsCollection_getItems() {
         messageList.setItems(Arrays.asList(item1, item2));
-        Assert.assertEquals(Arrays.asList(item1, item2),
+        Assertions.assertEquals(Arrays.asList(item1, item2),
                 messageList.getItems());
     }
 
     @Test
-    public void setItemsVarArgs_getItems() {
+    void setItemsVarArgs_getItems() {
         messageList.setItems(item1, item2);
-        Assert.assertEquals(Arrays.asList(item1, item2),
+        Assertions.assertEquals(Arrays.asList(item1, item2),
                 messageList.getItems());
     }
 
     @Test
-    public void addClassNames_removeClassNames_hasClassName() {
+    void addClassNames_removeClassNames_hasClassName() {
         item1.addClassNames("foo", "bar");
-        Assert.assertTrue(item1.hasClassName("foo"));
-        Assert.assertTrue(item1.hasClassName("bar"));
+        Assertions.assertTrue(item1.hasClassName("foo"));
+        Assertions.assertTrue(item1.hasClassName("bar"));
 
         item1.removeClassNames("foo");
-        Assert.assertFalse(item1.hasClassName("foo"));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setItems_nullCollection_throws() {
-        messageList.setItems((Collection<MessageListItem>) null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setItems_containsNullItem_throws() {
-        messageList.setItems(item1, null, item2);
+        Assertions.assertFalse(item1.hasClassName("foo"));
     }
 
     @Test
-    public void setImageAsStreamResource_overridesImageUrl() {
+    void setItems_nullCollection_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> messageList.setItems((Collection<MessageListItem>) null));
+    }
+
+    @Test
+    void setItems_containsNullItem_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> messageList.setItems(item1, null, item2));
+    }
+
+    @Test
+    void setImageAsStreamResource_overridesImageUrl() {
         item1.setUserImage("foo/bar");
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
         String userImage = item1.getUserImage();
-        Assert.assertTrue("User image should start with 'VAADIN/dynamic'",
-                userImage.startsWith("VAADIN/dynamic"));
+        Assertions.assertTrue(userImage.startsWith("VAADIN/dynamic"),
+                "User image should start with 'VAADIN/dynamic'");
     }
 
     @Test
-    public void setImageAsUrl_streamResourceBecomesNull() {
+    void setImageAsUrl_streamResourceBecomesNull() {
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
         item1.setUserImage("foo/bar");
-        Assert.assertNull(item1.getUserImageResource());
+        Assertions.assertNull(item1.getUserImageResource());
     }
 
     @Test
-    public void setImageHandler_overridesImageUrl() {
+    void setImageHandler_overridesImageUrl() {
         item1.setUserImage("foo/bar");
         item1.setUserImageHandler(
                 DownloadHandler.fromInputStream(data -> new DownloadResponse(
                         getClass().getResourceAsStream("baz/qux"),
                         "message-list-img", null, -1)));
         String userImage = item1.getUserImage();
-        Assert.assertTrue("User image should start with 'VAADIN/dynamic'",
-                userImage.startsWith("VAADIN/dynamic"));
+        Assertions.assertTrue(userImage.startsWith("VAADIN/dynamic"),
+                "User image should start with 'VAADIN/dynamic'");
     }
 
     @Test
-    public void setImageHandler_streamResourceBecomesNull() {
+    void setImageHandler_streamResourceBecomesNull() {
         item1.setUserImageHandler(
                 DownloadHandler.fromInputStream(data -> new DownloadResponse(
                         getClass().getResourceAsStream("baz/qux"),
                         "message-list-img", null, -1)));
         item1.setUserImage("foo/bar");
-        Assert.assertNull(item1.getUserImageResource());
+        Assertions.assertNull(item1.getUserImageResource());
     }
 
     @Test
-    public void addThemeNames_serialize_separatedBySpaces() {
+    void addThemeNames_serialize_separatedBySpaces() {
         item1.addThemeNames("foo", "bar");
         item1.addThemeNames("baz");
-        Assert.assertEquals("foo bar baz", getSerializedThemeProperty(item1));
+        Assertions.assertEquals("foo bar baz",
+                getSerializedThemeProperty(item1));
     }
 
     @Test
-    public void addThemeNames_serialize_noDuplicates() {
+    void addThemeNames_serialize_noDuplicates() {
         item1.addThemeNames("foo", "foo");
-        Assert.assertEquals("foo", getSerializedThemeProperty(item1));
+        Assertions.assertEquals("foo", getSerializedThemeProperty(item1));
     }
 
     @Test
-    public void removeThemeNames_serialize_themeNamesRemoved() {
+    void removeThemeNames_serialize_themeNamesRemoved() {
         item1.addThemeNames("foo", "bar", "baz");
         item1.removeThemeNames("foo", "bar", "qux");
-        Assert.assertEquals("baz", getSerializedThemeProperty(item1));
+        Assertions.assertEquals("baz", getSerializedThemeProperty(item1));
     }
 
     @Test
-    public void clearThemeNames_serialize_nullProperty() {
+    void clearThemeNames_serialize_nullProperty() {
         item1.addThemeNames("foo");
         item1.removeThemeNames("foo");
-        Assert.assertNull(getSerializedThemeProperty(item1));
+        Assertions.assertNull(getSerializedThemeProperty(item1));
     }
 
     @Test
-    public void hasThemeName_falseForNonExistingThemeName() {
-        Assert.assertFalse(item1.hasThemeName("foo"));
+    void hasThemeName_falseForNonExistingThemeName() {
+        Assertions.assertFalse(item1.hasThemeName("foo"));
     }
 
     @Test
-    public void hasThemeName_trueForExistingThemeName() {
+    void hasThemeName_trueForExistingThemeName() {
         item1.addThemeNames("foo");
-        Assert.assertTrue(item1.hasThemeName("foo"));
+        Assertions.assertTrue(item1.hasThemeName("foo"));
     }
 
     @Test
-    public void unattachedItem_setText_doesNotThrow() {
+    void unattachedItem_setText_doesNotThrow() {
         item1.setText("foo");
     }
 
     @Test
-    public void setMarkdown_isMarkdown() {
-        Assert.assertFalse(messageList.isMarkdown());
+    void setMarkdown_isMarkdown() {
+        Assertions.assertFalse(messageList.isMarkdown());
         messageList.setMarkdown(true);
-        Assert.assertTrue(messageList.isMarkdown());
+        Assertions.assertTrue(messageList.isMarkdown());
     }
 
     @Test
-    public void setAnnounceMessages_isAnnounceMessages() {
-        Assert.assertFalse(messageList.isAnnounceMessages());
-        Assert.assertFalse(messageList.getElement()
+    void setAnnounceMessages_isAnnounceMessages() {
+        Assertions.assertFalse(messageList.isAnnounceMessages());
+        Assertions.assertFalse(messageList.getElement()
                 .getProperty("announceMessages", false));
 
         messageList.setAnnounceMessages(true);
-        Assert.assertTrue(messageList.isAnnounceMessages());
-        Assert.assertTrue(messageList.getElement()
+        Assertions.assertTrue(messageList.isAnnounceMessages());
+        Assertions.assertTrue(messageList.getElement()
                 .getProperty("announceMessages", false));
     }
 
     @Test
-    public void getAttachments_defaultIsEmpty() {
-        Assert.assertTrue(item1.getAttachments().isEmpty());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getAttachments_returnsUnmodifiableList() {
-        item1.getAttachments().add(
-                new MessageListItem.Attachment("test", "url", "text/plain"));
+    void getAttachments_defaultIsEmpty() {
+        Assertions.assertTrue(item1.getAttachments().isEmpty());
     }
 
     @Test
-    public void addAttachment_getAttachments() {
+    void getAttachments_returnsUnmodifiableList() {
+        Assertions
+                .assertThrows(UnsupportedOperationException.class,
+                        () -> item1.getAttachments()
+                                .add(new MessageListItem.Attachment("test",
+                                        "url", "text/plain")));
+    }
+
+    @Test
+    void addAttachment_getAttachments() {
         var attachment = new MessageListItem.Attachment("file.pdf",
                 "http://example.com/file.pdf", "application/pdf");
         item1.addAttachment(attachment);
 
-        Assert.assertEquals(1, item1.getAttachments().size());
-        Assert.assertEquals(attachment, item1.getAttachments().get(0));
+        Assertions.assertEquals(1, item1.getAttachments().size());
+        Assertions.assertEquals(attachment, item1.getAttachments().get(0));
     }
 
     @Test
-    public void setAttachments_getAttachments() {
+    void setAttachments_getAttachments() {
         var attachment1 = new MessageListItem.Attachment("file1.pdf",
                 "http://example.com/file1.pdf", "application/pdf");
         var attachment2 = new MessageListItem.Attachment("file2.png",
@@ -222,46 +229,50 @@ public class MessageListTest {
 
         item1.setAttachments(List.of(attachment1, attachment2));
 
-        Assert.assertEquals(2, item1.getAttachments().size());
-        Assert.assertEquals(attachment1, item1.getAttachments().get(0));
-        Assert.assertEquals(attachment2, item1.getAttachments().get(1));
+        Assertions.assertEquals(2, item1.getAttachments().size());
+        Assertions.assertEquals(attachment1, item1.getAttachments().get(0));
+        Assertions.assertEquals(attachment2, item1.getAttachments().get(1));
     }
 
     @Test
-    public void setAttachments_emptyList_clearsAttachments() {
+    void setAttachments_emptyList_clearsAttachments() {
         item1.addAttachment(new MessageListItem.Attachment("file.pdf",
                 "http://example.com/file.pdf", "application/pdf"));
         item1.setAttachments(List.of());
 
-        Assert.assertTrue(item1.getAttachments().isEmpty());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setAttachments_null_throws() {
-        item1.setAttachments(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void addAttachment_null_throws() {
-        item1.addAttachment(null);
+        Assertions.assertTrue(item1.getAttachments().isEmpty());
     }
 
     @Test
-    public void attachmentSerialization_containsExpectedFields() {
+    void setAttachments_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> item1.setAttachments(null));
+    }
+
+    @Test
+    void addAttachment_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> item1.addAttachment(null));
+    }
+
+    @Test
+    void attachmentSerialization_containsExpectedFields() {
         item1.addAttachment(new MessageListItem.Attachment("proposal.pdf",
                 "#proposal.pdf", "application/pdf"));
 
         var json = JacksonUtils.beanToJson(item1);
         var attachments = json.get("attachments");
 
-        Assert.assertNotNull(attachments);
-        Assert.assertTrue(attachments.isArray());
-        Assert.assertEquals(1, attachments.size());
+        Assertions.assertNotNull(attachments);
+        Assertions.assertTrue(attachments.isArray());
+        Assertions.assertEquals(1, attachments.size());
 
         var attachment = attachments.get(0);
-        Assert.assertEquals("proposal.pdf", attachment.get("name").asString());
-        Assert.assertEquals("#proposal.pdf", attachment.get("url").asString());
-        Assert.assertEquals("application/pdf",
+        Assertions.assertEquals("proposal.pdf",
+                attachment.get("name").asString());
+        Assertions.assertEquals("#proposal.pdf",
+                attachment.get("url").asString());
+        Assertions.assertEquals("application/pdf",
                 attachment.get("type").asString());
     }
 

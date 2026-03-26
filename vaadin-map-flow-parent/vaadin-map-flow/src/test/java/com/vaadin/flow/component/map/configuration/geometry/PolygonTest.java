@@ -11,24 +11,24 @@ package com.vaadin.flow.component.map.configuration.geometry;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
 
-public class PolygonTest {
+class PolygonTest {
 
     private PropertyChangeListener propertyChangeListenerMock;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         propertyChangeListenerMock = Mockito.mock(PropertyChangeListener.class);
     }
 
     @Test
-    public void defaults() {
+    void defaults() {
         final Polygon polygon = new Polygon(List.of(new Coordinate(1, 1),
                 new Coordinate(2, 2), new Coordinate(1, 1)));
 
@@ -39,20 +39,20 @@ public class PolygonTest {
     }
 
     @Test
-    public void failsWithNullOrEmptyValues() {
-        Assert.assertThrows(IllegalArgumentException.class,
+    void failsWithNullOrEmptyValues() {
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new Polygon((List<Coordinate>) null));
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new Polygon(List.of()));
 
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new Polygon((Coordinate[][]) null));
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new Polygon(new Coordinate[0][]));
     }
 
     @Test
-    public void setCoordinates() {
+    void setCoordinates() {
         final TestPolygon polygon = new TestPolygon(
                 List.of(new Coordinate(1, 1), new Coordinate(2, 2),
                         new Coordinate(1, 1)));
@@ -71,7 +71,7 @@ public class PolygonTest {
     }
 
     @Test
-    public void setCoordinatesArray() {
+    void setCoordinatesArray() {
         final TestPolygon polygon = new TestPolygon(
                 List.of(new Coordinate(1, 1), new Coordinate(2, 2),
                         new Coordinate(1, 1)));
@@ -93,22 +93,22 @@ public class PolygonTest {
     }
 
     @Test
-    public void setCoordinates_failsWithNullOrEmptyValues() {
+    void setCoordinates_failsWithNullOrEmptyValues() {
         final Polygon polygon = new Polygon(List.of(new Coordinate()));
 
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> polygon.setCoordinates((List<Coordinate>) null));
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> polygon.setCoordinates(List.of()));
 
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> polygon.setCoordinates((Coordinate[][]) null));
-        Assert.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> polygon.setCoordinates(new Coordinate[0][]));
     }
 
     @Test
-    public void translate() {
+    void translate() {
         final Polygon polygon = new Polygon(List.of(new Coordinate(1, 1),
                 new Coordinate(2, 2), new Coordinate(1, 1)));
 
@@ -123,16 +123,16 @@ public class PolygonTest {
     private void assertCoordinates(Coordinate[][] expected, Polygon polygon) {
         Coordinate[][] actual = polygon.getCoordinates();
 
-        Assert.assertNotNull(actual);
-        Assert.assertEquals(expected.length, actual.length);
+        Assertions.assertNotNull(actual);
+        Assertions.assertEquals(expected.length, actual.length);
 
         for (int i = 0; i < expected.length; i++) {
-            Assert.assertEquals(expected[i].length, actual[i].length);
+            Assertions.assertEquals(expected[i].length, actual[i].length);
             for (int j = 0; j < expected[i].length; j++) {
-                Assert.assertEquals(expected[i][j].getX(), actual[i][j].getX(),
-                        0);
-                Assert.assertEquals(expected[i][j].getY(), actual[i][j].getY(),
-                        0);
+                Assertions.assertEquals(expected[i][j].getX(),
+                        actual[i][j].getX(), 0);
+                Assertions.assertEquals(expected[i][j].getY(),
+                        actual[i][j].getY(), 0);
             }
         }
     }

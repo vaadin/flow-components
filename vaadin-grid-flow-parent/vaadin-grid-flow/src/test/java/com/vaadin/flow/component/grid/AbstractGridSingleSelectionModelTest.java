@@ -19,15 +19,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.selection.SelectionListener;
 
-public class AbstractGridSingleSelectionModelTest {
+class AbstractGridSingleSelectionModelTest {
     private Grid<TestEntity> grid;
     private CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider;
     private SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock;
@@ -36,9 +36,9 @@ public class AbstractGridSingleSelectionModelTest {
     private final TestEntity entity2 = new TestEntity(2, "Name");
     private final TestEntity entity3 = new TestEntity(3, "Name");
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setup() {
+    void setup() {
         grid = new Grid<>();
         dataProviderWithIdentityProvider = new CallbackDataProvider<>(
                 query -> Stream.of(entity1, entity2, entity3), query -> 3,
@@ -48,7 +48,7 @@ public class AbstractGridSingleSelectionModelTest {
     }
 
     @Test
-    public void select_usesDataProviderIdentify() {
+    void select_usesDataProviderIdentify() {
         grid.setItems(dataProviderWithIdentityProvider);
         GridSelectionModel<TestEntity> selectionModel = grid
                 .getSelectionModel();
@@ -64,7 +64,7 @@ public class AbstractGridSingleSelectionModelTest {
     }
 
     @Test
-    public void select_setNullClearsSelection() {
+    void select_setNullClearsSelection() {
         grid.setItems(dataProviderWithIdentityProvider);
         GridSelectionModel<TestEntity> selectionModel = grid
                 .getSelectionModel();
@@ -76,11 +76,11 @@ public class AbstractGridSingleSelectionModelTest {
         // Second select should result in a selection change
         Mockito.verify(selectionListenerMock, Mockito.times(2))
                 .selectionChange(Mockito.any());
-        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+        Assertions.assertEquals(0, selectionModel.getSelectedItems().size());
     }
 
     @Test
-    public void selectFromClient_usesDataProviderIdentify() {
+    void selectFromClient_usesDataProviderIdentify() {
         grid.setItems(dataProviderWithIdentityProvider);
         GridSelectionModel<TestEntity> selectionModel = grid
                 .getSelectionModel();
@@ -96,7 +96,7 @@ public class AbstractGridSingleSelectionModelTest {
     }
 
     @Test
-    public void selectFromClient_setNullClearsSelection() {
+    void selectFromClient_setNullClearsSelection() {
         grid.setItems(dataProviderWithIdentityProvider);
         GridSelectionModel<TestEntity> selectionModel = grid
                 .getSelectionModel();
@@ -108,11 +108,11 @@ public class AbstractGridSingleSelectionModelTest {
         // Second select should result in a selection change
         Mockito.verify(selectionListenerMock, Mockito.times(2))
                 .selectionChange(Mockito.any());
-        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+        Assertions.assertEquals(0, selectionModel.getSelectedItems().size());
     }
 
     @Test
-    public void isSelected_usesDataProviderIdentify() {
+    void isSelected_usesDataProviderIdentify() {
         grid.setItems(dataProviderWithIdentityProvider);
         GridSelectionModel<TestEntity> selectionModel = grid
                 .getSelectionModel();
@@ -120,12 +120,12 @@ public class AbstractGridSingleSelectionModelTest {
         selectionModel.select(new TestEntity(1, "joseph"));
         // Item with same ID, but different hash code should be reported as
         // selected
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 selectionModel.isSelected(new TestEntity(1, "Joseph")));
     }
 
     @Test
-    public void selectFromClient_withItemSelectableProvider_preventsSelection() {
+    void selectFromClient_withItemSelectableProvider_preventsSelection() {
         grid.setItems(dataProviderWithIdentityProvider);
         grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
 
@@ -134,15 +134,16 @@ public class AbstractGridSingleSelectionModelTest {
 
         // prevent client selection of non-selectable item
         selectionModel.selectFromClient(entity1);
-        Assert.assertEquals(Set.of(), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(), selectionModel.getSelectedItems());
 
         // allow client selection of selectable item
         selectionModel.selectFromClient(entity2);
-        Assert.assertEquals(Set.of(entity2), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(entity2),
+                selectionModel.getSelectedItems());
     }
 
     @Test
-    public void deselectFromClient_withItemSelectableProvider_preventsDeselection() {
+    void deselectFromClient_withItemSelectableProvider_preventsDeselection() {
         grid.setItems(dataProviderWithIdentityProvider);
         grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
 
@@ -152,16 +153,17 @@ public class AbstractGridSingleSelectionModelTest {
         // prevent client deselection of non-selectable item
         selectionModel.select(entity1);
         selectionModel.deselectFromClient(entity1);
-        Assert.assertEquals(Set.of(entity1), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(entity1),
+                selectionModel.getSelectedItems());
 
         // allow client deselection of selectable item
         selectionModel.select(entity2);
         selectionModel.deselectFromClient(entity2);
-        Assert.assertEquals(Set.of(), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(), selectionModel.getSelectedItems());
     }
 
     @Test
-    public void select_withItemSelectableProvider_allowsSelection() {
+    void select_withItemSelectableProvider_allowsSelection() {
         grid.setItems(dataProviderWithIdentityProvider);
         grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
 
@@ -170,14 +172,16 @@ public class AbstractGridSingleSelectionModelTest {
 
         // allow programmatic selection of any item
         selectionModel.select(entity1);
-        Assert.assertEquals(Set.of(entity1), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(entity1),
+                selectionModel.getSelectedItems());
 
         selectionModel.select(entity2);
-        Assert.assertEquals(Set.of(entity2), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(entity2),
+                selectionModel.getSelectedItems());
     }
 
     @Test
-    public void deselect_withItemSelectableProvider_allowsDeselection() {
+    void deselect_withItemSelectableProvider_allowsDeselection() {
         grid.setItems(dataProviderWithIdentityProvider);
         grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
 
@@ -187,11 +191,12 @@ public class AbstractGridSingleSelectionModelTest {
         // allow programmatic deselection of any item
         selectionModel.select(entity1);
         selectionModel.deselect(entity1);
-        Assert.assertEquals(Set.of(), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(), selectionModel.getSelectedItems());
 
         selectionModel.select(entity2);
         selectionModel.select(entity2);
-        Assert.assertEquals(Set.of(entity2), selectionModel.getSelectedItems());
+        Assertions.assertEquals(Set.of(entity2),
+                selectionModel.getSelectedItems());
     }
 
     public static class TestEntity {

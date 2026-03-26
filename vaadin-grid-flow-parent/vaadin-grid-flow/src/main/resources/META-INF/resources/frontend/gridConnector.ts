@@ -276,27 +276,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  const itemsUpdated = function (items) {
-    if (!items || !Array.isArray(items)) {
-      throw 'Attempted to call itemsUpdated with an invalid value: ' + JSON.stringify(items);
-    }
-    let detailsOpenedItems = Array.from(grid.detailsOpenedItems);
-    for (let i = 0; i < items.length; ++i) {
-      const item = items[i];
-      if (!item) {
-        continue;
-      }
-      if (item.detailsOpened) {
-        if (grid._getItemIndexInArray(item, detailsOpenedItems) < 0) {
-          detailsOpenedItems.push(item);
-        }
-      } else if (grid._getItemIndexInArray(item, detailsOpenedItems) >= 0) {
-        detailsOpenedItems.splice(grid._getItemIndexInArray(item, detailsOpenedItems), 1);
-      }
-    }
-    grid.detailsOpenedItems = detailsOpenedItems;
-  };
-
   grid.$connector.set = function (startIndex, items) {
     const { rootCache } = dataProviderController;
     items.forEach((item, i) => {
@@ -306,7 +285,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     preventUpdateVisibleRows(() => {
       grid.$connector.doSelection(items.filter((item) => item.selected));
       grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
-      itemsUpdated(items);
+
+      items.forEach((item) => {
+        if (item.detailsOpened) {
+          grid.openItemDetails(item);
+        } else {
+          grid.closeItemDetails(item);
+        }
+      });
     });
 
     grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
@@ -319,22 +305,26 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    */
   grid.$connector.updateFlatData = function (updatedItems) {
     const { rootCache } = dataProviderController;
-    const updatedIndexes = [];
 
-    for (let i = 0; i < updatedItems.length; i++) {
-      const itemContext = dataProviderController.getItemContext(updatedItems[i]);
-      if (itemContext) {
-        const { index } = itemContext;
-        rootCache.items[index] = updatedItems[i];
-        updatedIndexes.push(index);
+    updatedItems.forEach((item) => {
+      const itemContext = dataProviderController.getItemContext(item);
+      if (!itemContext) {
+        return;
       }
-    }
 
-    preventUpdateVisibleRows(() => {
-      itemsUpdated(updatedItems);
+      const { index } = itemContext;
+      rootCache.items[index] = item;
+
+      preventUpdateVisibleRows(() => {
+        if (item.detailsOpened) {
+          grid.openItemDetails(item);
+        } else {
+          grid.closeItemDetails(item);
+        }
+      });
+
+      grid.__updateVisibleRows(index, index);
     });
-
-    updatedIndexes.forEach((index) => grid.__updateVisibleRows(index, index));
   };
 
   grid.$connector.clear = function (index, length) {

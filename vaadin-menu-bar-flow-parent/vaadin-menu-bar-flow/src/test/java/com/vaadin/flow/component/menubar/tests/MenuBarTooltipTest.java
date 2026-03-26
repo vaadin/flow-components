@@ -18,9 +18,9 @@ package com.vaadin.flow.component.menubar.tests;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.dom.Element;
@@ -30,38 +30,38 @@ import com.vaadin.flow.dom.Element;
  *
  * @author Vaadin Ltd.
  */
-public class MenuBarTooltipTest {
+class MenuBarTooltipTest {
 
     private MenuBar menuBar;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         menuBar = new MenuBar();
     }
 
     @Test
-    public void default_doesNotHaveTooltipElement() {
-        Assert.assertFalse(getTooltipElement(menuBar).isPresent());
+    void default_doesNotHaveTooltipElement() {
+        Assertions.assertFalse(getTooltipElement(menuBar).isPresent());
     }
 
     @Test
-    public void addItemWithTooltip_hasTooltipElement() {
+    void addItemWithTooltip_hasTooltipElement() {
         menuBar.addItem("Item", "Item tooltip");
-        Assert.assertTrue(getTooltipElement(menuBar).isPresent());
+        Assertions.assertTrue(getTooltipElement(menuBar).isPresent());
     }
 
     @Test
-    public void addItemWithTooltip_tooltipHasSlot() {
+    void addItemWithTooltip_tooltipHasSlot() {
         menuBar.addItem("Item", "Item tooltip");
-        Assert.assertEquals("tooltip",
+        Assertions.assertEquals("tooltip",
                 getTooltipElement(menuBar).get().getAttribute("slot"));
     }
 
     @Test
-    public void addAnotherItemWithTooltip_hasOneTooltipElement() {
+    void addAnotherItemWithTooltip_hasOneTooltipElement() {
         menuBar.addItem("Item 0", "Item 0 tooltip");
         menuBar.addItem("Item 1", "Item 1 tooltip");
-        Assert.assertEquals(1, getTooltipElements(menuBar).count());
+        Assertions.assertEquals(1, getTooltipElements(menuBar).count());
     }
 
     private Optional<Element> getTooltipElement(MenuBar menuBar) {

@@ -15,92 +15,93 @@
  */
 package com.vaadin.flow.component.notification;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 
-public class NotificationHasStyleTest {
+class NotificationHasStyleTest {
     private final Notification notification = new Notification();
 
     @Test
-    public void addClassName_notificationHasOverlayClass() {
+    void addClassName_notificationHasOverlayClass() {
         notification.addClassName("foo");
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo",
                 notification.getElement().getProperty("overlayClass"));
 
         notification.addClassName("bar");
-        Assert.assertEquals("foo bar",
+        Assertions.assertEquals("foo bar",
                 notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
-    public void removeClassName_notificationHasOverlayClass() {
+    void removeClassName_notificationHasOverlayClass() {
         notification.addClassName("foo");
 
         notification.removeClassName("foo");
-        Assert.assertEquals(null,
+        Assertions.assertEquals(null,
                 notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
-    public void setClassNameString_notificationHasOverlayClass() {
+    void setClassNameString_notificationHasOverlayClass() {
         notification.setClassName("foo");
-        Assert.assertEquals("foo",
+        Assertions.assertEquals("foo",
                 notification.getElement().getProperty("overlayClass"));
 
         notification.setClassName("bar");
-        Assert.assertEquals("bar",
+        Assertions.assertEquals("bar",
                 notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
-    public void setClassNameBoolean_notificationHasOverlayClass() {
+    void setClassNameBoolean_notificationHasOverlayClass() {
         notification.setClassName("foo", true);
 
         notification.setClassName("foo", false);
 
-        Assert.assertEquals(null,
+        Assertions.assertEquals(null,
                 notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
-    public void setClassNameMultiple_notificationHasOverlayClass() {
+    void setClassNameMultiple_notificationHasOverlayClass() {
         notification.setClassName("foo bar");
         notification.getClassNames().set("foo", false);
 
-        Assert.assertEquals("bar",
+        Assertions.assertEquals("bar",
                 notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
-    public void addClassNames_notificationHasOverlayClass() {
+    void addClassNames_notificationHasOverlayClass() {
         notification.addClassNames("foo", "bar");
-        Assert.assertEquals("foo bar",
+        Assertions.assertEquals("foo bar",
                 notification.getElement().getProperty("overlayClass"));
 
         notification.addClassNames("baz", "qux");
-        Assert.assertEquals("foo bar baz qux",
+        Assertions.assertEquals("foo bar baz qux",
                 notification.getElement().getProperty("overlayClass"));
     }
 
     @Test
-    public void removeClassNames_notificationHasOverlayClass() {
+    void removeClassNames_notificationHasOverlayClass() {
         notification.addClassNames("foo", "bar", "baz", "qux");
 
         notification.removeClassNames("foo", "bar");
-        Assert.assertEquals("baz qux",
+        Assertions.assertEquals("baz qux",
                 notification.getElement().getProperty("overlayClass"));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getStyle_unsupported() {
-        notification.getStyle();
+    @Test
+    void getStyle_unsupported() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> notification.getStyle());
     }
 
     @Test
-    public void getClassNames_usesProxy() {
-        Assert.assertTrue(
+    void getClassNames_usesProxy() {
+        Assertions.assertTrue(
                 notification.getClassNames() instanceof OverlayClassListProxy);
     }
 }

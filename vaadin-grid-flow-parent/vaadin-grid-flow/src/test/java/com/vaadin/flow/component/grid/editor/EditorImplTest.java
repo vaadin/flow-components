@@ -19,25 +19,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.StatusChangeEvent;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class EditorImplTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class EditorImplTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     private Grid<String> grid;
     private TestEditor editor;
@@ -56,8 +52,8 @@ public class EditorImplTest {
         }
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         grid = new Grid<>();
         ui.add(grid);
         editor = new TestEditor(grid);
@@ -67,48 +63,51 @@ public class EditorImplTest {
     }
 
     @Test()
-    public void editItem_itemIsNotKnown_noException() {
+    void editItem_itemIsNotKnown_noException() {
         try {
             // Edit an item that is not in the grid's active range yet
             editor.editItem("foo");
             ui.fakeClientCommunication();
         } catch (Exception e) {
-            Assert.fail("No exception should be thrown");
+            Assertions.fail("No exception should be thrown");
         }
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void editItem_noBinder_throw() {
+    @Test
+    void editItem_noBinder_throw() {
         editor = new TestEditor(grid);
         editor.editItem("bar");
-
-        ui.fakeClientCommunication();
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            ui.fakeClientCommunication();
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void editItem_editorIsBufferedAndOpen_throw() {
+    @Test
+    void editItem_editorIsBufferedAndOpen_throw() {
         grid.getDataCommunicator().getKeyMapper().key("foo");
 
         editor.setBuffered(true);
         editor.editItem("bar");
         ui.fakeClientCommunication();
-
         editor.editItem("foo");
-        ui.fakeClientCommunication();
+
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            ui.fakeClientCommunication();
+        });
     }
 
     @Test
-    public void editItem_itemIsKnown_binderStatusEventAndEditorOpenEvent() {
+    void editItem_itemIsKnown_binderStatusEventAndEditorOpenEvent() {
         AtomicReference<StatusChangeEvent> statusEventCapture = new AtomicReference<>();
         AtomicReference<EditorEvent<String>> openEventCapure = new AtomicReference<EditorEvent<String>>();
         assertOpenEvents(statusEventCapture, openEventCapure);
 
         // In not buffered mode there is the bean in the binder
-        Assert.assertEquals("bar", editor.getBinder().getBean());
+        Assertions.assertEquals("bar", editor.getBinder().getBean());
     }
 
     @Test
-    public void editItem_itemIsKnown_binderIsInBufferedMode_binderStatusEventAndEditorOpenEvent() {
+    void editItem_itemIsKnown_binderIsInBufferedMode_binderStatusEventAndEditorOpenEvent() {
         editor.setBuffered(true);
 
         AtomicReference<StatusChangeEvent> statusEventCapture = new AtomicReference<>();
@@ -116,11 +115,11 @@ public class EditorImplTest {
         assertOpenEvents(statusEventCapture, openEventCapure);
 
         // In not buffered mode there is no bean in the binder
-        Assert.assertNull("bar", editor.getBinder().getBean());
+        Assertions.assertNull(editor.getBinder().getBean());
     }
 
     @Test
-    public void editItem_switchEditedItem_itemsAreRefreshed() {
+    void editItem_switchEditedItem_itemsAreRefreshed() {
         grid.getDataCommunicator().getKeyMapper().key("foo");
 
         editor.editItem("bar");
@@ -130,13 +129,13 @@ public class EditorImplTest {
         editor.editItem("foo");
         ui.fakeClientCommunication();
 
-        Assert.assertEquals(2, editor.refreshedItems.size());
-        Assert.assertEquals("bar", editor.refreshedItems.get(0));
-        Assert.assertEquals("foo", editor.refreshedItems.get(1));
+        Assertions.assertEquals(2, editor.refreshedItems.size());
+        Assertions.assertEquals("bar", editor.refreshedItems.get(0));
+        Assertions.assertEquals("foo", editor.refreshedItems.get(1));
     }
 
     @Test
-    public void cancel_eventIsFiredAndItemIsRefreshed() {
+    void cancel_eventIsFiredAndItemIsRefreshed() {
         editor.editItem("bar");
         ui.fakeClientCommunication();
 
@@ -150,30 +149,30 @@ public class EditorImplTest {
                 event -> closeEventCapture.compareAndSet(null, event));
         editor.cancel();
 
-        Assert.assertNotNull(cancelEventCapture.get());
-        Assert.assertNotNull(closeEventCapture.get());
+        Assertions.assertNotNull(cancelEventCapture.get());
+        Assertions.assertNotNull(closeEventCapture.get());
 
-        Assert.assertEquals(1, editor.refreshedItems.size());
-        Assert.assertEquals("bar", editor.refreshedItems.get(0));
+        Assertions.assertEquals(1, editor.refreshedItems.size());
+        Assertions.assertEquals("bar", editor.refreshedItems.get(0));
     }
 
     @Test
-    public void save_editorIsNotOpened_noEvents() {
+    void save_editorIsNotOpened_noEvents() {
         AtomicReference<StatusChangeEvent> statusEventCapture = new AtomicReference<>();
         AtomicReference<EditorEvent<String>> saveEventCapture = new AtomicReference<>();
         AtomicReference<EditorEvent<String>> closeEventCapture = new AtomicReference<>();
 
         assertNegativeSave(statusEventCapture, saveEventCapture,
                 closeEventCapture);
-        Assert.assertEquals(0, editor.refreshedItems.size());
+        Assertions.assertEquals(0, editor.refreshedItems.size());
 
-        Assert.assertNull(statusEventCapture.get());
-        Assert.assertNull(saveEventCapture.get());
-        Assert.assertNull(closeEventCapture.get());
+        Assertions.assertNull(statusEventCapture.get());
+        Assertions.assertNull(saveEventCapture.get());
+        Assertions.assertNull(closeEventCapture.get());
     }
 
     @Test
-    public void save_editorIsOpened_editorIsInNotBufferedMode_noEvents() {
+    void save_editorIsOpened_editorIsInNotBufferedMode_noEvents() {
         editor.editItem("bar");
         ui.fakeClientCommunication();
 
@@ -185,15 +184,15 @@ public class EditorImplTest {
 
         assertNegativeSave(statusEventCapture, saveEventCapture,
                 closeEventCapture);
-        Assert.assertEquals(0, editor.refreshedItems.size());
+        Assertions.assertEquals(0, editor.refreshedItems.size());
 
-        Assert.assertNull(statusEventCapture.get());
-        Assert.assertNull(saveEventCapture.get());
-        Assert.assertNull(closeEventCapture.get());
+        Assertions.assertNull(statusEventCapture.get());
+        Assertions.assertNull(saveEventCapture.get());
+        Assertions.assertNull(closeEventCapture.get());
     }
 
     @Test
-    public void save_editorIsOpened_editorIsInBufferedMode_eventsAreFired() {
+    void save_editorIsOpened_editorIsInBufferedMode_eventsAreFired() {
         editor.editItem("bar");
         ui.fakeClientCommunication();
 
@@ -204,18 +203,18 @@ public class EditorImplTest {
         AtomicReference<EditorEvent<String>> saveEventCapture = new AtomicReference<>();
         AtomicReference<EditorEvent<String>> closeEventCapture = new AtomicReference<>();
 
-        Assert.assertTrue(doSave(statusEventCapture, saveEventCapture,
+        Assertions.assertTrue(doSave(statusEventCapture, saveEventCapture,
                 closeEventCapture));
-        Assert.assertEquals(1, editor.refreshedItems.size());
-        Assert.assertEquals("bar", editor.refreshedItems.get(0));
+        Assertions.assertEquals(1, editor.refreshedItems.size());
+        Assertions.assertEquals("bar", editor.refreshedItems.get(0));
 
-        Assert.assertNotNull(statusEventCapture.get());
-        Assert.assertNotNull(saveEventCapture.get());
-        Assert.assertNotNull(closeEventCapture.get());
+        Assertions.assertNotNull(statusEventCapture.get());
+        Assertions.assertNotNull(saveEventCapture.get());
+        Assertions.assertNotNull(closeEventCapture.get());
     }
 
     @Test
-    public void save_editorIsOpened_editorIsInBufferedMode_beanIsInvalid_editorIsNotClosed() {
+    void save_editorIsOpened_editorIsInBufferedMode_beanIsInvalid_editorIsNotClosed() {
         editor.getBinder().forField(new TextField())
                 .withValidator(value -> !value.equals("bar"), "")
                 .bind(ValueProvider.identity(), (item, value) -> {
@@ -230,23 +229,19 @@ public class EditorImplTest {
         AtomicReference<EditorEvent<String>> saveEventCapture = new AtomicReference<>();
         AtomicReference<EditorEvent<String>> closeEventCapture = new AtomicReference<>();
 
-        Assert.assertFalse(doSave(statusEventCapture, saveEventCapture,
+        Assertions.assertFalse(doSave(statusEventCapture, saveEventCapture,
                 closeEventCapture));
-        Assert.assertEquals(0, editor.refreshedItems.size());
+        Assertions.assertEquals(0, editor.refreshedItems.size());
 
-        Assert.assertNotNull(statusEventCapture.get());
-        Assert.assertNull(saveEventCapture.get());
-        Assert.assertNull(closeEventCapture.get());
+        Assertions.assertNotNull(statusEventCapture.get());
+        Assertions.assertNull(saveEventCapture.get());
+        Assertions.assertNull(closeEventCapture.get());
 
-        Assert.assertTrue(statusEventCapture.get().hasValidationErrors());
+        Assertions.assertTrue(statusEventCapture.get().hasValidationErrors());
     }
 
     @Test
-    public void editorIsInBufferedMode_closeEditorThrows() {
-        thrown.expect(UnsupportedOperationException.class);
-        thrown.reportMissingExceptionWithMessage(
-                "Buffered editor should be closed using save() or cancel()");
-
+    void editorIsInBufferedMode_closeEditorThrows() {
         editor.editItem("bar");
         ui.fakeClientCommunication();
 
@@ -258,15 +253,15 @@ public class EditorImplTest {
         editor.addCloseListener(
                 event -> closeEventCapture.compareAndSet(null, event));
 
-        editor.closeEditor();
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> editor.closeEditor());
 
-        Assert.assertNull(
-                "Received close event even though method should have thrown.",
-                closeEventCapture.get());
+        Assertions.assertNull(closeEventCapture.get(),
+                "Received close event even though method should have thrown.");
     }
 
     @Test
-    public void editorInUnBufferedMode_closeEditorSendsCloseEvent() {
+    void editorInUnBufferedMode_closeEditorSendsCloseEvent() {
         editor.editItem("bar");
         ui.fakeClientCommunication();
 
@@ -279,15 +274,15 @@ public class EditorImplTest {
 
         editor.closeEditor();
 
-        Assert.assertNotNull("No close event was fired.",
-                closeEventCapture.get());
+        Assertions.assertNotNull(closeEventCapture.get(),
+                "No close event was fired.");
     }
 
     private void assertNegativeSave(
             AtomicReference<StatusChangeEvent> statusEventCapture,
             AtomicReference<EditorEvent<String>> saveEventCapture,
             AtomicReference<EditorEvent<String>> closeEventCapture) {
-        Assert.assertFalse(doSave(statusEventCapture, saveEventCapture,
+        Assertions.assertFalse(doSave(statusEventCapture, saveEventCapture,
                 closeEventCapture));
     }
 
@@ -316,9 +311,9 @@ public class EditorImplTest {
         editor.editItem("bar");
         ui.fakeClientCommunication();
 
-        Assert.assertNotNull(statusEventCapture.get());
-        Assert.assertNotNull(openEventCapure.get());
+        Assertions.assertNotNull(statusEventCapture.get());
+        Assertions.assertNotNull(openEventCapure.get());
 
-        Assert.assertEquals("bar", openEventCapure.get().getItem());
+        Assertions.assertEquals("bar", openEventCapure.get().getItem());
     }
 }

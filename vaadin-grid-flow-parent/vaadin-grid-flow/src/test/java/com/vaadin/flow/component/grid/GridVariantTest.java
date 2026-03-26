@@ -15,29 +15,29 @@
  */
 package com.vaadin.flow.component.grid;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class GridVariantTest {
+class GridVariantTest {
 
     @Test
-    public void addThemeVariant_themeNamesContainsThemeVariant() {
+    void addThemeVariant_themeNamesContainsThemeVariant() {
         var grid = new Grid<>();
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         var themeNames = grid.getThemeNames();
-        Assert.assertTrue(themeNames
+        Assertions.assertTrue(themeNames
                 .contains(GridVariant.LUMO_NO_BORDER.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         var grid = new Grid<>();
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.removeThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         var themeNames = grid.getThemeNames();
-        Assert.assertFalse(themeNames
+        Assertions.assertFalse(themeNames
                 .contains(GridVariant.LUMO_NO_BORDER.getVariantName()));
     }
 }

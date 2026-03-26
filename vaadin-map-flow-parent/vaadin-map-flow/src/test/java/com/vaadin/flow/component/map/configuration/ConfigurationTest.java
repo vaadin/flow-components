@@ -11,21 +11,21 @@ package com.vaadin.flow.component.map.configuration;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.controls.Control;
 
-public class ConfigurationTest {
+class ConfigurationTest {
 
     private Configuration configuration;
     private Consumer<AbstractConfigurationObject> changeCollectorMock;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         configuration = new Configuration();
         // Clear initial dirty flag for tests
         configuration.collectChanges(o -> {
@@ -35,7 +35,7 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void addControl() {
+    void addControl() {
         TestControl control1 = new TestControl("type-1");
         TestControl control2 = new TestControl("type-2");
 
@@ -43,27 +43,29 @@ public class ConfigurationTest {
         configuration.addControl(control2);
 
         List<Control> controls = configuration.getControls();
-        Assert.assertEquals(2, controls.size());
-        Assert.assertEquals(control1, controls.get(0));
-        Assert.assertEquals(control2, controls.get(1));
+        Assertions.assertEquals(2, controls.size());
+        Assertions.assertEquals(control1, controls.get(0));
+        Assertions.assertEquals(control2, controls.get(1));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void addControl_doesNotAllowNull() {
-        configuration.addControl(null);
+    @Test
+    void addControl_doesNotAllowNull() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> configuration.addControl(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void addControl_doesNotAllowDuplicateType() {
+    @Test
+    void addControl_doesNotAllowDuplicateType() {
         TestControl control1 = new TestControl("same-type");
         TestControl control2 = new TestControl("same-type");
 
         configuration.addControl(control1);
-        configuration.addControl(control2);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> configuration.addControl(control2));
     }
 
     @Test
-    public void removeControl() {
+    void removeControl() {
         TestControl control1 = new TestControl("type-1");
         TestControl control2 = new TestControl("type-2");
 
@@ -72,17 +74,18 @@ public class ConfigurationTest {
         configuration.removeControl(control1);
 
         List<Control> controls = configuration.getControls();
-        Assert.assertEquals(1, controls.size());
-        Assert.assertEquals(control2, controls.getFirst());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void removeControl_doesNotAllowNull() {
-        configuration.removeControl(null);
+        Assertions.assertEquals(1, controls.size());
+        Assertions.assertEquals(control2, controls.getFirst());
     }
 
     @Test
-    public void controls_changeTracking() {
+    void removeControl_doesNotAllowNull() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> configuration.removeControl(null));
+    }
+
+    @Test
+    void controls_changeTracking() {
         TestControl control = new TestControl();
 
         ConfigurationTestUtil.testCollectionChangeTracking(configuration,
@@ -92,7 +95,7 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void getVisibleControls() {
+    void getVisibleControls() {
         TestControl control1 = new TestControl("type-1");
         control1.setVisible(true);
         TestControl control2 = new TestControl("type-2");
@@ -105,14 +108,14 @@ public class ConfigurationTest {
         configuration.addControl(control3);
 
         List<Control> visibleControls = configuration.getVisibleControls();
-        Assert.assertEquals(2, visibleControls.size());
-        Assert.assertTrue(visibleControls.contains(control1));
-        Assert.assertFalse(visibleControls.contains(control2));
-        Assert.assertTrue(visibleControls.contains(control3));
+        Assertions.assertEquals(2, visibleControls.size());
+        Assertions.assertTrue(visibleControls.contains(control1));
+        Assertions.assertFalse(visibleControls.contains(control2));
+        Assertions.assertTrue(visibleControls.contains(control3));
     }
 
     @Test
-    public void controlVisibilityChange_marksConfigurationAsDirty() {
+    void controlVisibilityChange_marksConfigurationAsDirty() {
         TestControl control = new TestControl();
         configuration.addControl(control);
         // Clear dirty flag
@@ -127,7 +130,7 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void removeControl_controlVisibilityChange_doesNotMarkConfigurationAsDirty() {
+    void removeControl_controlVisibilityChange_doesNotMarkConfigurationAsDirty() {
         TestControl control = new TestControl();
         configuration.addControl(control);
         configuration.removeControl(control);
@@ -143,7 +146,7 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void controlOtherPropertyChange_marksConfigurationAsDirty() {
+    void controlOtherPropertyChange_marksConfigurationAsDirty() {
         TestControl control = new TestControl();
         configuration.addControl(control);
         // Clear dirty flag

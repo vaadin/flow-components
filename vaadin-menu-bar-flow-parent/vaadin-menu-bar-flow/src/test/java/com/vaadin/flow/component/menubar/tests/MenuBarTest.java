@@ -15,40 +15,41 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
 
-public class MenuBarTest {
+class MenuBarTest {
 
     private MenuBar menuBar;
     private MenuItem item1, item2;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         menuBar = new MenuBar();
         item1 = menuBar.addItem("foo");
         item2 = menuBar.addItem(new Span("bar"));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void rootMenuItem_setCheckableTrue_throws() {
-        item1.setCheckable(true);
+    @Test
+    void rootMenuItem_setCheckableTrue_throws() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> item1.setCheckable(true));
     }
 
     // Note that the MenuManager is already tested in vaadin-context-menu-flow.
 
     @Test
-    public void getChildren_getItems() {
+    void getChildren_getItems() {
         assertChildrenAndItems(item1, item2);
     }
 
     @Test
-    public void addChildrenWithClickListeners_getChildren_getItems() {
+    void addChildrenWithClickListeners_getChildren_getItems() {
         MenuItem item3 = menuBar.addItem("foo", e -> {
         });
         MenuItem item4 = menuBar.addItem(new Span("bar"), e -> {
@@ -57,69 +58,70 @@ public class MenuBarTest {
     }
 
     @Test
-    public void remove_getChildren_getItems() {
+    void remove_getChildren_getItems() {
         menuBar.remove(item1);
         assertChildrenAndItems(item2);
     }
 
     @Test
-    public void removeAll_getChildren_getItems() {
+    void removeAll_getChildren_getItems() {
         menuBar.removeAll();
         assertChildrenAndItems();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void removeNonChildItem_throws() {
+    @Test
+    void removeNonChildItem_throws() {
         MenuItem item = new MenuBar().addItem("foo");
-        menuBar.remove(item);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> menuBar.remove(item));
     }
 
     @Test
-    public void openOnHover_falseByDefault() {
-        Assert.assertFalse(menuBar.isOpenOnHover());
+    void openOnHover_falseByDefault() {
+        Assertions.assertFalse(menuBar.isOpenOnHover());
     }
 
     @Test
-    public void setOpenOnHover_isOpenOnHover() {
+    void setOpenOnHover_isOpenOnHover() {
         menuBar.setOpenOnHover(true);
-        Assert.assertTrue(menuBar.isOpenOnHover());
+        Assertions.assertTrue(menuBar.isOpenOnHover());
     }
 
     @Test
-    public void isReverseCollapseOrder() {
-        Assert.assertFalse(menuBar.isReverseCollapseOrder());
-        Assert.assertFalse(
+    void isReverseCollapseOrder() {
+        Assertions.assertFalse(menuBar.isReverseCollapseOrder());
+        Assertions.assertFalse(
                 menuBar.getElement().getProperty("reverseCollapse", false));
     }
 
     @Test
-    public void setReverseCollapseOrder_isReverseCollapseOrder() {
+    void setReverseCollapseOrder_isReverseCollapseOrder() {
         menuBar.setReverseCollapseOrder(true);
-        Assert.assertTrue(menuBar.isReverseCollapseOrder());
-        Assert.assertTrue(
+        Assertions.assertTrue(menuBar.isReverseCollapseOrder());
+        Assertions.assertTrue(
                 menuBar.getElement().getProperty("reverseCollapse", false));
     }
 
     @Test
-    public void isTabNavigation() {
-        Assert.assertFalse(menuBar.isTabNavigation());
-        Assert.assertFalse(
+    void isTabNavigation() {
+        Assertions.assertFalse(menuBar.isTabNavigation());
+        Assertions.assertFalse(
                 menuBar.getElement().getProperty("tabNavigation", false));
     }
 
     @Test
-    public void setTabNavigation_isTabNavigation() {
+    void setTabNavigation_isTabNavigation() {
         menuBar.setTabNavigation(true);
-        Assert.assertTrue(menuBar.isTabNavigation());
-        Assert.assertTrue(
+        Assertions.assertTrue(menuBar.isTabNavigation());
+        Assertions.assertTrue(
                 menuBar.getElement().getProperty("tabNavigation", false));
     }
 
     private void assertChildrenAndItems(MenuItem... expected) {
         Object[] menuItems = menuBar.getChildren().toArray();
-        Assert.assertArrayEquals(expected, menuItems);
+        Assertions.assertArrayEquals(expected, menuItems);
 
         menuItems = menuBar.getItems().toArray();
-        Assert.assertArrayEquals(expected, menuItems);
+        Assertions.assertArrayEquals(expected, menuItems);
     }
 }

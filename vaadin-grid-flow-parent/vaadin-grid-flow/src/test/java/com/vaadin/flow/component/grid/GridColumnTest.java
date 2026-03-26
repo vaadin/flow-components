@@ -15,17 +15,16 @@
  */
 package com.vaadin.flow.component.grid;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Span;
@@ -35,11 +34,11 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class GridColumnTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class GridColumnTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     Grid<String> grid;
     Column<String> firstColumn;
@@ -49,11 +48,8 @@ public class GridColumnTest {
 
     IconRenderer<String> renderer;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         grid = new Grid<>();
         firstColumn = grid.addColumn(str -> str);
         secondColumn = grid.addColumn(str -> str);
@@ -63,92 +59,98 @@ public class GridColumnTest {
     }
 
     @Test
-    public void setKey_getByKey() {
+    void setKey_getByKey() {
         firstColumn.setKey("foo");
         secondColumn.setKey("bar");
-        Assert.assertEquals(firstColumn, grid.getColumnByKey("foo"));
-        Assert.assertEquals(secondColumn, grid.getColumnByKey("bar"));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void changeKey_throws() {
-        firstColumn.setKey("foo");
-        firstColumn.setKey("bar");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void duplicateKey_throws() {
-        firstColumn.setKey("foo");
-        secondColumn.setKey("foo");
+        Assertions.assertEquals(firstColumn, grid.getColumnByKey("foo"));
+        Assertions.assertEquals(secondColumn, grid.getColumnByKey("bar"));
     }
 
     @Test
-    public void removeColumnByKey() {
+    void changeKey_throws() {
+        firstColumn.setKey("foo");
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> firstColumn.setKey("bar"));
+    }
+
+    @Test
+    void duplicateKey_throws() {
+        firstColumn.setKey("foo");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> secondColumn.setKey("foo"));
+    }
+
+    @Test
+    void removeColumnByKey() {
         firstColumn.setKey("first");
         grid.removeColumnByKey("first");
-        Assert.assertNull(grid.getColumnByKey("first"));
+        Assertions.assertNull(grid.getColumnByKey("first"));
     }
 
     @Test
-    public void removeColumnByNullKey_throws() {
-        expectNullPointerException("columnKey should not be null");
-        grid.removeColumnByKey(null);
+    void removeColumnByNullKey_throws() {
+        var ex = Assertions.assertThrows(NullPointerException.class,
+                () -> grid.removeColumnByKey(null));
+        Assertions.assertTrue(
+                ex.getMessage().contains("columnKey should not be null"));
     }
 
     @Test
-    public void removeColumn() {
+    void removeColumn() {
         firstColumn.setKey("first");
         grid.removeColumn(firstColumn);
-        Assert.assertNull(grid.getColumnByKey("first"));
+        Assertions.assertNull(grid.getColumnByKey("first"));
     }
 
     @Test
-    public void removeNullColumn_throws() {
-        expectNullPointerException("column should not be null");
-        grid.removeColumn(null);
+    void removeNullColumn_throws() {
+        var ex = Assertions.assertThrows(NullPointerException.class,
+                () -> grid.removeColumn(null));
+        Assertions.assertTrue(
+                ex.getMessage().contains("column should not be null"));
     }
 
     @Test
-    public void removeInvalidColumnByKey_throws() {
-        expectIllegalArgumentException(
-                "The column with key 'wrong' is not part of this Grid");
-
-        grid.removeColumnByKey("wrong");
+    void removeInvalidColumnByKey_throws() {
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> grid.removeColumnByKey("wrong"));
+        Assertions.assertTrue(ex.getMessage().contains(
+                "The column with key 'wrong' is not part of this Grid"));
     }
 
     @Test
-    public void removeColumnByKeyTwice_throws() {
-        expectIllegalArgumentException(
-                "The column with key 'first' is not part of this Grid");
-
+    void removeColumnByKeyTwice_throws() {
         firstColumn.setKey("first");
         grid.removeColumnByKey("first");
-        grid.removeColumnByKey("first");
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> grid.removeColumnByKey("first"));
+        Assertions.assertTrue(ex.getMessage().contains(
+                "The column with key 'first' is not part of this Grid"));
     }
 
     @Test
-    public void removeInvalidColumn_throws() {
-        expectIllegalArgumentException(
-                "The column with key 'wrong' is not owned by this Grid");
-
+    void removeInvalidColumn_throws() {
         Grid<String> grid2 = new Grid<>();
         Column<String> wrongColumn = grid2.addColumn(str -> str);
         wrongColumn.setKey("wrong");
-        grid.removeColumn(wrongColumn);
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> grid.removeColumn(wrongColumn));
+        Assertions.assertTrue(ex.getMessage().contains(
+                "The column with key 'wrong' is not owned by this Grid"));
     }
 
     @Test
-    public void removeColumnTwice_throws() {
-        expectIllegalArgumentException(
-                "The column with key 'first' is not owned by this Grid");
-
+    void removeColumnTwice_throws() {
         firstColumn.setKey("first");
         grid.removeColumn(firstColumn);
-        grid.removeColumn(firstColumn);
+        var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> grid.removeColumn(firstColumn));
+        Assertions.assertTrue(ex.getMessage().contains(
+                "The column with key 'first' is not owned by this Grid"));
     }
 
     @Test
-    public void addColumn_defaultComparator() {
+    void addColumn_defaultComparator() {
         Grid<Person> grid = new Grid<>();
 
         Column<Person> nameColumn = grid.addColumn(Person::getName);
@@ -159,18 +161,16 @@ public class GridColumnTest {
         Person person2 = new Person("b", 1960);
         int result = nameComparator.compare(person1, person2);
 
-        Assert.assertEquals(
-                "The first person name should be less than the name of the second person",
-                -1, result);
+        Assertions.assertEquals(-1, result,
+                "The first person name should be less than the name of the second person");
 
         Column<Person> ageColumn = grid.addColumn(Person::getBorn);
         SerializableComparator<Person> ageComparator = ageColumn
                 .getComparator(SortDirection.ASCENDING);
         result = ageComparator.compare(person1, person2);
 
-        Assert.assertEquals(
-                "The first person year of born should be greater than the year of born of the second person",
-                1, result);
+        Assertions.assertEquals(1, result,
+                "The first person year of born should be greater than the year of born of the second person");
 
         // comparator which uses toString
         Column<Person> identityColumn = grid.addColumn(person -> person);
@@ -178,77 +178,70 @@ public class GridColumnTest {
                 .getComparator(SortDirection.ASCENDING);
         result = personComparator.compare(person1, person2);
 
-        Assert.assertEquals(
-                "The first person toString() result greater than the the second person toString() result",
-                -1, result);
+        Assertions.assertEquals(-1, result,
+                "The first person toString() result greater than the the second person toString() result");
     }
 
     @Test
-    public void testRenderer() {
+    void testRenderer() {
         assert renderer != null;
-        Assert.assertEquals(renderer, fourthColumn.getRenderer());
+        Assertions.assertEquals(renderer, fourthColumn.getRenderer());
     }
 
     @Test
-    public void setRenderer() {
+    void setRenderer() {
         Renderer<String> newRenderer = LitRenderer
                 .<String> of("<span>${text}</span>")
                 .withProperty("text", ValueProvider.identity());
         fourthColumn.setRenderer(newRenderer);
-        Assert.assertEquals(newRenderer, fourthColumn.getRenderer());
+        Assertions.assertEquals(newRenderer, fourthColumn.getRenderer());
     }
 
     @Test
-    public void setRendererReturnsColumn() {
+    void setRendererReturnsColumn() {
         Renderer<String> newRenderer = LitRenderer
                 .<String> of("<span>${text}</span>")
                 .withProperty("text", ValueProvider.identity());
         Grid.Column<String> result = fourthColumn.setRenderer(newRenderer);
-        Assert.assertEquals(fourthColumn, result);
+        Assertions.assertEquals(fourthColumn, result);
     }
 
     @Test
-    public void addColumn_defaultTextAlign() {
+    void addColumn_defaultTextAlign() {
         Grid<Person> grid = new Grid<>();
 
         Column<Person> nameColumn = grid.addColumn(Person::getName);
-        Assert.assertEquals(ColumnTextAlign.START, nameColumn.getTextAlign());
+        Assertions.assertEquals(ColumnTextAlign.START,
+                nameColumn.getTextAlign());
     }
 
     @Test
-    public void setTextAlignToNull_defaultTextAlign() {
+    void setTextAlignToNull_defaultTextAlign() {
         Grid<Person> grid = new Grid<>();
 
         Column<Person> nameColumn = grid.addColumn(Person::getName)
                 .setTextAlign(null);
-        Assert.assertEquals(ColumnTextAlign.START, nameColumn.getTextAlign());
+        Assertions.assertEquals(ColumnTextAlign.START,
+                nameColumn.getTextAlign());
 
         nameColumn.setTextAlign(ColumnTextAlign.CENTER);
-        Assert.assertEquals(ColumnTextAlign.CENTER, nameColumn.getTextAlign());
+        Assertions.assertEquals(ColumnTextAlign.CENTER,
+                nameColumn.getTextAlign());
 
         nameColumn.setTextAlign(null);
-        Assert.assertEquals(ColumnTextAlign.START, nameColumn.getTextAlign());
-    }
-
-    private void expectNullPointerException(String message) {
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage(message);
-    }
-
-    private void expectIllegalArgumentException(String message) {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(message);
+        Assertions.assertEquals(ColumnTextAlign.START,
+                nameColumn.getTextAlign());
     }
 
     @Test
-    public void createColumn_returnsNonNullAndBasicType() {
+    void createColumn_returnsNonNullAndBasicType() {
         Column column = new Grid<Person>().createColumn(LitRenderer.of(""), "");
         assertNotNull(column);
-        Assert.assertEquals(Column.class, column.getClass());
+        Assertions.assertEquals(Column.class, column.getClass());
     }
 
     @Test
-    public void addColumn_extendedColumnTypeByOverridingCreateMethod() {
+    void addColumn_extendedColumnTypeByOverridingCreateMethod() {
         Grid<Person> extendedGrid = new Grid<Person>() {
             @Override
             protected Column<Person> createColumn(Renderer<Person> renderer,
@@ -260,11 +253,11 @@ public class GridColumnTest {
         Column<Person> column = extendedGrid.addColumn(Person::toString);
 
         assertNotNull(column);
-        Assert.assertEquals(ExtendedColumn.class, column.getClass());
+        Assertions.assertEquals(ExtendedColumn.class, column.getClass());
     }
 
     @Test
-    public void addColumn_extendedColumnTypeByOverridingDefaultColumnFactoryGetter() {
+    void addColumn_extendedColumnTypeByOverridingDefaultColumnFactoryGetter() {
         Grid<Person> extendedGrid = new Grid<Person>() {
             public ExtendedColumn<Person> createCustomColumn(
                     Renderer<Person> renderer, String columnId) {
@@ -280,11 +273,11 @@ public class GridColumnTest {
         Column<Person> column = extendedGrid.addColumn(Person::toString);
 
         assertNotNull(column);
-        Assert.assertEquals(ExtendedColumn.class, column.getClass());
+        Assertions.assertEquals(ExtendedColumn.class, column.getClass());
     }
 
     @Test
-    public void addColumn_extendedColumnTypeByUsingAddColumnOverload() {
+    void addColumn_extendedColumnTypeByUsingAddColumnOverload() {
         ExtendedGrid<Person> extendedGrid = new ExtendedGrid<>();
 
         List<ExtendedColumn<Person>> columnsList = new ArrayList<>();
@@ -296,12 +289,12 @@ public class GridColumnTest {
 
         columnsList.forEach(column -> {
             assertNotNull(column);
-            Assert.assertEquals(ExtendedColumn.class, column.getClass());
+            Assertions.assertEquals(ExtendedColumn.class, column.getClass());
         });
     }
 
     @Test
-    public void addRegularColumnAndExtendedColumn() {
+    void addRegularColumnAndExtendedColumn() {
         ExtendedGrid<Person> extendedGrid = new ExtendedGrid<>();
 
         Column regularColumn = extendedGrid.addColumn(Person::toString);
@@ -314,19 +307,19 @@ public class GridColumnTest {
     }
 
     @Test
-    public void setColumnRowHeader_updatedPropertyValue() {
+    void setColumnRowHeader_updatedPropertyValue() {
         Grid<Person> grid = new Grid<>();
 
         Column<Person> rowHeaderColumn = grid.addColumn(Person::getName);
         rowHeaderColumn.setRowHeader(true);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 rowHeaderColumn.getElement().getProperty("rowHeader", false));
-        Assert.assertTrue(rowHeaderColumn.isRowHeader());
+        Assertions.assertTrue(rowHeaderColumn.isRowHeader());
     }
 
     private void assertEqualColumnClasses(Class columnClass, Class compareTo) {
         assertNotNull(columnClass);
-        Assert.assertEquals(compareTo, columnClass);
+        Assertions.assertEquals(compareTo, columnClass);
     }
 
     private static class ExtendedColumn<T> extends Column<T> {
