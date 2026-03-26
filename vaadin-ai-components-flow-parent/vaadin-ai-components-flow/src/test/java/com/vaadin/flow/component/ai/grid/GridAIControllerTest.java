@@ -29,12 +29,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.tests.MockUIExtension;
 
 class GridAIControllerTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Grid<Map<String, Object>> grid;
     private StubDatabaseProvider dbProvider;
@@ -43,6 +48,7 @@ class GridAIControllerTest {
     @BeforeEach
     void setUp() {
         grid = new Grid<>();
+        ui.add(grid);
         dbProvider = new StubDatabaseProvider();
         controller = new GridAIController(grid, dbProvider);
     }
@@ -171,8 +177,7 @@ class GridAIControllerTest {
     @Test
     void onRequestCompleted_renderFails_doesNotUpdateCurrentQuery() {
         dbProvider.queryResults = List.of(row("a", 1));
-        // Queue via tool call only (not simulateUpdate which calls
-        // onRequestCompleted)
+        // Queue via tool call only
         findTool("update_grid_data")
                 .execute("{\"query\": \"SELECT a FROM t\"}");
 
@@ -189,7 +194,7 @@ class GridAIControllerTest {
 
     @Test
     void emptyResult_setsDefaultEmptyStateText() {
-        dbProvider.queryResults = List.of(); // empty
+        dbProvider.queryResults = List.of();
         simulateUpdate("SELECT * FROM empty_table");
 
         Assertions.assertEquals("No results", grid.getEmptyStateText());
