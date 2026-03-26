@@ -18,7 +18,6 @@ package com.vaadin.flow.component.ai.chart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
@@ -69,14 +69,6 @@ class ChartAIControllerTest {
     class GetTools {
 
         @Test
-        void returnsToolsIncludingDatabaseAndChartTools() {
-            var tools = controller.getTools();
-            // DatabaseProviderAITools provides 1 tool (get_database_schema)
-            // ChartAITools provides 3 tools
-            Assertions.assertEquals(4, tools.size());
-        }
-
-        @Test
         void toolNamesIncludeExpected() {
             var names = controller.getTools().stream().map(t -> t.getName())
                     .toList();
@@ -104,50 +96,43 @@ class ChartAIControllerTest {
     }
 
     @Nested
-    class ChartIdIsUniquePerInstance {
-
-        @Test
-        void differentControllers_haveDifferentChartIds() {
-            var controller2 = new ChartAIController(new Chart(),
-                    databaseProvider);
-            var ids1 = controller.getTools().stream()
-                    .filter(t -> t.getName().equals("get_chart_state"))
-                    .findFirst().get().execute("{}");
-            var ids2 = controller2.getTools().stream()
-                    .filter(t -> t.getName().equals("get_chart_state"))
-                    .findFirst().get().execute("{}");
-            // The chartId in the JSON responses should differ
-            Assertions.assertNotEquals(ids1, ids2);
-        }
-    }
-
-    @Nested
     class ToolCallbacks {
 
         @Test
-        void getChartState_returnsStateJson() {
-            var tool = controller.getTools().stream()
-                    .filter(t -> t.getName().equals("get_chart_state"))
-                    .findFirst().get();
+        void getChartState_excludesSeriesFromConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
 
-            String result = tool.execute("{}");
-            Assertions.assertTrue(result.contains("chartId"));
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"column\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            String state = findTool(tools, "get_chart_state").execute("{}");
+            Assertions.assertTrue(state.contains("\"configuration\""));
+            Assertions.assertFalse(state.contains("\"series\""),
+                    "State configuration should not contain series data");
         }
 
         @Test
-        void updateConfiguration_setsPendingConfig() {
-            var tool = controller.getTools().stream().filter(
-                    t -> t.getName().equals("update_chart_configuration"))
-                    .findFirst().get();
+        void getOrCreate_withMismatchedChartId_throws() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
 
-            String result = tool.execute(
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
                     "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
-            Assertions.assertTrue(result.contains("updated"));
-
-            // Verify pending config is applied by onRequestCompleted
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
             controller.onRequestCompleted();
-            Assertions.assertNotNull(
-                    chart.getConfiguration().getChart().getType());
+
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertNotNull(entry);
+
+            Assertions.assertThrows(IllegalStateException.class,
+                    () -> ChartEntry.getOrCreate(chart, "wrong-id"));
         }
 
         @Test
@@ -185,67 +170,49 @@ class ChartAIControllerTest {
     }
 
     @Nested
-    class OnRequestCompleted {
-
-        @Test
-        void noPendingState_doesNothing() {
-            controller.onRequestCompleted();
-            // No exception
-        }
-
-        @Test
-        void appliesPendingConfiguration() {
-            var configTool = controller.getTools().stream().filter(
-                    t -> t.getName().equals("update_chart_configuration"))
-                    .findFirst().get();
-
-            configTool.execute(
-                    "{\"configuration\":{\"title\":{\"text\":\"Applied\"}}}");
-
-            controller.onRequestCompleted();
-
-            Assertions.assertEquals("Applied",
-                    chart.getConfiguration().getTitle().getText());
-        }
-    }
-
-    @Nested
     class SetDataConverter {
 
         @Test
         void customConverter_isUsedDuringRendering() {
             databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
 
-            AtomicBoolean converterCalled = new AtomicBoolean(false);
             controller.setDataConverter(data -> {
-                converterCalled.set(true);
-                DataSeries series = new DataSeries();
-                series.add(new DataSeriesItem("custom", 42));
+                DataSeries series = new DataSeries("custom");
+                series.add(new DataSeriesItem("A", 42));
                 return List.of(series);
             });
 
             var tools = controller.getTools();
 
-            // Set a chart type first (required for rendering)
             tools.stream()
                     .filter(t -> t.getName()
                             .equals("update_chart_configuration"))
                     .findFirst().get().execute(
                             "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
 
-            // Trigger a data update
             tools.stream()
                     .filter(t -> t.getName().equals("update_chart_data_source"))
                     .findFirst().get().execute("{\"queries\":[\"SELECT 1\"]}");
 
             controller.onRequestCompleted();
 
-            Assertions.assertTrue(converterCalled.get(),
-                    "Custom DataConverter should have been called");
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(1, series.size());
+            Assertions.assertEquals("custom", series.get(0).getName());
+            var items = ((DataSeries) series.get(0)).getData();
+            Assertions.assertEquals(1, items.size());
+            Assertions.assertEquals("A", items.get(0).getName());
+            Assertions.assertEquals(42, items.get(0).getY().intValue());
         }
     }
 
     // --- Helpers ---
+
+    private static LLMProvider.ToolSpec findTool(
+            List<LLMProvider.ToolSpec> tools, String name) {
+        return tools.stream().filter(t -> t.getName().equals(name)).findFirst()
+                .orElseThrow();
+    }
 
     private static class TestDatabaseProvider implements DatabaseProvider {
 

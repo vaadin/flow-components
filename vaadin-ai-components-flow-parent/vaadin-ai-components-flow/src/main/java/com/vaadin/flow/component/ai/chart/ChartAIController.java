@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
@@ -50,7 +49,7 @@ import com.vaadin.flow.component.charts.Chart;
  */
 public class ChartAIController implements AIController {
 
-    private final String chartId = UUID.randomUUID().toString();
+    private static final String CHART_ID = "chart";
 
     private static final String SYSTEM_PROMPT = """
             You have chart visualization tools. Follow this workflow when working with Charts:
@@ -141,7 +140,7 @@ public class ChartAIController implements AIController {
 
             @Override
             public Set<String> getChartIds() {
-                return Set.of(chartId);
+                return Set.of(CHART_ID);
             }
         }));
         return tools;

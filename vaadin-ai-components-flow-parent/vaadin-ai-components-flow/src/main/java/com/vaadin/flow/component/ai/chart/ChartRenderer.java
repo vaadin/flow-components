@@ -91,10 +91,6 @@ public class ChartRenderer {
                 String effectiveConfig = configJson != null ? configJson
                         : ChartSerialization.toJSON(chart.getConfiguration());
                 renderChart(chart, effectiveQueries, effectiveConfig);
-            } else if (configJson != null) {
-                chart.getElement().getNode().runWhenAttached(
-                        ui -> ui.access(() -> configurationApplier
-                                .applyConfiguration(chart, configJson)));
             }
         } finally {
             entry.clearPendingState();

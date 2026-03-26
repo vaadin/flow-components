@@ -70,6 +70,10 @@ public class ChartEntry implements Serializable {
         if (entry == null) {
             entry = new ChartEntry(chartId);
             ComponentUtil.setData(chart, ChartEntry.class, entry);
+        } else if (!entry.id.equals(chartId)) {
+            throw new IllegalStateException(
+                    "Chart already has an entry with id '" + entry.id
+                            + "', cannot reassign to '" + chartId + "'");
         }
         return entry;
     }

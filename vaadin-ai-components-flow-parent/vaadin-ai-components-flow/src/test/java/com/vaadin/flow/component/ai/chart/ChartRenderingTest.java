@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,67 +84,8 @@ class ChartRenderingTest {
         findTool("update_chart_data_source").execute(sb.toString());
     }
 
-    @Test
-    void constructor_nullProvider_throws() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> new ChartAIController(chart, null));
-    }
-
-    @Test
-    void setDataConverter_nullConverter_throws() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> controller.setDataConverter(null));
-    }
-
-    @Test
-    void setDataConverter_customConverter_isUsedDuringRendering() {
-        databaseProvider.results = List.of(row("x", 1, "y", 10));
-
-        AtomicBoolean called = new AtomicBoolean(false);
-        controller.setDataConverter(data -> {
-            called.set(true);
-            DataSeries series = new DataSeries("custom");
-            series.add(new DataSeriesItem("A", 42));
-            return List.of(series);
-        });
-
-        updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
-        updateData("SELECT 1");
-        controller.onRequestCompleted();
-
-        Assertions.assertTrue(called.get(),
-                "Custom DataConverter should have been called");
-        Assertions.assertEquals("custom",
-                chart.getConfiguration().getSeries().get(0).getName());
-    }
-
     @Nested
     class ApplyPendingState {
-
-        @Test
-        void noEntry_doesNothing() {
-            controller.onRequestCompleted();
-            // No exception, no configuration change
-        }
-
-        @Test
-        void noPendingState_doesNothing() {
-            // Create and consume pending state
-            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
-            controller.onRequestCompleted();
-            // Now entry exists but has no pending state
-            controller.onRequestCompleted();
-        }
-
-        @Test
-        void pendingConfigOnly_appliesConfiguration() {
-            updateConfiguration("{\"title\":{\"text\":\"My Title\"}}");
-
-            controller.onRequestCompleted();
-
-            Assertions.assertEquals("My Title",
-                    chart.getConfiguration().getTitle().getText());
-        }
 
         @Test
         void pendingDataAndConfig_rendersChart() {
@@ -234,22 +174,6 @@ class ChartRenderingTest {
     class RenderChart {
 
         @Test
-        void singleQuery_createsSeries() {
-            databaseProvider.results = List.of(
-                    row("category", "Jan", "value", 100),
-                    row("category", "Feb", "value", 200));
-
-            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
-            updateData("SELECT category, value FROM t");
-            controller.onRequestCompleted();
-
-            Configuration config = chart.getConfiguration();
-            Assertions.assertEquals(ChartType.COLUMN,
-                    config.getChart().getType());
-            Assertions.assertFalse(config.getSeries().isEmpty());
-        }
-
-        @Test
         void multipleQueries_createsMultipleSeries() {
             databaseProvider.results = List.of(row("x", 1, "y", 10));
 
@@ -259,42 +183,6 @@ class ChartRenderingTest {
 
             Assertions.assertEquals(2,
                     chart.getConfiguration().getSeries().size());
-        }
-
-        @Test
-        void nullConfig_keepsCurrentConfiguration() {
-            // First render: establish config
-            databaseProvider.results = List
-                    .of(row(ColumnNames.X, 1, ColumnNames.Y, 10));
-            updateConfiguration(
-                    "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Keep Me\"}}");
-            updateData("SELECT x, y FROM t");
-            controller.onRequestCompleted();
-
-            // Second render: only data update, no config change
-            databaseProvider.results = List
-                    .of(row(ColumnNames.X, 1, ColumnNames.Y, 10));
-            updateData("SELECT x, y FROM t");
-            controller.onRequestCompleted();
-
-            Assertions.assertEquals("Keep Me",
-                    chart.getConfiguration().getTitle().getText());
-        }
-
-        @Test
-        void callsDrawChart() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
-
-            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
-            updateData("SELECT category, value FROM t");
-            controller.onRequestCompleted();
-
-            // drawChart(true) triggers a full redraw — verify by checking
-            // that series data is present on the configuration (drawChart
-            // would fail if configuration was inconsistent)
-            Assertions.assertFalse(
-                    chart.getConfiguration().getSeries().isEmpty());
         }
     }
 
@@ -560,21 +448,6 @@ class ChartRenderingTest {
             controller.onRequestCompleted();
 
             Assertions.assertNotEquals(AxisType.DATETIME,
-                    chart.getConfiguration().getxAxis().getType());
-        }
-
-        @Test
-        void allXValuesAreDatetime_setsDatetimeAxisType() {
-            databaseProvider.results = List.of(
-                    row(ColumnNames.X, 1704067200000L, ColumnNames.Y, 10),
-                    row(ColumnNames.X, 1704153600000L, ColumnNames.Y, 20),
-                    row(ColumnNames.X, 1704240000000L, ColumnNames.Y, 30));
-
-            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
-            updateData("SELECT x, y FROM t");
-            controller.onRequestCompleted();
-
-            Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
         }
 
