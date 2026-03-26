@@ -144,9 +144,10 @@ class ChartAIControllerTest {
                     "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
             Assertions.assertTrue(result.contains("updated"));
 
-            ChartEntry entry = ChartEntry.get(chart);
-            Assertions.assertNotNull(entry);
-            Assertions.assertNotNull(entry.getPendingConfigurationJson());
+            // Verify pending config is applied by onRequestCompleted
+            controller.onRequestCompleted();
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getChart().getType());
         }
 
         @Test
@@ -166,17 +167,20 @@ class ChartAIControllerTest {
         void updateData_setsPendingDataUpdate() {
             databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
 
-            var tool = controller.getTools().stream()
+            var tools = controller.getTools();
+            var dataTool = tools.stream()
                     .filter(t -> t.getName().equals("update_chart_data_source"))
                     .findFirst().get();
 
-            String result = tool.execute("{\"queries\":[\"SELECT 1\"]}");
+            String result = dataTool.execute("{\"queries\":[\"SELECT 1\"]}");
             Assertions.assertTrue(result.contains("updated"));
 
-            ChartEntry entry = ChartEntry.get(chart);
-            Assertions.assertNotNull(entry);
-            Assertions.assertTrue(entry.isPendingDataUpdate());
-            Assertions.assertEquals(List.of("SELECT 1"), entry.getQueries());
+            // Verify queries are stored via get_chart_state
+            var stateTool = tools.stream()
+                    .filter(t -> t.getName().equals("get_chart_state"))
+                    .findFirst().get();
+            String state = stateTool.execute("{}");
+            Assertions.assertTrue(state.contains("SELECT 1"));
         }
     }
 

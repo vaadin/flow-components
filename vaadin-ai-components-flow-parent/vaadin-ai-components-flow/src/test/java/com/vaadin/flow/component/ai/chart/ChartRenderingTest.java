@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -37,33 +39,62 @@ import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
 
-class ChartRendererTest {
+/**
+ * Tests chart rendering behavior through the {@link ChartAIController} public
+ * API. Covers data conversion, pending state application, axis defaults, series
+ * naming, and configuration reset across chart type switches.
+ */
+class ChartRenderingTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
     private Chart chart;
     private TestDatabaseProvider databaseProvider;
-    private ChartRenderer renderer;
+    private ChartAIController controller;
+    private List<LLMProvider.ToolSpec> tools;
 
     @BeforeEach
     void setUp() {
         chart = new Chart();
         ui.add(chart);
         databaseProvider = new TestDatabaseProvider();
-        renderer = new ChartRenderer(databaseProvider);
+        controller = new ChartAIController(chart, databaseProvider);
+        tools = controller.getTools();
+    }
+
+    private LLMProvider.ToolSpec findTool(String name) {
+        return tools.stream().filter(t -> t.getName().equals(name)).findFirst()
+                .orElseThrow();
+    }
+
+    private void updateConfiguration(String configJson) {
+        findTool("update_chart_configuration")
+                .execute("{\"configuration\":" + configJson + "}");
+    }
+
+    private void updateData(String... queries) {
+        StringBuilder sb = new StringBuilder("{\"queries\":[");
+        for (int i = 0; i < queries.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append("\"").append(queries[i]).append("\"");
+        }
+        sb.append("]}");
+        findTool("update_chart_data_source").execute(sb.toString());
     }
 
     @Test
     void constructor_nullProvider_throws() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> new ChartRenderer(null));
+                () -> new ChartAIController(chart, null));
     }
 
     @Test
     void setDataConverter_nullConverter_throws() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> renderer.setDataConverter(null));
+                () -> controller.setDataConverter(null));
     }
 
     @Test
@@ -71,15 +102,16 @@ class ChartRendererTest {
         databaseProvider.results = List.of(row("x", 1, "y", 10));
 
         AtomicBoolean called = new AtomicBoolean(false);
-        renderer.setDataConverter(data -> {
+        controller.setDataConverter(data -> {
             called.set(true);
             DataSeries series = new DataSeries("custom");
             series.add(new DataSeriesItem("A", 42));
             return List.of(series);
         });
 
-        renderer.renderChart(chart, List.of("SELECT 1"),
-                "{\"chart\":{\"type\":\"column\"}}");
+        updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+        updateData("SELECT 1");
+        controller.onRequestCompleted();
 
         Assertions.assertTrue(called.get(),
                 "Custom DataConverter should have been called");
@@ -92,25 +124,25 @@ class ChartRendererTest {
 
         @Test
         void noEntry_doesNothing() {
-            renderer.applyPendingState(chart);
+            controller.onRequestCompleted();
             // No exception, no configuration change
         }
 
         @Test
         void noPendingState_doesNothing() {
-            ChartEntry.getOrCreate(chart, "test");
-            renderer.applyPendingState(chart);
+            // Create and consume pending state
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            controller.onRequestCompleted();
+            // Now entry exists but has no pending state
+            controller.onRequestCompleted();
         }
 
         @Test
         void pendingConfigOnly_appliesConfiguration() {
-            ChartEntry entry = ChartEntry.getOrCreate(chart, "test");
-            entry.setPendingConfigurationJson(
-                    "{\"title\":{\"text\":\"My Title\"}}");
+            updateConfiguration("{\"title\":{\"text\":\"My Title\"}}");
 
-            renderer.applyPendingState(chart);
+            controller.onRequestCompleted();
 
-            Assertions.assertFalse(entry.hasPendingState());
             Assertions.assertEquals("My Title",
                     chart.getConfiguration().getTitle().getText());
         }
@@ -120,15 +152,11 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
-            ChartEntry entry = ChartEntry.getOrCreate(chart, "test");
-            entry.setQueries(List.of("SELECT category, value FROM t"));
-            entry.setPendingDataUpdate(true);
-            entry.setPendingConfigurationJson(
+            updateConfiguration(
                     "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Sales\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
-            renderer.applyPendingState(chart);
-
-            Assertions.assertFalse(entry.hasPendingState());
             Configuration config = chart.getConfiguration();
             Assertions.assertEquals(ChartType.COLUMN,
                     config.getChart().getType());
@@ -138,18 +166,20 @@ class ChartRendererTest {
 
         @Test
         void pendingDataOnly_usesExistingConfig() {
-            chart.getConfiguration().setTitle("Existing Title");
-            chart.getConfiguration().getChart().setType(ChartType.COLUMN);
+            // First render: establish config and data
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
+            updateConfiguration(
+                    "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Existing Title\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
-            ChartEntry entry = ChartEntry.getOrCreate(chart, "test");
-            entry.setQueries(List.of("SELECT category, value FROM t"));
-            entry.setPendingDataUpdate(true);
+            // Second update: only data, no config change
+            databaseProvider.results = List
+                    .of(row("category", "B", "value", 20));
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
-            renderer.applyPendingState(chart);
-
-            Assertions.assertFalse(entry.hasPendingState());
             Assertions.assertEquals("Existing Title",
                     chart.getConfiguration().getTitle().getText());
             Assertions.assertFalse(
@@ -160,23 +190,20 @@ class ChartRendererTest {
         void configOnlyAfterGauge_resetsPane() {
             // First: full render as gauge
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
-            ChartEntry entry = ChartEntry.getOrCreate(chart, "test");
-            entry.setQueries(List.of("SELECT current_val"));
-            entry.setPendingDataUpdate(true);
-            entry.setPendingConfigurationJson("{\"chart\":{\"type\":\"gauge\"},"
+            updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
                     + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
                     + "\"yAxis\":{\"min\":0,\"max\":100}}");
-            renderer.applyPendingState(chart);
+            updateData("SELECT current_val");
+            controller.onRequestCompleted();
 
             // Verify pane was set
             String json1 = ChartSerialization.toJSON(chart.getConfiguration());
             Assertions.assertTrue(json1.contains("\"startAngle\""));
 
             // Second: config-only update to column (no data change)
-            entry.setPendingConfigurationJson(
-                    "{\"chart\":{\"type\":\"column\"},"
-                            + "\"title\":{\"text\":\"Revenue\"}}");
-            renderer.applyPendingState(chart);
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"title\":{\"text\":\"Revenue\"}}");
+            controller.onRequestCompleted();
 
             // Pane should be cleared
             String json2 = ChartSerialization.toJSON(chart.getConfiguration());
@@ -187,16 +214,19 @@ class ChartRendererTest {
 
         @Test
         void clearsPendingStateEvenOnError() {
+            // Set up data successfully (eager validation passes)
+            databaseProvider.results = List.of(row("x", 1));
+            updateData("SELECT 1");
+
+            // Make DB throw for the render phase
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
 
-            ChartEntry entry = ChartEntry.getOrCreate(chart, "test");
-            entry.setQueries(List.of("SELECT 1"));
-            entry.setPendingDataUpdate(true);
-
             Assertions.assertThrows(RuntimeException.class,
-                    () -> renderer.applyPendingState(chart));
+                    () -> controller.onRequestCompleted());
 
-            Assertions.assertFalse(entry.hasPendingState());
+            // Pending state should be cleared despite the error
+            databaseProvider.throwOnExecute = null;
+            controller.onRequestCompleted(); // should be no-op
         }
     }
 
@@ -209,9 +239,9 @@ class ChartRendererTest {
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Configuration config = chart.getConfiguration();
             Assertions.assertEquals(ChartType.COLUMN,
@@ -223,9 +253,9 @@ class ChartRendererTest {
         void multipleQueries_createsMultipleSeries() {
             databaseProvider.results = List.of(row("x", 1, "y", 10));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT x, y FROM t1", "SELECT x, y FROM t2"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t1", "SELECT x, y FROM t2");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(2,
                     chart.getConfiguration().getSeries().size());
@@ -233,13 +263,19 @@ class ChartRendererTest {
 
         @Test
         void nullConfig_keepsCurrentConfiguration() {
-            chart.getConfiguration().setTitle("Keep Me");
-            chart.getConfiguration().getChart().setType(ChartType.LINE);
-
+            // First render: establish config
             databaseProvider.results = List
                     .of(row(ColumnNames.X, 1, ColumnNames.Y, 10));
+            updateConfiguration(
+                    "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Keep Me\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"), null);
+            // Second render: only data update, no config change
+            databaseProvider.results = List
+                    .of(row(ColumnNames.X, 1, ColumnNames.Y, 10));
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals("Keep Me",
                     chart.getConfiguration().getTitle().getText());
@@ -250,9 +286,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // drawChart(true) triggers a full redraw — verify by checking
             // that series data is present on the configuration (drawChart
@@ -271,9 +307,9 @@ class ChartRendererTest {
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
@@ -289,8 +325,9 @@ class ChartRendererTest {
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
                     row(ColumnNames.X, 2, ColumnNames.Y, 20));
 
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
@@ -311,8 +348,9 @@ class ChartRendererTest {
                     row(ColumnNames.SERIES, "South", "category", "Mar", "value",
                             180));
 
-            renderer.renderChart(chart, List.of("SELECT s, c, v FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
 
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
@@ -331,15 +369,16 @@ class ChartRendererTest {
             // not be set (extractCategories returns null)
             databaseProvider.results = List.of(row("x", 1, "y", 10));
 
-            renderer.setDataConverter(data -> {
+            controller.setDataConverter(data -> {
                 DataSeries series = new DataSeries();
                 series.add(new DataSeriesItem("Jan", 100));
                 series.add(new DataSeriesItem(1, 200)); // no name
                 return List.of(series);
             });
 
-            renderer.renderChart(chart, List.of("SELECT 1"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT 1");
+            controller.onRequestCompleted();
 
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
@@ -351,9 +390,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"pie\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"pie\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
@@ -366,9 +405,9 @@ class ChartRendererTest {
             databaseProvider.results = List.of(
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
             Assertions.assertNotNull(
                     chart.getConfiguration().getxAxis().getCategories());
 
@@ -377,8 +416,9 @@ class ChartRendererTest {
             databaseProvider.results = List.of(
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
                     row(ColumnNames.X, 2, ColumnNames.Y, 20));
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
@@ -389,15 +429,22 @@ class ChartRendererTest {
 
         @Test
         void emptySeries_resetsAxisType() {
+            controller.setDataConverter(data -> List.of(new DataSeries()));
             databaseProvider.results = List.of();
 
-            // Use a custom converter that returns an empty list
-            renderer.setDataConverter(data -> List.of(new DataSeries()));
+            // First render: establish a LINEAR axis type via config
+            updateConfiguration(
+                    "{\"chart\":{\"type\":\"line\"},\"xAxis\":{\"type\":\"linear\"}}");
+            updateData("SELECT 1");
+            controller.onRequestCompleted();
 
-            chart.getConfiguration().getxAxis().setType(AxisType.LINEAR);
+            Assertions.assertEquals(AxisType.LINEAR,
+                    chart.getConfiguration().getxAxis().getType());
 
-            renderer.renderChart(chart, List.of("SELECT 1"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            // Second render: config without axis type — should clear it
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT 1");
+            controller.onRequestCompleted();
 
             // Configuration reset clears stale axis type when config
             // doesn't specify one, so Highcharts auto-detects
@@ -407,15 +454,15 @@ class ChartRendererTest {
 
         @Test
         void ganttSeries_setsDatetimeAxis() {
-            // Gantt series need datetime X-axis — but we can't easily create
-            // GanttSeries from the converter, so test via the default converter
-            // with Gantt column names
+            // Gantt series need datetime X-axis — test via the default
+            // converter with Gantt column names
             databaseProvider.results = List
                     .of(row(ColumnNames.NAME, "Task 1", ColumnNames.START,
                             1704067200000L, ColumnNames.END, 1704153600000L));
 
-            renderer.renderChart(chart, List.of("SELECT name, start, end"),
-                    "{\"chart\":{\"type\":\"gantt\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"gantt\"}}");
+            updateData("SELECT name, start, end");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
@@ -423,16 +470,17 @@ class ChartRendererTest {
 
         @Test
         void ohlcChart_doesNotSetCategoryAxis() {
-            // OHLC/candlestick items have names (dates) and datetime X values;
-            // categories should NOT be set from names, so the datetime axis
-            // can render formatted dates instead of raw epoch strings.
+            // OHLC/candlestick items have names (dates) and datetime X
+            // values; categories should NOT be set from names, so the
+            // datetime axis can render formatted dates instead of raw epoch
+            // strings.
             databaseProvider.results = List.of(row(ColumnNames.X,
                     1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
                     148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT trade_date, open, high, low, close"),
-                    "{\"chart\":{\"type\":\"candlestick\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"}}");
+            updateData("SELECT trade_date, open, high, low, close");
+            controller.onRequestCompleted();
 
             // Should have datetime axis, not categories
             Assertions.assertEquals(AxisType.DATETIME,
@@ -445,14 +493,13 @@ class ChartRendererTest {
 
         @Test
         void multipleQueries_withMixedXValues_detectsDatetime() {
-            // First query: OHLC with epoch X values
+            // Use a converter that returns both a datetime series and a
+            // volume series with row-index X values
             databaseProvider.results = List.of(row(ColumnNames.X,
                     1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
                     148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
-            // Use a converter that returns both a datetime series and a
-            // volume series with row-index X values
-            renderer.setDataConverter(data -> {
+            controller.setDataConverter(data -> {
                 DataSeries ohlcSeries = new DataSeries("OHLC");
                 ohlcSeries.add(new OhlcItem(1704067200000L, 142.5, 148.2, 141.0,
                         147.8));
@@ -461,8 +508,9 @@ class ChartRendererTest {
                 return List.of(ohlcSeries, volumeSeries);
             });
 
-            renderer.renderChart(chart, List.of("SELECT 1"),
-                    "{\"chart\":{\"type\":\"candlestick\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"}}");
+            updateData("SELECT 1");
+            controller.onRequestCompleted();
 
             // Even though volumeSeries has X=0, the OHLC series with epoch
             // X values should still cause datetime detection
@@ -477,8 +525,9 @@ class ChartRendererTest {
                     row(ColumnNames.X, 1704067200000L, ColumnNames.Y, 10),
                     row(ColumnNames.X, 1704153600000L, ColumnNames.Y, 20));
 
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
@@ -490,8 +539,9 @@ class ChartRendererTest {
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
                     row(ColumnNames.X, 2, ColumnNames.Y, 20));
 
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertNotEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
@@ -505,8 +555,9 @@ class ChartRendererTest {
                     row(ColumnNames.X, 1704067200000L, ColumnNames.Y, 10),
                     row(ColumnNames.X, 5, ColumnNames.Y, 20));
 
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertNotEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
@@ -519,8 +570,9 @@ class ChartRendererTest {
                     row(ColumnNames.X, 1704153600000L, ColumnNames.Y, 20),
                     row(ColumnNames.X, 1704240000000L, ColumnNames.Y, 30));
 
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
@@ -528,13 +580,14 @@ class ChartRendererTest {
 
         @Test
         void noXValues_doesNotSetDatetimeAxisType() {
-            // Items with no X values — hasDatetimeXValues should return false
+            // Items with no X values — hasDatetimeXValues should return
+            // false
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertNotEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
@@ -549,9 +602,10 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
+            updateConfiguration(
                     "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Revenue\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             var series = chart.getConfiguration().getSeries();
             Assertions.assertEquals(1, series.size());
@@ -563,9 +617,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             var series = chart.getConfiguration().getSeries();
             Assertions.assertEquals(1, series.size());
@@ -580,9 +634,10 @@ class ChartRendererTest {
                     row(ColumnNames.SERIES, "Series B", "category", "Jan",
                             "value", 200));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT series_name, category, value FROM t"),
+            updateConfiguration(
                     "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Revenue\"}}");
+            updateData("SELECT series_name, category, value FROM t");
+            controller.onRequestCompleted();
 
             var series = chart.getConfiguration().getSeries();
             Assertions.assertEquals(2, series.size());
@@ -603,10 +658,10 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"},"
-                            + "\"xAxis\":{\"categories\":[\"A\",\"B\"]}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"xAxis\":{\"categories\":[\"A\",\"B\"]}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Categories were set on X-axis
             Assertions.assertTrue(chart.getConfiguration().getxAxis()
@@ -617,8 +672,9 @@ class ChartRendererTest {
                     row(ColumnNames.X, 1, ColumnNames.Y, 100),
                     row(ColumnNames.X, 2, ColumnNames.Y, 200));
 
-            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
-                    "{\"chart\":{\"type\":\"scatter\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"scatter\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onRequestCompleted();
 
             // Y-axis serialization must NOT contain "categories" — check
             // via JSON to distinguish null field from empty ArrayList
@@ -635,9 +691,10 @@ class ChartRendererTest {
             databaseProvider.results = List.of(row(ColumnNames.X, 9,
                     ColumnNames.Y, 0, ColumnNames.VALUE, 120));
 
-            renderer.renderChart(chart, List.of("SELECT x, y, value"),
-                    "{\"chart\":{\"type\":\"heatmap\"},"
-                            + "\"tooltip\":{\"pointFormat\":\"Day: {point.y}<br>Hour: {point.x}<br>Visitors: {point.value}\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"heatmap\"},"
+                    + "\"tooltip\":{\"pointFormat\":\"Day: {point.y}<br>Hour: {point.x}<br>Visitors: {point.value}\"}}");
+            updateData("SELECT x, y, value");
+            controller.onRequestCompleted();
 
             Assertions.assertNotNull(
                     chart.getConfiguration().getTooltip().getPointFormat());
@@ -647,9 +704,10 @@ class ChartRendererTest {
                     1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
                     148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
-            renderer.renderChart(chart, List.of("SELECT trade_date, open"),
-                    "{\"chart\":{\"type\":\"candlestick\"},"
-                            + "\"title\":{\"text\":\"Stock Prices\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"},"
+                    + "\"title\":{\"text\":\"Stock Prices\"}}");
+            updateData("SELECT trade_date, open");
+            controller.onRequestCompleted();
 
             // Tooltip should be reset, not carry heatmap format
             Assertions.assertNull(
@@ -663,9 +721,9 @@ class ChartRendererTest {
                     1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
                     148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT trade_date, open, high, low, close"),
-                    "{\"chart\":{\"type\":\"candlestick\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"}}");
+            updateData("SELECT trade_date, open, high, low, close");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
@@ -675,10 +733,10 @@ class ChartRendererTest {
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"},"
-                            + "\"title\":{\"text\":\"Revenue\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"title\":{\"text\":\"Revenue\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Datetime axis type should be cleared, categories used instead
             Assertions.assertNotEquals(AxisType.DATETIME,
@@ -692,9 +750,10 @@ class ChartRendererTest {
             // First render: gauge with explicit min/max
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
 
-            renderer.renderChart(chart, List.of("SELECT current_val"),
-                    "{\"chart\":{\"type\":\"gauge\"},"
-                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
+                    + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateData("SELECT current_val");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(0.0,
                     chart.getConfiguration().getyAxis().getMin().doubleValue());
@@ -705,9 +764,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Gauge min/max should be cleared
             Assertions.assertNull(chart.getConfiguration().getyAxis().getMin());
@@ -720,10 +779,10 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"},"
-                            + "\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertNotNull(
                     chart.getConfiguration().getPlotOptions(ChartType.COLUMN));
@@ -732,9 +791,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Stacked column plot options should be cleared
             Assertions.assertNull(
@@ -747,9 +806,10 @@ class ChartRendererTest {
             databaseProvider.results = List.of(row(ColumnNames.X, 0,
                     ColumnNames.Y, 0, ColumnNames.VALUE, 100));
 
-            renderer.renderChart(chart, List.of("SELECT x, y, value"),
-                    "{\"chart\":{\"type\":\"heatmap\"},"
-                            + "\"colorAxis\":{\"min\":0,\"max\":300}}");
+            updateConfiguration("{\"chart\":{\"type\":\"heatmap\"},"
+                    + "\"colorAxis\":{\"min\":0,\"max\":300}}");
+            updateData("SELECT x, y, value");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(1,
                     chart.getConfiguration().getNumberOfColorAxes());
@@ -758,9 +818,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Color axis should be cleared
             Assertions.assertEquals(0,
@@ -772,11 +832,12 @@ class ChartRendererTest {
             // First render: gauge with pane config
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
 
-            renderer.renderChart(chart, List.of("SELECT current_val"),
-                    "{\"chart\":{\"type\":\"gauge\"},"
-                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150,"
-                            + "\"center\":[\"50%\",\"50%\"],\"size\":\"80%\"},"
-                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
+                    + "\"pane\":{\"startAngle\":-150,\"endAngle\":150,"
+                    + "\"center\":[\"50%\",\"50%\"],\"size\":\"80%\"},"
+                    + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateData("SELECT current_val");
+            controller.onRequestCompleted();
 
             // Pane should be set
             String json1 = ChartSerialization.toJSON(chart.getConfiguration());
@@ -787,9 +848,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Pane should be cleared
             String json2 = ChartSerialization.toJSON(chart.getConfiguration());
@@ -804,10 +865,10 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"pie\"},"
-                            + "\"legend\":{\"enabled\":false}}");
+            updateConfiguration("{\"chart\":{\"type\":\"pie\"},"
+                    + "\"legend\":{\"enabled\":false}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertFalse(
                     chart.getConfiguration().getLegend().getEnabled());
@@ -816,9 +877,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Legend should be reset to default (enabled=true or null)
             Boolean legendEnabled = chart.getConfiguration().getLegend()
@@ -833,10 +894,10 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"},"
-                            + "\"subtitle\":{\"text\":\"Q1 2024\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"subtitle\":{\"text\":\"Q1 2024\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals("Q1 2024",
                     chart.getConfiguration().getSubTitle().getText());
@@ -845,9 +906,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"line\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // Subtitle should be cleared
             Assertions.assertEquals("",
@@ -860,9 +921,10 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
+            updateConfiguration(
                     "{\"chart\":{\"type\":\"line\",\"polar\":true}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions
                     .assertTrue(chart.getConfiguration().getChart().getPolar());
@@ -871,9 +933,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertFalse(
                     chart.getConfiguration().getChart().getPolar());
@@ -884,17 +946,19 @@ class ChartRendererTest {
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
 
             // First gauge render
-            renderer.renderChart(chart, List.of("SELECT current_val"),
-                    "{\"chart\":{\"type\":\"gauge\"},"
-                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
-                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
+                    + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
+                    + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateData("SELECT current_val");
+            controller.onRequestCompleted();
 
             // Second gauge render (e.g. user changes the gauge value)
             databaseProvider.results = List.of(row(ColumnNames.Y, 85));
-            renderer.renderChart(chart, List.of("SELECT current_val"),
-                    "{\"chart\":{\"type\":\"gauge\"},"
-                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
-                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
+                    + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
+                    + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateData("SELECT current_val");
+            controller.onRequestCompleted();
 
             // Should have exactly 1 pane, not 2
             String json = ChartSerialization.toJSON(chart.getConfiguration());
@@ -910,10 +974,11 @@ class ChartRendererTest {
             databaseProvider.results = List.of(row(ColumnNames.X, 9,
                     ColumnNames.Y, 0, ColumnNames.VALUE, 120));
 
-            renderer.renderChart(chart, List.of("SELECT x, y, value"),
-                    "{\"chart\":{\"type\":\"heatmap\"},"
-                            + "\"colorAxis\":{\"min\":0,\"max\":300},"
-                            + "\"tooltip\":{\"pointFormat\":\"Visitors: {point.value}\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"heatmap\"},"
+                    + "\"colorAxis\":{\"min\":0,\"max\":300},"
+                    + "\"tooltip\":{\"pointFormat\":\"Visitors: {point.value}\"}}");
+            updateData("SELECT x, y, value");
+            controller.onRequestCompleted();
 
             Assertions.assertEquals(1,
                     chart.getConfiguration().getNumberOfColorAxes());
@@ -921,10 +986,11 @@ class ChartRendererTest {
             // Step 2: Gauge with pane and yAxis min/max
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
 
-            renderer.renderChart(chart, List.of("SELECT current_val"),
-                    "{\"chart\":{\"type\":\"gauge\"},"
-                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
-                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
+                    + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
+                    + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            updateData("SELECT current_val");
+            controller.onRequestCompleted();
 
             // colorAxis from heatmap should be gone
             Assertions.assertEquals(0,
@@ -937,9 +1003,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             // pane from gauge should be cleared
             String json = ChartSerialization.toJSON(chart.getConfiguration());
@@ -959,9 +1025,10 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
+            updateConfiguration(
                     "{\"chart\":{\"type\":\"bar\",\"inverted\":true}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertTrue(
                     chart.getConfiguration().getChart().getInverted());
@@ -970,9 +1037,9 @@ class ChartRendererTest {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
 
-            renderer.renderChart(chart,
-                    List.of("SELECT category, value FROM t"),
-                    "{\"chart\":{\"type\":\"column\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
 
             Assertions.assertFalse(
                     chart.getConfiguration().getChart().getInverted());
@@ -998,9 +1065,10 @@ class ChartRendererTest {
                     row(ColumnNames.NAME, "Net Profit", ColumnNames.Y, 0,
                             ColumnNames.WATERFALL_TYPE, "sum"));
 
-            renderer.renderChart(chart, List.of("SELECT name, y, type"),
-                    "{\"chart\":{\"type\":\"waterfall\"},"
-                            + "\"title\":{\"text\":\"Budget\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"waterfall\"},"
+                    + "\"title\":{\"text\":\"Budget\"}}");
+            updateData("SELECT name, y, type");
+            controller.onRequestCompleted();
 
             String[] categories = chart.getConfiguration().getxAxis()
                     .getCategories();
@@ -1023,8 +1091,7 @@ class ChartRendererTest {
         return map;
     }
 
-    private static class TestDatabaseProvider
-            implements com.vaadin.flow.component.ai.provider.DatabaseProvider {
+    private static class TestDatabaseProvider implements DatabaseProvider {
 
         List<Map<String, Object>> results = new ArrayList<>();
         RuntimeException throwOnExecute;
