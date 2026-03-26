@@ -132,11 +132,25 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-test-generic</artifactId>
                 <version>${flow.version}</version>
+                <exclusions>
+                    <!-- Prevent JUnit 4 leaking into modules that should use JUnit Jupiter APIs-->
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-test-util</artifactId>
                 <version>${flow.version}</version>
+                <exclusions>
+                    <!-- Prevent JUnit 4 leaking into modules that should use JUnit Jupiter APIs-->
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -205,11 +219,6 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
