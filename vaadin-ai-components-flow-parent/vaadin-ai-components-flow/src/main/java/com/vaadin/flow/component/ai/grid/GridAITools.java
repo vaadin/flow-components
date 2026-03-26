@@ -1,0 +1,234 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.ai.grid;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
+
+/**
+ * Factory for creating reusable grid {@link LLMProvider.ToolSpec} instances.
+ * <p>
+ * The tools use a {@code gridId} parameter to identify which grid to operate
+ * on, allowing a single set of tools to manage multiple grids (e.g., in a
+ * dashboard). Callers provide a {@link Callbacks} implementation for state
+ * retrieval and mutation, keeping this class decoupled from {@code Grid}.
+ * </p>
+ *
+ * @author Vaadin Ltd
+ */
+public final class GridAITools {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(GridAITools.class);
+
+    private GridAITools() {
+    }
+
+    /**
+     * Callback interface for grid state access and mutation.
+     */
+    public interface Callbacks extends Serializable {
+
+        /**
+         * Returns the current state of a grid as a JSON string. Should throw if
+         * the grid is not found.
+         *
+         * @param gridId
+         *            the grid ID
+         * @return the grid state as JSON
+         */
+        String getState(String gridId);
+
+        /**
+         * Handles a SQL query for the given grid. Implementations should
+         * validate the query and store it for deferred rendering. Should throw
+         * if the grid is not found or the query is invalid.
+         *
+         * @param gridId
+         *            the grid ID
+         * @param query
+         *            the SQL SELECT query
+         */
+        void updateData(String gridId, String query);
+
+        /**
+         * Returns the set of available grid IDs.
+         *
+         * @return the grid IDs, never {@code null}
+         */
+        Set<String> getGridIds();
+    }
+
+    /**
+     * Resolves the grid ID from the tool arguments. If {@code gridId} is not
+     * provided and there is exactly one grid, that grid's ID is used.
+     */
+    private static String resolveGridId(JsonNode args, Callbacks callbacks) {
+        var idNode = args.get("gridId");
+        if (idNode != null && !idNode.isNull()) {
+            return idNode.asString();
+        }
+        var ids = callbacks.getGridIds();
+        if (ids.size() == 1) {
+            return ids.iterator().next();
+        }
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("No grids available.");
+        }
+        throw new IllegalArgumentException(
+                "gridId is required when multiple grids exist. "
+                        + "Available grid IDs: " + ids);
+    }
+
+    /**
+     * Creates a tool that returns the current grid state.
+     *
+     * @param callbacks
+     *            the callbacks for grid state access, not {@code null}
+     * @return the tool definition, never {@code null}
+     */
+    public static LLMProvider.ToolSpec getGridState(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return "get_grid_state";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Returns the current grid state including the SQL "
+                        + "query.";
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "gridId": {
+                              "type": "string",
+                              "description": "The ID of the grid. Optional when there is only one grid."
+                            }
+                          }
+                        }""";
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    LOGGER.info("get_grid_state called");
+                    var args = JacksonUtils.readTree(arguments);
+                    var gridId = resolveGridId(args, callbacks);
+                    return callbacks.getState(gridId);
+                } catch (Exception e) {
+                    LOGGER.error("get_grid_state failed", e);
+                    return "Error getting grid state: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    /**
+     * Creates a tool that updates the grid data with a SQL query. If the
+     * handler throws, the error is returned to the LLM.
+     *
+     * @param callbacks
+     *            the callbacks for grid mutation, not {@code null}
+     * @return the tool definition, never {@code null}
+     */
+    public static LLMProvider.ToolSpec updateGridData(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return "update_grid_data";
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                        Updates the grid data using a SQL SELECT query.
+                        The grid automatically creates columns from query results.
+                        Use SQL aliases (AS) for human-readable column headers.
+                        Do NOT use LIMIT or OFFSET — the grid handles pagination.
+                        Example: SELECT name AS "Name", salary AS "Salary" FROM employees
+                        """;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "gridId": {
+                              "type": "string",
+                              "description": "The ID of the grid. Optional when there is only one grid."
+                            },
+                            "query": {
+                              "type": "string",
+                              "description": "SQL SELECT query without LIMIT/OFFSET"
+                            }
+                          },
+                          "required": ["query"]
+                        }""";
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    LOGGER.info("update_grid_data called with: {}", arguments);
+                    var args = JacksonUtils.readTree(arguments);
+                    var gridId = resolveGridId(args, callbacks);
+                    var query = args.get("query").asString();
+                    LOGGER.info("update_grid_data gridId={} query={}", gridId,
+                            query);
+                    callbacks.updateData(gridId, query);
+                    return "Grid '" + gridId
+                            + "' data update queued successfully";
+                } catch (Exception e) {
+                    LOGGER.error("update_grid_data failed", e);
+                    return "Error updating grid data: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    /**
+     * Creates all grid tools for the given callbacks.
+     *
+     * @param callbacks
+     *            the callbacks for grid state access and mutation, not
+     *            {@code null}
+     * @return a list of all grid tools, never {@code null}
+     */
+    public static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
+        return List.of(getGridState(callbacks), updateGridData(callbacks));
+    }
+}
