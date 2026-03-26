@@ -15,53 +15,88 @@
  */
 package com.vaadin.flow.component.ai.grid;
 
+import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Factory for creating reusable grid {@link LLMProvider.ToolSpec} instances.
- * These tools are not tied to any specific controller and can be used by both
- * standalone grid controllers and dashboard controllers.
  * <p>
  * The tools use a {@code gridId} parameter to identify which grid to operate
  * on, allowing a single set of tools to manage multiple grids (e.g., in a
- * dashboard). Grid state ({@link GridEntry}) is stored directly on each
- * {@link Grid} instance via {@link GridEntry#getOrCreate(Grid, String)}.
+ * dashboard). Callers provide a {@link Callbacks} implementation for state
+ * retrieval and mutation, keeping this class decoupled from {@code Grid}.
  * </p>
  *
  * @author Vaadin Ltd
  */
 public final class GridAITools {
 
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(GridAITools.class);
+
     private GridAITools() {
     }
 
     /**
-     * Resolves the grid ID from the tool arguments. If {@code gridId} is not
-     * provided and there is exactly one grid, that grid's ID is used as the
-     * default.
+     * Callback interface for grid state access and mutation.
      */
-    private static String resolveGridId(JsonNode args,
-            Supplier<Set<String>> gridIdsSupplier) {
-        JsonNode idNode = args.get("gridId");
+    public interface Callbacks extends Serializable {
+
+        /**
+         * Returns the current state of a grid as a JSON string. Should throw if
+         * the grid is not found.
+         *
+         * @param gridId
+         *            the grid ID
+         * @return the grid state as JSON
+         */
+        String getState(String gridId);
+
+        /**
+         * Handles a SQL query for the given grid. Implementations should
+         * validate the query and store it for deferred rendering. Should throw
+         * if the grid is not found or the query is invalid.
+         *
+         * @param gridId
+         *            the grid ID
+         * @param query
+         *            the SQL SELECT query
+         */
+        void updateData(String gridId, String query);
+
+        /**
+         * Returns the set of available grid IDs.
+         *
+         * @return the grid IDs, never {@code null}
+         */
+        Set<String> getGridIds();
+    }
+
+    /**
+     * Resolves the grid ID from the tool arguments. If {@code gridId} is not
+     * provided and there is exactly one grid, that grid's ID is used.
+     */
+    private static String resolveGridId(JsonNode args, Callbacks callbacks) {
+        var idNode = args.get("gridId");
         if (idNode != null && !idNode.isNull()) {
             return idNode.asString();
         }
-        var ids = gridIdsSupplier.get();
+        var ids = callbacks.getGridIds();
         if (ids.size() == 1) {
             return ids.iterator().next();
+        }
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("No grids available.");
         }
         throw new IllegalArgumentException(
                 "gridId is required when multiple grids exist. "
@@ -69,74 +104,24 @@ public final class GridAITools {
     }
 
     /**
-     * Resolves a grid by ID, throwing if not found.
-     */
-    private static Grid<Map<String, Object>> resolveGrid(String gridId,
-            Function<String, Grid<Map<String, Object>>> gridResolver) {
-        Grid<Map<String, Object>> grid = gridResolver.apply(gridId);
-        if (grid == null) {
-            throw new IllegalArgumentException(
-                    "No grid found with ID '" + gridId + "'");
-        }
-        return grid;
-    }
-
-    /**
-     * Returns the recommended system prompt for grid data display capabilities.
+     * Creates a tool that returns the current grid state.
      *
-     * @return the system prompt text
-     */
-    public static String getSystemPrompt() {
-        return """
-                You have access to grid data display capabilities:
-
-                TOOLS:
-                1. getSchema() - Retrieves database schema (tables, columns, types)
-                2. get_grid_state(gridId) - Returns current grid state (query)
-                3. update_grid_data(gridId, query) - Updates grid data with SQL SELECT query
-
-                WORKFLOW:
-                1. ALWAYS call get_grid_state() FIRST before making changes
-                2. Use getSchema() to understand available data
-                3. Use update_grid_data() to populate the grid with query results
-
-                The grid automatically creates columns based on query result columns.
-                Column headers are derived from SQL column names/aliases.
-                Use SQL aliases (AS) to provide human-readable column headers.
-
-                Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
-                """;
-    }
-
-    /**
-     * Creates a tool that retrieves the current state of a grid, including its
-     * SQL query.
-     *
-     * @param gridResolver
-     *            resolves a grid ID to a {@link Grid} instance, returning
-     *            {@code null} if not found; not {@code null}
-     * @param gridIdsSupplier
-     *            supplies the set of available grid IDs; not {@code null}
+     * @param callbacks
+     *            the callbacks for grid state access, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolSpec getGridState(
-            Function<String, Grid<Map<String, Object>>> gridResolver,
-            Supplier<Set<String>> gridIdsSupplier, String toolNamePrefix) {
-        Objects.requireNonNull(gridResolver, "gridResolver must not be null");
-        Objects.requireNonNull(gridIdsSupplier,
-                "gridIdsSupplier must not be null");
-        String prefix = toolNamePrefix != null ? toolNamePrefix : "";
+    public static LLMProvider.ToolSpec getGridState(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
-                return prefix + "get_grid_state";
+                return "get_grid_state";
             }
 
             @Override
             public String getDescription() {
-                return "Returns the current state of the grid including "
-                        + "the SQL query. Takes no parameters when there "
-                        + "is only one grid.";
+                return "Returns the current grid state including the SQL "
+                        + "query.";
             }
 
             @Override
@@ -155,70 +140,44 @@ public final class GridAITools {
 
             @Override
             public String execute(String arguments) {
-                JsonNode args = JacksonUtils.readTree(arguments);
-                String gridId = resolveGridId(args, gridIdsSupplier);
-                Grid<Map<String, Object>> grid = resolveGrid(gridId,
-                        gridResolver);
-                GridEntry entry = GridEntry.getOrCreate(grid, gridId);
-
-                ObjectNode result = JacksonUtils.createObjectNode();
-                result.put("gridId", gridId);
-
-                String query = entry.getQuery();
-                if (query != null) {
-                    result.put("query", query);
-                } else {
-                    result.put("status", "empty");
-                    result.put("message", "No grid data has been loaded yet");
+                try {
+                    LOGGER.info("get_grid_state called");
+                    var args = JacksonUtils.readTree(arguments);
+                    var gridId = resolveGridId(args, callbacks);
+                    return callbacks.getState(gridId);
+                } catch (Exception e) {
+                    LOGGER.error("get_grid_state failed", e);
+                    return "Error getting grid state: " + e.getMessage();
                 }
-                return result.toString();
             }
         };
     }
 
     /**
-     * Creates a tool that updates a grid's data source query. The query is
-     * validated and stored as pending state, applied when the request
-     * completes.
+     * Creates a tool that updates the grid data with a SQL query. If the
+     * handler throws, the error is returned to the LLM.
      *
-     * @param gridResolver
-     *            resolves a grid ID to a {@link Grid} instance, returning
-     *            {@code null} if not found; not {@code null}
-     * @param gridIdsSupplier
-     *            supplies the set of available grid IDs; not {@code null}
-     * @param queryValidator
-     *            validates SQL queries before accepting them, or {@code null}
-     *            to skip validation
+     * @param callbacks
+     *            the callbacks for grid mutation, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolSpec updateGridData(
-            Function<String, Grid<Map<String, Object>>> gridResolver,
-            Supplier<Set<String>> gridIdsSupplier,
-            Consumer<String> queryValidator, String toolNamePrefix) {
-        Objects.requireNonNull(gridResolver, "gridResolver must not be null");
-        Objects.requireNonNull(gridIdsSupplier,
-                "gridIdsSupplier must not be null");
-        String prefix = toolNamePrefix != null ? toolNamePrefix : "";
+    public static LLMProvider.ToolSpec updateGridData(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
-                return prefix + "update_grid_data";
+                return "update_grid_data";
             }
 
             @Override
             public String getDescription() {
                 return """
                         Updates the grid data using a SQL SELECT query.
-                        The grid will automatically create columns based on the query result columns.
-                        Use SQL column aliases (AS) to provide human-readable column headers.
-
-                        Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
-
-                        Parameters:
-                        - gridId (string): The ID of the grid. Optional when there is only one grid.
-                        - query (string, required): SQL SELECT query to retrieve data
-
-                        Changes are applied when the request completes.""";
+                        The grid automatically creates columns from query results.
+                        Use SQL aliases (AS) for human-readable column headers.
+                        Do NOT use LIMIT or OFFSET — the grid handles pagination.
+                        Example: SELECT name AS "Name", salary AS "Salary" FROM employees
+                        """;
             }
 
             @Override
@@ -233,7 +192,7 @@ public final class GridAITools {
                             },
                             "query": {
                               "type": "string",
-                              "description": "SQL SELECT query to retrieve data"
+                              "description": "SQL SELECT query without LIMIT/OFFSET"
                             }
                           },
                           "required": ["query"]
@@ -243,25 +202,17 @@ public final class GridAITools {
             @Override
             public String execute(String arguments) {
                 try {
-                    JsonNode args = JacksonUtils.readTree(arguments);
-                    String gridId = resolveGridId(args, gridIdsSupplier);
-                    Grid<Map<String, Object>> grid = resolveGrid(gridId,
-                            gridResolver);
-                    GridEntry entry = GridEntry.getOrCreate(grid, gridId);
-
-                    String query = args.get("query").asString();
-
-                    if (queryValidator != null) {
-                        queryValidator.accept(query);
-                    }
-
-                    entry.setQuery(query);
-                    entry.setPendingDataUpdate(true);
-
+                    LOGGER.info("update_grid_data called with: {}", arguments);
+                    var args = JacksonUtils.readTree(arguments);
+                    var gridId = resolveGridId(args, callbacks);
+                    var query = args.get("query").asString();
+                    LOGGER.info("update_grid_data gridId={} query={}", gridId,
+                            query);
+                    callbacks.updateData(gridId, query);
                     return "Grid '" + gridId
-                            + "' data update queued successfully. "
-                            + "Changes will be applied when the request completes.";
+                            + "' data update queued successfully";
                 } catch (Exception e) {
+                    LOGGER.error("update_grid_data failed", e);
                     return "Error updating grid data: " + e.getMessage();
                 }
             }
@@ -269,50 +220,15 @@ public final class GridAITools {
     }
 
     /**
-     * Creates all grid tools for the given grid resolver.
+     * Creates all grid tools for the given callbacks.
      *
-     * @param gridResolver
-     *            resolves a grid ID to a {@link Grid} instance, returning
-     *            {@code null} if not found; not {@code null}
-     * @param gridIdsSupplier
-     *            supplies the set of available grid IDs; not {@code null}
-     * @param queryValidator
-     *            validates SQL queries before accepting them, or {@code null}
-     *            to skip validation
+     * @param callbacks
+     *            the callbacks for grid state access and mutation, not
+     *            {@code null}
      * @return a list of all grid tools, never {@code null}
      */
-    public static List<LLMProvider.ToolSpec> createAll(
-            Function<String, Grid<Map<String, Object>>> gridResolver,
-            Supplier<Set<String>> gridIdsSupplier,
-            Consumer<String> queryValidator) {
-        return createAll(gridResolver, gridIdsSupplier, queryValidator, null);
-    }
-
-    /**
-     * Creates all grid tools for the given grid resolver with a name prefix.
-     * The prefix is prepended to each tool name to avoid collisions when
-     * multiple controllers are registered on the same orchestrator.
-     *
-     * @param gridResolver
-     *            resolves a grid ID to a {@link Grid} instance, returning
-     *            {@code null} if not found; not {@code null}
-     * @param gridIdsSupplier
-     *            supplies the set of available grid IDs; not {@code null}
-     * @param queryValidator
-     *            validates SQL queries before accepting them, or {@code null}
-     *            to skip validation
-     * @param toolNamePrefix
-     *            prefix for tool names (e.g. {@code "dashboard_"}), or
-     *            {@code null} for no prefix
-     * @return a list of all grid tools, never {@code null}
-     */
-    public static List<LLMProvider.ToolSpec> createAll(
-            Function<String, Grid<Map<String, Object>>> gridResolver,
-            Supplier<Set<String>> gridIdsSupplier,
-            Consumer<String> queryValidator, String toolNamePrefix) {
-        return List.of(
-                getGridState(gridResolver, gridIdsSupplier, toolNamePrefix),
-                updateGridData(gridResolver, gridIdsSupplier, queryValidator,
-                        toolNamePrefix));
+    public static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
+        return List.of(getGridState(callbacks), updateGridData(callbacks));
     }
 }
