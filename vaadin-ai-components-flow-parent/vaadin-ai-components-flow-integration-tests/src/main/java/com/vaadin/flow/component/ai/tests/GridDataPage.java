@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -39,7 +40,6 @@ import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.grid.GridAIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -217,7 +217,7 @@ public class GridDataPage extends Div {
                 .build();
         var chatModel = OpenAiChatModel.builder().openAiApi(openAiApi)
                 .defaultOptions(chatOptions).build();
-        var llmProvider = LLMProvider.from(chatModel);
+        var llmProvider = new SpringAILLMProvider(chatModel);
 
         gridController = new GridAIController(grid, dbProvider);
         var currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
