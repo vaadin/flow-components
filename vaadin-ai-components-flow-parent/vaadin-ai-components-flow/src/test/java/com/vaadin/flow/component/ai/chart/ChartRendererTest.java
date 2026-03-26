@@ -33,6 +33,7 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartRendererTest {
@@ -329,7 +330,7 @@ class ChartRendererTest {
         }
 
         @Test
-        void emptySeries_doesNotModifyAxis() {
+        void emptySeries_resetsAxisType() {
             databaseProvider.results = List.of();
 
             // Use a custom converter that returns an empty list
@@ -340,9 +341,10 @@ class ChartRendererTest {
             renderer.renderChart(chart, List.of("SELECT 1"),
                     "{\"chart\":{\"type\":\"line\"}}");
 
-            // Axis type should remain unchanged
-            Assertions.assertEquals(AxisType.LINEAR,
-                    chart.getConfiguration().getxAxis().getType());
+            // Configuration reset clears stale axis type when config
+            // doesn't specify one, so Highcharts auto-detects
+            Assertions
+                    .assertNull(chart.getConfiguration().getxAxis().getType());
         }
 
         @Test
@@ -357,6 +359,55 @@ class ChartRendererTest {
             renderer.renderChart(chart, List.of("SELECT name, start, end"),
                     "{\"chart\":{\"type\":\"gantt\"}}");
 
+            Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+        }
+
+        @Test
+        void ohlcChart_doesNotSetCategoryAxis() {
+            // OHLC/candlestick items have names (dates) and datetime X values;
+            // categories should NOT be set from names, so the datetime axis
+            // can render formatted dates instead of raw epoch strings.
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT trade_date, open, high, low, close"),
+                    "{\"chart\":{\"type\":\"candlestick\"}}");
+
+            // Should have datetime axis, not categories
+            Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+            var categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertTrue(categories == null || categories.length == 0,
+                    "OHLC chart should not have category axis");
+        }
+
+        @Test
+        void multipleQueries_withMixedXValues_detectsDatetime() {
+            // First query: OHLC with epoch X values
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            // Use a converter that returns both a datetime series and a
+            // volume series with row-index X values
+            renderer.setDataConverter(data -> {
+                DataSeries ohlcSeries = new DataSeries("OHLC");
+                ohlcSeries.add(new OhlcItem(1704067200000L, 142.5, 148.2, 141.0,
+                        147.8));
+                DataSeries volumeSeries = new DataSeries("Volume");
+                volumeSeries.add(new DataSeriesItem(0, 1200000));
+                return List.of(ohlcSeries, volumeSeries);
+            });
+
+            renderer.renderChart(chart, List.of("SELECT 1"),
+                    "{\"chart\":{\"type\":\"candlestick\"}}");
+
+            // Even though volumeSeries has X=0, the OHLC series with epoch
+            // X values should still cause datetime detection
             Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
         }
@@ -465,6 +516,175 @@ class ChartRendererTest {
             Assertions.assertEquals(2, series.size());
             Assertions.assertEquals("Series A", series.get(0).getName());
             Assertions.assertEquals("Series B", series.get(1).getName());
+        }
+    }
+
+    @Nested
+    class ConfigurationReset {
+
+        @Test
+        void tooltipFromHeatmap_doesNotLeakToCandlestick() {
+            // First render: heatmap with custom tooltip
+            databaseProvider.results = List.of(row(ColumnNames.X, 9,
+                    ColumnNames.Y, 0, ColumnNames.VALUE, 120));
+
+            renderer.renderChart(chart, List.of("SELECT x, y, value"),
+                    "{\"chart\":{\"type\":\"heatmap\"},"
+                            + "\"tooltip\":{\"pointFormat\":\"Day: {point.y}<br>Hour: {point.x}<br>Visitors: {point.value}\"}}");
+
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getTooltip().getPointFormat());
+
+            // Second render: candlestick without tooltip config
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            renderer.renderChart(chart, List.of("SELECT trade_date, open"),
+                    "{\"chart\":{\"type\":\"candlestick\"},"
+                            + "\"title\":{\"text\":\"Stock Prices\"}}");
+
+            // Tooltip should be reset, not carry heatmap format
+            Assertions.assertNull(
+                    chart.getConfiguration().getTooltip().getPointFormat());
+        }
+
+        @Test
+        void axisTypeFromDatetime_doesNotLeakToCategory() {
+            // First render: candlestick with datetime axis
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT trade_date, open, high, low, close"),
+                    "{\"chart\":{\"type\":\"candlestick\"}}");
+
+            Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+
+            // Second render: column chart with categories
+            databaseProvider.results = List.of(
+                    row("category", "Jan", "value", 100),
+                    row("category", "Feb", "value", 200));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"title\":{\"text\":\"Revenue\"}}");
+
+            // Datetime axis type should be cleared, categories used instead
+            Assertions.assertNotEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getxAxis().getCategories());
+        }
+
+        @Test
+        void axisMinMaxFromGauge_doesNotLeakToColumn() {
+            // First render: gauge with explicit min/max
+            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+
+            renderer.renderChart(chart, List.of("SELECT current_val"),
+                    "{\"chart\":{\"type\":\"gauge\"},"
+                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+
+            Assertions.assertEquals(0.0,
+                    chart.getConfiguration().getyAxis().getMin().doubleValue());
+            Assertions.assertEquals(100.0,
+                    chart.getConfiguration().getyAxis().getMax().doubleValue());
+
+            // Second render: column chart without min/max
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // Gauge min/max should be cleared
+            Assertions.assertNull(chart.getConfiguration().getyAxis().getMin());
+            Assertions.assertNull(chart.getConfiguration().getyAxis().getMax());
+        }
+
+        @Test
+        void plotOptionsFromStacked_doesNotLeakToLine() {
+            // First render: stacked column
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
+
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getPlotOptions(ChartType.COLUMN));
+
+            // Second render: plain line
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"line\"}}");
+
+            // Stacked column plot options should be cleared
+            Assertions.assertNull(
+                    chart.getConfiguration().getPlotOptions(ChartType.COLUMN));
+        }
+
+        @Test
+        void colorAxisFromHeatmap_doesNotLeakToColumn() {
+            // First render: heatmap with color axis
+            databaseProvider.results = List.of(row(ColumnNames.X, 0,
+                    ColumnNames.Y, 0, ColumnNames.VALUE, 100));
+
+            renderer.renderChart(chart, List.of("SELECT x, y, value"),
+                    "{\"chart\":{\"type\":\"heatmap\"},"
+                            + "\"colorAxis\":{\"min\":0,\"max\":300}}");
+
+            Assertions.assertEquals(1,
+                    chart.getConfiguration().getNumberOfColorAxes());
+
+            // Second render: column chart
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // Color axis should be cleared
+            Assertions.assertEquals(0,
+                    chart.getConfiguration().getNumberOfColorAxes());
+        }
+
+        @Test
+        void subtitleFromPrevious_doesNotLeak() {
+            // First render with subtitle
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"subtitle\":{\"text\":\"Q1 2024\"}}");
+
+            Assertions.assertEquals("Q1 2024",
+                    chart.getConfiguration().getSubTitle().getText());
+
+            // Second render without subtitle
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"line\"}}");
+
+            // Subtitle should be cleared
+            Assertions.assertEquals("",
+                    chart.getConfiguration().getSubTitle().getText());
         }
     }
 

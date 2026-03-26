@@ -64,6 +64,50 @@ public class ChartConfigurationApplier implements Serializable {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartConfigurationApplier.class);
 
+    /**
+     * Resets chart configuration properties that may have been set by a
+     * previous {@link #applyConfiguration} call. This prevents stale settings
+     * (tooltip formats, axis types/categories, pane, color axis, plot options)
+     * from leaking across chart type switches.
+     *
+     * @param chart
+     *            the chart to reset, not {@code null}
+     */
+    public void resetConfiguration(Chart chart) {
+        Configuration config = chart.getConfiguration();
+
+        // Reset tooltip to defaults
+        config.setTooltip(new Tooltip());
+
+        // Reset axes — clear type, categories, title, min/max
+        resetAxis(config.getxAxis());
+        resetAxis(config.getyAxis());
+
+        // Reset color axis
+        config.removeColorAxes();
+
+        // Reset plot options
+        config.setPlotOptions();
+
+        // Reset chart model properties that are chart-type-specific
+        config.getChart().setInverted(false);
+        config.getChart().setPolar(false);
+
+        // Reset subtitle
+        config.setSubTitle("");
+    }
+
+    private static void resetAxis(Axis axis) {
+        if (axis == null) {
+            return;
+        }
+        axis.setType(null);
+        axis.setCategories();
+        axis.setMin((Number) null);
+        axis.setMax((Number) null);
+        axis.setTitle((AxisTitle) null);
+    }
+
     public void applyConfiguration(Chart chart, String configJson) {
         try {
             JsonNode parsedNode = JacksonUtils.getMapper().readTree(configJson);
