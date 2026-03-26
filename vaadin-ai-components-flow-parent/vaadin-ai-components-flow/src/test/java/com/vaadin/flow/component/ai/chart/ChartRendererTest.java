@@ -302,6 +302,33 @@ class ChartRendererTest {
         }
 
         @Test
+        void reRenderWithoutNames_clearsPreviousCategories() {
+            // First render: items with names → categories set
+            databaseProvider.results = List.of(
+                    row("category", "Jan", "value", 100),
+                    row("category", "Feb", "value", 200));
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getxAxis().getCategories());
+
+            // Second render: numeric X/Y data without names → categories
+            // should be cleared
+            databaseProvider.results = List.of(
+                    row(ColumnNames.X, 1, ColumnNames.Y, 10),
+                    row(ColumnNames.X, 2, ColumnNames.Y, 20));
+            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
+                    "{\"chart\":{\"type\":\"line\"}}");
+
+            String[] categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertTrue(categories == null || categories.length == 0,
+                    "Categories should be cleared when re-rendering with "
+                            + "numeric data");
+        }
+
+        @Test
         void emptySeries_doesNotModifyAxis() {
             databaseProvider.results = List.of();
 
