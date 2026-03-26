@@ -68,7 +68,7 @@ public class ChartConfigurationApplier implements Serializable {
         try {
             JsonNode parsedNode = JacksonUtils.getMapper().readTree(configJson);
             // Handle double-encoded JSON strings from LLM
-            if (parsedNode.isTextual()) {
+            if (parsedNode.isString()) {
                 parsedNode = JacksonUtils.getMapper()
                         .readTree(parsedNode.asString());
             }
