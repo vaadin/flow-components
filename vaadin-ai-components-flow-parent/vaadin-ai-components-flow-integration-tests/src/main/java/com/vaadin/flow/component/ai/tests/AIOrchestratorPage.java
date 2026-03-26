@@ -20,20 +20,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.flow.component.ai.chart.ChartAIController;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.component.upload.UploadFileList;
@@ -85,16 +81,9 @@ public class AIOrchestratorPage extends UploadDropZone {
 
         clickedAttachmentInfo.setId("clicked-attachment-info");
 
-        // Chart section for ChartAIController integration testing
-        var chart = new Chart();
-        chart.setId("test-chart");
-        chart.setSizeFull();
-        var chartController = new ChartAIController(chart,
-                createTestDatabaseProvider());
-
         var builder = AIOrchestrator.builder(new EchoLLMProvider(), null)
                 .withMessageList(messageList).withInput(messageInput)
-                .withFileReceiver(uploadManager).withController(chartController)
+                .withFileReceiver(uploadManager)
                 .withAttachmentSubmitListener(event -> {
                     attachmentStorage.put(event.getMessageId(),
                             event.getAttachments());
@@ -134,97 +123,26 @@ public class AIOrchestratorPage extends UploadDropZone {
                 e -> orchestrator.prompt("Hello from button"));
         promptButton.setId("prompt-button");
 
-        var renderBarChart = new NativeButton("Render Bar Chart",
-                e -> orchestrator.prompt("/render-bar"));
-        renderBarChart.setId("render-bar-chart");
-
-        var renderLineChart = new NativeButton("Render Line Chart",
-                e -> orchestrator.prompt("/render-line"));
-        renderLineChart.setId("render-line-chart");
-
-        var renderScatterChart = new NativeButton("Render Scatter Chart",
-                e -> orchestrator.prompt("/render-scatter"));
-        renderScatterChart.setId("render-scatter-chart");
-
-        var buttonBar = new Div(promptButton, renderBarChart, renderLineChart,
-                renderScatterChart);
-        buttonBar.getStyle().set("display", "flex").set("gap", "4px");
-
         var inputLayout = new Div(uploadButton, messageInput);
         inputLayout.getStyle().set("display", "flex");
         inputLayout.setWidthFull();
 
-        var chatLayout = new Div(messageList, fileList, inputLayout, buttonBar,
-                clickedAttachmentInfo);
+        var chatLayout = new Div(messageList, fileList, inputLayout,
+                promptButton, clickedAttachmentInfo);
         chatLayout.getStyle().set("display", "flex");
         chatLayout.getStyle().set("flexDirection", "column");
         chatLayout.setSizeFull();
 
-        var mainLayout = new HorizontalLayout(chatLayout, chart);
-        mainLayout.setSizeFull();
-
-        setContent(mainLayout);
-    }
-
-    private static DatabaseProvider createTestDatabaseProvider() {
-        var barRows = List.of(
-                Map.<String, Object> of("_NAME", "January", "_Y", 45000),
-                Map.<String, Object> of("_NAME", "February", "_Y", 52000),
-                Map.<String, Object> of("_NAME", "March", "_Y", 48000));
-        var scatterRows = List.of(
-                Map.<String, Object> of("_X", 10, "_Y", 20),
-                Map.<String, Object> of("_X", 30, "_Y", 40),
-                Map.<String, Object> of("_X", 50, "_Y", 60));
-        return new DatabaseProvider() {
-            @Override
-            public String getSchema() {
-                return "sales(month VARCHAR, revenue INT); points(x INT, y INT)";
-            }
-
-            @Override
-            public List<Map<String, Object>> executeQuery(String sql) {
-                if (sql.contains("points")) {
-                    return scatterRows;
-                }
-                return barRows;
-            }
-        };
+        setContent(chatLayout);
     }
 
     /**
-     * A test LLM provider that echoes messages back and executes chart tool
-     * commands when it receives specific prompts.
+     * A simple LLM provider that echoes the user message back.
      */
     private static class EchoLLMProvider implements LLMProvider {
         @Override
         public Flux<String> stream(LLMRequest request) {
-            var message = request.userMessage();
-            var tools = request.explicitTools();
-
-            if ("/render-bar".equals(message)) {
-                executeTool(tools, "update_chart_data_source",
-                        "{\"queries\":[\"SELECT * FROM sales\"]}");
-                executeTool(tools, "update_chart_configuration",
-                        "{\"configuration\":{\"chart\":{\"type\":\"bar\"},"
-                                + "\"title\":{\"text\":\"Monthly Revenue\"}}}");
-                return Flux.just("Rendered bar chart.");
-            }
-            if ("/render-line".equals(message)) {
-                executeTool(tools, "update_chart_configuration",
-                        "{\"configuration\":{\"chart\":{\"type\":\"line\"},"
-                                + "\"title\":{\"text\":\"Monthly Revenue\"}}}");
-                return Flux.just("Rendered line chart.");
-            }
-            if ("/render-scatter".equals(message)) {
-                executeTool(tools, "update_chart_data_source",
-                        "{\"queries\":[\"SELECT * FROM points\"]}");
-                executeTool(tools, "update_chart_configuration",
-                        "{\"configuration\":{\"chart\":{\"type\":\"scatter\"},"
-                                + "\"title\":{\"text\":\"Points\"}}}");
-                return Flux.just("Rendered scatter chart.");
-            }
-
-            var response = "Echo: " + message;
+            var response = "Echo: " + request.userMessage();
             return Flux.fromArray(response.split(" ")).map(word -> word + " ");
         }
 
@@ -232,12 +150,6 @@ public class AIOrchestratorPage extends UploadDropZone {
         public void setHistory(List<ChatMessage> history,
                 Map<String, List<AIAttachment>> attachmentsByMessageId) {
             // No-op for testing
-        }
-
-        private static void executeTool(List<ToolSpec> tools, String name,
-                String args) {
-            tools.stream().filter(t -> t.getName().equals(name)).findFirst()
-                    .orElseThrow().execute(args);
         }
     }
 }
