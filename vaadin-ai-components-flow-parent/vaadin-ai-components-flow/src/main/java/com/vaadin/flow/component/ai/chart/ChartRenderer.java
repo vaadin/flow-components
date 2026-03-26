@@ -194,7 +194,7 @@ public class ChartRenderer {
         // different months).
         if (!NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
             var categories = extractCategories(allItems);
-            if (categories != null) {
+            if (!categories.isEmpty()) {
                 xAxis.setCategories(categories.toArray(new String[0]));
             }
         }
@@ -213,14 +213,14 @@ public class ChartRenderer {
 
     /**
      * Returns unique category names extracted from items (preserving insertion
-     * order), or {@code null} if any item has no name.
+     * order), or an empty list if any item has no name.
      */
     private static List<String> extractCategories(List<DataSeriesItem> items) {
         var seen = new LinkedHashSet<String>();
         for (var item : items) {
             var name = item.getName();
             if (name == null) {
-                return null;
+                return List.of();
             }
             seen.add(name);
         }
