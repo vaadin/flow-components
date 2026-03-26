@@ -413,7 +413,9 @@ public class ChartConfigurationApplier implements Serializable {
         if (!paneNode.isObject()) {
             return;
         }
-        Pane pane = new Pane();
+        // Use the existing pane instead of adding a new one to avoid
+        // pane accumulation across repeated renders.
+        Pane pane = config.getPane();
         if (paneNode.has(START_ANGLE) && paneNode.get(START_ANGLE).isNumber()) {
             pane.setStartAngle(paneNode.get(START_ANGLE).asInt());
         }
@@ -430,7 +432,6 @@ public class ChartConfigurationApplier implements Serializable {
         if (paneNode.has(SIZE) && paneNode.get(SIZE).isString()) {
             pane.setSize(paneNode.get(SIZE).asString());
         }
-        config.addPane(pane);
     }
 
     private void applyPlotOptionsConfig(Configuration config,

@@ -33,6 +33,8 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartRendererTest {
@@ -155,6 +157,35 @@ class ChartRendererTest {
         }
 
         @Test
+        void configOnlyAfterGauge_resetsPane() {
+            // First: full render as gauge
+            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+            ChartEntry entry = ChartEntry.getOrCreate(chart, "test");
+            entry.setQueries(List.of("SELECT current_val"));
+            entry.setPendingDataUpdate(true);
+            entry.setPendingConfigurationJson("{\"chart\":{\"type\":\"gauge\"},"
+                    + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
+                    + "\"yAxis\":{\"min\":0,\"max\":100}}");
+            renderer.applyPendingState(chart);
+
+            // Verify pane was set
+            String json1 = ChartSerialization.toJSON(chart.getConfiguration());
+            Assertions.assertTrue(json1.contains("\"startAngle\""));
+
+            // Second: config-only update to column (no data change)
+            entry.setPendingConfigurationJson(
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"title\":{\"text\":\"Revenue\"}}");
+            renderer.applyPendingState(chart);
+
+            // Pane should be cleared
+            String json2 = ChartSerialization.toJSON(chart.getConfiguration());
+            Assertions.assertFalse(json2.contains("\"startAngle\""),
+                    "Pane from gauge should be cleared on config-only "
+                            + "update: " + json2);
+        }
+
+        @Test
         void clearsPendingStateEvenOnError() {
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
 
@@ -267,6 +298,34 @@ class ChartRendererTest {
         }
 
         @Test
+        void multiSeriesCategories_collectsFromAllSeries() {
+            // Multi-series with _series column where each series has
+            // different category names — categories should be the union
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "North", "category", "Jan", "value",
+                            100),
+                    row(ColumnNames.SERIES, "North", "category", "Feb", "value",
+                            200),
+                    row(ColumnNames.SERIES, "South", "category", "Jan", "value",
+                            150),
+                    row(ColumnNames.SERIES, "South", "category", "Mar", "value",
+                            180));
+
+            renderer.renderChart(chart, List.of("SELECT s, c, v FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            String[] categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertNotNull(categories);
+            // Should contain Jan, Feb, Mar (union of both series)
+            Assertions.assertEquals(3, categories.length,
+                    "Categories should be union of all series: "
+                            + java.util.Arrays.toString(categories));
+            Assertions.assertArrayEquals(new String[] { "Jan", "Feb", "Mar" },
+                    categories);
+        }
+
+        @Test
         void mixedNamesAndNull_doesNotSetCategories() {
             // When some items have names and some don't, categories should
             // not be set (extractCategories returns null)
@@ -329,7 +388,7 @@ class ChartRendererTest {
         }
 
         @Test
-        void emptySeries_doesNotModifyAxis() {
+        void emptySeries_resetsAxisType() {
             databaseProvider.results = List.of();
 
             // Use a custom converter that returns an empty list
@@ -340,9 +399,10 @@ class ChartRendererTest {
             renderer.renderChart(chart, List.of("SELECT 1"),
                     "{\"chart\":{\"type\":\"line\"}}");
 
-            // Axis type should remain unchanged
-            Assertions.assertEquals(AxisType.LINEAR,
-                    chart.getConfiguration().getxAxis().getType());
+            // Configuration reset clears stale axis type when config
+            // doesn't specify one, so Highcharts auto-detects
+            Assertions
+                    .assertNull(chart.getConfiguration().getxAxis().getType());
         }
 
         @Test
@@ -357,6 +417,55 @@ class ChartRendererTest {
             renderer.renderChart(chart, List.of("SELECT name, start, end"),
                     "{\"chart\":{\"type\":\"gantt\"}}");
 
+            Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+        }
+
+        @Test
+        void ohlcChart_doesNotSetCategoryAxis() {
+            // OHLC/candlestick items have names (dates) and datetime X values;
+            // categories should NOT be set from names, so the datetime axis
+            // can render formatted dates instead of raw epoch strings.
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT trade_date, open, high, low, close"),
+                    "{\"chart\":{\"type\":\"candlestick\"}}");
+
+            // Should have datetime axis, not categories
+            Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+            var categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertTrue(categories == null || categories.length == 0,
+                    "OHLC chart should not have category axis");
+        }
+
+        @Test
+        void multipleQueries_withMixedXValues_detectsDatetime() {
+            // First query: OHLC with epoch X values
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            // Use a converter that returns both a datetime series and a
+            // volume series with row-index X values
+            renderer.setDataConverter(data -> {
+                DataSeries ohlcSeries = new DataSeries("OHLC");
+                ohlcSeries.add(new OhlcItem(1704067200000L, 142.5, 148.2, 141.0,
+                        147.8));
+                DataSeries volumeSeries = new DataSeries("Volume");
+                volumeSeries.add(new DataSeriesItem(0, 1200000));
+                return List.of(ohlcSeries, volumeSeries);
+            });
+
+            renderer.renderChart(chart, List.of("SELECT 1"),
+                    "{\"chart\":{\"type\":\"candlestick\"}}");
+
+            // Even though volumeSeries has X=0, the OHLC series with epoch
+            // X values should still cause datetime detection
             Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
         }
@@ -450,6 +559,20 @@ class ChartRendererTest {
         }
 
         @Test
+        void singleUnnamedSeries_withNoTitle_keepsNull() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(1, series.size());
+            Assertions.assertNull(series.get(0).getName());
+        }
+
+        @Test
         void multipleSeriesWithSeriesColumn_keepsOriginalNames() {
             databaseProvider.results = List.of(
                     row(ColumnNames.SERIES, "Series A", "category", "Jan",
@@ -465,6 +588,428 @@ class ChartRendererTest {
             Assertions.assertEquals(2, series.size());
             Assertions.assertEquals("Series A", series.get(0).getName());
             Assertions.assertEquals("Series B", series.get(1).getName());
+        }
+    }
+
+    @Nested
+    class ConfigurationReset {
+
+        @Test
+        void resetDoesNotSetEmptyCategoriesArray() {
+            // If reset sets categories to an empty ArrayList instead of
+            // null, Highcharts treats the axis as a category axis (creates
+            // a tick for every unique data value). Verify via serialization
+            // that categories property is not emitted after reset.
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"xAxis\":{\"categories\":[\"A\",\"B\"]}}");
+
+            // Categories were set on X-axis
+            Assertions.assertTrue(chart.getConfiguration().getxAxis()
+                    .getCategories().length > 0);
+
+            // Second render: scatter chart without categories
+            databaseProvider.results = List.of(
+                    row(ColumnNames.X, 1, ColumnNames.Y, 100),
+                    row(ColumnNames.X, 2, ColumnNames.Y, 200));
+
+            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
+                    "{\"chart\":{\"type\":\"scatter\"}}");
+
+            // Y-axis serialization must NOT contain "categories" — check
+            // via JSON to distinguish null field from empty ArrayList
+            String json = ChartSerialization.toJSON(chart.getConfiguration());
+            // Parse and check the yAxis doesn't have categories
+            Assertions.assertFalse(json.contains("\"categories\":[]"),
+                    "Reset axes should not emit empty categories array: "
+                            + json);
+        }
+
+        @Test
+        void tooltipFromHeatmap_doesNotLeakToCandlestick() {
+            // First render: heatmap with custom tooltip
+            databaseProvider.results = List.of(row(ColumnNames.X, 9,
+                    ColumnNames.Y, 0, ColumnNames.VALUE, 120));
+
+            renderer.renderChart(chart, List.of("SELECT x, y, value"),
+                    "{\"chart\":{\"type\":\"heatmap\"},"
+                            + "\"tooltip\":{\"pointFormat\":\"Day: {point.y}<br>Hour: {point.x}<br>Visitors: {point.value}\"}}");
+
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getTooltip().getPointFormat());
+
+            // Second render: candlestick without tooltip config
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            renderer.renderChart(chart, List.of("SELECT trade_date, open"),
+                    "{\"chart\":{\"type\":\"candlestick\"},"
+                            + "\"title\":{\"text\":\"Stock Prices\"}}");
+
+            // Tooltip should be reset, not carry heatmap format
+            Assertions.assertNull(
+                    chart.getConfiguration().getTooltip().getPointFormat());
+        }
+
+        @Test
+        void axisTypeFromDatetime_doesNotLeakToCategory() {
+            // First render: candlestick with datetime axis
+            databaseProvider.results = List.of(row(ColumnNames.X,
+                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
+                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT trade_date, open, high, low, close"),
+                    "{\"chart\":{\"type\":\"candlestick\"}}");
+
+            Assertions.assertEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+
+            // Second render: column chart with categories
+            databaseProvider.results = List.of(
+                    row("category", "Jan", "value", 100),
+                    row("category", "Feb", "value", 200));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"title\":{\"text\":\"Revenue\"}}");
+
+            // Datetime axis type should be cleared, categories used instead
+            Assertions.assertNotEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getxAxis().getCategories());
+        }
+
+        @Test
+        void axisMinMaxFromGauge_doesNotLeakToColumn() {
+            // First render: gauge with explicit min/max
+            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+
+            renderer.renderChart(chart, List.of("SELECT current_val"),
+                    "{\"chart\":{\"type\":\"gauge\"},"
+                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+
+            Assertions.assertEquals(0.0,
+                    chart.getConfiguration().getyAxis().getMin().doubleValue());
+            Assertions.assertEquals(100.0,
+                    chart.getConfiguration().getyAxis().getMax().doubleValue());
+
+            // Second render: column chart without min/max
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // Gauge min/max should be cleared
+            Assertions.assertNull(chart.getConfiguration().getyAxis().getMin());
+            Assertions.assertNull(chart.getConfiguration().getyAxis().getMax());
+        }
+
+        @Test
+        void plotOptionsFromStacked_doesNotLeakToLine() {
+            // First render: stacked column
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
+
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getPlotOptions(ChartType.COLUMN));
+
+            // Second render: plain line
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"line\"}}");
+
+            // Stacked column plot options should be cleared
+            Assertions.assertNull(
+                    chart.getConfiguration().getPlotOptions(ChartType.COLUMN));
+        }
+
+        @Test
+        void colorAxisFromHeatmap_doesNotLeakToColumn() {
+            // First render: heatmap with color axis
+            databaseProvider.results = List.of(row(ColumnNames.X, 0,
+                    ColumnNames.Y, 0, ColumnNames.VALUE, 100));
+
+            renderer.renderChart(chart, List.of("SELECT x, y, value"),
+                    "{\"chart\":{\"type\":\"heatmap\"},"
+                            + "\"colorAxis\":{\"min\":0,\"max\":300}}");
+
+            Assertions.assertEquals(1,
+                    chart.getConfiguration().getNumberOfColorAxes());
+
+            // Second render: column chart
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // Color axis should be cleared
+            Assertions.assertEquals(0,
+                    chart.getConfiguration().getNumberOfColorAxes());
+        }
+
+        @Test
+        void paneFromGauge_doesNotLeakToColumn() {
+            // First render: gauge with pane config
+            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+
+            renderer.renderChart(chart, List.of("SELECT current_val"),
+                    "{\"chart\":{\"type\":\"gauge\"},"
+                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150,"
+                            + "\"center\":[\"50%\",\"50%\"],\"size\":\"80%\"},"
+                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+
+            // Pane should be set
+            String json1 = ChartSerialization.toJSON(chart.getConfiguration());
+            Assertions.assertTrue(json1.contains("\"pane\""),
+                    "Gauge should have pane config");
+
+            // Second render: column chart without pane
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // Pane should be cleared
+            String json2 = ChartSerialization.toJSON(chart.getConfiguration());
+            Assertions.assertFalse(json2.contains("\"startAngle\""),
+                    "Pane startAngle from gauge should not leak to column: "
+                            + json2);
+        }
+
+        @Test
+        void legendFromPieChart_doesNotLeakToColumn() {
+            // First render: pie chart with legend disabled
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"pie\"},"
+                            + "\"legend\":{\"enabled\":false}}");
+
+            Assertions.assertFalse(
+                    chart.getConfiguration().getLegend().getEnabled());
+
+            // Second render: column chart without legend config
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // Legend should be reset to default (enabled=true or null)
+            Boolean legendEnabled = chart.getConfiguration().getLegend()
+                    .getEnabled();
+            Assertions.assertTrue(legendEnabled == null || legendEnabled,
+                    "Legend enabled=false from pie should not leak to column");
+        }
+
+        @Test
+        void subtitleFromPrevious_doesNotLeak() {
+            // First render with subtitle
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"subtitle\":{\"text\":\"Q1 2024\"}}");
+
+            Assertions.assertEquals("Q1 2024",
+                    chart.getConfiguration().getSubTitle().getText());
+
+            // Second render without subtitle
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"line\"}}");
+
+            // Subtitle should be cleared
+            Assertions.assertEquals("",
+                    chart.getConfiguration().getSubTitle().getText());
+        }
+
+        @Test
+        void polarFromGauge_doesNotLeakToColumn() {
+            // First render: polar chart
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"line\",\"polar\":true}}");
+
+            Assertions
+                    .assertTrue(chart.getConfiguration().getChart().getPolar());
+
+            // Second render: column chart (not polar)
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            Assertions.assertFalse(
+                    chart.getConfiguration().getChart().getPolar());
+        }
+
+        @Test
+        void repeatedGaugeRenders_doNotAccumulatePanes() {
+            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+
+            // First gauge render
+            renderer.renderChart(chart, List.of("SELECT current_val"),
+                    "{\"chart\":{\"type\":\"gauge\"},"
+                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
+                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+
+            // Second gauge render (e.g. user changes the gauge value)
+            databaseProvider.results = List.of(row(ColumnNames.Y, 85));
+            renderer.renderChart(chart, List.of("SELECT current_val"),
+                    "{\"chart\":{\"type\":\"gauge\"},"
+                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
+                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+
+            // Should have exactly 1 pane, not 2
+            String json = ChartSerialization.toJSON(chart.getConfiguration());
+            int paneCount = json.split("\"startAngle\"").length - 1;
+            Assertions.assertEquals(1, paneCount,
+                    "Repeated gauge renders should not accumulate panes: "
+                            + json);
+        }
+
+        @Test
+        void multiHopSwitch_heatmapToGaugeToColumn() {
+            // Step 1: Heatmap with colorAxis and tooltip
+            databaseProvider.results = List.of(row(ColumnNames.X, 9,
+                    ColumnNames.Y, 0, ColumnNames.VALUE, 120));
+
+            renderer.renderChart(chart, List.of("SELECT x, y, value"),
+                    "{\"chart\":{\"type\":\"heatmap\"},"
+                            + "\"colorAxis\":{\"min\":0,\"max\":300},"
+                            + "\"tooltip\":{\"pointFormat\":\"Visitors: {point.value}\"}}");
+
+            Assertions.assertEquals(1,
+                    chart.getConfiguration().getNumberOfColorAxes());
+
+            // Step 2: Gauge with pane and yAxis min/max
+            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+
+            renderer.renderChart(chart, List.of("SELECT current_val"),
+                    "{\"chart\":{\"type\":\"gauge\"},"
+                            + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
+                            + "\"yAxis\":{\"min\":0,\"max\":100}}");
+
+            // colorAxis from heatmap should be gone
+            Assertions.assertEquals(0,
+                    chart.getConfiguration().getNumberOfColorAxes());
+            // tooltip from heatmap should be gone
+            Assertions.assertNull(
+                    chart.getConfiguration().getTooltip().getPointFormat());
+
+            // Step 3: Column chart
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            // pane from gauge should be cleared
+            String json = ChartSerialization.toJSON(chart.getConfiguration());
+            Assertions.assertFalse(json.contains("\"startAngle\""),
+                    "Pane from gauge should not leak: " + json);
+            // yAxis min/max from gauge should be cleared
+            Assertions.assertNull(chart.getConfiguration().getyAxis().getMin());
+            Assertions.assertNull(chart.getConfiguration().getyAxis().getMax());
+            // Should have categories
+            Assertions.assertNotNull(
+                    chart.getConfiguration().getxAxis().getCategories());
+        }
+
+        @Test
+        void invertedFromBar_doesNotLeakToColumn() {
+            // First render: bar chart (inverted)
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"bar\",\"inverted\":true}}");
+
+            Assertions.assertTrue(
+                    chart.getConfiguration().getChart().getInverted());
+
+            // Second render: column chart (not inverted)
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"}}");
+
+            Assertions.assertFalse(
+                    chart.getConfiguration().getChart().getInverted());
+        }
+    }
+
+    @Nested
+    class WaterfallChart {
+
+        @Test
+        void waterfallWithSumItems_categoriesIncludeSumNames() {
+            // Waterfall data with regular items, intermediate sum, and
+            // final sum — all should have names used as categories
+            databaseProvider.results = List.of(
+                    row(ColumnNames.NAME, "Revenue", ColumnNames.Y, 420000,
+                            ColumnNames.WATERFALL_TYPE, null),
+                    row(ColumnNames.NAME, "Cost of Goods", ColumnNames.Y,
+                            -180000, ColumnNames.WATERFALL_TYPE, null),
+                    row(ColumnNames.NAME, "Gross Profit", ColumnNames.Y, 0,
+                            ColumnNames.WATERFALL_TYPE, "intermediate"),
+                    row(ColumnNames.NAME, "Salaries", ColumnNames.Y, -120000,
+                            ColumnNames.WATERFALL_TYPE, null),
+                    row(ColumnNames.NAME, "Net Profit", ColumnNames.Y, 0,
+                            ColumnNames.WATERFALL_TYPE, "sum"));
+
+            renderer.renderChart(chart, List.of("SELECT name, y, type"),
+                    "{\"chart\":{\"type\":\"waterfall\"},"
+                            + "\"title\":{\"text\":\"Budget\"}}");
+
+            String[] categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertNotNull(categories,
+                    "Waterfall should have categories from item names");
+            Assertions.assertEquals(5, categories.length);
+            Assertions.assertEquals("Revenue", categories[0]);
+            Assertions.assertEquals("Gross Profit", categories[2]);
+            Assertions.assertEquals("Net Profit", categories[4]);
         }
     }
 
