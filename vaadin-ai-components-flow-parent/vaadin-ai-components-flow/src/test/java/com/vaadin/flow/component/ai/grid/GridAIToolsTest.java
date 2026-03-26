@@ -126,6 +126,35 @@ class GridAIToolsTest {
     }
 
     @Test
+    void getGridState_noGrids_returnsError() {
+        var tool = GridAITools.getGridState(new GridAITools.Callbacks() {
+            @Override
+            public String getState(String gridId) {
+                return "{}";
+            }
+
+            @Override
+            public void updateData(String gridId, String query) {
+            }
+
+            @Override
+            public Set<String> getGridIds() {
+                return Set.of();
+            }
+        });
+        var result = tool.execute("{}");
+        Assertions.assertTrue(result.contains("Error"));
+        Assertions.assertTrue(result.contains("No grids available"));
+    }
+
+    @Test
+    void getGridState_malformedJson_returnsError() {
+        var tool = GridAITools.getGridState(singleGridCallbacks(null, null));
+        var result = tool.execute("not json");
+        Assertions.assertTrue(result.contains("Error"));
+    }
+
+    @Test
     void getGridState_nullCallbacks_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> GridAITools.getGridState(null));
@@ -210,6 +239,13 @@ class GridAIToolsTest {
                 .execute("{\"gridId\": \"g1\", \"query\": \"SELECT 1\"}");
         Assertions.assertTrue(result.contains("queued successfully"));
         Assertions.assertEquals("g1:SELECT 1", updated.get());
+    }
+
+    @Test
+    void updateGridData_malformedJson_returnsError() {
+        var tool = GridAITools.updateGridData(singleGridCallbacks(null, null));
+        var result = tool.execute("not json");
+        Assertions.assertTrue(result.contains("Error"));
     }
 
     @Test
