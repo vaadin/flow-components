@@ -27,10 +27,10 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
- * Integration tests for ChartAIController rendering.
+ * Integration tests for ChartAIController rendering within a Dashboard.
  */
-@TestPath("vaadin-ai/chart-controller")
-public class ChartControllerIT extends AbstractComponentIT {
+@TestPath("vaadin-ai/dashboard-chart-controller")
+public class DashboardChartControllerIT extends AbstractComponentIT {
 
     @Before
     public void init() {

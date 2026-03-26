@@ -138,7 +138,7 @@ public class ChartRenderer {
 
             // Full reset required. Without it, axis categories are
             // lost when the chart is rendered via async Push (see
-            // ChartControllerIT#renderBarChart_categoriesDisplayed).
+            // DashboardChartControllerIT).
             chart.drawChart(true);
         }));
     }

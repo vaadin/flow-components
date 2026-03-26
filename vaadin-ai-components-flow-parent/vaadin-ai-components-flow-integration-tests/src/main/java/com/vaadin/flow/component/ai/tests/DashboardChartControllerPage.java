@@ -45,12 +45,12 @@ import reactor.core.publisher.Flux;
  * dashboard widget addition and chart rendering happen across separate Push
  * updates, causing the connectedCallback/updateConfiguration microtask race.
  */
-@Route("vaadin-ai/chart-controller")
-public class ChartControllerPage extends Div {
+@Route("vaadin-ai/dashboard-chart-controller")
+public class DashboardChartControllerPage extends Div {
 
     private static final DatabaseProvider DB = createDatabaseProvider();
 
-    public ChartControllerPage() {
+    public DashboardChartControllerPage() {
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
 
         var dashboard = new Dashboard();
