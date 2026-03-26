@@ -15,229 +15,148 @@
  */
 package com.vaadin.flow.component.ai.dashboard;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Consumer;
 
-import com.vaadin.flow.component.ai.chart.ChartAITools;
-import com.vaadin.flow.component.ai.chart.ChartEntry;
-import com.vaadin.flow.component.ai.grid.GridAITools;
-import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardWidget;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Provides LLM tool definitions for dashboard operations: listing widgets,
- * updating widget properties, creating and removing widgets, and managing
- * chart/grid data tools.
+ * Factory for creating reusable dashboard {@link LLMProvider.ToolSpec}
+ * instances.
+ * <p>
+ * The tools manage dashboard layout operations: listing widgets, updating
+ * widget properties, creating and removing widgets. Callers provide a
+ * {@link Callbacks} implementation for state retrieval and mutation, keeping
+ * this class decoupled from {@code Dashboard} and widget components.
+ * </p>
+ * <p>
+ * Chart and grid data tools are not included here — they are created separately
+ * via {@code ChartAITools} and {@code GridAITools}.
+ * </p>
  *
  * @author Vaadin Ltd
  */
-public class DashboardAITools {
+public final class DashboardAITools {
 
-    /**
-     * Callback for creating dashboard widgets.
-     */
-    @FunctionalInterface
-    interface WidgetCreator {
-        DashboardWidget create(String widgetId, String title, int colspan,
-                int rowspan);
+    private DashboardAITools() {
     }
 
-    private final Dashboard dashboard;
-    private final Consumer<String> queryValidator;
-    private final WidgetCreator chartWidgetCreator;
-    private final WidgetCreator gridWidgetCreator;
-    private final Map<String, Checkbox> widgetCheckboxes = new LinkedHashMap<>();
-    private int widgetCounter = 0;
+    /**
+     * Callback interface that dashboard tool consumers must implement to
+     * provide dashboard state access and mutation operations.
+     */
+    public interface Callbacks extends Serializable {
+
+        /**
+         * Returns the current state of the dashboard as a JSON string,
+         * including all widgets with their IDs, titles, types, sizes, and
+         * selection state.
+         *
+         * @return the dashboard state as JSON
+         */
+        String getState();
+
+        /**
+         * Updates a widget's properties. Implementations should throw if the
+         * widget is not found. Null parameters should be ignored (not updated).
+         *
+         * @param widgetId
+         *            the ID of the widget to update
+         * @param title
+         *            new title, or {@code null} to leave unchanged
+         * @param colspan
+         *            new column span, or {@code null} to leave unchanged
+         * @param rowspan
+         *            new row span, or {@code null} to leave unchanged
+         */
+        void updateWidget(String widgetId, String title, Integer colspan,
+                Integer rowspan);
+
+        /**
+         * Reorders the widgets on the dashboard. Implementations should throw
+         * if any widget ID is not found.
+         *
+         * @param widgetIds
+         *            widget IDs in the desired display order
+         */
+        void reorderWidgets(List<String> widgetIds);
+
+        /**
+         * Adds a new chart widget to the dashboard. Implementations should
+         * validate queries if provided.
+         *
+         * @param title
+         *            the widget title
+         * @param colspan
+         *            the column span
+         * @param rowspan
+         *            the row span
+         * @param queries
+         *            SQL queries to populate the chart, or {@code null}
+         * @param configJson
+         *            chart configuration JSON, or {@code null}
+         * @return the assigned widget ID
+         */
+        String addChartWidget(String title, int colspan, int rowspan,
+                List<String> queries, String configJson);
+
+        /**
+         * Adds a new grid widget to the dashboard. Implementations should
+         * validate the query if provided.
+         *
+         * @param title
+         *            the widget title
+         * @param colspan
+         *            the column span
+         * @param rowspan
+         *            the row span
+         * @param query
+         *            SQL query to populate the grid, or {@code null}
+         * @return the assigned widget ID
+         */
+        String addGridWidget(String title, int colspan, int rowspan,
+                String query);
+
+        /**
+         * Removes a widget from the dashboard. Implementations should throw if
+         * the widget is not found.
+         *
+         * @param widgetId
+         *            the ID of the widget to remove
+         */
+        void removeWidget(String widgetId);
+    }
 
     /**
-     * Creates a new dashboard tools instance.
+     * Creates all dashboard layout tools for the given callbacks.
      *
-     * @param dashboard
-     *            the dashboard component to manage, not {@code null}
-     * @param queryValidator
-     *            validates SQL queries before accepting them, not {@code null}
-     * @param chartWidgetCreator
-     *            creates chart widgets, not {@code null}
-     * @param gridWidgetCreator
-     *            creates grid widgets, not {@code null}
+     * @param callbacks
+     *            the callbacks for dashboard state access and mutation, not
+     *            {@code null}
+     * @return a list of all dashboard tools, never {@code null}
      */
-    DashboardAITools(Dashboard dashboard, Consumer<String> queryValidator,
-            WidgetCreator chartWidgetCreator, WidgetCreator gridWidgetCreator) {
-        this.dashboard = Objects.requireNonNull(dashboard,
-                "dashboard must not be null");
-        this.queryValidator = Objects.requireNonNull(queryValidator,
-                "queryValidator must not be null");
-        this.chartWidgetCreator = Objects.requireNonNull(chartWidgetCreator,
-                "chartWidgetCreator must not be null");
-        this.gridWidgetCreator = Objects.requireNonNull(gridWidgetCreator,
-                "gridWidgetCreator must not be null");
+    public static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
+        return List.of(getDashboardState(callbacks), updateWidget(callbacks),
+                reorderWidgets(callbacks), addChartWidget(callbacks),
+                addGridWidget(callbacks), removeWidget(callbacks));
     }
 
     /**
-     * Returns all tool definitions for dashboard operations.
+     * Creates a tool that returns the current dashboard state.
      *
-     * @return list of tool definitions
+     * @param callbacks
+     *            the callbacks for dashboard state access, not {@code null}
+     * @return the tool definition, never {@code null}
      */
-    public List<LLMProvider.ToolSpec> getTools() {
-        List<LLMProvider.ToolSpec> tools = new ArrayList<>();
-
-        // Dashboard layout tools
-        tools.add(createGetDashboardStateTool());
-        tools.add(createUpdateWidgetTool());
-        tools.add(createReorderWidgetsTool());
-
-        // Widget creation/removal tools
-        tools.add(createAddChartWidgetTool());
-        tools.add(createAddGridWidgetTool());
-        tools.add(createRemoveWidgetTool());
-
-        // Chart tools (shared across all charts, resolved from dashboard)
-        tools.addAll(ChartAITools.createAll(new ChartAITools.Callbacks() {
-            @Override
-            public String getState(String chartId) {
-                return ChartEntry.getStateAsJson(resolveChart(chartId),
-                        chartId);
-            }
-
-            @Override
-            public void updateConfiguration(String chartId, String configJson) {
-                ChartEntry.getOrCreate(resolveChart(chartId), chartId)
-                        .setPendingConfigurationJson(configJson);
-            }
-
-            @Override
-            public void updateData(String chartId, List<String> queries) {
-                for (String q : queries) {
-                    queryValidator.accept(q);
-                }
-                Chart chart = resolveChart(chartId);
-                ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
-                entry.setQueries(queries);
-                entry.setPendingDataUpdate(true);
-            }
-
-            @Override
-            public Set<String> getChartIds() {
-                return getChartWidgetIds();
-            }
-        }));
-
-        // Grid tools (shared across all grids, resolved from dashboard)
-        tools.addAll(GridAITools.createAll(this::findGridById,
-                this::getGridWidgetIds, queryValidator, "dashboard_"));
-
-        return tools;
-    }
-
-    /**
-     * Adds a selection checkbox to the widget's header content. The checkbox
-     * state is included in the dashboard state reported to the LLM, allowing
-     * users to select which widgets an AI action should target.
-     *
-     * @param widget
-     *            the widget to add a checkbox to
-     */
-    void addSelectionCheckbox(DashboardWidget widget) {
-        String widgetId = widget.getId().orElse(null);
-        if (widgetId == null || widgetCheckboxes.containsKey(widgetId)) {
-            return;
-        }
-        var checkbox = new Checkbox();
-        checkbox.getElement().setAttribute("title", "Select for AI actions");
-        widgetCheckboxes.put(widgetId, checkbox);
-        widget.setHeaderContent(checkbox);
-    }
-
-    /**
-     * Clears all tracked selection checkboxes. Should be called when the
-     * dashboard is cleared (e.g. during state restore).
-     */
-    void clearSelectionCheckboxes() {
-        widgetCheckboxes.clear();
-    }
-
-    // ===== Chart Resolution =====
-
-    private Chart findChartById(String chartId) {
-        for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getContent() instanceof Chart chart) {
-                ChartEntry entry = ChartEntry.get(chart);
-                if (entry != null && chartId.equals(entry.getId())) {
-                    return chart;
-                }
-            }
-        }
-        return null;
-    }
-
-    private Chart resolveChart(String chartId) {
-        Chart chart = findChartById(chartId);
-        if (chart == null) {
-            throw new IllegalArgumentException(
-                    "No chart found with ID '" + chartId + "'");
-        }
-        return chart;
-    }
-
-    private Set<String> getChartWidgetIds() {
-        var ids = new LinkedHashSet<String>();
-        for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getContent() instanceof Chart chart) {
-                ChartEntry entry = ChartEntry.get(chart);
-                if (entry != null) {
-                    ids.add(entry.getId());
-                }
-            }
-        }
-        return ids;
-    }
-
-    // ===== Grid Resolution =====
-
-    @SuppressWarnings("unchecked")
-    private Grid<Map<String, Object>> findGridById(String gridId) {
-        for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getContent() instanceof Grid<?> grid) {
-                GridEntry entry = GridEntry.get(grid);
-                if (entry != null && gridId.equals(entry.getId())) {
-                    return (Grid<Map<String, Object>>) grid;
-                }
-            }
-        }
-        return null;
-    }
-
-    private Set<String> getGridWidgetIds() {
-        var ids = new LinkedHashSet<String>();
-        for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getContent() instanceof Grid<?> grid) {
-                GridEntry entry = GridEntry.get(grid);
-                if (entry != null) {
-                    ids.add(entry.getId());
-                }
-            }
-        }
-        return ids;
-    }
-
-    // ===== Tool Implementations =====
-
-    private LLMProvider.ToolSpec createGetDashboardStateTool() {
+    public static LLMProvider.ToolSpec getDashboardState(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -256,48 +175,24 @@ public class DashboardAITools {
 
             @Override
             public String execute(String arguments) {
-                List<DashboardWidget> widgets = dashboard.getWidgets();
-                if (widgets.isEmpty()) {
-                    return "{\"status\":\"empty\",\"message\":\"Dashboard has no widgets\",\"widgets\":[]}";
+                try {
+                    return callbacks.getState();
+                } catch (Exception e) {
+                    return "Error getting dashboard state: " + e.getMessage();
                 }
-                StringBuilder sb = new StringBuilder("{\"widgets\":[");
-                for (int i = 0; i < widgets.size(); i++) {
-                    DashboardWidget widget = widgets.get(i);
-                    if (i > 0) {
-                        sb.append(",");
-                    }
-                    sb.append("{\"widgetId\":\"")
-                            .append(widget.getId().orElse("widget-" + i))
-                            .append("\"");
-                    sb.append(",\"title\":\"")
-                            .append(widget.getTitle() != null
-                                    ? widget.getTitle().replace("\"", "\\\"")
-                                    : "")
-                            .append("\"");
-                    sb.append(",\"colspan\":").append(widget.getColspan());
-                    sb.append(",\"rowspan\":").append(widget.getRowspan());
-                    String contentType = "unknown";
-                    if (widget.getContent() instanceof Chart) {
-                        contentType = "chart";
-                    } else if (widget.getContent() instanceof Grid) {
-                        contentType = "grid";
-                    }
-                    sb.append(",\"contentType\":\"").append(contentType)
-                            .append("\"");
-                    boolean selected = widget.getId().map(id -> {
-                        Checkbox cb = widgetCheckboxes.get(id);
-                        return cb != null && cb.getValue();
-                    }).orElse(false);
-                    sb.append(",\"selected\":").append(selected);
-                    sb.append("}");
-                }
-                sb.append("]}");
-                return sb.toString();
             }
         };
     }
 
-    private LLMProvider.ToolSpec createUpdateWidgetTool() {
+    /**
+     * Creates a tool that updates a widget's properties.
+     *
+     * @param callbacks
+     *            the callbacks for widget mutation, not {@code null}
+     * @return the tool definition, never {@code null}
+     */
+    public static LLMProvider.ToolSpec updateWidget(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -355,32 +250,25 @@ public class DashboardAITools {
                             .readTree(arguments);
                     String widgetId = node.get("widgetId").asString();
 
-                    DashboardWidget targetWidget = findWidgetById(widgetId);
-                    if (targetWidget == null) {
-                        return "Error: Widget with ID '" + widgetId
-                                + "' not found";
+                    String title = null;
+                    JsonNode titleNode = node.get("title");
+                    if (titleNode != null && !titleNode.isNull()) {
+                        title = titleNode.asString();
                     }
 
-                    dashboard.getElement().getNode()
-                            .runWhenAttached(ui -> ui.access(() -> {
-                                JsonNode titleNode = node.get("title");
-                                if (titleNode != null && !titleNode.isNull()) {
-                                    targetWidget.setTitle(titleNode.asString());
-                                }
-                                JsonNode colspanNode = node.get("colspan");
-                                if (colspanNode != null
-                                        && !colspanNode.isNull()) {
-                                    targetWidget.setColspan(
-                                            Math.max(1, colspanNode.asInt()));
-                                }
-                                JsonNode rowspanNode = node.get("rowspan");
-                                if (rowspanNode != null
-                                        && !rowspanNode.isNull()) {
-                                    targetWidget.setRowspan(
-                                            Math.max(1, rowspanNode.asInt()));
-                                }
-                            }));
+                    Integer colspan = null;
+                    JsonNode colspanNode = node.get("colspan");
+                    if (colspanNode != null && !colspanNode.isNull()) {
+                        colspan = Math.max(1, colspanNode.asInt());
+                    }
 
+                    Integer rowspan = null;
+                    JsonNode rowspanNode = node.get("rowspan");
+                    if (rowspanNode != null && !rowspanNode.isNull()) {
+                        rowspan = Math.max(1, rowspanNode.asInt());
+                    }
+
+                    callbacks.updateWidget(widgetId, title, colspan, rowspan);
                     return "Widget '" + widgetId + "' updated successfully";
                 } catch (Exception e) {
                     return "Error updating widget: " + e.getMessage();
@@ -389,7 +277,15 @@ public class DashboardAITools {
         };
     }
 
-    private LLMProvider.ToolSpec createReorderWidgetsTool() {
+    /**
+     * Creates a tool that reorders dashboard widgets.
+     *
+     * @param callbacks
+     *            the callbacks for widget reordering, not {@code null}
+     * @return the tool definition, never {@code null}
+     */
+    public static LLMProvider.ToolSpec reorderWidgets(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -437,25 +333,12 @@ public class DashboardAITools {
                     }
 
                     String[] ids = idsNode.asString().split(",");
-                    List<DashboardWidget> orderedWidgets = new ArrayList<>();
+                    List<String> widgetIds = new ArrayList<>();
                     for (String id : ids) {
-                        String trimmedId = id.trim();
-                        DashboardWidget widget = findWidgetById(trimmedId);
-                        if (widget == null) {
-                            return "Error: Widget with ID '" + trimmedId
-                                    + "' not found";
-                        }
-                        orderedWidgets.add(widget);
+                        widgetIds.add(id.trim());
                     }
 
-                    dashboard.getElement().getNode()
-                            .runWhenAttached(ui -> ui.access(() -> {
-                                dashboard.remove(orderedWidgets);
-                                for (DashboardWidget widget : orderedWidgets) {
-                                    dashboard.add(widget);
-                                }
-                            }));
-
+                    callbacks.reorderWidgets(widgetIds);
                     return "Widgets reordered successfully";
                 } catch (Exception e) {
                     return "Error reordering widgets: " + e.getMessage();
@@ -464,7 +347,15 @@ public class DashboardAITools {
         };
     }
 
-    private LLMProvider.ToolSpec createAddChartWidgetTool() {
+    /**
+     * Creates a tool that adds a new chart widget to the dashboard.
+     *
+     * @param callbacks
+     *            the callbacks for widget creation, not {@code null}
+     * @return the tool definition, never {@code null}
+     */
+    public static LLMProvider.ToolSpec addChartWidget(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -568,35 +459,8 @@ public class DashboardAITools {
                         }
                     }
 
-                    // Validate queries if provided
-                    if (queries != null) {
-                        for (String q : queries) {
-                            queryValidator.accept(q);
-                        }
-                    }
-
-                    String widgetId = "chart-" + (++widgetCounter);
-                    DashboardWidget widget = chartWidgetCreator.create(widgetId,
-                            title, colspan, rowspan);
-                    addSelectionCheckbox(widget);
-
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> dashboard.add(widget));
-                    }, () -> {
-                        dashboard.add(widget);
-                    });
-
-                    // Queue data and config for deferred rendering
-                    if (queries != null) {
-                        Chart chart = (Chart) widget.getContent();
-                        ChartEntry entry = ChartEntry.getOrCreate(chart,
-                                widgetId);
-                        entry.setQueries(queries);
-                        entry.setPendingDataUpdate(true);
-                        if (configJson != null) {
-                            entry.setPendingConfigurationJson(configJson);
-                        }
-                    }
+                    String widgetId = callbacks.addChartWidget(title, colspan,
+                            rowspan, queries, configJson);
 
                     return "{\"widgetId\":\"" + widgetId
                             + "\",\"type\":\"chart\",\"title\":\""
@@ -610,7 +474,15 @@ public class DashboardAITools {
         };
     }
 
-    private LLMProvider.ToolSpec createAddGridWidgetTool() {
+    /**
+     * Creates a tool that adds a new grid widget to the dashboard.
+     *
+     * @param callbacks
+     *            the callbacks for widget creation, not {@code null}
+     * @return the tool definition, never {@code null}
+     */
+    public static LLMProvider.ToolSpec addGridWidget(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -675,29 +547,8 @@ public class DashboardAITools {
                         }
                     }
 
-                    // Validate query if provided
-                    if (query != null) {
-                        queryValidator.accept(query);
-                    }
-
-                    String widgetId = "grid-" + (++widgetCounter);
-                    DashboardWidget widget = gridWidgetCreator.create(widgetId,
-                            title, colspan, rowspan);
-                    addSelectionCheckbox(widget);
-
-                    dashboard.getUI().ifPresentOrElse(ui -> {
-                        ui.access(() -> dashboard.add(widget));
-                    }, () -> {
-                        dashboard.add(widget);
-                    });
-
-                    // Queue data for deferred rendering
-                    if (query != null) {
-                        Grid<?> grid = (Grid<?>) widget.getContent();
-                        GridEntry entry = GridEntry.getOrCreate(grid, widgetId);
-                        entry.setQuery(query);
-                        entry.setPendingDataUpdate(true);
-                    }
+                    String widgetId = callbacks.addGridWidget(title, colspan,
+                            rowspan, query);
 
                     return "{\"widgetId\":\"" + widgetId
                             + "\",\"type\":\"grid\",\"title\":\""
@@ -711,7 +562,15 @@ public class DashboardAITools {
         };
     }
 
-    private LLMProvider.ToolSpec createRemoveWidgetTool() {
+    /**
+     * Creates a tool that removes a widget from the dashboard.
+     *
+     * @param callbacks
+     *            the callbacks for widget removal, not {@code null}
+     * @return the tool definition, never {@code null}
+     */
+    public static LLMProvider.ToolSpec removeWidget(Callbacks callbacks) {
+        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -751,35 +610,12 @@ public class DashboardAITools {
                     ObjectNode node = (ObjectNode) JacksonUtils
                             .readTree(arguments);
                     String widgetId = node.get("widgetId").asString();
-
-                    DashboardWidget targetWidget = findWidgetById(widgetId);
-
-                    if (targetWidget == null) {
-                        return "Error: Widget with ID '" + widgetId
-                                + "' not found";
-                    }
-
-                    final DashboardWidget toRemove = targetWidget;
-                    dashboard.getElement().getNode().runWhenAttached(
-                            ui -> ui.access(() -> dashboard.remove(toRemove)));
-
+                    callbacks.removeWidget(widgetId);
                     return "Widget '" + widgetId + "' removed successfully";
                 } catch (Exception e) {
                     return "Error removing widget: " + e.getMessage();
                 }
             }
         };
-    }
-
-    // ===== Helpers =====
-
-    private DashboardWidget findWidgetById(String widgetId) {
-        for (DashboardWidget widget : dashboard.getWidgets()) {
-            if (widget.getId().isPresent()
-                    && widget.getId().get().equals(widgetId)) {
-                return widget;
-            }
-        }
-        return null;
     }
 }

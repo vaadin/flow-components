@@ -16,15 +16,20 @@
 package com.vaadin.flow.component.ai.dashboard;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.chart.ChartAITools;
 import com.vaadin.flow.component.ai.chart.ChartEntry;
 import com.vaadin.flow.component.ai.chart.ChartRenderer;
+import com.vaadin.flow.component.ai.grid.GridAITools;
 import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.grid.GridRenderer;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
@@ -32,6 +37,7 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.grid.Grid;
@@ -74,9 +80,10 @@ public class DashboardAIController implements AIController {
 
     private final Dashboard dashboard;
     private final DatabaseProvider databaseProvider;
-    private final DashboardAITools dashboardTools;
     private final ChartRenderer chartRenderer;
     private final GridRenderer gridRenderer;
+    private final Map<String, Checkbox> widgetCheckboxes = new LinkedHashMap<>();
+    private int widgetCounter = 0;
 
     /**
      * Creates a new AI dashboard controller with a database provider.
@@ -94,9 +101,6 @@ public class DashboardAIController implements AIController {
                 "Database provider cannot be null");
         this.chartRenderer = new ChartRenderer(databaseProvider);
         this.gridRenderer = new GridRenderer(databaseProvider);
-        this.dashboardTools = new DashboardAITools(dashboard,
-                databaseProvider::executeQuery, this::createChartWidget,
-                this::createGridWidget);
     }
 
     /**
@@ -111,8 +115,174 @@ public class DashboardAIController implements AIController {
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
+
+        // Database schema tool
         tools.add(DatabaseProviderAITools.getDatabaseSchema(databaseProvider));
-        tools.addAll(dashboardTools.getTools());
+
+        // Dashboard layout tools
+        tools.addAll(
+                DashboardAITools.createAll(new DashboardAITools.Callbacks() {
+                    @Override
+                    public String getState() {
+                        return getDashboardStateJson();
+                    }
+
+                    @Override
+                    public void updateWidget(String widgetId, String title,
+                            Integer colspan, Integer rowspan) {
+                        DashboardWidget widget = resolveWidget(widgetId);
+                        dashboard.getElement().getNode()
+                                .runWhenAttached(ui -> ui.access(() -> {
+                                    if (title != null) {
+                                        widget.setTitle(title);
+                                    }
+                                    if (colspan != null) {
+                                        widget.setColspan(colspan);
+                                    }
+                                    if (rowspan != null) {
+                                        widget.setRowspan(rowspan);
+                                    }
+                                }));
+                    }
+
+                    @Override
+                    public void reorderWidgets(List<String> widgetIds) {
+                        List<DashboardWidget> orderedWidgets = new ArrayList<>();
+                        for (String id : widgetIds) {
+                            orderedWidgets.add(resolveWidget(id));
+                        }
+                        dashboard.getElement().getNode()
+                                .runWhenAttached(ui -> ui.access(() -> {
+                                    dashboard.remove(orderedWidgets);
+                                    for (DashboardWidget w : orderedWidgets) {
+                                        dashboard.add(w);
+                                    }
+                                }));
+                    }
+
+                    @Override
+                    public String addChartWidget(String title, int colspan,
+                            int rowspan, List<String> queries,
+                            String configJson) {
+                        if (queries != null) {
+                            for (String q : queries) {
+                                databaseProvider.executeQuery(q);
+                            }
+                        }
+
+                        String widgetId = "chart-" + (++widgetCounter);
+                        DashboardWidget widget = createChartWidget(widgetId,
+                                title, colspan, rowspan);
+                        addSelectionCheckbox(widget);
+                        addWidgetToDashboard(widget);
+
+                        if (queries != null) {
+                            Chart chart = (Chart) widget.getContent();
+                            ChartEntry entry = ChartEntry.getOrCreate(chart,
+                                    widgetId);
+                            entry.setQueries(queries);
+                            entry.setPendingDataUpdate(true);
+                            if (configJson != null) {
+                                entry.setPendingConfigurationJson(configJson);
+                            }
+                        }
+
+                        return widgetId;
+                    }
+
+                    @Override
+                    public String addGridWidget(String title, int colspan,
+                            int rowspan, String query) {
+                        if (query != null) {
+                            databaseProvider.executeQuery(query);
+                        }
+
+                        String widgetId = "grid-" + (++widgetCounter);
+                        DashboardWidget widget = createGridWidget(widgetId,
+                                title, colspan, rowspan);
+                        addSelectionCheckbox(widget);
+                        addWidgetToDashboard(widget);
+
+                        if (query != null) {
+                            Grid<?> grid = (Grid<?>) widget.getContent();
+                            GridEntry entry = GridEntry.getOrCreate(grid,
+                                    widgetId);
+                            entry.setQuery(query);
+                            entry.setPendingDataUpdate(true);
+                        }
+
+                        return widgetId;
+                    }
+
+                    @Override
+                    public void removeWidget(String widgetId) {
+                        DashboardWidget widget = resolveWidget(widgetId);
+                        dashboard.getElement().getNode()
+                                .runWhenAttached(ui -> ui.access(
+                                        () -> dashboard.remove(widget)));
+                    }
+                }));
+
+        // Chart tools (shared across all charts, resolved from dashboard)
+        tools.addAll(ChartAITools.createAll(new ChartAITools.Callbacks() {
+            @Override
+            public String getState(String chartId) {
+                return ChartEntry.getStateAsJson(resolveChart(chartId),
+                        chartId);
+            }
+
+            @Override
+            public void updateConfiguration(String chartId, String configJson) {
+                ChartEntry.getOrCreate(resolveChart(chartId), chartId)
+                        .setPendingConfigurationJson(configJson);
+            }
+
+            @Override
+            public void updateData(String chartId, List<String> queries) {
+                for (String q : queries) {
+                    databaseProvider.executeQuery(q);
+                }
+                Chart chart = resolveChart(chartId);
+                ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
+                entry.setQueries(queries);
+                entry.setPendingDataUpdate(true);
+            }
+
+            @Override
+            public Set<String> getChartIds() {
+                return getChartWidgetIds();
+            }
+        }));
+
+        // Grid tools (shared across all grids, resolved from dashboard)
+        tools.addAll(GridAITools.createAll(new GridAITools.Callbacks() {
+            @Override
+            public String getState(String gridId) {
+                Grid<?> grid = resolveGrid(gridId);
+                GridEntry entry = GridEntry.get(grid);
+                if (entry == null || entry.getQuery() == null) {
+                    return "{\"gridId\":\"" + gridId
+                            + "\",\"status\":\"empty\"}";
+                }
+                return "{\"gridId\":\"" + gridId + "\",\"query\":\""
+                        + entry.getQuery().replace("\"", "\\\"") + "\"}";
+            }
+
+            @Override
+            public void updateData(String gridId, String query) {
+                databaseProvider.executeQuery(query);
+                Grid<?> grid = resolveGrid(gridId);
+                GridEntry entry = GridEntry.getOrCreate(grid, gridId);
+                entry.setQuery(query);
+                entry.setPendingDataUpdate(true);
+            }
+
+            @Override
+            public Set<String> getGridIds() {
+                return getGridWidgetIds();
+            }
+        }));
+
         return tools;
     }
 
@@ -194,13 +364,13 @@ public class DashboardAIController implements AIController {
     public void restoreState(DashboardState state) {
         dashboard.getUI().ifPresent(ui -> ui.access(() -> {
             dashboard.removeAll();
-            dashboardTools.clearSelectionCheckboxes();
+            widgetCheckboxes.clear();
 
             for (WidgetState ws : state.widgets()) {
                 if ("chart".equals(ws.type())) {
                     DashboardWidget widget = createChartWidget(ws.widgetId(),
                             ws.title(), ws.colspan(), ws.rowspan());
-                    dashboardTools.addSelectionCheckbox(widget);
+                    addSelectionCheckbox(widget);
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
                         Chart chart = (Chart) widget.getContent();
@@ -218,7 +388,7 @@ public class DashboardAIController implements AIController {
                 } else if ("grid".equals(ws.type())) {
                     DashboardWidget widget = createGridWidget(ws.widgetId(),
                             ws.title(), ws.colspan(), ws.rowspan());
-                    dashboardTools.addSelectionCheckbox(widget);
+                    addSelectionCheckbox(widget);
                     dashboard.add(widget);
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
                         Grid<Map<String, Object>> grid = (Grid<Map<String, Object>>) widget
@@ -252,6 +422,124 @@ public class DashboardAIController implements AIController {
             String configuration) implements java.io.Serializable {
     }
 
+    // ===== Dashboard State JSON =====
+
+    private String getDashboardStateJson() {
+        List<DashboardWidget> widgets = dashboard.getWidgets();
+        if (widgets.isEmpty()) {
+            return "{\"status\":\"empty\",\"message\":\"Dashboard has no widgets\",\"widgets\":[]}";
+        }
+        StringBuilder sb = new StringBuilder("{\"widgets\":[");
+        for (int i = 0; i < widgets.size(); i++) {
+            DashboardWidget widget = widgets.get(i);
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append("{\"widgetId\":\"")
+                    .append(widget.getId().orElse("widget-" + i)).append("\"");
+            sb.append(",\"title\":\"")
+                    .append(widget.getTitle() != null
+                            ? widget.getTitle().replace("\"", "\\\"")
+                            : "")
+                    .append("\"");
+            sb.append(",\"colspan\":").append(widget.getColspan());
+            sb.append(",\"rowspan\":").append(widget.getRowspan());
+            String contentType = "unknown";
+            if (widget.getContent() instanceof Chart) {
+                contentType = "chart";
+            } else if (widget.getContent() instanceof Grid) {
+                contentType = "grid";
+            }
+            sb.append(",\"contentType\":\"").append(contentType).append("\"");
+            boolean selected = widget.getId().map(id -> {
+                Checkbox cb = widgetCheckboxes.get(id);
+                return cb != null && cb.getValue();
+            }).orElse(false);
+            sb.append(",\"selected\":").append(selected);
+            sb.append("}");
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    // ===== Selection Checkboxes =====
+
+    private void addSelectionCheckbox(DashboardWidget widget) {
+        String widgetId = widget.getId().orElse(null);
+        if (widgetId == null || widgetCheckboxes.containsKey(widgetId)) {
+            return;
+        }
+        var checkbox = new Checkbox();
+        checkbox.getElement().setAttribute("title", "Select for AI actions");
+        widgetCheckboxes.put(widgetId, checkbox);
+        widget.setHeaderContent(checkbox);
+    }
+
+    // ===== Widget Resolution =====
+
+    private DashboardWidget resolveWidget(String widgetId) {
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getId().isPresent()
+                    && widget.getId().get().equals(widgetId)) {
+                return widget;
+            }
+        }
+        throw new IllegalArgumentException(
+                "Widget with ID '" + widgetId + "' not found");
+    }
+
+    private Chart resolveChart(String chartId) {
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry != null && chartId.equals(entry.getId())) {
+                    return chart;
+                }
+            }
+        }
+        throw new IllegalArgumentException(
+                "No chart found with ID '" + chartId + "'");
+    }
+
+    private Grid<?> resolveGrid(String gridId) {
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Grid<?> grid) {
+                GridEntry entry = GridEntry.get(grid);
+                if (entry != null && gridId.equals(entry.getId())) {
+                    return grid;
+                }
+            }
+        }
+        throw new IllegalArgumentException(
+                "No grid found with ID '" + gridId + "'");
+    }
+
+    private Set<String> getChartWidgetIds() {
+        var ids = new LinkedHashSet<String>();
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry != null) {
+                    ids.add(entry.getId());
+                }
+            }
+        }
+        return ids;
+    }
+
+    private Set<String> getGridWidgetIds() {
+        var ids = new LinkedHashSet<String>();
+        for (DashboardWidget widget : dashboard.getWidgets()) {
+            if (widget.getContent() instanceof Grid<?> grid) {
+                GridEntry entry = GridEntry.get(grid);
+                if (entry != null) {
+                    ids.add(entry.getId());
+                }
+            }
+        }
+        return ids;
+    }
+
     // ===== Widget Creation =====
 
     private DashboardWidget createChartWidget(String widgetId, String title,
@@ -276,5 +564,13 @@ public class DashboardAIController implements AIController {
         widget.setColspan(Math.max(1, colspan));
         widget.setRowspan(Math.max(1, rowspan));
         return widget;
+    }
+
+    private void addWidgetToDashboard(DashboardWidget widget) {
+        dashboard.getUI().ifPresentOrElse(ui -> {
+            ui.access(() -> dashboard.add(widget));
+        }, () -> {
+            dashboard.add(widget);
+        });
     }
 }
