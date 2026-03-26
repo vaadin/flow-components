@@ -31,14 +31,11 @@ import tools.jackson.databind.JsonNode;
 
 /**
  * Factory for creating reusable chart {@link LLMProvider.ToolSpec} instances.
- * These tools are not tied to any specific controller and can be used by both
- * {@link ChartAIController} and {@code DashboardAIController}.
  * <p>
  * The tools use a {@code chartId} parameter to identify which chart to operate
  * on, allowing a single set of tools to manage multiple charts (e.g., in a
  * dashboard). Callers provide a {@link Callbacks} implementation for state
- * retrieval and mutation, keeping this class decoupled from {@code Chart} and
- * {@code ChartEntry}.
+ * retrieval and mutation.
  * </p>
  *
  * @author Vaadin Ltd
