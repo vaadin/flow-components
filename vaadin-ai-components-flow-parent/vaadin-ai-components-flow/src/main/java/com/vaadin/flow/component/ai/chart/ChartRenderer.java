@@ -136,6 +136,9 @@ public class ChartRenderer {
             // legend shows a meaningful label instead of "Series 1".
             nameUnnamedSeries(config, allSeries);
 
+            // Full reset required. Without it, axis categories are
+            // lost when the chart is rendered via async Push (see
+            // ChartControllerIT#renderBarChart_categoriesDisplayed).
             chart.drawChart(true);
         }));
     }
