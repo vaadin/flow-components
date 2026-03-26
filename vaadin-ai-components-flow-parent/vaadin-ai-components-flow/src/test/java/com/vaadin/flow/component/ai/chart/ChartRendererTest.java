@@ -34,6 +34,7 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartRendererTest {
@@ -521,6 +522,41 @@ class ChartRendererTest {
 
     @Nested
     class ConfigurationReset {
+
+        @Test
+        void resetDoesNotSetEmptyCategoriesArray() {
+            // If reset sets categories to an empty ArrayList instead of
+            // null, Highcharts treats the axis as a category axis (creates
+            // a tick for every unique data value). Verify via serialization
+            // that categories property is not emitted after reset.
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 50));
+
+            renderer.renderChart(chart,
+                    List.of("SELECT category, value FROM t"),
+                    "{\"chart\":{\"type\":\"column\"},"
+                            + "\"xAxis\":{\"categories\":[\"A\",\"B\"]}}");
+
+            // Categories were set on X-axis
+            Assertions.assertTrue(chart.getConfiguration().getxAxis()
+                    .getCategories().length > 0);
+
+            // Second render: scatter chart without categories
+            databaseProvider.results = List.of(
+                    row(ColumnNames.X, 1, ColumnNames.Y, 100),
+                    row(ColumnNames.X, 2, ColumnNames.Y, 200));
+
+            renderer.renderChart(chart, List.of("SELECT x, y FROM t"),
+                    "{\"chart\":{\"type\":\"scatter\"}}");
+
+            // Y-axis serialization must NOT contain "categories" — check
+            // via JSON to distinguish null field from empty ArrayList
+            String json = ChartSerialization.toJSON(chart.getConfiguration());
+            // Parse and check the yAxis doesn't have categories
+            Assertions.assertFalse(json.contains("\"categories\":[]"),
+                    "Reset axes should not emit empty categories array: "
+                            + json);
+        }
 
         @Test
         void tooltipFromHeatmap_doesNotLeakToCandlestick() {

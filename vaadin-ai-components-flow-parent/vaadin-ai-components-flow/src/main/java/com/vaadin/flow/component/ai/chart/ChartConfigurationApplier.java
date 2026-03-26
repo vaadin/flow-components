@@ -79,9 +79,11 @@ public class ChartConfigurationApplier implements Serializable {
         // Reset tooltip to defaults
         config.setTooltip(new Tooltip());
 
-        // Reset axes — clear type, categories, title, min/max
-        resetAxis(config.getxAxis());
-        resetAxis(config.getyAxis());
+        // Reset axes — remove and recreate to ensure categories, type,
+        // min/max, title are all null (not empty arrays that would trigger
+        // Highcharts category mode)
+        config.removexAxes();
+        config.removeyAxes();
 
         // Reset color axis
         config.removeColorAxes();
@@ -95,17 +97,6 @@ public class ChartConfigurationApplier implements Serializable {
 
         // Reset subtitle
         config.setSubTitle("");
-    }
-
-    private static void resetAxis(Axis axis) {
-        if (axis == null) {
-            return;
-        }
-        axis.setType(null);
-        axis.setCategories();
-        axis.setMin((Number) null);
-        axis.setMax((Number) null);
-        axis.setTitle((AxisTitle) null);
     }
 
     public void applyConfiguration(Chart chart, String configJson) {
