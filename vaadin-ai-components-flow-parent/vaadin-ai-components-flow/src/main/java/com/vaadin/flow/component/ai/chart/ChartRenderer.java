@@ -30,7 +30,10 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.GanttSeries;
+import com.vaadin.flow.component.charts.model.Legend;
+import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 /**
@@ -94,7 +97,7 @@ public class ChartRenderer {
             } else if (configJson != null) {
                 chart.getElement().getNode()
                         .runWhenAttached(ui -> ui.access(() -> {
-                            configurationApplier.resetConfiguration(chart);
+                            resetConfiguration(chart);
                             configurationApplier.applyConfiguration(chart,
                                     configJson);
                         }));
@@ -127,7 +130,7 @@ public class ChartRenderer {
             config.setSeries(allSeries.toArray(new Series[0]));
 
             if (configJson != null) {
-                configurationApplier.resetConfiguration(chart);
+                resetConfiguration(chart);
                 configurationApplier.applyConfiguration(chart, configJson);
             }
 
@@ -145,6 +148,49 @@ public class ChartRenderer {
             // DashboardChartControllerIT).
             chart.drawChart(true);
         }));
+    }
+
+    /**
+     * Resets chart configuration properties that may have been set by a
+     * previous render. This prevents stale settings (tooltip formats, axis
+     * types/categories, pane, color axis, plot options) from leaking across
+     * chart type switches.
+     */
+    private static void resetConfiguration(Chart chart) {
+        Configuration config = chart.getConfiguration();
+
+        // Reset tooltip to defaults
+        config.setTooltip(new Tooltip());
+
+        // Reset axes — remove and recreate to ensure categories, type,
+        // min/max, title are all null (not empty arrays that would trigger
+        // Highcharts category mode)
+        config.removexAxes();
+        config.removeyAxes();
+        config.removezAxes();
+
+        // Reset color axis
+        config.removeColorAxes();
+
+        // Reset pane properties (used by gauge/polar charts)
+        Pane pane = config.getPane();
+        pane.setStartAngle(null);
+        pane.setEndAngle(null);
+        pane.setCenter(null);
+        pane.setSize(null);
+
+        // Reset plot options
+        config.setPlotOptions();
+
+        // Reset legend to defaults
+        config.setLegend(new Legend());
+
+        // Reset chart model properties that are chart-type-specific
+        config.getChart().setInverted(false);
+        config.getChart().setPolar(false);
+
+        // Reset subtitle
+        config.setSubTitle("");
     }
 
     /**

@@ -64,41 +64,6 @@ public class ChartConfigurationApplier implements Serializable {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartConfigurationApplier.class);
 
-    /**
-     * Resets chart configuration properties that may have been set by a
-     * previous {@link #applyConfiguration} call. This prevents stale settings
-     * (tooltip formats, axis types/categories, pane, color axis, plot options)
-     * from leaking across chart type switches.
-     *
-     * @param chart
-     *            the chart to reset, not {@code null}
-     */
-    public void resetConfiguration(Chart chart) {
-        Configuration config = chart.getConfiguration();
-
-        // Reset tooltip to defaults
-        config.setTooltip(new Tooltip());
-
-        // Reset axes — remove and recreate to ensure categories, type,
-        // min/max, title are all null (not empty arrays that would trigger
-        // Highcharts category mode)
-        config.removexAxes();
-        config.removeyAxes();
-
-        // Reset color axis
-        config.removeColorAxes();
-
-        // Reset plot options
-        config.setPlotOptions();
-
-        // Reset chart model properties that are chart-type-specific
-        config.getChart().setInverted(false);
-        config.getChart().setPolar(false);
-
-        // Reset subtitle
-        config.setSubTitle("");
-    }
-
     public void applyConfiguration(Chart chart, String configJson) {
         try {
             JsonNode parsedNode = JacksonUtils.getMapper().readTree(configJson);
@@ -448,7 +413,9 @@ public class ChartConfigurationApplier implements Serializable {
         if (!paneNode.isObject()) {
             return;
         }
-        Pane pane = new Pane();
+        // Use the existing pane instead of adding a new one to avoid
+        // pane accumulation across repeated renders.
+        Pane pane = config.getPane();
         if (paneNode.has(START_ANGLE) && paneNode.get(START_ANGLE).isNumber()) {
             pane.setStartAngle(paneNode.get(START_ANGLE).asInt());
         }
@@ -465,7 +432,6 @@ public class ChartConfigurationApplier implements Serializable {
         if (paneNode.has(SIZE) && paneNode.get(SIZE).isString()) {
             pane.setSize(paneNode.get(SIZE).asString());
         }
-        config.addPane(pane);
     }
 
     private void applyPlotOptionsConfig(Configuration config,
