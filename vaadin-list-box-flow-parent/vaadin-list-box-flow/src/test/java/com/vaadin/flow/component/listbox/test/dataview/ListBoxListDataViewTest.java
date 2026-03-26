@@ -18,9 +18,9 @@ package com.vaadin.flow.component.listbox.test.dataview;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.tests.dataprovider.AbstractListDataViewListenerJUnit6Test;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
-class ListBoxListDataViewTest extends AbstractListDataViewListenerJUnit6Test {
+class ListBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
     /*
      * ListDataView implementation is tested in AbstractListDataViewTest. No

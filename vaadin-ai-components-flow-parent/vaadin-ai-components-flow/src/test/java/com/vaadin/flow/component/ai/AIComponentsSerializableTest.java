@@ -55,6 +55,8 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory\\$LazyHolder",
                 "com\\.vaadin\\.flow\\.component\\.upload\\.receivers\\.TempDirectory",
                 "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\..*",
+                "com\\.vaadin\\.flow\\.component\\.grid\\.GridColumnOrderHelper.*",
+                "com\\.vaadin\\.flow\\.component\\.grid\\.GridSelectionSignalHelper.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\..*",
                 // GridAIController — intentionally not serializable; restored
                 // via reconnect()

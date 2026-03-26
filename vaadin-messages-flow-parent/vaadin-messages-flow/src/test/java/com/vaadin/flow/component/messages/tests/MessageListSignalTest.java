@@ -26,11 +26,11 @@ import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
 import tools.jackson.databind.node.ArrayNode;
 
-class MessageListSignalTest extends AbstractSignalsJUnit6Test {
+class MessageListSignalTest extends AbstractSignalsTest {
 
     private MessageList messageList;
 

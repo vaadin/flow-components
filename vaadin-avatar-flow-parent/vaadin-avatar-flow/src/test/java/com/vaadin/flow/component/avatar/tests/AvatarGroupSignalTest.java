@@ -25,11 +25,11 @@ import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
 import tools.jackson.databind.node.ArrayNode;
 
-class AvatarGroupSignalTest extends AbstractSignalsJUnit6Test {
+class AvatarGroupSignalTest extends AbstractSignalsTest {
 
     private AvatarGroup avatarGroup;
 

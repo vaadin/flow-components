@@ -22,9 +22,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -51,8 +51,8 @@ public abstract class AbstractComponentDataViewTest {
     protected DataView<String> dataView;
     protected HasDataView<String, ?, ? extends DataView<String>> component;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    protected void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         dataProvider = new CustomInMemoryDataProvider<>(items);
         component = getVerifiedComponent();
@@ -60,29 +60,29 @@ public abstract class AbstractComponentDataViewTest {
     }
 
     @Test
-    public void getItems_noFiltersSet_allItemsObtained() {
+    void getItems_noFiltersSet_allItemsObtained() {
         Stream<String> allItems = dataView.getItems();
-        Assert.assertArrayEquals("Unexpected data set", items.toArray(),
-                allItems.toArray());
+        Assertions.assertArrayEquals(items.toArray(), allItems.toArray(),
+                "Unexpected data set");
     }
 
     @Test
-    public void getItems_filtersSet_filteredItemsObtained() {
+    void getItems_filtersSet_filteredItemsObtained() {
         dataProvider.setFilter(item -> item.equals("first"));
-        Assert.assertArrayEquals("Unexpected data set after filtering",
-                new String[] { "first" }, dataView.getItems().toArray());
+        Assertions.assertArrayEquals(new String[] { "first" },
+                dataView.getItems().toArray(),
+                "Unexpected data set after filtering");
     }
 
     @Test
-    public void getItems_sortingSet_sortedItemsObtained() {
+    void getItems_sortingSet_sortedItemsObtained() {
         dataProvider.setSortComparator(String::compareToIgnoreCase);
-        Assert.assertArrayEquals("Unexpected items sorting",
-                new String[] { "first", "last", "middle" },
-                dataView.getItems().toArray());
+        Assertions.assertArrayEquals(new String[] { "first", "last", "middle" },
+                dataView.getItems().toArray(), "Unexpected items sorting");
     }
 
     @Test
-    public void addItemCountChangeListener_fireEvent_listenerNotified() {
+    void addItemCountChangeListener_fireEvent_listenerNotified() {
         AtomicInteger fired = new AtomicInteger(0);
         dataView.addItemCountChangeListener(
                 event -> fired.compareAndSet(0, event.getItemCount()));
@@ -90,7 +90,7 @@ public abstract class AbstractComponentDataViewTest {
         ComponentUtil.fireEvent((Component) component,
                 new ItemCountChangeEvent<>((Component) component, 10, false));
 
-        Assert.assertEquals(10, fired.get());
+        Assertions.assertEquals(10, fired.get());
     }
 
     protected abstract HasDataView<String, ?, ? extends DataView<String>> getComponent();

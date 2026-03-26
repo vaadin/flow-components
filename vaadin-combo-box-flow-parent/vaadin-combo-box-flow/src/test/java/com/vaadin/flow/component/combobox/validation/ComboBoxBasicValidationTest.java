@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class ComboBoxBasicValidationTest
-        extends AbstractBasicValidationJUnit6Test<ComboBox<String>, String> {
+        extends AbstractBasicValidationTest<ComboBox<String>, String> {
     @Test
     void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);

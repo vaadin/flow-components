@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class DashboardSignalTest extends AbstractSignalsJUnit6Test {
+class DashboardSignalTest extends AbstractSignalsTest {
     @Test
     void dashboard_bindVisible_throwsException() {
         var dashboard = new Dashboard();

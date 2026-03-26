@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class ListBoxSignalTest extends AbstractSignalsJUnit6Test {
+class ListBoxSignalTest extends AbstractSignalsTest {
     @Test
     void listBox_bindRequiredIndicatorVisible_throwsException() {
         var listBox = new ListBox<>();

@@ -28,9 +28,9 @@ import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class SignalBindingUtilTest extends AbstractSignalsJUnit6Test {
+class SignalBindingUtilTest extends AbstractSignalsTest {
 
     private enum Color {
         RED("red"), GREEN("green"), BLUE("blue");

@@ -18,10 +18,9 @@ package com.vaadin.flow.component.checkbox.dataview;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.tests.dataprovider.AbstractListDataViewListenerJUnit6Test;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
-class CheckboxGroupListDataViewTest
-        extends AbstractListDataViewListenerJUnit6Test {
+class CheckboxGroupListDataViewTest extends AbstractListDataViewListenerTest {
 
     /*
      * ListDataView implementation is tested in AbstractListDataViewTest. No

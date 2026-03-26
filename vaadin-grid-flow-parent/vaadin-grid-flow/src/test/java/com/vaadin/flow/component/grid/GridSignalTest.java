@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class GridSignalTest extends AbstractSignalsJUnit6Test {
+class GridSignalTest extends AbstractSignalsTest {
 
     private Grid<String> grid;
 

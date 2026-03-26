@@ -25,10 +25,10 @@ import com.vaadin.flow.component.badge.BadgeFeatureFlagProvider;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 
-class BadgeSignalTest extends AbstractSignalsJUnit6Test {
+class BadgeSignalTest extends AbstractSignalsTest {
 
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(

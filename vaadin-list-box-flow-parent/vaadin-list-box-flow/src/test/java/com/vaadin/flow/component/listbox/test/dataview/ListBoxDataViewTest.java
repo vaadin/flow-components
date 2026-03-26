@@ -39,9 +39,9 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.dataprovider.AbstractComponentDataViewJUnit6Test;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
 
-class ListBoxDataViewTest extends AbstractComponentDataViewJUnit6Test {
+class ListBoxDataViewTest extends AbstractComponentDataViewTest {
 
     private static final String OUTER_HTML = "<vaadin-item><span>%s</span></vaadin-item>";
 
