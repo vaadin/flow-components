@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class LoginFormSignalTest extends AbstractSignalsJUnit6Test {
+class LoginFormSignalTest extends AbstractSignalsTest {
     @Test
     void bindEnabled_throwsException() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {

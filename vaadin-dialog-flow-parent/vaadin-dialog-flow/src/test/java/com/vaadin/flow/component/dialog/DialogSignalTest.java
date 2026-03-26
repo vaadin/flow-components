@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class DialogSignalTest extends AbstractSignalsJUnit6Test {
+class DialogSignalTest extends AbstractSignalsTest {
     private final Dialog dialog = new Dialog();
 
     @Test

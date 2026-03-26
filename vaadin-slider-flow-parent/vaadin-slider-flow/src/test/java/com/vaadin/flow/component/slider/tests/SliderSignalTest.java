@@ -24,10 +24,10 @@ import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 
-class SliderSignalTest extends AbstractSignalsJUnit6Test {
+class SliderSignalTest extends AbstractSignalsTest {
 
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(

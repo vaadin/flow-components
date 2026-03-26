@@ -26,9 +26,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class HasClearButtonSignalTest extends AbstractSignalsJUnit6Test {
+class HasClearButtonSignalTest extends AbstractSignalsTest {
 
     @Tag("test")
     private static class TestComponent extends Component

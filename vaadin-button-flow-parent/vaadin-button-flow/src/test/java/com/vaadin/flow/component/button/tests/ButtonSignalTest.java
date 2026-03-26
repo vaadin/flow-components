@@ -29,9 +29,9 @@ import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class ButtonSignalTest extends AbstractSignalsJUnit6Test {
+class ButtonSignalTest extends AbstractSignalsTest {
 
     private Button button;
     private Icon icon;

@@ -28,9 +28,9 @@ import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class SvgIconSignalTest extends AbstractSignalsJUnit6Test {
+class SvgIconSignalTest extends AbstractSignalsTest {
 
     private SvgIcon svgIcon;
     private ValueSignal<String> symbolSignal;

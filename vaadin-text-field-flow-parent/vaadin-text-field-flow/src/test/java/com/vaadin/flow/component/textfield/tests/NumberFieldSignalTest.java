@@ -25,9 +25,9 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class NumberFieldSignalTest extends AbstractSignalsJUnit6Test {
+class NumberFieldSignalTest extends AbstractSignalsTest {
 
     private NumberField numberField;
     private ValueSignal<Double> minSignal;

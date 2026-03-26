@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class TextFieldBasicValidationTest
-        extends AbstractBasicValidationJUnit6Test<TextField, String> {
+        extends AbstractBasicValidationTest<TextField, String> {
     @Test
     void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);

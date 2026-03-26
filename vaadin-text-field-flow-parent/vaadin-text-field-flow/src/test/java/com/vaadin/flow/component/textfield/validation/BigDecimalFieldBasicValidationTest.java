@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class BigDecimalFieldBasicValidationTest
-        extends AbstractBasicValidationJUnit6Test<BigDecimalField, BigDecimal> {
+        extends AbstractBasicValidationTest<BigDecimalField, BigDecimal> {
     @Test
     void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
         testField.addValidationStatusChangeListener(event1 -> {

@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.tests.validation.AbstractBasicValidationJUnit6Test;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class CheckboxBasicValidationTest
-        extends AbstractBasicValidationJUnit6Test<Checkbox, Boolean> {
+        extends AbstractBasicValidationTest<Checkbox, Boolean> {
     @Test
     void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);

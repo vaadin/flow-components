@@ -25,9 +25,9 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsJUnit6Test;
+import com.vaadin.tests.AbstractSignalsTest;
 
-class IntegerFieldSignalTest extends AbstractSignalsJUnit6Test {
+class IntegerFieldSignalTest extends AbstractSignalsTest {
 
     private IntegerField integerField;
     private ValueSignal<Integer> minSignal;

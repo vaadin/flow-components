@@ -37,9 +37,9 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.dataprovider.AbstractComponentDataViewJUnit6Test;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
 
-class SelectDataViewTest extends AbstractComponentDataViewJUnit6Test {
+class SelectDataViewTest extends AbstractComponentDataViewTest {
 
     @Test
     void getItem_dataViewWithItems_returnsCorrectItem() {
