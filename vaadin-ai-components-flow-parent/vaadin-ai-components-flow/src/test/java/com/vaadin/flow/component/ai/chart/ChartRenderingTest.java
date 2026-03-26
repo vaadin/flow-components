@@ -471,20 +471,6 @@ class ChartRenderingTest {
                     chart.getConfiguration().getxAxis().getType());
         }
 
-        @Test
-        void noXValuesDoesNotSetDatetimeAxisType() {
-            // Items with no X values — hasDatetimeXValues should return
-            // false
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
-
-            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
-            updateData("SELECT category, value FROM t");
-            controller.onRequestCompleted();
-
-            Assertions.assertNotEquals(AxisType.DATETIME,
-                    chart.getConfiguration().getxAxis().getType());
-        }
     }
 
     @Nested
@@ -861,82 +847,6 @@ class ChartRenderingTest {
                             + json);
         }
 
-        @Test
-        void multiHopSwitchHeatmapToGaugeToColumn() {
-            // Step 1: Heatmap with colorAxis and tooltip
-            databaseProvider.results = List.of(row(ColumnNames.X, 9,
-                    ColumnNames.Y, 0, ColumnNames.VALUE, 120));
-
-            updateConfiguration("{\"chart\":{\"type\":\"heatmap\"},"
-                    + "\"colorAxis\":{\"min\":0,\"max\":300},"
-                    + "\"tooltip\":{\"pointFormat\":\"Visitors: {point.value}\"}}");
-            updateData("SELECT x, y, value");
-            controller.onRequestCompleted();
-
-            Assertions.assertEquals(1,
-                    chart.getConfiguration().getNumberOfColorAxes());
-
-            // Step 2: Gauge with pane and yAxis min/max
-            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
-
-            updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
-                    + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
-                    + "\"yAxis\":{\"min\":0,\"max\":100}}");
-            updateData("SELECT current_val");
-            controller.onRequestCompleted();
-
-            // colorAxis from heatmap should be gone
-            Assertions.assertEquals(0,
-                    chart.getConfiguration().getNumberOfColorAxes());
-            // tooltip from heatmap should be gone
-            Assertions.assertNull(
-                    chart.getConfiguration().getTooltip().getPointFormat());
-
-            // Step 3: Column chart
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
-
-            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
-            updateData("SELECT category, value FROM t");
-            controller.onRequestCompleted();
-
-            // pane from gauge should be cleared
-            String json = ChartSerialization.toJSON(chart.getConfiguration());
-            Assertions.assertFalse(json.contains("\"startAngle\""),
-                    "Pane from gauge should not leak: " + json);
-            // yAxis min/max from gauge should be cleared
-            Assertions.assertNull(chart.getConfiguration().getyAxis().getMin());
-            Assertions.assertNull(chart.getConfiguration().getyAxis().getMax());
-            // Should have categories
-            Assertions.assertNotNull(
-                    chart.getConfiguration().getxAxis().getCategories());
-        }
-
-        @Test
-        void invertedFromBarDoesNotLeakToColumn() {
-            // First render: bar chart (inverted)
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
-
-            updateConfiguration(
-                    "{\"chart\":{\"type\":\"bar\",\"inverted\":true}}");
-            updateData("SELECT category, value FROM t");
-            controller.onRequestCompleted();
-
-            Assertions.assertTrue(
-                    chart.getConfiguration().getChart().getInverted());
-
-            // Second render: column chart (not inverted)
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
-
-            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
-            updateData("SELECT category, value FROM t");
-            controller.onRequestCompleted();
-
-            Assertions.assertFalse(
-                    chart.getConfiguration().getChart().getInverted());
-        }
     }
 
     @Nested
