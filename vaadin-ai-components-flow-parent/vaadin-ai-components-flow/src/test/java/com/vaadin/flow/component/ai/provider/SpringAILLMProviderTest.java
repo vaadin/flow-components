@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +41,8 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.annotation.Tool;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
@@ -58,10 +58,14 @@ class SpringAILLMProviderTest {
     private ChatModel mockChatModel;
     private SpringAILLMProvider provider;
 
+    private TestLogger logger = TestLoggerFactory
+            .getTestLogger(SpringAILLMProvider.class);
+
     @BeforeEach
     void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         provider = new SpringAILLMProvider(mockChatModel);
+        logger.clear();
     }
 
     @Test
@@ -556,23 +560,18 @@ class SpringAILLMProviderTest {
     void stream_withStreamingAndPushDisabled_logsWarning() {
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
-        var originalErr = System.err;
-        var errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        try {
-            var request = createSimpleRequest("Hello");
-            var tokens = List.of("Hello", " ", "World");
-            Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
-                    .thenReturn(Flux.fromIterable(tokens.stream()
-                            .map(this::mockSimpleChatResponse).toList()));
+        var request = createSimpleRequest("Hello");
+        var tokens = List.of("Hello", " ", "World");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.fromIterable(tokens.stream()
+                        .map(this::mockSimpleChatResponse).toList()));
 
-            provider.stream(request).collectList().block();
+        provider.stream(request).collectList().block();
 
-            var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assertions.assertTrue(errContent.contains("Push is not enabled"));
-        } finally {
-            System.setErr(originalErr);
-        }
+        var warning = logger.getLoggingEvents().stream().filter(
+                event -> event.getMessage().contains("Push is not enabled"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(), "Expected push warning");
     }
 
     @Test
@@ -580,20 +579,15 @@ class SpringAILLMProviderTest {
         provider.setStreaming(false);
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
-        var originalErr = System.err;
-        var errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        try {
-            var request = createSimpleRequest("Hello");
-            mockSimpleChat("Hi there");
+        var request = createSimpleRequest("Hello");
+        mockSimpleChat("Hi there");
 
-            provider.stream(request).collectList().block();
+        provider.stream(request).collectList().block();
 
-            var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assertions.assertFalse(errContent.contains("Push is not enabled"));
-        } finally {
-            System.setErr(originalErr);
-        }
+        var warning = logger.getLoggingEvents().stream().filter(
+                event -> event.getMessage().contains("Push is not enabled"))
+                .findFirst();
+        Assertions.assertFalse(warning.isPresent(), "Expected no push warning");
     }
 
     @Test
