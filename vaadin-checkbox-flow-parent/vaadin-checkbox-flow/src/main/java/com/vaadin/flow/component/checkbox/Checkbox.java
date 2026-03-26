@@ -40,6 +40,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 
@@ -365,12 +366,15 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * @param writeCallback
      *            the callback to propagate value changes back, or {@code null}
      *            for one-way binding
-     * @since 25.1
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.2
      */
-    public void bindIndeterminate(Signal<Boolean> signal,
+    public SignalBinding<Boolean> bindIndeterminate(Signal<Boolean> signal,
             SerializableConsumer<Boolean> writeCallback) {
         Objects.requireNonNull(signal, "Signal cannot be null");
-        getElement().bindProperty("indeterminate",
+        return getElement().bindProperty("indeterminate",
                 signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }
 

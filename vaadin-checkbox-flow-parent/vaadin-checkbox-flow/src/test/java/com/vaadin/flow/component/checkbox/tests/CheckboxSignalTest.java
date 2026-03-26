@@ -83,12 +83,15 @@ public class CheckboxSignalTest extends AbstractSignalsUnitTest {
         Assert.assertFalse(checkbox.isIndeterminate());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindIndeterminate_setWhileBound_throws() {
+    public void bindIndeterminate_setWhileBound_syncsToSignal() {
         checkbox.bindIndeterminate(signal, signal::set);
         UI.getCurrent().add(checkbox);
 
         checkbox.setIndeterminate(true);
+        Assert.assertTrue(signal.peek());
+
+        checkbox.setIndeterminate(false);
+        Assert.assertFalse(signal.peek());
     }
 
     @Test(expected = BindingActiveException.class)
