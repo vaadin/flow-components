@@ -10,7 +10,6 @@ package com.vaadin.flow.component.textfield.tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -97,10 +96,10 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
         WebElement button = findElement(By.id("required"));
         button.click();
-        waitUntil(attributeToBe(emailField, "required", "true"));
+        waitUntil(driver -> emailField.hasAttribute("required"));
 
         button.click();
-        waitUntil(attributeToBe(emailField, "required", ""));
+        waitUntil(driver -> !emailField.hasAttribute("required"));
     }
 
     @Test
