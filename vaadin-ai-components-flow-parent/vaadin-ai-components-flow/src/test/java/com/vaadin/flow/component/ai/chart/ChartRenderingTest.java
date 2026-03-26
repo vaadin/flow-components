@@ -88,7 +88,7 @@ class ChartRenderingTest {
     class ApplyPendingState {
 
         @Test
-        void pendingDataAndConfig_rendersChart() {
+        void pendingDataAndConfigRendersChart() {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
@@ -105,7 +105,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void configThenData_inSeparateRequests_retainsConfig() {
+        void configThenDataInSeparateRequestsRetainsConfig() {
             // First request: config only
             updateConfiguration(
                     "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Revenue\"}}");
@@ -125,7 +125,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void pendingDataOnly_usesExistingConfig() {
+        void pendingDataOnlyUsesExistingConfig() {
             // First render: establish config and data
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
@@ -147,7 +147,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void configOnlyAfterGauge_resetsPane() {
+        void configOnlyAfterGaugeResetsPane() {
             // First: full render as gauge
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
             updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
@@ -194,7 +194,7 @@ class ChartRenderingTest {
     class RenderChart {
 
         @Test
-        void multipleQueries_createsMultipleSeries() {
+        void multipleQueriesCreatesMultipleSeries() {
             databaseProvider.results = List.of(row("x", 1, "y", 10));
 
             updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
@@ -210,7 +210,7 @@ class ChartRenderingTest {
     class AxisDefaults {
 
         @Test
-        void itemsWithNames_setsCategoriesOnXAxis() {
+        void itemsWithNamesSetsCategoriesOnXAxis() {
             databaseProvider.results = List.of(
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
@@ -227,7 +227,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void itemsWithoutNames_doesNotSetCategories() {
+        void itemsWithoutNamesDoesNotSetCategories() {
             // Items with X/Y numeric data (no names) should not set categories
             databaseProvider.results = List.of(
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
@@ -243,7 +243,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void multiSeriesCategories_collectsFromAllSeries() {
+        void multiSeriesCategoriesCollectsFromAllSeries() {
             // Multi-series with _series column where each series has
             // different category names — categories should be the union
             databaseProvider.results = List.of(
@@ -272,7 +272,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void mixedNamesAndNull_doesNotSetCategories() {
+        void mixedNamesAndNullDoesNotSetCategories() {
             // When some items have names and some don't, categories should
             // not be set (extractCategories returns null)
             databaseProvider.results = List.of(row("x", 1, "y", 10));
@@ -294,7 +294,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void pieChart_doesNotSetCategories() {
+        void pieChartDoesNotSetCategories() {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
@@ -308,7 +308,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void reRenderWithoutNames_clearsPreviousCategories() {
+        void reRenderWithoutNamesClearsPreviousCategories() {
             // First render: items with names → categories set
             databaseProvider.results = List.of(
                     row("category", "Jan", "value", 100),
@@ -336,7 +336,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void emptySeries_resetsAxisType() {
+        void emptySeriesResetsAxisType() {
             controller.setDataConverter(data -> List.of(new DataSeries()));
             databaseProvider.results = List.of();
 
@@ -361,7 +361,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void ganttSeries_setsDatetimeAxis() {
+        void ganttSeriesSetsDatetimeAxis() {
             // Gantt series need datetime X-axis — test via the default
             // converter with Gantt column names
             databaseProvider.results = List
@@ -377,7 +377,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void ohlcChart_doesNotSetCategoryAxis() {
+        void ohlcChartDoesNotSetCategoryAxis() {
             // OHLC/candlestick items have names (dates) and datetime X
             // values; categories should NOT be set from names, so the
             // datetime axis can render formatted dates instead of raw epoch
@@ -400,7 +400,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void multipleQueries_withMixedXValues_detectsDatetime() {
+        void multipleQueriesWithMixedXValuesDetectsDatetime() {
             // Use a converter that returns both a datetime series and a
             // volume series with row-index X values
             databaseProvider.results = List.of(row(ColumnNames.X,
@@ -427,7 +427,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void datetimeXValues_setsDatetimeAxisType() {
+        void datetimeXValuesSetsDatetimeAxisType() {
             // Epoch ms for 2024-01-01: 1704067200000
             databaseProvider.results = List.of(
                     row(ColumnNames.X, 1704067200000L, ColumnNames.Y, 10),
@@ -442,7 +442,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void smallXValues_doesNotSetDatetimeAxisType() {
+        void smallXValuesDoesNotSetDatetimeAxisType() {
             databaseProvider.results = List.of(
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
                     row(ColumnNames.X, 2, ColumnNames.Y, 20));
@@ -456,7 +456,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void mixedXValues_smallAndLarge_doesNotSetDatetime() {
+        void mixedXValuesSmallAndLargeDoesNotSetDatetime() {
             // First value is a timestamp, second is small — should NOT be
             // detected as datetime since not all values qualify
             databaseProvider.results = List.of(
@@ -472,7 +472,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void noXValues_doesNotSetDatetimeAxisType() {
+        void noXValuesDoesNotSetDatetimeAxisType() {
             // Items with no X values — hasDatetimeXValues should return
             // false
             databaseProvider.results = List
@@ -491,7 +491,7 @@ class ChartRenderingTest {
     class NameUnnamedSeries {
 
         @Test
-        void singleUnnamedSeries_usesChartTitle() {
+        void singleUnnamedSeriesUsesChartTitle() {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
@@ -506,7 +506,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void singleUnnamedSeries_withNoTitle_keepsNull() {
+        void singleUnnamedSeriesWithNoTitleKeepsNull() {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
 
@@ -520,7 +520,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void multipleSeriesWithSeriesColumn_keepsOriginalNames() {
+        void multipleSeriesWithSeriesColumnKeepsOriginalNames() {
             databaseProvider.results = List.of(
                     row(ColumnNames.SERIES, "Series A", "category", "Jan",
                             "value", 100),
@@ -579,7 +579,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void tooltipFromHeatmap_doesNotLeakToCandlestick() {
+        void tooltipFromHeatmapDoesNotLeakToCandlestick() {
             // First render: heatmap with custom tooltip
             databaseProvider.results = List.of(row(ColumnNames.X, 9,
                     ColumnNames.Y, 0, ColumnNames.VALUE, 120));
@@ -608,7 +608,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void axisTypeFromDatetime_doesNotLeakToCategory() {
+        void axisTypeFromDatetimeDoesNotLeakToCategory() {
             // First render: candlestick with datetime axis
             databaseProvider.results = List.of(row(ColumnNames.X,
                     1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
@@ -639,7 +639,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void axisMinMaxFromGauge_doesNotLeakToColumn() {
+        void axisMinMaxFromGaugeDoesNotLeakToColumn() {
             // First render: gauge with explicit min/max
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
 
@@ -667,7 +667,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void plotOptionsFromStacked_doesNotLeakToLine() {
+        void plotOptionsFromStackedDoesNotLeakToLine() {
             // First render: stacked column
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
@@ -694,7 +694,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void colorAxisFromHeatmap_doesNotLeakToColumn() {
+        void colorAxisFromHeatmapDoesNotLeakToColumn() {
             // First render: heatmap with color axis
             databaseProvider.results = List.of(row(ColumnNames.X, 0,
                     ColumnNames.Y, 0, ColumnNames.VALUE, 100));
@@ -721,7 +721,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void paneFromGauge_doesNotLeakToColumn() {
+        void paneFromGaugeDoesNotLeakToColumn() {
             // First render: gauge with pane config
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
 
@@ -753,7 +753,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void legendFromPieChart_doesNotLeakToColumn() {
+        void legendFromPieChartDoesNotLeakToColumn() {
             // First render: pie chart with legend disabled
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
@@ -782,7 +782,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void subtitleFromPrevious_doesNotLeak() {
+        void subtitleFromPreviousDoesNotLeak() {
             // First render with subtitle
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
@@ -809,7 +809,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void polarFromGauge_doesNotLeakToColumn() {
+        void polarFromGaugeDoesNotLeakToColumn() {
             // First render: polar chart
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
@@ -835,7 +835,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void repeatedGaugeRenders_doNotAccumulatePanes() {
+        void repeatedGaugeRendersDoNotAccumulatePanes() {
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
 
             // First gauge render
@@ -862,7 +862,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void multiHopSwitch_heatmapToGaugeToColumn() {
+        void multiHopSwitchHeatmapToGaugeToColumn() {
             // Step 1: Heatmap with colorAxis and tooltip
             databaseProvider.results = List.of(row(ColumnNames.X, 9,
                     ColumnNames.Y, 0, ColumnNames.VALUE, 120));
@@ -913,7 +913,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void invertedFromBar_doesNotLeakToColumn() {
+        void invertedFromBarDoesNotLeakToColumn() {
             // First render: bar chart (inverted)
             databaseProvider.results = List
                     .of(row("category", "A", "value", 50));
@@ -943,7 +943,7 @@ class ChartRenderingTest {
     class WaterfallChart {
 
         @Test
-        void waterfallWithSumItems_categoriesIncludeSumNames() {
+        void waterfallWithSumItemsCategoriesIncludeSumNames() {
             // Waterfall data with regular items, intermediate sum, and
             // final sum — all should have names used as categories
             databaseProvider.results = List.of(
