@@ -105,6 +105,26 @@ class ChartRenderingTest {
         }
 
         @Test
+        void configThenData_inSeparateRequests_retainsConfig() {
+            // First request: config only
+            updateConfiguration(
+                    "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Revenue\"}}");
+            controller.onRequestCompleted();
+
+            // Second request: data only
+            databaseProvider.results = List
+                    .of(row("category", "Q1", "value", 100));
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
+
+            Configuration config = chart.getConfiguration();
+            Assertions.assertEquals(ChartType.COLUMN,
+                    config.getChart().getType());
+            Assertions.assertEquals("Revenue", config.getTitle().getText());
+            Assertions.assertFalse(config.getSeries().isEmpty());
+        }
+
+        @Test
         void pendingDataOnly_usesExistingConfig() {
             // First render: establish config and data
             databaseProvider.results = List

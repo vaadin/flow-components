@@ -83,17 +83,22 @@ public class ChartRenderer {
         if (entry == null || !entry.hasPendingState()) {
             return;
         }
-        try {
-            String configJson = entry.getPendingConfigurationJson();
-            List<String> effectiveQueries = entry.getQueries();
+        String configJson = entry.getPendingConfigurationJson();
+        List<String> effectiveQueries = entry.getQueries();
 
-            if (!effectiveQueries.isEmpty()) {
+        if (!effectiveQueries.isEmpty()) {
+            try {
                 String effectiveConfig = configJson != null ? configJson
                         : ChartSerialization.toJSON(chart.getConfiguration());
                 renderChart(chart, effectiveQueries, effectiveConfig);
+            } finally {
+                entry.clearPendingState();
             }
-        } finally {
-            entry.clearPendingState();
+        } else {
+            // Config-only: no queries to render yet. Clear only the
+            // data flag but keep pendingConfigurationJson so it's used
+            // when data arrives in a later request.
+            entry.setPendingDataUpdate(false);
         }
     }
 
