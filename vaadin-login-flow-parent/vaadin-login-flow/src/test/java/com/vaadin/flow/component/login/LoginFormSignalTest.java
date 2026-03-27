@@ -15,15 +15,18 @@
  */
 package com.vaadin.flow.component.login;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsTest;
 
-public class LoginFormSignalTest extends AbstractSignalsUnitTest {
-    @Test(expected = UnsupportedOperationException.class)
-    public void bindEnabled_throwsException() {
-        var login = new LoginForm();
-        login.bindEnabled(new ValueSignal<>(false));
+class LoginFormSignalTest extends AbstractSignalsTest {
+    @Test
+    void bindEnabled_throwsException() {
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            var login = new LoginForm();
+            login.bindEnabled(new ValueSignal<>(false));
+        });
     }
 }

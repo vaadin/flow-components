@@ -17,137 +17,139 @@ package com.vaadin.flow.component.avatar.tests;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 
-public class AvatarGroupTest {
+class AvatarGroupTest {
 
     private AvatarGroup avatarGroup;
     private AvatarGroupItem avatarGroupItem1;
     private AvatarGroupItem avatarGroupItem2;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         avatarGroup = new AvatarGroup();
         avatarGroupItem1 = new AvatarGroupItem();
         avatarGroupItem2 = new AvatarGroupItem("Foo Bar");
     }
 
     @Test
-    public void setName_getName() {
+    void setName_getName() {
         avatarGroupItem1.setName("foo bar");
-        Assert.assertEquals(avatarGroupItem1.getName(), "foo bar");
+        Assertions.assertEquals("foo bar", avatarGroupItem1.getName());
     }
 
     @Test
-    public void setAbbr_getAbbr() {
+    void setAbbr_getAbbr() {
         avatarGroupItem1.setAbbreviation("fb");
-        Assert.assertEquals(avatarGroupItem1.getAbbreviation(), "fb");
+        Assertions.assertEquals("fb", avatarGroupItem1.getAbbreviation());
     }
 
     @Test
-    public void setImgUrl_getImgUrl() {
+    void setImgUrl_getImgUrl() {
         avatarGroupItem1.setImage("https://vaadin.com/");
-        Assert.assertEquals(avatarGroupItem1.getImage(), "https://vaadin.com/");
+        Assertions.assertEquals("https://vaadin.com/",
+                avatarGroupItem1.getImage());
     }
 
     @Test
-    public void setColorIndex_getColorIndex() {
+    void setColorIndex_getColorIndex() {
         avatarGroupItem1.setColorIndex(3);
-        Assert.assertEquals(avatarGroupItem1.getColorIndex(), (Integer) 3);
+        Assertions.assertEquals((Integer) 3, avatarGroupItem1.getColorIndex());
     }
 
     @Test
-    public void addClassNames_removeClassNames_getClassNames() {
+    void addClassNames_removeClassNames_getClassNames() {
         avatarGroupItem1.addClassNames("foo", "bar");
-        Assert.assertEquals(avatarGroupItem1.getClassName(), "foo bar");
+        Assertions.assertEquals("foo bar", avatarGroupItem1.getClassName());
 
         avatarGroupItem1.removeClassNames("foo");
-        Assert.assertEquals(avatarGroupItem1.getClassName(), "bar");
+        Assertions.assertEquals("bar", avatarGroupItem1.getClassName());
     }
 
     @Test
-    public void setCreatedItems_getCreatedItems() {
+    void setCreatedItems_getCreatedItems() {
         List<AvatarGroupItem> items = List.of(avatarGroupItem1,
                 avatarGroupItem2);
         avatarGroup.setItems(items);
 
-        Assert.assertEquals(items, avatarGroup.getItems());
+        Assertions.assertEquals(items, avatarGroup.getItems());
     }
 
     @Test
-    public void getEmptyItems_doesNotThrow() {
+    void getEmptyItems_doesNotThrow() {
         avatarGroup.getItems();
     }
 
     @Test
-    public void createWithItems_getCreatedItems() {
+    void createWithItems_getCreatedItems() {
         List<AvatarGroupItem> items = List.of(avatarGroupItem1,
                 avatarGroupItem2);
         AvatarGroup createdAvatarGroup = new AvatarGroup(items);
 
-        Assert.assertEquals(items, createdAvatarGroup.getItems());
+        Assertions.assertEquals(items, createdAvatarGroup.getItems());
     }
 
     @Test
-    public void createWithVarargsItems_getCreatedItems() {
+    void createWithVarargsItems_getCreatedItems() {
         AvatarGroup createdAvatarGroup = new AvatarGroup(avatarGroupItem1,
                 avatarGroupItem2);
 
-        Assert.assertEquals(List.of(avatarGroupItem1, avatarGroupItem2),
+        Assertions.assertEquals(List.of(avatarGroupItem1, avatarGroupItem2),
                 createdAvatarGroup.getItems());
     }
 
     @Test
-    public void addItems_getItems() {
+    void addItems_getItems() {
         avatarGroup.setItems(List.of(avatarGroupItem1, avatarGroupItem2));
         AvatarGroupItem addedItem = new AvatarGroupItem("Bar Baz");
         avatarGroup.add(addedItem);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 List.of(avatarGroupItem1, avatarGroupItem2, addedItem),
                 avatarGroup.getItems());
     }
 
     @Test
-    public void removeItems_getItems() {
+    void removeItems_getItems() {
         avatarGroup.setItems(List.of(avatarGroupItem1, avatarGroupItem2));
         avatarGroup.remove(avatarGroupItem2);
 
-        Assert.assertEquals(List.of(avatarGroupItem1), avatarGroup.getItems());
+        Assertions.assertEquals(List.of(avatarGroupItem1),
+                avatarGroup.getItems());
     }
 
     @Test
-    public void setMaxItemsVisible_getMaxItemsVisible() {
+    void setMaxItemsVisible_getMaxItemsVisible() {
         avatarGroup.setMaxItemsVisible(3);
 
-        Assert.assertEquals((Integer) 3, avatarGroup.getMaxItemsVisible());
+        Assertions.assertEquals((Integer) 3, avatarGroup.getMaxItemsVisible());
     }
 
     @Test
-    public void getMaxItemsVisible_returnsNull() {
-        Assert.assertNull(avatarGroup.getMaxItemsVisible());
+    void getMaxItemsVisible_returnsNull() {
+        Assertions.assertNull(avatarGroup.getMaxItemsVisible());
     }
 
     @Test
-    public void setI18n() {
+    void setI18n() {
         AvatarGroup.AvatarGroupI18n i18n = new AvatarGroup.AvatarGroupI18n()
                 .setAnonymous("anonyymi")
                 .setOneActiveUser("Yksi käyttäjä aktiivinen")
                 .setManyActiveUsers("{count} aktiivista käyttäjää");
 
         avatarGroup.setI18n(i18n);
-        Assert.assertEquals(i18n, avatarGroup.getI18n());
+        Assertions.assertEquals(i18n, avatarGroup.getI18n());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(AvatarGroup.class));
     }
 }

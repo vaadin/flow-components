@@ -19,41 +19,41 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 
-public class DialogChildrenTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class DialogChildrenTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Dialog dialog;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         dialog = new Dialog();
         ui.add(dialog);
     }
 
     @Test
-    public void add_virtualNodeIdsInSync() {
+    void add_virtualNodeIdsInSync() {
         var child = new Div();
         dialog.add(child);
         assertVirtualChildren(child);
     }
 
     @Test
-    public void addMany_virtualNodeIdsInSync() {
+    void addMany_virtualNodeIdsInSync() {
         var child = new Div();
         var child2 = new Div();
         dialog.add(child);
@@ -62,7 +62,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void addCollection_virtualNodeIdsInSync() {
+    void addCollection_virtualNodeIdsInSync() {
         var child = new Div();
         var child2 = new Div();
         dialog.add(List.of(child, child2));
@@ -70,7 +70,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void addComponentAsFirst_virtualNodeIdsInSync() {
+    void addComponentAsFirst_virtualNodeIdsInSync() {
         var child = new Div();
         var child2 = new Div();
         dialog.add(child);
@@ -79,7 +79,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void remove_virtualNodeIdsInSync() {
+    void remove_virtualNodeIdsInSync() {
         var child = new Div();
         var child2 = new Div();
         dialog.add(child, child2);
@@ -88,7 +88,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void removeAll_virtualNodeIdsInSync() {
+    void removeAll_virtualNodeIdsInSync() {
         var child = new Div();
         var child2 = new Div();
         dialog.add(child, child2);
@@ -97,7 +97,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void addComponentAtIndex_virtualNodeIdsInSync() {
+    void addComponentAtIndex_virtualNodeIdsInSync() {
         var child = new Div();
         var child2 = new Div();
         var child3 = new Div();
@@ -107,7 +107,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void addTextNodes_virtualNodeIdsInSync() {
+    void addTextNodes_virtualNodeIdsInSync() {
         var child = new Text("text");
         var child2 = new Text("text2");
         dialog.add(child, child2);
@@ -115,17 +115,17 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void addBeforeAttaching_validNodeIds() {
+    void addBeforeAttaching_validNodeIds() {
         dialog = new Dialog();
         var child = new Div();
         dialog.add(child);
         ui.add(dialog);
-        Assert.assertNotEquals("[-1]",
+        Assertions.assertNotEquals("[-1]",
                 dialog.getElement().getProperty("virtualChildNodeIds"));
     }
 
     @Test
-    public void selfRemoveChild_virtualNodeIdsInSync() {
+    void selfRemoveChild_virtualNodeIdsInSync() {
         var child = new Div();
         var child2 = new Div();
         dialog.add(child, child2);
@@ -134,7 +134,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void addSeparately_selfRemoveChild_doesNotThrow() {
+    void addSeparately_selfRemoveChild_doesNotThrow() {
         var child = new Div();
         var child2 = new Div();
         dialog.add(child);
@@ -144,7 +144,7 @@ public class DialogChildrenTest {
     }
 
     @Test
-    public void relocateChild_detachListenerRemoved() {
+    void relocateChild_detachListenerRemoved() {
         var child = new Div();
         dialog.add(child);
 
@@ -159,32 +159,32 @@ public class DialogChildrenTest {
         dialog.getElement().setProperty("virtualChildNodeIds", "[-1]");
 
         newParent.remove(child);
-        Assert.assertEquals(
-                dialog.getElement().getProperty("virtualChildNodeIds"), "[-1]");
+        Assertions.assertEquals("[-1]",
+                dialog.getElement().getProperty("virtualChildNodeIds"));
     }
 
     @Test
-    public void headerAndFooterAddedAsVirtualChildren() {
+    void headerAndFooterAddedAsVirtualChildren() {
         dialog.getHeader().add(new Div());
         dialog.getFooter().add(new Div());
 
-        Assert.assertEquals(0, dialog.getElement().getChildCount());
-        Assert.assertEquals(dialog.getElement(),
+        Assertions.assertEquals(0, dialog.getElement().getChildCount());
+        Assertions.assertEquals(dialog.getElement(),
                 dialog.getHeader().root.getParent());
-        Assert.assertEquals(dialog.getElement(),
+        Assertions.assertEquals(dialog.getElement(),
                 dialog.getFooter().root.getParent());
     }
 
     @Test
-    public void removeAll_doesNotRemoveHeaderOrFooter() {
+    void removeAll_doesNotRemoveHeaderOrFooter() {
         dialog.getHeader().add(new Div());
         dialog.getFooter().add(new Div());
 
         dialog.removeAll();
 
-        Assert.assertEquals(dialog.getElement(),
+        Assertions.assertEquals(dialog.getElement(),
                 dialog.getHeader().root.getParent());
-        Assert.assertEquals(dialog.getElement(),
+        Assertions.assertEquals(dialog.getElement(),
                 dialog.getFooter().root.getParent());
     }
 
@@ -201,7 +201,7 @@ public class DialogChildrenTest {
         var virtualChildNodeIds = JacksonUtils.stream(jsonArrayOfIds)
                 .mapToInt(JsonNode::asInt).boxed().collect(Collectors.toList());
 
-        Assert.assertEquals(childIds, virtualChildNodeIds);
+        Assertions.assertEquals(childIds, virtualChildNodeIds);
     }
 
 }

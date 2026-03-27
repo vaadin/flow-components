@@ -8,8 +8,8 @@
  */
 package com.vaadin.flow.component.map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
@@ -18,98 +18,99 @@ import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 
-public class MapTest {
+class MapTest {
     @Test
-    public void defaults() {
+    void defaults() {
         Map map = new Map();
 
-        Assert.assertEquals(2, map.getConfiguration().getLayers().size());
+        Assertions.assertEquals(2, map.getConfiguration().getLayers().size());
         Layer backgroundLayer = map.getConfiguration().getLayers().get(0);
         Layer featureLayer = map.getConfiguration().getLayers().get(1);
 
-        Assert.assertTrue(backgroundLayer instanceof TileLayer);
-        Assert.assertTrue(
+        Assertions.assertTrue(backgroundLayer instanceof TileLayer);
+        Assertions.assertTrue(
                 ((TileLayer) backgroundLayer).getSource() instanceof OSMSource);
-        Assert.assertTrue(featureLayer instanceof FeatureLayer);
+        Assertions.assertTrue(featureLayer instanceof FeatureLayer);
 
-        Assert.assertNotNull(map.getControls());
+        Assertions.assertNotNull(map.getControls());
 
-        Assert.assertNotNull(map.getControls().getAttribution());
-        Assert.assertTrue(map.getControls().getAttribution().isVisible());
+        Assertions.assertNotNull(map.getControls().getAttribution());
+        Assertions.assertTrue(map.getControls().getAttribution().isVisible());
 
-        Assert.assertNotNull(map.getControls().getScale());
-        Assert.assertFalse(map.getControls().getScale().isVisible());
+        Assertions.assertNotNull(map.getControls().getScale());
+        Assertions.assertFalse(map.getControls().getScale().isVisible());
 
-        Assert.assertNotNull(map.getControls().getZoom());
-        Assert.assertTrue(map.getControls().getZoom().isVisible());
+        Assertions.assertNotNull(map.getControls().getZoom());
+        Assertions.assertTrue(map.getControls().getZoom().isVisible());
     }
 
     @Test
-    public void setBackgroundLayer_replacesDefaultLayer() {
+    void setBackgroundLayer_replacesDefaultLayer() {
         Map map = new Map();
         TileLayer newBackgroundLayer = new TileLayer();
         map.setBackgroundLayer(newBackgroundLayer);
 
-        Assert.assertEquals(2, map.getConfiguration().getLayers().size());
-        Assert.assertTrue(map.getConfiguration().getLayers()
+        Assertions.assertEquals(2, map.getConfiguration().getLayers().size());
+        Assertions.assertTrue(map.getConfiguration().getLayers()
                 .contains(newBackgroundLayer));
     }
 
     @Test
-    public void setBackgroundLayer_prependsLayer() {
+    void setBackgroundLayer_prependsLayer() {
         Map map = new Map();
         TileLayer newBackgroundLayer = new TileLayer();
         map.setBackgroundLayer(newBackgroundLayer);
 
-        Assert.assertEquals(2, map.getConfiguration().getLayers().size());
-        Assert.assertEquals(0,
+        Assertions.assertEquals(2, map.getConfiguration().getLayers().size());
+        Assertions.assertEquals(0,
                 map.getConfiguration().getLayers().indexOf(newBackgroundLayer));
     }
 
     @Test
-    public void setBackgroundLayer_doesNotAcceptNull() {
+    void setBackgroundLayer_doesNotAcceptNull() {
         Map map = new Map();
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> map.setBackgroundLayer(null));
     }
 
     @Test
-    public void getCenter_delegatesToInternalView() {
+    void getCenter_delegatesToInternalView() {
         Map map = new Map();
         map.getView().setCenter(new Coordinate(1, 2));
 
-        Assert.assertEquals(1, map.getCenter().getX(), 0);
-        Assert.assertEquals(2, map.getCenter().getY(), 0);
+        Assertions.assertEquals(1, map.getCenter().getX(), 0);
+        Assertions.assertEquals(2, map.getCenter().getY(), 0);
     }
 
     @Test
-    public void setCenter_delegatesToInternalView() {
+    void setCenter_delegatesToInternalView() {
         Map map = new Map();
         map.setCenter(new Coordinate(1, 2));
 
-        Assert.assertEquals(1, map.getView().getCenter().getX(), 0);
-        Assert.assertEquals(2, map.getView().getCenter().getY(), 0);
+        Assertions.assertEquals(1, map.getView().getCenter().getX(), 0);
+        Assertions.assertEquals(2, map.getView().getCenter().getY(), 0);
     }
 
     @Test
-    public void getZoom_delegatesToInternalView() {
+    void getZoom_delegatesToInternalView() {
         Map map = new Map();
         map.getView().setZoom(15);
 
-        Assert.assertEquals(15, map.getZoom(), 0);
+        Assertions.assertEquals(15, map.getZoom(), 0);
     }
 
     @Test
-    public void setZoom_delegatesToInternalView() {
+    void setZoom_delegatesToInternalView() {
         Map map = new Map();
         map.setZoom(15);
 
-        Assert.assertEquals(15, map.getView().getZoom(), 0);
+        Assertions.assertEquals(15, map.getView().getZoom(), 0);
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Map.class));
+    void implementsHasThemeVariant() {
+        Assertions
+                .assertTrue(HasThemeVariant.class.isAssignableFrom(Map.class));
     }
 }

@@ -11,20 +11,20 @@ package com.vaadin.flow.component.map.configuration;
 import java.beans.PropertyChangeListener;
 import java.util.function.Consumer;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class AbstractConfigurationObjectTest {
+class AbstractConfigurationObjectTest {
 
     private TestConfiguration testConfiguration;
     private PropertyChangeListener changeListenerMock;
     private Consumer<AbstractConfigurationObject> changeCollectorMock;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         testConfiguration = new TestConfiguration();
         testConfiguration.setNestedConfiguration(new TestConfiguration());
         // Clear initial dirty flag for tests
@@ -36,12 +36,12 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void generatesDefaultId() {
-        Assert.assertNotNull(testConfiguration.getId());
+    void generatesDefaultId() {
+        Assertions.assertNotNull(testConfiguration.getId());
     }
 
     @Test
-    public void collectChanges_resetsDirtyFlag() {
+    void collectChanges_resetsDirtyFlag() {
         TestConfiguration testConfiguration = new TestConfiguration();
         // Collect changes to clear dirty flag
         testConfiguration.collectChanges(o -> {
@@ -53,7 +53,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void setProperty_notifyChanges() {
+    void setProperty_notifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.setFoo("test");
 
@@ -62,7 +62,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void setProperty_marksAsDirty() {
+    void setProperty_marksAsDirty() {
         testConfiguration.setFoo("test");
         // Collect changes, should only include root object as changed
         testConfiguration.collectChanges(changeCollectorMock);
@@ -72,7 +72,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void setNestedProperty_notifyChanges() {
+    void setNestedProperty_notifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.getNestedConfiguration().setFoo("test");
 
@@ -81,7 +81,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void setNestedProperty_marksNestedObjectAsDirty() {
+    void setNestedProperty_marksNestedObjectAsDirty() {
         testConfiguration.getNestedConfiguration().setFoo("test");
         // Collect changes, should only include nested object as changed
         testConfiguration.collectChanges(changeCollectorMock);
@@ -92,7 +92,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void setNestedObject_notifyChanges() {
+    void setNestedObject_notifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.setNestedConfiguration(new TestConfiguration());
 
@@ -103,7 +103,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void setNestedObject_marksNestedHierarchyAsDirty() {
+    void setNestedObject_marksNestedHierarchyAsDirty() {
         // Create new nested object, clear dirty flag on it
         TestConfiguration newNestedObject = new TestConfiguration();
         newNestedObject.collectChanges(o -> {
@@ -124,12 +124,12 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void setNestedObject_addsAndRemovesChangeListener() {
+    void setNestedObject_addsAndRemovesChangeListener() {
         TestConfiguration nestedObject = new TestConfiguration();
-        Assert.assertFalse(nestedObject.hasListeners());
+        Assertions.assertFalse(nestedObject.hasListeners());
 
         testConfiguration.setNestedConfiguration(nestedObject);
-        Assert.assertTrue(nestedObject.hasListeners());
+        Assertions.assertTrue(nestedObject.hasListeners());
 
         testConfiguration.addPropertyChangeListener(changeListenerMock);
 
@@ -138,7 +138,7 @@ public class AbstractConfigurationObjectTest {
                 .propertyChange(Mockito.any());
 
         testConfiguration.setNestedConfiguration(null);
-        Assert.assertFalse(nestedObject.hasListeners());
+        Assertions.assertFalse(nestedObject.hasListeners());
         Mockito.verify(changeListenerMock, Mockito.times(2))
                 .propertyChange(Mockito.any());
 
@@ -148,7 +148,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void removeChangeListener_doesNotNotifyChanges() {
+    void removeChangeListener_doesNotNotifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.removePropertyChangeListener(changeListenerMock);
         testConfiguration.setFoo("test");
@@ -158,7 +158,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithChangeTracking_notifyChanges() {
+    void updateWithChangeTracking_notifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.update(() -> testConfiguration.setFoo("test"), true);
 
@@ -167,7 +167,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithChangeTracking_marksAsDirty() {
+    void updateWithChangeTracking_marksAsDirty() {
         testConfiguration.update(() -> testConfiguration.setFoo("test"), true);
 
         // Collect changes, should include root object as changed
@@ -178,7 +178,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithoutChangeTracking_doesNotNotifyChanges() {
+    void updateWithoutChangeTracking_doesNotNotifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.update(() -> testConfiguration.setFoo("test"), false);
 
@@ -187,7 +187,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithoutChangeTracking_doesNotMarkAsDirty() {
+    void updateWithoutChangeTracking_doesNotMarkAsDirty() {
         testConfiguration.update(() -> testConfiguration.setFoo("test"), false);
 
         testConfiguration.collectChanges(changeCollectorMock);
@@ -196,7 +196,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithoutChangeTracking_doesNotNotifyNestedChanges() {
+    void updateWithoutChangeTracking_doesNotNotifyNestedChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.update(
                 () -> testConfiguration.getNestedConfiguration().setFoo("test"),
@@ -207,7 +207,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithoutChangeTracking_doesNotMarkNestedObjectAsDirty() {
+    void updateWithoutChangeTracking_doesNotMarkNestedObjectAsDirty() {
         testConfiguration.update(
                 () -> testConfiguration.getNestedConfiguration().setFoo("test"),
                 false);
@@ -218,7 +218,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithoutChangeTracking_resetTrackChangesFlag() {
+    void updateWithoutChangeTracking_resetTrackChangesFlag() {
         // Update without change notifications
         testConfiguration.update(() -> testConfiguration.setFoo("test"), false);
 
@@ -231,7 +231,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void updateWithoutChangeTrackingAndException_resetTrackChangesFlag() {
+    void updateWithoutChangeTrackingAndException_resetTrackChangesFlag() {
         // Update without change notifications, throws an exception during
         // execution
         try {
@@ -251,7 +251,7 @@ public class AbstractConfigurationObjectTest {
     }
 
     @Test
-    public void deepMarkAsDirty_marksFullHierarchyAsDirty() {
+    void deepMarkAsDirty_marksFullHierarchyAsDirty() {
         testConfiguration.deepMarkAsDirty();
         testConfiguration.collectChanges(changeCollectorMock);
         Mockito.verify(changeCollectorMock, Mockito.times(2))
@@ -267,23 +267,24 @@ public class AbstractConfigurationObjectTest {
      * trigger a change event as well
      */
     @Test
-    public void deepMarkAsDirty_doesNotNotifyChanges() {
+    void deepMarkAsDirty_doesNotNotifyChanges() {
         testConfiguration.addPropertyChangeListener(changeListenerMock);
         testConfiguration.deepMarkAsDirty();
         Mockito.verify(changeListenerMock, Mockito.times(0))
                 .propertyChange(Mockito.any());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void addChild_doesNotAllowNull() {
-        testConfiguration.addChild(null);
+    @Test
+    void addChild_doesNotAllowNull() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> testConfiguration.addChild(null));
     }
 
     @Test
-    public void addNullableChild_ignoresNull() throws Exception {
+    void addNullableChild_ignoresNull() throws Exception {
         testConfiguration = new TestConfiguration();
         testConfiguration.addNullableChild(null);
-        Assert.assertEquals(0,
+        Assertions.assertEquals(0,
                 ConfigurationTestUtil.getChildren(testConfiguration).size());
     }
 

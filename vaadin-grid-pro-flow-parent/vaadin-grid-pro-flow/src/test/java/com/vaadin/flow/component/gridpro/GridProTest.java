@@ -11,11 +11,10 @@ package com.vaadin.flow.component.gridpro;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -28,24 +27,21 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ObjectNode;
 
-public class GridProTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class GridProTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     GridPro<Person> grid;
     ObjectNode selectedItem;
     ArrayList<Person> items = new ArrayList<>();
     Person testItem = new Person("Foo", 1996);
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         grid = Mockito.spy(GridPro.class);
 
         Mockito.when(grid.getDataProvider())
@@ -55,8 +51,8 @@ public class GridProTest {
                 .key(testItem);
 
         // We should ensure the correct value were passed
-        grid.addEditColumn(Person::getName)
-                .text((item, newValue) -> Assert.assertEquals("foo", newValue));
+        grid.addEditColumn(Person::getName).text(
+                (item, newValue) -> Assertions.assertEquals("foo", newValue));
 
         // A client-side Grid item.
         selectedItem = JacksonUtils.createObjectNode();
@@ -65,25 +61,25 @@ public class GridProTest {
     }
 
     @Test
-    public void setEnterNextRow_getEnterNextRow() {
+    void setEnterNextRow_getEnterNextRow() {
         grid.setEnterNextRow(true);
-        Assert.assertEquals(grid.getEnterNextRow(), true);
+        Assertions.assertEquals(true, grid.getEnterNextRow());
     }
 
     @Test
-    public void setSingleCellEdit_getSingleCellEdit() {
+    void setSingleCellEdit_getSingleCellEdit() {
         grid.setSingleCellEdit(true);
-        Assert.assertTrue(grid.getSingleCellEdit());
+        Assertions.assertTrue(grid.getSingleCellEdit());
     }
 
     @Test
-    public void setEditOnClick_getEditOnClick() {
+    void setEditOnClick_getEditOnClick() {
         grid.setEditOnClick(true);
-        Assert.assertTrue(grid.getEditOnClick());
+        Assertions.assertTrue(grid.getEditOnClick());
     }
 
     @Test
-    public void itemAvailableInAllEvents() {
+    void itemAvailableInAllEvents() {
         // Assert that all events come with an item.
         grid.addCellEditStartedListener(e -> items.add(e.getItem()));
         grid.addItemPropertyChangedListener(e -> items.add(e.getItem()));
@@ -96,12 +92,12 @@ public class GridProTest {
                         selectedItem, "col0"))
                 .forEach(e -> ComponentUtil.fireEvent(grid, e));
 
-        Assert.assertEquals(2, items.size());
-        items.forEach(item -> Assert.assertEquals(testItem, item));
+        Assertions.assertEquals(2, items.size());
+        items.forEach(item -> Assertions.assertEquals(testItem, item));
     }
 
     @Test
-    public void propertyChangedEvent_itemNotPresentDataProvider_itemUpdaterNotCalled() {
+    void propertyChangedEvent_itemNotPresentDataProvider_itemUpdaterNotCalled() {
         var dataProvider = grid.getDataProvider();
         Mockito.doNothing().when(dataProvider).refreshItem(Mockito.isNull());
 
@@ -121,7 +117,7 @@ public class GridProTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void itemPropertyChangedListener_onlyCalledWhenCellIsEditable() {
+    void itemPropertyChangedListener_onlyCalledWhenCellIsEditable() {
         ComponentEventListener listener = Mockito
                 .mock(ComponentEventListener.class);
         grid.addItemPropertyChangedListener(listener);
@@ -164,7 +160,7 @@ public class GridProTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void itemPropertyChangedListener_notCalledWhenValueUnchanged_checkbox() {
+    void itemPropertyChangedListener_notCalledWhenValueUnchanged_checkbox() {
         ComponentEventListener listener = Mockito
                 .mock(ComponentEventListener.class);
         grid.addItemPropertyChangedListener(listener);
@@ -193,7 +189,7 @@ public class GridProTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void itemPropertyChangedListener_calledWhenValueChanged_checkbox() {
+    void itemPropertyChangedListener_calledWhenValueChanged_checkbox() {
         ComponentEventListener listener = Mockito
                 .mock(ComponentEventListener.class);
         grid.addItemPropertyChangedListener(listener);
@@ -227,7 +223,7 @@ public class GridProTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void itemPropertyChangedListener_notCalledWhenValueUnchanged_customEditor() {
+    void itemPropertyChangedListener_notCalledWhenValueUnchanged_customEditor() {
         UI.getCurrent().add(grid);
         ComponentEventListener listener = Mockito
                 .mock(ComponentEventListener.class);
@@ -262,7 +258,7 @@ public class GridProTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void itemPropertyChangedListener_calledWhenValueChanged_customEditor() {
+    void itemPropertyChangedListener_calledWhenValueChanged_customEditor() {
         ComponentEventListener listener = Mockito
                 .mock(ComponentEventListener.class);
         grid.addItemPropertyChangedListener(listener);

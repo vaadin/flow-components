@@ -19,7 +19,7 @@ import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest
+class BasicValidationTest
         extends AbstractBasicValidationTest<CustomField<String>, String> {
     class TestCustomField extends CustomField<String> {
         private Input input = new Input();

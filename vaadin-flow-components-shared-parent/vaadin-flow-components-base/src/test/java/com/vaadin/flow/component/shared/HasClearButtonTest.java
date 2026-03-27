@@ -15,37 +15,37 @@
  */
 package com.vaadin.flow.component.shared;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
-public class HasClearButtonTest {
+class HasClearButtonTest {
 
     private TestComponent component;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void initialValue() {
-        Assert.assertFalse(component.isClearButtonVisible());
+    void initialValue() {
+        Assertions.assertFalse(component.isClearButtonVisible());
     }
 
     @Test
-    public void changeValue() {
+    void changeValue() {
         component.setClearButtonVisible(true);
-        Assert.assertTrue(component.isClearButtonVisible());
-        Assert.assertTrue(component.getElement()
+        Assertions.assertTrue(component.isClearButtonVisible());
+        Assertions.assertTrue(component.getElement()
                 .getProperty("clearButtonVisible", false));
 
         component.setClearButtonVisible(false);
-        Assert.assertFalse(component.isClearButtonVisible());
-        Assert.assertFalse(component.getElement()
+        Assertions.assertFalse(component.isClearButtonVisible());
+        Assertions.assertFalse(component.getElement()
                 .getProperty("clearButtonVisible", false));
     }
 

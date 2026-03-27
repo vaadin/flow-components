@@ -15,23 +15,23 @@
  */
 package com.vaadin.flow.component.select;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class SelectVariantTest {
+class SelectVariantTest {
 
     private Select select;
 
-    @Before
-    public void initTest() {
+    @BeforeEach
+    void initTest() {
         select = new Select<>();
     }
 
     @Test
-    public void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
+    void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.ALIGN_CENTER);
         assertThemeAttribute("align-center");
@@ -40,35 +40,35 @@ public class SelectVariantTest {
     }
 
     @Test
-    public void addAlignRightVariant_themeAttributeUpdated() {
+    void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    public void addSmallVariant_themeAttributeUpdated() {
+    void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addAlignLeftVariant_themeAttributeUpdated() {
+    void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
     @Test
-    public void addHelperAbove_themeAttributeUpdated() {
+    void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
     @Test
-    public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.SMALL);
         select.addThemeVariants(SelectVariant.HELPER_ABOVE);
@@ -79,7 +79,7 @@ public class SelectVariantTest {
     }
 
     @Test
-    public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.SMALL);
         select.addThemeVariants(SelectVariant.HELPER_ABOVE);
@@ -88,7 +88,7 @@ public class SelectVariantTest {
     }
 
     @Test
-    public void addTwiceAndSeeOnce_themeAttributeUpdated() {
+    void addTwiceAndSeeOnce_themeAttributeUpdated() {
         assertThemeAttribute(null);
         select.addThemeVariants(SelectVariant.SMALL);
         select.addThemeVariants(SelectVariant.SMALL);
@@ -97,12 +97,12 @@ public class SelectVariantTest {
 
     private void assertThemeAttribute(String expected) {
         String actual = select.getThemeName();
-        assertEquals("Unexpected theme attribute on select", expected, actual);
+        assertEquals(expected, actual, "Unexpected theme attribute on select");
     }
 
     private void assertThemeAttributeContains(String expected) {
         String actual = select.getThemeName();
-        assertTrue("Theme attribute not present on select",
-                actual.contains(expected));
+        assertTrue(actual.contains(expected),
+                "Theme attribute not present on select");
     }
 }

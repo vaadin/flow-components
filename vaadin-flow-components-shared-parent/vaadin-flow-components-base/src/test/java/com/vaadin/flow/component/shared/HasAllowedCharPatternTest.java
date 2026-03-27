@@ -15,37 +15,36 @@
  */
 package com.vaadin.flow.component.shared;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
-public class HasAllowedCharPatternTest {
+class HasAllowedCharPatternTest {
 
     private TestComponent component;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         component = new TestComponent();
     }
 
     @Test
-    public void initialValue() {
-        Assert.assertEquals(component.getAllowedCharPattern(), "");
+    void initialValue() {
+        Assertions.assertEquals("", component.getAllowedCharPattern());
     }
 
     @Test
-    public void changeValue() {
+    void changeValue() {
         component.setAllowedCharPattern("[-+\\d]");
-        Assert.assertEquals(
-                component.getElement().getProperty("allowedCharPattern"),
-                "[-+\\d]");
+        Assertions.assertEquals("[-+\\d]",
+                component.getElement().getProperty("allowedCharPattern"));
 
         component.setAllowedCharPattern(null);
-        Assert.assertEquals(
-                component.getElement().getProperty("allowedCharPattern"), "");
+        Assertions.assertEquals("",
+                component.getElement().getProperty("allowedCharPattern"));
     }
 
     @Tag("test")

@@ -15,52 +15,57 @@
  */
 package com.vaadin.flow.component.grid;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class GridColumnRenderingTest {
+class GridColumnRenderingTest {
 
     @Test
-    public void defaultColumnRendering() {
+    void defaultColumnRendering() {
         var grid = new Grid<String>();
-        Assert.assertEquals(ColumnRendering.EAGER, grid.getColumnRendering());
+        Assertions.assertEquals(ColumnRendering.EAGER,
+                grid.getColumnRendering());
     }
 
     @Test
-    public void setColumnRendering_updatedPropertyValue() {
+    void setColumnRendering_updatedPropertyValue() {
         var grid = new Grid<String>();
         grid.setColumnRendering(ColumnRendering.LAZY);
-        Assert.assertEquals(ColumnRendering.LAZY, grid.getColumnRendering());
-        Assert.assertEquals("lazy",
+        Assertions.assertEquals(ColumnRendering.LAZY,
+                grid.getColumnRendering());
+        Assertions.assertEquals("lazy",
                 grid.getElement().getProperty("columnRendering"));
     }
 
     @Test
-    public void setColumnRenderingNull_defaultPropertyValue() {
+    void setColumnRenderingNull_defaultPropertyValue() {
         var grid = new Grid<String>();
         grid.setColumnRendering(null);
-        Assert.assertEquals(ColumnRendering.EAGER, grid.getColumnRendering());
-        Assert.assertEquals("eager",
+        Assertions.assertEquals(ColumnRendering.EAGER,
+                grid.getColumnRendering());
+        Assertions.assertEquals("eager",
                 grid.getElement().getProperty("columnRendering"));
     }
 
     @Test
-    public void setColumnRenderingFromLazyToNull_updatedPropertyValue() {
+    void setColumnRenderingFromLazyToNull_updatedPropertyValue() {
         var grid = new Grid<String>();
         grid.setColumnRendering(ColumnRendering.LAZY);
         grid.setColumnRendering(null);
-        Assert.assertEquals(ColumnRendering.EAGER, grid.getColumnRendering());
-        Assert.assertEquals("eager",
+        Assertions.assertEquals(ColumnRendering.EAGER,
+                grid.getColumnRendering());
+        Assertions.assertEquals("eager",
                 grid.getElement().getProperty("columnRendering"));
     }
 
     @Test
-    public void setColumnRenderingFromNullToLazy_updatedPropertyValue() {
+    void setColumnRenderingFromNullToLazy_updatedPropertyValue() {
         var grid = new Grid<String>();
         grid.setColumnRendering(null);
         grid.setColumnRendering(ColumnRendering.LAZY);
-        Assert.assertEquals(ColumnRendering.LAZY, grid.getColumnRendering());
-        Assert.assertEquals("lazy",
+        Assertions.assertEquals(ColumnRendering.LAZY,
+                grid.getColumnRendering());
+        Assertions.assertEquals("lazy",
                 grid.getElement().getProperty("columnRendering"));
     }
 }

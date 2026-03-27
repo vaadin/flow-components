@@ -15,54 +15,54 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.HasTooltip;
 
-public class IconTest {
+class IconTest {
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         Icon icon = new Icon();
-        Assert.assertTrue(icon instanceof HasTooltip);
+        Assertions.assertTrue(icon instanceof HasTooltip);
     }
 
     @Test
-    public void emptyIconIsEmpty() {
-        Assert.assertNull(new Icon().getIcon());
+    void emptyIconIsEmpty() {
+        Assertions.assertNull(new Icon().getIcon());
     }
 
     @Test
-    public void usesVaadinCollectionByDefault() {
-        Assert.assertEquals("vaadin:foo", new Icon("foo").getIcon());
+    void usesVaadinCollectionByDefault() {
+        Assertions.assertEquals("vaadin:foo", new Icon("foo").getIcon());
     }
 
     @Test
-    public void canDefineCollectionInConstructor() {
-        Assert.assertEquals("bar:foo", new Icon("bar:foo").getIcon());
+    void canDefineCollectionInConstructor() {
+        Assertions.assertEquals("bar:foo", new Icon("bar:foo").getIcon());
     }
 
     @Test
-    public void canDefineCollectionInSetter() {
+    void canDefineCollectionInSetter() {
         Icon icon = new Icon();
         icon.setIcon("bar:foo");
-        Assert.assertEquals("bar:foo", icon.getIcon());
+        Assertions.assertEquals("bar:foo", icon.getIcon());
     }
 
     @Test
-    public void setterUsesCurrentCollection() {
+    void setterUsesCurrentCollection() {
         Icon icon = new Icon("bar:foo");
         icon.setIcon("baz");
-        Assert.assertEquals("bar:baz", icon.getIcon());
+        Assertions.assertEquals("bar:baz", icon.getIcon());
     }
 
     @Test
-    public void canSetNewVaadinIcon() {
+    void canSetNewVaadinIcon() {
         Icon icon = new Icon("bar:foo");
         icon.setIcon(VaadinIcon.ABSOLUTE_POSITION);
-        Assert.assertEquals("vaadin:absolute-position", icon.getIcon());
+        Assertions.assertEquals("vaadin:absolute-position", icon.getIcon());
     }
 }

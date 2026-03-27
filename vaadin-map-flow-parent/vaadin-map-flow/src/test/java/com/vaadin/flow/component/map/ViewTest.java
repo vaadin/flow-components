@@ -8,32 +8,32 @@
  */
 package com.vaadin.flow.component.map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.configuration.View;
 
-public class ViewTest {
+class ViewTest {
 
     @Test
-    public void setCenter_doesNotAllowNullValue() {
+    void setCenter_doesNotAllowNullValue() {
         View view = new View();
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> view.setCenter(null));
     }
 
     @Test
-    public void viewProjectionDefaultIsSet() {
+    void viewProjectionDefaultIsSet() {
         View view = new View();
 
-        Assert.assertEquals(view.getProjection(), "EPSG:3857");
+        Assertions.assertEquals("EPSG:3857", view.getProjection());
     }
 
     @Test
-    public void viewProjectionDefaultCanBeChanged() {
+    void viewProjectionDefaultCanBeChanged() {
         View view = new View("EPSG:4326");
 
-        Assert.assertEquals(view.getProjection(), "EPSG:4326");
+        Assertions.assertEquals("EPSG:4326", view.getProjection());
     }
 }

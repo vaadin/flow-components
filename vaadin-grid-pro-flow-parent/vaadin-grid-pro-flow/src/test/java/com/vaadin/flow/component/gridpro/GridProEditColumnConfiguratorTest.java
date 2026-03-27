@@ -11,26 +11,21 @@ package com.vaadin.flow.component.gridpro;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
 
-public class GridProEditColumnConfiguratorTest {
+class GridProEditColumnConfiguratorTest {
 
     EditColumnConfigurator<Person> configurator;
     ItemUpdater testItemUpdater;
     List<String> listOptions;
     EditColumn<Person> column;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         GridPro<Person> grid = new GridPro<>();
         configurator = grid.addEditColumn(value -> value);
         column = (EditColumn<Person>) configurator.getColumn();
@@ -44,84 +39,84 @@ public class GridProEditColumnConfiguratorTest {
     }
 
     @Test
-    public void shouldConfigureTextEditColumnPreset() {
+    void shouldConfigureTextEditColumnPreset() {
         configurator.text(testItemUpdater);
 
-        Assert.assertEquals(column.getEditorType(),
+        Assertions.assertEquals(column.getEditorType(),
                 EditorType.TEXT.getTypeName());
-        Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
+        Assertions.assertEquals(column.getItemUpdater(), testItemUpdater);
     }
 
     @Test
-    public void shouldConfigureCheckboxEditColumnPreset() {
+    void shouldConfigureCheckboxEditColumnPreset() {
         Person initialItem = new Person(null, 0);
         String initialValue = "true";
 
         testItemUpdater = (item, newValue) -> {
-            Assert.assertEquals(initialItem, item);
-            Assert.assertTrue(Boolean.parseBoolean(initialValue));
+            Assertions.assertEquals(initialItem, item);
+            Assertions.assertTrue(Boolean.parseBoolean(initialValue));
         };
 
         configurator.checkbox(testItemUpdater);
-        Assert.assertEquals(column.getEditorType(),
+        Assertions.assertEquals(column.getEditorType(),
                 EditorType.CHECKBOX.getTypeName());
         column.getItemUpdater().accept(initialItem, initialValue);
     }
 
     @Test
-    public void shouldConfigureSelectEditColumnPreset() {
+    void shouldConfigureSelectEditColumnPreset() {
         configurator.select(testItemUpdater, listOptions);
 
-        Assert.assertEquals(column.getEditorType(),
+        Assertions.assertEquals(column.getEditorType(),
                 EditorType.SELECT.getTypeName());
-        Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
-        Assert.assertEquals(column.getOptions(), listOptions);
+        Assertions.assertEquals(column.getItemUpdater(), testItemUpdater);
+        Assertions.assertEquals(column.getOptions(), listOptions);
     }
 
     @Test
-    public void shouldConfigureSelectEditColumnEnumPreset() {
+    void shouldConfigureSelectEditColumnEnumPreset() {
         configurator.select(testItemUpdater, "foo", "bar", "baz");
 
-        Assert.assertEquals(column.getEditorType(),
+        Assertions.assertEquals(column.getEditorType(),
                 EditorType.SELECT.getTypeName());
-        Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
-        Assert.assertEquals(column.getOptions(), listOptions);
+        Assertions.assertEquals(column.getItemUpdater(), testItemUpdater);
+        Assertions.assertEquals(column.getOptions(), listOptions);
     }
 
     @Test
-    public void shouldConfigureSelectEditColumnEnumToStringPreset() {
+    void shouldConfigureSelectEditColumnEnumToStringPreset() {
         Person initialItem = new Person(null, 0);
         String initialValue = "bar";
 
         testItemUpdater = (item, newValue) -> {
-            Assert.assertEquals(initialItem, item);
-            Assert.assertEquals(initialValue,
+            Assertions.assertEquals(initialItem, item);
+            Assertions.assertEquals(initialValue,
                     ((TestEnum) newValue).getStringRepresentation());
         };
         configurator.select(testItemUpdater, TestEnum.class,
                 TestEnum::getStringRepresentation);
 
-        Assert.assertEquals(column.getEditorType(),
+        Assertions.assertEquals(column.getEditorType(),
                 EditorType.SELECT.getTypeName());
-        Assert.assertEquals(column.getOptions(), listOptions);
+        Assertions.assertEquals(column.getOptions(), listOptions);
         column.getItemUpdater().accept(initialItem, initialValue);
     }
 
     @Test
-    public void shouldConfigureSelectEditColumnEnumDefaultPreset() {
+    void shouldConfigureSelectEditColumnEnumDefaultPreset() {
         Person initialItem = new Person(null, 0);
         String initialValue = "bar";
 
         testItemUpdater = (item, newValue) -> {
-            Assert.assertEquals(initialItem, item);
-            Assert.assertEquals(initialValue,
+            Assertions.assertEquals(initialItem, item);
+            Assertions.assertEquals(initialValue,
                     ((TestEnum) newValue).getStringRepresentation());
         };
         configurator.select(testItemUpdater, TestEnum.class);
 
-        Assert.assertEquals(column.getEditorType(),
+        Assertions.assertEquals(column.getEditorType(),
                 EditorType.SELECT.getTypeName());
-        Assert.assertEquals(column.getOptions(), listOptions);
+        Assertions.assertEquals(column.getOptions(), listOptions);
         column.getItemUpdater().accept(initialItem, initialValue);
     }
 

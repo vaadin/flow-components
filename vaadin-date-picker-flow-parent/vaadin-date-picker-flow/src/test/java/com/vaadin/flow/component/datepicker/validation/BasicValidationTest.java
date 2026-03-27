@@ -17,8 +17,8 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.dom.DomEvent;
@@ -26,10 +26,10 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest
+class BasicValidationTest
         extends AbstractBasicValidationTest<DatePicker, LocalDate> {
     @Test
-    public void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
+    void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
         testField.addValidationStatusChangeListener(event1 -> {
             testField.addValidationStatusChangeListener(event2 -> {
             });
@@ -41,86 +41,88 @@ public class BasicValidationTest
     }
 
     @Test
-    public void badInput_validate_emptyErrorMessageDisplayed() {
+    void badInput_validate_emptyErrorMessageDisplayed() {
         testField.getElement().setProperty("_inputElementValue", "foo");
         fireUnparsableChangeDomEvent();
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setBadInputErrorMessage("Date has invalid format"));
         testField.getElement().setProperty("_inputElementValue", "foo");
         fireUnparsableChangeDomEvent();
-        Assert.assertEquals("Date has invalid format",
+        Assertions.assertEquals("Date has invalid format",
                 testField.getErrorMessage());
     }
 
     @Test
-    public void required_validate_emptyErrorMessageDisplayed() {
+    void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(LocalDate.now());
         testField.setValue(null);
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(LocalDate.now());
         testField.setValue(null);
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assertions.assertEquals("Field is required",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void min_validate_emptyErrorMessageDisplayed() {
+    void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(LocalDate.now());
         testField.setValue(LocalDate.now().minusDays(1));
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void min_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void min_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setMin(LocalDate.now());
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setMinErrorMessage("Date is too small"));
         testField.setValue(LocalDate.now().minusDays(1));
-        Assert.assertEquals("Date is too small", testField.getErrorMessage());
+        Assertions.assertEquals("Date is too small",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void max_validate_emptyErrorMessageDisplayed() {
+    void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(LocalDate.now());
         testField.setValue(LocalDate.now().plusDays(1));
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void max_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void max_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setMax(LocalDate.now());
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setMaxErrorMessage("Date is too big"));
         testField.setValue(LocalDate.now().plusDays(1));
-        Assert.assertEquals("Date is too big", testField.getErrorMessage());
+        Assertions.assertEquals("Date is too big", testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+    void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDate.now());
         testField.setValue(null);
-        Assert.assertEquals("Custom error message",
+        Assertions.assertEquals("Custom error message",
                 testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -130,7 +132,8 @@ public class BasicValidationTest
         testField.setErrorMessage("");
         testField.setValue(LocalDate.now());
         testField.setValue(null);
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assertions.assertEquals("Field is required",
+                testField.getErrorMessage());
     }
 
     @Override

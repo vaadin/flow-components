@@ -15,26 +15,26 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.timepicker.TimePickerVariant;
 
-public class TimePickerVariantTest {
+class TimePickerVariantTest {
 
     private TimePicker timePicker;
 
-    @Before
-    public void initTest() {
+    @BeforeEach
+    void initTest() {
         timePicker = new TimePicker();
     }
 
     @Test
-    public void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
+    void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.ALIGN_CENTER);
         assertThemeAttribute("align-center");
@@ -43,35 +43,35 @@ public class TimePickerVariantTest {
     }
 
     @Test
-    public void addAlignRightVariant_themeAttributeUpdated() {
+    void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    public void addSmallVariant_themeAttributeUpdated() {
+    void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addAlignLeftVariant_themeAttributeUpdated() {
+    void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
     @Test
-    public void addHelperAbove_themeAttributeUpdated() {
+    void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
     @Test
-    public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.SMALL);
         timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE);
@@ -82,7 +82,7 @@ public class TimePickerVariantTest {
     }
 
     @Test
-    public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.SMALL);
         timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE);
@@ -91,7 +91,7 @@ public class TimePickerVariantTest {
     }
 
     @Test
-    public void addTwiceAndSeeOnce_themeAttributeUpdated() {
+    void addTwiceAndSeeOnce_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.SMALL);
         timePicker.addThemeVariants(TimePickerVariant.SMALL);
@@ -100,13 +100,13 @@ public class TimePickerVariantTest {
 
     private void assertThemeAttribute(String expected) {
         String actual = timePicker.getThemeName();
-        assertEquals("Unexpected theme attribute on time picker", expected,
-                actual);
+        assertEquals(expected, actual,
+                "Unexpected theme attribute on time picker");
     }
 
     private void assertThemeAttributeContains(String expected) {
         String actual = timePicker.getThemeName();
-        assertTrue("Theme attribute not present on time picker",
-                actual.contains(expected));
+        assertTrue(actual.contains(expected),
+                "Theme attribute not present on time picker");
     }
 }

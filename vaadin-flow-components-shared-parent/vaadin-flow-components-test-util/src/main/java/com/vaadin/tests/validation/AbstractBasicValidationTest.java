@@ -15,9 +15,9 @@
  */
 package com.vaadin.tests.validation;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
@@ -34,58 +34,60 @@ import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> & HasValidation, V> {
     protected C testField;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         testField = createTestField();
     }
 
     @Test
-    public void webComponentManualValidationEnabled() {
-        Assert.assertTrue(
+    void webComponentManualValidationEnabled() {
+        Assertions.assertTrue(
                 testField.getElement().getProperty("manualValidation", false));
     }
 
     @Test
-    public void setRequired_setManualValidation_fireValueChangeEvent_noValidation() {
+    void setRequired_setManualValidation_fireValueChangeEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
         testField.setManualValidation(true);
 
         ComponentUtil.fireEvent(testField, new ComponentValueChangeEvent<>(
                 testField, testField, testField.getEmptyValue(), false));
-        Assert.assertFalse(testField.isInvalid());
+        Assertions.assertFalse(testField.isInvalid());
     }
 
     @Test
-    public void setRequired_setManualValidation_fireUnparsableChangeEvent_noValidation() {
+    void setRequired_setManualValidation_fireUnparsableChangeEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
         testField.setManualValidation(true);
 
         fireUnparsableChangeDomEvent();
-        Assert.assertFalse(testField.isInvalid());
+        Assertions.assertFalse(testField.isInvalid());
     }
 
     @Test
-    public void setErrorMessage_getErrorMessage() {
-        Assert.assertNull(testField.getErrorMessage());
-        Assert.assertNull(testField.getElement().getProperty("errorMessage"));
+    void setErrorMessage_getErrorMessage() {
+        Assertions.assertNull(testField.getErrorMessage());
+        Assertions
+                .assertNull(testField.getElement().getProperty("errorMessage"));
 
         testField.setErrorMessage("Error");
 
-        Assert.assertEquals("Error", testField.getErrorMessage());
-        Assert.assertEquals("Error",
+        Assertions.assertEquals("Error", testField.getErrorMessage());
+        Assertions.assertEquals("Error",
                 testField.getElement().getProperty("errorMessage"));
     }
 
     @Test
-    public void setInvalid_isInvalid() {
-        Assert.assertFalse(testField.isInvalid());
-        Assert.assertFalse(
+    void setInvalid_isInvalid() {
+        Assertions.assertFalse(testField.isInvalid());
+        Assertions.assertFalse(
                 testField.getElement().getProperty("invalid", false));
 
         testField.setInvalid(true);
 
-        Assert.assertTrue(testField.isInvalid());
-        Assert.assertTrue(testField.getElement().getProperty("invalid", false));
+        Assertions.assertTrue(testField.isInvalid());
+        Assertions.assertTrue(
+                testField.getElement().getProperty("invalid", false));
     }
 
     protected abstract C createTestField();

@@ -18,7 +18,7 @@ package com.vaadin.flow.component.textfield.validation;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public class IntegerFieldBinderValidationTest
+class IntegerFieldBinderValidationTest
         extends AbstractBinderValidationTest<Integer, IntegerField> {
 
     @Override

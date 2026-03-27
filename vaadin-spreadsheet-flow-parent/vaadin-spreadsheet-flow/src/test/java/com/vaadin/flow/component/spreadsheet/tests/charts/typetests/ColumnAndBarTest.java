@@ -8,12 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests.charts.typetests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -24,13 +24,13 @@ import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
-public class ColumnAndBarTest extends ChartTestBase {
+class ColumnAndBarTest extends ChartTestBase {
 
     protected Integer[][] columnAndBarData = { { 100, 200 }, { 200, 300 },
             { 400, 400 }, { 800, 500 }, { 1600, 600 } };
 
     @Test
-    public void columnClusteredChart() throws Exception {
+    void columnClusteredChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Column.xlsx",
                 "C1").getConfiguration();
 
@@ -40,7 +40,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void columnStuckedChart() throws Exception {
+    void columnStuckedChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Column.xlsx",
                 "I1").getConfiguration();
 
@@ -50,7 +50,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void columnPercentStuckChart() throws Exception {
+    void columnPercentStuckChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Column.xlsx",
                 "O1").getConfiguration();
 
@@ -60,7 +60,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void column3dClusteredChart() throws Exception {
+    void column3dClusteredChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Column.xlsx",
                 "C20").getConfiguration();
 
@@ -71,7 +71,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void column3dStuckedChart() throws Exception {
+    void column3dStuckedChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Column.xlsx",
                 "I20").getConfiguration();
 
@@ -82,7 +82,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void column3dPercentStuckChart() throws Exception {
+    void column3dPercentStuckChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Column.xlsx",
                 "O20").getConfiguration();
 
@@ -93,7 +93,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void barClusteredChart() throws Exception {
+    void barClusteredChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Bar.xlsx",
                 "C1").getConfiguration();
 
@@ -103,7 +103,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void barStuckedChart() throws Exception {
+    void barStuckedChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Bar.xlsx",
                 "I1").getConfiguration();
 
@@ -113,7 +113,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void barPercentStuckChart() throws Exception {
+    void barPercentStuckChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Bar.xlsx",
                 "O1").getConfiguration();
 
@@ -123,7 +123,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void bar3dClusteredChart() throws Exception {
+    void bar3dClusteredChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Bar.xlsx",
                 "C20").getConfiguration();
 
@@ -134,7 +134,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void bar3dStuckedChart() throws Exception {
+    void bar3dStuckedChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Bar.xlsx",
                 "I20").getConfiguration();
 
@@ -145,7 +145,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void bar3dPercentStuckChart() throws Exception {
+    void bar3dPercentStuckChart() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Bar.xlsx",
                 "O20").getConfiguration();
 
@@ -156,7 +156,7 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void pyramidCylinderConeCharts() throws Exception {
+    void pyramidCylinderConeCharts() throws Exception {
         testColumnChart("E2");
         testColumnChart("M2");
         testColumnChart("E19");
@@ -173,47 +173,47 @@ public class ColumnAndBarTest extends ChartTestBase {
     }
 
     @Test
-    public void columnNotColorByPoint() throws Exception {
+    void columnNotColorByPoint() throws Exception {
         Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx", "K2")
                 .getConfiguration();
         assertSeriesType(conf.getSeries(), ChartType.COLUMN);
-        Assert.assertNull(
+        Assertions.assertNull(
                 ((PlotOptionsColumn) conf.getSeries().get(0).getPlotOptions())
                         .getColorByPoint());
     }
 
     @Test
-    public void columnColorByPoint() throws Exception {
+    void columnColorByPoint() throws Exception {
         Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx", "D2")
                 .getConfiguration();
         assertSeriesType(conf.getSeries(), ChartType.COLUMN);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 ((PlotOptionsColumn) conf.getSeries().get(0).getPlotOptions())
                         .getColorByPoint());
     }
 
     @Test
-    public void barNotColorByPoint() throws Exception {
+    void barNotColorByPoint() throws Exception {
         Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx", "K18")
                 .getConfiguration();
         assertSeriesType(conf.getSeries(), ChartType.BAR);
-        Assert.assertNull(
+        Assertions.assertNull(
                 ((PlotOptionsBar) conf.getSeries().get(0).getPlotOptions())
                         .getColorByPoint());
     }
 
     @Test
-    public void barColorByPoint() throws Exception {
+    void barColorByPoint() throws Exception {
         Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx", "D18")
                 .getConfiguration();
         assertSeriesType(conf.getSeries(), ChartType.BAR);
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 ((PlotOptionsBar) conf.getSeries().get(0).getPlotOptions())
                         .getColorByPoint());
     }
 
     @Test
-    public void barWithHiddenCol() throws Exception {
+    void barWithHiddenCol() throws Exception {
         Configuration conf = getChartFromSampleFile(
                 "HiddenColumnChartTest.xlsx", "D10").getConfiguration();
         assertSeriesType(conf.getSeries(), ChartType.COLUMN);

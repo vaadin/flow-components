@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.component.grid;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class NestedPropertyNameTest {
+class NestedPropertyNameTest {
 
     @Test
-    public void nestedProperty_sameNameCanBeAdded() {
+    void nestedProperty_sameNameCanBeAdded() {
         Grid<Person> grid = new Grid<>(Person.class);
         grid.addColumn("street.name");
     }

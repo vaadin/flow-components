@@ -18,7 +18,7 @@ package com.vaadin.flow.component.slider.validation;
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class SliderBasicValidationTest
+class SliderBasicValidationTest
         extends AbstractBasicValidationTest<Slider, Double> {
 
     @Override

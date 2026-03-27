@@ -17,15 +17,15 @@ package com.vaadin.flow.component.datetimepicker;
 
 import java.time.LocalDateTime;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsTest;
 
-public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
+class DateTimePickerSignalTest extends AbstractSignalsTest {
 
     private final DateTimePicker dateTimePicker = new DateTimePicker();
     private final ValueSignal<LocalDateTime> signal = new ValueSignal<>(
@@ -34,134 +34,145 @@ public class DateTimePickerSignalTest extends AbstractSignalsUnitTest {
             false);
 
     @Test
-    public void bindMin_elementAttached_updatesWithSignal() {
+    void bindMin_elementAttached_updatesWithSignal() {
         UI.getCurrent().add(dateTimePicker);
         dateTimePicker.bindMin(signal);
 
-        Assert.assertEquals(signal.peek(), dateTimePicker.getMin());
-        Assert.assertEquals(signal.peek().toString(),
+        Assertions.assertEquals(signal.peek(), dateTimePicker.getMin());
+        Assertions.assertEquals(signal.peek().toString(),
                 dateTimePicker.getElement().getProperty("min"));
 
         LocalDateTime newValue = LocalDateTime.of(2023, 10, 2, 11, 0);
         signal.set(newValue);
-        Assert.assertEquals(newValue, dateTimePicker.getMin());
-        Assert.assertEquals(newValue.toString(),
+        Assertions.assertEquals(newValue, dateTimePicker.getMin());
+        Assertions.assertEquals(newValue.toString(),
                 dateTimePicker.getElement().getProperty("min"));
     }
 
     @Test
-    public void bindMin_elementNotAttached_bindingInactive_untilAttach() {
+    void bindMin_elementNotAttached_initialValueApplied() {
         dateTimePicker.bindMin(signal);
 
-        Assert.assertNull(dateTimePicker.getMin());
+        // Initial value is applied immediately (effect runs on creation)
+        Assertions.assertEquals(signal.peek(), dateTimePicker.getMin());
 
         UI.getCurrent().add(dateTimePicker);
-        Assert.assertEquals(signal.peek(), dateTimePicker.getMin());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void setMin_whileBound_throwsException() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindMin(signal);
-        dateTimePicker.setMin(LocalDateTime.now());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindMin_whileBound_throwsException() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindMin(signal);
-        dateTimePicker.bindMin(new ValueSignal<>(LocalDateTime.now()));
+        Assertions.assertEquals(signal.peek(), dateTimePicker.getMin());
     }
 
     @Test
-    public void bindMax_elementAttached_updatesWithSignal() {
+    void setMin_whileBound_throwsException() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindMin(signal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> dateTimePicker.setMin(LocalDateTime.now()));
+    }
+
+    @Test
+    void bindMin_whileBound_throwsException() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindMin(signal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> dateTimePicker
+                        .bindMin(new ValueSignal<>(LocalDateTime.now())));
+    }
+
+    @Test
+    void bindMax_elementAttached_updatesWithSignal() {
         UI.getCurrent().add(dateTimePicker);
         dateTimePicker.bindMax(signal);
 
-        Assert.assertEquals(signal.peek(), dateTimePicker.getMax());
-        Assert.assertEquals(signal.peek().toString(),
+        Assertions.assertEquals(signal.peek(), dateTimePicker.getMax());
+        Assertions.assertEquals(signal.peek().toString(),
                 dateTimePicker.getElement().getProperty("max"));
 
         LocalDateTime newValue = LocalDateTime.of(2023, 10, 2, 11, 0);
         signal.set(newValue);
-        Assert.assertEquals(newValue, dateTimePicker.getMax());
-        Assert.assertEquals(newValue.toString(),
+        Assertions.assertEquals(newValue, dateTimePicker.getMax());
+        Assertions.assertEquals(newValue.toString(),
                 dateTimePicker.getElement().getProperty("max"));
     }
 
     @Test
-    public void bindMax_elementNotAttached_bindingInactive_untilAttach() {
+    void bindMax_elementNotAttached_initialValueApplied() {
         dateTimePicker.bindMax(signal);
 
-        Assert.assertNull(dateTimePicker.getMax());
+        // Initial value is applied immediately (effect runs on creation)
+        Assertions.assertEquals(signal.peek(), dateTimePicker.getMax());
 
         UI.getCurrent().add(dateTimePicker);
-        Assert.assertEquals(signal.peek(), dateTimePicker.getMax());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void setMax_whileBound_throwsException() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindMax(signal);
-        dateTimePicker.setMax(LocalDateTime.now());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindMax_whileBound_throwsException() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindMax(signal);
-        dateTimePicker.bindMax(new ValueSignal<>(LocalDateTime.now()));
+        Assertions.assertEquals(signal.peek(), dateTimePicker.getMax());
     }
 
     @Test
-    public void bindReadOnly_elementAttached_updatesWithSignal() {
+    void setMax_whileBound_throwsException() {
         UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindReadOnly(readonlySignal);
-
-        Assert.assertFalse(dateTimePicker.isReadOnly());
-
-        readonlySignal.set(true);
-        Assert.assertTrue(dateTimePicker.isReadOnly());
+        dateTimePicker.bindMax(signal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> dateTimePicker.setMax(LocalDateTime.now()));
     }
 
     @Test
-    public void bindReadOnly_elementNotAttached_bindingInactive_untilAttach() {
-        readonlySignal.set(true);
-        dateTimePicker.bindReadOnly(readonlySignal);
-
-        Assert.assertFalse(dateTimePicker.isReadOnly());
-
+    void bindMax_whileBound_throwsException() {
         UI.getCurrent().add(dateTimePicker);
-        Assert.assertTrue(dateTimePicker.isReadOnly());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void setReadOnly_whileBound_throwsException() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindReadOnly(readonlySignal);
-        dateTimePicker.setReadOnly(true);
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindReadOnly_whileBound_throwsException() {
-        UI.getCurrent().add(dateTimePicker);
-        dateTimePicker.bindReadOnly(readonlySignal);
-        dateTimePicker.bindReadOnly(new ValueSignal<>(true));
+        dateTimePicker.bindMax(signal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> dateTimePicker
+                        .bindMax(new ValueSignal<>(LocalDateTime.now())));
     }
 
     @Test
-    public void bindReadOnly_synchronizesChildComponents() {
+    void bindReadOnly_elementAttached_updatesWithSignal() {
         UI.getCurrent().add(dateTimePicker);
         dateTimePicker.bindReadOnly(readonlySignal);
 
-        Assert.assertFalse(dateTimePicker.isReadOnly());
-        Assert.assertFalse(getDatePicker().isReadOnly());
-        Assert.assertFalse(getTimePicker().isReadOnly());
+        Assertions.assertFalse(dateTimePicker.isReadOnly());
 
         readonlySignal.set(true);
-        Assert.assertTrue(dateTimePicker.isReadOnly());
-        Assert.assertTrue(getDatePicker().isReadOnly());
-        Assert.assertTrue(getTimePicker().isReadOnly());
+        Assertions.assertTrue(dateTimePicker.isReadOnly());
+    }
+
+    @Test
+    void bindReadOnly_elementNotAttached_initialValueApplied() {
+        readonlySignal.set(true);
+        dateTimePicker.bindReadOnly(readonlySignal);
+
+        // Initial value is applied immediately (effect runs on creation)
+        Assertions.assertTrue(dateTimePicker.isReadOnly());
+
+        UI.getCurrent().add(dateTimePicker);
+        Assertions.assertTrue(dateTimePicker.isReadOnly());
+    }
+
+    @Test
+    void setReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindReadOnly(readonlySignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> dateTimePicker.setReadOnly(true));
+    }
+
+    @Test
+    void bindReadOnly_whileBound_throwsException() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindReadOnly(readonlySignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> dateTimePicker.bindReadOnly(new ValueSignal<>(true)));
+    }
+
+    @Test
+    void bindReadOnly_synchronizesChildComponents() {
+        UI.getCurrent().add(dateTimePicker);
+        dateTimePicker.bindReadOnly(readonlySignal);
+
+        Assertions.assertFalse(dateTimePicker.isReadOnly());
+        Assertions.assertFalse(getDatePicker().isReadOnly());
+        Assertions.assertFalse(getTimePicker().isReadOnly());
+
+        readonlySignal.set(true);
+        Assertions.assertTrue(dateTimePicker.isReadOnly());
+        Assertions.assertTrue(getDatePicker().isReadOnly());
+        Assertions.assertTrue(getTimePicker().isReadOnly());
     }
 
     private DateTimePickerDatePicker getDatePicker() {

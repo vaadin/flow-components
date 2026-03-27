@@ -19,262 +19,266 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Unit tests for the {@link Card} component.
  */
-public class CardTest {
-    @Rule
-    public final MockUIRule ui = new MockUIRule();
+class CardTest {
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     private Card card;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         card = new Card();
         ui.add(card);
     }
 
     @Test
-    public void titleNullByDefault() {
-        Assert.assertNull(card.getTitle());
+    void titleNullByDefault() {
+        Assertions.assertNull(card.getTitle());
     }
 
     @Test
-    public void titleUpdatedCorrectly() {
+    void titleUpdatedCorrectly() {
         slotBasedFieldUpdatedCorrectly(Card::getTitle, Card::setTitle);
     }
 
     @Test
-    public void setTitle_slotAttributeSet() {
+    void setTitle_slotAttributeSet() {
         setSlotContent_slotAttributeIsSet(Card::setTitle, "title");
     }
 
     @Test
-    public void stringTitleIsEmptyByDefault() {
-        Assert.assertEquals("", card.getTitleAsText());
+    void stringTitleIsEmptyByDefault() {
+        Assertions.assertEquals("", card.getTitleAsText());
     }
 
     @Test
-    public void setStringTitle_titleIsSet() {
+    void setStringTitle_titleIsSet() {
         var title = "Some Title";
         card.setTitle(title);
-        Assert.assertEquals(title, card.getTitleAsText());
-        Assert.assertEquals(title, card.getElement().getProperty("cardTitle"));
+        Assertions.assertEquals(title, card.getTitleAsText());
+        Assertions.assertEquals(title,
+                card.getElement().getProperty("cardTitle"));
         title = "Other Title";
         card.setTitle(title, 2);
-        Assert.assertEquals(title, card.getTitleAsText());
-        Assert.assertEquals(title, card.getElement().getProperty("cardTitle"));
+        Assertions.assertEquals(title, card.getTitleAsText());
+        Assertions.assertEquals(title,
+                card.getElement().getProperty("cardTitle"));
     }
 
     @Test
-    public void setStringTitle_setNullStringTitle_titleCleared() {
+    void setStringTitle_setNullStringTitle_titleCleared() {
         card.setTitle("Some Title");
         card.setTitle((String) null);
-        Assert.assertEquals("", card.getTitleAsText());
+        Assertions.assertEquals("", card.getTitleAsText());
     }
 
     @Test
-    public void setTitleHeadingLevel_elementPropertyIsUpdated() {
+    void setTitleHeadingLevel_elementPropertyIsUpdated() {
         var titleHeadingLevel = 1;
         card.setTitleHeadingLevel(titleHeadingLevel);
-        Assert.assertEquals(titleHeadingLevel,
+        Assertions.assertEquals(titleHeadingLevel,
                 card.getElement().getProperty("titleHeadingLevel", -1));
         titleHeadingLevel = 7;
         card.setTitleHeadingLevel(titleHeadingLevel);
-        Assert.assertEquals(titleHeadingLevel,
+        Assertions.assertEquals(titleHeadingLevel,
                 card.getElement().getProperty("titleHeadingLevel", -1));
     }
 
     @Test
-    public void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
+    void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
         card.setTitleHeadingLevel(1);
         card.setTitleHeadingLevel(null);
-        Assert.assertFalse(card.getElement().hasProperty("titleHeadingLevel"));
+        Assertions.assertFalse(
+                card.getElement().hasProperty("titleHeadingLevel"));
     }
 
     @Test
-    public void setStringTitle_setComponentTitle_stringTitleIsRemoved() {
+    void setStringTitle_setComponentTitle_stringTitleIsRemoved() {
         card.setTitle("Some Title");
         card.setTitle(new Div("Other Title"));
-        Assert.assertEquals("", card.getTitleAsText());
+        Assertions.assertEquals("", card.getTitleAsText());
     }
 
     @Test
-    public void setComponentTitle_setStringTitle_componentTitleIsRemoved() {
+    void setComponentTitle_setStringTitle_componentTitleIsRemoved() {
         card.setTitle(new Div("Other Title"));
         card.setTitle("Some Title");
-        Assert.assertNull(card.getTitle());
+        Assertions.assertNull(card.getTitle());
     }
 
     @Test
-    public void subtitleNullByDefault() {
-        Assert.assertNull(card.getSubtitle());
+    void subtitleNullByDefault() {
+        Assertions.assertNull(card.getSubtitle());
     }
 
     @Test
-    public void subtitleUpdatedCorrectly() {
+    void subtitleUpdatedCorrectly() {
         slotBasedFieldUpdatedCorrectly(Card::getSubtitle, Card::setSubtitle);
     }
 
     @Test
-    public void setSubtitle_slotAttributeSet() {
+    void setSubtitle_slotAttributeSet() {
         setSlotContent_slotAttributeIsSet(Card::setSubtitle, "subtitle");
     }
 
     @Test
-    public void setStringSubtitle_subtitleIsSet() {
+    void setStringSubtitle_subtitleIsSet() {
         var subtitle = "Some Subtitle";
         card.setSubtitle(subtitle);
-        Assert.assertNotNull(card.getSubtitle());
-        Assert.assertTrue(card.getSubtitle() instanceof Span);
-        Assert.assertEquals(subtitle, ((Span) card.getSubtitle()).getText());
-    }
-
-    @Test
-    public void setStringSubtitle_setNullStringSubtitle_subtitleCleared() {
-        card.setSubtitle("Some Subtitle");
-        card.setSubtitle((String) null);
-        Assert.assertNull(card.getSubtitle());
-    }
-
-    @Test
-    public void setStringSubtitle_setComponentSubtitle_stringSubtitleIsReplaced() {
-        card.setSubtitle("Some Subtitle");
-        var newSubtitle = new Div("Other Subtitle");
-        card.setSubtitle(newSubtitle);
-        Assert.assertEquals(newSubtitle, card.getSubtitle());
-    }
-
-    @Test
-    public void setComponentSubtitle_setStringSubtitle_componentSubtitleIsReplaced() {
-        var componentSubtitle = new Div("Component Subtitle");
-        card.setSubtitle(componentSubtitle);
-        var stringSubtitle = "String Subtitle";
-        card.setSubtitle(stringSubtitle);
-        Assert.assertTrue(card.getSubtitle() instanceof Span);
-        Assert.assertEquals(stringSubtitle,
+        Assertions.assertNotNull(card.getSubtitle());
+        Assertions.assertTrue(card.getSubtitle() instanceof Span);
+        Assertions.assertEquals(subtitle,
                 ((Span) card.getSubtitle()).getText());
     }
 
     @Test
-    public void mediaNullByDefault() {
-        Assert.assertNull(card.getMedia());
+    void setStringSubtitle_setNullStringSubtitle_subtitleCleared() {
+        card.setSubtitle("Some Subtitle");
+        card.setSubtitle((String) null);
+        Assertions.assertNull(card.getSubtitle());
     }
 
     @Test
-    public void mediaUpdatedCorrectly() {
+    void setStringSubtitle_setComponentSubtitle_stringSubtitleIsReplaced() {
+        card.setSubtitle("Some Subtitle");
+        var newSubtitle = new Div("Other Subtitle");
+        card.setSubtitle(newSubtitle);
+        Assertions.assertEquals(newSubtitle, card.getSubtitle());
+    }
+
+    @Test
+    void setComponentSubtitle_setStringSubtitle_componentSubtitleIsReplaced() {
+        var componentSubtitle = new Div("Component Subtitle");
+        card.setSubtitle(componentSubtitle);
+        var stringSubtitle = "String Subtitle";
+        card.setSubtitle(stringSubtitle);
+        Assertions.assertTrue(card.getSubtitle() instanceof Span);
+        Assertions.assertEquals(stringSubtitle,
+                ((Span) card.getSubtitle()).getText());
+    }
+
+    @Test
+    void mediaNullByDefault() {
+        Assertions.assertNull(card.getMedia());
+    }
+
+    @Test
+    void mediaUpdatedCorrectly() {
         slotBasedFieldUpdatedCorrectly(Card::getMedia, Card::setMedia);
     }
 
     @Test
-    public void setMedia_slotAttributeSet() {
+    void setMedia_slotAttributeSet() {
         setSlotContent_slotAttributeIsSet(Card::setMedia, "media");
     }
 
     @Test
-    public void headerNullByDefault() {
-        Assert.assertNull(card.getHeader());
+    void headerNullByDefault() {
+        Assertions.assertNull(card.getHeader());
     }
 
     @Test
-    public void headerUpdatedCorrectly() {
+    void headerUpdatedCorrectly() {
         slotBasedFieldUpdatedCorrectly(Card::getHeader, Card::setHeader);
     }
 
     @Test
-    public void setHeader_slotAttributeSet() {
+    void setHeader_slotAttributeSet() {
         setSlotContent_slotAttributeIsSet(Card::setHeader, "header");
     }
 
     @Test
-    public void headerPrefixNullByDefault() {
-        Assert.assertNull(card.getHeaderPrefix());
+    void headerPrefixNullByDefault() {
+        Assertions.assertNull(card.getHeaderPrefix());
     }
 
     @Test
-    public void headerPrefixUpdatedCorrectly() {
+    void headerPrefixUpdatedCorrectly() {
         slotBasedFieldUpdatedCorrectly(Card::getHeaderPrefix,
                 Card::setHeaderPrefix);
     }
 
     @Test
-    public void setHeaderPrefix_slotAttributeSet() {
+    void setHeaderPrefix_slotAttributeSet() {
         setSlotContent_slotAttributeIsSet(Card::setHeaderPrefix,
                 "header-prefix");
     }
 
     @Test
-    public void headerSuffixNullByDefault() {
-        Assert.assertNull(card.getHeaderSuffix());
+    void headerSuffixNullByDefault() {
+        Assertions.assertNull(card.getHeaderSuffix());
     }
 
     @Test
-    public void headerSuffixUpdatedCorrectly() {
+    void headerSuffixUpdatedCorrectly() {
         slotBasedFieldUpdatedCorrectly(Card::getHeaderSuffix,
                 Card::setHeaderSuffix);
     }
 
     @Test
-    public void setHeaderSuffix_slotAttributeSet() {
+    void setHeaderSuffix_slotAttributeSet() {
         setSlotContent_slotAttributeIsSet(Card::setHeaderSuffix,
                 "header-suffix");
     }
 
     @Test
-    public void hasNoFooterComponentsByDefault() {
-        Assert.assertEquals(0, card.getFooterComponents().length);
+    void hasNoFooterComponentsByDefault() {
+        Assertions.assertEquals(0, card.getFooterComponents().length);
     }
 
     @Test
-    public void addToFooterInArray_footerUpdated() {
+    void addToFooterInArray_footerUpdated() {
         var firstFooterContent = new Div();
         var secondFooterContent = new Div();
         card.addToFooter(firstFooterContent, secondFooterContent);
         var footerComponents = card.getFooterComponents();
-        Assert.assertEquals(2, footerComponents.length);
-        Assert.assertEquals(firstFooterContent, footerComponents[0]);
-        Assert.assertEquals(secondFooterContent, footerComponents[1]);
+        Assertions.assertEquals(2, footerComponents.length);
+        Assertions.assertEquals(firstFooterContent, footerComponents[0]);
+        Assertions.assertEquals(secondFooterContent, footerComponents[1]);
     }
 
     @Test
-    public void addToFooterSeparately_footerUpdated() {
+    void addToFooterSeparately_footerUpdated() {
         var firstFooterContent = new Div();
         var secondFooterContent = new Div();
         card.addToFooter(firstFooterContent);
         card.addToFooter(secondFooterContent);
         var footerComponents = card.getFooterComponents();
-        Assert.assertEquals(2, footerComponents.length);
-        Assert.assertEquals(firstFooterContent, footerComponents[0]);
-        Assert.assertEquals(secondFooterContent, footerComponents[1]);
+        Assertions.assertEquals(2, footerComponents.length);
+        Assertions.assertEquals(firstFooterContent, footerComponents[0]);
+        Assertions.assertEquals(secondFooterContent, footerComponents[1]);
     }
 
     @Test
-    public void addToFooter_slotAttributeSet() {
+    void addToFooter_slotAttributeSet() {
         var footerComponents = List.of(new Div(), new Span());
         footerComponents.forEach(card::addToFooter);
         footerComponents
-                .forEach(footerComponent -> Assert.assertEquals("footer",
+                .forEach(footerComponent -> Assertions.assertEquals("footer",
                         footerComponent.getElement().getAttribute("slot")));
     }
 
     @Test
-    public void getChildren_emptyByDefault() {
-        Assert.assertTrue(card.getChildren().findAny().isEmpty());
+    void getChildren_emptyByDefault() {
+        Assertions.assertTrue(card.getChildren().findAny().isEmpty());
     }
 
     @Test
-    public void getChildren_onlyReturnsComponentsFromDefaultSlot() {
+    void getChildren_onlyReturnsComponentsFromDefaultSlot() {
         card.setTitle(new Div());
         card.setSubtitle(new Div());
         card.setHeader(new Div());
@@ -282,16 +286,16 @@ public class CardTest {
         card.setHeaderSuffix(new Div());
         card.setMedia(new Div());
 
-        Assert.assertTrue(card.getChildren().findAny().isEmpty());
+        Assertions.assertTrue(card.getChildren().findAny().isEmpty());
 
         var content = new Span();
         card.add(content);
 
-        Assert.assertEquals(List.of(content), card.getChildren().toList());
+        Assertions.assertEquals(List.of(content), card.getChildren().toList());
     }
 
     @Test
-    public void removeAll_onlyRemovesContent() {
+    void removeAll_onlyRemovesContent() {
         card.setTitle(new Div());
         card.setSubtitle(new Div());
         card.setHeader(new Div());
@@ -299,51 +303,53 @@ public class CardTest {
         card.setHeaderSuffix(new Div());
         card.setMedia(new Div());
         card.removeAll();
-        Assert.assertNotNull(card.getTitle());
-        Assert.assertNotNull(card.getSubtitle());
-        Assert.assertNotNull(card.getHeader());
-        Assert.assertNotNull(card.getHeaderPrefix());
-        Assert.assertNotNull(card.getHeaderSuffix());
-        Assert.assertNotNull(card.getMedia());
+        Assertions.assertNotNull(card.getTitle());
+        Assertions.assertNotNull(card.getSubtitle());
+        Assertions.assertNotNull(card.getHeader());
+        Assertions.assertNotNull(card.getHeaderPrefix());
+        Assertions.assertNotNull(card.getHeaderSuffix());
+        Assertions.assertNotNull(card.getMedia());
     }
 
     @Test
-    public void removeAll_allChildrenRemoved() {
+    void removeAll_allChildrenRemoved() {
         var component1 = new Div();
         var component2 = new Span();
         card.add(component1, component2);
         card.removeAll();
-        Assert.assertTrue(card.getChildren().findAny().isEmpty());
-        Assert.assertFalse(component1.isAttached());
-        Assert.assertFalse(component2.isAttached());
+        Assertions.assertTrue(card.getChildren().findAny().isEmpty());
+        Assertions.assertFalse(component1.isAttached());
+        Assertions.assertFalse(component2.isAttached());
     }
 
     @Test
-    public void emptyCard_addComponentAtIndex_componentAddedAtCorrectIndex() {
+    void emptyCard_addComponentAtIndex_componentAddedAtCorrectIndex() {
         var component = new Span();
         card.addComponentAtIndex(0, component);
-        Assert.assertEquals(List.of(component), card.getChildren().toList());
-        Assert.assertTrue(component.isAttached());
+        Assertions.assertEquals(List.of(component),
+                card.getChildren().toList());
+        Assertions.assertTrue(component.isAttached());
     }
 
     @Test
-    public void addComponentAtNextIndex_componentAddedAtCorrectIndex() {
+    void addComponentAtNextIndex_componentAddedAtCorrectIndex() {
         var first = new Span();
         card.add(first);
         var second = new Span();
         card.addComponentAtIndex(1, second);
-        Assert.assertEquals(List.of(first, second),
+        Assertions.assertEquals(List.of(first, second),
                 card.getChildren().toList());
-        Assert.assertTrue(second.isAttached());
+        Assertions.assertTrue(second.isAttached());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void addComponentAtNegativeIndex_throwsIllegalArgumentException() {
-        card.addComponentAtIndex(-1, new Span());
+    @Test
+    void addComponentAtNegativeIndex_throwsIllegalArgumentException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> card.addComponentAtIndex(-1, new Span()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void addComponentAtOutOfBoundsIndex_throwsIllegalArgumentException() {
+    @Test
+    void addComponentAtOutOfBoundsIndex_throwsIllegalArgumentException() {
         // Add components to other slots to check that index only operates on
         // default slot
         card.setTitle(new Div());
@@ -354,32 +360,33 @@ public class CardTest {
         card.setMedia(new Div());
 
         card.add(new Span());
-        card.addComponentAtIndex(2, new Span());
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> card.addComponentAtIndex(2, new Span()));
     }
 
     @Test
-    public void addComponentAtIndex_componentsAddedAtCorrectIndexes() {
+    void addComponentAtIndex_componentsAddedAtCorrectIndexes() {
         var first = new Span();
         card.add(first);
 
         var second = new Span();
         card.addComponentAtIndex(0, second);
-        Assert.assertEquals(List.of(second, first),
+        Assertions.assertEquals(List.of(second, first),
                 card.getChildren().toList());
 
         var third = new Span();
         card.addComponentAtIndex(2, third);
-        Assert.assertEquals(List.of(second, first, third),
+        Assertions.assertEquals(List.of(second, first, third),
                 card.getChildren().toList());
 
         var fourth = new Span();
         card.addComponentAtIndex(1, fourth);
-        Assert.assertEquals(List.of(second, fourth, first, third),
+        Assertions.assertEquals(List.of(second, fourth, first, third),
                 card.getChildren().toList());
     }
 
     @Test
-    public void addComponentAtIndex_ignoresComponentsFromOtherSlots() {
+    void addComponentAtIndex_ignoresComponentsFromOtherSlots() {
         card.setTitle(new Div());
         card.setSubtitle(new Div());
         card.setHeader(new Div());
@@ -395,12 +402,12 @@ public class CardTest {
 
         var third = new Span();
         card.addComponentAtIndex(1, third);
-        Assert.assertEquals(List.of(first, third, second),
+        Assertions.assertEquals(List.of(first, third, second),
                 card.getChildren().toList());
     }
 
     @Test
-    public void addComponentAtIndex_withAlreadyAddedComponent() {
+    void addComponentAtIndex_withAlreadyAddedComponent() {
         card.setTitle(new Div());
         card.setSubtitle(new Div());
         card.setHeader(new Div());
@@ -417,44 +424,45 @@ public class CardTest {
         card.add(third);
 
         card.addComponentAtIndex(2, third);
-        Assert.assertEquals(List.of(first, second, third),
+        Assertions.assertEquals(List.of(first, second, third),
                 card.getChildren().toList());
 
         card.addComponentAtIndex(0, third);
-        Assert.assertEquals(List.of(third, first, second),
+        Assertions.assertEquals(List.of(third, first, second),
                 card.getChildren().toList());
     }
 
     @Test
-    public void ariaRoleEmptyByDefault() {
-        Assert.assertTrue(card.getAriaRole().isEmpty());
+    void ariaRoleEmptyByDefault() {
+        Assertions.assertTrue(card.getAriaRole().isEmpty());
     }
 
     @Test
-    public void setAriaRole_ariaRoleUpdated() {
+    void setAriaRole_ariaRoleUpdated() {
         var ariaRole = "custom-role";
         card.setAriaRole(ariaRole);
-        Assert.assertTrue(card.getAriaRole().isPresent());
-        Assert.assertEquals(ariaRole, card.getAriaRole().get());
+        Assertions.assertTrue(card.getAriaRole().isPresent());
+        Assertions.assertEquals(ariaRole, card.getAriaRole().get());
     }
 
     @Test
-    public void setAriaRoleNull_ariaRoleUpdated() {
+    void setAriaRoleNull_ariaRoleUpdated() {
         card.setAriaRole("custom-role");
         card.setAriaRole(null);
-        Assert.assertTrue(card.getAriaRole().isEmpty());
+        Assertions.assertTrue(card.getAriaRole().isEmpty());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(HasThemeVariant.class.isAssignableFrom(Card.class));
+    void implementsHasThemeVariant() {
+        Assertions
+                .assertTrue(HasThemeVariant.class.isAssignableFrom(Card.class));
     }
 
     private void setSlotContent_slotAttributeIsSet(
             BiConsumer<Card, Component> setter, String slotName) {
         var slotContent = new Div();
         setter.accept(card, slotContent);
-        Assert.assertEquals(slotName,
+        Assertions.assertEquals(slotName,
                 slotContent.getElement().getAttribute("slot"));
     }
 
@@ -464,22 +472,22 @@ public class CardTest {
         // Set slot component
         var component = new Span("Text");
         setter.accept(card, component);
-        Assert.assertEquals(component, getter.apply(card));
-        Assert.assertTrue(component.isAttached());
-        Assert.assertTrue(isAncestor(component, card));
+        Assertions.assertEquals(component, getter.apply(card));
+        Assertions.assertTrue(component.isAttached());
+        Assertions.assertTrue(isAncestor(component, card));
         // Set another slot component
         var anotherComponent = new Div("New Text");
         setter.accept(card, anotherComponent);
-        Assert.assertEquals(anotherComponent, getter.apply(card));
-        Assert.assertTrue(anotherComponent.isAttached());
-        Assert.assertTrue(isAncestor(anotherComponent, card));
-        Assert.assertFalse(component.isAttached());
-        Assert.assertFalse(isAncestor(component, card));
+        Assertions.assertEquals(anotherComponent, getter.apply(card));
+        Assertions.assertTrue(anotherComponent.isAttached());
+        Assertions.assertTrue(isAncestor(anotherComponent, card));
+        Assertions.assertFalse(component.isAttached());
+        Assertions.assertFalse(isAncestor(component, card));
         // Set null
         setter.accept(card, null);
-        Assert.assertNull(getter.apply(card));
-        Assert.assertFalse(anotherComponent.isAttached());
-        Assert.assertFalse(isAncestor(anotherComponent, card));
+        Assertions.assertNull(getter.apply(card));
+        Assertions.assertFalse(anotherComponent.isAttached());
+        Assertions.assertFalse(isAncestor(anotherComponent, card));
     }
 
     private boolean isAncestor(Component component, Card probableAncestor) {

@@ -15,46 +15,47 @@
  */
 package com.vaadin.flow.component.combobox.validation;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class ComboBoxBasicValidationTest
+class ComboBoxBasicValidationTest
         extends AbstractBasicValidationTest<ComboBox<String>, String> {
     @Test
-    public void required_validate_emptyErrorMessageDisplayed() {
+    void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setValue("foo");
         testField.setValue(null);
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new ComboBox.ComboBoxI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue("foo");
         testField.setValue(null);
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assertions.assertEquals("Field is required",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+    void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new ComboBox.ComboBoxI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue("foo");
         testField.setValue(null);
-        Assert.assertEquals("Custom error message",
+        Assertions.assertEquals("Custom error message",
                 testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new ComboBox.ComboBoxI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -64,7 +65,8 @@ public class ComboBoxBasicValidationTest
         testField.setErrorMessage("");
         testField.setValue("foo");
         testField.setValue(null);
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assertions.assertEquals("Field is required",
+                testField.getErrorMessage());
     }
 
     @Override

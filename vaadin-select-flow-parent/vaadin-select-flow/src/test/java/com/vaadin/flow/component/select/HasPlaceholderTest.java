@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.select;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasPlaceholder;
 
-public class HasPlaceholderTest {
+class HasPlaceholderTest {
 
     @Test
-    public void select() {
+    void select() {
         Select<String> c = new Select<>();
-        Assert.assertTrue(c instanceof HasPlaceholder);
+        Assertions.assertTrue(c instanceof HasPlaceholder);
     }
 
 }

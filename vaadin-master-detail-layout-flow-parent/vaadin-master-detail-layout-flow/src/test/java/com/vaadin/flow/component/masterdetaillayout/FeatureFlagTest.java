@@ -15,28 +15,30 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.tests.EnableFeatureFlagRule;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.EnableFeatureFlagExtension;
+import com.vaadin.tests.MockUIExtension;
 
-public class FeatureFlagTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-    @Rule
-    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+class FeatureFlagTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
 
     @Test
-    public void featureEnabled_attachLayout_doesNotThrow() {
+    void featureEnabled_attachLayout_doesNotThrow() {
         ui.add(new MasterDetailLayout());
     }
 
-    @Test(expected = ExperimentalFeatureException.class)
-    public void featureDisabled_attachLayout_throwsExperimentalFeatureException() {
-        featureFlagRule.disableFeature();
-        ui.add(new MasterDetailLayout());
+    @Test
+    void featureDisabled_attachLayout_throwsExperimentalFeatureException() {
+        featureFlagExtension.disableFeature();
+        Assertions.assertThrows(ExperimentalFeatureException.class,
+                () -> ui.add(new MasterDetailLayout()));
     }
 }

@@ -17,9 +17,9 @@ package com.vaadin.flow.component.messages.tests;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
@@ -28,63 +28,65 @@ import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 
-public class MessageInputTest {
+class MessageInputTest {
 
     private MessageInput messageInput;
     private MessageInputI18n i18n;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         messageInput = new MessageInput();
         i18n = new MessageInputI18n();
     }
 
     @Test
-    public void getI18n_returnsNull() {
-        Assert.assertNull(messageInput.getI18n());
+    void getI18n_returnsNull() {
+        Assertions.assertNull(messageInput.getI18n());
     }
 
     @Test
-    public void setI18n_getI18n() {
+    void setI18n_getI18n() {
         messageInput.setI18n(i18n);
-        Assert.assertSame(i18n, messageInput.getI18n());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setI18n_null_throws() {
-        messageInput.setI18n(null);
+        Assertions.assertSame(i18n, messageInput.getI18n());
     }
 
     @Test
-    public void i18nPropertySetters_returnI18n() {
-        Assert.assertSame(i18n, i18n.setMessage("foo"));
-        Assert.assertSame(i18n, i18n.setSend("bar"));
+    void setI18n_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> messageInput.setI18n(null));
     }
 
     @Test
-    public void constructWithSubmitListener_fireEvent_listenerCalled() {
+    void i18nPropertySetters_returnI18n() {
+        Assertions.assertSame(i18n, i18n.setMessage("foo"));
+        Assertions.assertSame(i18n, i18n.setSend("bar"));
+    }
+
+    @Test
+    void constructWithSubmitListener_fireEvent_listenerCalled() {
         AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
         MessageInput messageInput = new MessageInput(eventRef::set);
         MessageInput.SubmitEvent event = new MessageInput.SubmitEvent(
                 messageInput, false, "foo");
         ComponentUtil.fireEvent(messageInput, event);
-        Assert.assertSame(event, eventRef.get());
+        Assertions.assertSame(event, eventRef.get());
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(messageInput instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(messageInput instanceof HasTooltip);
     }
 
     @Test
-    public void implementsFocusable() {
-        Assert.assertTrue("MessageInput should be focusable",
-                Focusable.class.isAssignableFrom(messageInput.getClass()));
+    void implementsFocusable() {
+        Assertions.assertTrue(
+                Focusable.class.isAssignableFrom(messageInput.getClass()),
+                "MessageInput should be focusable");
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(MessageInput.class));
     }
 }

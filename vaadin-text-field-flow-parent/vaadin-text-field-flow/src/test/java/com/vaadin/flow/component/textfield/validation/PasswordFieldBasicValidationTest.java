@@ -15,95 +15,98 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class PasswordFieldBasicValidationTest
+class PasswordFieldBasicValidationTest
         extends AbstractBasicValidationTest<PasswordField, String> {
     @Test
-    public void required_validate_emptyErrorMessageDisplayed() {
+    void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setValue("AAA");
         testField.setValue("");
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new PasswordField.PasswordFieldI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue("AAA");
         testField.setValue("");
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
-    }
-
-    @Test
-    public void minLength_validate_emptyErrorMessageDisplayed() {
-        testField.setMinLength(3);
-        testField.setValue("AA");
-        Assert.assertEquals("", testField.getErrorMessage());
-    }
-
-    @Test
-    public void minLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
-        testField.setMinLength(3);
-        testField.setI18n(new PasswordField.PasswordFieldI18n()
-                .setMinLengthErrorMessage("Value is too short"));
-        testField.setValue("AA");
-        Assert.assertEquals("Value is too short", testField.getErrorMessage());
-    }
-
-    @Test
-    public void maxLength_validate_emptyErrorMessageDisplayed() {
-        testField.setMaxLength(3);
-        testField.setValue("AAAA");
-        Assert.assertEquals("", testField.getErrorMessage());
-    }
-
-    @Test
-    public void maxLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
-        testField.setMaxLength(3);
-        testField.setI18n(new PasswordField.PasswordFieldI18n()
-                .setMaxLengthErrorMessage("Value is too long"));
-        testField.setValue("AAAA");
-        Assert.assertEquals("Value is too long", testField.getErrorMessage());
-    }
-
-    @Test
-    public void pattern_validate_emptyErrorMessageDisplayed() {
-        testField.setPattern("\\d+");
-        testField.setValue("AAAA");
-        Assert.assertEquals("", testField.getErrorMessage());
-    }
-
-    @Test
-    public void pattern_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
-        testField.setPattern("\\d+");
-        testField.setI18n(new PasswordField.PasswordFieldI18n()
-                .setPatternErrorMessage("Value does not match the pattern"));
-        testField.setValue("AAAA");
-        Assert.assertEquals("Value does not match the pattern",
+        Assertions.assertEquals("Field is required",
                 testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+    void minLength_validate_emptyErrorMessageDisplayed() {
+        testField.setMinLength(3);
+        testField.setValue("AA");
+        Assertions.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    void minLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMinLength(3);
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setMinLengthErrorMessage("Value is too short"));
+        testField.setValue("AA");
+        Assertions.assertEquals("Value is too short",
+                testField.getErrorMessage());
+    }
+
+    @Test
+    void maxLength_validate_emptyErrorMessageDisplayed() {
+        testField.setMaxLength(3);
+        testField.setValue("AAAA");
+        Assertions.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    void maxLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMaxLength(3);
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setMaxLengthErrorMessage("Value is too long"));
+        testField.setValue("AAAA");
+        Assertions.assertEquals("Value is too long",
+                testField.getErrorMessage());
+    }
+
+    @Test
+    void pattern_validate_emptyErrorMessageDisplayed() {
+        testField.setPattern("\\d+");
+        testField.setValue("AAAA");
+        Assertions.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    void pattern_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setPattern("\\d+");
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setPatternErrorMessage("Value does not match the pattern"));
+        testField.setValue("AAAA");
+        Assertions.assertEquals("Value does not match the pattern",
+                testField.getErrorMessage());
+    }
+
+    @Test
+    void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new PasswordField.PasswordFieldI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue("AAAA");
         testField.setValue("");
-        Assert.assertEquals("Custom error message",
+        Assertions.assertEquals("Custom error message",
                 testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new PasswordField.PasswordFieldI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -113,7 +116,8 @@ public class PasswordFieldBasicValidationTest
         testField.setErrorMessage("");
         testField.setValue("AAAA");
         testField.setValue("");
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assertions.assertEquals("Field is required",
+                testField.getErrorMessage());
     }
 
     @Override

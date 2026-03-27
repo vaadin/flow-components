@@ -8,23 +8,23 @@
  */
 package com.vaadin.flow.component.charts;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ChartVariantTest {
+class ChartVariantTest {
 
     private Chart chart;
 
-    @Before
-    public void initTest() {
+    @BeforeEach
+    void initTest() {
         chart = new Chart();
     }
 
     @Test
-    public void addAndRemoveLumoGradientVariant_themeAttributeUpdated() {
+    void addAndRemoveLumoGradientVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
         assertThemeAttribute("gradient");
@@ -33,28 +33,28 @@ public class ChartVariantTest {
     }
 
     @Test
-    public void addLumoGradientVariant_themeAttributeUpdated() {
+    void addLumoGradientVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
         assertThemeAttribute("gradient");
     }
 
     @Test
-    public void addLumoMonotoneVariant_themeAttributeUpdated() {
+    void addLumoMonotoneVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_MONOTONE);
         assertThemeAttribute("monotone");
     }
 
     @Test
-    public void addLumoClassicVariant_themeAttributeUpdated() {
+    void addLumoClassicVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
         assertThemeAttribute("classic");
     }
 
     @Test
-    public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_MONOTONE);
         chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
@@ -65,7 +65,7 @@ public class ChartVariantTest {
     }
 
     @Test
-    public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_MONOTONE);
         chart.addThemeVariants(ChartVariant.LUMO_GRADIENT);
@@ -74,7 +74,7 @@ public class ChartVariantTest {
     }
 
     @Test
-    public void addTwiceAndSeeOnce_themeAttributeUpdated() {
+    void addTwiceAndSeeOnce_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
         chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
@@ -83,12 +83,12 @@ public class ChartVariantTest {
 
     private void assertThemeAttribute(String expected) {
         String actual = chart.getThemeName();
-        assertEquals("Unexpected theme attribute on chart", expected, actual);
+        assertEquals(expected, actual, "Unexpected theme attribute on chart");
     }
 
     private void assertThemeAttributeContains(String expected) {
         String actual = chart.getThemeName();
-        assertTrue("Theme attribute not present on chart",
-                actual.contains(expected));
+        assertTrue(actual.contains(expected),
+                "Theme attribute not present on chart");
     }
 }

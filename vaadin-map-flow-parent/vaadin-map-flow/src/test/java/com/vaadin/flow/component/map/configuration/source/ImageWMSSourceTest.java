@@ -12,43 +12,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class ImageWMSSourceTest {
+class ImageWMSSourceTest {
     @Test
-    public void initialize_validOptions() {
+    void initialize_validOptions() {
         ImageWMSSource.Options options = createValidOptions();
 
         ImageWMSSource source = new ImageWMSSource(options);
-        Assert.assertEquals("https://example.com", source.getUrl());
-        Assert.assertEquals("layer1", source.getParams().get("LAYERS"));
-        Assert.assertEquals(5f, source.getRatio(), 0.1);
-        Assert.assertEquals("testServerType", source.getServerType());
-        Assert.assertEquals("testCrossOrigin", source.getCrossOrigin());
-        Assert.assertEquals("testProjection", source.getProjection());
-        Assert.assertEquals("testAttributions",
+        Assertions.assertEquals("https://example.com", source.getUrl());
+        Assertions.assertEquals("layer1", source.getParams().get("LAYERS"));
+        Assertions.assertEquals(5f, source.getRatio(), 0.1);
+        Assertions.assertEquals("testServerType", source.getServerType());
+        Assertions.assertEquals("testCrossOrigin", source.getCrossOrigin());
+        Assertions.assertEquals("testProjection", source.getProjection());
+        Assertions.assertEquals("testAttributions",
                 source.getAttributions().get(0));
-        Assert.assertFalse(source.isAttributionsCollapsible());
+        Assertions.assertFalse(source.isAttributionsCollapsible());
     }
 
     @Test
-    public void initialize_params_mustNotBeNull() {
+    void initialize_params_mustNotBeNull() {
         ImageWMSSource.Options options = createValidOptions();
         options.setParams(null);
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new ImageWMSSource(options));
     }
 
     @Test
-    public void initialize_params_layer_mustNotBeNull() {
+    void initialize_params_layer_mustNotBeNull() {
         ImageWMSSource.Options options = createValidOptions();
         Map<String, Object> params = createValidParams();
         params.remove("LAYERS");
         options.setParams(params);
 
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> new ImageWMSSource(options));
     }
 

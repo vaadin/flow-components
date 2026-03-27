@@ -10,13 +10,13 @@ package com.vaadin.flow.component.map.configuration.feature;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.geometry.LineString;
 
-public class LineStringFeatureTest {
+class LineStringFeatureTest {
     private static final Coordinate coordinate1 = new Coordinate(0, 0);
     private static final Coordinate coordinate2 = new Coordinate(10, 10);
     private static final Coordinate coordinate3 = new Coordinate(20, 5);
@@ -25,7 +25,7 @@ public class LineStringFeatureTest {
             coordinate2, coordinate3 };
 
     @Test
-    public void initializeWithList() {
+    void initializeWithList() {
         LineStringFeature feature = new LineStringFeature(
                 List.of(testCoordinates));
 
@@ -33,14 +33,14 @@ public class LineStringFeatureTest {
     }
 
     @Test
-    public void initializeWithArray() {
+    void initializeWithArray() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
 
         assertCoordinates(testCoordinates, feature);
     }
 
     @Test
-    public void initializeWithVarargs() {
+    void initializeWithVarargs() {
         LineStringFeature feature = new LineStringFeature(coordinate1,
                 coordinate2, coordinate3);
 
@@ -48,29 +48,30 @@ public class LineStringFeatureTest {
     }
 
     @Test
-    public void defaultStyle() {
+    void defaultStyle() {
         List<Coordinate> coordinates = List.of(testCoordinates);
         LineStringFeature feature = new LineStringFeature(coordinates);
 
-        Assert.assertNotNull(feature.getStyle());
-        Assert.assertNotNull(feature.getStyle().getStroke());
-        Assert.assertEquals("hsl(214, 100%, 48%)",
+        Assertions.assertNotNull(feature.getStyle());
+        Assertions.assertNotNull(feature.getStyle().getStroke());
+        Assertions.assertEquals("hsl(214, 100%, 48%)",
                 feature.getStyle().getStroke().getColor());
-        Assert.assertEquals(2, feature.getStyle().getStroke().getWidth(), 0);
-        Assert.assertNull(feature.getStyle().getFill());
-        Assert.assertNull(feature.getStyle().getTextStyle());
+        Assertions.assertEquals(2, feature.getStyle().getStroke().getWidth(),
+                0);
+        Assertions.assertNull(feature.getStyle().getFill());
+        Assertions.assertNull(feature.getStyle().getTextStyle());
     }
 
     @Test
-    public void individualStyleInstances() {
+    void individualStyleInstances() {
         LineStringFeature line1 = new LineStringFeature(testCoordinates);
         LineStringFeature line2 = new LineStringFeature(testCoordinates);
 
-        Assert.assertNotEquals(line1.getStyle(), line2.getStyle());
+        Assertions.assertNotEquals(line1.getStyle(), line2.getStyle());
     }
 
     @Test
-    public void setCoordinatesWithList() {
+    void setCoordinatesWithList() {
         LineStringFeature feature = new LineStringFeature(new Coordinate(0, 0),
                 new Coordinate(1, 1));
         feature.setCoordinates(List.of(testCoordinates));
@@ -79,7 +80,7 @@ public class LineStringFeatureTest {
     }
 
     @Test
-    public void setCoordinatesWithArray() {
+    void setCoordinatesWithArray() {
         LineStringFeature feature = new LineStringFeature(new Coordinate(0, 0),
                 new Coordinate(1, 1));
         feature.setCoordinates(testCoordinates);
@@ -88,7 +89,7 @@ public class LineStringFeatureTest {
     }
 
     @Test
-    public void setCoordinatesWithVarargs() {
+    void setCoordinatesWithVarargs() {
         LineStringFeature feature = new LineStringFeature(new Coordinate(0, 0),
                 new Coordinate(1, 1));
         feature.setCoordinates(coordinate1, coordinate2, coordinate3);
@@ -97,101 +98,116 @@ public class LineStringFeatureTest {
     }
 
     @Test
-    public void setGeometry() {
+    void setGeometry() {
         LineStringFeature feature = new LineStringFeature(new Coordinate(0, 0),
                 new Coordinate(1, 1));
         LineString lineString = new LineString(testCoordinates);
         feature.setGeometry(lineString);
 
-        Assert.assertSame(lineString, feature.getGeometry());
+        Assertions.assertSame(lineString, feature.getGeometry());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void constructWithNullList_throwsException() {
-        new LineStringFeature((List<Coordinate>) null);
+    @Test
+    void constructWithNullList_throwsException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new LineStringFeature((List<Coordinate>) null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void constructWithNullArray_throwsException() {
-        new LineStringFeature((Coordinate[]) null);
+    @Test
+    void constructWithNullArray_throwsException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new LineStringFeature((Coordinate[]) null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void constructWithEmptyList_throwsException() {
-        new LineStringFeature(List.of());
+    @Test
+    void constructWithEmptyList_throwsException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new LineStringFeature(List.of()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void constructWithEmptyArray_throwsException() {
-        new LineStringFeature(new Coordinate[] {});
+    @Test
+    void constructWithEmptyArray_throwsException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new LineStringFeature(new Coordinate[] {}));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void constructWithSingleCoordinateList_throwsException() {
-        new LineStringFeature(List.of(new Coordinate(0, 0)));
+    @Test
+    void constructWithSingleCoordinateList_throwsException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new LineStringFeature(List.of(new Coordinate(0, 0))));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void constructWithSingleCoordinateArray_throwsException() {
-        new LineStringFeature(new Coordinate[] { new Coordinate(0, 0) });
+    @Test
+    void constructWithSingleCoordinateArray_throwsException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new LineStringFeature(
+                        new Coordinate[] { new Coordinate(0, 0) }));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void constructWithSingleArgument_throwsException() {
-        new LineStringFeature(new Coordinate(0, 0));
+    @Test
+    void constructWithSingleArgument_throwsException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new LineStringFeature(new Coordinate(0, 0)));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setCoordinatesWithNullList_throwsException() {
+    @Test
+    void setCoordinatesWithNullList_throwsException() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
-        feature.setCoordinates((List<Coordinate>) null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> feature.setCoordinates((List<Coordinate>) null));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setCoordinatesWithNullArray_throwsException() {
+    @Test
+    void setCoordinatesWithNullArray_throwsException() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
-        feature.setCoordinates((Coordinate[]) null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> feature.setCoordinates((Coordinate[]) null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setCoordinatesWithEmptyList_throwsException() {
+    @Test
+    void setCoordinatesWithEmptyList_throwsException() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
-        feature.setCoordinates(List.of());
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> feature.setCoordinates(List.of()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setCoordinatesWithEmptyArray_throwsException() {
+    @Test
+    void setCoordinatesWithEmptyArray_throwsException() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
-        feature.setCoordinates(new Coordinate[] {});
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> feature.setCoordinates(new Coordinate[] {}));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setCoordinatesWithSingleCoordinateList_throwsException() {
+    @Test
+    void setCoordinatesWithSingleCoordinateList_throwsException() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
-        feature.setCoordinates(List.of(new Coordinate(0, 0)));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> feature.setCoordinates(List.of(new Coordinate(0, 0))));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setCoordinatesWithSingleCoordinateArray_throwsException() {
+    @Test
+    void setCoordinatesWithSingleCoordinateArray_throwsException() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
-        feature.setCoordinates(new Coordinate[] { new Coordinate(0, 0) });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> feature
+                .setCoordinates(new Coordinate[] { new Coordinate(0, 0) }));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setCoordinatesWithSingleCoordinate_throwsException() {
+    @Test
+    void setCoordinatesWithSingleCoordinate_throwsException() {
         LineStringFeature feature = new LineStringFeature(testCoordinates);
-        feature.setCoordinates(new Coordinate(0, 0));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> feature.setCoordinates(new Coordinate(0, 0)));
     }
 
     private void assertCoordinates(Coordinate[] expected,
             LineStringFeature feature) {
         Coordinate[] actual = feature.getGeometry().getCoordinates();
 
-        Assert.assertEquals(expected.length, actual.length);
+        Assertions.assertEquals(expected.length, actual.length);
 
         for (int i = 0; i < expected.length; i++) {
-            Assert.assertEquals(expected[i].getX(), actual[i].getX(), 0);
-            Assert.assertEquals(expected[i].getY(), actual[i].getY(), 0);
+            Assertions.assertEquals(expected[i].getX(), actual[i].getX(), 0);
+            Assertions.assertEquals(expected[i].getY(), actual[i].getY(), 0);
         }
     }
 }

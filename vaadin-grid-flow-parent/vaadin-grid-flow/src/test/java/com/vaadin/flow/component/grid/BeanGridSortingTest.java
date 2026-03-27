@@ -22,16 +22,16 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-public class BeanGridSortingTest {
+class BeanGridSortingTest {
 
     public static class SortableBean {
         private String string;
@@ -103,71 +103,76 @@ public class BeanGridSortingTest {
 
     private Grid<SortableBean> grid;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         grid = new Grid<>(SortableBean.class);
         grid.setItems(createBeans());
     }
 
     @Test
-    public void setSortableColumns_onlyTheReferencedColumnsAreSortable() {
+    void setSortableColumns_onlyTheReferencedColumnsAreSortable() {
         grid.setColumns("string", "integer", "bool", "number");
 
-        Assert.assertTrue(grid.getColumnByKey("string").isSortable());
-        Assert.assertTrue(grid.getColumnByKey("integer").isSortable());
-        Assert.assertTrue(grid.getColumnByKey("bool").isSortable());
-        Assert.assertTrue(grid.getColumnByKey("number").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("string").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("integer").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("bool").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("number").isSortable());
 
         grid.setSortableColumns("string");
 
-        Assert.assertTrue(grid.getColumnByKey("string").isSortable());
-        Assert.assertFalse(grid.getColumnByKey("integer").isSortable());
-        Assert.assertFalse(grid.getColumnByKey("bool").isSortable());
-        Assert.assertFalse(grid.getColumnByKey("number").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("string").isSortable());
+        Assertions.assertFalse(grid.getColumnByKey("integer").isSortable());
+        Assertions.assertFalse(grid.getColumnByKey("bool").isSortable());
+        Assertions.assertFalse(grid.getColumnByKey("number").isSortable());
 
         grid.setSortableColumns("bool", "number");
 
-        Assert.assertFalse(grid.getColumnByKey("string").isSortable());
-        Assert.assertFalse(grid.getColumnByKey("integer").isSortable());
-        Assert.assertTrue(grid.getColumnByKey("bool").isSortable());
-        Assert.assertTrue(grid.getColumnByKey("number").isSortable());
+        Assertions.assertFalse(grid.getColumnByKey("string").isSortable());
+        Assertions.assertFalse(grid.getColumnByKey("integer").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("bool").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("number").isSortable());
     }
 
     @Test
-    public void setSortableColumns_onlyComparablePropertiesAreSortable() {
-        Assert.assertTrue(grid.getColumnByKey("string").isSortable());
-        Assert.assertFalse(grid.getColumnByKey("notComparable").isSortable());
+    void setSortableColumns_onlyComparablePropertiesAreSortable() {
+        Assertions.assertTrue(grid.getColumnByKey("string").isSortable());
+        Assertions
+                .assertFalse(grid.getColumnByKey("notComparable").isSortable());
 
         grid.setColumns("string", "notComparable", "innerBean",
                 "innerBean.string");
 
-        Assert.assertTrue(grid.getColumnByKey("string").isSortable());
-        Assert.assertFalse(grid.getColumnByKey("notComparable").isSortable());
-        Assert.assertFalse(grid.getColumnByKey("innerBean").isSortable());
-        Assert.assertTrue(grid.getColumnByKey("innerBean.string").isSortable());
+        Assertions.assertTrue(grid.getColumnByKey("string").isSortable());
+        Assertions
+                .assertFalse(grid.getColumnByKey("notComparable").isSortable());
+        Assertions.assertFalse(grid.getColumnByKey("innerBean").isSortable());
+        Assertions.assertTrue(
+                grid.getColumnByKey("innerBean.string").isSortable());
 
         grid.addColumn("bool");
         grid.addColumn("innerBean.notComparable");
 
-        Assert.assertTrue(grid.getColumnByKey("bool").isSortable());
-        Assert.assertFalse(
+        Assertions.assertTrue(grid.getColumnByKey("bool").isSortable());
+        Assertions.assertFalse(
                 grid.getColumnByKey("innerBean.notComparable").isSortable());
 
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void setSortableColumnsForNonBeanGrid_throws() {
+    @Test
+    void setSortableColumnsForNonBeanGrid_throws() {
         Grid<SortableBean> nonBeanGrid = new Grid<>();
-        nonBeanGrid.setSortableColumns("string");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setSortableColumnsForNonExistingProperty_throws() {
-        grid.setSortableColumns("nonExisting");
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> nonBeanGrid.setSortableColumns("string"));
     }
 
     @Test
-    public void basicPropertiesAreSortedAsComparables() {
+    void setSortableColumnsForNonExistingProperty_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> grid.setSortableColumns("nonExisting"));
+    }
+
+    @Test
+    void basicPropertiesAreSortedAsComparables() {
         grid.setColumns("string", "integer", "bool", "number");
         grid.setSortableColumns("string", "integer", "bool", "number");
 
@@ -201,7 +206,7 @@ public class BeanGridSortingTest {
     }
 
     @Test
-    public void innerPropertiesAreSortedAsComparables() {
+    void innerPropertiesAreSortedAsComparables() {
         grid.setColumns("innerBean.string", "innerBean.integer",
                 "innerBean.bool", "innerBean.number");
         grid.setSortableColumns("innerBean.string", "innerBean.integer",
@@ -261,7 +266,7 @@ public class BeanGridSortingTest {
         expectedOrder.sort(comparator);
         actualOrder.sort(grid.getDataCommunicator().getInMemorySorting());
 
-        Assert.assertEquals(expectedOrder, actualOrder);
+        Assertions.assertEquals(expectedOrder, actualOrder);
     }
 
     private void callSortersChanged(String columnId, String direction) {
@@ -280,7 +285,7 @@ public class BeanGridSortingTest {
         } catch (NoSuchMethodException | SecurityException
                 | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
-            Assert.fail("Could not call Grid.sortersChanged: " + e);
+            Assertions.fail("Could not call Grid.sortersChanged: " + e);
         }
     }
 

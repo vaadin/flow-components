@@ -17,9 +17,9 @@ package com.vaadin.flow.component.popover;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
@@ -28,14 +28,14 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
-public class PopoverOpenedChangeListenerTest {
+class PopoverOpenedChangeListenerTest {
     private Popover popover;
     private AtomicReference<Popover.OpenedChangeEvent> event;
     private ComponentEventListener<Popover.OpenedChangeEvent> mockListener;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         popover = new Popover();
 
         event = new AtomicReference<>();
@@ -46,37 +46,37 @@ public class PopoverOpenedChangeListenerTest {
     }
 
     @Test
-    public void open() {
+    void open() {
         popover.open();
 
-        Assert.assertFalse(event.get().isFromClient());
-        Assert.assertTrue(event.get().isOpened());
+        Assertions.assertFalse(event.get().isFromClient());
+        Assertions.assertTrue(event.get().isOpened());
         assertListenerCalls(1);
 
         clearCapturedData();
         popover.open();
-        Assert.assertNull(event.get());
+        Assertions.assertNull(event.get());
         assertListenerCalls(0);
     }
 
     @Test
-    public void close() {
+    void close() {
         popover.open();
         clearCapturedData();
 
         popover.close();
-        Assert.assertFalse(event.get().isFromClient());
-        Assert.assertFalse(event.get().isOpened());
+        Assertions.assertFalse(event.get().isFromClient());
+        Assertions.assertFalse(event.get().isOpened());
         assertListenerCalls(1);
 
         clearCapturedData();
         popover.close();
-        Assert.assertNull(event.get());
+        Assertions.assertNull(event.get());
         assertListenerCalls(0);
     }
 
     @Test
-    public void openedChangeFromClient_noChangeEvent() {
+    void openedChangeFromClient_noChangeEvent() {
         Element element = popover.getElement();
         element.getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(new DomEvent(element, "opened-changed",
@@ -84,7 +84,7 @@ public class PopoverOpenedChangeListenerTest {
 
         // The event should only be fired when the opened state changes, not for
         // any opened-changed event from the client
-        Assert.assertNull(event.get());
+        Assertions.assertNull(event.get());
         assertListenerCalls(0);
     }
 

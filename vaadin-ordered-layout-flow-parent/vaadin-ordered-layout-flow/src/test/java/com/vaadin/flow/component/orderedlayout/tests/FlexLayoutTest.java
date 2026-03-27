@@ -15,37 +15,37 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 
-public class FlexLayoutTest {
+class FlexLayoutTest {
 
     @Test
-    public void replace_nullToComponent_appendAsResult() {
+    void replace_nullToComponent_appendAsResult() {
         FlexLayout layout = new FlexLayout();
         layout.add(new Span());
         Div div = new Div();
         layout.replace(null, div);
-        Assert.assertEquals(div, layout.getComponentAt(1));
+        Assertions.assertEquals(div, layout.getComponentAt(1));
     }
 
     @Test
-    public void replace_componentToNull_removeAsResult() {
+    void replace_componentToNull_removeAsResult() {
         FlexLayout layout = new FlexLayout();
         layout.add(new Span());
         Div div = new Div();
         layout.add(div);
         layout.replace(div, null);
-        Assert.assertEquals(1, layout.getComponentCount());
+        Assertions.assertEquals(1, layout.getComponentCount());
     }
 
     @Test
-    public void replace_keepAlignmentSelf() {
+    void replace_keepAlignmentSelf() {
         FlexLayout layout = new FlexLayout();
         Div div = new Div();
         layout.add(div);
@@ -53,11 +53,11 @@ public class FlexLayoutTest {
 
         Span span = new Span();
         layout.replace(div, span);
-        Assert.assertEquals(Alignment.END, layout.getAlignSelf(span));
+        Assertions.assertEquals(Alignment.END, layout.getAlignSelf(span));
     }
 
     @Test
-    public void replace_keepFlexGrow() {
+    void replace_keepFlexGrow() {
         FlexLayout layout = new FlexLayout();
         Div div = new Div();
         layout.add(div);
@@ -65,65 +65,68 @@ public class FlexLayoutTest {
 
         Span span = new Span();
         layout.replace(div, span);
-        Assert.assertEquals(1.1d, layout.getFlexGrow(span), Double.MIN_VALUE);
+        Assertions.assertEquals(1.1d, layout.getFlexGrow(span),
+                Double.MIN_VALUE);
     }
 
     @Test
-    public void testFlexLayout_setAndUnsetAlignContent() {
+    void testFlexLayout_setAndUnsetAlignContent() {
         FlexLayout layout = new FlexLayout();
         FlexLayout.ContentAlignment contentAlignment = FlexLayout.ContentAlignment.CENTER;
         layout.setAlignContent(contentAlignment);
 
-        Assert.assertEquals("should set align-content",
-                layout.getAlignContent(), contentAlignment);
+        Assertions.assertEquals(contentAlignment, layout.getAlignContent(),
+                "should set align-content");
 
         layout.setAlignContent(null);
-        Assert.assertEquals("should return stretch if no align-content set",
-                layout.getAlignContent(), FlexLayout.ContentAlignment.STRETCH);
+        Assertions.assertEquals(FlexLayout.ContentAlignment.STRETCH,
+                layout.getAlignContent(),
+                "should return stretch if no align-content set");
     }
 
     @Test
-    public void testFlexLayout_setAndRemoveFlexBasis() {
+    void testFlexLayout_setAndRemoveFlexBasis() {
         FlexLayout layout = new FlexLayout();
         Div div = new Div();
         layout.add(div);
         layout.setFlexBasis("10px", div);
 
-        Assert.assertEquals("should set flex-basis", layout.getFlexBasis(div),
-                "10px");
+        Assertions.assertEquals("10px", layout.getFlexBasis(div),
+                "should set flex-basis");
 
         layout.setFlexBasis(null, div);
-        Assert.assertNull("should remove flex-basis from component",
-                layout.getFlexBasis(div));
+        Assertions.assertNull(layout.getFlexBasis(div),
+                "should remove flex-basis from component");
     }
 
     @Test
-    public void testFlexLayout_setAndUnsetFlexDirection() {
+    void testFlexLayout_setAndUnsetFlexDirection() {
         FlexLayout layout = new FlexLayout();
         FlexLayout.FlexDirection direction = FlexLayout.FlexDirection.ROW_REVERSE;
         layout.setFlexDirection(direction);
 
-        Assert.assertEquals("should set flex-direction",
-                layout.getFlexDirection(), direction);
+        Assertions.assertEquals(direction, layout.getFlexDirection(),
+                "should set flex-direction");
 
         layout.setFlexDirection(null);
-        Assert.assertEquals("should return row if no flex-direction set",
-                layout.getFlexDirection(), FlexLayout.FlexDirection.ROW);
+        Assertions.assertEquals(FlexLayout.FlexDirection.ROW,
+                layout.getFlexDirection(),
+                "should return row if no flex-direction set");
     }
 
     @Test
-    public void testFlexLayout_setAndUnsetOrder() {
+    void testFlexLayout_setAndUnsetOrder() {
         FlexLayout layout = new FlexLayout();
         Div div = new Div();
         layout.add(div);
 
-        Assert.assertEquals("should return 0 if no order set",
-                layout.getOrder(div), 0);
+        Assertions.assertEquals(0, layout.getOrder(div),
+                "should return 0 if no order set");
 
         layout.setOrder(1, div);
-        Assert.assertEquals("should set order", layout.getOrder(div), 1);
+        Assertions.assertEquals(1, layout.getOrder(div), "should set order");
 
         layout.setOrder(0, div);
-        Assert.assertEquals("should unset order", layout.getOrder(div), 0);
+        Assertions.assertEquals(0, layout.getOrder(div), "should unset order");
     }
 }

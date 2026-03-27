@@ -15,32 +15,32 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.FontIcon;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsTest;
 
-public class FontIconSignalTest extends AbstractSignalsUnitTest {
+class FontIconSignalTest extends AbstractSignalsTest {
 
     private FontIcon fontIcon;
     private ValueSignal<String> ligatureSignal;
     private ValueSignal<String> charCodeSignal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         fontIcon = new FontIcon();
         ligatureSignal = new ValueSignal<>("home");
         charCodeSignal = new ValueSignal<>("e001");
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (fontIcon != null && fontIcon.isAttached()) {
             fontIcon.removeFromParent();
         }
@@ -49,124 +49,128 @@ public class FontIconSignalTest extends AbstractSignalsUnitTest {
     // ===== LIGATURE BINDING TESTS =====
 
     @Test
-    public void bindLigature_signalBound_ligatureSynchronizedWhenAttached() {
+    void bindLigature_signalBound_ligatureSynchronizedWhenAttached() {
         fontIcon.bindLigature(ligatureSignal);
         UI.getCurrent().add(fontIcon);
 
-        Assert.assertEquals("home", fontIcon.getLigature());
+        Assertions.assertEquals("home", fontIcon.getLigature());
 
         ligatureSignal.set("settings");
-        Assert.assertEquals("settings", fontIcon.getLigature());
+        Assertions.assertEquals("settings", fontIcon.getLigature());
 
         ligatureSignal.set("search");
-        Assert.assertEquals("search", fontIcon.getLigature());
+        Assertions.assertEquals("search", fontIcon.getLigature());
     }
 
     @Test
-    public void bindLigature_signalBound_noEffectWhenDetached() {
+    void bindLigature_signalBound_noEffectWhenDetached() {
         fontIcon.bindLigature(ligatureSignal);
         // Not attached to UI
 
         String initialLigature = fontIcon.getLigature();
         ligatureSignal.set("settings");
-        Assert.assertEquals(initialLigature, fontIcon.getLigature());
+        Assertions.assertEquals(initialLigature, fontIcon.getLigature());
     }
 
     @Test
-    public void bindLigature_signalBound_detachAndReattach() {
+    void bindLigature_signalBound_detachAndReattach() {
         fontIcon.bindLigature(ligatureSignal);
         UI.getCurrent().add(fontIcon);
-        Assert.assertEquals("home", fontIcon.getLigature());
+        Assertions.assertEquals("home", fontIcon.getLigature());
 
         // Detach
         fontIcon.removeFromParent();
         ligatureSignal.set("settings");
-        Assert.assertEquals("home", fontIcon.getLigature());
+        Assertions.assertEquals("home", fontIcon.getLigature());
 
         // Reattach
         UI.getCurrent().add(fontIcon);
-        Assert.assertEquals("settings", fontIcon.getLigature());
+        Assertions.assertEquals("settings", fontIcon.getLigature());
 
         ligatureSignal.set("search");
-        Assert.assertEquals("search", fontIcon.getLigature());
+        Assertions.assertEquals("search", fontIcon.getLigature());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindLigature_setLigatureWhileBound_throwsException() {
+    @Test
+    void bindLigature_setLigatureWhileBound_throwsException() {
         fontIcon.bindLigature(ligatureSignal);
         UI.getCurrent().add(fontIcon);
 
-        fontIcon.setLigature("settings");
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> fontIcon.setLigature("settings"));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindLigature_bindAgainWhileBound_throwsException() {
+    @Test
+    void bindLigature_bindAgainWhileBound_throwsException() {
         fontIcon.bindLigature(ligatureSignal);
         UI.getCurrent().add(fontIcon);
 
         ValueSignal<String> anotherSignal = new ValueSignal<>("settings");
-        fontIcon.bindLigature(anotherSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> fontIcon.bindLigature(anotherSignal));
     }
 
     // ===== CHAR CODE BINDING TESTS =====
 
     @Test
-    public void bindCharCode_signalBound_charCodeSynchronizedWhenAttached() {
+    void bindCharCode_signalBound_charCodeSynchronizedWhenAttached() {
         fontIcon.bindCharCode(charCodeSignal);
         UI.getCurrent().add(fontIcon);
 
-        Assert.assertEquals("e001", fontIcon.getCharCode());
+        Assertions.assertEquals("e001", fontIcon.getCharCode());
 
         charCodeSignal.set("e002");
-        Assert.assertEquals("e002", fontIcon.getCharCode());
+        Assertions.assertEquals("e002", fontIcon.getCharCode());
 
         charCodeSignal.set("e003");
-        Assert.assertEquals("e003", fontIcon.getCharCode());
+        Assertions.assertEquals("e003", fontIcon.getCharCode());
     }
 
     @Test
-    public void bindCharCode_signalBound_noEffectWhenDetached() {
+    void bindCharCode_signalBound_noEffectWhenDetached() {
         fontIcon.bindCharCode(charCodeSignal);
         // Not attached to UI
 
         String initialCharCode = fontIcon.getCharCode();
         charCodeSignal.set("e002");
-        Assert.assertEquals(initialCharCode, fontIcon.getCharCode());
+        Assertions.assertEquals(initialCharCode, fontIcon.getCharCode());
     }
 
     @Test
-    public void bindCharCode_signalBound_detachAndReattach() {
+    void bindCharCode_signalBound_detachAndReattach() {
         fontIcon.bindCharCode(charCodeSignal);
         UI.getCurrent().add(fontIcon);
-        Assert.assertEquals("e001", fontIcon.getCharCode());
+        Assertions.assertEquals("e001", fontIcon.getCharCode());
 
         // Detach
         fontIcon.removeFromParent();
         charCodeSignal.set("e002");
-        Assert.assertEquals("e001", fontIcon.getCharCode());
+        Assertions.assertEquals("e001", fontIcon.getCharCode());
 
         // Reattach
         UI.getCurrent().add(fontIcon);
-        Assert.assertEquals("e002", fontIcon.getCharCode());
+        Assertions.assertEquals("e002", fontIcon.getCharCode());
 
         charCodeSignal.set("e003");
-        Assert.assertEquals("e003", fontIcon.getCharCode());
+        Assertions.assertEquals("e003", fontIcon.getCharCode());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindCharCode_setCharCodeWhileBound_throwsException() {
+    @Test
+    void bindCharCode_setCharCodeWhileBound_throwsException() {
         fontIcon.bindCharCode(charCodeSignal);
         UI.getCurrent().add(fontIcon);
 
-        fontIcon.setCharCode("e002");
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> fontIcon.setCharCode("e002"));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindCharCode_bindAgainWhileBound_throwsException() {
+    @Test
+    void bindCharCode_bindAgainWhileBound_throwsException() {
         fontIcon.bindCharCode(charCodeSignal);
         UI.getCurrent().add(fontIcon);
 
         ValueSignal<String> anotherSignal = new ValueSignal<>("e002");
-        fontIcon.bindCharCode(anotherSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> fontIcon.bindCharCode(anotherSignal));
     }
 }

@@ -15,31 +15,31 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsTest;
 
-public class IconSignalTest extends AbstractSignalsUnitTest {
+class IconSignalTest extends AbstractSignalsTest {
 
     private Icon icon;
     private ValueSignal<VaadinIcon> iconSignal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         icon = new Icon();
         iconSignal = new ValueSignal<>(VaadinIcon.HOME);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (icon != null && icon.isAttached()) {
             icon.removeFromParent();
         }
@@ -48,74 +48,76 @@ public class IconSignalTest extends AbstractSignalsUnitTest {
     // ===== ICON BINDING TESTS =====
 
     @Test
-    public void bindIcon_signalBound_iconSynchronizedWhenAttached() {
+    void bindIcon_signalBound_iconSynchronizedWhenAttached() {
         icon.bindIcon(iconSignal);
         UI.getCurrent().add(icon);
 
-        Assert.assertEquals("vaadin:home", icon.getIcon());
+        Assertions.assertEquals("vaadin:home", icon.getIcon());
 
         iconSignal.set(VaadinIcon.SEARCH);
-        Assert.assertEquals("vaadin:search", icon.getIcon());
+        Assertions.assertEquals("vaadin:search", icon.getIcon());
 
         iconSignal.set(VaadinIcon.USER);
-        Assert.assertEquals("vaadin:user", icon.getIcon());
+        Assertions.assertEquals("vaadin:user", icon.getIcon());
     }
 
     @Test
-    public void bindIcon_signalBound_noEffectWhenDetached() {
+    void bindIcon_signalBound_noEffectWhenDetached() {
         icon.bindIcon(iconSignal);
         // Not attached to UI
 
         String initialIcon = icon.getIcon();
         iconSignal.set(VaadinIcon.SEARCH);
-        Assert.assertEquals(initialIcon, icon.getIcon());
+        Assertions.assertEquals(initialIcon, icon.getIcon());
     }
 
     @Test
-    public void bindIcon_signalBound_detachAndReattach() {
+    void bindIcon_signalBound_detachAndReattach() {
         icon.bindIcon(iconSignal);
         UI.getCurrent().add(icon);
-        Assert.assertEquals("vaadin:home", icon.getIcon());
+        Assertions.assertEquals("vaadin:home", icon.getIcon());
 
         // Detach
         icon.removeFromParent();
         iconSignal.set(VaadinIcon.SEARCH);
-        Assert.assertEquals("vaadin:home", icon.getIcon());
+        Assertions.assertEquals("vaadin:home", icon.getIcon());
 
         // Reattach
         UI.getCurrent().add(icon);
-        Assert.assertEquals("vaadin:search", icon.getIcon());
+        Assertions.assertEquals("vaadin:search", icon.getIcon());
 
         iconSignal.set(VaadinIcon.USER);
-        Assert.assertEquals("vaadin:user", icon.getIcon());
+        Assertions.assertEquals("vaadin:user", icon.getIcon());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindIcon_setIconWhileBound_throwsException() {
+    @Test
+    void bindIcon_setIconWhileBound_throwsException() {
         icon.bindIcon(iconSignal);
         UI.getCurrent().add(icon);
 
-        icon.setIcon(VaadinIcon.SEARCH);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> icon.setIcon(VaadinIcon.SEARCH));
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindIcon_bindAgainWhileBound_throwsException() {
+    @Test
+    void bindIcon_bindAgainWhileBound_throwsException() {
         icon.bindIcon(iconSignal);
         UI.getCurrent().add(icon);
 
         ValueSignal<VaadinIcon> anotherSignal = new ValueSignal<>(
                 VaadinIcon.SEARCH);
-        icon.bindIcon(anotherSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> icon.bindIcon(anotherSignal));
     }
 
     @Test
-    public void constructor_withSignal_bindsIconCorrectly() {
+    void constructor_withSignal_bindsIconCorrectly() {
         icon = new Icon(iconSignal);
         UI.getCurrent().add(icon);
 
-        Assert.assertEquals("vaadin:home", icon.getIcon());
+        Assertions.assertEquals("vaadin:home", icon.getIcon());
 
         iconSignal.set(VaadinIcon.SEARCH);
-        Assert.assertEquals("vaadin:search", icon.getIcon());
+        Assertions.assertEquals("vaadin:search", icon.getIcon());
     }
 }

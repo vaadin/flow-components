@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
@@ -34,7 +34,7 @@ import com.vaadin.flow.dom.ElementFactory;
 /**
  * @author Vaadin Ltd.
  */
-public class ThemableLayoutTest {
+class ThemableLayoutTest {
     private ThemableLayout layout;
 
     private class TestLayout implements ThemableLayout {
@@ -47,96 +47,97 @@ public class ThemableLayoutTest {
         }
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         layout = new TestLayout();
     }
 
     @Test
-    public void checkMargin() {
+    void checkMargin() {
         checkThemeToggling("margin", layout::isMargin, layout::setMargin);
     }
 
     @Test
-    public void checkPadding() {
+    void checkPadding() {
         checkThemeToggling("padding", layout::isPadding, layout::setPadding);
     }
 
     @Test
-    public void checkSpacing() {
+    void checkSpacing() {
         checkThemeToggling("spacing", layout::isSpacing, layout::setSpacing);
     }
 
     @Test
-    public void checkWrap() {
+    void checkWrap() {
         checkThemeToggling("wrap", layout::isWrap, layout::setWrap);
     }
 
     @Test
-    public void checkSpacingStringSetter() {
+    void checkSpacingStringSetter() {
         layout.setSpacing("20px");
-        assertTrue("Expected spacing to be applied after setting it",
-                layout.isSpacing());
-        assertEquals("Expected spacing to be '20px'", "20px",
-                layout.getSpacing());
+        assertTrue(layout.isSpacing(),
+                "Expected spacing to be applied after setting it");
+        assertEquals("20px", layout.getSpacing(),
+                "Expected spacing to be '20px'");
     }
 
     @Test
-    public void checkSpacingUnitSetter() {
+    void checkSpacingUnitSetter() {
         layout.setSpacing(2, Unit.REM);
-        assertTrue("Expected spacing to be applied after setting it",
-                layout.isSpacing());
-        assertEquals("Expected spacing to be '2.0rem'", "2.0rem",
-                layout.getSpacing());
+        assertTrue(layout.isSpacing(),
+                "Expected spacing to be applied after setting it");
+        assertEquals("2.0rem", layout.getSpacing(),
+                "Expected spacing to be '2.0rem'");
     }
 
     @Test
-    public void checkIsSpacing() {
+    void checkIsSpacing() {
         layout.setSpacing("20px");
-        assertTrue("Expected spacing to be applied after setting it",
-                layout.isSpacing());
+        assertTrue(layout.isSpacing(),
+                "Expected spacing to be applied after setting it");
         layout.setSpacing(false);
-        assertFalse("Expected no spacing applied after removing it",
-                layout.isSpacing());
+        assertFalse(layout.isSpacing(),
+                "Expected no spacing applied after removing it");
         layout.setSpacing(true);
-        assertTrue("Expected spacing to be applied after setting it",
-                layout.isSpacing());
+        assertTrue(layout.isSpacing(),
+                "Expected spacing to be applied after setting it");
         layout.setSpacing(false);
-        assertFalse("Expected no spacing applied after removing it",
-                layout.isSpacing());
+        assertFalse(layout.isSpacing(),
+                "Expected no spacing applied after removing it");
     }
 
     @Test
-    public void removeSpacing_gapIsRemoved() {
+    void removeSpacing_gapIsRemoved() {
         layout.setSpacing("20px");
         layout.setSpacing(false);
-        assertFalse("Expected spacing to be removed after setting it to false",
-                layout.isSpacing());
-        assertNull("Expected spacing to be null", layout.getSpacing());
-        assertNull("Expected gap to be null",
-                layout.getElement().getStyle().get("gap"));
+        assertFalse(layout.isSpacing(),
+                "Expected spacing to be removed after setting it to false");
+        assertNull(layout.getSpacing(), "Expected spacing to be null");
+        assertNull(layout.getElement().getStyle().get("gap"),
+                "Expected gap to be null");
     }
 
     private void checkThemeToggling(String themeName,
             Supplier<Boolean> themeGetter, Consumer<Boolean> themeSetter) {
-        assertFalse(String.format(
-                "Expected no '%s' theme applied initially to layout",
-                themeName), themeGetter.get());
+        assertFalse(themeGetter.get(),
+                String.format(
+                        "Expected no '%s' theme applied initially to layout",
+                        themeName));
         themeSetter.accept(true);
-        assertTrue(String.format("Expected '%s' theme applied after setting it",
-                themeName), themeGetter.get());
+        assertTrue(themeGetter.get(), String.format(
+                "Expected '%s' theme applied after setting it", themeName));
         themeSetter.accept(true);
-        assertTrue(String.format(
-                "Expected '%s' theme applied after setting it twice",
-                themeName), themeGetter.get());
+        assertTrue(themeGetter.get(),
+                String.format(
+                        "Expected '%s' theme applied after setting it twice",
+                        themeName));
 
         themeSetter.accept(false);
-        assertFalse(String.format(
-                "Expected no '%s' theme applied after removing it", themeName),
-                themeGetter.get());
+        assertFalse(themeGetter.get(), String.format(
+                "Expected no '%s' theme applied after removing it", themeName));
         themeSetter.accept(false);
-        assertFalse(String.format(
+        assertFalse(themeGetter.get(), String.format(
                 "Expected no '%s' theme applied after removing it twice",
-                themeName), themeGetter.get());
+                themeName));
     }
 }

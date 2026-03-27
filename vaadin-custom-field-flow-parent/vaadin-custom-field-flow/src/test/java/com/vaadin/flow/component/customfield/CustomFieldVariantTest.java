@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.customfield;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class CustomFieldVariantTest {
+class CustomFieldVariantTest {
 
     private CustomField<String> customField;
 
-    @Before
-    public void initTest() {
+    @BeforeEach
+    void initTest() {
         customField = new CustomField<String>() {
             @Override
             protected String generateModelValue() {
@@ -41,28 +41,28 @@ public class CustomFieldVariantTest {
     }
 
     @Test
-    public void addSmall_themeAttributeUpdated() {
+    void addSmall_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addHelperAbove_themeAttributeUpdated() {
+    void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
     @Test
-    public void addLumoWhitespace_themeAttributeUpdated() {
+    void addLumoWhitespace_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.LUMO_WHITESPACE);
         assertThemeAttribute("whitespace");
     }
 
     @Test
-    public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.SMALL);
         customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
@@ -73,7 +73,7 @@ public class CustomFieldVariantTest {
     }
 
     @Test
-    public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         customField.addThemeVariants(CustomFieldVariant.SMALL);
         customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
@@ -83,13 +83,13 @@ public class CustomFieldVariantTest {
 
     private void assertThemeAttribute(String expected) {
         String actual = customField.getThemeName();
-        assertEquals("Unexpected theme attribute on custom field", expected,
-                actual);
+        assertEquals(expected, actual,
+                "Unexpected theme attribute on custom field");
     }
 
     private void assertThemeAttributeContains(String expected) {
         String actual = customField.getThemeName();
-        assertTrue("Theme attribute not present on custom field",
-                actual.contains(expected));
+        assertTrue(actual.contains(expected),
+                "Theme attribute not present on custom field");
     }
 }

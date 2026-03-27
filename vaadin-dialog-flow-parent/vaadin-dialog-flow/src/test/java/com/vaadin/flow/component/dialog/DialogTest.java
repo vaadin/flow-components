@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -34,17 +34,17 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Unit tests for the Dialog.
  */
-public class DialogTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class DialogTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void createDialogWithComponents_componentsArePartOfGetChildren() {
+    void createDialogWithComponents_componentsArePartOfGetChildren() {
         Span span1 = new Span("Text 1");
         Span span2 = new Span("Text 2");
         Span span3 = new Span("Text 3");
@@ -55,205 +55,220 @@ public class DialogTest {
 
         List<Component> children = dialog.getChildren()
                 .collect(Collectors.toList());
-        Assert.assertEquals(2, children.size());
-        Assert.assertTrue(children.contains(span1));
-        Assert.assertTrue(children.contains(span2));
+        Assertions.assertEquals(2, children.size());
+        Assertions.assertTrue(children.contains(span1));
+        Assertions.assertTrue(children.contains(span2));
 
         dialog.add(span3);
         children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(3, children.size());
-        Assert.assertTrue(children.contains(span1));
-        Assert.assertTrue(children.contains(span2));
-        Assert.assertTrue(children.contains(span3));
+        Assertions.assertEquals(3, children.size());
+        Assertions.assertTrue(children.contains(span1));
+        Assertions.assertTrue(children.contains(span2));
+        Assertions.assertTrue(children.contains(span3));
 
         dialog.remove(span2);
         children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(2, children.size());
-        Assert.assertTrue(children.contains(span1));
-        Assert.assertTrue(children.contains(span3));
+        Assertions.assertEquals(2, children.size());
+        Assertions.assertTrue(children.contains(span1));
+        Assertions.assertTrue(children.contains(span3));
 
         span1.getElement().removeFromParent();
         children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(1, children.size());
-        Assert.assertTrue(children.contains(span3));
+        Assertions.assertEquals(1, children.size());
+        Assertions.assertTrue(children.contains(span3));
 
         dialog.removeAll();
         children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(0, children.size());
+        Assertions.assertEquals(0, children.size());
 
-        Assert.assertEquals(dialog.getWidth(), "200px");
-        Assert.assertEquals(dialog.getHeight(), "100px");
+        Assertions.assertEquals("200px", dialog.getWidth());
+        Assertions.assertEquals("100px", dialog.getHeight());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void setOpened_noUi() {
+    @Test
+    void setOpened_noUi() {
         ui.clearUI();
         Dialog dialog = new Dialog();
-        dialog.setOpened(true);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addComponentAtIndex_negativeIndex() {
-        addDivAtIndex(-1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
-        addDivAtIndex(1);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> dialog.setOpened(true));
     }
 
     @Test
-    public void isDraggable_falseByDefault() {
+    void addComponentAtIndex_negativeIndex() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> addDivAtIndex(-1));
+    }
+
+    @Test
+    void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> addDivAtIndex(1));
+    }
+
+    @Test
+    void isDraggable_falseByDefault() {
         Dialog dialog = new Dialog();
 
-        Assert.assertFalse("draggable is false by default",
-                dialog.getElement().getProperty("draggable", false));
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("draggable", false),
+                "draggable is false by default");
     }
 
     @Test
-    public void setDraggable_dialogCanBeDraggable() {
+    void setDraggable_dialogCanBeDraggable() {
         Dialog dialog = new Dialog();
         dialog.setDraggable(true);
 
-        Assert.assertTrue("draggable can be set to true",
-                dialog.getElement().getProperty("draggable", false));
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("draggable", false),
+                "draggable can be set to true");
     }
 
     @Test
-    public void isKeepInViewport_falseByDefault() {
+    void isKeepInViewport_falseByDefault() {
         Dialog dialog = new Dialog();
 
-        Assert.assertFalse("keepInViewport is false by default",
-                dialog.isKeepInViewport());
-        Assert.assertFalse("keepInViewport property is false by default",
-                dialog.getElement().getProperty("keepInViewport", false));
+        Assertions.assertFalse(dialog.isKeepInViewport(),
+                "keepInViewport is false by default");
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("keepInViewport", false),
+                "keepInViewport property is false by default");
     }
 
     @Test
-    public void setKeepInViewport_updatesProperty() {
+    void setKeepInViewport_updatesProperty() {
         Dialog dialog = new Dialog();
         dialog.setKeepInViewport(true);
 
-        Assert.assertTrue("keepInViewport can be set to true",
-                dialog.isKeepInViewport());
-        Assert.assertTrue("keepInViewport property is true",
-                dialog.getElement().getProperty("keepInViewport", false));
+        Assertions.assertTrue(dialog.isKeepInViewport(),
+                "keepInViewport can be set to true");
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("keepInViewport", false),
+                "keepInViewport property is true");
     }
 
     @Test
-    public void draggedEvent_topLeftPropertiesSynced() {
+    void draggedEvent_topLeftPropertiesSynced() {
         Dialog dialog = new Dialog();
 
         // Emulate a drag event
         ComponentUtil.fireEvent(dialog,
                 new Dialog.DialogDraggedEvent(dialog, true, "20", "10"));
 
-        Assert.assertEquals("20", dialog.getLeft());
-        Assert.assertEquals("10", dialog.getTop());
+        Assertions.assertEquals("20", dialog.getLeft());
+        Assertions.assertEquals("10", dialog.getTop());
     }
 
     @Test
-    public void resizeEvent_widthHeightTopLeftPropertiesSynced() {
+    void resizeEvent_widthHeightTopLeftPropertiesSynced() {
         Dialog dialog = new Dialog();
 
         // Emulate a resize event
         ComponentUtil.fireEvent(dialog, new Dialog.DialogResizeEvent(dialog,
                 true, "200", "100", "10", "20"));
 
-        Assert.assertEquals("200", dialog.getWidth());
-        Assert.assertEquals("100", dialog.getHeight());
-        Assert.assertEquals("10", dialog.getLeft());
-        Assert.assertEquals("20", dialog.getTop());
+        Assertions.assertEquals("200", dialog.getWidth());
+        Assertions.assertEquals("100", dialog.getHeight());
+        Assertions.assertEquals("10", dialog.getLeft());
+        Assertions.assertEquals("20", dialog.getTop());
     }
 
     @Test
-    public void isResizable_falseByDefault() {
+    void isResizable_falseByDefault() {
         Dialog dialog = new Dialog();
 
-        Assert.assertFalse("resizable is false by default",
-                dialog.getElement().getProperty("resizable", false));
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("resizable", false),
+                "resizable is false by default");
     }
 
     @Test
-    public void setResizable_dialogCanBeResizable() {
+    void setResizable_dialogCanBeResizable() {
         Dialog dialog = new Dialog();
         dialog.setResizable(true);
 
-        Assert.assertTrue("resizable can be set to true",
-                dialog.getElement().getProperty("resizable", false));
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("resizable", false),
+                "resizable can be set to true");
     }
 
     @Test
-    public void isFocusTrap_trueByDefault() {
+    void isFocusTrap_trueByDefault() {
         Dialog dialog = new Dialog();
-        Assert.assertTrue("focusTrap is true by default", dialog.isFocusTrap());
-        Assert.assertFalse("noFocusTrap property is false by default",
-                dialog.getElement().getProperty("noFocusTrap", false));
+        Assertions.assertTrue(dialog.isFocusTrap(),
+                "focusTrap is true by default");
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noFocusTrap", false),
+                "noFocusTrap property is false by default");
     }
 
     @Test
-    public void setFocusTrap_dialogFocusTrapCanBeDisabled() {
+    void setFocusTrap_dialogFocusTrapCanBeDisabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
-        Assert.assertFalse("focusTrap can be set to false",
-                dialog.isFocusTrap());
-        Assert.assertTrue(
-                "noFocusTrap property is true when focus trap is disabled",
-                dialog.getElement().getProperty("noFocusTrap", false));
+        Assertions.assertFalse(dialog.isFocusTrap(),
+                "focusTrap can be set to false");
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("noFocusTrap", false),
+                "noFocusTrap property is true when focus trap is disabled");
     }
 
     @Test
-    public void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
+    void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
         dialog.setFocusTrap(true);
-        Assert.assertTrue("focusTrap can be re-enabled", dialog.isFocusTrap());
-        Assert.assertFalse(
-                "noFocusTrap property is false when focus trap is enabled",
-                dialog.getElement().getProperty("noFocusTrap", false));
+        Assertions.assertTrue(dialog.isFocusTrap(),
+                "focusTrap can be re-enabled");
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noFocusTrap", false),
+                "noFocusTrap property is false when focus trap is enabled");
     }
 
     @Test
-    public void getRole_defaultDialog() {
+    void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
 
-        Assert.assertEquals("dialog", dialog.getRole());
-        Assert.assertEquals("dialog", dialog.getOverlayRole());
-        Assert.assertEquals("dialog", dialog.getElement().getProperty("role"));
+        Assertions.assertEquals("dialog", dialog.getRole());
+        Assertions.assertEquals("dialog", dialog.getOverlayRole());
+        Assertions.assertEquals("dialog",
+                dialog.getElement().getProperty("role"));
     }
 
     @Test
-    public void setOverlayRole_getOverlayRole() {
+    void setOverlayRole_getOverlayRole() {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole("alertdialog");
 
-        Assert.assertEquals("alertdialog", dialog.getRole());
-        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
-        Assert.assertEquals("alertdialog",
+        Assertions.assertEquals("alertdialog", dialog.getRole());
+        Assertions.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assertions.assertEquals("alertdialog",
                 dialog.getElement().getProperty("role"));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void setOverlayRole_null_throws() {
-        Dialog dialog = new Dialog();
-        dialog.setOverlayRole(null);
     }
 
     @Test
-    public void setRole_getRole() {
+    void setOverlayRole_null_throws() {
+        Dialog dialog = new Dialog();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> dialog.setOverlayRole(null));
+    }
+
+    @Test
+    void setRole_getRole() {
         Dialog dialog = new Dialog();
         dialog.setRole("alertdialog");
 
-        Assert.assertEquals("alertdialog", dialog.getRole());
-        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
-        Assert.assertEquals("alertdialog",
+        Assertions.assertEquals("alertdialog", dialog.getRole());
+        Assertions.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assertions.assertEquals("alertdialog",
                 dialog.getElement().getProperty("role"));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void setRole_null_throws() {
+    @Test
+    void setRole_null_throws() {
         Dialog dialog = new Dialog();
-        dialog.setRole(null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> dialog.setRole(null));
     }
 
     private void addDivAtIndex(int index) {
@@ -264,46 +279,46 @@ public class DialogTest {
     }
 
     @Test
-    public void dialogHasStyle() {
+    void dialogHasStyle() {
         Dialog dialog = new Dialog();
-        Assert.assertTrue(dialog instanceof HasStyle);
+        Assertions.assertTrue(dialog instanceof HasStyle);
     }
 
     @Test
-    public void elementAddedToHeaderOrFooter_elementShouldHaveDialogAsParent() {
+    void elementAddedToHeaderOrFooter_elementShouldHaveDialogAsParent() {
         Dialog dialog = new Dialog();
         Span content = new Span("content");
         dialog.getHeader().add(content);
 
-        Assert.assertTrue(content.getParent().isPresent());
-        Assert.assertEquals(content.getParent().get(), dialog);
+        Assertions.assertTrue(content.getParent().isPresent());
+        Assertions.assertEquals(content.getParent().get(), dialog);
 
         Span secondContent = new Span("second_content");
         Span thirdContent = new Span("third_content");
 
         dialog.getHeader().add(secondContent, thirdContent);
 
-        Assert.assertTrue(secondContent.getParent().isPresent());
-        Assert.assertEquals(secondContent.getParent().get(), dialog);
+        Assertions.assertTrue(secondContent.getParent().isPresent());
+        Assertions.assertEquals(secondContent.getParent().get(), dialog);
 
-        Assert.assertTrue(thirdContent.getParent().isPresent());
-        Assert.assertEquals(thirdContent.getParent().get(), dialog);
+        Assertions.assertTrue(thirdContent.getParent().isPresent());
+        Assertions.assertEquals(thirdContent.getParent().get(), dialog);
 
         Span fourthContent = new Span("fourth_content");
         dialog.getHeader().addComponentAsFirst(fourthContent);
 
-        Assert.assertTrue(fourthContent.getParent().isPresent());
-        Assert.assertEquals(fourthContent.getParent().get(), dialog);
+        Assertions.assertTrue(fourthContent.getParent().isPresent());
+        Assertions.assertEquals(fourthContent.getParent().get(), dialog);
 
         Span fifthContent = new Span("fifth_content");
         dialog.getHeader().addComponentAtIndex(2, fifthContent);
 
-        Assert.assertTrue(fifthContent.getParent().isPresent());
-        Assert.assertEquals(fifthContent.getParent().get(), dialog);
+        Assertions.assertTrue(fifthContent.getParent().isPresent());
+        Assertions.assertEquals(fifthContent.getParent().get(), dialog);
     }
 
     @Test
-    public void elementRemovedFromHeaderOrFooter_elementShouldNotHaveDialogAsParent() {
+    void elementRemovedFromHeaderOrFooter_elementShouldNotHaveDialogAsParent() {
         Dialog dialog = new Dialog();
         Span content = new Span("content");
         Span secondContent = new Span("second_content");
@@ -313,15 +328,15 @@ public class DialogTest {
 
         dialog.getHeader().remove(content);
 
-        Assert.assertFalse(content.getParent().isPresent());
+        Assertions.assertFalse(content.getParent().isPresent());
 
         dialog.getHeader().remove(secondContent, thirdContent);
-        Assert.assertFalse(secondContent.getParent().isPresent());
-        Assert.assertFalse(thirdContent.getParent().isPresent());
+        Assertions.assertFalse(secondContent.getParent().isPresent());
+        Assertions.assertFalse(thirdContent.getParent().isPresent());
     }
 
     @Test
-    public void allElementsRemovedFromHeader_elementsShouldNotHaveDialogAsParents() {
+    void allElementsRemovedFromHeader_elementsShouldNotHaveDialogAsParents() {
         Dialog dialog = new Dialog();
         Span content = new Span("content");
         Span secondContent = new Span("second_content");
@@ -331,13 +346,13 @@ public class DialogTest {
 
         dialog.getHeader().removeAll();
 
-        Assert.assertFalse(content.getParent().isPresent());
-        Assert.assertFalse(secondContent.getParent().isPresent());
-        Assert.assertFalse(thirdContent.getParent().isPresent());
+        Assertions.assertFalse(content.getParent().isPresent());
+        Assertions.assertFalse(secondContent.getParent().isPresent());
+        Assertions.assertFalse(thirdContent.getParent().isPresent());
     }
 
     @Test
-    public void allElementsRemovedFromFooter_elementsShouldNotHaveDialogAsParents() {
+    void allElementsRemovedFromFooter_elementsShouldNotHaveDialogAsParents() {
         Dialog dialog = new Dialog();
         Span content = new Span("content");
         Span secondContent = new Span("second_content");
@@ -347,25 +362,27 @@ public class DialogTest {
 
         dialog.getFooter().removeAll();
 
-        Assert.assertFalse(content.getParent().isPresent());
-        Assert.assertFalse(secondContent.getParent().isPresent());
-        Assert.assertFalse(thirdContent.getParent().isPresent());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void callAddToHeaderOrFooter_withNull_shouldThrowError() {
-        Dialog dialog = new Dialog();
-        dialog.getHeader().add((Component) null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void callAddToHeaderOrFooter_withAnyNullValue_shouldThrowError() {
-        Dialog dialog = new Dialog();
-        dialog.getHeader().add(new Span("content"), null);
+        Assertions.assertFalse(content.getParent().isPresent());
+        Assertions.assertFalse(secondContent.getParent().isPresent());
+        Assertions.assertFalse(thirdContent.getParent().isPresent());
     }
 
     @Test
-    public void unregisterOpenedChangeListenerOnEvent() {
+    void callAddToHeaderOrFooter_withNull_shouldThrowError() {
+        Dialog dialog = new Dialog();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> dialog.getHeader().add((Component) null));
+    }
+
+    @Test
+    void callAddToHeaderOrFooter_withAnyNullValue_shouldThrowError() {
+        Dialog dialog = new Dialog();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> dialog.getHeader().add(new Span("content"), null));
+    }
+
+    @Test
+    void unregisterOpenedChangeListenerOnEvent() {
         var dialog = new Dialog();
 
         var listenerInvokedCount = new AtomicInteger(0);
@@ -377,15 +394,15 @@ public class DialogTest {
         dialog.open();
         dialog.close();
 
-        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Test
-    public void createDialogWithTitle() {
+    void createDialogWithTitle() {
         String title = "Title";
 
         var dialog = new Dialog(title);
-        Assert.assertEquals(title, dialog.getHeaderTitle());
+        Assertions.assertEquals(title, dialog.getHeaderTitle());
 
         Span content = new Span("content");
         Span secondContent = new Span("second_content");
@@ -393,47 +410,47 @@ public class DialogTest {
 
         var dialogWithComponents = new Dialog(title, content, secondContent,
                 thirdContent);
-        Assert.assertEquals(title, dialogWithComponents.getHeaderTitle());
-        Assert.assertEquals(content,
+        Assertions.assertEquals(title, dialogWithComponents.getHeaderTitle());
+        Assertions.assertEquals(content,
                 dialogWithComponents.getChildren().toList().get(0));
-        Assert.assertEquals(secondContent,
+        Assertions.assertEquals(secondContent,
                 dialogWithComponents.getChildren().toList().get(1));
-        Assert.assertEquals(thirdContent,
+        Assertions.assertEquals(thirdContent,
                 dialogWithComponents.getChildren().toList().get(2));
     }
 
     @Test
-    public void open_autoAttachedInBeforeClientResponse() {
+    void open_autoAttachedInBeforeClientResponse() {
         Dialog dialog = new Dialog();
         dialog.open();
 
         ui.fakeClientCommunication();
-        Assert.assertNotNull(dialog.getElement().getParent());
+        Assertions.assertNotNull(dialog.getElement().getParent());
     }
 
     @Test
-    public void open_close_notAutoAttachedInBeforeClientResponse() {
+    void open_close_notAutoAttachedInBeforeClientResponse() {
         Dialog dialog = new Dialog();
         dialog.open();
         dialog.close();
 
         ui.fakeClientCommunication();
-        Assert.assertNull(dialog.getElement().getParent());
+        Assertions.assertNull(dialog.getElement().getParent());
     }
 
     @Test
-    public void position_setTopLeft_positionIsDefined() {
+    void position_setTopLeft_positionIsDefined() {
         Dialog dialog = new Dialog();
         dialog.setTop("10px");
         dialog.setLeft("20px");
 
-        Assert.assertEquals("10px", dialog.getTop());
-        Assert.assertEquals("20px", dialog.getLeft());
+        Assertions.assertEquals("10px", dialog.getTop());
+        Assertions.assertEquals("20px", dialog.getLeft());
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void addClosedListener_listenerInvokedOnClose() {
+    void addClosedListener_listenerInvokedOnClose() {
         Dialog dialog = new Dialog();
         ComponentEventListener<Dialog.ClosedEvent> listener = Mockito
                 .mock(ComponentEventListener.class);
@@ -448,9 +465,10 @@ public class DialogTest {
                 .onComponentEvent(Mockito.any(Dialog.ClosedEvent.class));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void bindChildren_throwsUnsupportedOperationException() {
+    @Test
+    void bindChildren_throwsUnsupportedOperationException() {
         Dialog dialog = new Dialog();
-        dialog.bindChildren(null, null);
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> dialog.bindChildren(null, null));
     }
 }

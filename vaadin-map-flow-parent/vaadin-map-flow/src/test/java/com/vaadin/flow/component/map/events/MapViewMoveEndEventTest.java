@@ -8,18 +8,18 @@
  */
 package com.vaadin.flow.component.map.events;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
 
-public class MapViewMoveEndEventTest {
+class MapViewMoveEndEventTest {
 
     @Test
-    public void create() {
+    void create() {
         Map map = new Map();
         ArrayNode coordinates = JacksonUtils.createArrayNode();
         coordinates.add(10);
@@ -33,18 +33,18 @@ public class MapViewMoveEndEventTest {
         MapViewMoveEndEvent event = new MapViewMoveEndEvent(map, true, 0, 0,
                 coordinates, extent);
 
-        Assert.assertNotNull(event.getCenter());
-        Assert.assertEquals(10, event.getCenter().getX(), 0);
-        Assert.assertEquals(20, event.getCenter().getY(), 0);
-        Assert.assertNotNull(event.getExtent());
-        Assert.assertEquals(30, event.getExtent().getMinX(), 0);
-        Assert.assertEquals(40, event.getExtent().getMinY(), 0);
-        Assert.assertEquals(50, event.getExtent().getMaxX(), 0);
-        Assert.assertEquals(60, event.getExtent().getMaxY(), 0);
+        Assertions.assertNotNull(event.getCenter());
+        Assertions.assertEquals(10, event.getCenter().getX(), 0);
+        Assertions.assertEquals(20, event.getCenter().getY(), 0);
+        Assertions.assertNotNull(event.getExtent());
+        Assertions.assertEquals(30, event.getExtent().getMinX(), 0);
+        Assertions.assertEquals(40, event.getExtent().getMinY(), 0);
+        Assertions.assertEquals(50, event.getExtent().getMaxX(), 0);
+        Assertions.assertEquals(60, event.getExtent().getMaxY(), 0);
     }
 
     @Test
-    public void createFromInvalidCoordinates_usesFallback() {
+    void createFromInvalidCoordinates_usesFallback() {
         Map map = new Map();
         ArrayNode coordinates = JacksonUtils.createArrayNode();
         coordinates.add(JacksonUtils.nullNode());
@@ -58,13 +58,13 @@ public class MapViewMoveEndEventTest {
         MapViewMoveEndEvent event = new MapViewMoveEndEvent(map, true, 0, 0,
                 coordinates, extent);
 
-        Assert.assertNotNull(event.getCenter());
-        Assert.assertEquals(0, event.getCenter().getX(), 0);
-        Assert.assertEquals(0, event.getCenter().getY(), 0);
-        Assert.assertNotNull(event.getExtent());
-        Assert.assertEquals(0, event.getExtent().getMinX(), 0);
-        Assert.assertEquals(0, event.getExtent().getMinY(), 0);
-        Assert.assertEquals(0, event.getExtent().getMaxX(), 0);
-        Assert.assertEquals(0, event.getExtent().getMaxY(), 0);
+        Assertions.assertNotNull(event.getCenter());
+        Assertions.assertEquals(0, event.getCenter().getX(), 0);
+        Assertions.assertEquals(0, event.getCenter().getY(), 0);
+        Assertions.assertNotNull(event.getExtent());
+        Assertions.assertEquals(0, event.getExtent().getMinX(), 0);
+        Assertions.assertEquals(0, event.getExtent().getMinY(), 0);
+        Assertions.assertEquals(0, event.getExtent().getMaxX(), 0);
+        Assertions.assertEquals(0, event.getExtent().getMaxY(), 0);
     }
 }

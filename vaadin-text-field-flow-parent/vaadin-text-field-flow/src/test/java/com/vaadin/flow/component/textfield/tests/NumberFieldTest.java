@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -35,45 +35,46 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Tests for the {@link NumberField}.
  */
-public class NumberFieldTest extends TextFieldTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class NumberFieldTest extends TextFieldTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private NumberField field;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         field = new NumberField();
     }
 
     @Override
     @Test
-    public void setValueNull() {
-        assertNull("Value should be null", field.getValue());
+    void setValueNull() {
+        assertNull(field.getValue(), "Value should be null");
         field.setValue(null);
     }
 
     @Override
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         NumberField numberField = new NumberField();
-        Assert.assertNull(numberField.getValue());
-        Assert.assertEquals("", numberField.getElement().getProperty("value"));
+        Assertions.assertNull(numberField.getValue());
+        Assertions.assertEquals("",
+                numberField.getElement().getProperty("value"));
     }
 
     @Override
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
     }
 
     @Override
     @Test
-    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+    void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-number-field");
         element.setProperty("value", "1");
 
@@ -86,82 +87,83 @@ public class NumberFieldTest extends TextFieldTest {
                 .thenAnswer(invocation -> new NumberField());
 
         NumberField numberField = Component.from(element, NumberField.class);
-        Assert.assertEquals("1", numberField.getElement().getProperty("value"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void assertStepIsNotNegative() {
-        field.setStep(-1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void assertStepGreaterThanZero() {
-        field.setStep(0);
+        Assertions.assertEquals("1",
+                numberField.getElement().getProperty("value"));
     }
 
     @Test
-    public void assertDefaultValuesForMinMaxStep() {
-        Assert.assertEquals(
-                "The default max of NumberField should be the largest possible double value",
-                Double.POSITIVE_INFINITY, field.getMax(), 0);
-        Assert.assertEquals(
-                "The default min of NumberField should be the smallest possible double value",
-                Double.NEGATIVE_INFINITY, field.getMin(), 0);
-        Assert.assertEquals("The default step of NumberField should be 1.0",
-                1.0, field.getStep(), 0);
+    void assertStepIsNotNegative() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> field.setStep(-1));
     }
 
     @Test
-    public void setInitialMinMaxRequired_shouldNotInvalidateField() {
+    void assertStepGreaterThanZero() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> field.setStep(0));
+    }
+
+    @Test
+    void assertDefaultValuesForMinMaxStep() {
+        Assertions.assertEquals(Double.POSITIVE_INFINITY, field.getMax(), 0,
+                "The default max of NumberField should be the largest possible double value");
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY, field.getMin(), 0,
+                "The default min of NumberField should be the smallest possible double value");
+        Assertions.assertEquals(1.0, field.getStep(), 0,
+                "The default step of NumberField should be 1.0");
+    }
+
+    @Test
+    void setInitialMinMaxRequired_shouldNotInvalidateField() {
         field.setRequiredIndicatorVisible(true);
         field.setMin(3);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
         field.setMin(-5);
         field.setMax(-1);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
     }
 
     @Test
-    public void assertMinValidation() {
+    void assertMinValidation() {
         field.setValue(-10.5);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
 
         field.setMin(-10.3);
         field.setValue(-10.4); // need to update value to run validation
-        Assert.assertTrue(field.isInvalid());
+        Assertions.assertTrue(field.isInvalid());
 
         field.setValue(-10.3);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
     }
 
     @Test
-    public void assertMaxValidation() {
+    void assertMaxValidation() {
         field.setValue(100.0);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
 
         field.setMax(99.999);
         field.setValue(99.9991); // need to update value to run validation
-        Assert.assertTrue(field.isInvalid());
+        Assertions.assertTrue(field.isInvalid());
 
         field.setValue(99.999);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
     }
 
     @Test
-    public void stepValidation_doesntValidateWhenPropertyNotExplicitlySet() {
-        Assert.assertEquals(1.0, field.getStep(), 0.0);
+    void stepValidation_doesntValidateWhenPropertyNotExplicitlySet() {
+        Assertions.assertEquals(1.0, field.getStep(), 0.0);
 
         field.setValue(0.3);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
 
         field.setMin(0.0);
         field.setMax(10.0);
         field.setValue(0.4);
-        Assert.assertFalse(field.isInvalid());
+        Assertions.assertFalse(field.isInvalid());
     }
 
     @Test
-    public void stepValidation_minNotDefined() {
+    void stepValidation_minNotDefined() {
         field.setStep(1.5);
 
         assertValidValues(-6.0, -1.5, 0.0, 1.5, 4.5);
@@ -169,7 +171,7 @@ public class NumberFieldTest extends TextFieldTest {
     }
 
     @Test
-    public void stepValidation_positiveMin_minUsedAsStepBasis() {
+    void stepValidation_positiveMin_minUsedAsStepBasis() {
         field.setMin(1.0);
         field.setStep(1.5);
 
@@ -178,7 +180,7 @@ public class NumberFieldTest extends TextFieldTest {
     }
 
     @Test
-    public void stepValidation_negativeMin_minUsedAsStepBasis() {
+    void stepValidation_negativeMin_minUsedAsStepBasis() {
         field.setMin(-5.0);
         field.setStep(4.5);
 
@@ -187,7 +189,7 @@ public class NumberFieldTest extends TextFieldTest {
     }
 
     @Test
-    public void setMinNegativeInfinity_doesNotThrow() {
+    void setMinNegativeInfinity_doesNotThrow() {
         field.setStep(1.0);
         field.setMin(Double.NEGATIVE_INFINITY);
         field.setValue(6.0);
@@ -195,49 +197,49 @@ public class NumberFieldTest extends TextFieldTest {
 
     @Override
     @Test
-    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         1.1d, NumberField.class, ui);
     }
 
     @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+    void addThemeVariant_themeAttributeContainsThemeVariant() {
         field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertTrue(themeNames
+                .contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         field.addThemeVariants(TextFieldVariant.SMALL);
         field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertFalse(themeNames
+                .contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(field instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(field instanceof HasTooltip);
     }
 
     private void assertValidValues(Double... values) {
         Arrays.asList(values).forEach(v -> {
             field.setValue(v);
-            Assert.assertFalse("Expected field to be valid with value " + v,
-                    field.isInvalid());
+            Assertions.assertFalse(field.isInvalid(),
+                    "Expected field to be valid with value " + v);
         });
     }
 
     private void assertInvalidValues(Double... values) {
         Arrays.asList(values).forEach(v -> {
             field.setValue(v);
-            Assert.assertTrue("Expected field to be invalid with value " + v,
-                    field.isInvalid());
+            Assertions.assertTrue(field.isInvalid(),
+                    "Expected field to be invalid with value " + v);
         });
     }
 
@@ -261,44 +263,46 @@ public class NumberFieldTest extends TextFieldTest {
     }
 
     @Test
-    public void implementsHasAllowedCharPattern() {
-        Assert.assertTrue("NumberField should support char pattern",
+    void implementsHasAllowedCharPattern() {
+        Assertions.assertTrue(
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new NumberField().getClass()));
+                        .isAssignableFrom(new NumberField().getClass()),
+                "NumberField should support char pattern");
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         NumberField field = new NumberField();
-        Assert.assertTrue(field instanceof HasAriaLabel);
+        Assertions.assertTrue(field instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         NumberField field = new NumberField();
 
         field.setAriaLabel("aria-label");
-        Assert.assertTrue(field.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+        Assertions.assertTrue(field.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", field.getAriaLabel().get());
 
         field.setAriaLabel(null);
-        Assert.assertTrue(field.getAriaLabel().isEmpty());
+        Assertions.assertTrue(field.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         NumberField field = new NumberField();
 
         field.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+        Assertions.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                field.getAriaLabelledBy().get());
 
         field.setAriaLabelledBy(null);
-        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void setI18n_getI18n() {
+    void setI18n_getI18n() {
         NumberField textField = new NumberField();
         NumberField.NumberFieldI18n i18n = new NumberField.NumberFieldI18n()
                 .setBadInputErrorMessage("Bad input error")
@@ -306,6 +310,6 @@ public class NumberFieldTest extends TextFieldTest {
                 .setMinErrorMessage("Min error").setMaxErrorMessage("Max error")
                 .setStepErrorMessage("Step error");
         textField.setI18n(i18n);
-        Assert.assertEquals(i18n, textField.getI18n());
+        Assertions.assertEquals(i18n, textField.getI18n());
     }
 }

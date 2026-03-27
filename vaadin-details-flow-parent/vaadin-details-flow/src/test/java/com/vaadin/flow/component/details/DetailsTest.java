@@ -17,51 +17,51 @@ package com.vaadin.flow.component.details;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 
-public class DetailsTest {
+class DetailsTest {
 
     private Details details;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         details = new Details();
     }
 
     @Test
-    public void initContent() {
+    void initContent() {
         details.add(new Span(), new Span());
-        Assert.assertEquals(2, details.getContent().count());
+        Assertions.assertEquals(2, details.getContent().count());
 
         details.removeAll();
         details.add(new Span());
-        Assert.assertEquals(1, details.getContent().count());
+        Assertions.assertEquals(1, details.getContent().count());
     }
 
     @Test
-    public void noSummaryDefined_getSummaryText_returnsEmptyString() {
-        Assert.assertEquals("", details.getSummaryText());
+    void noSummaryDefined_getSummaryText_returnsEmptyString() {
+        Assertions.assertEquals("", details.getSummaryText());
     }
 
     @Test
-    public void summaryDefined_getSummaryText_returnsStringDefined() {
+    void summaryDefined_getSummaryText_returnsStringDefined() {
         details.setSummaryText("summary");
-        Assert.assertEquals("summary", details.getSummaryText());
+        Assertions.assertEquals("summary", details.getSummaryText());
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue(details instanceof HasTooltip);
+    void implementsHasTooltip() {
+        Assertions.assertTrue(details instanceof HasTooltip);
     }
 
     @Test
-    public void unregisterOpenedChangeListenerOnEvent() {
+    void unregisterOpenedChangeListenerOnEvent() {
         var listenerInvokedCount = new AtomicInteger(0);
         details.addOpenedChangeListener(e -> {
             listenerInvokedCount.incrementAndGet();
@@ -71,12 +71,12 @@ public class DetailsTest {
         details.setOpened(true);
         details.setOpened(false);
 
-        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assertions.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Details.class));
     }
 }

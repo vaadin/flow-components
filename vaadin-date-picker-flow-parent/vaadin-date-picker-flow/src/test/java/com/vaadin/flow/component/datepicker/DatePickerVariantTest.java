@@ -15,23 +15,23 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class DatePickerVariantTest {
+class DatePickerVariantTest {
 
     private DatePicker datePicker;
 
-    @Before
-    public void initTest() {
+    @BeforeEach
+    void initTest() {
         datePicker = new DatePicker();
     }
 
     @Test
-    public void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
+    void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.ALIGN_CENTER);
         assertThemeAttribute("align-center");
@@ -40,35 +40,35 @@ public class DatePickerVariantTest {
     }
 
     @Test
-    public void addAlignRightVariant_themeAttributeUpdated() {
+    void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    public void addSmallVariant_themeAttributeUpdated() {
+    void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    public void addAlignLeftVariant_themeAttributeUpdated() {
+    void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
     @Test
-    public void addHelperAbove_themeAttributeUpdated() {
+    void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
     @Test
-    public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.SMALL);
         datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE);
@@ -79,7 +79,7 @@ public class DatePickerVariantTest {
     }
 
     @Test
-    public void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
+    void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.SMALL);
         datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE);
@@ -88,7 +88,7 @@ public class DatePickerVariantTest {
     }
 
     @Test
-    public void addTwiceAndSeeOnce_themeAttributeUpdated() {
+    void addTwiceAndSeeOnce_themeAttributeUpdated() {
         assertThemeAttribute(null);
         datePicker.addThemeVariants(DatePickerVariant.SMALL);
         datePicker.addThemeVariants(DatePickerVariant.SMALL);
@@ -97,13 +97,13 @@ public class DatePickerVariantTest {
 
     private void assertThemeAttribute(String expected) {
         String actual = datePicker.getThemeName();
-        assertEquals("Unexpected theme attribute on date picker", expected,
-                actual);
+        assertEquals(expected, actual,
+                "Unexpected theme attribute on date picker");
     }
 
     private void assertThemeAttributeContains(String expected) {
         String actual = datePicker.getThemeName();
-        assertTrue("Theme attribute not present on date picker",
-                actual.contains(expected));
+        assertTrue(actual.contains(expected),
+                "Theme attribute not present on date picker");
     }
 }

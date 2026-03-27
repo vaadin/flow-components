@@ -18,25 +18,25 @@ package com.vaadin.flow.component.grid.dataview;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
-public class GridLazyDataViewTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class GridLazyDataViewTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private GridLazyDataView<String> dataView;
     private Grid<String> grid;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         BackEndDataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> {
                     query.getOffset();
@@ -51,18 +51,18 @@ public class GridLazyDataViewTest {
     }
 
     @Test
-    public void setItemCountCallback_switchFromUndefinedSize_definedSize() {
-        Assert.assertTrue(grid.getDataCommunicator().isDefinedSize());
+    void setItemCountCallback_switchFromUndefinedSize_definedSize() {
+        Assertions.assertTrue(grid.getDataCommunicator().isDefinedSize());
 
         dataView.setItemCountUnknown();
-        Assert.assertFalse(grid.getDataCommunicator().isDefinedSize());
+        Assertions.assertFalse(grid.getDataCommunicator().isDefinedSize());
 
         dataView.setItemCountCallback(query -> 5);
-        Assert.assertTrue(grid.getDataCommunicator().isDefinedSize());
+        Assertions.assertTrue(grid.getDataCommunicator().isDefinedSize());
     }
 
     @Test
-    public void setItemCountCallback_setAnotherCountCallback_itemCountChanged() {
+    void setItemCountCallback_setAnotherCountCallback_itemCountChanged() {
         final AtomicInteger itemCount = new AtomicInteger(0);
         dataView.addItemCountChangeListener(
                 event -> itemCount.set(event.getItemCount()));
@@ -72,6 +72,7 @@ public class GridLazyDataViewTest {
 
         ui.fakeClientCommunication();
 
-        Assert.assertEquals("Invalid item count reported", 2, itemCount.get());
+        Assertions.assertEquals(2, itemCount.get(),
+                "Invalid item count reported");
     }
 }

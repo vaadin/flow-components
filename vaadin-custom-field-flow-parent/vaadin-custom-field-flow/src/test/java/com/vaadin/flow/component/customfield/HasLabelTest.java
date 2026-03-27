@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.customfield;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasLabel;
 
-public class HasLabelTest {
+class HasLabelTest {
 
     @Test
-    public void customField() {
+    void customField() {
         CustomField<String> c = new CustomField<String>() {
             @Override
             protected String generateModelValue() {
@@ -35,7 +35,7 @@ public class HasLabelTest {
 
             }
         };
-        Assert.assertTrue(c instanceof HasLabel);
+        Assertions.assertTrue(c instanceof HasLabel);
     }
 
 }

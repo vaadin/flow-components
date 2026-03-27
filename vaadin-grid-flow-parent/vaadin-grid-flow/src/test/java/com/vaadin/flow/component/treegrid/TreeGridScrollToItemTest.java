@@ -20,10 +20,10 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
@@ -35,20 +35,20 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class TreeGridScrollToItemTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class TreeGridScrollToItemTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private TreeGrid<HierarchicalTestBean> treeGrid;
     private TreeData<HierarchicalTestBean> treeData;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         treeGrid = new TreeGrid<>();
         treeGrid.addHierarchyColumn(HierarchicalTestBean::getIndex)
                 .setSortable(true);
@@ -58,14 +58,15 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void setProviderWithoutMethodImpl_scrollToItem_unsupportedOperationExceptionThrown() {
+    void setProviderWithoutMethodImpl_scrollToItem_unsupportedOperationExceptionThrown() {
         treeGrid.setDataProvider(new DataProviderWithoutMethodImpl());
-        Assert.assertThrows(UnsupportedOperationException.class, () -> treeGrid
-                .scrollToItem(new HierarchicalTestBean("", 0, 0)));
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> treeGrid
+                        .scrollToItem(new HierarchicalTestBean("", 0, 0)));
     }
 
     @Test
-    public void treeDataProvider_flattenedHierarchyFormat_scrollToRootItem_scrollsToCorrectIndex() {
+    void treeDataProvider_flattenedHierarchyFormat_scrollToRootItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
 
@@ -77,7 +78,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_nestedHierarchyFormat_scrollToRootItem_scrollsToCorrectIndex() {
+    void treeDataProvider_nestedHierarchyFormat_scrollToRootItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
 
@@ -89,7 +90,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_flattenedHierarchyFormat_scrollToExpandedChildItem_scrollsToCorrectIndex() {
+    void treeDataProvider_flattenedHierarchyFormat_scrollToExpandedChildItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
 
@@ -104,7 +105,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_nestedHierarchyFormat_scrollToExpandedChildItem_scrollsToCorrectIndex() {
+    void treeDataProvider_nestedHierarchyFormat_scrollToExpandedChildItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
 
@@ -119,7 +120,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_flattenedHierarchyFormat_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
+    void treeDataProvider_flattenedHierarchyFormat_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
 
@@ -133,7 +134,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_nestedHierarchyFormat_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
+    void treeDataProvider_nestedHierarchyFormat_scrollToCollapsedChildItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
 
@@ -147,36 +148,36 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_flattenedHierarchyFormat_scrollToItemWithCollapsedParent_expandsParent() {
+    void treeDataProvider_flattenedHierarchyFormat_scrollToItemWithCollapsedParent_expandsParent() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         var rootItem = treeData.getRootItems().get(10);
-        Assert.assertFalse(treeGrid.isExpanded(rootItem));
+        Assertions.assertFalse(treeGrid.isExpanded(rootItem));
         var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
-        Assert.assertTrue(treeGrid.isExpanded(rootItem));
-        Assert.assertFalse(treeGrid.isExpanded(firstChild));
+        Assertions.assertTrue(treeGrid.isExpanded(rootItem));
+        Assertions.assertFalse(treeGrid.isExpanded(firstChild));
     }
 
     @Test
-    public void treeDataProvider_nestedHierarchyFormat_scrollToItemWithCollapsedParent_expandsParent() {
+    void treeDataProvider_nestedHierarchyFormat_scrollToItemWithCollapsedParent_expandsParent() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
 
         var rootItem = treeData.getRootItems().get(10);
-        Assert.assertFalse(treeGrid.isExpanded(rootItem));
+        Assertions.assertFalse(treeGrid.isExpanded(rootItem));
         var firstChild = treeData.getChildren(rootItem).getFirst();
         treeGrid.scrollToItem(firstChild);
-        Assert.assertTrue(treeGrid.isExpanded(rootItem));
-        Assert.assertFalse(treeGrid.isExpanded(firstChild));
+        Assertions.assertTrue(treeGrid.isExpanded(rootItem));
+        Assertions.assertFalse(treeGrid.isExpanded(firstChild));
     }
 
     @Test
-    public void treeDataProvider_flattenedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
+    void treeDataProvider_flattenedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
 
-        Assert.assertThrows(NoSuchElementException.class,
+        Assertions.assertThrows(NoSuchElementException.class,
                 this::scrollToMissingItem);
 
         ui.fakeClientCommunication();
@@ -184,11 +185,11 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_nestedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
+    void treeDataProvider_nestedHierarchyFormat_scrollToMissingItem_doesNotScroll() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
 
-        Assert.assertThrows(NoSuchElementException.class,
+        Assertions.assertThrows(NoSuchElementException.class,
                 this::scrollToMissingItem);
 
         ui.fakeClientCommunication();
@@ -196,7 +197,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_flattenedHierarchyFormat_reverseSort_scrollToItem_scrollsToCorrectIndex() {
+    void treeDataProvider_flattenedHierarchyFormat_reverseSort_scrollToItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
         sortDescending();
@@ -209,7 +210,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_nestedHierarchyFormat_reverseSort_scrollToItem_scrollsToCorrectIndex() {
+    void treeDataProvider_nestedHierarchyFormat_reverseSort_scrollToItem_scrollsToCorrectIndex() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
         sortDescending();
@@ -222,23 +223,23 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void treeDataProvider_flattenedHierarchyFormat_scrollToItem_nullItem_nullPointerExceptionThrown() {
+    void treeDataProvider_flattenedHierarchyFormat_scrollToItem_nullItem_nullPointerExceptionThrown() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.FLATTENED));
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> treeGrid.scrollToItem(null));
     }
 
     @Test
-    public void treeDataProvider_nestedHierarchyFormat_scrollToItem_nullItem_nullPointerExceptionThrown() {
+    void treeDataProvider_nestedHierarchyFormat_scrollToItem_nullItem_nullPointerExceptionThrown() {
         treeGrid.setDataProvider(new TreeDataProvider<>(treeData,
                 HierarchicalDataProvider.HierarchyFormat.NESTED));
-        Assert.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> treeGrid.scrollToItem(null));
     }
 
     @Test
-    public void scrollToItem_afterAttach_schedulesJsExecution() {
+    void scrollToItem_afterAttach_schedulesJsExecution() {
         var item = treeData.getRootItems().get(10);
         treeGrid.setTreeData(treeData);
 
@@ -249,7 +250,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void scrollToItem_beforeAttach_thenAttach_schedulesJsExecution() {
+    void scrollToItem_beforeAttach_thenAttach_schedulesJsExecution() {
         var item = treeData.getRootItems().get(10);
         treeGrid.setTreeData(treeData);
 
@@ -262,7 +263,7 @@ public class TreeGridScrollToItemTest {
     }
 
     @Test
-    public void scrollToIndex_scrollToItem_onlyScrollToItemExecuted() {
+    void scrollToIndex_scrollToItem_onlyScrollToItemExecuted() {
         var item = treeData.getRootItems().get(10);
         treeGrid.setTreeData(treeData);
         ui.add(treeGrid);
@@ -279,7 +280,7 @@ public class TreeGridScrollToItemTest {
 
     private void assertNoJavaScriptScrollToItemInvocation() {
         List<JavaScriptInvocation> invocations = getJavaScriptScrollInvocations();
-        Assert.assertTrue(invocations.isEmpty());
+        Assertions.assertTrue(invocations.isEmpty());
     }
 
     private void assertSingleJavaScriptScrollToItemInvocation(
@@ -288,12 +289,14 @@ public class TreeGridScrollToItemTest {
                 .key(expectedItem);
 
         var invocations = getJavaScriptScrollInvocations();
-        Assert.assertEquals(1, invocations.size());
+        Assertions.assertEquals(1, invocations.size());
 
         var invocation = invocations.get(0);
-        Assert.assertTrue(invocation.getExpression().contains("scrollToItem"));
-        Assert.assertEquals(expectedItemKey, invocation.getParameters().get(0));
-        Assert.assertArrayEquals(expectedPath,
+        Assertions.assertTrue(
+                invocation.getExpression().contains("scrollToItem"));
+        Assertions.assertEquals(expectedItemKey,
+                invocation.getParameters().get(0));
+        Assertions.assertArrayEquals(expectedPath,
                 (int[]) invocation.getParameters().get(1));
     }
 

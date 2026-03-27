@@ -15,14 +15,14 @@ import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
 
-public class ColumnFiltersTest {
+class ColumnFiltersTest {
 
     final String TABLE1_RANGE = "B2:B4";
     final String TABLE2_RANGE = "B6:B8";
@@ -30,8 +30,8 @@ public class ColumnFiltersTest {
     private XSSFWorkbook workbook;
     private Spreadsheet spreadsheet;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet();
 
@@ -61,22 +61,22 @@ public class ColumnFiltersTest {
     }
 
     @Test
-    public void sheetWithFilters_loadWorkbook_filtersPreserved() {
-        Assert.assertNotNull(spreadsheet.getTables());
-        Assert.assertEquals(1, spreadsheet.getTables().size());
-        Assert.assertEquals(CellRangeAddress.valueOf(TABLE1_RANGE),
+    void sheetWithFilters_loadWorkbook_filtersPreserved() {
+        Assertions.assertNotNull(spreadsheet.getTables());
+        Assertions.assertEquals(1, spreadsheet.getTables().size());
+        Assertions.assertEquals(CellRangeAddress.valueOf(TABLE1_RANGE),
                 spreadsheet.getTables().iterator().next().getFullTableRegion());
     }
 
     @Test
-    public void sheetWithTables_loadWorkbook_tablesPreserved() {
+    void sheetWithTables_loadWorkbook_tablesPreserved() {
         workbook.getSheetAt(0)
                 .createTable(new AreaReference(TABLE2_RANGE, null));
 
         spreadsheet.setWorkbook(workbook);
 
-        Assert.assertNotNull(spreadsheet.getTables());
-        Assert.assertEquals(2, spreadsheet.getTables().size());
+        Assertions.assertNotNull(spreadsheet.getTables());
+        Assertions.assertEquals(2, spreadsheet.getTables().size());
 
         final Iterator<SpreadsheetTable> iterator = spreadsheet.getTables()
                 .iterator();
@@ -85,26 +85,28 @@ public class ColumnFiltersTest {
 
         final CellRangeAddress table2 = iterator.next().getFullTableRegion();
 
-        Assert.assertTrue(CellRangeAddress.valueOf(TABLE1_RANGE).equals(table1)
+        Assertions.assertTrue(CellRangeAddress.valueOf(TABLE1_RANGE)
+                .equals(table1)
                 || CellRangeAddress.valueOf(TABLE1_RANGE).equals(table2));
 
-        Assert.assertTrue(CellRangeAddress.valueOf(TABLE2_RANGE).equals(table1)
+        Assertions.assertTrue(CellRangeAddress.valueOf(TABLE2_RANGE)
+                .equals(table1)
                 || CellRangeAddress.valueOf(TABLE2_RANGE).equals(table2));
     }
 
     @Test
-    public void loadFile_filteredColumnsLoadedAsActive() {
+    void loadFile_filteredColumnsLoadedAsActive() {
         Spreadsheet spr = TestHelper
                 .createSpreadsheet("autofilter_with_active_column.xlsx");
 
         final SpreadsheetTable table = spr.getTables().iterator().next();
 
-        Assert.assertTrue(table.getPopupButton(1).isActive());
-        Assert.assertFalse(table.getPopupButton(2).isActive());
+        Assertions.assertTrue(table.getPopupButton(1).isActive());
+        Assertions.assertFalse(table.getPopupButton(2).isActive());
     }
 
     @Test
-    public void loadFile_switchSheets_tablesRegisteredOnce() {
+    void loadFile_switchSheets_tablesRegisteredOnce() {
         Spreadsheet spreadsheet = TestHelper
                 .createSpreadsheet("tables_on_multiple_sheets.xlsx");
 
@@ -113,11 +115,11 @@ public class ColumnFiltersTest {
         spreadsheet.setActiveSheetIndex(0);
 
         // just 2 tables, one table per sheet
-        Assert.assertEquals(2, spreadsheet.getTables().size());
+        Assertions.assertEquals(2, spreadsheet.getTables().size());
     }
 
     @Test
-    public void loadFile_goToSheet1_popupButtonsCreatedOnTable() {
+    void loadFile_goToSheet1_popupButtonsCreatedOnTable() {
         Spreadsheet spreadsheet = TestHelper
                 .createSpreadsheet("table_with_disabled_autofilter.xlsx");
 
@@ -125,11 +127,11 @@ public class ColumnFiltersTest {
 
         // filter popup buttons visible on table on Sheet1
         var table = getFirstTableOnActiveSheet(spreadsheet);
-        Assert.assertEquals(3, table.getPopupButtons().size());
+        Assertions.assertEquals(3, table.getPopupButtons().size());
     }
 
     @Test
-    public void loadFile_goToSheet2_noPopupButtonsOnTable() {
+    void loadFile_goToSheet2_noPopupButtonsOnTable() {
         Spreadsheet spreadsheet = TestHelper
                 .createSpreadsheet("table_with_disabled_autofilter.xlsx");
 
@@ -137,11 +139,11 @@ public class ColumnFiltersTest {
 
         // there are no filter popup buttons on table on Sheet2
         var table = getFirstTableOnActiveSheet(spreadsheet);
-        Assert.assertEquals(0, table.getPopupButtons().size());
+        Assertions.assertEquals(0, table.getPopupButtons().size());
     }
 
     @Test
-    public void loadFile_goToSheet3_noPopupButtonsOnTable() {
+    void loadFile_goToSheet3_noPopupButtonsOnTable() {
         Spreadsheet spreadsheet = TestHelper
                 .createSpreadsheet("table_with_disabled_autofilter.xlsx");
 
@@ -149,11 +151,11 @@ public class ColumnFiltersTest {
 
         // there are no filter popup buttons on table on Sheet3
         var table = getFirstTableOnActiveSheet(spreadsheet);
-        Assert.assertEquals(0, table.getPopupButtons().size());
+        Assertions.assertEquals(0, table.getPopupButtons().size());
     }
 
     @Test
-    public void loadFile_goToSheet4_popupButtonsCreateOnWorksheet() {
+    void loadFile_goToSheet4_popupButtonsCreateOnWorksheet() {
         Spreadsheet spreadsheet = TestHelper
                 .createSpreadsheet("table_with_disabled_autofilter.xlsx");
 
@@ -161,7 +163,7 @@ public class ColumnFiltersTest {
 
         // there is one popup button for a worksheet filter on Sheet4
         var table = getFirstTableOnActiveSheet(spreadsheet);
-        Assert.assertEquals(1, table.getPopupButtons().size());
+        Assertions.assertEquals(1, table.getPopupButtons().size());
     }
 
     private SpreadsheetTable getFirstTableOnActiveSheet(

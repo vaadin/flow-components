@@ -8,9 +8,10 @@
  */
 package com.vaadin.flow.component.charts.export;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,9 +24,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
@@ -45,46 +46,48 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
 
-public class SVGGeneratorTest {
+class SVGGeneratorTest {
 
     private SVGGenerator svgGenerator;
 
-    @Before
-    public void setup() throws IOException {
+    @BeforeEach
+    void setup() throws IOException {
         svgGenerator = new SVGGenerator();
     }
 
-    @After
-    public void cleanup() throws IOException {
+    @AfterEach
+    void cleanup() throws IOException {
         if (!svgGenerator.isClosed()) {
             svgGenerator.close();
         }
     }
 
-    @Test(expected = NullPointerException.class)
-    public void chartConfigurationMustNotBeNull()
+    @Test
+    void chartConfigurationMustNotBeNull()
             throws IOException, InterruptedException {
-        svgGenerator.generate(null);
+        assertThrows(NullPointerException.class,
+                () -> svgGenerator.generate(null));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throwIllegalStateExceptionOnClosedGenerator()
+    @Test
+    void throwIllegalStateExceptionOnClosedGenerator()
             throws IOException, InterruptedException {
         svgGenerator.close();
         // it should check to see if the generator is closed before it checks if
         // the config is null
-        svgGenerator.generate(null);
+        assertThrows(IllegalStateException.class,
+                () -> svgGenerator.generate(null));
     }
 
     @Test
-    public void shouldKnowWhenItIsClosed() throws IOException {
+    void shouldKnowWhenItIsClosed() throws IOException {
         assertFalse(svgGenerator.isClosed());
         svgGenerator.close();
         assertTrue(svgGenerator.isClosed());
     }
 
     @Test
-    public void generateSVGFromAnEmptyConfiguration()
+    void generateSVGFromAnEmptyConfiguration()
             throws IOException, InterruptedException {
         Configuration configuration = new Configuration();
         String svg = svgGenerator.generate(configuration);
@@ -95,7 +98,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void generateSVGFromValidConfiguration()
+    void generateSVGFromValidConfiguration()
             throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         String svg = svgGenerator.generate(conf);
@@ -105,7 +108,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void generateSVGFromChartWithoutTitle()
+    void generateSVGFromChartWithoutTitle()
             throws IOException, InterruptedException {
         Configuration conf = createColumnWithoutTitle();
         String svg = svgGenerator.generate(conf);
@@ -116,8 +119,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithCustomWidth()
-            throws IOException, InterruptedException {
+    void exportWithCustomWidth() throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         ExportOptions options = new ExportOptions();
         options.setWidth(999);
@@ -129,8 +131,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithCustomHeight()
-            throws IOException, InterruptedException {
+    void exportWithCustomHeight() throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         ExportOptions options = new ExportOptions();
         options.setHeight(999);
@@ -142,8 +143,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithCustomTheme()
-            throws IOException, InterruptedException {
+    void exportWithCustomTheme() throws IOException, InterruptedException {
         Configuration conf = createPieChartConfiguration();
         ExportOptions options = new ExportOptions();
         options.setTheme(new LumoDarkTheme());
@@ -155,8 +155,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithCustomLang()
-            throws IOException, InterruptedException {
+    void exportWithCustomLang() throws IOException, InterruptedException {
         Configuration conf = createAreaChartConfiguration();
         ExportOptions options = new ExportOptions();
         Lang lang = createLang();
@@ -169,7 +168,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithTimeline() throws IOException, InterruptedException {
+    void exportWithTimeline() throws IOException, InterruptedException {
         Configuration configuration = new Configuration();
         configuration.getChart().setType(ChartType.AREASPLINERANGE);
         configuration.getTitle().setText("Temperature variation by day");
@@ -191,8 +190,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithEnabledFunctions()
-            throws IOException, InterruptedException {
+    void exportWithEnabledFunctions() throws IOException, InterruptedException {
         Configuration configuration = createAreaChartConfiguration();
         configuration.getyAxis().getLabels().setFormatter(
                 "function () { return this.value +' formatted'; }");
@@ -206,8 +204,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithLargeSeries()
-            throws IOException, InterruptedException {
+    void exportWithLargeSeries() throws IOException, InterruptedException {
         Configuration configuration = new Configuration();
         List<Number> data = IntStream.range(0, 100000).boxed()
                 .collect(Collectors.toList());
@@ -217,7 +214,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithLabel() throws IOException, InterruptedException {
+    void exportWithLabel() throws IOException, InterruptedException {
         var conf = createPieChartConfiguration();
         var label = new AnnotationItemLabel("Blue");
         label.setPoint(new AnnotationItemLabelPoint(350, 170));

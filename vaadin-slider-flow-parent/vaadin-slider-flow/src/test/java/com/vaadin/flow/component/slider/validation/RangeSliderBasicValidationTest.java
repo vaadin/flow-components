@@ -19,7 +19,7 @@ import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class RangeSliderBasicValidationTest
+class RangeSliderBasicValidationTest
         extends AbstractBasicValidationTest<RangeSlider, RangeSliderValue> {
 
     @Override

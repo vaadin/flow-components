@@ -15,14 +15,16 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class TextRendererTest {
+class TextRendererTest {
 
-    @Test(expected = IllegalStateException.class)
-    public void dontAllowNullInLabelGenerator() {
+    @Test
+    void dontAllowNullInLabelGenerator() {
         TextRenderer<Object> renderer = new TextRenderer<>(obj -> null);
-        renderer.createComponent(new Object());
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> renderer.createComponent(new Object()));
     }
 
 }

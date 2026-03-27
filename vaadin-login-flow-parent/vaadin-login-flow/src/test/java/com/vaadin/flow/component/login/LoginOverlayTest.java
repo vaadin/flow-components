@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.login;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -25,33 +25,33 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.shared.Registration;
 
-public class LoginOverlayTest {
+class LoginOverlayTest {
     @Test
-    public void showErrorMessage_fromNullI18n() {
+    void showErrorMessage_fromNullI18n() {
         final LoginOverlay overlay = new LoginOverlay(null);
         overlay.showErrorMessage("title", "message");
 
-        Assert.assertTrue(overlay.isError());
-        Assert.assertEquals("title",
+        Assertions.assertTrue(overlay.isError());
+        Assertions.assertEquals("title",
                 overlay.getI18n().getErrorMessage().getTitle());
-        Assert.assertEquals("message",
+        Assertions.assertEquals("message",
                 overlay.getI18n().getErrorMessage().getMessage());
     }
 
     @Test
-    public void showErrorMessage_fromDefaultI18n() {
+    void showErrorMessage_fromDefaultI18n() {
         final LoginOverlay overlay = new LoginOverlay();
         overlay.showErrorMessage("title", "message");
 
-        Assert.assertTrue(overlay.isError());
-        Assert.assertEquals("title",
+        Assertions.assertTrue(overlay.isError());
+        Assertions.assertEquals("title",
                 overlay.getI18n().getErrorMessage().getTitle());
-        Assert.assertEquals("message",
+        Assertions.assertEquals("message",
                 overlay.getI18n().getErrorMessage().getMessage());
     }
 
     @Test
-    public void showErrorMessage_preservesExistingI18n() {
+    void showErrorMessage_preservesExistingI18n() {
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());
         i18n.getHeader().setTitle("Custom title");
@@ -59,14 +59,14 @@ public class LoginOverlayTest {
         final LoginOverlay overlay = new LoginOverlay(i18n);
         overlay.showErrorMessage("title", "message");
 
-        Assert.assertEquals("Custom title",
+        Assertions.assertEquals("Custom title",
                 overlay.getI18n().getHeader().getTitle());
-        Assert.assertEquals("Custom username",
+        Assertions.assertEquals("Custom username",
                 overlay.getI18n().getForm().getUsername());
     }
 
     @Test
-    public void addLoginListeners_setAction_logsWarning() {
+    void addLoginListeners_setAction_logsWarning() {
         final LoginOverlay overlay = new LoginOverlay();
         Registration registration1 = overlay.addLoginListener(ev -> {
         });
@@ -98,7 +98,7 @@ public class LoginOverlayTest {
     }
 
     @Test
-    public void setAction_addLoginListener_logsWarning() {
+    void setAction_addLoginListener_logsWarning() {
         final LoginOverlay overlay = new LoginOverlay();
         overlay.setAction("login");
 
@@ -123,27 +123,24 @@ public class LoginOverlayTest {
     }
 
     @Test
-    public void setAction_unregisterAndRegisterDefaultLoginListener() {
+    void setAction_unregisterAndRegisterDefaultLoginListener() {
         final LoginOverlay overlay = new LoginOverlay();
         overlay.setAction("login");
         overlay.setError(true);
 
         ComponentUtil.fireEvent(overlay, new AbstractLogin.LoginEvent(overlay,
                 true, "username", "password"));
-        Assert.assertTrue(
-                "Expected form not being disabled by default listener",
-                overlay.isEnabled());
-        Assert.assertTrue(
-                "Expected error status not being reset by default listener",
-                overlay.isError());
+        Assertions.assertTrue(overlay.isEnabled(),
+                "Expected form not being disabled by default listener");
+        Assertions.assertTrue(overlay.isError(),
+                "Expected error status not being reset by default listener");
 
         overlay.setAction(null);
         ComponentUtil.fireEvent(overlay, new AbstractLogin.LoginEvent(overlay,
                 true, "username", "password"));
-        Assert.assertFalse("Expected form being disabled by default listener",
-                overlay.isEnabled());
-        Assert.assertFalse(
-                "Expected error status being reset by default listener",
-                overlay.isError());
+        Assertions.assertFalse(overlay.isEnabled(),
+                "Expected form being disabled by default listener");
+        Assertions.assertFalse(overlay.isError(),
+                "Expected error status being reset by default listener");
     }
 }

@@ -13,9 +13,9 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -23,13 +23,13 @@ import org.mockito.Mockito;
 import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.frontend.FrontendToolsLocator;
 
-public class NodeRunnerTest {
+class NodeRunnerTest {
 
     private Pattern vaadinHomeNodeRegexp;
     private ArgumentMatcher<File> matchesVaadinHomeNode;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         Path vaadinHome = FrontendUtils.getVaadinHomeDirectory().toPath();
         var vaadinNodeHome = vaadinHome.resolve("node/node").toAbsolutePath();
         var nodeExecutableRegex = Pattern.quote(vaadinNodeHome.toString())
@@ -40,7 +40,7 @@ public class NodeRunnerTest {
     }
 
     @Test()
-    public void findNodeExecutable_globalNodeAndVaadinHomeNode_usesGlobalNode() {
+    void findNodeExecutable_globalNodeAndVaadinHomeNode_usesGlobalNode() {
         FrontendToolsLocator frontendToolsLocatorMock = Mockito
                 .mock(FrontendToolsLocator.class);
         // Mock being able to locate global node installation
@@ -57,12 +57,12 @@ public class NodeRunnerTest {
         NodeRunner nodeRunner = new NodeRunner(frontendToolsLocatorMock);
         String nodeExecutable = nodeRunner.findNodeExecutable();
 
-        Assert.assertEquals(mockNodeInstallationPath.toString(),
+        Assertions.assertEquals(mockNodeInstallationPath.toString(),
                 nodeExecutable);
     }
 
     @Test()
-    public void findNodeExecutable_noGlobalNodeAndVaadinHomeNode_usesVaadinHomeNode() {
+    void findNodeExecutable_noGlobalNodeAndVaadinHomeNode_usesVaadinHomeNode() {
         FrontendToolsLocator frontendToolsLocatorMock = Mockito
                 .mock(FrontendToolsLocator.class);
         // Mock not being able to locate global node installation
@@ -77,12 +77,12 @@ public class NodeRunnerTest {
         NodeRunner nodeRunner = new NodeRunner(frontendToolsLocatorMock);
         String nodeExecutable = nodeRunner.findNodeExecutable();
 
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 vaadinHomeNodeRegexp.matcher(nodeExecutable).matches());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void findNodeExecutable_noGlobalNodeAndNoVaadinHomeNode_throwsException() {
+    @Test
+    void findNodeExecutable_noGlobalNodeAndNoVaadinHomeNode_throwsException() {
         FrontendToolsLocator frontendToolsLocatorMock = Mockito
                 .mock(FrontendToolsLocator.class);
         // Mock not being able to locate any node installation
@@ -94,6 +94,8 @@ public class NodeRunnerTest {
                 .thenReturn(false);
 
         NodeRunner nodeRunner = new NodeRunner(frontendToolsLocatorMock);
-        nodeRunner.findNodeExecutable();
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> nodeRunner.findNodeExecutable());
     }
 }

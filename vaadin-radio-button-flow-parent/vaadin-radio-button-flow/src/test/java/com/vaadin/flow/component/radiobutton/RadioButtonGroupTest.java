@@ -22,10 +22,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -43,36 +42,34 @@ import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
-public class RadioButtonGroupTest {
+class RadioButtonGroupTest {
     private static final String OUTER_HTML = "<vaadin-radio-button><label slot=\"label\"><span>%s</span></label></vaadin-radio-button>";
 
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void setReadOnlyRadioGroup_groupIsReadOnly() {
+    void setReadOnlyRadioGroup_groupIsReadOnly() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar");
         group.setReadOnly(true);
-        Assert.assertTrue(group.isReadOnly());
+        Assertions.assertTrue(group.isReadOnly());
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assertions.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("readonly"));
 
         long disabledChildCount = group.getChildren().filter(
                 child -> child.getElement().getProperty("disabled", false))
                 .count();
-        Assert.assertEquals(group.getChildren().count(), disabledChildCount);
+        Assertions.assertEquals(group.getChildren().count(),
+                disabledChildCount);
     }
 
     @Test
-    public void setReadOnlyRadioGroup_checkedButtonIsEnabled() {
+    void setReadOnlyRadioGroup_checkedButtonIsEnabled() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar");
         group.setValue("foo");
@@ -81,11 +78,11 @@ public class RadioButtonGroupTest {
         long disabledChildCount = group.getChildren().filter(
                 child -> child.getElement().getProperty("disabled", false))
                 .count();
-        Assert.assertEquals(1, disabledChildCount);
+        Assertions.assertEquals(1, disabledChildCount);
     }
 
     @Test
-    public void setReadOnlyRadioGroup_checkedButtonIsEnabled2() {
+    void setReadOnlyRadioGroup_checkedButtonIsEnabled2() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar");
         group.setReadOnly(true);
@@ -94,57 +91,57 @@ public class RadioButtonGroupTest {
         long disabledChildCount = group.getChildren().filter(
                 child -> child.getElement().getProperty("disabled", false))
                 .count();
-        Assert.assertEquals(1, disabledChildCount);
+        Assertions.assertEquals(1, disabledChildCount);
     }
 
     @Test
-    public void setReadOnlyDisabledRadioGroup_groupIsDisabledAndReadonly() {
+    void setReadOnlyDisabledRadioGroup_groupIsDisabledAndReadonly() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setEnabled(false);
         group.setReadOnly(true);
 
-        Assert.assertTrue(group.isReadOnly());
-        Assert.assertFalse(group.isEnabled());
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assertions.assertTrue(group.isReadOnly());
+        Assertions.assertFalse(group.isEnabled());
+        Assertions.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("disabled"));
     }
 
     @Test
-    public void unsetReadOnlyDisabledRadioGroup_groupIsDisabledAndNotReadonly() {
+    void unsetReadOnlyDisabledRadioGroup_groupIsDisabledAndNotReadonly() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setEnabled(false);
         group.setReadOnly(false);
 
-        Assert.assertFalse(group.isReadOnly());
-        Assert.assertFalse(group.isEnabled());
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assertions.assertFalse(group.isReadOnly());
+        Assertions.assertFalse(group.isEnabled());
+        Assertions.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("disabled"));
     }
 
     @Test
-    public void setReadOnlyEnabledRadioGroup_groupIsDisabledAndNotReadonly() {
+    void setReadOnlyEnabledRadioGroup_groupIsDisabledAndNotReadonly() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setReadOnly(true);
         group.setEnabled(true);
 
-        Assert.assertTrue(group.isReadOnly());
-        Assert.assertTrue(group.isEnabled());
-        Assert.assertEquals(Boolean.FALSE.toString(),
+        Assertions.assertTrue(group.isReadOnly());
+        Assertions.assertTrue(group.isEnabled());
+        Assertions.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
-        Assert.assertEquals(Boolean.TRUE.toString(),
+        Assertions.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("readonly"));
 
         group.setReadOnly(false);
 
-        Assert.assertTrue(group.isEnabled());
-        Assert.assertEquals(Boolean.FALSE.toString(),
+        Assertions.assertTrue(group.isEnabled());
+        Assertions.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
-        Assert.assertEquals(Boolean.FALSE.toString(),
+        Assertions.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("readonly"));
     }
 
     @Test
-    public void unsetReadOnlyEnabledRadioGroup_groupIsEnabled() {
+    void unsetReadOnlyEnabledRadioGroup_groupIsEnabled() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setEnabled(false);
         group.setReadOnly(true);
@@ -152,13 +149,13 @@ public class RadioButtonGroupTest {
 
         group.setReadOnly(false);
 
-        Assert.assertTrue(group.isEnabled());
-        Assert.assertEquals(Boolean.FALSE.toString(),
+        Assertions.assertTrue(group.isEnabled());
+        Assertions.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
     }
 
     @Test
-    public void selectDisabledItem_noRedundantEvent() {
+    void selectDisabledItem_noRedundantEvent() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("enabled", "disabled");
         group.setItemEnabledProvider("enabled"::equals);
@@ -173,20 +170,20 @@ public class RadioButtonGroupTest {
         String disabledKey = keys.get(1);
 
         group.getElement().setProperty("value", disabledKey);
-        Assert.assertNull(group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertNull(group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         group.getElement().setProperty("value", enabledKey);
-        Assert.assertEquals("enabled", group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals("enabled", group.getValue());
+        Assertions.assertEquals(1, events.size());
 
         ValueChangeEvent<String> event = events.get(0);
-        Assert.assertNull(event.getOldValue());
-        Assert.assertEquals("enabled", event.getValue());
+        Assertions.assertNull(event.getOldValue());
+        Assertions.assertEquals("enabled", event.getValue());
     }
 
     @Test
-    public void disabledItems_itemEnabledProvider_stayDisabled() {
+    void disabledItems_itemEnabledProvider_stayDisabled() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("enabled", "disabled");
         group.setItemEnabledProvider("enabled"::equals);
@@ -195,24 +192,24 @@ public class RadioButtonGroupTest {
                 .map(child -> (RadioButton<String>) child)
                 .collect(Collectors.toList());
 
-        Assert.assertTrue(children.get(0).isEnabled());
-        Assert.assertFalse(children.get(1).isEnabled());
+        Assertions.assertTrue(children.get(0).isEnabled());
+        Assertions.assertFalse(children.get(1).isEnabled());
 
         group.setEnabled(false);
-        Assert.assertFalse(children.get(0).isEnabled());
-        Assert.assertFalse(children.get(1).isEnabled());
+        Assertions.assertFalse(children.get(0).isEnabled());
+        Assertions.assertFalse(children.get(1).isEnabled());
 
         group.setEnabled(true);
-        Assert.assertTrue(children.get(0).isEnabled());
-        Assert.assertFalse(children.get(1).isEnabled());
+        Assertions.assertTrue(children.get(0).isEnabled());
+        Assertions.assertFalse(children.get(1).isEnabled());
 
         group.setEnabled(false);
-        Assert.assertFalse(children.get(0).isEnabled());
-        Assert.assertFalse(children.get(1).isEnabled());
+        Assertions.assertFalse(children.get(0).isEnabled());
+        Assertions.assertFalse(children.get(1).isEnabled());
     }
 
     @Test
-    public void changeItems_selectionIsReset() {
+    void changeItems_selectionIsReset() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         radioButtonGroup.setItems("Foo", "Bar");
 
@@ -222,19 +219,19 @@ public class RadioButtonGroupTest {
 
         radioButtonGroup.setValue("Foo");
 
-        Assert.assertEquals("Foo", capture.get());
+        Assertions.assertEquals("Foo", capture.get());
 
-        Assert.assertEquals("Foo", radioButtonGroup.getValue());
+        Assertions.assertEquals("Foo", radioButtonGroup.getValue());
 
         radioButtonGroup.setItems("Foo", "Baz");
 
-        Assert.assertEquals(null, radioButtonGroup.getValue());
-        Assert.assertEquals(null, capture.get());
+        Assertions.assertEquals(null, radioButtonGroup.getValue());
+        Assertions.assertEquals(null, capture.get());
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testResetAllItems() {
+    void testResetAllItems() {
         RadioButtonGroup<ItemHelper> group = new RadioButtonGroup<ItemHelper>();
         ItemHelper item1 = new ItemHelper("foo", "01");
         ItemHelper item2 = new ItemHelper("baz", "02");
@@ -254,15 +251,15 @@ public class RadioButtonGroupTest {
         RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components
                 .get(1);
 
-        Assert.assertEquals(String.format(OUTER_HTML, "zoo"),
+        Assertions.assertEquals(String.format(OUTER_HTML, "zoo"),
                 radioZoo.getElement().getOuterHTML());
-        Assert.assertEquals(String.format(OUTER_HTML, "bar"),
+        Assertions.assertEquals(String.format(OUTER_HTML, "bar"),
                 radioBar.getElement().getOuterHTML());
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testResetSingleItem() {
+    void testResetSingleItem() {
         RadioButtonGroup<ItemHelper> group = new RadioButtonGroup<ItemHelper>();
         ItemHelper item1 = new ItemHelper("foo", "01");
         ItemHelper item2 = new ItemHelper("baz", "02");
@@ -281,14 +278,14 @@ public class RadioButtonGroupTest {
         RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components
                 .get(1);
 
-        Assert.assertEquals(String.format(OUTER_HTML, "foo"),
+        Assertions.assertEquals(String.format(OUTER_HTML, "foo"),
                 radioFoo.getElement().getOuterHTML());
-        Assert.assertEquals(String.format(OUTER_HTML, "bar"),
+        Assertions.assertEquals(String.format(OUTER_HTML, "bar"),
                 radioBar.getElement().getOuterHTML());
     }
 
     @Test
-    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-radio-group");
         element.setProperty("value", "foo");
 
@@ -300,17 +297,12 @@ public class RadioButtonGroupTest {
                 .thenAnswer(invocation -> new RadioButtonGroup());
         RadioButtonGroup field = Component.from(element,
                 RadioButtonGroup.class);
-        Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
+        Assertions.assertEquals("foo",
+                field.getElement().getPropertyRaw("value"));
     }
 
     @Test
-    public void dataViewForFaultyDataProvider_throwsException() {
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(
-                "RadioButtonGroupListDataView only supports 'ListDataProvider' "
-                        + "or it's subclasses, but was given a "
-                        + "'AbstractBackEndDataProvider'");
-
+    void dataViewForFaultyDataProvider_throwsException() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         final RadioButtonGroupListDataView<String> listDataView = radioButtonGroup
                 .setItems(Arrays.asList("one", "two"));
@@ -320,11 +312,17 @@ public class RadioButtonGroupTest {
 
         radioButtonGroup.setItems(dataProvider);
 
-        radioButtonGroup.getListDataView();
+        IllegalStateException exception = Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> radioButtonGroup.getListDataView());
+        Assertions.assertTrue(exception.getMessage().contains(
+                "RadioButtonGroupListDataView only supports 'ListDataProvider' "
+                        + "or it's subclasses, but was given a "
+                        + "'AbstractBackEndDataProvider'"));
     }
 
     @Test
-    public void setIdentifierProvider_setItemWithIdentifierOnly_shouldSelectCorrectItem() {
+    void setIdentifierProvider_setItemWithIdentifierOnly_shouldSelectCorrectItem() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -340,8 +338,8 @@ public class RadioButtonGroupTest {
 
         radioButtonGroup.setValue(new CustomItem(1L));
 
-        Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(radioButtonGroup.getValue().getName(), "First");
+        Assertions.assertNotNull(radioButtonGroup.getValue());
+        Assertions.assertEquals("First", radioButtonGroup.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -354,13 +352,13 @@ public class RadioButtonGroupTest {
         // with just the Id:
         radioButtonGroup.setValue(new CustomItem(2L));
 
-        Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(Long.valueOf(2L),
+        Assertions.assertNotNull(radioButtonGroup.getValue());
+        Assertions.assertEquals(Long.valueOf(2L),
                 radioButtonGroup.getValue().getId());
     }
 
     @Test
-    public void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
+    void setIdentifierProvider_setItemWithIdAndWrongName_shouldSelectCorrectItemBasedOnIdNotEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -376,8 +374,8 @@ public class RadioButtonGroupTest {
 
         radioButtonGroup.setValue(new CustomItem(1L));
 
-        Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals("First", radioButtonGroup.getValue().getName());
+        Assertions.assertNotNull(radioButtonGroup.getValue());
+        Assertions.assertEquals("First", radioButtonGroup.getValue().getName());
 
         // Make the names similar to the name of not selected one to mess
         // with the <equals> implementation in CustomItem:
@@ -390,13 +388,13 @@ public class RadioButtonGroupTest {
         // another items, should verify that <equals> method is not in use:
         radioButtonGroup.setValue(new CustomItem(3L, "Second"));
 
-        Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(Long.valueOf(3L),
+        Assertions.assertNotNull(radioButtonGroup.getValue());
+        Assertions.assertEquals(Long.valueOf(3L),
                 radioButtonGroup.getValue().getId());
     }
 
     @Test
-    public void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
+    void withoutSettingIdentifierProvider_setItemWithNullId_shouldSelectCorrectItemBasedOnEquals() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -409,13 +407,13 @@ public class RadioButtonGroupTest {
 
         radioButtonGroup.setValue(new CustomItem(null, "Second"));
 
-        Assert.assertNotNull(radioButtonGroup.getValue());
-        Assert.assertEquals(Long.valueOf(2L),
+        Assertions.assertNotNull(radioButtonGroup.getValue());
+        Assertions.assertEquals(Long.valueOf(2L),
                 radioButtonGroup.getValue().getId());
     }
 
     @Test
-    public void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
+    void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -430,19 +428,19 @@ public class RadioButtonGroupTest {
         listDataView.setIdentifierProvider(CustomItem::getId);
 
         radioButtonGroup.setValue(new CustomItem(null, "First"));
-        Assert.assertNull(radioButtonGroup.getValue().getId());
+        Assertions.assertNull(radioButtonGroup.getValue().getId());
     }
 
     @Test
-    public void addNullOption_setValue() {
+    void addNullOption_setValue() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("enabled", "disabled", null);
         group.setValue(null);
-        Assert.assertEquals(group.getValue(), null);
+        Assertions.assertEquals(null, group.getValue());
     }
 
     @Test
-    public void setItemEnabledProvider_nullValue_doesNotThrow() {
+    void setItemEnabledProvider_nullValue_doesNotThrow() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("Foo", "Bar", "Baz");
         group.setValue("Foo");
@@ -455,7 +453,7 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void dataProviderListeners_radioButtonGroupAttachedAndDetached_oldDataProviderListenerRemoved() {
+    void dataProviderListeners_radioButtonGroupAttachedAndDetached_oldDataProviderListenerRemoved() {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new RadioButtonGroup<>(), 1, 1, new int[] { 0, 1 },
@@ -463,50 +461,51 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        Assert.assertTrue(group instanceof HasTooltip);
+        Assertions.assertTrue(group instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
-        Assert.assertTrue(
+    void implementHasAriaLabel() {
+        Assertions.assertTrue(
                 HasAriaLabel.class.isAssignableFrom(RadioButtonGroup.class));
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setAriaLabel("aria-label");
 
-        Assert.assertTrue(group.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", group.getAriaLabel().get());
+        Assertions.assertTrue(group.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", group.getAriaLabel().get());
 
         group.setAriaLabel(null);
-        Assert.assertTrue(group.getAriaLabel().isEmpty());
+        Assertions.assertTrue(group.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setAriaLabelledBy("aria-labelledby");
 
-        Assert.assertTrue(group.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", group.getAriaLabelledBy().get());
+        Assertions.assertTrue(group.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                group.getAriaLabelledBy().get());
 
         group.setAriaLabelledBy(null);
-        Assert.assertTrue(group.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(group.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         RadioButtonGroup<String> field = new RadioButtonGroup<String>();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<String>, String>, String>);
     }
 
     @Test
-    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+    void discardSelectionOnDataChange_noExtraChangeEventsFired() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -519,17 +518,17 @@ public class RadioButtonGroupTest {
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertEquals(1, events.size());
         events.clear();
 
         group.getDataProvider().refreshAll();
-        Assert.assertNull(group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertNull(group.getValue());
+        Assertions.assertEquals(1, events.size());
     }
 
     @Test
-    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+    void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -543,27 +542,27 @@ public class RadioButtonGroupTest {
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertEquals(1, events.size());
         events.clear();
 
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(items.get(1));
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(selectedItem);
         group.getDataProvider().refreshAll();
-        Assert.assertNull(group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertNull(group.getValue());
+        Assertions.assertEquals(1, events.size());
     }
 
     @Test
-    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+    void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -577,27 +576,27 @@ public class RadioButtonGroupTest {
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertEquals(1, events.size());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertEquals(1, events.size());
         events.clear();
 
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(items.get(1));
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertTrue(events.isEmpty());
 
         items.remove(selectedItem);
         group.getDataProvider().refreshAll();
-        Assert.assertEquals(selectedItem, group.getValue());
-        Assert.assertTrue(events.isEmpty());
+        Assertions.assertEquals(selectedItem, group.getValue());
+        Assertions.assertTrue(events.isEmpty());
     }
 
     @Test
-    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+    void refreshItem_selectFromClient_valueContainsUpdatedItem() {
         RadioButtonGroup<CustomItem> group = new RadioButtonGroup<>();
         RadioButtonGroupListDataView<CustomItem> dataView = group.setItems(
                 new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
@@ -615,13 +614,13 @@ public class RadioButtonGroupTest {
                 .getElement().getProperty("value");
         group.getElement().setProperty("value", itemKey);
 
-        Assert.assertEquals("updated", selectedItem.get().getName());
-        Assert.assertEquals("updated", group.getValue().getName());
+        Assertions.assertEquals("updated", selectedItem.get().getName());
+        Assertions.assertEquals("updated", group.getValue().getName());
     }
 
     @Test
-    public void implementsHasThemeVariant() {
-        Assert.assertTrue(
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(RadioButtonGroup.class));
     }
 }

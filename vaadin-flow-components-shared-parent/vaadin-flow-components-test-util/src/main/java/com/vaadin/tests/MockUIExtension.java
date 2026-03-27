@@ -22,7 +22,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -34,9 +36,16 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
- * JUnit rule to set up a UI and VaadinSession for testing.
+ * JUnit extension to set up a UI and VaadinSession for testing.
+ * <p>
+ * Usage:
+ *
+ * <pre>
+ * &#64;RegisterExtension
+ * MockUIExtension ui = new MockUIExtension();
+ * </pre>
  */
-public class MockUIRule extends ExternalResource {
+public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
 
     // Keep the session and UI as fields to ensure they are not garbage
     // collected during the test
@@ -45,7 +54,8 @@ public class MockUIRule extends ExternalResource {
     private VaadinService service;
 
     @Override
-    protected void before() {
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    public void beforeEach(ExtensionContext context) {
         service = Mockito.mock(VaadinService.class);
         DeploymentConfiguration deploymentConfig = Mockito
                 .mock(DeploymentConfiguration.class);
@@ -63,15 +73,20 @@ public class MockUIRule extends ExternalResource {
     }
 
     @Override
-    protected void after() {
+    public void afterEach(ExtensionContext context) {
+        cleanup();
+    }
+
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    private void cleanup() {
         removeAll();
         UI.setCurrent(null);
         VaadinSession.setCurrent(null);
     }
 
     /**
-     * Get the UI instance that is set up by this rule.
-     * 
+     * Get the UI instance that is set up by this extension.
+     *
      * @return the UI instance
      */
     public UI getUI() {
@@ -82,23 +97,23 @@ public class MockUIRule extends ExternalResource {
      * Clears the current the UI.
      */
     public void clearUI() {
-        after();
+        cleanup();
     }
 
     /**
      * Replaces the current UI with a new instance.
      */
     public void replaceUI() {
-        after();
-        before();
+        cleanup();
+        beforeEach(null);
     }
 
     /**
-     * Get the VaadinSession instance that is set up by this rule.
+     * Get the VaadinSession instance that is set up by this extension.
      * <p>
      * Note that this returns a Mockito spy, so it supports stubbing and
      * verification.
-     * 
+     *
      * @return the VaadinSession instance
      */
     public VaadinSession getSession() {
@@ -106,11 +121,11 @@ public class MockUIRule extends ExternalResource {
     }
 
     /**
-     * Get the VaadinService instance that is set up by this rule.
+     * Get the VaadinService instance that is set up by this extension.
      * <p>
      * Note that this returns a Mockito mock, so it supports stubbing and
      * verification.
-     * 
+     *
      * @return the VaadinService instance
      */
     public VaadinService getService() {
@@ -120,7 +135,7 @@ public class MockUIRule extends ExternalResource {
     /**
      * Add a component to the UI. Delegates to {@link UI#add(Component...)} for
      * convenience.
-     * 
+     *
      * @param component
      *            the component to add
      */
@@ -131,7 +146,7 @@ public class MockUIRule extends ExternalResource {
     /**
      * Remove a component from the UI. Delegates to
      * {@link UI#remove(Component...)} for convenience.
-     * 
+     *
      * @param component
      *            the component to remove
      */
@@ -150,7 +165,7 @@ public class MockUIRule extends ExternalResource {
     /**
      * Set the locale of the UI. Delegates to {@link UI#setLocale(Locale)} for
      * convenience.
-     * 
+     *
      * @param locale
      *            the locale to set
      */
@@ -170,7 +185,7 @@ public class MockUIRule extends ExternalResource {
 
     /**
      * Dump the pending JavaScript invocations from the UI internals.
-     * 
+     *
      * @return a list of pending JavaScript invocations
      */
     public List<PendingJavaScriptInvocation> dumpPendingJavaScriptInvocations() {

@@ -15,20 +15,20 @@
  */
 package com.vaadin.flow.component.grid;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.SelectionListener;
 
-public class GridMultiSelectionWithIdProviderTest {
+class GridMultiSelectionWithIdProviderTest {
 
     private Person AARON;
 
@@ -36,8 +36,8 @@ public class GridMultiSelectionWithIdProviderTest {
     private SelectionListener<Grid<Person>, Person> selectionListenerMock;
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         AARON = new Person(1, "Aaron", "Archer");
         Set<Person> mockPersons = new HashSet<>();
         mockPersons.add(AARON);
@@ -58,7 +58,7 @@ public class GridMultiSelectionWithIdProviderTest {
     }
 
     @Test
-    public void select_changeHashCode_deselect_nothingSelected() {
+    void select_changeHashCode_deselect_nothingSelected() {
         grid.select(AARON);
         assertEquals(1, grid.getSelectedItems().size());
         Mockito.verify(selectionListenerMock, Mockito.times(1))
@@ -72,7 +72,7 @@ public class GridMultiSelectionWithIdProviderTest {
     }
 
     @Test
-    public void selectFromClient_changeHashCode_deselectFromClient_nothingSelected() {
+    void selectFromClient_changeHashCode_deselectFromClient_nothingSelected() {
         grid.getSelectionModel().selectFromClient(AARON);
         assertEquals(1, grid.getSelectedItems().size());
         Mockito.verify(selectionListenerMock, Mockito.times(1))
@@ -86,7 +86,7 @@ public class GridMultiSelectionWithIdProviderTest {
     }
 
     @Test
-    public void select_selectDuplicateWithDifferentHashCode_oneItemSelected() {
+    void select_selectDuplicateWithDifferentHashCode_oneItemSelected() {
         Person aaronDuplicate = new Person(AARON.id, "aaron", "archer");
 
         grid.select(AARON);
@@ -101,7 +101,7 @@ public class GridMultiSelectionWithIdProviderTest {
     }
 
     @Test
-    public void selectFromClient_selectDuplicateWithDifferentHashCode_oneItemSelected() {
+    void selectFromClient_selectDuplicateWithDifferentHashCode_oneItemSelected() {
         Person aaronDuplicate = new Person(AARON.id, "aaron", "archer");
 
         grid.getSelectionModel().selectFromClient(AARON);

@@ -10,35 +10,35 @@ package com.vaadin.flow.component.map.configuration.source;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class OSMSourceTest {
+class OSMSourceTest {
 
     @Test
-    public void initializeWithOptions() {
+    void initializeWithOptions() {
         OSMSource.Options options = createOptions();
         OSMSource source = new OSMSource(options);
 
-        Assert.assertEquals("https://example.com", source.getUrl());
-        Assert.assertEquals("testCrossOrigin", source.getCrossOrigin());
-        Assert.assertEquals("testProjection", source.getProjection());
-        Assert.assertEquals("testAttributions",
+        Assertions.assertEquals("https://example.com", source.getUrl());
+        Assertions.assertEquals("testCrossOrigin", source.getCrossOrigin());
+        Assertions.assertEquals("testProjection", source.getProjection());
+        Assertions.assertEquals("testAttributions",
                 source.getAttributions().get(0));
-        Assert.assertFalse(source.isAttributionsCollapsible());
-        Assert.assertTrue(source.isOpaque());
+        Assertions.assertFalse(source.isAttributionsCollapsible());
+        Assertions.assertTrue(source.isOpaque());
     }
 
     @Test
-    public void setAttributionsCollapsible_disabledByDefault() {
+    void setAttributionsCollapsible_disabledByDefault() {
         OSMSource source = new OSMSource();
 
-        Assert.assertFalse(source.isAttributionsCollapsible());
+        Assertions.assertFalse(source.isAttributionsCollapsible());
     }
 
     @Test
-    public void setAttributionsCollapsible_mayNotBeEnabled() {
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
+    void setAttributionsCollapsible_mayNotBeEnabled() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             OSMSource.Options options = new OSMSource.Options();
             options.setAttributionsCollapsible(true);
         });

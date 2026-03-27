@@ -15,47 +15,50 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsTest;
 
-public class MenuItemSignalTest extends AbstractSignalsUnitTest {
+class MenuItemSignalTest extends AbstractSignalsTest {
 
     private ContextMenu contextMenu;
     private MenuItem item;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         contextMenu = new ContextMenu();
         item = contextMenu.addItem("");
         ui.add(contextMenu);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void bindEnabled_disableOnClickActive_throws() {
+    @Test
+    void bindEnabled_disableOnClickActive_throws() {
         item.setDisableOnClick(true);
 
-        item.bindEnabled(new ValueSignal<>(true));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setDisableOnClick_enabledBindingActive_throws() {
-        item.bindEnabled(new ValueSignal<>(true));
-
-        item.setDisableOnClick(true);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> item.bindEnabled(new ValueSignal<>(true)));
     }
 
     @Test
-    public void setDisableOnClickFalse_enabledBindingActive_doesNotThrow() {
+    void setDisableOnClick_enabledBindingActive_throws() {
+        item.bindEnabled(new ValueSignal<>(true));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> item.setDisableOnClick(true));
+    }
+
+    @Test
+    void setDisableOnClickFalse_enabledBindingActive_doesNotThrow() {
         item.bindEnabled(new ValueSignal<>(true));
 
         item.setDisableOnClick(false);
     }
 
     @Test
-    public void bindEnabled_disableOnClickNotActive_doesNotThrow() {
+    void bindEnabled_disableOnClickNotActive_doesNotThrow() {
         item.bindEnabled(new ValueSignal<>(true));
     }
 }

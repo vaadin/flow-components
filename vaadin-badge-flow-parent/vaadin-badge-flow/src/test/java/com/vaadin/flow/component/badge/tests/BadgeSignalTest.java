@@ -15,72 +15,72 @@
  */
 package com.vaadin.flow.component.badge.tests;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.badge.BadgeFeatureFlagProvider;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
-import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.AbstractSignalsTest;
+import com.vaadin.tests.EnableFeatureFlagExtension;
 
-public class BadgeSignalTest extends AbstractSignalsUnitTest {
+class BadgeSignalTest extends AbstractSignalsTest {
 
-    @Rule
-    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             BadgeFeatureFlagProvider.BADGE_COMPONENT);
 
     private ValueSignal<String> textSignal;
     private ValueSignal<Integer> numberSignal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         textSignal = new ValueSignal<>("foo");
         numberSignal = new ValueSignal<>(0);
     }
 
     @Test
-    public void textSignalConstructor() {
+    void textSignalConstructor() {
         Badge badge = new Badge(textSignal);
         ui.add(badge);
-        Assert.assertNull(badge.getIcon());
-        Assert.assertNull(badge.getNumber());
-        Assert.assertEquals("foo", badge.getText());
+        Assertions.assertNull(badge.getIcon());
+        Assertions.assertNull(badge.getNumber());
+        Assertions.assertEquals("foo", badge.getText());
     }
 
     @Test
-    public void textSignalAndIconConstructor() {
+    void textSignalAndIconConstructor() {
         Span icon = new Span();
         Badge badge = new Badge(textSignal, icon);
         ui.add(badge);
-        Assert.assertNull(badge.getNumber());
-        Assert.assertEquals(icon, badge.getIcon());
-        Assert.assertEquals("foo", badge.getText());
+        Assertions.assertNull(badge.getNumber());
+        Assertions.assertEquals(icon, badge.getIcon());
+        Assertions.assertEquals("foo", badge.getText());
     }
 
     @Test
-    public void bindTextSignal() {
+    void bindTextSignal() {
         Badge badge = new Badge();
         badge.bindText(textSignal);
         ui.add(badge);
-        Assert.assertEquals("foo", badge.getText());
-        Assert.assertEquals("foo", badge.getElement().getText());
+        Assertions.assertEquals("foo", badge.getText());
+        Assertions.assertEquals("foo", badge.getElement().getText());
 
         textSignal.set(null);
-        Assert.assertNull(badge.getText());
-        Assert.assertEquals("", badge.getElement().getText());
+        Assertions.assertNull(badge.getText());
+        Assertions.assertEquals("", badge.getElement().getText());
 
         textSignal.set("bar");
-        Assert.assertEquals("bar", badge.getText());
-        Assert.assertEquals("bar", badge.getElement().getText());
+        Assertions.assertEquals("bar", badge.getText());
+        Assertions.assertEquals("bar", badge.getElement().getText());
     }
 
     @Test
-    public void bindText_replacesContent() {
+    void bindText_replacesContent() {
         Badge badge = new Badge();
         Span content = new Span();
         badge.setContent(content);
@@ -88,42 +88,45 @@ public class BadgeSignalTest extends AbstractSignalsUnitTest {
         badge.bindText(textSignal);
         ui.add(badge);
 
-        Assert.assertNull(badge.getContent());
-        Assert.assertFalse(content.getParent().isPresent());
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindTextSignal_setText_throws() {
-        Badge badge = new Badge();
-        badge.bindText(textSignal);
-        badge.setText("bar");
-    }
-
-    @Test(expected = BindingActiveException.class)
-    public void bindTextSignal_setContent_throws() {
-        Badge badge = new Badge();
-        badge.bindText(textSignal);
-        badge.setContent(new Span());
+        Assertions.assertNull(badge.getContent());
+        Assertions.assertFalse(content.getParent().isPresent());
     }
 
     @Test
-    public void bindNumberSignal() {
+    void bindTextSignal_setText_throws() {
+        Badge badge = new Badge();
+        badge.bindText(textSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> badge.setText("bar"));
+    }
+
+    @Test
+    void bindTextSignal_setContent_throws() {
+        Badge badge = new Badge();
+        badge.bindText(textSignal);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> badge.setContent(new Span()));
+    }
+
+    @Test
+    void bindNumberSignal() {
         Badge badge = new Badge();
         badge.bindNumber(numberSignal);
         ui.add(badge);
-        Assert.assertEquals((Integer) 0, badge.getNumber());
+        Assertions.assertEquals((Integer) 0, badge.getNumber());
 
         numberSignal.set(null);
-        Assert.assertNull(badge.getNumber());
+        Assertions.assertNull(badge.getNumber());
 
         numberSignal.set(50);
-        Assert.assertEquals((Integer) 50, badge.getNumber());
+        Assertions.assertEquals((Integer) 50, badge.getNumber());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindNumberSignal_setNumber_throws() {
+    @Test
+    void bindNumberSignal_setNumber_throws() {
         Badge badge = new Badge();
         badge.bindNumber(numberSignal);
-        badge.setNumber(5);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> badge.setNumber(5));
     }
 }

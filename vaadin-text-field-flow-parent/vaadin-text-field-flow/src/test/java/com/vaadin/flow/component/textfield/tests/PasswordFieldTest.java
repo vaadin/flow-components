@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -34,48 +33,45 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Tests for the {@link PasswordField}.
  */
-public class PasswordFieldTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class PasswordFieldTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void setValueNull() {
+    void setValueNull() {
         PasswordField passwordField = new PasswordField();
-        assertEquals("Value should be an empty string", "",
-                passwordField.getValue());
+        assertEquals("", passwordField.getValue(),
+                "Value should be an empty string");
 
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage("Null value is not supported");
-
-        passwordField.setValue(null);
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> passwordField.setValue(null));
+        Assertions.assertTrue(
+                exception.getMessage().contains("Null value is not supported"));
     }
 
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         PasswordField passwordField = new PasswordField();
-        Assert.assertEquals("", passwordField.getValue());
-        Assert.assertEquals("",
+        Assertions.assertEquals("", passwordField.getValue());
+        Assertions.assertEquals("",
                 passwordField.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
         PasswordField passwordField = new PasswordField((String) null);
-        Assert.assertEquals("", passwordField.getValue());
-        Assert.assertEquals("",
+        Assertions.assertEquals("", passwordField.getValue());
+        Assertions.assertEquals("",
                 passwordField.getElement().getProperty("value"));
     }
 
     @Test
-    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+    void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-password-field");
         element.setProperty("value", "test");
 
@@ -89,12 +85,12 @@ public class PasswordFieldTest {
 
         PasswordField passwordField = Component.from(element,
                 PasswordField.class);
-        Assert.assertEquals("test",
+        Assertions.assertEquals("test",
                 passwordField.getElement().getProperty("value"));
     }
 
     @Test
-    public void clearButtonVisiblePropertyValue() {
+    void clearButtonVisiblePropertyValue() {
         PasswordField passwordField = new PasswordField();
 
         assertClearButtonPropertyValueEquals(passwordField, true);
@@ -110,7 +106,7 @@ public class PasswordFieldTest {
     }
 
     @Test
-    public void autoselectPropertyValue() {
+    void autoselectPropertyValue() {
         PasswordField passwordField = new PasswordField();
 
         assertAutoselectPropertyValueEquals(passwordField, true);
@@ -118,7 +114,7 @@ public class PasswordFieldTest {
     }
 
     @Test
-    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         "foo", PasswordField.class, ui);
@@ -133,67 +129,69 @@ public class PasswordFieldTest {
     }
 
     @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+    void addThemeVariant_themeAttributeContainsThemeVariant() {
         PasswordField field = new PasswordField();
         field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertTrue(themeNames
+                .contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         PasswordField field = new PasswordField();
         field.addThemeVariants(TextFieldVariant.SMALL);
         field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertFalse(themeNames
+                .contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
-    public void implementsHasAllowedCharPattern() {
-        assertTrue("PasswordField should support char pattern",
+    void implementsHasAllowedCharPattern() {
+        assertTrue(
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new PasswordField().getClass()));
+                        .isAssignableFrom(new PasswordField().getClass()),
+                "PasswordField should support char pattern");
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         PasswordField field = new PasswordField();
-        Assert.assertTrue(field instanceof HasAriaLabel);
+        Assertions.assertTrue(field instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         PasswordField field = new PasswordField();
 
         field.setAriaLabel("aria-label");
-        Assert.assertTrue(field.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+        Assertions.assertTrue(field.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", field.getAriaLabel().get());
 
         field.setAriaLabel(null);
-        Assert.assertTrue(field.getAriaLabel().isEmpty());
+        Assertions.assertTrue(field.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         PasswordField field = new PasswordField();
 
         field.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+        Assertions.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                field.getAriaLabelledBy().get());
 
         field.setAriaLabelledBy(null);
-        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         PasswordField field = new PasswordField();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>);
     }
 }

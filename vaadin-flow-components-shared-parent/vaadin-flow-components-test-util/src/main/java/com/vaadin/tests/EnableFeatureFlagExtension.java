@@ -15,7 +15,9 @@
  */
 package com.vaadin.tests;
 
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -23,19 +25,28 @@ import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 
 /**
- * JUnit rule to enable a specific feature flag for the duration of a test.
+ * JUnit extension to enable a specific feature flag for the duration of a test.
+ * <p>
+ * Usage:
+ *
+ * <pre>
+ * &#64;RegisterExtension
+ * EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+ *         MyFeatureFlagProvider.MY_FEATURE);
+ * </pre>
  */
-public class EnableFeatureFlagRule extends ExternalResource {
+public class EnableFeatureFlagExtension
+        implements BeforeEachCallback, AfterEachCallback {
     private final Feature feature;
     private FeatureFlags mockFeatureFlags;
     private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
 
-    public EnableFeatureFlagRule(Feature feature) {
+    public EnableFeatureFlagExtension(Feature feature) {
         this.feature = feature;
     }
 
     @Override
-    public void before() {
+    public void beforeEach(ExtensionContext context) {
         mockFeatureFlags = Mockito.mock(FeatureFlags.class);
         Mockito.when(mockFeatureFlags.isEnabled(feature)).thenReturn(true);
         Mockito.when(mockFeatureFlags.isEnabled(feature.getId()))
@@ -47,7 +58,7 @@ public class EnableFeatureFlagRule extends ExternalResource {
     }
 
     @Override
-    public void after() {
+    public void afterEach(ExtensionContext context) {
         mockFeatureFlagsStatic.close();
     }
 

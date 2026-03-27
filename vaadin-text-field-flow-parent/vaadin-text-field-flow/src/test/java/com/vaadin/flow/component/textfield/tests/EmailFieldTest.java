@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -35,46 +34,45 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Tests for the {@link EmailField}.
  */
-public class EmailFieldTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class EmailFieldTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void setValueNull() {
+    void setValueNull() {
         EmailField emailField = new EmailField();
-        assertEquals("Value should be an empty string", "",
-                emailField.getValue());
+        assertEquals("", emailField.getValue(),
+                "Value should be an empty string");
 
-        thrown.expect(NullPointerException.class);
-        thrown.expectMessage("Null value is not supported");
-
-        emailField.setValue(null);
+        NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class, () -> emailField.setValue(null));
+        Assertions.assertTrue(
+                exception.getMessage().contains("Null value is not supported"));
     }
 
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         EmailField emailField = new EmailField();
-        Assert.assertEquals("", emailField.getValue());
-        Assert.assertEquals("", emailField.getElement().getProperty("value"));
+        Assertions.assertEquals("", emailField.getValue());
+        Assertions.assertEquals("",
+                emailField.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
         EmailField emailField = new EmailField((String) null);
-        Assert.assertEquals("", emailField.getValue());
-        Assert.assertEquals("", emailField.getElement().getProperty("value"));
+        Assertions.assertEquals("", emailField.getValue());
+        Assertions.assertEquals("",
+                emailField.getElement().getProperty("value"));
     }
 
     @Test
-    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+    void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
         Element element = new Element("vaadin-email-field");
         element.setProperty("value", "foo@example.com");
 
@@ -87,85 +85,87 @@ public class EmailFieldTest {
                 .thenAnswer(invocation -> new EmailField());
 
         EmailField emailField = Component.from(element, EmailField.class);
-        Assert.assertEquals("foo@example.com",
+        Assertions.assertEquals("foo@example.com",
                 emailField.getElement().getProperty("value"));
     }
 
     @Test
-    public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         "foo@example.com", EmailField.class, ui);
     }
 
     @Test
-    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+    void addThemeVariant_themeAttributeContainsThemeVariant() {
         EmailField field = new EmailField();
         field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertTrue(themeNames
+                .contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+    void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         EmailField field = new EmailField();
         field.addThemeVariants(TextFieldVariant.SMALL);
         field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertFalse(themeNames
+                .contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
-    public void implementsHasAllowedCharPattern() {
-        assertTrue("EmailField should support char pattern",
+    void implementsHasAllowedCharPattern() {
+        assertTrue(
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new EmailField().getClass()));
+                        .isAssignableFrom(new EmailField().getClass()),
+                "EmailField should support char pattern");
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         EmailField field = new EmailField();
-        Assert.assertTrue(field instanceof HasTooltip);
+        Assertions.assertTrue(field instanceof HasTooltip);
     }
 
     @Test
-    public void implementHasAriaLabel() {
+    void implementHasAriaLabel() {
         EmailField field = new EmailField();
-        Assert.assertTrue(field instanceof HasAriaLabel);
+        Assertions.assertTrue(field instanceof HasAriaLabel);
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         EmailField field = new EmailField();
 
         field.setAriaLabel("aria-label");
-        Assert.assertTrue(field.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+        Assertions.assertTrue(field.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", field.getAriaLabel().get());
 
         field.setAriaLabel(null);
-        Assert.assertTrue(field.getAriaLabel().isEmpty());
+        Assertions.assertTrue(field.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setAriaLabelledBy() {
+    void setAriaLabelledBy() {
         EmailField field = new EmailField();
 
         field.setAriaLabelledBy("aria-labelledby");
-        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+        Assertions.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assertions.assertEquals("aria-labelledby",
+                field.getAriaLabelledBy().get());
 
         field.setAriaLabelledBy(null);
-        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+        Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         EmailField field = new EmailField();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<EmailField, String>, String>);
     }
 }

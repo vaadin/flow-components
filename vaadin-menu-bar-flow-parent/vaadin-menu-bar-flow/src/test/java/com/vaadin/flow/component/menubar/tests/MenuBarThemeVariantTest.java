@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 
-public class MenuBarThemeVariantTest {
+class MenuBarThemeVariantTest {
 
     private MenuBar menuBar = new MenuBar();
 
     @Test
-    public void addAndRemoveTertiaryVariant_themeAttributeUpdated() {
+    void addAndRemoveTertiaryVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
         menuBar.addThemeVariants(MenuBarVariant.TERTIARY);
         assertThemeAttribute("tertiary");
@@ -36,7 +36,7 @@ public class MenuBarThemeVariantTest {
 
     private void assertThemeAttribute(String expected) {
         String theme = menuBar.getElement().getAttribute("theme");
-        Assert.assertEquals("Unexpected theme attribute on menu bar", expected,
-                theme);
+        Assertions.assertEquals(expected, theme,
+                "Unexpected theme attribute on menu bar");
     }
 }

@@ -10,23 +10,23 @@ package com.vaadin.flow.component.map.configuration.source;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class XYZSourceTest {
+class XYZSourceTest {
 
     @Test
-    public void initializeWithOptions() {
+    void initializeWithOptions() {
         XYZSource.Options options = createOptions();
         XYZSource source = new XYZSource(options);
 
-        Assert.assertEquals("https://example.com", source.getUrl());
-        Assert.assertEquals("testCrossOrigin", source.getCrossOrigin());
-        Assert.assertEquals("testProjection", source.getProjection());
-        Assert.assertEquals("testAttributions",
+        Assertions.assertEquals("https://example.com", source.getUrl());
+        Assertions.assertEquals("testCrossOrigin", source.getCrossOrigin());
+        Assertions.assertEquals("testProjection", source.getProjection());
+        Assertions.assertEquals("testAttributions",
                 source.getAttributions().get(0));
-        Assert.assertFalse(source.isAttributionsCollapsible());
-        Assert.assertTrue(source.isOpaque());
+        Assertions.assertFalse(source.isAttributionsCollapsible());
+        Assertions.assertTrue(source.isOpaque());
     }
 
     private XYZSource.Options createOptions() {

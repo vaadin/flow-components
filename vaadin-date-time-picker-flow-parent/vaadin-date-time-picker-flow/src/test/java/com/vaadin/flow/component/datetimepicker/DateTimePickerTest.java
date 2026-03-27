@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
@@ -35,47 +35,47 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.tests.MockUIRule;
+import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-public class DateTimePickerTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+class DateTimePickerTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+    void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         DateTimePicker picker = new DateTimePicker();
-        Assert.assertNull(picker.getValue());
-        Assert.assertEquals("", picker.getElement().getProperty("value"));
+        Assertions.assertNull(picker.getValue());
+        Assertions.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    void initialValueIsNull_valuePropertyHasEmptyString() {
         DateTimePicker picker = new DateTimePicker((LocalDateTime) null);
-        Assert.assertNull(picker.getValue());
-        Assert.assertEquals("", picker.getElement().getProperty("value"));
+        Assertions.assertNull(picker.getValue());
+        Assertions.assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test
-    public void initialValueIsDateTime_valuePropertyHasInitialValue() {
+    void initialValueIsDateTime_valuePropertyHasInitialValue() {
         DateTimePicker picker = new DateTimePicker(
                 LocalDateTime.of(2018, 4, 25, 13, 45, 10));
-        Assert.assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
+        Assertions.assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
                 picker.getValue());
-        Assert.assertEquals("2018-04-25T13:45:10",
+        Assertions.assertEquals("2018-04-25T13:45:10",
                 picker.getElement().getProperty("value"));
     }
 
     @Test
-    public void emptyField() {
+    void emptyField() {
         DateTimePicker picker = new DateTimePicker();
         assertEquals(null, picker.getValue());
     }
 
     @Test
-    public void setInitialValue() {
+    void setInitialValue() {
         DateTimePicker picker = new DateTimePicker(
                 LocalDateTime.of(2018, 4, 25, 13, 45, 10));
         assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
@@ -83,7 +83,7 @@ public class DateTimePickerTest {
     }
 
     @Test
-    public void setInitialValue_truncatesToMilliseconds() {
+    void setInitialValue_truncatesToMilliseconds() {
         Duration oneMillisecondAndOneNano = Duration.ofMillis(1).plusNanos(1);
         Duration oneMillisecond = Duration.ofMillis(1);
         LocalDateTime baseDateTime = LocalDateTime.of(2018, 4, 25, 13, 45, 10);
@@ -97,7 +97,7 @@ public class DateTimePickerTest {
     }
 
     @Test
-    public void setValue() {
+    void setValue() {
         DateTimePicker picker = new DateTimePicker();
         picker.setValue(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
         assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
@@ -105,7 +105,7 @@ public class DateTimePickerTest {
     }
 
     @Test
-    public void setValue_truncatesToMilliseconds() {
+    void setValue_truncatesToMilliseconds() {
         Duration oneMillisecondAndOneNano = Duration.ofMillis(1).plusNanos(1);
         Duration oneMillisecond = Duration.ofMillis(1);
         LocalDateTime baseDateTime = LocalDateTime.of(2018, 4, 25, 13, 45, 10);
@@ -120,7 +120,7 @@ public class DateTimePickerTest {
     }
 
     @Test
-    public void setMinGetMin() {
+    void setMinGetMin() {
         DateTimePicker picker = new DateTimePicker();
         picker.setMin(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
         assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
@@ -128,7 +128,7 @@ public class DateTimePickerTest {
     }
 
     @Test
-    public void setMaxGetMax() {
+    void setMaxGetMax() {
         DateTimePicker picker = new DateTimePicker();
         picker.setMax(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
         assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
@@ -136,14 +136,14 @@ public class DateTimePickerTest {
     }
 
     @Test
-    public void setErrorMessage() {
+    void setErrorMessage() {
         DateTimePicker picker = new DateTimePicker();
         picker.setErrorMessage("error message");
         assertEquals("error message", picker.getErrorMessage());
     }
 
     @Test
-    public void setI18n() {
+    void setI18n() {
         DateTimePicker picker = new DateTimePicker();
 
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n()
@@ -162,20 +162,20 @@ public class DateTimePickerTest {
     }
 
     @Test
-    public void setAutoOpen() {
+    void setAutoOpen() {
         final DateTimePicker picker = new DateTimePicker();
-        assertTrue("Auto-open should be enabled by default",
-                picker.isAutoOpen());
+        assertTrue(picker.isAutoOpen(),
+                "Auto-open should be enabled by default");
         picker.setAutoOpen(false);
-        assertFalse("Should be possible to disable auto-open",
-                picker.isAutoOpen());
+        assertFalse(picker.isAutoOpen(),
+                "Should be possible to disable auto-open");
         picker.setAutoOpen(true);
-        assertTrue("Should be possible to enable auto-open",
-                picker.isAutoOpen());
+        assertTrue(picker.isAutoOpen(),
+                "Should be possible to enable auto-open");
     }
 
     @Test
-    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+    void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-date-time-picker");
 
         String value = LocalDateTime.now().toString();
@@ -190,55 +190,57 @@ public class DateTimePickerTest {
                 .thenAnswer(invocation -> new DateTimePicker());
 
         DateTimePicker field = Component.from(element, DateTimePicker.class);
-        Assert.assertEquals(value, field.getElement().getProperty("value"));
+        Assertions.assertEquals(value, field.getElement().getProperty("value"));
     }
 
     @Test
-    public void setAriaLabel() {
+    void setAriaLabel() {
         final DateTimePicker picker = new DateTimePicker();
-        Assert.assertTrue(picker.getAriaLabel().isEmpty());
+        Assertions.assertTrue(picker.getAriaLabel().isEmpty());
         picker.setAriaLabel("aria-label");
-        Assert.assertTrue(picker.getAriaLabel().isPresent());
-        Assert.assertEquals("aria-label", picker.getAriaLabel().get());
+        Assertions.assertTrue(picker.getAriaLabel().isPresent());
+        Assertions.assertEquals("aria-label", picker.getAriaLabel().get());
 
         picker.setAriaLabel(null);
-        Assert.assertTrue(picker.getAriaLabel().isEmpty());
+        Assertions.assertTrue(picker.getAriaLabel().isEmpty());
     }
 
     @Test
-    public void setDateAriaLabel() {
+    void setDateAriaLabel() {
         final DateTimePicker picker = new DateTimePicker();
-        Assert.assertTrue(picker.getDateAriaLabel().isEmpty());
+        Assertions.assertTrue(picker.getDateAriaLabel().isEmpty());
         picker.setDateAriaLabel("date-aria-label");
-        Assert.assertTrue(picker.getDateAriaLabel().isPresent());
-        Assert.assertEquals("date-aria-label", picker.getDateAriaLabel().get());
+        Assertions.assertTrue(picker.getDateAriaLabel().isPresent());
+        Assertions.assertEquals("date-aria-label",
+                picker.getDateAriaLabel().get());
 
         picker.setDateAriaLabel(null);
-        Assert.assertTrue(picker.getDateAriaLabel().isEmpty());
+        Assertions.assertTrue(picker.getDateAriaLabel().isEmpty());
     }
 
     @Test
-    public void setTimeAriaLabel() {
+    void setTimeAriaLabel() {
         final DateTimePicker picker = new DateTimePicker();
-        Assert.assertTrue(picker.getTimeAriaLabel().isEmpty());
+        Assertions.assertTrue(picker.getTimeAriaLabel().isEmpty());
         picker.setTimeAriaLabel("time-aria-label");
-        Assert.assertTrue(picker.getTimeAriaLabel().isPresent());
-        Assert.assertEquals("time-aria-label", picker.getTimeAriaLabel().get());
+        Assertions.assertTrue(picker.getTimeAriaLabel().isPresent());
+        Assertions.assertEquals("time-aria-label",
+                picker.getTimeAriaLabel().get());
 
         picker.setTimeAriaLabel(null);
-        Assert.assertTrue(picker.getTimeAriaLabel().isEmpty());
+        Assertions.assertTrue(picker.getTimeAriaLabel().isEmpty());
     }
 
     @Test
-    public void implementsHasTooltip() {
+    void implementsHasTooltip() {
         DateTimePicker picker = new DateTimePicker();
-        Assert.assertTrue(picker instanceof HasTooltip);
+        Assertions.assertTrue(picker instanceof HasTooltip);
     }
 
     @Test
-    public void implementsInputField() {
+    void implementsInputField() {
         DateTimePicker field = new DateTimePicker();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>);
     }
 }

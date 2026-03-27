@@ -12,8 +12,8 @@ import java.time.LocalDate;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.SheetImageWrapper;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
@@ -25,10 +25,10 @@ import tools.jackson.core.JacksonException;
  * Tests for conditional formatting
  *
  */
-public class ConditionalFormatterTest {
+class ConditionalFormatterTest {
 
     @Test
-    public void createConditionalFormatterRules_sheetWithStringFormatRuleForNumericCell_rulesCreatedWithoutExceptions() {
+    void createConditionalFormatterRules_sheetWithStringFormatRuleForNumericCell_rulesCreatedWithoutExceptions() {
         createConditionalFormatterRulesForSheet("conditional_formatting.xlsx");
     }
 
@@ -42,26 +42,26 @@ public class ConditionalFormatterTest {
      * }. Assertions can be disabled with -DenableAssertions=false in maven.
      */
     @Test
-    public void matchesFormula_rulesWithoutFormula_formulasEvaluatedWithoutExceptions() {
+    void matchesFormula_rulesWithoutFormula_formulasEvaluatedWithoutExceptions() {
         // ensure sheet with rules without formulas is active
         createConditionalFormatterRulesForSheet(
                 "ConditionalFormatterSamples.xlsx", 3);
     }
 
     @Test
-    public void cellValueMatchesFormula_cellHasFormatting() {
+    void cellValueMatchesFormula_cellHasFormatting() {
         var sheet = createConditionalFormatterRulesForSheet(
                 "ConditionalFormatterSamples.xlsx", 1);
         // D3:D21 range has conditional formatting applied to cell with value <
         // 500
         // D7 cell value is $192,10, so it meets the criteria
         var cell = sheet.getCell("D7");
-        Assert.assertNotNull(
+        Assertions.assertNotNull(
                 sheet.getConditionalFormatter().getCellFormattingIndex(cell));
     }
 
     @Test
-    public void cellValueMatchedFormula_valueIsChangeToNotMatch_cellHasNoFormatting() {
+    void cellValueMatchedFormula_valueIsChangeToNotMatch_cellHasNoFormatting() {
         var sheet = createConditionalFormatterRulesForSheet(
                 "ConditionalFormatterSamples.xlsx", 1);
         // D3:D21 range has conditional formatting applied to cell with value <
@@ -70,24 +70,24 @@ public class ConditionalFormatterTest {
         var cell = sheet.getCell("D7");
         cell.setCellValue(550);
         sheet.refreshCells(cell);
-        Assert.assertNull(
+        Assertions.assertNull(
                 sheet.getConditionalFormatter().getCellFormattingIndex(cell));
     }
 
     @Test
-    public void cellDoesntMatchFormula_cellHasNoFormatting() {
+    void cellDoesntMatchFormula_cellHasNoFormatting() {
         var sheet = createConditionalFormatterRulesForSheet(
                 "ConditionalFormatterSamples.xlsx", 1);
         // D3:D21 range has conditional formatting applied to cell with value <
         // 500
         // D9 cell value is $560,40, so it doesn't meet the criteria
         var cell = sheet.getCell("D9");
-        Assert.assertNull(
+        Assertions.assertNull(
                 sheet.getConditionalFormatter().getCellFormattingIndex(cell));
     }
 
     @Test
-    public void cellValuesMatchedFormula_styleIsPresent() {
+    void cellValuesMatchedFormula_styleIsPresent() {
         var sheet = createConditionalFormatterRulesForSheet(
                 "ConditionalFormatterSamples.xlsx", 1);
         // D3:D21 range has conditional formatting applied to cell with value <
@@ -99,7 +99,7 @@ public class ConditionalFormatterTest {
     }
 
     @Test
-    public void sheetHasConditionalsFormatting_cellsMatching_allCellsHaveStyles() {
+    void sheetHasConditionalsFormatting_cellsMatching_allCellsHaveStyles() {
         var sheet = createConditionalFormatterRulesForSheet(
                 "ConditionalFormatterSamples.xlsx", 1);
 
@@ -123,7 +123,7 @@ public class ConditionalFormatterTest {
     }
 
     @Test
-    public void createConditionalFormatterRules_ruleWithNullBackgroundColor_rulesCreatedWithoutExceptions() {
+    void createConditionalFormatterRules_ruleWithNullBackgroundColor_rulesCreatedWithoutExceptions() {
         createConditionalFormatterRulesForSheet(
                 "conditionalformater_nobackground.xlsx");
     }
@@ -151,10 +151,10 @@ public class ConditionalFormatterTest {
             var cellFormattingIndex = sheet.getConditionalFormatter()
                     .getCellFormattingIndex(cell);
 
-            Assert.assertEquals(1, cellFormattingIndex.size());
+            Assertions.assertEquals(1, cellFormattingIndex.size());
             var formattingIndex = cellFormattingIndex.stream().findFirst()
                     .orElse(-1).toString();
-            Assert.assertNotNull(styles.get(formattingIndex));
+            Assertions.assertNotNull(styles.get(formattingIndex));
         } catch (JacksonException e) {
             throw new RuntimeException("Failed to parse JSON", e);
         }

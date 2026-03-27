@@ -17,8 +17,8 @@ package com.vaadin.flow.component.login;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -28,10 +28,10 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.shared.Registration;
 
-public class LoginFormTest {
+class LoginFormTest {
 
     @Test
-    public void onForgotPasswordEvent() {
+    void onForgotPasswordEvent() {
         LoginForm loginFormComponent = new LoginForm();
 
         AtomicInteger count = new AtomicInteger(0);
@@ -41,60 +41,60 @@ public class LoginFormTest {
         ComponentUtil.fireEvent(loginFormComponent,
                 new LoginForm.ForgotPasswordEvent(loginFormComponent, false));
 
-        Assert.assertEquals(1, count.get());
+        Assertions.assertEquals(1, count.get());
     }
 
     @Test
-    public void onLoginEvent() {
+    void onLoginEvent() {
         LoginForm loginFormComponent = new LoginForm();
 
         AtomicInteger count = new AtomicInteger(0);
         loginFormComponent.addLoginListener(e -> {
-            Assert.assertEquals("username", e.getUsername());
-            Assert.assertEquals("password", e.getPassword());
+            Assertions.assertEquals("username", e.getUsername());
+            Assertions.assertEquals("password", e.getPassword());
             count.incrementAndGet();
         });
 
-        Assert.assertTrue(loginFormComponent.isEnabled());
+        Assertions.assertTrue(loginFormComponent.isEnabled());
         ComponentUtil.fireEvent(loginFormComponent, new LoginForm.LoginEvent(
                 loginFormComponent, false, "username", "password"));
 
-        Assert.assertEquals(1, count.get());
-        Assert.assertFalse(loginFormComponent.isEnabled());
+        Assertions.assertEquals(1, count.get());
+        Assertions.assertFalse(loginFormComponent.isEnabled());
     }
 
     @Test
-    public void loginFormHasStyle() {
+    void loginFormHasStyle() {
         LoginForm loginForm = new LoginForm();
-        Assert.assertTrue(loginForm instanceof HasStyle);
+        Assertions.assertTrue(loginForm instanceof HasStyle);
     }
 
     @Test
-    public void showErrorMessage_fromNullI18n() {
+    void showErrorMessage_fromNullI18n() {
         final LoginForm form = new LoginForm(null);
         form.showErrorMessage("title", "message");
 
-        Assert.assertTrue(form.isError());
-        Assert.assertEquals("title",
+        Assertions.assertTrue(form.isError());
+        Assertions.assertEquals("title",
                 form.getI18n().getErrorMessage().getTitle());
-        Assert.assertEquals("message",
+        Assertions.assertEquals("message",
                 form.getI18n().getErrorMessage().getMessage());
     }
 
     @Test
-    public void showErrorMessage_fromDefaultI18n() {
+    void showErrorMessage_fromDefaultI18n() {
         final LoginForm form = new LoginForm();
         form.showErrorMessage("title", "message");
 
-        Assert.assertTrue(form.isError());
-        Assert.assertEquals("title",
+        Assertions.assertTrue(form.isError());
+        Assertions.assertEquals("title",
                 form.getI18n().getErrorMessage().getTitle());
-        Assert.assertEquals("message",
+        Assertions.assertEquals("message",
                 form.getI18n().getErrorMessage().getMessage());
     }
 
     @Test
-    public void showErrorMessage_preservesExistingI18n() {
+    void showErrorMessage_preservesExistingI18n() {
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());
         i18n.getHeader().setTitle("Custom title");
@@ -102,14 +102,14 @@ public class LoginFormTest {
         final LoginForm form = new LoginForm(i18n);
         form.showErrorMessage("title", "message");
 
-        Assert.assertEquals("Custom title",
+        Assertions.assertEquals("Custom title",
                 form.getI18n().getHeader().getTitle());
-        Assert.assertEquals("Custom username",
+        Assertions.assertEquals("Custom username",
                 form.getI18n().getForm().getUsername());
     }
 
     @Test
-    public void addLoginListeners_setAction_logsWarning() {
+    void addLoginListeners_setAction_logsWarning() {
         final LoginForm form = new LoginForm();
         Registration registration1 = form.addLoginListener(ev -> {
         });
@@ -141,7 +141,7 @@ public class LoginFormTest {
     }
 
     @Test
-    public void setAction_addLoginListener_logsWarning() {
+    void setAction_addLoginListener_logsWarning() {
         final LoginForm form = new LoginForm();
         form.setAction("login");
 
@@ -166,27 +166,24 @@ public class LoginFormTest {
     }
 
     @Test
-    public void setAction_unregisterAndRegisterDefaultLoginListener() {
+    void setAction_unregisterAndRegisterDefaultLoginListener() {
         final LoginForm form = new LoginForm();
         form.setAction("login");
         form.setError(true);
 
         ComponentUtil.fireEvent(form, new AbstractLogin.LoginEvent(form, true,
                 "username", "password"));
-        Assert.assertTrue(
-                "Expected form not being disabled by default listener",
-                form.isEnabled());
-        Assert.assertTrue(
-                "Expected error status not being reset by default listener",
-                form.isError());
+        Assertions.assertTrue(form.isEnabled(),
+                "Expected form not being disabled by default listener");
+        Assertions.assertTrue(form.isError(),
+                "Expected error status not being reset by default listener");
 
         form.setAction(null);
         ComponentUtil.fireEvent(form, new AbstractLogin.LoginEvent(form, true,
                 "username", "password"));
-        Assert.assertFalse("Expected form being disabled by default listener",
-                form.isEnabled());
-        Assert.assertFalse(
-                "Expected error status being reset by default listener",
-                form.isError());
+        Assertions.assertFalse(form.isEnabled(),
+                "Expected form being disabled by default listener");
+        Assertions.assertFalse(form.isError(),
+                "Expected error status being reset by default listener");
     }
 }

@@ -18,18 +18,18 @@ package com.vaadin.flow.component.grid;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
 
-public class SortOrderBuildersTest {
+class SortOrderBuildersTest {
 
     @Test
-    public void gridSortOrderBuilder() {
+    void gridSortOrderBuilder() {
         Grid<String> grid = new Grid<>();
         Column<String> col1 = grid.addColumn(string -> string);
         Column<String> col2 = grid.addColumn(string -> string);
@@ -52,7 +52,7 @@ public class SortOrderBuildersTest {
     }
 
     @Test
-    public void querySortOrderBuilder() {
+    void querySortOrderBuilder() {
         verifySortOrders(
                 Arrays.asList(new QuerySortOrder("a", SortDirection.ASCENDING),
                         new QuerySortOrder("b", SortDirection.DESCENDING),
@@ -72,11 +72,11 @@ public class SortOrderBuildersTest {
 
     private <T extends SortOrder<?>> void verifySortOrders(List<T> order1,
             List<T> order2) {
-        Assert.assertEquals(order1.size(), order2.size());
+        Assertions.assertEquals(order1.size(), order2.size());
         for (int i = 0; i < order1.size(); i++) {
-            Assert.assertEquals(order1.get(i).getDirection(),
+            Assertions.assertEquals(order1.get(i).getDirection(),
                     order2.get(i).getDirection());
-            Assert.assertEquals(order1.get(i).getSorted(),
+            Assertions.assertEquals(order1.get(i).getSorted(),
                     order1.get(i).getSorted());
         }
     }

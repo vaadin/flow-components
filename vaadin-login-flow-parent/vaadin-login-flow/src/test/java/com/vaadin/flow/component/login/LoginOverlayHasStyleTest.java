@@ -15,20 +15,22 @@
  */
 package com.vaadin.flow.component.login;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class LoginOverlayHasStyleTest {
+class LoginOverlayHasStyleTest {
 
     private LoginOverlay overlay;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         overlay = new LoginOverlay();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getStyle_unsupported() {
-        overlay.getStyle();
+    @Test
+    void getStyle_unsupported() {
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> overlay.getStyle());
     }
 }

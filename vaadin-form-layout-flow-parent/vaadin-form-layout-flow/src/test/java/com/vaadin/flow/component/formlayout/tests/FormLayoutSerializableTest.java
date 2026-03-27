@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-public class FormLayoutSerializableTest extends ClassesSerializableTest {
+class FormLayoutSerializableTest extends ClassesSerializableTest {
 
     @Override
     protected Stream<String> getExcludedPatterns() {

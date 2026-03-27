@@ -15,14 +15,14 @@
  */
 package com.vaadin.tests;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Base class for testing components with full-stack signals. Since signal
  * bindings are only active when components are attached, this class sets up a
  * mock UI instance for attaching components under test.
  */
-public class AbstractSignalsUnitTest {
-    @Rule
-    public MockUIRule ui = new MockUIRule();
+public class AbstractSignalsTest {
+    @RegisterExtension
+    protected MockUIExtension ui = new MockUIExtension();
 }

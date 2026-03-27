@@ -31,95 +31,19 @@ import reactor.core.publisher.Flux;
  * managing conversation memory, handling streaming responses, processing
  * vendor-specific tool annotations, and handling file attachments.
  * <p>
- * Use the {@code from(...)} factory methods to create a provider from a
- * vendor-specific model or client object:
+ * Create an instance by constructing the appropriate implementation directly:
  *
  * <pre>
  * // Spring AI
- * LLMProvider provider = LLMProvider.from(chatModel);
+ * LLMProvider provider = new SpringAILLMProvider(chatModel);
  *
  * // LangChain4j
- * LLMProvider provider = LLMProvider.from(streamingChatModel);
+ * LLMProvider provider = new LangChain4JLLMProvider(streamingChatModel);
  * </pre>
  *
  * @author Vaadin Ltd.
  */
 public interface LLMProvider {
-
-    /**
-     * Creates an {@link LLMProvider} from a Spring AI
-     * {@link org.springframework.ai.chat.model.ChatModel ChatModel}.
-     * <p>
-     * The provider manages conversation memory internally. Streaming is enabled
-     * by default and can be toggled via
-     * {@link SpringAILLMProvider#setStreaming(boolean)}.
-     *
-     * @param chatModel
-     *            the Spring AI chat model, not {@code null}
-     * @return a new provider instance, never {@code null}
-     * @throws NullPointerException
-     *             if chatModel is {@code null}
-     */
-    static SpringAILLMProvider from(
-            org.springframework.ai.chat.model.ChatModel chatModel) {
-        return new SpringAILLMProvider(chatModel);
-    }
-
-    /**
-     * Creates an {@link LLMProvider} from a Spring AI
-     * {@link org.springframework.ai.chat.client.ChatClient ChatClient}.
-     * <p>
-     * Use this when the {@code ChatClient} is pre-configured with custom
-     * advisors or externally managed memory. Note that providers created from a
-     * {@code ChatClient} do <b>not</b> support history restoration via
-     * {@link #setHistory(List, Map)} because the memory is managed externally.
-     *
-     * @param chatClient
-     *            the Spring AI chat client, not {@code null}
-     * @return a new provider instance, never {@code null}
-     * @throws NullPointerException
-     *             if chatClient is {@code null}
-     */
-    static SpringAILLMProvider from(
-            org.springframework.ai.chat.client.ChatClient chatClient) {
-        return new SpringAILLMProvider(chatClient);
-    }
-
-    /**
-     * Creates an {@link LLMProvider} from a LangChain4j
-     * {@link dev.langchain4j.model.chat.StreamingChatModel StreamingChatModel}.
-     * <p>
-     * The provider manages conversation memory internally. Responses are
-     * streamed token-by-token.
-     *
-     * @param streamingChatModel
-     *            the LangChain4j streaming chat model, not {@code null}
-     * @return a new provider instance, never {@code null}
-     * @throws NullPointerException
-     *             if streamingChatModel is {@code null}
-     */
-    static LangChain4JLLMProvider from(
-            dev.langchain4j.model.chat.StreamingChatModel streamingChatModel) {
-        return new LangChain4JLLMProvider(streamingChatModel);
-    }
-
-    /**
-     * Creates an {@link LLMProvider} from a LangChain4j
-     * {@link dev.langchain4j.model.chat.ChatModel ChatModel}.
-     * <p>
-     * The provider manages conversation memory internally. Responses are
-     * returned as a single block (non-streaming).
-     *
-     * @param chatModel
-     *            the LangChain4j chat model, not {@code null}
-     * @return a new provider instance, never {@code null}
-     * @throws NullPointerException
-     *             if chatModel is {@code null}
-     */
-    static LangChain4JLLMProvider from(
-            dev.langchain4j.model.chat.ChatModel chatModel) {
-        return new LangChain4JLLMProvider(chatModel);
-    }
 
     /**
      * Streams a response from the LLM based on the provided request. This
@@ -202,5 +126,96 @@ public interface LLMProvider {
          * @return array of tool objects, never {@code null} but may be empty
          */
         Object[] tools();
+
+        /**
+         * Gets the explicit tool definitions for this request. Unlike
+         * vendor-specific annotated tools returned by {@link #tools()}, these
+         * are framework-agnostic tool definitions provided programmatically
+         * (typically by
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController}
+         * instances).
+         *
+         * @return list of explicit tool definitions, never {@code null} but may
+         *         be empty
+         */
+        default List<ToolSpec> explicitTools() {
+            return List.of();
+        }
+    }
+
+    /**
+     * A framework-agnostic tool definition that the LLM can invoke.
+     * <p>
+     * Unlike vendor-specific tool annotations (e.g., LangChain4j's
+     * {@code @Tool}, Spring AI's {@code @Tool}), this interface allows tools to
+     * be defined programmatically without depending on any specific AI
+     * framework.
+     * </p>
+     * <p>
+     * Tool definitions are typically provided by
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController}
+     * implementations through their
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#getTools()}
+     * method.
+     * </p>
+     */
+    interface ToolSpec {
+
+        /**
+         * Gets the unique name of this tool. To avoid name collisions, use a
+         * namespaced name such as {@code "MyController_updateConfig"}.
+         *
+         * @return the tool name, never {@code null}
+         */
+        String getName();
+
+        /**
+         * Gets a human-readable description of what this tool does. This
+         * description is sent to the LLM to help it decide when to invoke the
+         * tool.
+         *
+         * @return the tool description, never {@code null}
+         */
+        String getDescription();
+
+        /**
+         * Gets the JSON Schema describing the parameters this tool accepts. The
+         * schema should follow the JSON Schema specification.
+         * <p>
+         * Example:
+         * </p>
+         *
+         * <pre>
+         * {
+         *   "type": "object",
+         *   "properties": {
+         *     "query": { "type": "string", "description": "The SQL query" }
+         *   },
+         *   "required": ["query"]
+         * }
+         * </pre>
+         *
+         * @return the JSON Schema string, or {@code null} if the tool takes no
+         *         parameters
+         */
+        String getParametersSchema();
+
+        /**
+         * Executes the tool with the given arguments.
+         * <p>
+         * Implementations should return a human-readable result string on
+         * success. On failure, implementations may throw any runtime exception;
+         * the provider will catch it and report the error message back to the
+         * LLM so it can recover gracefully.
+         * </p>
+         *
+         * @param arguments
+         *            the tool arguments as a JSON string matching the
+         *            parameters schema, or {@code null} if the tool takes no
+         *            parameters
+         * @return the result of the tool execution as a string, never
+         *         {@code null}
+         */
+        String execute(String arguments);
     }
 }

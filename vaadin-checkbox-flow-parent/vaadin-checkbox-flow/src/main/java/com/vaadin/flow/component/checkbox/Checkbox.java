@@ -40,6 +40,9 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Checkbox is an input field representing a binary choice.
@@ -78,7 +81,7 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/checkbox", version = "25.1.0-beta2")
+@NpmPackage(value = "@vaadin/checkbox", version = "25.2.0-alpha2")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
@@ -348,6 +351,28 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      */
     public void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
+    }
+
+    /**
+     * Binds the indeterminate state to the given signal. The binding is
+     * two-way: signal changes push to the DOM property, and client-side
+     * property changes invoke the write callback.
+     *
+     * @param signal
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate value changes back, or {@code null}
+     *            for one-way binding
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.2
+     */
+    public SignalBinding<Boolean> bindIndeterminate(Signal<Boolean> signal,
+            SerializableConsumer<Boolean> writeCallback) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        return getElement().bindProperty("indeterminate",
+                signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }
 
     /**

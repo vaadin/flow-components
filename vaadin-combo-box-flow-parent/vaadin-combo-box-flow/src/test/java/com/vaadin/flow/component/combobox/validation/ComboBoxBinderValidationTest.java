@@ -18,9 +18,9 @@ package com.vaadin.flow.component.combobox.validation;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -32,7 +32,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 
-public class ComboBoxBinderValidationTest {
+class ComboBoxBinderValidationTest {
     private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
@@ -56,55 +56,55 @@ public class ComboBoxBinderValidationTest {
         }
     }
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         MockitoAnnotations.openMocks(this);
         field = new ComboBox<>();
         field.setItems(Arrays.asList("foo", "bar", "baz"));
     }
 
     @Test
-    public void elementWithBinderValidation_invalidValue_binderValidationFails() {
+    void elementWithBinderValidation_invalidValue_binderValidationFails() {
         var binder = attachBinderToField();
 
         field.setValue("bar");
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
 
-        Assert.assertTrue(statusCaptor.getValue().isError());
-        Assert.assertEquals(BINDER_FAIL_MESSAGE,
+        Assertions.assertTrue(statusCaptor.getValue().isError());
+        Assertions.assertEquals(BINDER_FAIL_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
-    public void setRequiredOnBinder_validate_binderValidationFails() {
+    void setRequiredOnBinder_validate_binderValidationFails() {
         var binder = attachBinderToField(true);
         binder.validate();
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertTrue(statusCaptor.getValue().isError());
-        Assert.assertEquals(BINDER_REQUIRED_MESSAGE,
+        Assertions.assertTrue(statusCaptor.getValue().isError());
+        Assertions.assertEquals(BINDER_REQUIRED_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
-    public void setRequiredOnComponent_validate_binderValidationPasses() {
+    void setRequiredOnComponent_validate_binderValidationPasses() {
         var binder = attachBinderToField();
         field.setRequiredIndicatorVisible(true);
         binder.validate();
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertFalse(statusCaptor.getValue().isError());
+        Assertions.assertFalse(statusCaptor.getValue().isError());
 
     }
 
     @Test
-    public void setValidValue_binderValidationPasses() {
+    void setValidValue_binderValidationPasses() {
         attachBinderToField();
 
         field.setValue("foo");
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
-        Assert.assertFalse(statusCaptor.getValue().isError());
+        Assertions.assertFalse(statusCaptor.getValue().isError());
     }
 
     private Binder<Bean> attachBinderToField() {

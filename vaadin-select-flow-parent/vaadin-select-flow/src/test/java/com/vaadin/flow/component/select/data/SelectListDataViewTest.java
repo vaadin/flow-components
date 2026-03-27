@@ -20,7 +20,7 @@ import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
-public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
+class SelectListDataViewTest extends AbstractListDataViewListenerTest {
 
     /*
      * ListDataView implementation is tested in AbstractListDataViewTest. No

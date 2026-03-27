@@ -15,22 +15,22 @@
  */
 package com.vaadin.flow.component.slider.tests;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.slider.SliderFeatureFlagProvider;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
-import com.vaadin.tests.EnableFeatureFlagRule;
+import com.vaadin.tests.AbstractSignalsTest;
+import com.vaadin.tests.EnableFeatureFlagExtension;
 
-public class SliderSignalTest extends AbstractSignalsUnitTest {
+class SliderSignalTest extends AbstractSignalsTest {
 
-    @Rule
-    public EnableFeatureFlagRule featureFlagRule = new EnableFeatureFlagRule(
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
     private Slider slider;
@@ -38,8 +38,8 @@ public class SliderSignalTest extends AbstractSignalsUnitTest {
     private ValueSignal<Double> maxSignal;
     private ValueSignal<Double> stepSignal;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         slider = new Slider();
         minSignal = new ValueSignal<>(0.0);
         maxSignal = new ValueSignal<>(100.0);
@@ -49,57 +49,60 @@ public class SliderSignalTest extends AbstractSignalsUnitTest {
     // ===== MIN BINDING TESTS =====
 
     @Test
-    public void bindMinSignal() {
+    void bindMinSignal() {
         slider.bindMin(minSignal);
         ui.add(slider);
-        Assert.assertEquals(0.0, slider.getMin(), 0.001);
+        Assertions.assertEquals(0.0, slider.getMin(), 0.001);
 
         minSignal.set(10.0);
-        Assert.assertEquals(10.0, slider.getMin(), 0.001);
+        Assertions.assertEquals(10.0, slider.getMin(), 0.001);
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMinSignal_setMin_throws() {
+    @Test
+    void bindMinSignal_setMin_throws() {
         slider.bindMin(minSignal);
         ui.add(slider);
-        slider.setMin(10.0);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> slider.setMin(10.0));
     }
 
     // ===== MAX BINDING TESTS =====
 
     @Test
-    public void bindMaxSignal() {
+    void bindMaxSignal() {
         slider.bindMax(maxSignal);
         ui.add(slider);
-        Assert.assertEquals(100.0, slider.getMax(), 0.001);
+        Assertions.assertEquals(100.0, slider.getMax(), 0.001);
 
         maxSignal.set(200.0);
-        Assert.assertEquals(200.0, slider.getMax(), 0.001);
+        Assertions.assertEquals(200.0, slider.getMax(), 0.001);
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindMaxSignal_setMax_throws() {
+    @Test
+    void bindMaxSignal_setMax_throws() {
         slider.bindMax(maxSignal);
         ui.add(slider);
-        slider.setMax(200.0);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> slider.setMax(200.0));
     }
 
     // ===== STEP BINDING TESTS =====
 
     @Test
-    public void bindStepSignal() {
+    void bindStepSignal() {
         slider.bindStep(stepSignal);
         ui.add(slider);
-        Assert.assertEquals(1.0, slider.getStep(), 0.001);
+        Assertions.assertEquals(1.0, slider.getStep(), 0.001);
 
         stepSignal.set(5.0);
-        Assert.assertEquals(5.0, slider.getStep(), 0.001);
+        Assertions.assertEquals(5.0, slider.getStep(), 0.001);
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindStepSignal_setStep_throws() {
+    @Test
+    void bindStepSignal_setStep_throws() {
         slider.bindStep(stepSignal);
         ui.add(slider);
-        slider.setStep(5.0);
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> slider.setStep(5.0));
     }
 }
