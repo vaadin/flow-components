@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.tabs;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -693,22 +692,7 @@ public class Tabs extends Component
             fireEvent(new SelectedChangeEvent(this, previousTab,
                     changedFromClient));
         } else {
-            updateEnabled(currentlySelected);
             setSelectedTab(selectedTab);
-        }
-    }
-
-    private void updateEnabled(Tab tab) {
-        boolean enabled = tab.getElement().getNode().isEnabledSelf();
-        Serializable rawValue = tab.getElement().getPropertyRaw("disabled");
-        if (rawValue instanceof Boolean) {
-            // convert the boolean value to a String to force update the
-            // property value. Otherwise since the provided value is the same as
-            // the current one the update don't do anything.
-            tab.getElement().setProperty("disabled",
-                    enabled ? null : Boolean.TRUE.toString());
-        } else {
-            tab.setEnabled(enabled);
         }
     }
 
