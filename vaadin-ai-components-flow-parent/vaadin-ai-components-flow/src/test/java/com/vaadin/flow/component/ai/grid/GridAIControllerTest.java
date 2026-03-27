@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.tests.MockUIExtension;
 
 class GridAIControllerTest {
@@ -552,6 +556,145 @@ class GridAIControllerTest {
         }
     }
 
+    // --- SQL helpers ---
+
+    @Nested
+    class SqlHelperTests {
+
+        @Test
+        void wrapWithLimit() {
+            Assertions.assertEquals(
+                    "SELECT * FROM (SELECT 1) AS _limited LIMIT 10",
+                    GridRenderer.wrapWithLimit("SELECT 1", 10));
+        }
+
+        @Test
+        void wrapWithCount() {
+            Assertions.assertEquals(
+                    "SELECT COUNT(*) FROM (SELECT 1) AS _counted",
+                    GridRenderer.wrapWithCount("SELECT 1"));
+        }
+
+        @Test
+        void enrichQuery_noSort() {
+            var result = GridRenderer.enrichQuery("SELECT 1", 20, 10,
+                    List.of());
+            Assertions.assertEquals(
+                    "SELECT * FROM (SELECT 1) AS _limited LIMIT 10 OFFSET 20",
+                    result);
+        }
+
+        @Test
+        void enrichQuery_withSort() {
+            var sortOrders = List
+                    .of(new QuerySortOrder("name", SortDirection.ASCENDING));
+            var result = GridRenderer.enrichQuery("SELECT 1", 0, 50,
+                    sortOrders);
+            Assertions.assertTrue(result.contains("ORDER BY"));
+            Assertions.assertTrue(result.contains("\"name\" ASC"));
+            Assertions.assertTrue(result.contains("LIMIT 50"));
+            Assertions.assertTrue(result.contains("OFFSET 0"));
+        }
+
+        @Test
+        void enrichQuery_withMultipleSorts() {
+            var sortOrders = List.of(
+                    new QuerySortOrder("name", SortDirection.ASCENDING),
+                    new QuerySortOrder("age", SortDirection.DESCENDING));
+            var result = GridRenderer.enrichQuery("SELECT 1", 0, 50,
+                    sortOrders);
+            Assertions
+                    .assertTrue(result.contains("\"name\" ASC, \"age\" DESC"));
+        }
+    }
+
+    // --- Lazy data provider ---
+
+    @Nested
+    class LazyDataProviderTests {
+
+        @BeforeEach
+        void renderGrid() {
+            dbProvider.queryResults = List.of(row("a", 1));
+            simulateUpdate("SELECT a FROM t");
+            dbProvider.executedQueries.clear();
+        }
+
+        @Test
+        void fetch_executesQueryWithLimitAndOffset() {
+            grid.getDataProvider()
+                    .fetch(new Query<>(20, 10, List.of(), null, null));
+
+            Assertions.assertEquals(1, dbProvider.executedQueries.size());
+            var sql = dbProvider.executedQueries.getFirst();
+            Assertions.assertTrue(sql.contains("LIMIT 10"),
+                    "Should contain LIMIT: " + sql);
+            Assertions.assertTrue(sql.contains("OFFSET 20"),
+                    "Should contain OFFSET: " + sql);
+        }
+
+        @Test
+        void fetch_withSortOrder_includesOrderBy() {
+            var sort = List
+                    .of(new QuerySortOrder("a", SortDirection.DESCENDING));
+            grid.getDataProvider().fetch(new Query<>(0, 50, sort, null, null));
+
+            var sql = dbProvider.executedQueries.getFirst();
+            Assertions.assertTrue(sql.contains("ORDER BY"),
+                    "Should contain ORDER BY: " + sql);
+            Assertions.assertTrue(sql.contains("\"a\" DESC"),
+                    "Should contain sort column: " + sql);
+        }
+
+        @Test
+        void fetch_returnsRowsFromDatabase() {
+            dbProvider.queryResults = List.of(row("a", 10), row("a", 20));
+            var rows = grid.getDataProvider()
+                    .fetch(new Query<>(0, 50, List.of(), null, null)).toList();
+
+            Assertions.assertEquals(2, rows.size());
+            Assertions.assertEquals(10, rows.get(0).get("a"));
+            Assertions.assertEquals(20, rows.get(1).get("a"));
+        }
+
+        @Test
+        void count_executesCountQuery() {
+            dbProvider.queryResults = List.of(row("COUNT(*)", 42));
+            var size = grid.getDataProvider().size(new Query<>());
+
+            Assertions.assertEquals(42, size);
+            var sql = dbProvider.executedQueries.getFirst();
+            Assertions.assertTrue(sql.contains("COUNT(*)"),
+                    "Should be a count query: " + sql);
+        }
+
+        @Test
+        void count_emptyResult_returnsZero() {
+            dbProvider.queryResults = List.of();
+            var size = grid.getDataProvider().size(new Query<>());
+
+            Assertions.assertEquals(0, size);
+        }
+
+        @Test
+        void count_nonNumericResult_returnsZero() {
+            dbProvider.queryResults = List.of(row("COUNT(*)", "not a number"));
+            var size = grid.getDataProvider().size(new Query<>());
+
+            Assertions.assertEquals(0, size);
+        }
+
+        @Test
+        void dataProvider_replacedOnSubsequentUpdate() {
+            var first = grid.getDataProvider();
+
+            simulateUpdate("SELECT b FROM t");
+            var second = grid.getDataProvider();
+
+            Assertions.assertNotSame(first, second);
+        }
+    }
+
     // --- Helpers ---
 
     private LLMProvider.ToolSpec findTool(String name) {
@@ -585,6 +728,7 @@ class GridAIControllerTest {
         private String schema = "test schema";
         private List<Map<String, Object>> queryResults = List.of();
         private boolean throwOnExecute = false;
+        private final List<String> executedQueries = new ArrayList<>();
 
         @Override
         public String getSchema() {
@@ -593,6 +737,7 @@ class GridAIControllerTest {
 
         @Override
         public List<Map<String, Object>> executeQuery(String sql) {
+            executedQueries.add(sql);
             if (throwOnExecute) {
                 throw new RuntimeException("Query execution failed");
             }
