@@ -28,7 +28,6 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 /**
  * AI controller for creating interactive chart visualizations from database
@@ -158,30 +157,25 @@ public class ChartAIController implements AIController {
     public void onRequestCompleted() {
         ChartEntry entry = ChartEntry.get(chart);
         if (entry == null || !entry.hasPendingState()) {
-            LOGGER.debug("onRequestCompleted: no pending state");
             return;
         }
 
-        String configJson = entry.getPendingConfigurationJson();
-        List<String> effectiveQueries = entry.getQueries();
-
-        if (!effectiveQueries.isEmpty()) {
-            try {
-                String effectiveConfig = configJson != null ? configJson
-                        : ChartSerialization.toJSON(chart.getConfiguration());
-                LOGGER.info("onRequestCompleted: rendering chart");
-                ChartRenderer.renderChart(chart, databaseProvider,
-                        dataConverter, effectiveQueries, effectiveConfig);
-            } catch (Exception e) {
-                LOGGER.error("onRequestCompleted: rendering failed", e);
-            } finally {
-                entry.clearPendingState();
-            }
-        } else {
+        List<String> queries = entry.getQueries();
+        if (queries.isEmpty()) {
             // Config-only: no queries to render yet. Clear only the
             // data flag but keep pendingConfigurationJson so it's used
             // when data arrives in a later request.
             entry.setPendingDataUpdate(false);
+            return;
+        }
+
+        try {
+            ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
+                    queries, entry.getPendingConfigurationJson());
+        } catch (Exception e) {
+            LOGGER.error("onRequestCompleted: rendering failed", e);
+        } finally {
+            entry.clearPendingState();
         }
     }
 }
