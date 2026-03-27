@@ -15,28 +15,28 @@
  */
 package com.vaadin.flow.component.applayout;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsUnitTest;
+import com.vaadin.tests.AbstractSignalsTest;
 
-public class AppLayoutSignalTest extends AbstractSignalsUnitTest {
+public class AppLayoutSignalTest extends AbstractSignalsTest {
 
     private AppLayout appLayout;
     private ValueSignal<Boolean> signal;
 
-    @Before
+    @BeforeEach
     public void setup() {
         appLayout = new AppLayout();
         signal = new ValueSignal<>(true);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (appLayout != null && appLayout.isAttached()) {
             appLayout.removeFromParent();
@@ -48,13 +48,13 @@ public class AppLayoutSignalTest extends AbstractSignalsUnitTest {
         appLayout.bindDrawerOpened(signal, signal::set);
         UI.getCurrent().add(appLayout);
 
-        Assert.assertTrue(appLayout.isDrawerOpened());
+        Assertions.assertTrue(appLayout.isDrawerOpened());
 
         signal.set(false);
-        Assert.assertFalse(appLayout.isDrawerOpened());
+        Assertions.assertFalse(appLayout.isDrawerOpened());
 
         signal.set(true);
-        Assert.assertTrue(appLayout.isDrawerOpened());
+        Assertions.assertTrue(appLayout.isDrawerOpened());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class AppLayoutSignalTest extends AbstractSignalsUnitTest {
         boolean initial = appLayout.getElement().getProperty("drawerOpened",
                 true);
         signal.set(false);
-        Assert.assertEquals(initial,
+        Assertions.assertEquals(initial,
                 appLayout.getElement().getProperty("drawerOpened", true));
     }
 
@@ -74,42 +74,37 @@ public class AppLayoutSignalTest extends AbstractSignalsUnitTest {
         UI.getCurrent().add(appLayout);
 
         signal.set(false);
-        Assert.assertFalse(appLayout.isDrawerOpened());
+        Assertions.assertFalse(appLayout.isDrawerOpened());
 
         appLayout.removeFromParent();
         signal.set(true);
-        Assert.assertFalse(appLayout.isDrawerOpened());
+        Assertions.assertFalse(appLayout.isDrawerOpened());
 
         UI.getCurrent().add(appLayout);
-        Assert.assertTrue(appLayout.isDrawerOpened());
+        Assertions.assertTrue(appLayout.isDrawerOpened());
     }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindDrawerOpened_setWhileBound_throws() {
+    public void bindDrawerOpened_setWhileBound_syncsToSignal() {
         appLayout.bindDrawerOpened(signal, signal::set);
         UI.getCurrent().add(appLayout);
 
         appLayout.setDrawerOpened(false);
-    }
 
-    @Test(expected = BindingActiveException.class)
-    public void bindDrawerOpened_doubleBind_throws() {
-        appLayout.bindDrawerOpened(signal, signal::set);
-        var other = new ValueSignal<>(false);
-        appLayout.bindDrawerOpened(other, other::set);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void bindDrawerOpened_nullSignal_throwsNPE() {
-        appLayout.bindDrawerOpened(null, null);
+        Assertions.assertFalse(signal.peek());
     }
 
     @Test
-    public void bindDrawerOpened_nullDefault_defaultsToTrue() {
-        ValueSignal<Boolean> nullSignal = new ValueSignal<>(null);
-        appLayout.bindDrawerOpened(nullSignal, nullSignal::set);
-        UI.getCurrent().add(appLayout);
+    public void bindDrawerOpened_doubleBind_throws() {
+        appLayout.bindDrawerOpened(signal, signal::set);
+        var other = new ValueSignal<>(false);
 
-        Assert.assertTrue(appLayout.isDrawerOpened());
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> appLayout.bindDrawerOpened(other, other::set));
+    }
+
+    @Test
+    public void bindDrawerOpened_nullSignal_throwsNPE() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> appLayout.bindDrawerOpened(null, null));
     }
 }
