@@ -11,7 +11,7 @@ This is the Vaadin Flow Components repository containing Vaadin Flow wrappers fo
 - Java 21+
 - Maven
 - Vaadin Flow 25+
-- JUnit 4 for unit testing
+- JUnit for unit testing
 - Mockito for mocking in unit tests
 - Vaadin TestBench for integration tests
 - Jetty for running integration test servers
@@ -42,8 +42,12 @@ Shared modules used across components:
 
 ### Testing
 
-- Unit tests: Standard JUnit tests, located in component modules
-- Integration tests: TestBench-based browser tests, located in separate IT modules
+- Unit tests:
+  - Using JUnit 6
+  - Located in component modules
+- Integration tests:
+  - Using JUnit 4
+  - TestBench-based browser tests, located in separate IT modules
   - Each test consists of a test setup in form of a Vaadin Flow view and a JUnit test class
   - Both are linked using `@Route` and `@TestPath` annotations
   - New integration tests should extend from `com.vaadin.tests.AbstractComponentIT`
