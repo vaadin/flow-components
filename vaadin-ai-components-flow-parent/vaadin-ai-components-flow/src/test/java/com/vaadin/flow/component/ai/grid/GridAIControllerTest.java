@@ -556,58 +556,6 @@ class GridAIControllerTest {
         }
     }
 
-    // --- SQL helpers ---
-
-    @Nested
-    class SqlHelperTests {
-
-        @Test
-        void wrapWithLimit() {
-            Assertions.assertEquals(
-                    "SELECT * FROM (SELECT 1) AS _limited LIMIT 10",
-                    GridRenderer.wrapWithLimit("SELECT 1", 10));
-        }
-
-        @Test
-        void wrapWithCount() {
-            Assertions.assertEquals(
-                    "SELECT COUNT(*) FROM (SELECT 1) AS _counted",
-                    GridRenderer.wrapWithCount("SELECT 1"));
-        }
-
-        @Test
-        void enrichQuery_noSort() {
-            var result = GridRenderer.enrichQuery("SELECT 1", 20, 10,
-                    List.of());
-            Assertions.assertEquals(
-                    "SELECT * FROM (SELECT 1) AS _limited LIMIT 10 OFFSET 20",
-                    result);
-        }
-
-        @Test
-        void enrichQuery_withSort() {
-            var sortOrders = List
-                    .of(new QuerySortOrder("name", SortDirection.ASCENDING));
-            var result = GridRenderer.enrichQuery("SELECT 1", 0, 50,
-                    sortOrders);
-            Assertions.assertTrue(result.contains("ORDER BY"));
-            Assertions.assertTrue(result.contains("\"name\" ASC"));
-            Assertions.assertTrue(result.contains("LIMIT 50"));
-            Assertions.assertTrue(result.contains("OFFSET 0"));
-        }
-
-        @Test
-        void enrichQuery_withMultipleSorts() {
-            var sortOrders = List.of(
-                    new QuerySortOrder("name", SortDirection.ASCENDING),
-                    new QuerySortOrder("age", SortDirection.DESCENDING));
-            var result = GridRenderer.enrichQuery("SELECT 1", 0, 50,
-                    sortOrders);
-            Assertions
-                    .assertTrue(result.contains("\"name\" ASC, \"age\" DESC"));
-        }
-    }
-
     // --- Lazy data provider ---
 
     @Nested
@@ -621,29 +569,56 @@ class GridAIControllerTest {
         }
 
         @Test
-        void fetch_executesQueryWithLimitAndOffset() {
-            grid.getDataProvider()
-                    .fetch(new Query<>(20, 10, List.of(), null, null));
+        void render_executesSampleQueryWithLimit1() {
+            // The sample query was already executed in @BeforeEach.
+            // Re-render to capture the SQL.
+            dbProvider.executedQueries.clear();
+            dbProvider.queryResults = List.of(row("a", 1));
+            simulateUpdate("SELECT a FROM t");
 
-            Assertions.assertEquals(1, dbProvider.executedQueries.size());
-            var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertTrue(sql.contains("LIMIT 10"),
-                    "Should contain LIMIT: " + sql);
-            Assertions.assertTrue(sql.contains("OFFSET 20"),
-                    "Should contain OFFSET: " + sql);
+            // First query is the validation in updateData, second is
+            // the sample row fetch in renderGrid
+            var sampleSql = dbProvider.executedQueries.get(1);
+            Assertions.assertEquals(
+                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 1",
+                    sampleSql);
         }
 
         @Test
-        void fetch_withSortOrder_includesOrderBy() {
+        void fetch_wrapsQueryAsSubquery() {
+            grid.getDataProvider()
+                    .fetch(new Query<>(20, 10, List.of(), null, null));
+
+            var sql = dbProvider.executedQueries.getFirst();
+            Assertions.assertEquals(
+                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 10 OFFSET 20",
+                    sql);
+        }
+
+        @Test
+        void fetch_withSortOrder_wrapsWithOrderBy() {
             var sort = List
                     .of(new QuerySortOrder("a", SortDirection.DESCENDING));
             grid.getDataProvider().fetch(new Query<>(0, 50, sort, null, null));
 
             var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertTrue(sql.contains("ORDER BY"),
+            Assertions.assertTrue(sql.contains("ORDER BY \"a\" DESC"),
                     "Should contain ORDER BY: " + sql);
-            Assertions.assertTrue(sql.contains("\"a\" DESC"),
-                    "Should contain sort column: " + sql);
+            Assertions.assertTrue(sql.contains("LIMIT 50"),
+                    "Should contain LIMIT: " + sql);
+            Assertions.assertTrue(sql.contains("OFFSET 0"),
+                    "Should contain OFFSET: " + sql);
+        }
+
+        @Test
+        void fetch_withMultipleSortOrders() {
+            var sort = List.of(new QuerySortOrder("a", SortDirection.ASCENDING),
+                    new QuerySortOrder("b", SortDirection.DESCENDING));
+            grid.getDataProvider().fetch(new Query<>(0, 10, sort, null, null));
+
+            var sql = dbProvider.executedQueries.getFirst();
+            Assertions.assertTrue(sql.contains("\"a\" ASC, \"b\" DESC"),
+                    "Should contain both sort orders: " + sql);
         }
 
         @Test
@@ -658,14 +633,14 @@ class GridAIControllerTest {
         }
 
         @Test
-        void count_executesCountQuery() {
+        void count_wrapsQueryWithCount() {
             dbProvider.queryResults = List.of(row("COUNT(*)", 42));
             var size = grid.getDataProvider().size(new Query<>());
 
             Assertions.assertEquals(42, size);
             var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertTrue(sql.contains("COUNT(*)"),
-                    "Should be a count query: " + sql);
+            Assertions.assertEquals(
+                    "SELECT COUNT(*) FROM (SELECT a FROM t) AS _counted", sql);
         }
 
         @Test
