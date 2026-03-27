@@ -25,26 +25,26 @@ import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
-public class AppLayoutSignalTest extends AbstractSignalsTest {
+class AppLayoutSignalTest extends AbstractSignalsTest {
 
     private AppLayout appLayout;
     private ValueSignal<Boolean> signal;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         appLayout = new AppLayout();
         signal = new ValueSignal<>(true);
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         if (appLayout != null && appLayout.isAttached()) {
             appLayout.removeFromParent();
         }
     }
 
     @Test
-    public void bindDrawerOpened_signalBound_propertySync() {
+    void bindDrawerOpened_signalBound_propertySync() {
         appLayout.bindDrawerOpened(signal, signal::set);
         UI.getCurrent().add(appLayout);
 
@@ -58,7 +58,7 @@ public class AppLayoutSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    public void bindDrawerOpened_notAttached_noEffect() {
+    void bindDrawerOpened_notAttached_noEffect() {
         appLayout.bindDrawerOpened(signal, signal::set);
 
         boolean initial = appLayout.getElement().getProperty("drawerOpened",
@@ -69,7 +69,7 @@ public class AppLayoutSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    public void bindDrawerOpened_detachAndReattach() {
+    void bindDrawerOpened_detachAndReattach() {
         appLayout.bindDrawerOpened(signal, signal::set);
         UI.getCurrent().add(appLayout);
 
@@ -84,7 +84,7 @@ public class AppLayoutSignalTest extends AbstractSignalsTest {
         Assertions.assertTrue(appLayout.isDrawerOpened());
     }
 
-    public void bindDrawerOpened_setWhileBound_syncsToSignal() {
+    void bindDrawerOpened_setWhileBound_syncsToSignal() {
         appLayout.bindDrawerOpened(signal, signal::set);
         UI.getCurrent().add(appLayout);
 
@@ -94,7 +94,7 @@ public class AppLayoutSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    public void bindDrawerOpened_doubleBind_throws() {
+    void bindDrawerOpened_doubleBind_throws() {
         appLayout.bindDrawerOpened(signal, signal::set);
         var other = new ValueSignal<>(false);
 
@@ -103,7 +103,7 @@ public class AppLayoutSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    public void bindDrawerOpened_nullSignal_throwsNPE() {
+    void bindDrawerOpened_nullSignal_throwsNPE() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> appLayout.bindDrawerOpened(null, null));
     }
