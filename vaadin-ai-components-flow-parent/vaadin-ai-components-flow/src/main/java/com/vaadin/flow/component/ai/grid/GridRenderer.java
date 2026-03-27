@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -54,35 +55,58 @@ public class GridRenderer implements Serializable {
 
     private static final String DEFAULT_EMPTY_STATE_TEXT = "No results";
 
+    private static final String CURRENT_QUERY_KEY = "GridRenderer.currentQuery";
+
+    private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
 
     /**
      * Creates a new grid renderer.
      *
+     * @param grid
+     *            the grid to render, not {@code null}
      * @param databaseProvider
      *            the database provider for query execution, not {@code null}
      */
-    public GridRenderer(DatabaseProvider databaseProvider) {
+    public GridRenderer(Grid<Map<String, Object>> grid,
+            DatabaseProvider databaseProvider) {
+        this.grid = Objects.requireNonNull(grid, "Grid must not be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "databaseProvider must not be null");
+    }
+
+    /**
+     * Returns the current query stored on the grid, or {@code null} if no query
+     * has been applied yet.
+     *
+     * @return the current SQL query, or {@code null}
+     */
+    public String getCurrentQuery() {
+        return (String) ComponentUtil.getData(grid, CURRENT_QUERY_KEY);
     }
 
     /**
      * Renders the grid with results from the given SQL query. Columns are
      * created dynamically from the query result, with type-appropriate
      * renderers, grouping, and lazy loading.
-     * <p>
-     * The caller is responsible for ensuring this method runs on the UI thread
-     * (e.g., via {@code runWhenAttached} and {@code UI.access()}).
      *
-     * @param grid
-     *            the grid to render, not {@code null}
      * @param query
      *            the SQL SELECT query, not {@code null}
      */
-    public void renderGrid(Grid<Map<String, Object>> grid, String query) {
+    public void renderGrid(String query) {
+        grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+            try {
+                doRenderGrid(query);
+                ComponentUtil.setData(grid, CURRENT_QUERY_KEY, query);
+            } catch (Exception e) {
+                LOGGER.error("Error rendering grid", e);
+            }
+        }));
+    }
+
+    private void doRenderGrid(String query) {
         var sampleRows = databaseProvider.executeQuery(wrapWithLimit(query, 1));
-        removeExtraHeaderRows(grid);
+        removeExtraHeaderRows();
         grid.removeAllColumns();
         if (sampleRows.isEmpty()) {
             if (grid.getEmptyStateText() == null
@@ -100,15 +124,14 @@ public class GridRenderer implements Serializable {
             return prefixA.compareTo(prefixB);
         });
         for (var entry : sortedColumns) {
-            addColumn(grid, entry.getKey(), entry.getValue());
+            addColumn(entry.getKey(), entry.getValue());
         }
-        applyColumnGrouping(grid);
-        setupLazyDataProvider(grid, query);
+        applyColumnGrouping();
+        setupLazyDataProvider(query);
         LOGGER.info("Grid configured with {} columns", firstRow.size());
     }
 
-    private void addColumn(Grid<Map<String, Object>> grid, String columnName,
-            Object sampleValue) {
+    private void addColumn(String columnName, Object sampleValue) {
         var header = GridFormatting
                 .formatHeader(GridFormatting.stripGroupPrefix(columnName));
 
@@ -138,7 +161,7 @@ public class GridRenderer implements Serializable {
                 .setAutoWidth(true).setResizable(true);
     }
 
-    private void applyColumnGrouping(Grid<Map<String, Object>> grid) {
+    private void applyColumnGrouping() {
         var groups = new LinkedHashMap<String, List<Grid.Column<Map<String, Object>>>>();
         for (var column : grid.getColumns()) {
             var key = column.getKey();
@@ -165,7 +188,7 @@ public class GridRenderer implements Serializable {
         }
     }
 
-    private static void removeExtraHeaderRows(Grid<Map<String, Object>> grid) {
+    private void removeExtraHeaderRows() {
         var headerRows = grid.getHeaderRows();
         while (headerRows.size() > 1) {
             grid.removeHeaderRow(headerRows.getFirst());
@@ -173,8 +196,7 @@ public class GridRenderer implements Serializable {
         }
     }
 
-    private void setupLazyDataProvider(Grid<Map<String, Object>> grid,
-            String query) {
+    private void setupLazyDataProvider(String query) {
         var countQuery = wrapWithCount(query);
         var dataProvider = new CallbackDataProvider<Map<String, Object>, Void>(
                 fetchQuery -> {

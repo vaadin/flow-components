@@ -61,11 +61,9 @@ public class GridAIController implements AIController {
 
     private static final String DEFAULT_GRID_ID = "grid";
 
-    private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
     private final GridRenderer gridRenderer;
 
-    private final AtomicReference<String> currentQuery = new AtomicReference<>();
     private final AtomicReference<String> pendingQuery = new AtomicReference<>();
 
     /**
@@ -79,10 +77,10 @@ public class GridAIController implements AIController {
      */
     public GridAIController(Grid<Map<String, Object>> grid,
             DatabaseProvider databaseProvider) {
-        this.grid = Objects.requireNonNull(grid, "Grid must not be null");
+        Objects.requireNonNull(grid, "Grid must not be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "DatabaseProvider must not be null");
-        this.gridRenderer = new GridRenderer(databaseProvider);
+        this.gridRenderer = new GridRenderer(grid, databaseProvider);
     }
 
     /**
@@ -131,7 +129,7 @@ public class GridAIController implements AIController {
         tools.addAll(GridAITools.createAll(new GridAITools.Callbacks() {
             @Override
             public String getState(String gridId) {
-                var query = currentQuery.get();
+                var query = gridRenderer.getCurrentQuery();
                 var node = JacksonUtils.createObjectNode();
                 node.put("gridId", gridId);
                 if (query == null) {
@@ -166,14 +164,6 @@ public class GridAIController implements AIController {
             return;
         }
         LOGGER.info("onRequestCompleted: applying query: {}", query);
-        grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-            try {
-                gridRenderer.renderGrid(grid, query);
-                currentQuery.set(query);
-                LOGGER.info("onRequestCompleted: grid updated successfully");
-            } catch (Exception e) {
-                LOGGER.error("Error updating grid", e);
-            }
-        }));
+        gridRenderer.renderGrid(query);
     }
 }
