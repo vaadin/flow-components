@@ -58,39 +58,12 @@ public final class GridRenderer implements Serializable {
     }
 
     /**
-     * Applies pending state from the grid's {@link GridEntry} if present. Uses
-     * {@code runWhenAttached} and {@code UI.access()} to ensure the grid is
-     * attached and the update happens safely on the UI thread. On success, the
-     * current query is updated and pending state is cleared.
-     *
-     * @param grid
-     *            the grid to update, not {@code null}
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
-     */
-    public static void applyPendingState(Grid<Map<String, Object>> grid,
-            DatabaseProvider databaseProvider) {
-        var entry = GridEntry.get(grid);
-        if (entry == null || !entry.hasPendingState()) {
-            return;
-        }
-        var query = entry.getPendingQuery();
-        grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-            try {
-                renderGrid(grid, databaseProvider, query);
-                entry.setCurrentQuery(query);
-            } catch (Exception e) {
-                LOGGER.error("Error rendering grid", e);
-            } finally {
-                entry.clearPendingState();
-            }
-        }));
-    }
-
-    /**
      * Renders the grid with results from the given SQL query. Columns are
      * created dynamically from the query result, with type-appropriate
      * renderers, grouping, and lazy loading.
+     * <p>
+     * The caller is responsible for ensuring this method runs on the UI thread
+     * (e.g., via {@code runWhenAttached} and {@code UI.access()}).
      *
      * @param grid
      *            the grid to render, not {@code null}
@@ -99,7 +72,7 @@ public final class GridRenderer implements Serializable {
      * @param query
      *            the SQL SELECT query, not {@code null}
      */
-    private static void renderGrid(Grid<Map<String, Object>> grid,
+    public static void renderGrid(Grid<Map<String, Object>> grid,
             DatabaseProvider databaseProvider, String query) {
         var sampleRows = databaseProvider.executeQuery(wrapWithLimit(query, 1));
         removeExtraHeaderRows(grid);

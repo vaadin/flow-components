@@ -139,8 +139,7 @@ public class GridEntry implements Serializable {
     }
 
     /**
-     * Sets a pending query to be rendered on the next
-     * {@link GridRenderer#applyPendingState} call.
+     * Sets a pending query to be rendered.
      *
      * @param query
      *            the SQL query

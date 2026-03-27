@@ -155,8 +155,18 @@ public class GridAIController implements AIController {
             LOGGER.debug("onRequestCompleted: no pending query");
             return;
         }
-        LOGGER.info("onRequestCompleted: applying query: {}",
-                entry.getPendingQuery());
-        GridRenderer.applyPendingState(grid, databaseProvider);
+        var query = entry.getPendingQuery();
+        LOGGER.info("onRequestCompleted: applying query: {}", query);
+        grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+            try {
+                GridRenderer.renderGrid(grid, databaseProvider, query);
+                entry.setCurrentQuery(query);
+                LOGGER.info("onRequestCompleted: grid updated successfully");
+            } catch (Exception e) {
+                LOGGER.error("Error updating grid", e);
+            } finally {
+                entry.clearPendingState();
+            }
+        }));
     }
 }
