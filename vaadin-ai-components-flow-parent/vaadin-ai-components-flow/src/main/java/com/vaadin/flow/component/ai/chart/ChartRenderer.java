@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
@@ -34,51 +34,33 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 /**
- * Applies pending chart state and renders chart data. Encapsulates the
+ * Stateless utility for rendering chart data from SQL queries. Encapsulates the
  * query-execution-to-drawChart pipeline so that different controllers
  * (standalone chart, dashboard) share the same rendering logic.
  *
  * @author Vaadin Ltd
  */
-public class ChartRenderer {
+public final class ChartRenderer implements Serializable {
 
-    private final DatabaseProvider databaseProvider;
-    private DataConverter dataConverter;
-    private final ChartConfigurationApplier configurationApplier;
-
-    /**
-     * Creates a new chart renderer.
-     *
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
-     */
-    public ChartRenderer(DatabaseProvider databaseProvider) {
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "databaseProvider must not be null");
-        this.dataConverter = new DefaultDataConverter();
-        this.configurationApplier = new ChartConfigurationApplier();
-    }
-
-    /**
-     * Sets a custom data converter for transforming query results into chart
-     * data.
-     *
-     * @param dataConverter
-     *            the data converter to use, not {@code null}
-     */
-    public void setDataConverter(DataConverter dataConverter) {
-        this.dataConverter = Objects.requireNonNull(dataConverter,
-                "Data converter cannot be null");
+    private ChartRenderer() {
     }
 
     /**
      * Applies pending state from the chart's {@link ChartEntry} if present.
-     * After applying, the pending state is cleared.
+     * Uses {@code runWhenAttached} and {@code UI.access()} to ensure the chart
+     * is attached and the update happens safely on the UI thread. After
+     * applying, the pending state is cleared.
      *
      * @param chart
      *            the chart to update, not {@code null}
+     * @param databaseProvider
+     *            the database provider for query execution, not {@code null}
+     * @param dataConverter
+     *            the data converter for transforming query results, not
+     *            {@code null}
      */
-    public void applyPendingState(Chart chart) {
+    public static void applyPendingState(Chart chart,
+            DatabaseProvider databaseProvider, DataConverter dataConverter) {
         ChartEntry entry = ChartEntry.get(chart);
         if (entry == null || !entry.hasPendingState()) {
             return;
@@ -90,7 +72,8 @@ public class ChartRenderer {
             try {
                 String effectiveConfig = configJson != null ? configJson
                         : ChartSerialization.toJSON(chart.getConfiguration());
-                renderChart(chart, effectiveQueries, effectiveConfig);
+                renderChart(chart, databaseProvider, dataConverter,
+                        effectiveQueries, effectiveConfig);
             } finally {
                 entry.clearPendingState();
             }
@@ -108,13 +91,19 @@ public class ChartRenderer {
      *
      * @param chart
      *            the chart to render, not {@code null}
+     * @param databaseProvider
+     *            the database provider for query execution, not {@code null}
+     * @param dataConverter
+     *            the data converter for transforming query results, not
+     *            {@code null}
      * @param queries
      *            the SQL queries to execute (one per series), not {@code null}
      * @param configJson
      *            the chart configuration JSON, or {@code null} to keep current
      */
-    public void renderChart(Chart chart, List<String> queries,
-            String configJson) {
+    private static void renderChart(Chart chart,
+            DatabaseProvider databaseProvider, DataConverter dataConverter,
+            List<String> queries, String configJson) {
         chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             Configuration config = chart.getConfiguration();
             List<Series> allSeries = new ArrayList<>();
@@ -125,7 +114,7 @@ public class ChartRenderer {
             config.setSeries(allSeries.toArray(new Series[0]));
 
             if (configJson != null) {
-                configurationApplier.applyConfiguration(chart, configJson);
+                ChartConfigurationApplier.applyConfiguration(chart, configJson);
             }
 
             // Apply axis defaults from series data after LLM config,

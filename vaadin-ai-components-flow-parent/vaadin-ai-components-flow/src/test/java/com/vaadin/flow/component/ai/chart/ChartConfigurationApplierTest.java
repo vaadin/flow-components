@@ -45,18 +45,16 @@ class ChartConfigurationApplierTest {
 
     private Chart chart;
     private Configuration config;
-    private ChartConfigurationApplier applier;
 
     @BeforeEach
     void setUp() {
         chart = new Chart();
         ui.add(chart);
         config = chart.getConfiguration();
-        applier = new ChartConfigurationApplier();
     }
 
     private void apply(String json) {
-        applier.applyConfiguration(chart, json);
+        ChartConfigurationApplier.applyConfiguration(chart, json);
     }
 
     @Nested
@@ -79,7 +77,7 @@ class ChartConfigurationApplierTest {
             for (ChartType type : expectedTypes) {
                 chart = new Chart();
                 ui.add(chart);
-                applier.applyConfiguration(chart,
+                ChartConfigurationApplier.applyConfiguration(chart,
                         "{\"type\":\"" + type.toString().toLowerCase() + "\"}");
                 Assertions.assertEquals(type,
                         chart.getConfiguration().getChart().getType(),

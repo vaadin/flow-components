@@ -74,7 +74,7 @@ public class ChartAIController implements AIController {
 
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
-    private final ChartRenderer chartRenderer;
+    private DataConverter dataConverter;
 
     /**
      * Creates a new AI chart controller.
@@ -89,7 +89,7 @@ public class ChartAIController implements AIController {
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-        this.chartRenderer = new ChartRenderer(databaseProvider);
+        this.dataConverter = new DefaultDataConverter();
     }
 
     /**
@@ -100,7 +100,8 @@ public class ChartAIController implements AIController {
      *            the data converter to use, not {@code null}
      */
     public void setDataConverter(DataConverter dataConverter) {
-        chartRenderer.setDataConverter(dataConverter);
+        this.dataConverter = Objects.requireNonNull(dataConverter,
+                "Data converter cannot be null");
     }
 
     /**
@@ -155,7 +156,8 @@ public class ChartAIController implements AIController {
     @Override
     public void onRequestCompleted() {
         try {
-            chartRenderer.applyPendingState(chart);
+            ChartRenderer.applyPendingState(chart, databaseProvider,
+                    dataConverter);
         } catch (Exception e) {
             // Rendering failures should not propagate to the caller.
             // Pending state is already cleared by applyPendingState's

@@ -59,12 +59,15 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  */
-public class ChartConfigurationApplier implements Serializable {
+public final class ChartConfigurationApplier implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartConfigurationApplier.class);
 
-    public void applyConfiguration(Chart chart, String configJson) {
+    private ChartConfigurationApplier() {
+    }
+
+    public static void applyConfiguration(Chart chart, String configJson) {
         resetConfiguration(chart);
         try {
             JsonNode parsedNode = JacksonUtils.getMapper().readTree(configJson);
@@ -138,7 +141,8 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyChartType(Configuration config, String chartTypeStr) {
+    private static void applyChartType(Configuration config,
+            String chartTypeStr) {
         ChartType chartType = switch (chartTypeStr.toLowerCase()) {
         case "area" -> ChartType.AREA;
         case "line" -> ChartType.LINE;
@@ -176,7 +180,7 @@ public class ChartConfigurationApplier implements Serializable {
         config.getChart().setType(chartType);
     }
 
-    private void applyChartModelConfig(ChartModel chartModel,
+    private static void applyChartModelConfig(ChartModel chartModel,
             JsonNode chartNode) {
         if (chartNode.has(BACKGROUND_COLOR)
                 && chartNode.get(BACKGROUND_COLOR).isString()) {
@@ -276,7 +280,8 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyTitleConfig(Configuration config, JsonNode titleNode) {
+    private static void applyTitleConfig(Configuration config,
+            JsonNode titleNode) {
         if (titleNode.isObject() && titleNode.has(TEXT)) {
             config.setTitle(titleNode.get(TEXT).asString());
         } else if (titleNode.isString()) {
@@ -284,7 +289,7 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applySubtitleConfig(Configuration config,
+    private static void applySubtitleConfig(Configuration config,
             JsonNode subtitleNode) {
         if (subtitleNode.isObject() && subtitleNode.has(TEXT)) {
             config.setSubTitle(subtitleNode.get(TEXT).asString());
@@ -293,7 +298,8 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyTooltipConfig(Tooltip tooltip, JsonNode tooltipNode) {
+    private static void applyTooltipConfig(Tooltip tooltip,
+            JsonNode tooltipNode) {
         if (tooltipNode.has(POINT_FORMAT)) {
             tooltip.setPointFormat(tooltipNode.get(POINT_FORMAT).asString());
         }
@@ -311,7 +317,7 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyLegendConfig(Legend legend, JsonNode legendNode) {
+    private static void applyLegendConfig(Legend legend, JsonNode legendNode) {
         if (legendNode.has(ENABLED) && legendNode.get(ENABLED).isBoolean()) {
             legend.setEnabled(legendNode.get(ENABLED).asBoolean());
         }
@@ -342,7 +348,7 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyAxisConfig(Axis axis, JsonNode axisNode) {
+    private static void applyAxisConfig(Axis axis, JsonNode axisNode) {
         if (axis == null || !axisNode.isObject()) {
             return;
         }
@@ -374,7 +380,8 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyCreditsConfig(Credits credits, JsonNode creditsNode) {
+    private static void applyCreditsConfig(Credits credits,
+            JsonNode creditsNode) {
         if (creditsNode.has(ENABLED) && creditsNode.get(ENABLED).isBoolean()) {
             credits.setEnabled(creditsNode.get(ENABLED).asBoolean());
         }
@@ -386,7 +393,7 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyColorAxisConfig(Configuration config,
+    private static void applyColorAxisConfig(Configuration config,
             JsonNode colorAxisNode) {
         if (!colorAxisNode.isObject()) {
             return;
@@ -410,7 +417,8 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyPaneConfig(Configuration config, JsonNode paneNode) {
+    private static void applyPaneConfig(Configuration config,
+            JsonNode paneNode) {
         if (!paneNode.isObject()) {
             return;
         }
@@ -435,7 +443,7 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applyPlotOptionsConfig(Configuration config,
+    private static void applyPlotOptionsConfig(Configuration config,
             JsonNode plotOptionsNode) {
         if (plotOptionsNode.has(SERIES)
                 && plotOptionsNode.get(SERIES).isObject()) {
@@ -477,7 +485,7 @@ public class ChartConfigurationApplier implements Serializable {
         }
     }
 
-    private void applySeriesPlotOptions(PlotOptionsSeries options,
+    private static void applySeriesPlotOptions(PlotOptionsSeries options,
             JsonNode node) {
         parseStacking(node).ifPresent(options::setStacking);
         applyDataLabelsConfig(options.getDataLabels(), node);
@@ -504,7 +512,8 @@ public class ChartConfigurationApplier implements Serializable {
         return Optional.empty();
     }
 
-    private void applyDataLabelsConfig(DataLabels dataLabels, JsonNode node) {
+    private static void applyDataLabelsConfig(DataLabels dataLabels,
+            JsonNode node) {
         if (node.has(DATA_LABELS) && node.get(DATA_LABELS).isObject()) {
             JsonNode dlNode = node.get(DATA_LABELS);
             if (dlNode.has(ENABLED) && dlNode.get(ENABLED).isBoolean()) {
