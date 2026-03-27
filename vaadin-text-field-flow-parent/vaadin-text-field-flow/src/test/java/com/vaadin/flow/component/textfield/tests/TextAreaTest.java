@@ -144,8 +144,8 @@ class TextAreaTest {
         textArea.addThemeVariants(TextAreaVariant.SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(TextAreaVariant.SMALL.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(TextAreaVariant.SMALL.getVariantName()));
     }
 
     @Test
@@ -155,8 +155,8 @@ class TextAreaTest {
         textArea.removeThemeVariants(TextAreaVariant.SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(TextAreaVariant.SMALL.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(TextAreaVariant.SMALL.getVariantName()));
     }
 
     @Test

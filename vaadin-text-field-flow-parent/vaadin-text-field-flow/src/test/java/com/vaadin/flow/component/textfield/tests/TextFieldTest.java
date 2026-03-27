@@ -127,8 +127,8 @@ class TextFieldTest {
         field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
@@ -138,8 +138,8 @@ class TextFieldTest {
         field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     public void assertAutoselectPropertyValueEquals(TextField textField,

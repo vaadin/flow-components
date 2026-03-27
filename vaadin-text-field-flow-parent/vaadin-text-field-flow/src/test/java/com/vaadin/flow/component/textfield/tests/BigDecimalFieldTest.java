@@ -135,8 +135,8 @@ class BigDecimalFieldTest extends TextFieldTest {
         field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
@@ -145,8 +145,8 @@ class BigDecimalFieldTest extends TextFieldTest {
         field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(TextFieldVariant.SMALL.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test

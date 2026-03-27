@@ -19,8 +19,8 @@ class GridProVariantTest {
         gridPro.addThemeVariants(GridProVariant.NO_BORDER);
 
         var themeNames = gridPro.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(GridProVariant.NO_BORDER.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(GridProVariant.NO_BORDER.getVariantName()));
     }
 
     @Test
@@ -30,7 +30,7 @@ class GridProVariantTest {
         gridPro.removeThemeVariants(GridProVariant.NO_BORDER);
 
         var themeNames = gridPro.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(GridProVariant.NO_BORDER.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(GridProVariant.NO_BORDER.getVariantName()));
     }
 }

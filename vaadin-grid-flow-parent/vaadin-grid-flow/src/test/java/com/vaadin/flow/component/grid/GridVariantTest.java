@@ -26,8 +26,8 @@ class GridVariantTest {
         grid.addThemeVariants(GridVariant.NO_BORDER);
 
         var themeNames = grid.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(GridVariant.NO_BORDER.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(GridVariant.NO_BORDER.getVariantName()));
     }
 
     @Test
@@ -37,7 +37,7 @@ class GridVariantTest {
         grid.removeThemeVariants(GridVariant.NO_BORDER);
 
         var themeNames = grid.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(GridVariant.NO_BORDER.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(GridVariant.NO_BORDER.getVariantName()));
     }
 }
