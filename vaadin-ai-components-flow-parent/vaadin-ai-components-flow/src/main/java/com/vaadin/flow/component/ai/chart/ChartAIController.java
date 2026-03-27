@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
@@ -48,6 +51,9 @@ import com.vaadin.flow.component.charts.Chart;
  * @author Vaadin Ltd
  */
 public class ChartAIController implements AIController {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ChartAIController.class);
 
     private static final String CHART_ID = "chart";
 
@@ -154,6 +160,7 @@ public class ChartAIController implements AIController {
             // Rendering failures should not propagate to the caller.
             // Pending state is already cleared by applyPendingState's
             // finally block, so subsequent calls remain safe.
+            LOGGER.error("onRequestCompleted: rendering failed", e);
         }
     }
 }

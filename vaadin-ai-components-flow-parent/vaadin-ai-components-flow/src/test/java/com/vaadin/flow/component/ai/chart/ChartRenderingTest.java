@@ -181,8 +181,8 @@ class ChartRenderingTest {
             // Make DB throw for the render phase
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
 
-            Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onRequestCompleted());
+            // Exception is caught internally; no exception should propagate
+            controller.onRequestCompleted();
 
             // Pending state should be cleared despite the error
             databaseProvider.throwOnExecute = null;

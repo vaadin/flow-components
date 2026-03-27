@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -41,6 +44,9 @@ import tools.jackson.databind.JsonNode;
  * @author Vaadin Ltd
  */
 public final class ChartAITools {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ChartAITools.class);
 
     /**
      * Callback interface that chart tool consumers must implement to provide
@@ -336,10 +342,12 @@ public final class ChartAITools {
             @Override
             public String execute(String arguments) {
                 try {
+                    LOGGER.info("get_chart_state called");
                     JsonNode args = JacksonUtils.readTree(arguments);
                     String chartId = resolveChartId(args, callbacks);
                     return callbacks.getState(chartId);
                 } catch (Exception e) {
+                    LOGGER.error("get_chart_state failed", e);
                     return "Error getting chart state: " + e.getMessage();
                 }
             }
@@ -598,6 +606,8 @@ public final class ChartAITools {
             @Override
             public String execute(String arguments) {
                 try {
+                    LOGGER.info("update_chart_configuration called with: {}",
+                            arguments);
                     JsonNode args = JacksonUtils.readTree(arguments);
                     String chartId = resolveChartId(args, callbacks);
 
@@ -611,6 +621,7 @@ public final class ChartAITools {
                     return "Chart '" + chartId
                             + "' configuration updated. Changes will be applied when the request completes.";
                 } catch (Exception e) {
+                    LOGGER.error("update_chart_configuration failed", e);
                     return "Error updating chart configuration: "
                             + e.getMessage();
                 }
@@ -735,6 +746,8 @@ public final class ChartAITools {
             @Override
             public String execute(String arguments) {
                 try {
+                    LOGGER.info("update_chart_data_source called with: {}",
+                            arguments);
                     JsonNode args = JacksonUtils.readTree(arguments);
                     String chartId = resolveChartId(args, callbacks);
 
@@ -745,11 +758,15 @@ public final class ChartAITools {
                         return validationError;
                     }
 
+                    LOGGER.info(
+                            "update_chart_data_source chartId={} queries={}",
+                            chartId, queries);
                     callbacks.updateData(chartId, queries);
 
                     return "Chart '" + chartId
                             + "' data source updated. Changes will be applied when the request completes.";
                 } catch (Exception e) {
+                    LOGGER.error("update_chart_data_source failed", e);
                     return "Error updating chart data: " + e.getMessage();
                 }
             }
