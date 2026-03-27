@@ -68,6 +68,8 @@ public class AbstractSignalsTest {
      * <li><b>rebindWhileBoundThrows</b> – verifies that calling the bind method
      * again while a binding is already active throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.</li>
+     * <li><b>bindNullSignalThrows</b> – verifies that passing a {@code null}
+     * signal to the bind method throws a {@link NullPointerException}.</li>
      * </ul>
      * <p>
      * <b>NOTE:</b> The tests are not necessarily exhaustive for all aspects of
@@ -171,6 +173,12 @@ public class AbstractSignalsTest {
                             assertThrows(BindingActiveException.class,
                                     () -> bind.accept(component,
                                             signalFactory.get()));
+                        })),
+                        dynamicTest("bindNullSignalThrows", withMockUI(() -> {
+                            var component = componentFactory.get();
+
+                            assertThrows(NullPointerException.class,
+                                    () -> bind.accept(component, null));
                         })));
     }
 
