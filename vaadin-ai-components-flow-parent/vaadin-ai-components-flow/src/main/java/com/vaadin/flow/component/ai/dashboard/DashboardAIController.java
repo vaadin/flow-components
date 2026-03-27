@@ -297,12 +297,22 @@ public class DashboardAIController implements AIController {
                             widget.getId().orElse("unknown"), e);
                 }
             } else if (widget.getContent() instanceof Grid<?> grid) {
-                try {
-                    gridRenderer.applyPendingState(grid);
-                } catch (Exception e) {
-                    LOGGER.error("Error rendering grid for widget {}",
-                            widget.getId().orElse("unknown"), e);
-                }
+                grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+                    try {
+                        GridEntry entry = GridEntry.get(grid);
+                        if (entry == null || !entry.hasPendingState()) {
+                            return;
+                        }
+                        try {
+                            gridRenderer.renderGrid((Grid<Map<String, Object>>) grid, entry.getQuery());
+                        } finally {
+                            entry.clearPendingState();
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("Error rendering grid for widget {}",
+                                widget.getId().orElse("unknown"), e);
+                    }
+                }));
             }
         }
     }

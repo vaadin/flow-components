@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.grid;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,22 +40,14 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 
 /**
- * Applies pending grid state and renders grid data. Encapsulates the
- * query-execution-to-grid pipeline so that different controllers (standalone
- * grid, dashboard) share the same rendering logic.
- * <p>
- * Rendering includes:
- * <ul>
- * <li>Lazy loading with SQL {@code LIMIT}/{@code OFFSET}</li>
- * <li>Built-in renderers for dates and numbers</li>
- * <li>Right-alignment for numeric columns</li>
- * <li>Resizable, sortable columns with auto-width</li>
- * <li>Column grouping from dot-separated aliases</li>
- * </ul>
+ * Renders grid data from SQL queries. Handles column creation, type-based
+ * rendering, column grouping, and lazy loading via
+ * {@link CallbackDataProvider}.
  *
  * @author Vaadin Ltd
+ * @see GridAIController
  */
-public class GridRenderer {
+public class GridRenderer implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridRenderer.class);
@@ -75,89 +68,47 @@ public class GridRenderer {
     }
 
     /**
-     * Applies pending state from the grid's {@link GridEntry} if present. After
-     * applying, the pending state is cleared.
-     *
-     * @param grid
-     *            the grid to update, not {@code null}
-     */
-    @SuppressWarnings("unchecked")
-    public void applyPendingState(Grid<?> grid) {
-        GridEntry entry = GridEntry.get(grid);
-        if (entry == null || !entry.hasPendingState()) {
-            return;
-        }
-        try {
-            renderGrid((Grid<Map<String, Object>>) grid, entry.getQuery());
-        } finally {
-            entry.clearPendingState();
-        }
-    }
-
-    /**
-     * Renders a grid by executing a sample query for column detection, then
-     * setting up type-aware columns and a lazy data provider.
+     * Renders the grid with results from the given SQL query. Columns are
+     * created dynamically from the query result, with type-appropriate
+     * renderers, grouping, and lazy loading.
+     * <p>
+     * The caller is responsible for ensuring this method runs on the UI thread
+     * (e.g., via {@code runWhenAttached} and {@code UI.access()}).
      *
      * @param grid
      *            the grid to render, not {@code null}
-     * @param sqlQuery
-     *            the base SQL query (without LIMIT/OFFSET), not {@code null}
+     * @param query
+     *            the SQL SELECT query, not {@code null}
      */
-    public void renderGrid(Grid<Map<String, Object>> grid, String sqlQuery) {
-        var sampleRows = databaseProvider
-                .executeQuery(wrapWithLimit(sqlQuery, 1));
-
-        grid.getUI().ifPresentOrElse(
-                ui -> ui.access(
-                        () -> doRenderGrid(grid, sqlQuery, sampleRows)),
-                () -> doRenderGrid(grid, sqlQuery, sampleRows));
-    }
-
-    private void doRenderGrid(Grid<Map<String, Object>> grid, String sqlQuery,
-            List<Map<String, Object>> sampleRows) {
-        try {
-            removeExtraHeaderRows(grid);
-            grid.removeAllColumns();
-
-            if (sampleRows.isEmpty()) {
-                if (grid.getEmptyStateText() == null
-                        && grid.getEmptyStateComponent() == null) {
-                    grid.setEmptyStateText(DEFAULT_EMPTY_STATE_TEXT);
-                }
-                grid.setItems(List.of());
-                return;
+    public void renderGrid(Grid<Map<String, Object>> grid, String query) {
+        var sampleRows = databaseProvider.executeQuery(wrapWithLimit(query, 1));
+        removeExtraHeaderRows(grid);
+        grid.removeAllColumns();
+        if (sampleRows.isEmpty()) {
+            if (grid.getEmptyStateText() == null
+                    && grid.getEmptyStateComponent() == null) {
+                grid.setEmptyStateText(DEFAULT_EMPTY_STATE_TEXT);
             }
-
-            var firstRow = sampleRows.getFirst();
-            // Sort columns by group prefix so grouped columns are adjacent
-            // (required by HeaderRow.join)
-            var sortedColumns = new ArrayList<>(firstRow.entrySet());
-            sortedColumns.sort((a, b) -> {
-                var prefixA = GridFormatting.groupPrefix(a.getKey());
-                var prefixB = GridFormatting.groupPrefix(b.getKey());
-                return prefixA.compareTo(prefixB);
-            });
-
-            for (var entry : sortedColumns) {
-                addColumn(grid, entry.getKey(), entry.getValue());
-            }
-
-            applyColumnGrouping(grid);
-            setupLazyDataProvider(grid, sqlQuery);
-            LOGGER.info("Grid configured with {} columns", firstRow.size());
-        } catch (Exception e) {
-            LOGGER.error("Error rendering grid", e);
+            grid.setItems(List.of());
+            return;
         }
+        var firstRow = sampleRows.getFirst();
+        var sortedColumns = new ArrayList<>(firstRow.entrySet());
+        sortedColumns.sort((a, b) -> {
+            var prefixA = GridFormatting.groupPrefix(a.getKey());
+            var prefixB = GridFormatting.groupPrefix(b.getKey());
+            return prefixA.compareTo(prefixB);
+        });
+        for (var entry : sortedColumns) {
+            addColumn(grid, entry.getKey(), entry.getValue());
+        }
+        applyColumnGrouping(grid);
+        setupLazyDataProvider(grid, query);
+        LOGGER.info("Grid configured with {} columns", firstRow.size());
     }
 
-    // --- Column setup ---
-
-    /**
-     * Adds a column to the grid with type-appropriate rendering, alignment, and
-     * resizing based on the sample value.
-     */
-    private static void addColumn(Grid<Map<String, Object>> grid,
-            String columnName, Object sampleValue) {
+    private void addColumn(Grid<Map<String, Object>> grid, String columnName,
+            Object sampleValue) {
         var header = GridFormatting
                 .formatHeader(GridFormatting.stripGroupPrefix(columnName));
 
@@ -187,12 +138,7 @@ public class GridRenderer {
                 .setAutoWidth(true).setResizable(true);
     }
 
-    /**
-     * Applies column grouping based on dot-separated column names. Columns with
-     * names like {@code "Contact.Email"} and {@code "Contact.Phone"} are
-     * grouped under a {@code "Contact"} header.
-     */
-    private static void applyColumnGrouping(Grid<Map<String, Object>> grid) {
+    private void applyColumnGrouping(Grid<Map<String, Object>> grid) {
         var groups = new LinkedHashMap<String, List<Grid.Column<Map<String, Object>>>>();
         for (var column : grid.getColumns()) {
             var key = column.getKey();
@@ -219,19 +165,13 @@ public class GridRenderer {
         }
     }
 
-    /**
-     * Removes header rows added by previous column grouping, keeping only the
-     * default column header row.
-     */
-    private static void removeExtraHeaderRows(Grid<?> grid) {
+    private static void removeExtraHeaderRows(Grid<Map<String, Object>> grid) {
         var headerRows = grid.getHeaderRows();
         while (headerRows.size() > 1) {
             grid.removeHeaderRow(headerRows.getFirst());
             headerRows = grid.getHeaderRows();
         }
     }
-
-    // --- Data provider ---
 
     private void setupLazyDataProvider(Grid<Map<String, Object>> grid,
             String query) {

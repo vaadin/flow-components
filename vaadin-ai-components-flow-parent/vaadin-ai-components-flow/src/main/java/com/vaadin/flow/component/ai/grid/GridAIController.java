@@ -44,15 +44,14 @@ import com.vaadin.flow.internal.JacksonUtils;
  * </ul>
  * <p>
  * Tools are provided by {@link GridAITools} and
- * {@link DatabaseProviderAITools}. State changes are deferred and applied in
+ * {@link DatabaseProviderAITools}. Rendering is handled by
+ * {@link GridRenderer}. State changes are deferred and applied in
  * {@link #onRequestCompleted()}.
- * </p>
- * <p>
- * This controller is <b>not serializable</b>.
  * </p>
  *
  * @author Vaadin Ltd
  * @see GridAITools
+ * @see GridRenderer
  * @see DatabaseProviderAITools
  */
 public class GridAIController implements AIController {
@@ -60,14 +59,14 @@ public class GridAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAIController.class);
 
+    private static final String DEFAULT_GRID_ID = "grid";
+
     private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
     private final GridRenderer gridRenderer;
 
     private final AtomicReference<String> currentQuery = new AtomicReference<>();
     private final AtomicReference<String> pendingQuery = new AtomicReference<>();
-
-    private static final String DEFAULT_GRID_ID = "grid";
 
     /**
      * Creates a new grid AI controller.
@@ -163,16 +162,18 @@ public class GridAIController implements AIController {
     public void onRequestCompleted() {
         var query = pendingQuery.getAndSet(null);
         if (query == null) {
-            LOGGER.info("onRequestCompleted: no pending query");
+            LOGGER.debug("onRequestCompleted: no pending query");
             return;
         }
-        try {
-            LOGGER.info("onRequestCompleted: applying query: {}", query);
-            gridRenderer.renderGrid(grid, query);
-            currentQuery.set(query);
-            LOGGER.info("onRequestCompleted: grid updated successfully");
-        } catch (Exception e) {
-            LOGGER.error("Error updating grid", e);
-        }
+        LOGGER.info("onRequestCompleted: applying query: {}", query);
+        grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+            try {
+                gridRenderer.renderGrid(grid, query);
+                currentQuery.set(query);
+                LOGGER.info("onRequestCompleted: grid updated successfully");
+            } catch (Exception e) {
+                LOGGER.error("Error updating grid", e);
+            }
+        }));
     }
 }
