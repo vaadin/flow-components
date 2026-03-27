@@ -148,6 +148,12 @@ public class ChartAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        chartRenderer.applyPendingState(chart);
+        try {
+            chartRenderer.applyPendingState(chart);
+        } catch (Exception e) {
+            // Rendering failures should not propagate to the caller.
+            // Pending state is already cleared by applyPendingState's
+            // finally block, so subsequent calls remain safe.
+        }
     }
 }

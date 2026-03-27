@@ -149,6 +149,22 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void onRequestCompleted_renderFails_doesNotThrow() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            databaseProvider.throwOnExecute = new RuntimeException(
+                    "Render failure");
+
+            Assertions
+                    .assertDoesNotThrow(() -> controller.onRequestCompleted());
+        }
+
+        @Test
         void updateData_setsPendingDataUpdate() {
             databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
 
