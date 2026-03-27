@@ -39,6 +39,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -71,6 +73,9 @@ class AIOrchestratorTest {
     private AIInput mockInput;
     private AIFileReceiver mockFileReceiver;
 
+    private TestLogger logger = TestLoggerFactory
+            .getTestLogger(AIOrchestrator.class);
+
     @BeforeEach
     void setup() {
         mockProvider = Mockito.mock(LLMProvider.class);
@@ -79,6 +84,7 @@ class AIOrchestratorTest {
         mockFileReceiver = Mockito.mock(AIFileReceiver.class);
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(Collections.emptyList());
+        logger.clear();
     }
 
     @Test
@@ -1688,19 +1694,15 @@ class AIOrchestratorTest {
                 .withMessageList(mockMessageList).withController(controller)
                 .build();
 
-        var originalErr = System.err;
-        var errStream = new java.io.ByteArrayOutputStream();
-        System.setErr(new java.io.PrintStream(errStream));
-        try {
-            orchestrator.prompt("Hello");
-            var errContent = errStream
-                    .toString(java.nio.charset.StandardCharsets.UTF_8);
-            Assertions.assertTrue(
-                    errContent.contains("Duplicate tool name 'sameName'"),
-                    "Expected duplicate tool name warning, got: " + errContent);
-        } finally {
-            System.setErr(originalErr);
-        }
+        orchestrator.prompt("Hello");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage().equals(
+                        "Duplicate tool name '{}': previous tool will be replaced"))
+                .findFirst();
+
+        Assertions.assertTrue(warning.isPresent(),
+                "Expected duplicate tool name warning");
     }
 
     private static AIController createController(

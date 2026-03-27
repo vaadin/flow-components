@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +30,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
@@ -64,12 +64,16 @@ class LangChain4JLLMProviderTest {
     private LangChain4JLLMProvider provider;
     private LangChain4JLLMProvider streamingProvider;
 
+    private TestLogger logger = TestLoggerFactory
+            .getTestLogger(LangChain4JLLMProvider.class);
+
     @BeforeEach
     void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         mockStreamingChatModel = Mockito.mock(StreamingChatModel.class);
         provider = new LangChain4JLLMProvider(mockChatModel);
         streamingProvider = new LangChain4JLLMProvider(mockStreamingChatModel);
+        logger.clear();
     }
 
     @Test
@@ -581,54 +585,43 @@ class LangChain4JLLMProviderTest {
     void stream_withStreamingModelAndPushDisabled_logsWarning() {
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
-        var originalErr = System.err;
-        var errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        try {
-            var request = createSimpleRequest("Hello");
-            Mockito.doAnswer(invocation -> {
-                StreamingChatResponseHandler handler = invocation
-                        .getArgument(1);
-                handler.onPartialResponse("Hi");
-                var aiMessage = Mockito.mock(AiMessage.class);
-                Mockito.when(aiMessage.hasToolExecutionRequests())
-                        .thenReturn(false);
-                var response = Mockito.mock(ChatResponse.class);
-                Mockito.when(response.aiMessage()).thenReturn(aiMessage);
-                handler.onCompleteResponse(response);
-                return null;
-            }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
-                    Mockito.any(StreamingChatResponseHandler.class));
+        var request = createSimpleRequest("Hello");
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Hi");
+            var aiMessage = Mockito.mock(AiMessage.class);
+            Mockito.when(aiMessage.hasToolExecutionRequests())
+                    .thenReturn(false);
+            var response = Mockito.mock(ChatResponse.class);
+            Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
 
-            streamingProvider.stream(request).collectList().block();
+        streamingProvider.stream(request).collectList().block();
 
-            var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assertions.assertTrue(errContent.contains("Push is not enabled"));
-        } finally {
-            System.setErr(originalErr);
-        }
+        var warning = logger.getLoggingEvents().stream().filter(
+                event -> event.getMessage().contains("Push is not enabled"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(), "Expected push warning");
     }
 
     @Test
     void stream_withNonStreamingModelAndPushDisabled_doesNotLogWarning() {
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
 
-        var originalErr = System.err;
-        var errStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(errStream));
-        try {
-            var request = createSimpleRequest("Hello");
-            var response = mockSimpleResponse("Hi there");
-            Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                    .thenReturn(response);
+        var request = createSimpleRequest("Hello");
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
 
-            provider.stream(request).collectList().block();
+        provider.stream(request).collectList().block();
 
-            var errContent = errStream.toString(StandardCharsets.UTF_8);
-            Assertions.assertFalse(errContent.contains("Push is not enabled"));
-        } finally {
-            System.setErr(originalErr);
-        }
+        var warning = logger.getLoggingEvents().stream().filter(
+                event -> event.getMessage().contains("Push is not enabled"))
+                .findFirst();
+        Assertions.assertFalse(warning.isPresent(), "Expected no push warning");
     }
 
     @Test
