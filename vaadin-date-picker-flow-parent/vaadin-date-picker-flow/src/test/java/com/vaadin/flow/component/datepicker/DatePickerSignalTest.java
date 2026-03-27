@@ -18,7 +18,6 @@ package com.vaadin.flow.component.datepicker;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -26,15 +25,6 @@ import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
 class DatePickerSignalTest extends AbstractSignalsTest {
-
-    private DatePicker datePicker;
-    private ValueSignal<LocalDate> signal;
-
-    @BeforeEach
-    void setup() {
-        datePicker = new DatePicker();
-        signal = new ValueSignal<>(LocalDate.of(2023, 1, 1));
-    }
 
     @TestFactory
     Stream<DynamicTest> bindMin() {
