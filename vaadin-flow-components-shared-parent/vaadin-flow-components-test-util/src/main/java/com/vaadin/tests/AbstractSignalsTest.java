@@ -105,8 +105,9 @@ public class AbstractSignalsTest {
             Supplier<C> componentFactory, BiConsumer<C, ValueSignal<T>> bind,
             Function<C, T> getter, BiConsumer<C, T> setter,
             Supplier<ValueSignal<T>> signalFactory, T updatedValue) {
-        return Stream
-                .of(dynamicTest("synchronizesWhileAttached", withMockUI(() -> {
+
+        var synchronizesWhileAttached = createTest("synchronizesWhileAttached",
+                () -> {
                     var component = componentFactory.get();
                     var signal = signalFactory.get();
                     var initialValue = signal.peek();
@@ -118,83 +119,93 @@ public class AbstractSignalsTest {
 
                     signal.set(updatedValue);
                     assertEquals(updatedValue, getter.apply(component));
-                })), dynamicTest("appliesInitialValueWhileDetached",
-                        withMockUI(() -> {
-                            var component = componentFactory.get();
-                            var signal = signalFactory.get();
-                            var initialValue = signal.peek();
+                });
 
-                            bind.accept(component, signal);
+        var appliesInitialValueWhileDetached = createTest(
+                "appliesInitialValueWhileDetached", () -> {
+                    var component = componentFactory.get();
+                    var signal = signalFactory.get();
+                    var initialValue = signal.peek();
 
-                            assertEquals(initialValue, getter.apply(component));
-                        })), dynamicTest("doesNotSynchronizeWhileDetached",
-                                withMockUI(() -> {
-                                    var component = componentFactory.get();
-                                    var signal = signalFactory.get();
-                                    T initialValue = signal.peek();
+                    bind.accept(component, signal);
 
-                                    bind.accept(component, signal);
-                                    signal.set(updatedValue);
+                    assertEquals(initialValue, getter.apply(component));
+                });
 
-                                    assertEquals(initialValue,
-                                            getter.apply(component));
-                                })),
-                        dynamicTest("resynchronizesAfterAttach",
-                                withMockUI(() -> {
-                                    var component = componentFactory.get();
-                                    var signal = signalFactory.get();
-                                    T initialValue = signal.peek();
+        var doesNotSynchronizeWhileDetached = createTest(
+                "doesNotSynchronizeWhileDetached", () -> {
+                    var component = componentFactory.get();
+                    var signal = signalFactory.get();
+                    T initialValue = signal.peek();
 
-                                    bind.accept(component, signal);
-                                    signal.set(updatedValue);
+                    bind.accept(component, signal);
+                    signal.set(updatedValue);
 
-                                    UI.getCurrent().add(component);
+                    assertEquals(initialValue, getter.apply(component));
+                });
 
-                                    assertEquals(updatedValue,
-                                            getter.apply(component));
-                                })),
-                        dynamicTest("manualSetWhileBoundThrows",
-                                withMockUI(() -> {
-                                    var component = componentFactory.get();
-                                    var signal = signalFactory.get();
+        var resynchronizesAfterAttach = createTest("resynchronizesAfterAttach",
+                () -> {
+                    var component = componentFactory.get();
+                    var signal = signalFactory.get();
 
-                                    bind.accept(component, signal);
+                    bind.accept(component, signal);
+                    signal.set(updatedValue);
 
-                                    assertThrows(BindingActiveException.class,
-                                            () -> setter.accept(component,
-                                                    updatedValue));
-                                })),
-                        dynamicTest("rebindWhileBoundThrows", withMockUI(() -> {
-                            var component = componentFactory.get();
-                            var signal = signalFactory.get();
+                    UI.getCurrent().add(component);
 
-                            bind.accept(component, signal);
+                    assertEquals(updatedValue, getter.apply(component));
+                });
 
-                            assertThrows(BindingActiveException.class,
-                                    () -> bind.accept(component,
-                                            signalFactory.get()));
-                        })),
-                        dynamicTest("bindNullSignalThrows", withMockUI(() -> {
-                            var component = componentFactory.get();
+        var manualSetWhileBoundThrows = createTest("manualSetWhileBoundThrows",
+                () -> {
+                    var component = componentFactory.get();
+                    var signal = signalFactory.get();
 
-                            assertThrows(NullPointerException.class,
-                                    () -> bind.accept(component, null));
-                        })));
+                    bind.accept(component, signal);
+
+                    assertThrows(BindingActiveException.class,
+                            () -> setter.accept(component, updatedValue));
+                });
+
+        var rebindWhileBoundThrows = createTest("rebindWhileBoundThrows",
+                () -> {
+                    var component = componentFactory.get();
+                    var signal = signalFactory.get();
+
+                    bind.accept(component, signal);
+
+                    assertThrows(BindingActiveException.class,
+                            () -> bind.accept(component, signalFactory.get()));
+                });
+
+        var bindNullSignalThrows = createTest("bindNullSignalThrows", () -> {
+            var component = componentFactory.get();
+
+            assertThrows(NullPointerException.class,
+                    () -> bind.accept(component, null));
+        });
+
+        return Stream.of(synchronizesWhileAttached,
+                appliesInitialValueWhileDetached,
+                doesNotSynchronizeWhileDetached, resynchronizesAfterAttach,
+                manualSetWhileBoundThrows, rebindWhileBoundThrows,
+                bindNullSignalThrows);
     }
 
     /**
-     * Wraps a test executable with {@link MockUIExtension} beforeEach and
-     * afterEach, since JUnit 5 dynamic tests do not support lifecycle
+     * Creates a dynamic test that sets up and tears down a mock UI around the
+     * test executable, since JUnit 5 dynamic tests do not support lifecycle
      * callbacks.
      */
-    private Executable withMockUI(Executable test) {
-        return () -> {
+    private DynamicTest createTest(String name, Executable test) {
+        return dynamicTest(name, () -> {
             ui.beforeEach(null);
             try {
                 test.execute();
             } finally {
                 ui.afterEach(null);
             }
-        };
+        });
     }
 }
