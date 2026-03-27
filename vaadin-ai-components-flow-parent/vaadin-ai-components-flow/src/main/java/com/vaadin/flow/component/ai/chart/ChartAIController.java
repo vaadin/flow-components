@@ -28,6 +28,7 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 /**
  * AI controller for creating interactive chart visualizations from database
@@ -155,14 +156,32 @@ public class ChartAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        try {
-            ChartRenderer.applyPendingState(chart, databaseProvider,
-                    dataConverter);
-        } catch (Exception e) {
-            // Rendering failures should not propagate to the caller.
-            // Pending state is already cleared by applyPendingState's
-            // finally block, so subsequent calls remain safe.
-            LOGGER.error("onRequestCompleted: rendering failed", e);
+        ChartEntry entry = ChartEntry.get(chart);
+        if (entry == null || !entry.hasPendingState()) {
+            LOGGER.debug("onRequestCompleted: no pending state");
+            return;
+        }
+
+        String configJson = entry.getPendingConfigurationJson();
+        List<String> effectiveQueries = entry.getQueries();
+
+        if (!effectiveQueries.isEmpty()) {
+            try {
+                String effectiveConfig = configJson != null ? configJson
+                        : ChartSerialization.toJSON(chart.getConfiguration());
+                LOGGER.info("onRequestCompleted: rendering chart");
+                ChartRenderer.renderChart(chart, databaseProvider,
+                        dataConverter, effectiveQueries, effectiveConfig);
+            } catch (Exception e) {
+                LOGGER.error("onRequestCompleted: rendering failed", e);
+            } finally {
+                entry.clearPendingState();
+            }
+        } else {
+            // Config-only: no queries to render yet. Clear only the
+            // data flag but keep pendingConfigurationJson so it's used
+            // when data arrives in a later request.
+            entry.setPendingDataUpdate(false);
         }
     }
 }

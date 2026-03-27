@@ -31,7 +31,6 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.GanttSeries;
 import com.vaadin.flow.component.charts.model.Series;
-import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 /**
  * Stateless utility for rendering chart data from SQL queries. Encapsulates the
@@ -43,46 +42,6 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
 public final class ChartRenderer implements Serializable {
 
     private ChartRenderer() {
-    }
-
-    /**
-     * Applies pending state from the chart's {@link ChartEntry} if present.
-     * Uses {@code runWhenAttached} and {@code UI.access()} to ensure the chart
-     * is attached and the update happens safely on the UI thread. After
-     * applying, the pending state is cleared.
-     *
-     * @param chart
-     *            the chart to update, not {@code null}
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
-     * @param dataConverter
-     *            the data converter for transforming query results, not
-     *            {@code null}
-     */
-    public static void applyPendingState(Chart chart,
-            DatabaseProvider databaseProvider, DataConverter dataConverter) {
-        ChartEntry entry = ChartEntry.get(chart);
-        if (entry == null || !entry.hasPendingState()) {
-            return;
-        }
-        String configJson = entry.getPendingConfigurationJson();
-        List<String> effectiveQueries = entry.getQueries();
-
-        if (!effectiveQueries.isEmpty()) {
-            try {
-                String effectiveConfig = configJson != null ? configJson
-                        : ChartSerialization.toJSON(chart.getConfiguration());
-                renderChart(chart, databaseProvider, dataConverter,
-                        effectiveQueries, effectiveConfig);
-            } finally {
-                entry.clearPendingState();
-            }
-        } else {
-            // Config-only: no queries to render yet. Clear only the
-            // data flag but keep pendingConfigurationJson so it's used
-            // when data arrives in a later request.
-            entry.setPendingDataUpdate(false);
-        }
     }
 
     /**
@@ -101,7 +60,7 @@ public final class ChartRenderer implements Serializable {
      * @param configJson
      *            the chart configuration JSON, or {@code null} to keep current
      */
-    private static void renderChart(Chart chart,
+    public static void renderChart(Chart chart,
             DatabaseProvider databaseProvider, DataConverter dataConverter,
             List<String> queries, String configJson) {
         chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
