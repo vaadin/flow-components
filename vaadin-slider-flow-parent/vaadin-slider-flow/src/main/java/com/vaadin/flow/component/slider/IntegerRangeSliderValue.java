@@ -29,7 +29,7 @@ import java.io.Serializable;
  * @author Vaadin Ltd
  */
 public record IntegerRangeSliderValue(Integer start,
-        Integer end) implements Serializable, Range {
+        Integer end) implements Serializable, Range<Integer> {
 
     /**
      * Creates a new RangeSliderValue with the given start and end values.

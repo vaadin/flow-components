@@ -29,7 +29,7 @@ import java.io.Serializable;
  * @author Vaadin Ltd
  */
 public record RangeSliderValue(Double start,
-        Double end) implements Serializable, Range {
+        Double end) implements Serializable, Range<Double> {
 
     /**
      * Creates a new RangeSliderValue with the given start and end values.
