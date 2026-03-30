@@ -38,11 +38,6 @@ import com.vaadin.flow.component.charts.Chart;
  * visualizations based on natural language requests.
  * </p>
  * <p>
- * Chart state ({@link ChartEntry}) is stored directly on the {@link Chart}
- * instance via {@link ChartEntry#getOrCreate(Chart)}, so there is no separate
- * registry to maintain.
- * </p>
- * <p>
  * State changes requested by the LLM through the update tools are deferred and
  * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
  * redraws during a multi-tool LLM turn.
