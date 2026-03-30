@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ai.chart.ChartAITools;
 import com.vaadin.flow.component.ai.chart.ChartEntry;
 import com.vaadin.flow.component.ai.chart.ChartRenderer;
+import com.vaadin.flow.component.ai.chart.DataConverter;
+import com.vaadin.flow.component.ai.chart.DefaultDataConverter;
 import com.vaadin.flow.component.ai.grid.GridAITools;
 import com.vaadin.flow.component.ai.grid.GridEntry;
 import com.vaadin.flow.component.ai.grid.GridRenderer;
@@ -80,8 +82,7 @@ public class DashboardAIController implements AIController {
 
     private final Dashboard dashboard;
     private final DatabaseProvider databaseProvider;
-    private final ChartRenderer chartRenderer;
-    private final GridRenderer gridRenderer;
+    private final DataConverter dataConverter;
     private final Map<String, Checkbox> widgetCheckboxes = new LinkedHashMap<>();
     private int widgetCounter = 0;
 
@@ -99,8 +100,7 @@ public class DashboardAIController implements AIController {
                 "Dashboard cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-        this.chartRenderer = new ChartRenderer(databaseProvider);
-        this.gridRenderer = new GridRenderer(databaseProvider);
+        this.dataConverter = new DefaultDataConverter();
     }
 
     /**
@@ -207,8 +207,7 @@ public class DashboardAIController implements AIController {
                             Grid<?> grid = (Grid<?>) widget.getContent();
                             GridEntry entry = GridEntry.getOrCreate(grid,
                                     widgetId);
-                            entry.setQuery(query);
-                            entry.setPendingDataUpdate(true);
+                            entry.setPendingQuery(query);
                         }
 
                         return widgetId;
@@ -258,23 +257,15 @@ public class DashboardAIController implements AIController {
         tools.addAll(GridAITools.createAll(new GridAITools.Callbacks() {
             @Override
             public String getState(String gridId) {
-                Grid<?> grid = resolveGrid(gridId);
-                GridEntry entry = GridEntry.get(grid);
-                if (entry == null || entry.getQuery() == null) {
-                    return "{\"gridId\":\"" + gridId
-                            + "\",\"status\":\"empty\"}";
-                }
-                return "{\"gridId\":\"" + gridId + "\",\"query\":\""
-                        + entry.getQuery().replace("\"", "\\\"") + "\"}";
+                return GridEntry.getStateAsJson(resolveGrid(gridId), gridId);
             }
 
             @Override
             public void updateData(String gridId, String query) {
-                databaseProvider.executeQuery(query);
-                Grid<?> grid = resolveGrid(gridId);
-                GridEntry entry = GridEntry.getOrCreate(grid, gridId);
-                entry.setQuery(query);
-                entry.setPendingDataUpdate(true);
+                databaseProvider.executeQuery(
+                        "SELECT * FROM (" + query + ") AS _v LIMIT 1");
+                GridEntry.getOrCreate(resolveGrid(gridId), gridId)
+                        .setPendingQuery(query);
             }
 
             @Override
@@ -290,29 +281,46 @@ public class DashboardAIController implements AIController {
     public void onRequestCompleted() {
         for (DashboardWidget widget : dashboard.getWidgets()) {
             if (widget.getContent() instanceof Chart chart) {
+                ChartEntry entry = ChartEntry.get(chart);
+                if (entry == null || !entry.hasPendingState()) {
+                    continue;
+                }
+                List<String> queries = entry.getQueries();
+                if (queries.isEmpty()) {
+                    entry.setPendingDataUpdate(false);
+                    continue;
+                }
                 try {
-                    chartRenderer.applyPendingState(chart);
+                    ChartRenderer.renderChart(chart, databaseProvider,
+                            dataConverter, queries,
+                            entry.getPendingConfigurationJson());
                 } catch (Exception e) {
                     LOGGER.error("Error rendering chart for widget {}",
                             widget.getId().orElse("unknown"), e);
+                } finally {
+                    entry.clearPendingState();
                 }
             } else if (widget.getContent() instanceof Grid<?> grid) {
-                grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-                    try {
-                        GridEntry entry = GridEntry.get(grid);
-                        if (entry == null || !entry.hasPendingState()) {
-                            return;
-                        }
-                        try {
-                            gridRenderer.renderGrid((Grid<Map<String, Object>>) grid, entry.getQuery());
-                        } finally {
-                            entry.clearPendingState();
-                        }
-                    } catch (Exception e) {
-                        LOGGER.error("Error rendering grid for widget {}",
-                                widget.getId().orElse("unknown"), e);
-                    }
-                }));
+                GridEntry entry = GridEntry.get(grid);
+                if (entry == null || !entry.hasPendingState()) {
+                    continue;
+                }
+                String query = entry.getPendingQuery();
+                grid.getElement().getNode()
+                        .runWhenAttached(ui -> ui.access(() -> {
+                            try {
+                                GridRenderer.renderGrid(
+                                        (Grid<Map<String, Object>>) grid,
+                                        databaseProvider, query);
+                                entry.setCurrentQuery(query);
+                            } catch (Exception e) {
+                                LOGGER.error(
+                                        "Error rendering grid for widget {}",
+                                        widget.getId().orElse("unknown"), e);
+                            } finally {
+                                entry.clearPendingState();
+                            }
+                        }));
             }
         }
     }
@@ -349,7 +357,7 @@ public class DashboardAIController implements AIController {
                 }
                 widgetId = entry.getId();
                 type = "grid";
-                String sqlQuery = entry.getQuery();
+                String sqlQuery = entry.getCurrentQuery();
                 if (sqlQuery != null) {
                     queries = List.of(sqlQuery);
                 }
@@ -388,7 +396,8 @@ public class DashboardAIController implements AIController {
                                 ws.widgetId());
                         entry.setQueries(ws.queries());
                         try {
-                            chartRenderer.renderChart(chart, ws.queries(),
+                            ChartRenderer.renderChart(chart, databaseProvider,
+                                    dataConverter, ws.queries(),
                                     ws.configuration());
                         } catch (Exception e) {
                             LOGGER.error("Failed to restore chart widget {}",
@@ -403,10 +412,13 @@ public class DashboardAIController implements AIController {
                     if (ws.queries() != null && !ws.queries().isEmpty()) {
                         Grid<Map<String, Object>> grid = (Grid<Map<String, Object>>) widget
                                 .getContent();
-                        GridEntry entry = GridEntry.get(grid);
-                        entry.setQuery(ws.queries().get(0));
+                        GridEntry entry = GridEntry.getOrCreate(grid,
+                                ws.widgetId());
+                        String query = ws.queries().get(0);
                         try {
-                            gridRenderer.renderGrid(grid, ws.queries().get(0));
+                            GridRenderer.renderGrid(grid, databaseProvider,
+                                    query);
+                            entry.setCurrentQuery(query);
                         } catch (Exception e) {
                             LOGGER.error("Failed to restore grid widget {}",
                                     ws.widgetId(), e);
