@@ -71,7 +71,8 @@ public final class ChartRenderer implements Serializable {
             }
 
             if (configJson != null) {
-                chart.setConfiguration(ChartConfigurationParser.parse(configJson));
+                chart.setConfiguration(
+                        ChartConfigurationParser.parse(configJson));
             }
 
             Configuration config = chart.getConfiguration();
