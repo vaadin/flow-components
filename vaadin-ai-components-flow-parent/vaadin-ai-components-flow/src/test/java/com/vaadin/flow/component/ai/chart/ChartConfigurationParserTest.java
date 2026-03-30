@@ -18,12 +18,9 @@ package com.vaadin.flow.component.ai.chart;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -36,26 +33,11 @@ import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
-import com.vaadin.tests.MockUIExtension;
 
-class ChartConfigurationApplierTest {
+class ChartConfigurationParserTest {
 
-    @RegisterExtension
-    MockUIExtension ui = new MockUIExtension();
-
-    private Chart chart;
-    private Configuration config;
-
-    @BeforeEach
-    void setUp() {
-        chart = new Chart();
-        ui.add(chart);
-        config = chart.getConfiguration();
-    }
-
-    private void apply(String json) {
-        ChartConfigurationApplier.applyConfiguration(chart, json);
-        config = chart.getConfiguration();
+    private static Configuration parse(String json) {
+        return ChartConfigurationParser.parse(json);
     }
 
     @Nested
@@ -76,38 +58,35 @@ class ChartConfigurationApplierTest {
                     ChartType.TIMELINE, ChartType.OHLC, ChartType.ORGANIZATION,
                     ChartType.SANKEY, ChartType.XRANGE, ChartType.GANTT);
             for (ChartType type : expectedTypes) {
-                chart = new Chart();
-                ui.add(chart);
-                ChartConfigurationApplier.applyConfiguration(chart,
+                var config = parse(
                         "{\"type\":\"" + type.toString().toLowerCase() + "\"}");
-                Assertions.assertEquals(type,
-                        chart.getConfiguration().getChart().getType(),
+                Assertions.assertEquals(type, config.getChart().getType(),
                         "Chart type " + type + " should be mapped");
             }
         }
 
         @Test
         void topLevelType_setsChartType() {
-            apply("{\"type\":\"bar\"}");
+            var config = parse("{\"type\":\"bar\"}");
             Assertions.assertEquals(ChartType.BAR, config.getChart().getType());
         }
 
         @Test
         void nestedChartType_setsChartType() {
-            apply("{\"chart\":{\"type\":\"pie\"}}");
+            var config = parse("{\"chart\":{\"type\":\"pie\"}}");
             Assertions.assertEquals(ChartType.PIE, config.getChart().getType());
         }
 
         @Test
         void unknownType_defaultsToLine() {
-            apply("{\"type\":\"unknown_type\"}");
+            var config = parse("{\"type\":\"unknown_type\"}");
             Assertions.assertEquals(ChartType.LINE,
                     config.getChart().getType());
         }
 
         @Test
         void caseInsensitiveType() {
-            apply("{\"type\":\"COLUMN\"}");
+            var config = parse("{\"type\":\"COLUMN\"}");
             Assertions.assertEquals(ChartType.COLUMN,
                     config.getChart().getType());
         }
@@ -118,25 +97,25 @@ class ChartConfigurationApplierTest {
 
         @Test
         void titleAsObject() {
-            apply("{\"title\":{\"text\":\"My Title\"}}");
+            var config = parse("{\"title\":{\"text\":\"My Title\"}}");
             Assertions.assertEquals("My Title", config.getTitle().getText());
         }
 
         @Test
         void titleAsString() {
-            apply("{\"title\":\"My Title\"}");
+            var config = parse("{\"title\":\"My Title\"}");
             Assertions.assertEquals("My Title", config.getTitle().getText());
         }
 
         @Test
         void subtitleAsObject() {
-            apply("{\"subtitle\":{\"text\":\"Sub\"}}");
+            var config = parse("{\"subtitle\":{\"text\":\"Sub\"}}");
             Assertions.assertEquals("Sub", config.getSubTitle().getText());
         }
 
         @Test
         void subtitleAsString() {
-            apply("{\"subtitle\":\"Sub\"}");
+            var config = parse("{\"subtitle\":\"Sub\"}");
             Assertions.assertEquals("Sub", config.getSubTitle().getText());
         }
     }
@@ -146,7 +125,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void tooltipProperties() {
-            apply("{\"tooltip\":{\"pointFormat\":\"{point.y}\","
+            var config = parse("{\"tooltip\":{\"pointFormat\":\"{point.y}\","
                     + "\"headerFormat\":\"<b>{series.name}</b>\","
                     + "\"shared\":true,\"valueSuffix\":\" kg\","
                     + "\"valuePrefix\":\"$\"}}");
@@ -165,8 +144,9 @@ class ChartConfigurationApplierTest {
 
         @Test
         void legendProperties() {
-            apply("{\"legend\":{\"enabled\":false,\"align\":\"right\","
-                    + "\"verticalAlign\":\"top\",\"layout\":\"vertical\"}}");
+            var config = parse(
+                    "{\"legend\":{\"enabled\":false,\"align\":\"right\","
+                            + "\"verticalAlign\":\"top\",\"layout\":\"vertical\"}}");
             var legend = config.getLegend();
             Assertions.assertFalse(legend.getEnabled());
             Assertions.assertEquals(HorizontalAlign.RIGHT, legend.getAlign());
@@ -178,7 +158,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void invalidAlign_isIgnored() {
-            apply("{\"legend\":{\"align\":\"invalid\"}}");
+            parse("{\"legend\":{\"align\":\"invalid\"}}");
             // Should not throw, default value remains
         }
     }
@@ -188,14 +168,14 @@ class ChartConfigurationApplierTest {
 
         @Test
         void xAxisType() {
-            apply("{\"xAxis\":{\"type\":\"datetime\"}}");
+            var config = parse("{\"xAxis\":{\"type\":\"datetime\"}}");
             Assertions.assertEquals(AxisType.DATETIME,
                     config.getxAxis().getType());
         }
 
         @Test
         void yAxisTitleAndRange() {
-            apply("{\"yAxis\":{\"title\":{\"text\":\"Revenue\"},"
+            var config = parse("{\"yAxis\":{\"title\":{\"text\":\"Revenue\"},"
                     + "\"min\":0,\"max\":100}}");
             var yAxis = config.getyAxis();
             Assertions.assertEquals("Revenue", yAxis.getTitle().getText());
@@ -205,14 +185,15 @@ class ChartConfigurationApplierTest {
 
         @Test
         void xAxisCategories() {
-            apply("{\"xAxis\":{\"categories\":[\"Jan\",\"Feb\",\"Mar\"]}}");
+            var config = parse(
+                    "{\"xAxis\":{\"categories\":[\"Jan\",\"Feb\",\"Mar\"]}}");
             Assertions.assertArrayEquals(new String[] { "Jan", "Feb", "Mar" },
                     config.getxAxis().getCategories());
         }
 
         @Test
         void zAxis_isApplied() {
-            apply("{\"zAxis\":{\"type\":\"logarithmic\","
+            var config = parse("{\"zAxis\":{\"type\":\"logarithmic\","
                     + "\"title\":{\"text\":\"Depth\"},\"min\":1,\"max\":1000}}");
             var zAxis = config.getzAxis();
             Assertions.assertEquals(AxisType.LOGARITHMIC, zAxis.getType());
@@ -223,13 +204,13 @@ class ChartConfigurationApplierTest {
 
         @Test
         void invalidAxisType_isIgnored() {
-            apply("{\"xAxis\":{\"type\":\"invalid\"}}");
+            parse("{\"xAxis\":{\"type\":\"invalid\"}}");
             // Should not throw
         }
 
         @Test
         void nonObjectAxis_isIgnored() {
-            apply("{\"xAxis\":\"not_an_object\"}");
+            parse("{\"xAxis\":\"not_an_object\"}");
             // Should not throw
         }
     }
@@ -239,8 +220,9 @@ class ChartConfigurationApplierTest {
 
         @Test
         void creditsProperties() {
-            apply("{\"credits\":{\"enabled\":false,\"text\":\"Source\","
-                    + "\"href\":\"https://example.com\"}}");
+            var config = parse(
+                    "{\"credits\":{\"enabled\":false,\"text\":\"Source\","
+                            + "\"href\":\"https://example.com\"}}");
             var credits = config.getCredits();
             Assertions.assertFalse(credits.getEnabled());
             Assertions.assertEquals("Source", credits.getText());
@@ -253,38 +235,39 @@ class ChartConfigurationApplierTest {
 
         @Test
         void inverted() {
-            apply("{\"chart\":{\"inverted\":true}}");
+            var config = parse("{\"chart\":{\"inverted\":true}}");
             Assertions.assertTrue(config.getChart().getInverted());
         }
 
         @Test
         void polar() {
-            apply("{\"chart\":{\"polar\":true}}");
+            var config = parse("{\"chart\":{\"polar\":true}}");
             Assertions.assertTrue(config.getChart().getPolar());
         }
 
         @Test
         void dimensions() {
-            apply("{\"chart\":{\"width\":800,\"height\":\"600\"}}");
+            var config = parse(
+                    "{\"chart\":{\"width\":800,\"height\":\"600\"}}");
             Assertions.assertEquals(800, config.getChart().getWidth());
             Assertions.assertEquals("600", config.getChart().getHeight());
         }
 
         @Test
         void heightAsNumber() {
-            apply("{\"chart\":{\"height\":400}}");
+            var config = parse("{\"chart\":{\"height\":400}}");
             Assertions.assertEquals("400", config.getChart().getHeight());
         }
 
         @Test
         void backgroundColor() {
-            apply("{\"chart\":{\"backgroundColor\":\"#f0f0f0\"}}");
+            var config = parse("{\"chart\":{\"backgroundColor\":\"#f0f0f0\"}}");
             Assertions.assertNotNull(config.getChart().getBackgroundColor());
         }
 
         @Test
         void borderProperties() {
-            apply("{\"chart\":{\"borderColor\":\"#333\","
+            var config = parse("{\"chart\":{\"borderColor\":\"#333\","
                     + "\"borderWidth\":2,\"borderRadius\":5}}");
             var chartModel = config.getChart();
             Assertions.assertNotNull(chartModel.getBorderColor());
@@ -294,8 +277,9 @@ class ChartConfigurationApplierTest {
 
         @Test
         void margins() {
-            apply("{\"chart\":{\"marginTop\":10,\"marginRight\":20,"
-                    + "\"marginBottom\":30,\"marginLeft\":40}}");
+            var config = parse(
+                    "{\"chart\":{\"marginTop\":10,\"marginRight\":20,"
+                            + "\"marginBottom\":30,\"marginLeft\":40}}");
             var chartModel = config.getChart();
             Assertions.assertEquals(10, chartModel.getMarginTop());
             Assertions.assertEquals(20, chartModel.getMarginRight());
@@ -305,8 +289,9 @@ class ChartConfigurationApplierTest {
 
         @Test
         void spacing() {
-            apply("{\"chart\":{\"spacingTop\":5,\"spacingRight\":10,"
-                    + "\"spacingBottom\":15,\"spacingLeft\":20}}");
+            var config = parse(
+                    "{\"chart\":{\"spacingTop\":5,\"spacingRight\":10,"
+                            + "\"spacingBottom\":15,\"spacingLeft\":20}}");
             var chartModel = config.getChart();
             Assertions.assertEquals(5, chartModel.getSpacingTop());
             Assertions.assertEquals(10, chartModel.getSpacingRight());
@@ -316,7 +301,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void plotBackground() {
-            apply("{\"chart\":{\"plotBackgroundColor\":\"#eee\","
+            var config = parse("{\"chart\":{\"plotBackgroundColor\":\"#eee\","
                     + "\"plotBorderColor\":\"#aaa\",\"plotBorderWidth\":1}}");
             var chartModel = config.getChart();
             Assertions.assertNotNull(chartModel.getPlotBackgroundColor());
@@ -326,27 +311,27 @@ class ChartConfigurationApplierTest {
 
         @Test
         void animation() {
-            apply("{\"chart\":{\"animation\":false}}");
+            var config = parse("{\"chart\":{\"animation\":false}}");
             Assertions.assertFalse(config.getChart().getAnimation());
         }
 
         @Test
         void styledMode() {
-            apply("{\"chart\":{\"styledMode\":true}}");
+            var config = parse("{\"chart\":{\"styledMode\":true}}");
             Assertions.assertTrue(config.getChart().getStyledMode());
         }
 
         @SuppressWarnings("deprecation")
         @Test
         void zoomType() {
-            apply("{\"chart\":{\"zoomType\":\"xy\"}}");
+            var config = parse("{\"chart\":{\"zoomType\":\"xy\"}}");
             Assertions.assertEquals(Dimension.XY,
                     config.getChart().getZoomType());
         }
 
         @Test
         void invalidZoomType_isIgnored() {
-            apply("{\"chart\":{\"zoomType\":\"invalid\"}}");
+            parse("{\"chart\":{\"zoomType\":\"invalid\"}}");
             // Should not throw
         }
     }
@@ -356,7 +341,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void colorAxisMinMax() {
-            apply("{\"colorAxis\":{\"min\":0,\"max\":100}}");
+            var config = parse("{\"colorAxis\":{\"min\":0,\"max\":100}}");
             var colorAxis = config.getColorAxis();
             Assertions.assertEquals(0.0, colorAxis.getMin());
             Assertions.assertEquals(100.0, colorAxis.getMax());
@@ -364,7 +349,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void colorAxisColors() {
-            apply("{\"colorAxis\":{\"minColor\":\"#ffffff\","
+            var config = parse("{\"colorAxis\":{\"minColor\":\"#ffffff\","
                     + "\"maxColor\":\"#ff0000\"}}");
             var colorAxis = config.getColorAxis();
             Assertions.assertNotNull(colorAxis.getMinColor());
@@ -373,7 +358,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void nonObjectColorAxis_isIgnored() {
-            apply("{\"colorAxis\":\"not_an_object\"}");
+            parse("{\"colorAxis\":\"not_an_object\"}");
             // Should not throw
         }
     }
@@ -383,8 +368,8 @@ class ChartConfigurationApplierTest {
 
         @Test
         void paneAngles() {
-            apply("{\"pane\":{\"startAngle\":-150,\"endAngle\":150}}");
-            // addPane adds at index 0 when no panes exist yet
+            var config = parse(
+                    "{\"pane\":{\"startAngle\":-150,\"endAngle\":150}}");
             var pane = config.getPane();
             Assertions.assertEquals(-150, pane.getStartAngle());
             Assertions.assertEquals(150, pane.getEndAngle());
@@ -392,7 +377,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void paneCenterAndSize() {
-            apply("{\"pane\":{\"center\":[\"50%\",\"75%\"],"
+            var config = parse("{\"pane\":{\"center\":[\"50%\",\"75%\"],"
                     + "\"size\":\"80%\"}}");
             var pane = config.getPane();
             Assertions.assertArrayEquals(new String[] { "50%", "75%" },
@@ -402,7 +387,7 @@ class ChartConfigurationApplierTest {
 
         @Test
         void nonObjectPane_isIgnored() {
-            apply("{\"pane\":\"not_an_object\"}");
+            parse("{\"pane\":\"not_an_object\"}");
             // Should not throw
         }
     }
@@ -412,16 +397,17 @@ class ChartConfigurationApplierTest {
 
         @Test
         void seriesStacking() {
-            apply("{\"plotOptions\":{\"series\":{\"stacking\":\"normal\"}}}");
-            var series = getPlotOption(PlotOptionsSeries.class);
+            var config = parse(
+                    "{\"plotOptions\":{\"series\":{\"stacking\":\"normal\"}}}");
+            var series = getPlotOption(config, PlotOptionsSeries.class);
             Assertions.assertEquals(Stacking.NORMAL, series.getStacking());
         }
 
         @Test
         void seriesDataLabels() {
-            apply("{\"plotOptions\":{\"series\":{\"dataLabels\":"
+            var config = parse("{\"plotOptions\":{\"series\":{\"dataLabels\":"
                     + "{\"enabled\":true,\"format\":\"{point.y}\"}}}}");
-            var series = getPlotOption(PlotOptionsSeries.class);
+            var series = getPlotOption(config, PlotOptionsSeries.class);
             Assertions.assertTrue(series.getDataLabels().getEnabled());
             Assertions.assertEquals("{point.y}",
                     series.getDataLabels().getFormat());
@@ -429,46 +415,49 @@ class ChartConfigurationApplierTest {
 
         @Test
         void seriesMarker() {
-            apply("{\"plotOptions\":{\"series\":{\"marker\":"
+            var config = parse("{\"plotOptions\":{\"series\":{\"marker\":"
                     + "{\"enabled\":false}}}}");
-            var series = getPlotOption(PlotOptionsSeries.class);
+            var series = getPlotOption(config, PlotOptionsSeries.class);
             Assertions.assertFalse(series.getMarker().getEnabled());
         }
 
         @Test
         void pieInnerSize() {
-            apply("{\"plotOptions\":{\"pie\":{\"innerSize\":\"50%\"}}}");
-            var pie = getPlotOption(PlotOptionsPie.class);
+            var config = parse(
+                    "{\"plotOptions\":{\"pie\":{\"innerSize\":\"50%\"}}}");
+            var pie = getPlotOption(config, PlotOptionsPie.class);
             Assertions.assertEquals("50%", pie.getInnerSize());
         }
 
         @Test
         void columnStacking_andBorderRadius() {
-            apply("{\"plotOptions\":{\"column\":{\"stacking\":\"percent\","
-                    + "\"borderRadius\":5}}}");
-            var column = getPlotOption(PlotOptionsColumn.class);
+            var config = parse(
+                    "{\"plotOptions\":{\"column\":{\"stacking\":\"percent\","
+                            + "\"borderRadius\":5}}}");
+            var column = getPlotOption(config, PlotOptionsColumn.class);
             Assertions.assertEquals(Stacking.PERCENT, column.getStacking());
             Assertions.assertEquals(5, column.getBorderRadius());
         }
 
         @Test
         void barStacking_andBorderRadius() {
-            apply("{\"plotOptions\":{\"bar\":{\"stacking\":\"normal\","
-                    + "\"borderRadius\":3}}}");
-            var bar = getPlotOption(PlotOptionsBar.class);
+            var config = parse(
+                    "{\"plotOptions\":{\"bar\":{\"stacking\":\"normal\","
+                            + "\"borderRadius\":3}}}");
+            var bar = getPlotOption(config, PlotOptionsBar.class);
             Assertions.assertEquals(Stacking.NORMAL, bar.getStacking());
             Assertions.assertEquals(3, bar.getBorderRadius());
         }
 
         @Test
         void invalidStacking_isIgnored() {
-            apply("{\"plotOptions\":{\"series\":"
+            parse("{\"plotOptions\":{\"series\":"
                     + "{\"stacking\":\"invalid_value\"}}}");
             // Should not throw
         }
 
         @SuppressWarnings("unchecked")
-        private <T> T getPlotOption(Class<T> type) {
+        private <T> T getPlotOption(Configuration config, Class<T> type) {
             return (T) config.getPlotOptions().stream().filter(type::isInstance)
                     .findFirst().orElseThrow(() -> new RuntimeException(
                             "No PlotOptions of type " + type.getSimpleName()));
@@ -480,26 +469,26 @@ class ChartConfigurationApplierTest {
 
         @Test
         void doubleEncodedJson_isHandled() {
-            apply("\"{\\\"title\\\":{\\\"text\\\":\\\"Decoded\\\"}}\"");
+            var config = parse(
+                    "\"{\\\"title\\\":{\\\"text\\\":\\\"Decoded\\\"}}\"");
             Assertions.assertEquals("Decoded", config.getTitle().getText());
         }
 
         @Test
         void invalidJson_doesNotThrow() {
-            apply("not json");
+            parse("not json");
             // Should log error but not throw
         }
 
         @Test
         void nonObjectJson_doesNotThrow() {
-            apply("[1,2,3]");
+            parse("[1,2,3]");
             // Should log warning but not throw
         }
 
         @Test
-        void emptyObject_resetsConfig() {
-            config.setTitle("Original");
-            apply("{}");
+        void emptyObject_producesDefaultConfig() {
+            var config = parse("{}");
             Assertions.assertNull(config.getTitle().getText());
         }
     }
