@@ -296,6 +296,48 @@ class ChartAIControllerTest {
 
             Assertions.assertNull(captured.get());
         }
+
+        @Test
+        void rendersChart() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+
+            controller.restoreState(
+                    new ChartAIController.State(List.of("SELECT 1"), config));
+
+            Assertions.assertFalse(
+                    chart.getConfiguration().getSeries().isEmpty(),
+                    "restoreState should render the chart");
+        }
+
+        @Test
+        void clearsPendingState() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            // Create pending state via tool calls
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertTrue(entry.hasPendingState(),
+                    "Precondition: should have pending state");
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            controller.restoreState(
+                    new ChartAIController.State(List.of("SELECT 2"), config));
+
+            entry = ChartEntry.get(chart);
+            Assertions.assertFalse(entry.hasPendingState(),
+                    "restoreState should clear pending state");
+        }
     }
 
     @Nested
@@ -359,6 +401,28 @@ class ChartAIControllerTest {
             controller.onRequestCompleted();
 
             Assertions.assertNull(captured.get());
+        }
+
+        @Test
+        void doesNotFireOnSecondCall() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            List<ChartAIController.State> states = new ArrayList<>();
+            controller.addStateChangeListener(states::add);
+
+            controller.onRequestCompleted();
+
+            Assertions.assertTrue(states.isEmpty(),
+                    "Second onRequestCompleted should not fire listeners "
+                            + "because pending state was already cleared");
         }
 
         @Test
