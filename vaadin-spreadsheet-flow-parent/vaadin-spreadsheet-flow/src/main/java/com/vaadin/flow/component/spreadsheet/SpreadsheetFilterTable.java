@@ -215,7 +215,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         button.setDisableOnClick(true);
         button.setEnabled(false);
         button.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
-                ButtonVariant.LUMO_SMALL);
+                ButtonVariant.SMALL);
         button.addClassName(CLEAR_FILTERS_BUTTON_CLASSNAME);
         button.addClickListener(event -> clearAllFilters());
         return button;

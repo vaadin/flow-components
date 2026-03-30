@@ -205,21 +205,21 @@ class NumberFieldTest extends TextFieldTest {
 
     @Test
     void addThemeVariant_themeAttributeContainsThemeVariant() {
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
     void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
+        field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
