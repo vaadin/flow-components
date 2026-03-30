@@ -18,235 +18,50 @@ package com.vaadin.flow.component.slider.tests;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.slider.AbstractNumberRangeSliderTest;
 import com.vaadin.flow.component.slider.RangeSlider;
 import com.vaadin.flow.component.slider.RangeSliderValue;
-import com.vaadin.flow.data.value.HasValueChangeMode;
-import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.internal.JacksonUtils;
 
-import tools.jackson.databind.node.ArrayNode;
+class RangeSliderTest extends
+        AbstractNumberRangeSliderTest<RangeSlider, RangeSliderValue, Double> {
 
-class RangeSliderTest {
+    @Override
+    protected RangeSlider createSlider() {
+        return new RangeSlider();
+    }
 
-    @Test
-    void defaultConstructor() {
-        RangeSlider slider = new RangeSlider();
-        Assertions.assertEquals(0, slider.getMin(), 0);
-        Assertions.assertEquals(100, slider.getMax(), 0);
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
+    @Override
+    protected RangeSlider createSlider(int min, int max) {
+        return new RangeSlider(min, max);
+    }
+
+    @Override
+    protected RangeSlider createSlider(String label) {
+        return new RangeSlider(label);
+    }
+
+    @Override
+    protected RangeSlider createSlider(String label, int min, int max) {
+        return new RangeSlider(label, min, max);
+    }
+
+    @Override
+    protected RangeSliderValue createRange(double start, double end) {
+        return new RangeSliderValue(start, end);
+    }
+
+    @Override
+    protected Double fromDouble(double value) {
+        return value;
     }
 
     @Test
-    void minMaxConstructor() {
-        RangeSlider slider = new RangeSlider(10, 50);
-        Assertions.assertEquals(10, slider.getMin(), 0);
-        Assertions.assertEquals(50, slider.getMax(), 0);
-        Assertions.assertEquals(1, slider.getStep(), 0);
-        Assertions.assertEquals(new RangeSliderValue(10.0, 50.0),
-                slider.getValue());
-    }
-
-    @Test
-    void labelConstructor() {
-        RangeSlider slider = new RangeSlider("Label");
-        Assertions.assertEquals("Label", slider.getLabel());
-        Assertions.assertEquals(0, slider.getMin(), 0);
-        Assertions.assertEquals(100, slider.getMax(), 0);
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
-    }
-
-    @Test
-    void labelMinMaxConstructor() {
-        RangeSlider slider = new RangeSlider("Label", 10, 50);
-        Assertions.assertEquals("Label", slider.getLabel());
-        Assertions.assertEquals(10, slider.getMin(), 0);
-        Assertions.assertEquals(50, slider.getMax(), 0);
-        Assertions.assertEquals(1, slider.getStep(), 0);
-        Assertions.assertEquals(new RangeSliderValue(10.0, 50.0),
-                slider.getValue());
-    }
-
-    @Test
-    void setMin_updatesProperty() {
-        RangeSlider slider = new RangeSlider();
-        slider.setMin(10.0);
-
-        Assertions.assertEquals(10, slider.getMin(), 0);
-        Assertions.assertEquals(10, slider.getElement().getProperty("min", 0),
-                0);
-    }
-
-    @Test
-    void setMax_updatesProperty() {
-        RangeSlider slider = new RangeSlider();
-        slider.setMax(200.0);
-
-        Assertions.assertEquals(200, slider.getMax(), 0);
-        Assertions.assertEquals(200, slider.getElement().getProperty("max", 0),
-                0);
-    }
-
-    @Test
-    void setStep_updatesProperty() {
+    void setStep_fractional_updatesProperty() {
         RangeSlider slider = new RangeSlider();
         slider.setStep(0.1);
 
         Assertions.assertEquals(0.1, slider.getStep(), 0);
         Assertions.assertEquals(0.1,
                 slider.getElement().getProperty("step", 0.0), 0);
-    }
-
-    @Test
-    void setAccessibleNameStart() {
-        RangeSlider slider = new RangeSlider();
-        slider.setAccessibleNameStart("Start");
-
-        Assertions.assertTrue(slider.getAccessibleNameStart().isPresent());
-        Assertions.assertEquals("Start", slider.getAccessibleNameStart().get());
-        Assertions.assertEquals("Start",
-                slider.getElement().getProperty("accessibleNameStart"));
-
-        slider.setAccessibleNameStart(null);
-        Assertions.assertTrue(slider.getAccessibleNameStart().isEmpty());
-    }
-
-    @Test
-    void setAccessibleNameEnd() {
-        RangeSlider slider = new RangeSlider();
-        slider.setAccessibleNameEnd("End");
-
-        Assertions.assertTrue(slider.getAccessibleNameEnd().isPresent());
-        Assertions.assertEquals("End", slider.getAccessibleNameEnd().get());
-        Assertions.assertEquals("End",
-                slider.getElement().getProperty("accessibleNameEnd"));
-
-        slider.setAccessibleNameEnd(null);
-        Assertions.assertTrue(slider.getAccessibleNameEnd().isEmpty());
-    }
-
-    @Test
-    void setValueAlwaysVisible_defaultFalse() {
-        RangeSlider slider = new RangeSlider();
-        Assertions.assertFalse(slider.isValueAlwaysVisible());
-    }
-
-    @Test
-    void setValueAlwaysVisible_updatesProperty() {
-        RangeSlider slider = new RangeSlider();
-        slider.setValueAlwaysVisible(true);
-
-        Assertions.assertTrue(slider.isValueAlwaysVisible());
-        Assertions.assertTrue(
-                slider.getElement().getProperty("valueAlwaysVisible", false));
-
-        slider.setValueAlwaysVisible(false);
-        Assertions.assertFalse(slider.isValueAlwaysVisible());
-        Assertions.assertFalse(
-                slider.getElement().getProperty("valueAlwaysVisible", false));
-    }
-
-    @Test
-    void setMinMaxVisible_defaultFalse() {
-        RangeSlider slider = new RangeSlider();
-        Assertions.assertFalse(slider.isMinMaxVisible());
-    }
-
-    @Test
-    void setMinMaxVisible_updatesProperty() {
-        RangeSlider slider = new RangeSlider();
-        slider.setMinMaxVisible(true);
-
-        Assertions.assertTrue(slider.isMinMaxVisible());
-        Assertions.assertTrue(
-                slider.getElement().getProperty("minMaxVisible", false));
-
-        slider.setMinMaxVisible(false);
-        Assertions.assertFalse(slider.isMinMaxVisible());
-        Assertions.assertFalse(
-                slider.getElement().getProperty("minMaxVisible", false));
-    }
-
-    @Test
-    void setValueFromClient_null_ignored() {
-        RangeSlider slider = new RangeSlider();
-        slider.setStep(10.0);
-        slider.getElement().setPropertyJson("value", JacksonUtils.nullNode());
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
-    }
-
-    @Test
-    void setValueFromClient_startNotAlignedWithStep_ignored() {
-        RangeSlider slider = new RangeSlider();
-        slider.setStep(10.0);
-        slider.getElement().setPropertyJson("value", createValueArray(15, 80));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
-    }
-
-    @Test
-    void setValueFromClient_endNotAlignedWithStep_ignored() {
-        RangeSlider slider = new RangeSlider();
-        slider.setStep(10.0);
-        slider.getElement().setPropertyJson("value", createValueArray(20, 85));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
-    }
-
-    @Test
-    void setValueFromClient_startBelowMin_ignored() {
-        RangeSlider slider = new RangeSlider();
-        slider.setStep(10.0);
-        slider.getElement().setPropertyJson("value", createValueArray(-10, 50));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
-    }
-
-    @Test
-    void setValueFromClient_endAboveMax_ignored() {
-        RangeSlider slider = new RangeSlider();
-        slider.setStep(10.0);
-        slider.getElement().setPropertyJson("value", createValueArray(50, 110));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
-    }
-
-    @Test
-    void setValueFromClient_startGreaterThanEnd_ignored() {
-        RangeSlider slider = new RangeSlider();
-        slider.setStep(10.0);
-        slider.getElement().setPropertyJson("value", createValueArray(80, 20));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
-                slider.getValue());
-    }
-
-    @Test
-    void setValueChangeMode_getValueChangeMode() {
-        RangeSlider slider = new RangeSlider();
-        Assertions.assertEquals(ValueChangeMode.ON_CHANGE,
-                slider.getValueChangeMode());
-
-        slider.setValueChangeMode(ValueChangeMode.EAGER);
-        Assertions.assertEquals(ValueChangeMode.EAGER,
-                slider.getValueChangeMode());
-    }
-
-    @Test
-    void setValueChangeTimeout_getValueChangeTimeout() {
-        RangeSlider slider = new RangeSlider();
-        Assertions.assertEquals(HasValueChangeMode.DEFAULT_CHANGE_TIMEOUT,
-                slider.getValueChangeTimeout());
-
-        slider.setValueChangeTimeout(500);
-        Assertions.assertEquals(500, slider.getValueChangeTimeout());
-    }
-
-    private ArrayNode createValueArray(double start, double end) {
-        ArrayNode array = JacksonUtils.createArrayNode();
-        array.add(start);
-        array.add(end);
-        return array;
     }
 }
