@@ -129,9 +129,6 @@ public class GridDataPage extends Div {
             // --- Column resizing (verify columns are draggable) ---
             "Show all columns from the employees table",
 
-            // --- Custom renderer (SALARY column renders as currency) ---
-            "Show employee name and salary",
-
             // --- Multi-table aggregations ---
             "Show each department with total number of orders placed by its employees",
             "Show each employee with the total amount they spent on orders (sum of quantity * product price)",
