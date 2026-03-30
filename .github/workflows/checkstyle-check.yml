@@ -43,7 +43,7 @@ jobs:
 
       - name: Find existing checkstyle comment
         if: always()
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
         id: find-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -51,7 +51,7 @@ jobs:
 
       - name: Post or update checkstyle comment
         if: steps.checkstyle.outputs.has_errors == 'true'
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
@@ -68,7 +68,7 @@ jobs:
 
       - name: Delete checkstyle comment if clean
         if: steps.checkstyle.outputs.has_errors == 'false' && steps.find-comment.outputs.comment-id != ''
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace
