@@ -148,27 +148,36 @@ class GridAIControllerTest {
         Assertions.assertTrue(tool.getParametersSchema().contains("query"));
     }
 
-    // --- State and onRequestCompleted ---
+    // --- getState ---
 
     @Test
-    void getState_noQuery_returnsNull() {
+    void getState_beforeAnyUpdate_returnsNull() {
         Assertions.assertNull(controller.getState());
     }
 
     @Test
-    void getState_afterUpdate_returnsState() {
+    void getState_afterUpdate_returnsQuery() {
         dbProvider.queryResults = List.of(row("a", 1));
-        // Simulate tool call + onRequestCompleted
-        var tool = controller.getTools().stream()
-                .filter(t -> t.getName().equals("update_grid_data")).findFirst()
-                .orElseThrow();
-        tool.execute("{\"query\": \"SELECT a FROM t\"}");
-        controller.onRequestCompleted();
+        simulateUpdate("SELECT a FROM t");
 
         var state = controller.getState();
         Assertions.assertNotNull(state);
         Assertions.assertEquals("SELECT a FROM t", state.query());
     }
+
+    @Test
+    void getState_afterFailedRender_returnsNull() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        findTool("update_grid_data")
+                .execute("{\"query\": \"SELECT a FROM t\"}");
+
+        dbProvider.throwOnExecute = true;
+        controller.onRequestCompleted();
+
+        Assertions.assertNull(controller.getState());
+    }
+
+    // --- onRequestCompleted ---
 
     @Test
     void currentStateTool_afterUpdate_returnsQuery() {
@@ -186,6 +195,7 @@ class GridAIControllerTest {
         var columnsBefore = grid.getColumns().size();
         controller.onRequestCompleted();
         Assertions.assertEquals(columnsBefore, grid.getColumns().size());
+        Assertions.assertNull(controller.getState());
     }
 
     @Test
@@ -202,54 +212,18 @@ class GridAIControllerTest {
                 stateTool.execute("{}").contains("SELECT a FROM t"));
     }
 
-    @Test
-    void onRequestCompleted_renderFails_doesNotUpdateCurrentQuery() {
-        dbProvider.queryResults = List.of(row("a", 1));
-        // Queue via tool call only
-        findTool("update_grid_data")
-                .execute("{\"query\": \"SELECT a FROM t\"}");
-
-        // Make renderGrid fail
-        dbProvider.throwOnExecute = true;
-        controller.onRequestCompleted();
-
-        // currentQuery should still be null — state tool returns empty
-        var stateTool = findTool("get_grid_state");
-        Assertions.assertTrue(stateTool.execute("{}").contains("empty"));
-    }
-
-    @Test
-    void onRequestCompleted_noPending_doesNothing() {
-        // Should not throw
-        controller.onRequestCompleted();
-        Assertions.assertNull(controller.getState());
-    }
-
-    @Test
-    void onRequestCompleted_clearsPending() {
-        dbProvider.queryResults = List.of(row("a", 1));
-        var tool = controller.getTools().stream()
-                .filter(t -> t.getName().equals("update_grid_data")).findFirst()
-                .orElseThrow();
-        tool.execute("{\"query\": \"SELECT 1\"}");
-        controller.onRequestCompleted();
-        // Second call should be a no-op
-        controller.onRequestCompleted();
-        Assertions.assertNotNull(controller.getState());
-    }
-
     // --- GridState serialization ---
 
     @Test
     void gridState_isSerializable() throws Exception {
-        var state = new GridAIController.GridState("SELECT * FROM t");
+        var state = new GridState("SELECT * FROM t");
         var baos = new ByteArrayOutputStream();
         try (var oos = new ObjectOutputStream(baos)) {
             oos.writeObject(state);
         }
         try (var ois = new ObjectInputStream(
                 new ByteArrayInputStream(baos.toByteArray()))) {
-            var deserialized = (GridAIController.GridState) ois.readObject();
+            var deserialized = (GridState) ois.readObject();
             Assertions.assertEquals("SELECT * FROM t", deserialized.query());
         }
     }
@@ -257,23 +231,14 @@ class GridAIControllerTest {
     // --- restoreState ---
 
     @Test
-    void restoreState_setsCurrentQuery() {
-        dbProvider.queryResults = List.of(row("a", 1));
-        var state = new GridAIController.GridState("SELECT a FROM t");
-        controller.restoreState(state);
-
-        var restored = controller.getState();
-        Assertions.assertNotNull(restored);
-        Assertions.assertEquals("SELECT a FROM t", restored.query());
-    }
-
-    @Test
-    void restoreState_createsColumns() {
+    void restoreState_rendersGridAndSetsState() {
         dbProvider.queryResults = List.of(row("col1", "v1", "col2", 42));
-        controller.restoreState(
-                new GridAIController.GridState("SELECT col1, col2 FROM t"));
+        controller.restoreState(new GridState("SELECT col1, col2 FROM t"));
 
         Assertions.assertEquals(2, grid.getColumns().size());
+        var state = controller.getState();
+        Assertions.assertNotNull(state);
+        Assertions.assertEquals("SELECT col1, col2 FROM t", state.query());
     }
 
     @Test
@@ -285,23 +250,31 @@ class GridAIControllerTest {
     @Test
     void restoreState_failedQuery_doesNotUpdateState() {
         dbProvider.throwOnExecute = true;
-        controller.restoreState(new GridAIController.GridState("SELECT bad"));
-        // State should not be set because applyQuery failed
+        controller.restoreState(new GridState("SELECT bad"));
+
         Assertions.assertNull(controller.getState());
     }
 
     @Test
     void restoreState_thenLlmUpdate_overridesState() {
         dbProvider.queryResults = List.of(row("a", 1));
-        controller.restoreState(
-                new GridAIController.GridState("SELECT a FROM old"));
+        controller.restoreState(new GridState("SELECT a FROM old"));
         Assertions.assertEquals("SELECT a FROM old",
                 controller.getState().query());
 
         // LLM updates with a new query
-        simulateUpdate("SELECT a FROM new");
-        Assertions.assertEquals("SELECT a FROM new",
+        simulateUpdate("SELECT a FROM new_table");
+        Assertions.assertEquals("SELECT a FROM new_table",
                 controller.getState().query());
+    }
+
+    @Test
+    void restoreState_thenGetStateTool_returnsRestoredQuery() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        controller.restoreState(new GridState("SELECT a FROM t"));
+
+        var result = findTool("get_grid_state").execute("{}");
+        Assertions.assertTrue(result.contains("SELECT a FROM t"));
     }
 
     // --- Empty state ---

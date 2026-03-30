@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.grid;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -157,65 +156,47 @@ public class GridAIController implements AIController {
         }
         var query = entry.getPendingQuery();
         LOGGER.info("onRequestCompleted: applying query: {}", query);
-        renderGrid(query);
+        applyQuery(entry, query);
     }
 
     /**
-     * Returns the current grid state for persistence.
+     * Returns the current grid state for persistence, or {@code null} if no
+     * data has been loaded yet.
      *
-     * @return the current state, or {@code null} if no data has been loaded
+     * @return the current state, or {@code null}
      */
     public GridState getState() {
-        var gridEntry = GridEntry.get(grid);
-        return new GridState(gridEntry.getCurrentQuery());
+        var entry = GridEntry.get(grid);
+        if (entry == null || entry.getCurrentQuery() == null) {
+            return null;
+        }
+        return new GridState(entry.getCurrentQuery());
     }
 
     /**
-     * Restores a previously saved grid state.
+     * Restores a previously saved grid state. Re-executes the stored query and
+     * renders the grid.
      *
      * @param state
      *            the state to restore, not {@code null}
      */
     public void restoreState(GridState state) {
         Objects.requireNonNull(state, "State must not be null");
-        try {
-            applyQuery(state.query());
-        } catch (Exception e) {
-            LOGGER.error("Failed to restore grid state", e);
-        }
+        var entry = GridEntry.getOrCreate(grid, GRID_ID);
+        applyQuery(entry, state.query());
     }
 
-    private void applyQuery(String query) {
-        grid.getUI().ifPresentOrElse(ui -> ui.access(() -> {
-            try {
-                renderGrid(query);
-            } catch (Exception e) {
-                LOGGER.error("Error inside UI.access()", e);
-            }
-        }), () -> renderGrid(query));
-    }
-
-    private void renderGrid(String query) {
-        var entry = GridEntry.get(grid);
+    private void applyQuery(GridEntry entry, String query) {
         grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             try {
                 GridRenderer.renderGrid(grid, databaseProvider, query);
                 entry.setCurrentQuery(query);
-                LOGGER.info("onRequestCompleted: grid updated successfully");
+                LOGGER.info("Grid updated successfully");
             } catch (Exception e) {
                 LOGGER.error("Error updating grid", e);
             } finally {
                 entry.clearPendingState();
             }
         }));
-    }
-
-    /**
-     * Serializable grid state for persistence across sessions.
-     *
-     * @param query
-     *            the SQL query that populates the grid
-     */
-    public record GridState(String query) implements Serializable {
     }
 }

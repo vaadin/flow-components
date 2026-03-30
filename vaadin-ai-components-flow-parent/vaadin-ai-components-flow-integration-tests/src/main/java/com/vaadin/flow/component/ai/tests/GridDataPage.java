@@ -35,6 +35,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.grid.GridAIController;
+import com.vaadin.flow.component.ai.grid.GridState;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
@@ -218,7 +219,7 @@ public class GridDataPage extends Div {
 
         // Check for saved state in session
         var session = VaadinSession.getCurrent();
-        var savedGridState = (GridAIController.GridState) session
+        var savedGridState = (GridState) session
                 .getAttribute(SESSION_KEY_GRID_STATE);
         var savedHistory = (List<ChatMessage>) session
                 .getAttribute(SESSION_KEY_HISTORY);
