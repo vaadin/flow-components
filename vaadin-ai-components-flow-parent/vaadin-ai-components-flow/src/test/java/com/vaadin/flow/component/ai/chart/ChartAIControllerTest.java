@@ -439,6 +439,91 @@ class ChartAIControllerTest {
         }
     }
 
+    @Nested
+    class DetachedChart {
+
+        @BeforeEach
+        void detach() {
+            ui.remove(chart);
+        }
+
+        @Test
+        void onRequestCompleted_pendingStateSurvivesUntilRender() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Render is deferred (chart detached), so pending state
+            // should not yet be cleared.
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertTrue(entry.hasPendingState(),
+                    "Pending state should survive until render executes");
+        }
+
+        @Test
+        void onRequestCompleted_listenerFiresOnReattach() {
+            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Listener should not fire while chart is detached
+            Assertions.assertNull(captured.get(),
+                    "State change listener should not fire before "
+                            + "chart is attached and render completes");
+
+            // After re-attachment, deferred render should fire listener
+            ui.add(chart);
+            Assertions.assertNotNull(captured.get(),
+                    "State change listener should fire after "
+                            + "chart is re-attached");
+        }
+
+        @Test
+        void onRequestCompleted_rendersLatestStateOnAttach() {
+            var tools = controller.getTools();
+
+            // First request while detached
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Second request while still detached
+            databaseProvider.results = List
+                    .of(Map.of("category", "B", "value", 20));
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 2\"]}");
+            controller.onRequestCompleted();
+
+            ui.add(chart);
+
+            // After re-attachment, the chart should reflect the latest
+            // state from the second request.
+            Assertions.assertEquals(ChartType.PIE,
+                    chart.getConfiguration().getChart().getType());
+        }
+    }
+
     // --- Helpers ---
 
     private static LLMProvider.ToolSpec findTool(

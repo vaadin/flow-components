@@ -221,8 +221,6 @@ public class ChartAIController implements AIController {
         }
 
         String configJson = entry.getPendingConfigurationJson();
-        entry.clearPendingState();
-
         chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             try {
                 ChartRenderer.renderChart(chart, databaseProvider,
@@ -230,6 +228,8 @@ public class ChartAIController implements AIController {
                 fireStateChangeListeners();
             } catch (Exception e) {
                 LOGGER.error("onRequestCompleted: rendering failed", e);
+            } finally {
+                entry.clearPendingState();
             }
         }));
     }
