@@ -13,27 +13,27 @@ import static org.mockito.Mockito.when;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-class SpreadsheetFactoryTest {
+public class SpreadsheetFactoryTest {
 
     @Mock
     private Spreadsheet spreadsheet;
 
     private XSSFWorkbook workbook;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
         workbook = new XSSFWorkbook();
     }
 
     @Test
-    void loadFreezePane_bothSplits_setsBothPositions() {
+    public void loadFreezePane_bothSplits_setsBothPositions() {
         // POI: createFreezePane(colSplit, rowSplit)
         // colSplit → POI verticalSplitPosition (columns)
         // rowSplit → POI horizontalSplitPosition (rows)
@@ -52,7 +52,7 @@ class SpreadsheetFactoryTest {
     }
 
     @Test
-    void loadFreezePane_onlyFrozenRows_resetsHorizontalToZero() {
+    public void loadFreezePane_onlyFrozenRows_resetsHorizontalToZero() {
         // Only frozen rows (POI horizontalSplit), no frozen columns
         Sheet sheet = workbook.createSheet();
         sheet.createFreezePane(0, 3);
@@ -66,7 +66,7 @@ class SpreadsheetFactoryTest {
     }
 
     @Test
-    void loadFreezePane_onlyFrozenColumns_resetsVerticalToZero() {
+    public void loadFreezePane_onlyFrozenColumns_resetsVerticalToZero() {
         // Only frozen columns (POI verticalSplit), no frozen rows
         Sheet sheet = workbook.createSheet();
         sheet.createFreezePane(2, 0);
@@ -80,7 +80,7 @@ class SpreadsheetFactoryTest {
     }
 
     @Test
-    void loadFreezePane_noFreezePane_resetsBothToZero() {
+    public void loadFreezePane_noFreezePane_resetsBothToZero() {
         Sheet sheet = workbook.createSheet();
 
         when(spreadsheet.getActiveSheet()).thenReturn(sheet);
@@ -92,7 +92,7 @@ class SpreadsheetFactoryTest {
     }
 
     @Test
-    void loadFreezePane_switchingSheets_doesNotBleedState() {
+    public void loadFreezePane_switchingSheets_doesNotBleedState() {
         // Simulate switching from a sheet with both splits to one with
         // only frozen columns — the vertical split (frozen rows) must
         // be reset to 0 and not retain the previous sheet's value.
