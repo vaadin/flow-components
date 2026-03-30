@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -38,6 +37,7 @@ import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.grid.GridAIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
