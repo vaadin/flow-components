@@ -41,11 +41,6 @@ import com.vaadin.flow.component.grid.Grid;
  * <li>Column grouping from dot-separated aliases</li>
  * </ul>
  * <p>
- * Grid state ({@link GridEntry}) is stored directly on the {@link Grid}
- * instance via {@link GridEntry#getOrCreate(Grid, String)}, so there is no
- * separate registry to maintain.
- * </p>
- * <p>
  * State changes requested by the LLM through the update tools are deferred and
  * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
  * redraws during a multi-tool LLM turn.
