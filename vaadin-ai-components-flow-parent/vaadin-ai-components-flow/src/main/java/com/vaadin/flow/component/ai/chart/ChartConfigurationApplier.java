@@ -18,8 +18,12 @@ package com.vaadin.flow.component.ai.chart;
 import static com.vaadin.flow.component.ai.chart.ConfigurationKeys.*;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -141,42 +145,29 @@ public final class ChartConfigurationApplier implements Serializable {
         }
     }
 
+    private static final Map<String, ChartType> CHART_TYPES_BY_NAME;
+
+    static {
+        var map = new HashMap<String, ChartType>();
+        for (Field field : ChartType.class.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers())
+                    && Modifier.isFinal(field.getModifiers())
+                    && field.getType() == ChartType.class) {
+                try {
+                    ChartType value = (ChartType) field.get(null);
+                    map.put(value.toString(), value);
+                } catch (IllegalAccessException e) {
+                    throw new ExceptionInInitializerError(e);
+                }
+            }
+        }
+        CHART_TYPES_BY_NAME = Map.copyOf(map);
+    }
+
     private static void applyChartType(Configuration config,
             String chartTypeStr) {
-        ChartType chartType = switch (chartTypeStr.toLowerCase()) {
-        case "area" -> ChartType.AREA;
-        case "line" -> ChartType.LINE;
-        case "spline" -> ChartType.SPLINE;
-        case "areaspline" -> ChartType.AREASPLINE;
-        case "bullet" -> ChartType.BULLET;
-        case "column" -> ChartType.COLUMN;
-        case "bar" -> ChartType.BAR;
-        case "pie" -> ChartType.PIE;
-        case "scatter" -> ChartType.SCATTER;
-        case "gauge" -> ChartType.GAUGE;
-        case "arearange" -> ChartType.AREARANGE;
-        case "columnrange" -> ChartType.COLUMNRANGE;
-        case "areasplinerange" -> ChartType.AREASPLINERANGE;
-        case "boxplot" -> ChartType.BOXPLOT;
-        case "errorbar" -> ChartType.ERRORBAR;
-        case "bubble" -> ChartType.BUBBLE;
-        case "funnel" -> ChartType.FUNNEL;
-        case "waterfall" -> ChartType.WATERFALL;
-        case "pyramid" -> ChartType.PYRAMID;
-        case "solidgauge" -> ChartType.SOLIDGAUGE;
-        case "heatmap" -> ChartType.HEATMAP;
-        case "treemap" -> ChartType.TREEMAP;
-        case "polygon" -> ChartType.POLYGON;
-        case "candlestick" -> ChartType.CANDLESTICK;
-        case "flags" -> ChartType.FLAGS;
-        case "timeline" -> ChartType.TIMELINE;
-        case "ohlc" -> ChartType.OHLC;
-        case "organization" -> ChartType.ORGANIZATION;
-        case "sankey" -> ChartType.SANKEY;
-        case "xrange" -> ChartType.XRANGE;
-        case "gantt" -> ChartType.GANTT;
-        default -> ChartType.LINE;
-        };
+        ChartType chartType = CHART_TYPES_BY_NAME
+                .getOrDefault(chartTypeStr.toLowerCase(), ChartType.LINE);
         config.getChart().setType(chartType);
     }
 

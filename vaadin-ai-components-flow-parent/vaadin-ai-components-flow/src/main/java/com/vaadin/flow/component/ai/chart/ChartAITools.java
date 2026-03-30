@@ -15,10 +15,11 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
-import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
-
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -102,43 +103,33 @@ public final class ChartAITools {
         Set<String> getChartIds();
     }
 
-    // @formatter:off
-    private static final Map<String, String> COLUMN_PARAMS = Map.ofEntries(
-            Map.entry("{PREFIX}",         PREFIX),
-            Map.entry("{SERIES}",         SERIES),
-            Map.entry("{X}",              X),
-            Map.entry("{Y}",              Y),
-            Map.entry("{Z}",              Z),
-            Map.entry("{X2}",             X2),
-            Map.entry("{NAME}",           NAME),
-            Map.entry("{ID}",             ID),
-            Map.entry("{PARENT}",         PARENT),
-            Map.entry("{VALUE}",          VALUE),
-            Map.entry("{COLOR}",          COLOR),
-            Map.entry("{COLOR_VALUE}",    COLOR_VALUE),
-            Map.entry("{OPEN}",           OPEN),
-            Map.entry("{HIGH}",           HIGH),
-            Map.entry("{LOW}",            LOW),
-            Map.entry("{CLOSE}",          CLOSE),
-            Map.entry("{Q1}",             Q1),
-            Map.entry("{MEDIAN}",         MEDIAN),
-            Map.entry("{Q3}",             Q3),
-            Map.entry("{FROM}",           FROM),
-            Map.entry("{TO}",             TO),
-            Map.entry("{WEIGHT}",         WEIGHT),
-            Map.entry("{LABEL}",          LABEL),
-            Map.entry("{DESCRIPTION}",    DESCRIPTION),
-            Map.entry("{TITLE}",          TITLE),
-            Map.entry("{TEXT}",           TEXT),
-            Map.entry("{START}",          START),
-            Map.entry("{END}",            END),
-            Map.entry("{DEPENDENCY}",     DEPENDENCY),
-            Map.entry("{COMPLETED}",      COMPLETED),
-            Map.entry("{TARGET}",         TARGET),
-            Map.entry("{WATERFALL_TYPE}", WATERFALL_TYPE),
-            Map.entry("{IMAGE}",          IMAGE)
-    );
-    // @formatter:on
+    private static final Map<String, String> COLUMN_PARAMS = buildPlaceholderMap(
+            ColumnNames.class, "");
+    private static final Map<String, String> CONFIG_PARAMS = buildPlaceholderMap(
+            ConfigurationKeys.class, "c:");
+
+    /**
+     * Builds a placeholder map from all {@code public static final String}
+     * fields of the given class. Each field named {@code FOO} produces an entry
+     * {@code {<prefix>FOO} → fieldValue}.
+     */
+    private static Map<String, String> buildPlaceholderMap(Class<?> clazz,
+            String prefix) {
+        var map = new HashMap<String, String>();
+        for (Field field : clazz.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers())
+                    && Modifier.isFinal(field.getModifiers())
+                    && field.getType() == String.class) {
+                try {
+                    String value = (String) field.get(null);
+                    map.put("{" + prefix + field.getName() + "}", value);
+                } catch (IllegalAccessException e) {
+                    throw new ExceptionInInitializerError(e);
+                }
+            }
+        }
+        return Map.copyOf(map);
+    }
 
     /**
      * Replaces {@code {NAME}} placeholders in the template with the
@@ -147,85 +138,6 @@ public final class ChartAITools {
     private static String resolveColumnNames(String template) {
         return resolvePlaceholders(template, COLUMN_PARAMS);
     }
-
-    // @formatter:off
-    private static final Map<String, String> CONFIG_PARAMS = Map.ofEntries(
-            // Top-level sections
-            Map.entry("{c:CHART}",                ConfigurationKeys.CHART),
-            Map.entry("{c:TITLE}",                ConfigurationKeys.TITLE),
-            Map.entry("{c:SUBTITLE}",             ConfigurationKeys.SUBTITLE),
-            Map.entry("{c:TOOLTIP}",              ConfigurationKeys.TOOLTIP),
-            Map.entry("{c:LEGEND}",               ConfigurationKeys.LEGEND),
-            Map.entry("{c:X_AXIS}",               ConfigurationKeys.X_AXIS),
-            Map.entry("{c:Y_AXIS}",               ConfigurationKeys.Y_AXIS),
-            Map.entry("{c:Z_AXIS}",               ConfigurationKeys.Z_AXIS),
-            Map.entry("{c:COLOR_AXIS}",           ConfigurationKeys.COLOR_AXIS),
-            Map.entry("{c:CREDITS}",              ConfigurationKeys.CREDITS),
-            Map.entry("{c:PANE}",                 ConfigurationKeys.PANE),
-            Map.entry("{c:PLOT_OPTIONS}",         ConfigurationKeys.PLOT_OPTIONS),
-            // Common
-            Map.entry("{c:TYPE}",                 ConfigurationKeys.TYPE),
-            Map.entry("{c:TEXT}",                 ConfigurationKeys.TEXT),
-            Map.entry("{c:ENABLED}",              ConfigurationKeys.ENABLED),
-            Map.entry("{c:MIN}",                  ConfigurationKeys.MIN),
-            Map.entry("{c:MAX}",                  ConfigurationKeys.MAX),
-            Map.entry("{c:FORMAT}",               ConfigurationKeys.FORMAT),
-            // Chart model
-            Map.entry("{c:BACKGROUND_COLOR}",     ConfigurationKeys.BACKGROUND_COLOR),
-            Map.entry("{c:BORDER_COLOR}",         ConfigurationKeys.BORDER_COLOR),
-            Map.entry("{c:BORDER_WIDTH}",         ConfigurationKeys.BORDER_WIDTH),
-            Map.entry("{c:BORDER_RADIUS}",        ConfigurationKeys.BORDER_RADIUS),
-            Map.entry("{c:WIDTH}",                ConfigurationKeys.WIDTH),
-            Map.entry("{c:HEIGHT}",               ConfigurationKeys.HEIGHT),
-            Map.entry("{c:MARGIN_TOP}",           ConfigurationKeys.MARGIN_TOP),
-            Map.entry("{c:MARGIN_RIGHT}",         ConfigurationKeys.MARGIN_RIGHT),
-            Map.entry("{c:MARGIN_BOTTOM}",        ConfigurationKeys.MARGIN_BOTTOM),
-            Map.entry("{c:MARGIN_LEFT}",          ConfigurationKeys.MARGIN_LEFT),
-            Map.entry("{c:SPACING_TOP}",          ConfigurationKeys.SPACING_TOP),
-            Map.entry("{c:SPACING_RIGHT}",        ConfigurationKeys.SPACING_RIGHT),
-            Map.entry("{c:SPACING_BOTTOM}",       ConfigurationKeys.SPACING_BOTTOM),
-            Map.entry("{c:SPACING_LEFT}",         ConfigurationKeys.SPACING_LEFT),
-            Map.entry("{c:PLOT_BACKGROUND_COLOR}", ConfigurationKeys.PLOT_BACKGROUND_COLOR),
-            Map.entry("{c:PLOT_BORDER_COLOR}",    ConfigurationKeys.PLOT_BORDER_COLOR),
-            Map.entry("{c:PLOT_BORDER_WIDTH}",    ConfigurationKeys.PLOT_BORDER_WIDTH),
-            Map.entry("{c:INVERTED}",             ConfigurationKeys.INVERTED),
-            Map.entry("{c:POLAR}",                ConfigurationKeys.POLAR),
-            Map.entry("{c:ANIMATION}",            ConfigurationKeys.ANIMATION),
-            Map.entry("{c:STYLED_MODE}",          ConfigurationKeys.STYLED_MODE),
-            Map.entry("{c:ZOOM_TYPE}",            ConfigurationKeys.ZOOM_TYPE),
-            // Tooltip
-            Map.entry("{c:POINT_FORMAT}",         ConfigurationKeys.POINT_FORMAT),
-            Map.entry("{c:HEADER_FORMAT}",        ConfigurationKeys.HEADER_FORMAT),
-            Map.entry("{c:SHARED}",               ConfigurationKeys.SHARED),
-            Map.entry("{c:VALUE_SUFFIX}",         ConfigurationKeys.VALUE_SUFFIX),
-            Map.entry("{c:VALUE_PREFIX}",         ConfigurationKeys.VALUE_PREFIX),
-            // Legend
-            Map.entry("{c:ALIGN}",               ConfigurationKeys.ALIGN),
-            Map.entry("{c:VERTICAL_ALIGN}",      ConfigurationKeys.VERTICAL_ALIGN),
-            Map.entry("{c:LAYOUT}",              ConfigurationKeys.LAYOUT),
-            // Axis
-            Map.entry("{c:CATEGORIES}",          ConfigurationKeys.CATEGORIES),
-            // Color axis
-            Map.entry("{c:MIN_COLOR}",           ConfigurationKeys.MIN_COLOR),
-            Map.entry("{c:MAX_COLOR}",           ConfigurationKeys.MAX_COLOR),
-            // Credits
-            Map.entry("{c:HREF}",                ConfigurationKeys.HREF),
-            // Pane
-            Map.entry("{c:START_ANGLE}",         ConfigurationKeys.START_ANGLE),
-            Map.entry("{c:END_ANGLE}",           ConfigurationKeys.END_ANGLE),
-            Map.entry("{c:CENTER}",              ConfigurationKeys.CENTER),
-            Map.entry("{c:SIZE}",                ConfigurationKeys.SIZE),
-            // Plot options
-            Map.entry("{c:SERIES}",              ConfigurationKeys.SERIES),
-            Map.entry("{c:PIE}",                 ConfigurationKeys.PIE),
-            Map.entry("{c:COLUMN}",              ConfigurationKeys.COLUMN),
-            Map.entry("{c:BAR}",                 ConfigurationKeys.BAR),
-            Map.entry("{c:STACKING}",            ConfigurationKeys.STACKING),
-            Map.entry("{c:DATA_LABELS}",         ConfigurationKeys.DATA_LABELS),
-            Map.entry("{c:MARKER}",              ConfigurationKeys.MARKER),
-            Map.entry("{c:INNER_SIZE}",          ConfigurationKeys.INNER_SIZE)
-    );
-    // @formatter:on
 
     /**
      * Replaces {@code {c:NAME}} placeholders in the template with the
