@@ -248,8 +248,34 @@ class ChartAIControllerTest {
             ChartAIController.State state = controller.getState();
             Assertions.assertNotNull(state);
             Assertions.assertEquals(List.of("SELECT 1"), state.queries());
-            Assertions.assertSame(chart.getConfiguration(),
-                    state.configuration());
+            Assertions.assertNotSame(chart.getConfiguration(),
+                    state.configuration(),
+                    "State should contain a copy, not the live configuration");
+            Assertions.assertEquals(
+                    chart.getConfiguration().getChart().getType(),
+                    state.configuration().getChart().getType());
+        }
+
+        @Test
+        void configurationIsIsolatedFromChartMutations() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Original\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            ChartAIController.State savedState = controller.getState();
+
+            chart.getConfiguration().setTitle("Mutated");
+
+            Assertions.assertNotEquals("Mutated",
+                    savedState.configuration().getTitle().getText(),
+                    "State configuration should be a snapshot isolated "
+                            + "from later chart mutations");
         }
     }
 
@@ -268,7 +294,10 @@ class ChartAIControllerTest {
 
             controller.restoreState(state);
 
-            Assertions.assertSame(config, chart.getConfiguration());
+            Assertions.assertNotSame(config, chart.getConfiguration(),
+                    "restoreState should copy the configuration");
+            Assertions.assertEquals(ChartType.COLUMN,
+                    chart.getConfiguration().getChart().getType());
 
             ChartEntry entry = ChartEntry.get(chart);
             Assertions.assertNotNull(entry);
@@ -311,6 +340,25 @@ class ChartAIControllerTest {
             Assertions.assertFalse(
                     chart.getConfiguration().getSeries().isEmpty(),
                     "restoreState should render the chart");
+        }
+
+        @Test
+        void doesNotMutateInputConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            ChartAIController.State state = new ChartAIController.State(
+                    List.of("SELECT 1"), config);
+
+            Assertions.assertTrue(config.getSeries().isEmpty());
+
+            controller.restoreState(state);
+
+            Assertions.assertTrue(state.configuration().getSeries().isEmpty(),
+                    "restoreState should not mutate the input State's "
+                            + "Configuration");
         }
 
         @Test
@@ -361,8 +409,12 @@ class ChartAIControllerTest {
             Assertions.assertNotNull(captured.get());
             Assertions.assertEquals(List.of("SELECT 1"),
                     captured.get().queries());
-            Assertions.assertSame(chart.getConfiguration(),
-                    captured.get().configuration());
+            Assertions.assertNotSame(chart.getConfiguration(),
+                    captured.get().configuration(),
+                    "Listener state should contain a copy");
+            Assertions.assertEquals(
+                    chart.getConfiguration().getChart().getType(),
+                    captured.get().configuration().getChart().getType());
         }
 
         @Test
@@ -423,6 +475,30 @@ class ChartAIControllerTest {
             Assertions.assertTrue(states.isEmpty(),
                     "Second onRequestCompleted should not fire listeners "
                             + "because pending state was already cleared");
+        }
+
+        @Test
+        void throwingListenerDoesNotPreventOtherListeners() {
+            AtomicReference<ChartAIController.State> secondListenerState = new AtomicReference<>();
+
+            controller.addStateChangeListener(state -> {
+                throw new RuntimeException("Listener failure");
+            });
+            controller.addStateChangeListener(secondListenerState::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNotNull(secondListenerState.get(),
+                    "Second listener should still fire even if the "
+                            + "first listener throws an exception");
         }
 
         @Test
@@ -521,6 +597,38 @@ class ChartAIControllerTest {
             // state from the second request.
             Assertions.assertEquals(ChartType.PIE,
                     chart.getConfiguration().getChart().getType());
+        }
+
+        @Test
+        void onRequestCompleted_listenerFiresOnlyOnceForLatestState() {
+            List<ChartAIController.State> capturedStates = new ArrayList<>();
+            controller.addStateChangeListener(capturedStates::add);
+
+            var tools = controller.getTools();
+
+            // First request while detached
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Second request while still detached
+            databaseProvider.results = List
+                    .of(Map.of("category", "B", "value", 20));
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 2\"]}");
+            controller.onRequestCompleted();
+
+            ui.add(chart);
+
+            Assertions.assertEquals(1, capturedStates.size(),
+                    "Listener should fire exactly once with the final "
+                            + "state, not once per queued deferred render");
         }
 
         @Test

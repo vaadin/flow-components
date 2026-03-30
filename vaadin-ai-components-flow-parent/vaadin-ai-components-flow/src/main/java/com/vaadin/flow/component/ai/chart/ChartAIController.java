@@ -30,6 +30,7 @@ import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
@@ -74,6 +75,7 @@ public class ChartAIController implements AIController {
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
     private final List<SerializableConsumer<State>> stateChangeListeners = new ArrayList<>();
+    private int renderVersion;
     private DataConverter dataConverter;
 
     /**
@@ -164,7 +166,8 @@ public class ChartAIController implements AIController {
         if (entry == null || entry.getQueries().isEmpty()) {
             return null;
         }
-        return new State(entry.getQueries(), chart.getConfiguration());
+        return new State(entry.getQueries(),
+                copyConfiguration(chart.getConfiguration()));
     }
 
     /**
@@ -179,7 +182,7 @@ public class ChartAIController implements AIController {
      */
     public void restoreState(State state) {
         Objects.requireNonNull(state, "State cannot be null");
-        chart.setConfiguration(state.configuration());
+        chart.setConfiguration(copyConfiguration(state.configuration()));
         ChartEntry entry = ChartEntry.getOrCreate(chart, CHART_ID);
         entry.setQueries(state.queries());
         deferRender(entry, state.queries(), null, false);
@@ -222,7 +225,11 @@ public class ChartAIController implements AIController {
 
     private void deferRender(ChartEntry entry, List<String> queries,
             String configJson, boolean fireListeners) {
+        int expectedVersion = ++renderVersion;
         chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+            if (expectedVersion != renderVersion) {
+                return;
+            }
             try {
                 ChartRenderer.renderChart(chart, databaseProvider,
                         dataConverter, queries, configJson);
@@ -244,9 +251,19 @@ public class ChartAIController implements AIController {
         State state = getState();
         if (state != null) {
             for (var listener : List.copyOf(stateChangeListeners)) {
-                listener.accept(state);
+                try {
+                    listener.accept(state);
+                } catch (Exception e) {
+                    LOGGER.error("State change listener failed", e);
+                }
             }
         }
+    }
+
+    private static Configuration copyConfiguration(
+            Configuration configuration) {
+        String json = ChartSerialization.toJSON(configuration);
+        return ChartConfigurationParser.parse(json);
     }
 
     /**
