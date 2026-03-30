@@ -34,68 +34,67 @@ class TimePickerVariantTest {
     }
 
     @Test
-    void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
+    void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_ALIGN_CENTER);
+        timePicker.addThemeVariants(TimePickerVariant.ALIGN_CENTER);
         assertThemeAttribute("align-center");
-        timePicker.removeThemeVariants(TimePickerVariant.LUMO_ALIGN_CENTER);
+        timePicker.removeThemeVariants(TimePickerVariant.ALIGN_CENTER);
         assertThemeAttribute(null);
     }
 
     @Test
-    void addLumoAlignRightVariant_themeAttributeUpdated() {
+    void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_ALIGN_RIGHT);
+        timePicker.addThemeVariants(TimePickerVariant.ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    void addLumoSmallVariant_themeAttributeUpdated() {
+    void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);
+        timePicker.addThemeVariants(TimePickerVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    void addLumoAlignLeftVariant_themeAttributeUpdated() {
+    void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_ALIGN_LEFT);
+        timePicker.addThemeVariants(TimePickerVariant.ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
     @Test
-    void addLumoHelperAboveField_themeAttributeUpdated() {
+    void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
     @Test
     void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        timePicker.addThemeVariants(TimePickerVariant.SMALL);
+        timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        timePicker
-                .removeThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        timePicker.removeThemeVariants(TimePickerVariant.HELPER_ABOVE);
         assertThemeAttribute("small");
     }
 
     @Test
     void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        timePicker.addThemeVariants(TimePickerVariant.SMALL);
+        timePicker.addThemeVariants(TimePickerVariant.HELPER_ABOVE);
         timePicker.getThemeNames().clear();
         assertThemeAttribute(null);
     }
 
     @Test
-    void addTwiceAndSeeIbce_themeAttributeUpdated() {
+    void addTwiceAndSeeOnce_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);
-        timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);
+        timePicker.addThemeVariants(TimePickerVariant.SMALL);
+        timePicker.addThemeVariants(TimePickerVariant.SMALL);
         assertThemeAttribute("small");
     }
 

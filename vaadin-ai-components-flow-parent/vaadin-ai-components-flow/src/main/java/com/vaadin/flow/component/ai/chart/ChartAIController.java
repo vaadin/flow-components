@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
@@ -35,11 +38,6 @@ import com.vaadin.flow.component.charts.Chart;
  * visualizations based on natural language requests.
  * </p>
  * <p>
- * Chart state ({@link ChartEntry}) is stored directly on the {@link Chart}
- * instance via {@link ChartEntry#getOrCreate(Chart)}, so there is no separate
- * registry to maintain.
- * </p>
- * <p>
  * State changes requested by the LLM through the update tools are deferred and
  * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
  * redraws during a multi-tool LLM turn.
@@ -48,6 +46,9 @@ import com.vaadin.flow.component.charts.Chart;
  * @author Vaadin Ltd
  */
 public class ChartAIController implements AIController {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ChartAIController.class);
 
     private static final String CHART_ID = "chart";
 
@@ -68,7 +69,7 @@ public class ChartAIController implements AIController {
 
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
-    private final ChartRenderer chartRenderer;
+    private DataConverter dataConverter;
 
     /**
      * Creates a new AI chart controller.
@@ -83,7 +84,7 @@ public class ChartAIController implements AIController {
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");
-        this.chartRenderer = new ChartRenderer(databaseProvider);
+        this.dataConverter = new DefaultDataConverter();
     }
 
     /**
@@ -94,7 +95,8 @@ public class ChartAIController implements AIController {
      *            the data converter to use, not {@code null}
      */
     public void setDataConverter(DataConverter dataConverter) {
-        chartRenderer.setDataConverter(dataConverter);
+        this.dataConverter = Objects.requireNonNull(dataConverter,
+                "Data converter cannot be null");
     }
 
     /**
@@ -148,6 +150,27 @@ public class ChartAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        chartRenderer.applyPendingState(chart);
+        ChartEntry entry = ChartEntry.get(chart);
+        if (entry == null || !entry.hasPendingState()) {
+            return;
+        }
+
+        List<String> queries = entry.getQueries();
+        if (queries.isEmpty()) {
+            // Config-only: no queries to render yet. Clear only the
+            // data flag but keep pendingConfigurationJson so it's used
+            // when data arrives in a later request.
+            entry.setPendingDataUpdate(false);
+            return;
+        }
+
+        try {
+            ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
+                    queries, entry.getPendingConfigurationJson());
+        } catch (Exception e) {
+            LOGGER.error("onRequestCompleted: rendering failed", e);
+        } finally {
+            entry.clearPendingState();
+        }
     }
 }

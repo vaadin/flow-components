@@ -181,8 +181,8 @@ class ChartRenderingTest {
             // Make DB throw for the render phase
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
 
-            Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onRequestCompleted());
+            // Exception is caught internally; no exception should propagate
+            controller.onRequestCompleted();
 
             // Pending state should be cleared despite the error
             databaseProvider.throwOnExecute = null;
@@ -790,7 +790,7 @@ class ChartRenderingTest {
             controller.onRequestCompleted();
 
             // Subtitle should be cleared
-            Assertions.assertEquals("",
+            Assertions.assertNull(
                     chart.getConfiguration().getSubTitle().getText());
         }
 
@@ -816,8 +816,8 @@ class ChartRenderingTest {
             updateData("SELECT category, value FROM t");
             controller.onRequestCompleted();
 
-            Assertions.assertFalse(
-                    chart.getConfiguration().getChart().getPolar());
+            Assertions
+                    .assertNull(chart.getConfiguration().getChart().getPolar());
         }
 
         @Test

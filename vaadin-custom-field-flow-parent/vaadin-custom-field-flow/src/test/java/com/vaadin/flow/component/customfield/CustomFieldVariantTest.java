@@ -41,17 +41,16 @@ class CustomFieldVariantTest {
     }
 
     @Test
-    void addLumoSmall_themeAttributeUpdated() {
+    void addSmall_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
+        customField.addThemeVariants(CustomFieldVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    void addLumoHelperAboveField_themeAttributeUpdated() {
+    void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField
-                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
@@ -65,22 +64,19 @@ class CustomFieldVariantTest {
     @Test
     void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
-        customField
-                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.addThemeVariants(CustomFieldVariant.SMALL);
+        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        customField.removeThemeVariants(
-                CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.removeThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         assertThemeAttribute("small");
     }
 
     @Test
     void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        customField.addThemeVariants(CustomFieldVariant.LUMO_SMALL);
-        customField
-                .addThemeVariants(CustomFieldVariant.LUMO_HELPER_ABOVE_FIELD);
+        customField.addThemeVariants(CustomFieldVariant.SMALL);
+        customField.addThemeVariants(CustomFieldVariant.HELPER_ABOVE);
         customField.getThemeNames().clear();
         assertThemeAttribute(null);
     }

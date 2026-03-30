@@ -31,68 +31,67 @@ class DatePickerVariantTest {
     }
 
     @Test
-    void addAndRemoveLumoAlignCenterVariant_themeAttributeUpdated() {
+    void addAndRemoveAlignCenterVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_ALIGN_CENTER);
+        datePicker.addThemeVariants(DatePickerVariant.ALIGN_CENTER);
         assertThemeAttribute("align-center");
-        datePicker.removeThemeVariants(DatePickerVariant.LUMO_ALIGN_CENTER);
+        datePicker.removeThemeVariants(DatePickerVariant.ALIGN_CENTER);
         assertThemeAttribute(null);
     }
 
     @Test
-    void addLumoAlignRightVariant_themeAttributeUpdated() {
+    void addAlignRightVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_ALIGN_RIGHT);
+        datePicker.addThemeVariants(DatePickerVariant.ALIGN_RIGHT);
         assertThemeAttribute("align-right");
     }
 
     @Test
-    void addLumoSmallVariant_themeAttributeUpdated() {
+    void addSmallVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
+        datePicker.addThemeVariants(DatePickerVariant.SMALL);
         assertThemeAttribute("small");
     }
 
     @Test
-    void addLumoAlignLeftVariant_themeAttributeUpdated() {
+    void addAlignLeftVariant_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_ALIGN_LEFT);
+        datePicker.addThemeVariants(DatePickerVariant.ALIGN_LEFT);
         assertThemeAttribute("align-left");
     }
 
     @Test
-    void addLumoHelperAboveField_themeAttributeUpdated() {
+    void addHelperAbove_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE);
         assertThemeAttribute("helper-above-field");
     }
 
     @Test
     void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        datePicker.addThemeVariants(DatePickerVariant.SMALL);
+        datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE);
         assertThemeAttributeContains("helper-above-field");
         assertThemeAttributeContains("small");
-        datePicker
-                .removeThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        datePicker.removeThemeVariants(DatePickerVariant.HELPER_ABOVE);
         assertThemeAttribute("small");
     }
 
     @Test
     void addAndRemoveAllMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_HELPER_ABOVE_FIELD);
+        datePicker.addThemeVariants(DatePickerVariant.SMALL);
+        datePicker.addThemeVariants(DatePickerVariant.HELPER_ABOVE);
         datePicker.getThemeNames().clear();
         assertThemeAttribute(null);
     }
 
     @Test
-    void addTwiceAndSeeIbce_themeAttributeUpdated() {
+    void addTwiceAndSeeOnce_themeAttributeUpdated() {
         assertThemeAttribute(null);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
-        datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
+        datePicker.addThemeVariants(DatePickerVariant.SMALL);
+        datePicker.addThemeVariants(DatePickerVariant.SMALL);
         assertThemeAttribute("small");
     }
 

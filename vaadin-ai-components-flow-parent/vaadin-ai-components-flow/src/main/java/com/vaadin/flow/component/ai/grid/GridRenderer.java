@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -33,6 +32,7 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
@@ -40,31 +40,21 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 
 /**
- * Renders grid data from SQL queries. Handles column creation, type-based
- * rendering, column grouping, and lazy loading via
+ * Stateless utility for rendering grid data from SQL queries. Handles column
+ * creation, type-based rendering, column grouping, and lazy loading via
  * {@link CallbackDataProvider}.
  *
  * @author Vaadin Ltd
  * @see GridAIController
  */
-public class GridRenderer implements Serializable {
+public final class GridRenderer implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridRenderer.class);
 
     private static final String DEFAULT_EMPTY_STATE_TEXT = "No results";
 
-    private final DatabaseProvider databaseProvider;
-
-    /**
-     * Creates a new grid renderer.
-     *
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
-     */
-    public GridRenderer(DatabaseProvider databaseProvider) {
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "databaseProvider must not be null");
+    private GridRenderer() {
     }
 
     /**
@@ -77,10 +67,13 @@ public class GridRenderer implements Serializable {
      *
      * @param grid
      *            the grid to render, not {@code null}
+     * @param databaseProvider
+     *            the database provider for query execution, not {@code null}
      * @param query
      *            the SQL SELECT query, not {@code null}
      */
-    public void renderGrid(Grid<Map<String, Object>> grid, String query) {
+    public static void renderGrid(Grid<Map<String, Object>> grid,
+            DatabaseProvider databaseProvider, String query) {
         var sampleRows = databaseProvider.executeQuery(wrapWithLimit(query, 1));
         removeExtraHeaderRows(grid);
         grid.removeAllColumns();
@@ -103,12 +96,13 @@ public class GridRenderer implements Serializable {
             addColumn(grid, entry.getKey(), entry.getValue());
         }
         applyColumnGrouping(grid);
-        setupLazyDataProvider(grid, query);
+        var dataProvider = createDataProvider(databaseProvider, query);
+        grid.setItems(dataProvider);
         LOGGER.info("Grid configured with {} columns", firstRow.size());
     }
 
-    private void addColumn(Grid<Map<String, Object>> grid, String columnName,
-            Object sampleValue) {
+    private static void addColumn(Grid<Map<String, Object>> grid,
+            String columnName, Object sampleValue) {
         var header = GridFormatting
                 .formatHeader(GridFormatting.stripGroupPrefix(columnName));
 
@@ -138,7 +132,7 @@ public class GridRenderer implements Serializable {
                 .setAutoWidth(true).setResizable(true);
     }
 
-    private void applyColumnGrouping(Grid<Map<String, Object>> grid) {
+    private static void applyColumnGrouping(Grid<Map<String, Object>> grid) {
         var groups = new LinkedHashMap<String, List<Grid.Column<Map<String, Object>>>>();
         for (var column : grid.getColumns()) {
             var key = column.getKey();
@@ -173,28 +167,24 @@ public class GridRenderer implements Serializable {
         }
     }
 
-    private void setupLazyDataProvider(Grid<Map<String, Object>> grid,
-            String query) {
+    private static DataProvider<Map<String, Object>, Void> createDataProvider(
+            DatabaseProvider databaseProvider, String query) {
         var countQuery = wrapWithCount(query);
-        var dataProvider = new CallbackDataProvider<Map<String, Object>, Void>(
-                fetchQuery -> {
-                    var sql = enrichQuery(query, fetchQuery.getOffset(),
-                            fetchQuery.getLimit(), fetchQuery.getSortOrders());
-                    LOGGER.debug("Fetching rows: {}", sql);
-                    return databaseProvider.executeQuery(sql).stream();
-                }, countFetchQuery -> {
-                    LOGGER.debug("Counting rows: {}", countQuery);
-                    var countResult = databaseProvider.executeQuery(countQuery);
-                    if (!countResult.isEmpty()) {
-                        var firstValue = countResult.getFirst().values()
-                                .iterator().next();
-                        return firstValue instanceof Number n ? n.intValue()
-                                : 0;
-                    }
-                    return 0;
-                }, row -> row);
-
-        grid.setItems(dataProvider);
+        return new CallbackDataProvider<>(fetchQuery -> {
+            var sql = enrichQuery(query, fetchQuery.getOffset(),
+                    fetchQuery.getLimit(), fetchQuery.getSortOrders());
+            LOGGER.debug("Fetching rows: {}", sql);
+            return databaseProvider.executeQuery(sql).stream();
+        }, countFetchQuery -> {
+            LOGGER.debug("Counting rows: {}", countQuery);
+            var countResult = databaseProvider.executeQuery(countQuery);
+            if (!countResult.isEmpty()) {
+                var firstValue = countResult.getFirst().values().iterator()
+                        .next();
+                return firstValue instanceof Number n ? n.intValue() : 0;
+            }
+            return 0;
+        }, row -> row);
     }
 
     // --- Type conversion helpers ---
@@ -221,7 +211,7 @@ public class GridRenderer implements Serializable {
 
     // --- SQL helpers ---
 
-    static String enrichQuery(String query, int offset, int limit,
+    private static String enrichQuery(String query, int offset, int limit,
             List<QuerySortOrder> sortOrders) {
         var sortOrdersExpression = sortOrders.stream().map(sortOrder -> {
             var col = sortOrder.getSorted();
@@ -237,11 +227,11 @@ public class GridRenderer implements Serializable {
         return wrapWithLimit(query, limit) + " OFFSET " + offset;
     }
 
-    static String wrapWithLimit(String query, int limit) {
+    private static String wrapWithLimit(String query, int limit) {
         return "SELECT * FROM (" + query + ") AS _limited LIMIT " + limit;
     }
 
-    static String wrapWithCount(String query) {
+    private static String wrapWithCount(String query) {
         return "SELECT COUNT(*) FROM (" + query + ") AS _counted";
     }
 }

@@ -20,15 +20,20 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
- * Holds the data source query and pending LLM state for a grid. Grid entries
- * are stored directly on the {@link Grid} instance via {@link ComponentUtil},
- * so their lifecycle is tied to the grid component.
+ * Holds the pending and current query state for an AI-managed grid. Entries are
+ * stored directly on the {@link Grid} instance via {@link ComponentUtil}, so
+ * their lifecycle is tied to the grid component and they survive serialization.
  *
  * @author Vaadin Ltd
  */
 public class GridEntry implements Serializable {
+
+    private final String id;
+    private String currentQuery;
+    private String pendingQuery;
 
     /**
      * Gets the {@link GridEntry} for the given grid, or {@code null} if none
@@ -53,7 +58,7 @@ public class GridEntry implements Serializable {
      * @return the grid entry, never {@code null}
      */
     public static GridEntry getOrCreate(Grid<?> grid, String gridId) {
-        GridEntry entry = ComponentUtil.getData(grid, GridEntry.class);
+        var entry = get(grid);
         if (entry == null) {
             entry = new GridEntry(gridId);
             ComponentUtil.setData(grid, GridEntry.class, entry);
@@ -61,9 +66,28 @@ public class GridEntry implements Serializable {
         return entry;
     }
 
-    private final String id;
-    private String query;
-    private boolean pendingDataUpdate;
+    /**
+     * Returns the current state of the grid as a JSON string suitable for LLM
+     * tool responses.
+     *
+     * @param grid
+     *            the grid component, not {@code null}
+     * @param gridId
+     *            the grid ID
+     * @return the state as a JSON string, never {@code null}
+     */
+    public static String getStateAsJson(Grid<?> grid, String gridId) {
+        var node = JacksonUtils.createObjectNode();
+        node.put("gridId", gridId);
+        var entry = get(grid);
+        if (entry == null || entry.currentQuery == null) {
+            node.put("status", "empty");
+            node.put("message", "No grid data has been loaded yet");
+        } else {
+            node.put("query", entry.currentQuery);
+        }
+        return node.toString();
+    }
 
     /**
      * Creates a new grid entry with the given ID.
@@ -85,57 +109,58 @@ public class GridEntry implements Serializable {
     }
 
     /**
-     * Gets the current SQL query for this grid's data.
+     * Returns the current query that was last successfully rendered, or
+     * {@code null} if no query has been applied yet.
      *
-     * @return the SQL query, or {@code null} if no query has been set
+     * @return the current SQL query, or {@code null}
      */
-    public String getQuery() {
-        return query;
+    public String getCurrentQuery() {
+        return currentQuery;
     }
 
     /**
-     * Sets the SQL query for this grid's data.
+     * Sets the current query after successful rendering.
      *
      * @param query
      *            the SQL query
      */
-    public void setQuery(String query) {
-        this.query = query;
+    public void setCurrentQuery(String query) {
+        this.currentQuery = query;
     }
 
     /**
-     * Returns whether a data update is pending.
+     * Returns the pending query waiting to be rendered, or {@code null} if
+     * none.
      *
-     * @return {@code true} if the query was changed and the grid needs
-     *         re-rendering
+     * @return the pending SQL query, or {@code null}
      */
-    public boolean isPendingDataUpdate() {
-        return pendingDataUpdate;
+    public String getPendingQuery() {
+        return pendingQuery;
     }
 
     /**
-     * Marks or clears the pending data update flag.
+     * Sets a pending query to be rendered.
      *
-     * @param pendingDataUpdate
-     *            {@code true} if the grid data needs re-rendering
+     * @param query
+     *            the SQL query
      */
-    public void setPendingDataUpdate(boolean pendingDataUpdate) {
-        this.pendingDataUpdate = pendingDataUpdate;
+    public void setPendingQuery(String query) {
+        this.pendingQuery = query;
     }
 
     /**
-     * Returns whether this entry has pending state waiting to be applied.
+     * Returns whether this entry has a pending query waiting to be applied.
      *
-     * @return {@code true} if there is a pending data update
+     * @return {@code true} if there is a pending query
      */
     public boolean hasPendingState() {
-        return pendingDataUpdate;
+        return pendingQuery != null;
     }
 
     /**
-     * Clears all pending state.
+     * Clears the pending query.
      */
     public void clearPendingState() {
-        pendingDataUpdate = false;
+        pendingQuery = null;
     }
 }

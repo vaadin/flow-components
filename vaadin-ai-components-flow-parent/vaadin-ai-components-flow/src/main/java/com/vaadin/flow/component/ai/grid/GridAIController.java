@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,6 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * AI controller for populating a {@link Grid} with database data via LLM tool
@@ -43,10 +41,9 @@ import com.vaadin.flow.internal.JacksonUtils;
  * <li>Column grouping from dot-separated aliases</li>
  * </ul>
  * <p>
- * Tools are provided by {@link GridAITools} and
- * {@link DatabaseProviderAITools}. Rendering is handled by
- * {@link GridRenderer}. State changes are deferred and applied in
- * {@link #onRequestCompleted()}.
+ * State changes requested by the LLM through the update tools are deferred and
+ * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
+ * redraws during a multi-tool LLM turn.
  * </p>
  *
  * @author Vaadin Ltd
@@ -59,14 +56,10 @@ public class GridAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAIController.class);
 
-    private static final String DEFAULT_GRID_ID = "grid";
+    private static final String GRID_ID = "grid";
 
     private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
-    private final GridRenderer gridRenderer;
-
-    private final AtomicReference<String> currentQuery = new AtomicReference<>();
-    private final AtomicReference<String> pendingQuery = new AtomicReference<>();
 
     /**
      * Creates a new grid AI controller.
@@ -82,7 +75,6 @@ public class GridAIController implements AIController {
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "DatabaseProvider must not be null");
-        this.gridRenderer = new GridRenderer(databaseProvider);
     }
 
     /**
@@ -131,28 +123,21 @@ public class GridAIController implements AIController {
         tools.addAll(GridAITools.createAll(new GridAITools.Callbacks() {
             @Override
             public String getState(String gridId) {
-                var query = currentQuery.get();
-                var node = JacksonUtils.createObjectNode();
-                node.put("gridId", gridId);
-                if (query == null) {
-                    node.put("status", "empty");
-                    node.put("message", "No grid data has been loaded yet");
-                } else {
-                    node.put("query", query);
-                }
-                return node.toString();
+                return GridEntry.getStateAsJson(grid, gridId);
             }
 
             @Override
             public void updateData(String gridId, String query) {
-                databaseProvider
-                        .executeQuery(GridRenderer.wrapWithLimit(query, 1));
-                pendingQuery.set(query);
+                // Validate eagerly so invalid SQL propagates back
+                // to the LLM as a tool error it can fix.
+                databaseProvider.executeQuery(
+                        "SELECT * FROM (" + query + ") AS _v LIMIT 1");
+                GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
             }
 
             @Override
             public Set<String> getGridIds() {
-                return Set.of(DEFAULT_GRID_ID);
+                return Set.of(GRID_ID);
             }
         }));
         return tools;
@@ -160,19 +145,22 @@ public class GridAIController implements AIController {
 
     @Override
     public void onRequestCompleted() {
-        var query = pendingQuery.getAndSet(null);
-        if (query == null) {
+        var entry = GridEntry.get(grid);
+        if (entry == null || !entry.hasPendingState()) {
             LOGGER.debug("onRequestCompleted: no pending query");
             return;
         }
+        var query = entry.getPendingQuery();
         LOGGER.info("onRequestCompleted: applying query: {}", query);
         grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             try {
-                gridRenderer.renderGrid(grid, query);
-                currentQuery.set(query);
+                GridRenderer.renderGrid(grid, databaseProvider, query);
+                entry.setCurrentQuery(query);
                 LOGGER.info("onRequestCompleted: grid updated successfully");
             } catch (Exception e) {
                 LOGGER.error("Error updating grid", e);
+            } finally {
+                entry.clearPendingState();
             }
         }));
     }

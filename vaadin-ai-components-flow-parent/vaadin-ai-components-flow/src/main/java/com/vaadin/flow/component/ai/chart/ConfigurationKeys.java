@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 /**
  * Highcharts configuration property key constants used by
- * {@link ChartConfigurationApplier} and referenced in the
+ * {@link ChartConfigurationParser} and referenced in the
  * {@link ChartAITools#updateChartConfiguration} tool parameter schema.
  * <p>
  * These match the Highcharts options object property names.
