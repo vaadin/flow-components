@@ -64,17 +64,18 @@ public final class ChartRenderer implements Serializable {
             DatabaseProvider databaseProvider, DataConverter dataConverter,
             List<String> queries, String configJson) {
         chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-            Configuration config = chart.getConfiguration();
             List<Series> allSeries = new ArrayList<>();
             for (String query : queries) {
                 var results = databaseProvider.executeQuery(query);
                 allSeries.addAll(dataConverter.convertToSeries(results));
             }
-            config.setSeries(allSeries.toArray(new Series[0]));
 
             if (configJson != null) {
                 ChartConfigurationApplier.applyConfiguration(chart, configJson);
             }
+
+            Configuration config = chart.getConfiguration();
+            config.setSeries(allSeries.toArray(new Series[0]));
 
             // Apply axis defaults from series data after LLM config,
             // so that data-driven axis type detection (e.g. datetime)

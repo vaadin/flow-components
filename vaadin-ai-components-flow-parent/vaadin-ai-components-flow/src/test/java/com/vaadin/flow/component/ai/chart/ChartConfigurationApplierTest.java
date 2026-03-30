@@ -55,6 +55,7 @@ class ChartConfigurationApplierTest {
 
     private void apply(String json) {
         ChartConfigurationApplier.applyConfiguration(chart, json);
+        config = chart.getConfiguration();
     }
 
     @Nested
@@ -496,10 +497,10 @@ class ChartConfigurationApplierTest {
         }
 
         @Test
-        void emptyObject_doesNotChangeConfig() {
+        void emptyObject_resetsConfig() {
             config.setTitle("Original");
             apply("{}");
-            Assertions.assertEquals("Original", config.getTitle().getText());
+            Assertions.assertNull(config.getTitle().getText());
         }
     }
 }
