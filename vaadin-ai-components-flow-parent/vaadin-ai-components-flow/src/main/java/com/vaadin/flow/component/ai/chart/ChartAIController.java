@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +29,9 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * AI controller for creating interactive chart visualizations from database
@@ -69,6 +73,7 @@ public class ChartAIController implements AIController {
 
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
+    private final List<SerializableConsumer<State>> stateChangeListeners = new ArrayList<>();
     private DataConverter dataConverter;
 
     /**
@@ -148,6 +153,57 @@ public class ChartAIController implements AIController {
         return tools;
     }
 
+    /**
+     * Returns the current chart state, including the SQL queries and
+     * configuration. Returns {@code null} if the chart has no data queries.
+     *
+     * @return the current state, or {@code null}
+     */
+    public State getState() {
+        ChartEntry entry = ChartEntry.get(chart);
+        if (entry == null || entry.getQueries().isEmpty()) {
+            return null;
+        }
+        return new State(entry.getQueries(), chart.getConfiguration());
+    }
+
+    /**
+     * Restores a previously saved chart state. Applies the configuration, sets
+     * the queries, and re-renders the chart.
+     * <p>
+     * Does not fire state change listeners.
+     * </p>
+     *
+     * @param state
+     *            the state to restore, not {@code null}
+     */
+    public void restoreState(State state) {
+        Objects.requireNonNull(state, "State cannot be null");
+        chart.setConfiguration(state.configuration());
+        ChartEntry entry = ChartEntry.getOrCreate(chart, CHART_ID);
+        entry.setQueries(state.queries());
+        entry.clearPendingState();
+        chart.getElement().getNode()
+                .runWhenAttached(ui -> ui.access(
+                        () -> ChartRenderer.renderChart(chart, databaseProvider,
+                                dataConverter, state.queries(), null)));
+    }
+
+    /**
+     * Adds a listener that is notified when the chart state changes after an AI
+     * request completes successfully.
+     *
+     * @param listener
+     *            the listener, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addStateChangeListener(
+            SerializableConsumer<State> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        stateChangeListeners.add(listener);
+        return () -> stateChangeListeners.remove(listener);
+    }
+
     @Override
     public void onRequestCompleted() {
         ChartEntry entry = ChartEntry.get(chart);
@@ -164,13 +220,55 @@ public class ChartAIController implements AIController {
             return;
         }
 
-        try {
-            ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
-                    queries, entry.getPendingConfigurationJson());
-        } catch (Exception e) {
-            LOGGER.error("onRequestCompleted: rendering failed", e);
-        } finally {
-            entry.clearPendingState();
+        String configJson = entry.getPendingConfigurationJson();
+        entry.clearPendingState();
+
+        chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
+            try {
+                ChartRenderer.renderChart(chart, databaseProvider,
+                        dataConverter, queries, configJson);
+                fireStateChangeListeners();
+            } catch (Exception e) {
+                LOGGER.error("onRequestCompleted: rendering failed", e);
+            }
+        }));
+    }
+
+    private void fireStateChangeListeners() {
+        if (stateChangeListeners.isEmpty()) {
+            return;
+        }
+        State state = getState();
+        if (state != null) {
+            for (var listener : List.copyOf(stateChangeListeners)) {
+                listener.accept(state);
+            }
+        }
+    }
+
+    /**
+     * Immutable snapshot of the chart's current state, suitable for persistence
+     * or cross-session sharing.
+     *
+     * @param queries
+     *            the SQL queries for the chart's data series
+     * @param configuration
+     *            the chart configuration
+     */
+    public record State(List<String> queries,
+            Configuration configuration) implements Serializable {
+        /**
+         * Creates a new state instance.
+         *
+         * @param queries
+         *            the SQL queries, not {@code null}
+         * @param configuration
+         *            the chart configuration, not {@code null}
+         */
+        public State {
+            queries = List.copyOf(queries);
+            Objects.requireNonNull(configuration,
+                    "Configuration cannot be null");
         }
     }
 }

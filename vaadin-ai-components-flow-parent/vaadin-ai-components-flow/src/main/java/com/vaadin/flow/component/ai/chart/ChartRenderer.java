@@ -63,35 +63,32 @@ public final class ChartRenderer implements Serializable {
     public static void renderChart(Chart chart,
             DatabaseProvider databaseProvider, DataConverter dataConverter,
             List<String> queries, String configJson) {
-        chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-            List<Series> allSeries = new ArrayList<>();
-            for (String query : queries) {
-                var results = databaseProvider.executeQuery(query);
-                allSeries.addAll(dataConverter.convertToSeries(results));
-            }
+        List<Series> allSeries = new ArrayList<>();
+        for (String query : queries) {
+            var results = databaseProvider.executeQuery(query);
+            allSeries.addAll(dataConverter.convertToSeries(results));
+        }
 
-            if (configJson != null) {
-                chart.setConfiguration(
-                        ChartConfigurationParser.parse(configJson));
-            }
+        if (configJson != null) {
+            chart.setConfiguration(ChartConfigurationParser.parse(configJson));
+        }
 
-            Configuration config = chart.getConfiguration();
-            config.setSeries(allSeries.toArray(new Series[0]));
+        Configuration config = chart.getConfiguration();
+        config.setSeries(allSeries.toArray(new Series[0]));
 
-            // Apply axis defaults from series data after LLM config,
-            // so that data-driven axis type detection (e.g. datetime)
-            // overrides any incorrect LLM-provided axis type.
-            applyAxisDefaults(config, allSeries);
+        // Apply axis defaults from series data after LLM config,
+        // so that data-driven axis type detection (e.g. datetime)
+        // overrides any incorrect LLM-provided axis type.
+        applyAxisDefaults(config, allSeries);
 
-            // Name single unnamed series using the chart title so the
-            // legend shows a meaningful label instead of "Series 1".
-            nameUnnamedSeries(config, allSeries);
+        // Name single unnamed series using the chart title so the
+        // legend shows a meaningful label instead of "Series 1".
+        nameUnnamedSeries(config, allSeries);
 
-            // Full reset required. Without it, axis categories are
-            // lost when the chart is rendered via async Push (see
-            // DashboardChartControllerIT).
-            chart.drawChart(true);
-        }));
+        // Full reset required. Without it, axis categories are
+        // lost when the chart is rendered via async Push (see
+        // DashboardChartControllerIT).
+        chart.drawChart(true);
     }
 
     /**

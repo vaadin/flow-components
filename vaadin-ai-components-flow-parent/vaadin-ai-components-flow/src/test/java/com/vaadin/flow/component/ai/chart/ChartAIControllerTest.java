@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.chart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.ChartType;
+import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.tests.MockUIExtension;
@@ -219,6 +222,156 @@ class ChartAIControllerTest {
             Assertions.assertEquals(1, items.size());
             Assertions.assertEquals("A", items.get(0).getName());
             Assertions.assertEquals(42, items.get(0).getY().intValue());
+        }
+    }
+
+    @Nested
+    class GetState {
+
+        @Test
+        void noEntry_returnsNull() {
+            Assertions.assertNull(controller.getState());
+        }
+
+        @Test
+        void afterRender_returnsQueriesAndConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"column\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            ChartAIController.State state = controller.getState();
+            Assertions.assertNotNull(state);
+            Assertions.assertEquals(List.of("SELECT 1"), state.queries());
+            Assertions.assertSame(chart.getConfiguration(),
+                    state.configuration());
+        }
+    }
+
+    @Nested
+    class RestoreState {
+
+        @Test
+        void appliesConfigurationAndQueries() {
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            ChartAIController.State state = new ChartAIController.State(
+                    List.of("SELECT 1"), config);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            controller.restoreState(state);
+
+            Assertions.assertSame(config, chart.getConfiguration());
+
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertNotNull(entry);
+            Assertions.assertEquals(List.of("SELECT 1"), entry.getQueries());
+        }
+
+        @Test
+        void nullState_throws() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.restoreState(null));
+        }
+
+        @Test
+        void doesNotFireListeners() {
+            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            controller.restoreState(
+                    new ChartAIController.State(List.of("SELECT 1"), config));
+
+            Assertions.assertNull(captured.get());
+        }
+    }
+
+    @Nested
+    class StateChangeListeners {
+
+        @Test
+        void firesAfterOnRequestCompleted() {
+            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNotNull(captured.get());
+            Assertions.assertEquals(List.of("SELECT 1"),
+                    captured.get().queries());
+            Assertions.assertSame(chart.getConfiguration(),
+                    captured.get().configuration());
+        }
+
+        @Test
+        void doesNotFireOnRenderFailure() {
+            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            databaseProvider.throwOnExecute = new RuntimeException(
+                    "Render failure");
+            controller.onRequestCompleted();
+
+            Assertions.assertNull(captured.get());
+        }
+
+        @Test
+        void registration_removesListener() {
+            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            var registration = controller.addStateChangeListener(captured::set);
+            registration.remove();
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNull(captured.get());
+        }
+
+        @Test
+        void configOnlyUpdate_doesNotFire() {
+            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNull(captured.get());
         }
     }
 
