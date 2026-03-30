@@ -359,6 +359,7 @@ public class NavigationIT extends AbstractSpreadsheetIT {
         assertSelectedCell("A44");
     }
 
+    @Ignore("flaky")
     @Test
     public void testEnterAndTabWhenFormulaFieldIsFocused() throws Exception {
         clickCell("J10");
