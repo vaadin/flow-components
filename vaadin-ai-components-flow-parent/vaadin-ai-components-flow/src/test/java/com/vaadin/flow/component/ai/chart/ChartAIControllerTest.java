@@ -1,0 +1,251 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.ai.chart;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.tests.MockUIExtension;
+
+class ChartAIControllerTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+
+    private Chart chart;
+    private TestDatabaseProvider databaseProvider;
+    private ChartAIController controller;
+
+    @BeforeEach
+    void setUp() {
+        chart = new Chart();
+        ui.add(chart);
+        databaseProvider = new TestDatabaseProvider();
+        controller = new ChartAIController(chart, databaseProvider);
+    }
+
+    @Nested
+    class Constructor {
+
+        @Test
+        void nullChart_throws() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> new ChartAIController(null, databaseProvider));
+        }
+
+        @Test
+        void nullDatabaseProvider_throws() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> new ChartAIController(chart, null));
+        }
+    }
+
+    @Nested
+    class GetTools {
+
+        @Test
+        void toolNamesIncludeExpected() {
+            var names = controller.getTools().stream().map(t -> t.getName())
+                    .toList();
+            Assertions.assertTrue(names.contains("get_database_schema"));
+            Assertions.assertTrue(names.contains("get_chart_state"));
+            Assertions.assertTrue(names.contains("update_chart_configuration"));
+            Assertions.assertTrue(names.contains("update_chart_data_source"));
+        }
+    }
+
+    @Nested
+    class GetSystemPrompt {
+
+        @Test
+        void isNotEmpty() {
+            Assertions
+                    .assertFalse(ChartAIController.getSystemPrompt().isEmpty());
+        }
+
+        @Test
+        void mentionsWorkflow() {
+            Assertions.assertTrue(ChartAIController.getSystemPrompt()
+                    .contains("get_chart_state"));
+        }
+    }
+
+    @Nested
+    class ToolCallbacks {
+
+        @Test
+        void getChartState_excludesSeriesFromConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"column\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            String state = findTool(tools, "get_chart_state").execute("{}");
+            Assertions.assertTrue(state.contains("\"configuration\""));
+            Assertions.assertFalse(state.contains("\"series\""),
+                    "State configuration should not contain series data");
+        }
+
+        @Test
+        void getOrCreate_withMismatchedChartId_throws() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertNotNull(entry);
+
+            Assertions.assertThrows(IllegalStateException.class,
+                    () -> ChartEntry.getOrCreate(chart, "wrong-id"));
+        }
+
+        @Test
+        void updateData_validatesQueriesEagerly() {
+            databaseProvider.throwOnExecute = new RuntimeException("Bad SQL");
+
+            var tool = controller.getTools().stream()
+                    .filter(t -> t.getName().equals("update_chart_data_source"))
+                    .findFirst().get();
+
+            String result = tool.execute("{\"queries\":[\"SELECT invalid\"]}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("Bad SQL"));
+        }
+
+        @Test
+        void onRequestCompleted_renderFails_doesNotThrow() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            databaseProvider.throwOnExecute = new RuntimeException(
+                    "Render failure");
+
+            Assertions
+                    .assertDoesNotThrow(() -> controller.onRequestCompleted());
+        }
+
+        @Test
+        void updateData_setsPendingDataUpdate() {
+            databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
+
+            var tools = controller.getTools();
+            var dataTool = tools.stream()
+                    .filter(t -> t.getName().equals("update_chart_data_source"))
+                    .findFirst().get();
+
+            String result = dataTool.execute("{\"queries\":[\"SELECT 1\"]}");
+            Assertions.assertTrue(result.contains("updated"));
+
+            // Verify queries are stored via get_chart_state
+            var stateTool = tools.stream()
+                    .filter(t -> t.getName().equals("get_chart_state"))
+                    .findFirst().get();
+            String state = stateTool.execute("{}");
+            Assertions.assertTrue(state.contains("SELECT 1"));
+        }
+    }
+
+    @Nested
+    class SetDataConverter {
+
+        @Test
+        void customConverter_isUsedDuringRendering() {
+            databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
+
+            controller.setDataConverter(data -> {
+                DataSeries series = new DataSeries("custom");
+                series.add(new DataSeriesItem("A", 42));
+                return List.of(series);
+            });
+
+            var tools = controller.getTools();
+
+            tools.stream()
+                    .filter(t -> t.getName()
+                            .equals("update_chart_configuration"))
+                    .findFirst().get().execute(
+                            "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+
+            tools.stream()
+                    .filter(t -> t.getName().equals("update_chart_data_source"))
+                    .findFirst().get().execute("{\"queries\":[\"SELECT 1\"]}");
+
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(1, series.size());
+            Assertions.assertEquals("custom", series.get(0).getName());
+            var items = ((DataSeries) series.get(0)).getData();
+            Assertions.assertEquals(1, items.size());
+            Assertions.assertEquals("A", items.get(0).getName());
+            Assertions.assertEquals(42, items.get(0).getY().intValue());
+        }
+    }
+
+    // --- Helpers ---
+
+    private static LLMProvider.ToolSpec findTool(
+            List<LLMProvider.ToolSpec> tools, String name) {
+        return tools.stream().filter(t -> t.getName().equals(name)).findFirst()
+                .orElseThrow();
+    }
+
+    private static class TestDatabaseProvider implements DatabaseProvider {
+
+        List<Map<String, Object>> results = new ArrayList<>();
+        RuntimeException throwOnExecute;
+
+        @Override
+        public String getSchema() {
+            return "test schema";
+        }
+
+        @Override
+        public List<Map<String, Object>> executeQuery(String sql) {
+            if (throwOnExecute != null) {
+                throw throwOnExecute;
+            }
+            return results;
+        }
+    }
+}

@@ -70,7 +70,10 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Builder",
                 // Static utility class with anonymous ToolSpec instances —
                 // not instantiable or serializable
-                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAITools(\\$\\d+)?"));
+                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAITools(\\$\\d+)?",
+                // ChartAIController — intentionally not serializable;
+                // restored via reconnect()
+                "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAIController"));
     }
 
     @BeforeEach
