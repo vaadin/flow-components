@@ -41,9 +41,14 @@ import com.vaadin.flow.component.grid.Grid;
  * <li>Column grouping from dot-separated aliases</li>
  * </ul>
  * <p>
- * State changes requested by the LLM through the update tools are deferred and
- * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
- * redraws during a multi-tool LLM turn.
+ * State changes requested by the LLM are deferred and applied in
+ * {@link #onRequestCompleted()}, avoiding partial state and multiple redraws
+ * during a multi-tool LLM turn. The grid state is stored directly on the
+ * {@link Grid} component, so it survives serialization.
+ * </p>
+ * <p>
+ * This controller is <b>not serializable</b>. Grid state can be captured via
+ * {@link #getState()} and restored via {@link #restoreState(GridState)}.
  * </p>
  *
  * @author Vaadin Ltd
@@ -152,11 +157,45 @@ public class GridAIController implements AIController {
         }
         var query = entry.getPendingQuery();
         LOGGER.info("onRequestCompleted: applying query: {}", query);
+        applyQuery(entry, query);
+    }
+
+    /**
+     * Returns the current grid state for persistence, or {@code null} if no
+     * data has been loaded yet.
+     *
+     * @return the current state, or {@code null}
+     */
+    public GridState getState() {
+        var entry = GridEntry.get(grid);
+        if (entry == null || entry.getCurrentQuery() == null) {
+            return null;
+        }
+        return new GridState(entry.getCurrentQuery());
+    }
+
+    /**
+     * Restores a previously saved grid state. Re-executes the stored query and
+     * renders the grid.
+     *
+     * @param state
+     *            the state to restore, not {@code null}
+     */
+    public void restoreState(GridState state) {
+        Objects.requireNonNull(state, "State must not be null");
+        if (state.query() == null) {
+            return;
+        }
+        var entry = GridEntry.getOrCreate(grid, GRID_ID);
+        applyQuery(entry, state.query());
+    }
+
+    private void applyQuery(GridEntry entry, String query) {
         grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             try {
                 GridRenderer.renderGrid(grid, databaseProvider, query);
                 entry.setCurrentQuery(query);
-                LOGGER.info("onRequestCompleted: grid updated successfully");
+                LOGGER.info("Grid updated successfully");
             } catch (Exception e) {
                 LOGGER.error("Error updating grid", e);
             } finally {
