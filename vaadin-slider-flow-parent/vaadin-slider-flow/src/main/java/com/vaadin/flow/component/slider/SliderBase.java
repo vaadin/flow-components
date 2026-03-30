@@ -43,13 +43,16 @@ import com.vaadin.flow.signals.Signal;
  *
  * @author Vaadin Ltd
  */
-abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
+abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TPresentation>, TValue, TPresentation>
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
         KeyNotifier {
 
     private static final double DEFAULT_STEP = 1.0;
+
+    protected final SerializableFunction<TPresentation, TValue> presentationToModel;
+    protected final SerializableFunction<TValue, TPresentation> modelToPresentation;
 
     private ValueChangeMode currentMode;
 
@@ -74,12 +77,14 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param modelToPresentation
      *            a function to convert from model to presentation
      */
-    protected <TPresentation> SliderBase(double min, double max,
+    protected SliderBase(double min, double max,
             Class<TPresentation> presentationType,
             SerializableFunction<TPresentation, TValue> presentationToModel,
             SerializableFunction<TValue, TPresentation> modelToPresentation) {
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
+        this.presentationToModel = presentationToModel;
+        this.modelToPresentation = modelToPresentation;
 
         getElement().setProperty("manualValidation", true);
 

@@ -36,7 +36,8 @@ import tools.jackson.databind.node.ArrayNode;
 @Tag("vaadin-range-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.2.0-alpha3")
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
-public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
+public class RangeSlider
+        extends SliderBase<RangeSlider, RangeSliderValue, ArrayNode> {
     private static final SerializableFunction<ArrayNode, RangeSliderValue> PARSER = (
             arrayValue) -> {
         return new RangeSliderValue(arrayValue.get(0).asDouble(),
