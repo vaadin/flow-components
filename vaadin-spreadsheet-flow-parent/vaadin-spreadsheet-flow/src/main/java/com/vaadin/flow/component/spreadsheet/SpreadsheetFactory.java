@@ -1080,9 +1080,12 @@ public class SpreadsheetFactory implements Serializable {
                             .boxed().collect(Collectors.toMap(
                                     Function.identity(), index -> true)));
                 }
-            } else if (leftCol > 0) {
-                // TODO: should scroll vertically to restore viewport state
-                // This needs API on the Spreadsheet side
+            } else {
+                spreadsheet.setHorizontalSplitPosition(0);
+                if (leftCol > 0) {
+                    // TODO: should scroll horizontally to restore viewport
+                    // state. This needs API on the Spreadsheet side
+                }
             }
 
             if (hSplit > 0) {
@@ -1092,9 +1095,12 @@ public class SpreadsheetFactory implements Serializable {
                             .collect(Collectors.toMap(Function.identity(),
                                     index -> true)));
                 }
-            } else if (topRow > 0) {
-                // TODO: should scroll vertically to restore viewport state
-                // This needs API on the Spreadsheet side
+            } else {
+                spreadsheet.setVerticalSplitPosition(0);
+                if (topRow > 0) {
+                    // TODO: should scroll vertically to restore viewport
+                    // state. This needs API on the Spreadsheet side
+                }
             }
         } else {
             spreadsheet.setVerticalSplitPosition(0);
