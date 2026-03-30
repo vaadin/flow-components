@@ -27,7 +27,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-dashboard-widget")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0-alpha3")
 public class DashboardWidget extends Component {
 
     private int colspan = 1;
