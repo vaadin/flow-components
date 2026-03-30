@@ -29,7 +29,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Axis;
 import com.vaadin.flow.component.charts.model.AxisTitle;
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -59,20 +58,21 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Utility class for applying JSON configuration to Vaadin Chart objects.
+ * Parses a Highcharts JSON configuration string into a Vaadin
+ * {@link Configuration} object.
  *
  * @author Vaadin Ltd
  */
-public final class ChartConfigurationApplier implements Serializable {
+public final class ChartConfigurationParser implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(ChartConfigurationApplier.class);
+            .getLogger(ChartConfigurationParser.class);
 
-    private ChartConfigurationApplier() {
+    private ChartConfigurationParser() {
     }
 
-    public static void applyConfiguration(Chart chart, String configJson) {
-        chart.setConfiguration(new Configuration());
+    public static Configuration parse(String configJson) {
+        Configuration config = new Configuration();
         try {
             JsonNode parsedNode = JacksonUtils.getMapper().readTree(configJson);
             // Handle double-encoded JSON strings from LLM
@@ -83,9 +83,8 @@ public final class ChartConfigurationApplier implements Serializable {
             if (!(parsedNode instanceof ObjectNode configNode)) {
                 LOGGER.warn("Expected JSON object for chart config but got: {}",
                         parsedNode.getNodeType());
-                return;
+                return config;
             }
-            Configuration config = chart.getConfiguration();
 
             String chartType = null;
             if (configNode.has(TYPE)) {
@@ -143,6 +142,7 @@ public final class ChartConfigurationApplier implements Serializable {
         } catch (Exception e) {
             LOGGER.error("Error applying chart config", e);
         }
+        return config;
     }
 
     private static final Map<String, ChartType> CHART_TYPES_BY_NAME;
