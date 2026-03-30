@@ -522,6 +522,55 @@ class ChartAIControllerTest {
             Assertions.assertEquals(ChartType.PIE,
                     chart.getConfiguration().getChart().getType());
         }
+
+        @Test
+        void restoreState_renderFailure_doesNotThrow() {
+            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+
+            controller.restoreState(
+                    new ChartAIController.State(List.of("SELECT 1"), config));
+
+            // Re-attach triggers the deferred render, which will fail.
+            // Should not propagate the exception.
+            Assertions.assertDoesNotThrow(() -> ui.add(chart));
+        }
+
+        @Test
+        void restoreState_pendingStateSurvivesUntilRender() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            // Create pending state via tools
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            controller.restoreState(
+                    new ChartAIController.State(List.of("SELECT 2"), config));
+
+            // Render is deferred (chart detached), so pending state
+            // from the tool calls should be cleared by restoreState,
+            // but the restoreState render itself hasn't executed yet.
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertTrue(
+                    chart.getConfiguration().getSeries().isEmpty(),
+                    "Render should be deferred while chart is detached");
+
+            // After re-attachment, the chart should be rendered
+            ui.add(chart);
+            Assertions.assertFalse(
+                    chart.getConfiguration().getSeries().isEmpty(),
+                    "Chart should be rendered after re-attachment");
+            Assertions.assertFalse(entry.hasPendingState(),
+                    "Pending state should be cleared after render");
+        }
     }
 
     // --- Helpers ---

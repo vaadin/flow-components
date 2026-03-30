@@ -182,11 +182,7 @@ public class ChartAIController implements AIController {
         chart.setConfiguration(state.configuration());
         ChartEntry entry = ChartEntry.getOrCreate(chart, CHART_ID);
         entry.setQueries(state.queries());
-        entry.clearPendingState();
-        chart.getElement().getNode()
-                .runWhenAttached(ui -> ui.access(
-                        () -> ChartRenderer.renderChart(chart, databaseProvider,
-                                dataConverter, state.queries(), null)));
+        deferRender(entry, state.queries(), null, false);
     }
 
     /**
@@ -221,13 +217,20 @@ public class ChartAIController implements AIController {
         }
 
         String configJson = entry.getPendingConfigurationJson();
+        deferRender(entry, queries, configJson, true);
+    }
+
+    private void deferRender(ChartEntry entry, List<String> queries,
+            String configJson, boolean fireListeners) {
         chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             try {
                 ChartRenderer.renderChart(chart, databaseProvider,
                         dataConverter, queries, configJson);
-                fireStateChangeListeners();
+                if (fireListeners) {
+                    fireStateChangeListeners();
+                }
             } catch (Exception e) {
-                LOGGER.error("onRequestCompleted: rendering failed", e);
+                LOGGER.error("Rendering failed", e);
             } finally {
                 entry.clearPendingState();
             }
