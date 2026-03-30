@@ -33,7 +33,7 @@ class RangeSliderTest {
         RangeSlider slider = new RangeSlider();
         Assertions.assertEquals(0, slider.getMin(), 0);
         Assertions.assertEquals(100, slider.getMax(), 0);
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
@@ -43,7 +43,7 @@ class RangeSliderTest {
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(50, slider.getMax(), 0);
         Assertions.assertEquals(1, slider.getStep(), 0);
-        Assertions.assertEquals(new RangeSliderValue(10, 50),
+        Assertions.assertEquals(new RangeSliderValue(10.0, 50.0),
                 slider.getValue());
     }
 
@@ -53,7 +53,7 @@ class RangeSliderTest {
         Assertions.assertEquals("Label", slider.getLabel());
         Assertions.assertEquals(0, slider.getMin(), 0);
         Assertions.assertEquals(100, slider.getMax(), 0);
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
@@ -64,14 +64,14 @@ class RangeSliderTest {
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(50, slider.getMax(), 0);
         Assertions.assertEquals(1, slider.getStep(), 0);
-        Assertions.assertEquals(new RangeSliderValue(10, 50),
+        Assertions.assertEquals(new RangeSliderValue(10.0, 50.0),
                 slider.getValue());
     }
 
     @Test
     void setMin_updatesProperty() {
         RangeSlider slider = new RangeSlider();
-        slider.setMin(10);
+        slider.setMin(10.0);
 
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(10, slider.getElement().getProperty("min", 0),
@@ -81,7 +81,7 @@ class RangeSliderTest {
     @Test
     void setMax_updatesProperty() {
         RangeSlider slider = new RangeSlider();
-        slider.setMax(200);
+        slider.setMax(200.0);
 
         Assertions.assertEquals(200, slider.getMax(), 0);
         Assertions.assertEquals(200, slider.getElement().getProperty("max", 0),
@@ -171,54 +171,54 @@ class RangeSliderTest {
     @Test
     void setValueFromClient_null_ignored() {
         RangeSlider slider = new RangeSlider();
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", JacksonUtils.nullNode());
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_startNotAlignedWithStep_ignored() {
         RangeSlider slider = new RangeSlider();
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", createValueArray(15, 80));
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_endNotAlignedWithStep_ignored() {
         RangeSlider slider = new RangeSlider();
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", createValueArray(20, 85));
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_startBelowMin_ignored() {
         RangeSlider slider = new RangeSlider();
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", createValueArray(-10, 50));
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_endAboveMax_ignored() {
         RangeSlider slider = new RangeSlider();
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", createValueArray(50, 110));
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_startGreaterThanEnd_ignored() {
         RangeSlider slider = new RangeSlider();
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", createValueArray(80, 20));
-        Assertions.assertEquals(new RangeSliderValue(0, 100),
+        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 

@@ -63,7 +63,7 @@ class RangeSliderWarningsTest {
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setMin(200);
+        slider.setMin(200.0);
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
@@ -77,7 +77,7 @@ class RangeSliderWarningsTest {
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setMax(-10);
+        slider.setMax(-10.0);
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
@@ -91,41 +91,41 @@ class RangeSliderWarningsTest {
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setValue(new RangeSliderValue(0, 150));
+        slider.setValue(new RangeSliderValue(0.0, 150.0));
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(
                 Mockito.contains("outside the configured range"),
-                Mockito.eq(new RangeSliderValue(0, 150)), Mockito.eq(0.0),
+                Mockito.eq(new RangeSliderValue(0.0, 150.0)), Mockito.eq(0.0),
                 Mockito.eq(100.0));
     }
 
     @Test
     void setValueNotAlignedWithStep_warnsValueNotAligned() {
         RangeSlider slider = new RangeSlider(0, 100);
-        slider.setStep(10);
+        slider.setStep(10.0);
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setValue(new RangeSliderValue(0, 15));
+        slider.setValue(new RangeSliderValue(0.0, 15.0));
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(
                 Mockito.contains("not aligned with step"),
-                Mockito.eq(new RangeSliderValue(0, 15)), Mockito.eq(0.0),
+                Mockito.eq(new RangeSliderValue(0.0, 15.0)), Mockito.eq(0.0),
                 Mockito.eq(100.0), Mockito.eq(10.0));
     }
 
     @Test
     void setConsistentProperties_noWarnings() {
         RangeSlider slider = new RangeSlider(0, 100);
-        slider.setStep(10);
+        slider.setStep(10.0);
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setValue(new RangeSliderValue(20, 80));
+        slider.setValue(new RangeSliderValue(20.0, 80.0));
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
@@ -139,10 +139,10 @@ class RangeSliderWarningsTest {
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setMin(10);
-        slider.setMax(50);
-        slider.setStep(5);
-        slider.setValue(new RangeSliderValue(15, 45));
+        slider.setMin(10.0);
+        slider.setMax(50.0);
+        slider.setStep(5.0);
+        slider.setValue(new RangeSliderValue(15.0, 45.0));
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger, Mockito.never()).warn(Mockito.anyString(),
