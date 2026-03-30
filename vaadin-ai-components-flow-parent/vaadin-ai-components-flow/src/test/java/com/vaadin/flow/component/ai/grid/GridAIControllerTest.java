@@ -254,39 +254,6 @@ class GridAIControllerTest {
         }
     }
 
-    // --- Custom renderers ---
-
-    @Test
-    void setColumnRenderer_nullName_throws() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> controller.setColumnRenderer(null, v -> "x"));
-    }
-
-    @Test
-    void setColumnRenderer_nullRenderer_throws() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> controller.setColumnRenderer("col", null));
-    }
-
-    @Test
-    void removeColumnRenderer_afterSet_revertsToDefault() {
-        controller.setColumnRenderer("a", v -> "CUSTOM");
-        controller.removeColumnRenderer("a");
-
-        dbProvider.queryResults = List.of(row("a", 42));
-        simulateUpdate("SELECT a FROM t");
-
-        // Column should render with default formatting (not "CUSTOM")
-        var columns = grid.getColumns();
-        Assertions.assertEquals(1, columns.size());
-    }
-
-    @Test
-    void removeColumnRenderer_nonExistent_noError() {
-        // Should not throw
-        controller.removeColumnRenderer("nonexistent");
-    }
-
     // --- restoreState ---
 
     @Test

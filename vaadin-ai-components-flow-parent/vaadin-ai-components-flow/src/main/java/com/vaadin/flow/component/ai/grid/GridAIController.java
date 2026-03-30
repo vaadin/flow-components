@@ -16,19 +16,11 @@
 package com.vaadin.flow.component.ai.grid;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +65,6 @@ public class GridAIController implements AIController {
 
     private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
-    private final Map<String, Function<Object, String>> columnRenderers = new HashMap<>();
 
     /**
      * Creates a new grid AI controller.
@@ -128,33 +119,6 @@ public class GridAIController implements AIController {
                 - Do NOT stop after get_grid_state()
                 - Use double quotes for column aliases with spaces or dots
                 """;
-    }
-
-    /**
-     * Registers a custom renderer for a column, overriding the default
-     * type-based rendering.
-     *
-     * @param columnName
-     *            the column name as it appears in the query result, not
-     *            {@code null}
-     * @param renderer
-     *            converts the raw value to a display string, not {@code null}
-     */
-    public void setColumnRenderer(String columnName,
-            Function<Object, String> renderer) {
-        Objects.requireNonNull(columnName, "columnName must not be null");
-        Objects.requireNonNull(renderer, "renderer must not be null");
-        columnRenderers.put(columnName, renderer);
-    }
-
-    /**
-     * Removes a custom renderer for a column.
-     *
-     * @param columnName
-     *            the column name
-     */
-    public void removeColumnRenderer(String columnName) {
-        columnRenderers.remove(columnName);
     }
 
     @Override

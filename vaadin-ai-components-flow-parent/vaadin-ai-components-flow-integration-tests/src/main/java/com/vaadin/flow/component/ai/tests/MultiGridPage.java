@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -191,7 +192,7 @@ public class MultiGridPage extends Div {
                 .build();
         var chatModel = OpenAiChatModel.builder().openAiApi(openAiApi)
                 .defaultOptions(chatOptions).build();
-        var llmProvider = LLMProvider.from(chatModel);
+        var llmProvider = new SpringAILLMProvider(chatModel);
 
         // --- Prompt selector ---
         var promptSelect = new NativeSelect(EXAMPLE_PROMPTS);

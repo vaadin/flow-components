@@ -18,12 +18,10 @@ package com.vaadin.flow.component.ai.tests;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
@@ -220,11 +218,6 @@ public class GridDataPage extends Div {
         var llmProvider = new SpringAILLMProvider(chatModel);
 
         gridController = new GridAIController(grid, dbProvider);
-        var currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
-        gridController.setColumnRenderer("SALARY",
-                value -> value instanceof Number n
-                        ? currencyFormat.format(n.doubleValue())
-                        : value.toString());
 
         // Check for saved state in session
         var session = VaadinSession.getCurrent();
