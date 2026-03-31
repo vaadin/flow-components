@@ -79,7 +79,6 @@ public class ChartAIController implements AIController {
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
     private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
-    private int renderVersion;
     private DataConverter dataConverter;
 
     /**
@@ -229,11 +228,7 @@ public class ChartAIController implements AIController {
 
     private void deferRender(ChartEntry entry, List<String> queries,
             String configJson, boolean fireListeners) {
-        int expectedVersion = ++renderVersion;
         chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-            if (expectedVersion != renderVersion) {
-                return;
-            }
             try {
                 ChartRenderer.renderChart(chart, databaseProvider,
                         dataConverter, queries, configJson);

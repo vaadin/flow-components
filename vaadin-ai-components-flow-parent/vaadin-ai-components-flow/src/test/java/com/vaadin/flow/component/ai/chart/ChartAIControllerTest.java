@@ -625,38 +625,6 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onRequestCompleted_listenerFiresOnlyOnceForLatestState() {
-            List<ChartState> capturedStates = new ArrayList<>();
-            controller.addStateChangeListener(capturedStates::add);
-
-            var tools = controller.getTools();
-
-            // First request while detached
-            databaseProvider.results = List
-                    .of(Map.of("category", "A", "value", 10));
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
-            findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
-            controller.onRequestCompleted();
-
-            // Second request while still detached
-            databaseProvider.results = List
-                    .of(Map.of("category", "B", "value", 20));
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
-            findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 2\"]}");
-            controller.onRequestCompleted();
-
-            ui.add(chart);
-
-            Assertions.assertEquals(1, capturedStates.size(),
-                    "Listener should fire exactly once with the final "
-                            + "state, not once per queued deferred render");
-        }
-
-        @Test
         void restoreState_renderFailure_doesNotThrow() {
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
 
