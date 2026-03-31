@@ -980,8 +980,7 @@ public class AIOrchestrator implements Serializable {
                     orchestrator.messageList != null,
                     orchestrator.input != null,
                     orchestrator.fileReceiver != null,
-                    orchestrator.fileReceiver == null ? 0
-                            : orchestrator.tools.length,
+                    orchestrator.tools == null ? 0 : orchestrator.tools.length,
                     orchestrator.controller != null, orchestrator.userName,
                     orchestrator.assistantName);
 
