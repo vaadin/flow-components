@@ -304,7 +304,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    void reconnect_withControllers_replacesControllers() throws Throwable {
+    void reconnect_withController_replacesController() throws Throwable {
         var newProvider = Mockito.mock(LLMProvider.class);
         Mockito.when(
                 newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -322,7 +322,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
         var tool2 = createToolSpec("newTool", "New");
         AIController newController = createController(tool2);
 
-        deserialized.reconnect(newProvider).withControllers(newController)
+        deserialized.reconnect(newProvider).withController(newController)
                 .apply();
         deserialized.prompt("Hello");
 
