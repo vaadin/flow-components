@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
@@ -137,7 +134,7 @@ public class AIOrchestrator implements Serializable {
     private AIMessageList messageList;
     private AIInput input;
     private AIFileReceiver fileReceiver;
-    private transient Object[] tools = new Object[0];
+    private transient Object[] tools;
     private transient AIController controller;
     private String userName;
     private String assistantName;
@@ -412,7 +409,7 @@ public class AIOrchestrator implements Serializable {
 
             @Override
             public Object[] tools() {
-                return tools;
+                return tools == null ? new Object[0] : tools;
             }
 
             @Override
@@ -467,14 +464,6 @@ public class AIOrchestrator implements Serializable {
                     "AIOrchestrator");
         }
         featureFlagChecked.set(true);
-    }
-
-    @Serial
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        // Initialize transient fields to safe defaults
-        tools = new Object[0];
     }
 
     /**
@@ -573,9 +562,7 @@ public class AIOrchestrator implements Serializable {
         public void apply() {
             orchestrator.isProcessing.set(false);
             orchestrator.provider = provider;
-            if (tools != null) {
-                orchestrator.tools = tools;
-            }
+            orchestrator.tools = tools;
             orchestrator.controller = controller;
             if (!orchestrator.conversationHistory.isEmpty()) {
                 provider.setHistory(
@@ -637,7 +624,7 @@ public class AIOrchestrator implements Serializable {
         private AIMessageList messageList;
         private AIInput input;
         private AIFileReceiver fileReceiver;
-        private Object[] tools = new Object[0];
+        private Object[] tools;
         private AIController controller;
         private String userName;
         private String assistantName;
@@ -786,10 +773,10 @@ public class AIOrchestrator implements Serializable {
          * @return this builder
          */
         public Builder withTools(Object... tools) {
-            if (this.tools != null && this.tools.length > 0) {
+            if (this.tools != null) {
                 warnIfAlreadySet(this.tools, "tools");
             }
-            this.tools = tools != null ? tools : new Object[0];
+            this.tools = tools;
             return this;
         }
 
@@ -993,8 +980,10 @@ public class AIOrchestrator implements Serializable {
                     orchestrator.messageList != null,
                     orchestrator.input != null,
                     orchestrator.fileReceiver != null,
-                    orchestrator.tools.length, orchestrator.controller != null,
-                    orchestrator.userName, orchestrator.assistantName);
+                    orchestrator.fileReceiver == null ? 0
+                            : orchestrator.tools.length,
+                    orchestrator.controller != null, orchestrator.userName,
+                    orchestrator.assistantName);
 
             return orchestrator;
         }
