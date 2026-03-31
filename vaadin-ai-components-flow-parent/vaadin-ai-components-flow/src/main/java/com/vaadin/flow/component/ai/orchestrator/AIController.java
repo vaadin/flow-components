@@ -31,7 +31,7 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * Controllers are <b>not serialized</b> with the orchestrator. After
  * deserialization, restore controllers via
  * {@link AIOrchestrator#reconnect(com.vaadin.flow.component.ai.provider.LLMProvider)
- * reconnect(provider)}{@code .withControllers(controller).apply()}.
+ * reconnect(provider)}{@code .withController(controller).apply()}.
  * </p>
  *
  * @author Vaadin Ltd

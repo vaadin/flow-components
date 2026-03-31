@@ -73,7 +73,7 @@ class AIOrchestratorTest {
     private AIInput mockInput;
     private AIFileReceiver mockFileReceiver;
 
-    private TestLogger logger = TestLoggerFactory
+    private final TestLogger logger = TestLoggerFactory
             .getTestLogger(AIOrchestrator.class);
 
     @BeforeEach
@@ -1349,6 +1349,88 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_withFlowMessageList_scalesImageAttachmentThumbnails()
+            throws Exception {
+        var initialWidth = 500;
+        var initialHeight = 400;
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var largeImageData = createTestImage(initialWidth, initialHeight);
+        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
+                new AIAttachment("large.png", "image/png", largeImageData)));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList)
+                .withFileReceiver(mockFileReceiver).build();
+        orchestrator.prompt("Check this image");
+
+        var attachment = flowMessageList.getItems().getFirst().getAttachments()
+                .getFirst();
+        Assertions.assertTrue(
+                attachment.url().startsWith("data:image/jpeg;base64,"));
+
+        var scaledImage = decodeDataUrlToImage(attachment.url());
+        // 200 is the hardcoded max size for thumbnails
+        var scaleFactor = (double) 200 / Math.max(initialWidth, initialHeight);
+        Assertions.assertEquals((int) (scaleFactor * initialWidth),
+                scaledImage.getWidth());
+        Assertions.assertEquals((int) (scaleFactor * initialHeight),
+                scaledImage.getHeight());
+    }
+
+    @Test
+    void prompt_withFlowMessageList_smallImageNotScaled() throws Exception {
+        var initialWidth = 100;
+        var initialHeight = 80;
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var smallImageData = createTestImage(initialWidth, initialHeight);
+        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
+                new AIAttachment("small.png", "image/png", smallImageData)));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList)
+                .withFileReceiver(mockFileReceiver).build();
+        orchestrator.prompt("Check this small image");
+
+        var attachment = flowMessageList.getItems().getFirst().getAttachments()
+                .getFirst();
+        Assertions.assertTrue(
+                attachment.url().startsWith("data:image/png;base64,"));
+
+        var image = decodeDataUrlToImage(attachment.url());
+        Assertions.assertEquals(initialWidth, image.getWidth());
+        Assertions.assertEquals(initialHeight, image.getHeight());
+    }
+
+    @Test
+    void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl() {
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(new AIAttachment("document.pdf",
+                        "application/pdf", "fake pdf content".getBytes())));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList)
+                .withFileReceiver(mockFileReceiver).build();
+        orchestrator.prompt("Check this document");
+
+        var attachment = flowMessageList.getItems().getFirst().getAttachments()
+                .getFirst();
+        Assertions.assertEquals("document.pdf", attachment.name());
+        Assertions.assertEquals("application/pdf", attachment.mimeType());
+        Assertions.assertNull(attachment.url());
+    }
+
+    @Test
     void responseCompleteListener_afterSuccessfulExchange_firesWithResponse() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -1528,12 +1610,11 @@ class AIOrchestratorTest {
 
         var tool1 = createToolSpec("tool1", "First tool");
         var tool2 = createToolSpec("tool2", "Second tool");
-        AIController controller1 = createController(tool1);
-        AIController controller2 = createController(tool2);
+        var controller = createController(tool1, tool2);
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller1)
-                .withController(controller2).build();
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -1705,6 +1786,108 @@ class AIOrchestratorTest {
                 "Expected duplicate tool name warning");
     }
 
+    @Test
+    void builder_withControllerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withController(createController());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withController(createController()).build();
+        assertBuilderWarning("controller");
+    }
+
+    @Test
+    void builder_withMessageListCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList);
+        assertNoBuilderWarning();
+        orchestratorBuilder.withMessageList(mockMessageList).build();
+        assertBuilderWarning("messageList");
+    }
+
+    @Test
+    void builder_withInputCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withInput(mockInput);
+        assertNoBuilderWarning();
+        orchestratorBuilder.withInput(mockInput).build();
+        assertBuilderWarning("input");
+    }
+
+    @Test
+    void builder_withToolsCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withTools(new SampleTool());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withTools(new SampleTool()).build();
+        assertBuilderWarning("tools");
+    }
+
+    @Test
+    void builder_withUserNameCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withUserName("A");
+        assertNoBuilderWarning();
+        orchestratorBuilder.withUserName("B").build();
+        assertBuilderWarning("userName");
+    }
+
+    @Test
+    void builder_withAssistantNameCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withAssistantName("A");
+        assertNoBuilderWarning();
+        orchestratorBuilder.withAssistantName("B").build();
+        assertBuilderWarning("assistantName");
+    }
+
+    @Test
+    void builder_withResponseCompleteListenerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withResponseCompleteListener(event -> {
+                });
+        assertNoBuilderWarning();
+        orchestratorBuilder.withResponseCompleteListener(event -> {
+        }).build();
+        assertBuilderWarning("responseCompleteListener");
+    }
+
+    private static byte[] createTestImage(int width, int height)
+            throws IOException {
+        var image = new BufferedImage(width, height,
+                BufferedImage.TYPE_INT_RGB);
+        var g2d = image.createGraphics();
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        var baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", baos);
+        return baos.toByteArray();
+    }
+
+    private static BufferedImage decodeDataUrlToImage(String dataUrl)
+            throws IOException {
+        var base64Data = dataUrl.substring(dataUrl.indexOf(",") + 1);
+        var imageBytes = Base64.getDecoder().decode(base64Data);
+        return ImageIO.read(new ByteArrayInputStream(imageBytes));
+    }
+
+    private void assertBuilderWarning(String fieldName) {
+        var warning = logger.getLoggingEvents().stream().filter(
+                e -> e.getMessage().contains("was already set on the builder"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Expected warning for " + fieldName);
+    }
+
+    private void assertNoBuilderWarning() {
+        Assertions
+                .assertFalse(
+                        logger.getLoggingEvents().stream()
+                                .anyMatch(e -> e.getMessage()
+                                        .contains("was already set")),
+                        "No warning expected for single call");
+    }
+
     private static AIController createController(
             LLMProvider.ToolSpec... tools) {
         return new AIController() {
@@ -1767,107 +1950,5 @@ class AIOrchestratorTest {
 
     private static AIAttachment createAttachment(String fileName) {
         return new AIAttachment(fileName, "text/plain", "test".getBytes());
-    }
-
-    @Test
-    void prompt_withFlowMessageList_scalesImageAttachmentThumbnails()
-            throws Exception {
-        var initialWidth = 500;
-        var initialHeight = 400;
-        var flowMessageList = new MessageList();
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
-        var largeImageData = createTestImage(initialWidth, initialHeight);
-        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
-                new AIAttachment("large.png", "image/png", largeImageData)));
-
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(flowMessageList)
-                .withFileReceiver(mockFileReceiver).build();
-        orchestrator.prompt("Check this image");
-
-        var attachment = flowMessageList.getItems().getFirst().getAttachments()
-                .getFirst();
-        Assertions.assertTrue(
-                attachment.url().startsWith("data:image/jpeg;base64,"));
-
-        var scaledImage = decodeDataUrlToImage(attachment.url());
-        // 200 is the hardcoded max size for thumbnails
-        var scaleFactor = (double) 200 / Math.max(initialWidth, initialHeight);
-        Assertions.assertEquals((int) (scaleFactor * initialWidth),
-                scaledImage.getWidth());
-        Assertions.assertEquals((int) (scaleFactor * initialHeight),
-                scaledImage.getHeight());
-    }
-
-    @Test
-    void prompt_withFlowMessageList_smallImageNotScaled() throws Exception {
-        var initialWidth = 100;
-        var initialHeight = 80;
-        var flowMessageList = new MessageList();
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
-        var smallImageData = createTestImage(initialWidth, initialHeight);
-        Mockito.when(mockFileReceiver.takeAttachments()).thenReturn(List.of(
-                new AIAttachment("small.png", "image/png", smallImageData)));
-
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(flowMessageList)
-                .withFileReceiver(mockFileReceiver).build();
-        orchestrator.prompt("Check this small image");
-
-        var attachment = flowMessageList.getItems().getFirst().getAttachments()
-                .getFirst();
-        Assertions.assertTrue(
-                attachment.url().startsWith("data:image/png;base64,"));
-
-        var image = decodeDataUrlToImage(attachment.url());
-        Assertions.assertEquals(initialWidth, image.getWidth());
-        Assertions.assertEquals(initialHeight, image.getHeight());
-    }
-
-    @Test
-    void prompt_withFlowMessageList_nonImageAttachmentHasNoDataUrl() {
-        var flowMessageList = new MessageList();
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-        Mockito.when(mockFileReceiver.takeAttachments())
-                .thenReturn(List.of(new AIAttachment("document.pdf",
-                        "application/pdf", "fake pdf content".getBytes())));
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(flowMessageList)
-                .withFileReceiver(mockFileReceiver).build();
-        orchestrator.prompt("Check this document");
-
-        var attachment = flowMessageList.getItems().getFirst().getAttachments()
-                .getFirst();
-        Assertions.assertEquals("document.pdf", attachment.name());
-        Assertions.assertEquals("application/pdf", attachment.mimeType());
-        Assertions.assertNull(attachment.url());
-    }
-
-    private static byte[] createTestImage(int width, int height)
-            throws IOException {
-        var image = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_RGB);
-        var g2d = image.createGraphics();
-        g2d.setColor(Color.BLUE);
-        g2d.fillRect(0, 0, width, height);
-        g2d.dispose();
-        var baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", baos);
-        return baos.toByteArray();
-    }
-
-    private static BufferedImage decodeDataUrlToImage(String dataUrl)
-            throws IOException {
-        var base64Data = dataUrl.substring(dataUrl.indexOf(",") + 1);
-        var imageBytes = Base64.getDecoder().decode(base64Data);
-        return ImageIO.read(new ByteArrayInputStream(imageBytes));
     }
 }
