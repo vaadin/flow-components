@@ -47,7 +47,7 @@ function runTests() {
       }
 
       // Install the IT module dependencies
-      execSync(`mvn -DskipTests flow:prepare-frontend flow:build-frontend`, {
+      execSync(`mvn -DskipTests -Dvaadin.force.production.build=true flow:prepare-frontend flow:build-frontend`, {
         cwd: itFolder,
         stdio: 'inherit'
       });

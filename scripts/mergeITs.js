@@ -252,6 +252,20 @@ async function copySources() {
       }
     });
 
+  // clean stale Flow-generated files from previous runs
+  ['package.json', 'package-lock.json', 'pnpm-lock.yaml', 'tsconfig.json', 'types.d.ts', 'vite.generated.ts', '.npmrc', '.pnpmfile.cjs']
+    .forEach(f => {
+      const file = `${itFolder}/${f}`;
+      if (fs.existsSync(file)) {
+        console.log(`removing ${file}`);
+        fs.rmSync(file);
+      }
+    });
+
+  // Create empty package.json so that build-frontend does not
+  // perform aggressive cleanup that deletes flow-build-info.json
+  fs.writeFileSync(`${itFolder}/package.json`, '{}');
+
   modules.forEach(parent => {
     const id = parent.replace('-parent', '');
     console.log(`Copying ${parent}/${id}-integration-tests`);
