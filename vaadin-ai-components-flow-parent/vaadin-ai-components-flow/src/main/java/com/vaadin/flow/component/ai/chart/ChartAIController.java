@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,9 +42,14 @@ import com.vaadin.flow.shared.Registration;
  * visualizations based on natural language requests.
  * </p>
  * <p>
- * State changes requested by the LLM through the update tools are deferred and
- * applied in {@link #onRequestCompleted()}, avoiding partial state and multiple
- * redraws during a multi-tool LLM turn.
+ * State changes requested by the LLM are deferred and applied in
+ * {@link #onRequestCompleted()}, avoiding partial state and multiple redraws
+ * during a multi-tool LLM turn. The chart state is stored directly on the
+ * {@link Chart} component, so it survives serialization.
+ * </p>
+ * <p>
+ * This controller is <b>not serializable</b>. Chart state can be captured via
+ * {@link #getState()} and restored via {@link #restoreState(ChartState)}.
  * </p>
  *
  * @author Vaadin Ltd
@@ -74,7 +78,7 @@ public class ChartAIController implements AIController {
 
     private final Chart chart;
     private final DatabaseProvider databaseProvider;
-    private final List<SerializableConsumer<State>> stateChangeListeners = new ArrayList<>();
+    private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
     private int renderVersion;
     private DataConverter dataConverter;
 
@@ -161,12 +165,12 @@ public class ChartAIController implements AIController {
      *
      * @return the current state, or {@code null}
      */
-    public State getState() {
+    public ChartState getState() {
         ChartEntry entry = ChartEntry.get(chart);
         if (entry == null || entry.getQueries().isEmpty()) {
             return null;
         }
-        return new State(entry.getQueries(),
+        return new ChartState(entry.getQueries(),
                 copyConfiguration(chart.getConfiguration()));
     }
 
@@ -180,7 +184,7 @@ public class ChartAIController implements AIController {
      * @param state
      *            the state to restore, not {@code null}
      */
-    public void restoreState(State state) {
+    public void restoreState(ChartState state) {
         Objects.requireNonNull(state, "State cannot be null");
         chart.setConfiguration(copyConfiguration(state.configuration()));
         ChartEntry entry = ChartEntry.getOrCreate(chart, CHART_ID);
@@ -197,7 +201,7 @@ public class ChartAIController implements AIController {
      * @return a registration for removing the listener
      */
     public Registration addStateChangeListener(
-            SerializableConsumer<State> listener) {
+            SerializableConsumer<ChartState> listener) {
         Objects.requireNonNull(listener, "Listener cannot be null");
         stateChangeListeners.add(listener);
         return () -> stateChangeListeners.remove(listener);
@@ -248,7 +252,7 @@ public class ChartAIController implements AIController {
         if (stateChangeListeners.isEmpty()) {
             return;
         }
-        State state = getState();
+        ChartState state = getState();
         if (state != null) {
             for (var listener : List.copyOf(stateChangeListeners)) {
                 try {
@@ -266,29 +270,4 @@ public class ChartAIController implements AIController {
         return ChartConfigurationParser.parse(json);
     }
 
-    /**
-     * Immutable snapshot of the chart's current state, suitable for persistence
-     * or cross-session sharing.
-     *
-     * @param queries
-     *            the SQL queries for the chart's data series
-     * @param configuration
-     *            the chart configuration
-     */
-    public record State(List<String> queries,
-            Configuration configuration) implements Serializable {
-        /**
-         * Creates a new state instance.
-         *
-         * @param queries
-         *            the SQL queries, not {@code null}
-         * @param configuration
-         *            the chart configuration, not {@code null}
-         */
-        public State {
-            queries = List.copyOf(queries);
-            Objects.requireNonNull(configuration,
-                    "Configuration cannot be null");
-        }
-    }
 }

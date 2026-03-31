@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -245,7 +249,7 @@ class ChartAIControllerTest {
                     .execute("{\"queries\":[\"SELECT 1\"]}");
             controller.onRequestCompleted();
 
-            ChartAIController.State state = controller.getState();
+            ChartState state = controller.getState();
             Assertions.assertNotNull(state);
             Assertions.assertEquals(List.of("SELECT 1"), state.queries());
             Assertions.assertNotSame(chart.getConfiguration(),
@@ -268,7 +272,7 @@ class ChartAIControllerTest {
                     .execute("{\"queries\":[\"SELECT 1\"]}");
             controller.onRequestCompleted();
 
-            ChartAIController.State savedState = controller.getState();
+            ChartState savedState = controller.getState();
 
             chart.getConfiguration().setTitle("Mutated");
 
@@ -280,14 +284,36 @@ class ChartAIControllerTest {
     }
 
     @Nested
+    class ChartStateSerialization {
+
+        @Test
+        void chartState_isSerializable() throws Exception {
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            var state = new ChartState(List.of("SELECT 1"), config);
+            var baos = new ByteArrayOutputStream();
+            try (var oos = new ObjectOutputStream(baos)) {
+                oos.writeObject(state);
+            }
+            try (var ois = new ObjectInputStream(
+                    new ByteArrayInputStream(baos.toByteArray()))) {
+                var deserialized = (ChartState) ois.readObject();
+                Assertions.assertEquals(List.of("SELECT 1"),
+                        deserialized.queries());
+                Assertions.assertEquals(ChartType.COLUMN,
+                        deserialized.configuration().getChart().getType());
+            }
+        }
+    }
+
+    @Nested
     class RestoreState {
 
         @Test
         void appliesConfigurationAndQueries() {
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
-            ChartAIController.State state = new ChartAIController.State(
-                    List.of("SELECT 1"), config);
+            ChartState state = new ChartState(List.of("SELECT 1"), config);
 
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
@@ -312,7 +338,7 @@ class ChartAIControllerTest {
 
         @Test
         void doesNotFireListeners() {
-            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
             Configuration config = new Configuration();
@@ -320,8 +346,8 @@ class ChartAIControllerTest {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
 
-            controller.restoreState(
-                    new ChartAIController.State(List.of("SELECT 1"), config));
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 1"), config));
 
             Assertions.assertNull(captured.get());
         }
@@ -334,8 +360,8 @@ class ChartAIControllerTest {
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
 
-            controller.restoreState(
-                    new ChartAIController.State(List.of("SELECT 1"), config));
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 1"), config));
 
             Assertions.assertFalse(
                     chart.getConfiguration().getSeries().isEmpty(),
@@ -349,8 +375,7 @@ class ChartAIControllerTest {
 
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
-            ChartAIController.State state = new ChartAIController.State(
-                    List.of("SELECT 1"), config);
+            ChartState state = new ChartState(List.of("SELECT 1"), config);
 
             Assertions.assertTrue(config.getSeries().isEmpty());
 
@@ -379,8 +404,8 @@ class ChartAIControllerTest {
 
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
-            controller.restoreState(
-                    new ChartAIController.State(List.of("SELECT 2"), config));
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 2"), config));
 
             entry = ChartEntry.get(chart);
             Assertions.assertFalse(entry.hasPendingState(),
@@ -393,7 +418,7 @@ class ChartAIControllerTest {
 
         @Test
         void firesAfterOnRequestCompleted() {
-            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
             databaseProvider.results = List
@@ -419,7 +444,7 @@ class ChartAIControllerTest {
 
         @Test
         void doesNotFireOnRenderFailure() {
-            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
             databaseProvider.results = List
@@ -438,7 +463,7 @@ class ChartAIControllerTest {
 
         @Test
         void registration_removesListener() {
-            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            AtomicReference<ChartState> captured = new AtomicReference<>();
             var registration = controller.addStateChangeListener(captured::set);
             registration.remove();
 
@@ -467,7 +492,7 @@ class ChartAIControllerTest {
                     .execute("{\"queries\":[\"SELECT 1\"]}");
             controller.onRequestCompleted();
 
-            List<ChartAIController.State> states = new ArrayList<>();
+            List<ChartState> states = new ArrayList<>();
             controller.addStateChangeListener(states::add);
 
             controller.onRequestCompleted();
@@ -479,7 +504,7 @@ class ChartAIControllerTest {
 
         @Test
         void throwingListenerDoesNotPreventOtherListeners() {
-            AtomicReference<ChartAIController.State> secondListenerState = new AtomicReference<>();
+            AtomicReference<ChartState> secondListenerState = new AtomicReference<>();
 
             controller.addStateChangeListener(state -> {
                 throw new RuntimeException("Listener failure");
@@ -503,7 +528,7 @@ class ChartAIControllerTest {
 
         @Test
         void configOnlyUpdate_doesNotFire() {
-            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
             var tools = controller.getTools();
@@ -544,7 +569,7 @@ class ChartAIControllerTest {
 
         @Test
         void onRequestCompleted_listenerFiresOnReattach() {
-            AtomicReference<ChartAIController.State> captured = new AtomicReference<>();
+            AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
             databaseProvider.results = List
@@ -601,7 +626,7 @@ class ChartAIControllerTest {
 
         @Test
         void onRequestCompleted_listenerFiresOnlyOnceForLatestState() {
-            List<ChartAIController.State> capturedStates = new ArrayList<>();
+            List<ChartState> capturedStates = new ArrayList<>();
             controller.addStateChangeListener(capturedStates::add);
 
             var tools = controller.getTools();
@@ -638,8 +663,8 @@ class ChartAIControllerTest {
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
 
-            controller.restoreState(
-                    new ChartAIController.State(List.of("SELECT 1"), config));
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 1"), config));
 
             // Re-attach triggers the deferred render, which will fail.
             // Should not propagate the exception.
@@ -660,8 +685,8 @@ class ChartAIControllerTest {
 
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
-            controller.restoreState(
-                    new ChartAIController.State(List.of("SELECT 2"), config));
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 2"), config));
 
             // Render is deferred (chart detached), so pending state
             // from the tool calls should be cleared by restoreState,

@@ -36,7 +36,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  */
-public class ChartEntry implements Serializable {
+class ChartEntry implements Serializable {
 
     private final String id;
     private List<String> queries = new ArrayList<>();
@@ -84,7 +84,7 @@ public class ChartEntry implements Serializable {
      * @param id
      *            the chart ID, not {@code null}
      */
-    public ChartEntry(String id) {
+    ChartEntry(String id) {
         this.id = Objects.requireNonNull(id, "id must not be null");
     }
 
@@ -184,48 +184,24 @@ public class ChartEntry implements Serializable {
      *            the chart ID
      * @return the state as a JSON string, never {@code null}
      */
-    public static String getStateAsJson(Chart chart, String chartId) {
+    static String getStateAsJson(Chart chart, String chartId) {
         ObjectNode result = JacksonUtils.createObjectNode();
         result.put("chartId", chartId);
 
-        ChartState state = getState(chart);
-        if (state != null) {
-            result.set("configuration",
-                    JacksonUtils.readTree(state.configuration()));
+        ChartEntry entry = get(chart);
+        if (entry != null && !entry.queries.isEmpty()) {
+            String configJson = ChartSerialization
+                    .toJSON(chart.getConfiguration());
+            ObjectNode configNode = (ObjectNode) JacksonUtils
+                    .readTree(configJson);
+            configNode.remove("series");
+            result.set("configuration", configNode);
 
-            if (!state.queries().isEmpty()) {
-                ArrayNode arr = result.putArray("queries");
-                state.queries().forEach(arr::add);
-            }
+            ArrayNode arr = result.putArray("queries");
+            entry.queries.forEach(arr::add);
         }
 
         return result.toString();
     }
 
-    /**
-     * Returns the current chart state for persistence. The state includes the
-     * data source queries and the chart configuration (without series data).
-     * Returns {@code null} if the chart has no entry or no queries.
-     *
-     * @param chart
-     *            the chart component, not {@code null}
-     * @return the current state, or {@code null}
-     */
-    public static ChartState getState(Chart chart) {
-        ChartEntry entry = get(chart);
-        if (entry == null || entry.queries.isEmpty()) {
-            return null;
-        }
-        String configJson = ChartSerialization.toJSON(chart.getConfiguration());
-        ObjectNode configNode = (ObjectNode) JacksonUtils.readTree(configJson);
-        configNode.remove("series");
-        return new ChartState(entry.getQueries(), configNode.toString());
-    }
-
-    /**
-     * State record for chart persistence.
-     */
-    public record ChartState(List<String> queries,
-            String configuration) implements Serializable {
-    }
 }
