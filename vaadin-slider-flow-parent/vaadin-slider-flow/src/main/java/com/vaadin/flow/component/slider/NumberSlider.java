@@ -103,8 +103,10 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
             return false;
         }
 
-        return value.equals(
-                SliderUtil.clampToMinMax(toDouble.apply(value), min, max));
+        double doubleValue = toDouble.apply(value);
+        double clampedValue = SliderUtil.clampToMinMax(doubleValue, min, max);
+
+        return Double.compare(doubleValue, clampedValue) == 0;
     }
 
     @Override
@@ -116,7 +118,10 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
         }
 
         double step = toDouble.apply(getStep());
-        return value.equals(
-                SliderUtil.snapToStep(toDouble.apply(value), min, max, step));
+        double doubleValue = toDouble.apply(value);
+        double snappedValue = SliderUtil.snapToStep(doubleValue, min, max,
+                step);
+
+        return Double.compare(doubleValue, snappedValue) == 0;
     }
 }

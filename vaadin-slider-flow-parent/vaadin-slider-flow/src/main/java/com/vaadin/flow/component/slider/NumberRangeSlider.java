@@ -107,33 +107,31 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
             return false;
         }
 
-        double clampedStart = SliderUtil
-                .clampToMinMax(toDouble.apply(value.start()), min, max);
-        double clampedEnd = SliderUtil
-                .clampToMinMax(toDouble.apply(value.end()), min, max);
-        TValue clampedRange = createRange(fromDouble.apply(clampedStart),
-                fromDouble.apply(clampedEnd));
+        double valueStart = toDouble.apply(value.start());
+        double valueEnd = toDouble.apply(value.end());
+        double clampedStart = SliderUtil.clampToMinMax(valueStart, min, max);
+        double clampedEnd = SliderUtil.clampToMinMax(valueEnd, min, max);
 
-        return value.equals(clampedRange);
+        return Double.compare(valueStart, clampedStart) == 0
+                && Double.compare(valueEnd, clampedEnd) == 0;
     }
 
     @Override
     protected boolean isValueAlignedWithStep(TValue value) {
         double min = toDouble.apply(getMin());
         double max = toDouble.apply(getMax());
-        double step = toDouble.apply(getStep());
         if (min > max) {
             return false;
         }
 
-        double snappedStart = SliderUtil
-                .snapToStep(toDouble.apply(value.start()), min, max, step);
-        double snappedEnd = SliderUtil.snapToStep(toDouble.apply(value.end()),
-                min, max, step);
-        TValue snappedRange = createRange(fromDouble.apply(snappedStart),
-                fromDouble.apply(snappedEnd));
+        double step = toDouble.apply(getStep());
+        double valueStart = toDouble.apply(value.start());
+        double valueEnd = toDouble.apply(value.end());
+        double snappedStart = SliderUtil.snapToStep(valueStart, min, max, step);
+        double snappedEnd = SliderUtil.snapToStep(valueEnd, min, max, step);
 
-        return value.equals(snappedRange);
+        return Double.compare(valueStart, snappedStart) == 0
+                && Double.compare(valueEnd, snappedEnd) == 0;
     }
 
     protected abstract TValue createRange(TNumber start, TNumber end);
