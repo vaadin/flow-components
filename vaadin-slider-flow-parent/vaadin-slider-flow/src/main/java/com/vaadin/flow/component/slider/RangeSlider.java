@@ -75,7 +75,7 @@ public class RangeSlider
      *            the maximum value
      */
     public RangeSlider(double min, double max) {
-        super(min, max, PARSER, FORMATTER);
+        super(min, max, PARSER, FORMATTER, v -> v, v -> v);
     }
 
     /**
@@ -113,10 +113,5 @@ public class RangeSlider
     @Override
     protected RangeSliderValue createRange(Double start, Double end) {
         return new RangeSliderValue(start, end);
-    }
-
-    @Override
-    protected Double fromDouble(Double value) {
-        return value;
     }
 }

@@ -75,7 +75,8 @@ public class IntegerRangeSlider extends
      *            the maximum value
      */
     public IntegerRangeSlider(int min, int max) {
-        super(min, max, PARSER, FORMATTER);
+        super(min, max, PARSER, FORMATTER, Double::intValue,
+                Integer::doubleValue);
     }
 
     /**
@@ -113,10 +114,5 @@ public class IntegerRangeSlider extends
     @Override
     protected IntegerRangeSliderValue createRange(Integer start, Integer end) {
         return new IntegerRangeSliderValue(start, end);
-    }
-
-    @Override
-    protected Integer fromDouble(Double value) {
-        return value.intValue();
     }
 }

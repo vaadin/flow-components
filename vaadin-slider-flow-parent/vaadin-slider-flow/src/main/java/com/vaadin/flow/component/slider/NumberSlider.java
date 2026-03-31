@@ -21,12 +21,14 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.function.SerializableFunction;
 
 abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>, TValue extends Number>
-        extends SliderBase<TComponent, TValue, Double> implements HasAriaLabel {
+        extends SliderBase<TComponent, TValue, TValue, Double>
+        implements HasAriaLabel {
 
-    <TPresentation> NumberSlider(double min, double max,
+    <TPresentation> NumberSlider(TValue min, TValue max,
             SerializableFunction<Double, TValue> fromDouble,
             SerializableFunction<TValue, Double> toDouble) {
-        super(min, max, Double.class, fromDouble, toDouble);
+        super(min, max, Double.class, fromDouble, toDouble, fromDouble,
+                toDouble);
     }
 
     /**
@@ -78,69 +80,6 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
     }
 
     /**
-     * Gets the minimum value of the slider.
-     *
-     * @return the minimum value
-     */
-    public TValue getMin() {
-        return presentationToModel.apply(super.getMinDouble());
-    }
-
-    /**
-     * Sets the minimum value of the slider.
-     *
-     * @param min
-     *            the minimum value
-     */
-    public void setMin(TValue min) {
-        setMinDouble(min.doubleValue());
-    }
-
-    /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
-    public TValue getMax() {
-        return presentationToModel.apply(super.getMaxDouble());
-    }
-
-    /**
-     * Sets the maximum value of the slider.
-     *
-     * @param max
-     *            the maximum value
-     */
-    public void setMax(TValue max) {
-        setMaxDouble(max.doubleValue());
-    }
-
-    /**
-     * Gets the step value of the slider.
-     * <p>
-     * Valid slider values are calculated relative to the minimum value:
-     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
-     *
-     * @return the step value
-     */
-    public TValue getStep() {
-        return presentationToModel.apply(super.getStepDouble());
-    }
-
-    /**
-     * Sets the step value of the slider.
-     * <p>
-     * Valid slider values are calculated relative to the minimum value:
-     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
-     *
-     * @param step
-     *            the step value
-     */
-    public void setStep(TValue step) {
-        setStepDouble(step.doubleValue());
-    }
-
-    /**
      * Clears the slider value, setting it to the minimum value.
      *
      * @see #getMin()
@@ -152,32 +91,32 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
 
     @Override
     protected boolean hasValidValue() {
-        TValue value = presentationToModel
-                .apply(getElement().getProperty("value", 0.0));
+        TValue value = fromDouble.apply(getElement().getProperty("value", 0.0));
         return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
     }
 
     @Override
     protected boolean isValueWithinMinMax(TValue value) {
-        double min = getMinDouble();
-        double max = getMaxDouble();
+        double min = toDouble.apply(getMin());
+        double max = toDouble.apply(getMax());
         if (min > max) {
             return false;
         }
 
-        return value.equals(SliderUtil
-                .clampToMinMax(modelToPresentation.apply(value), min, max));
+        return value.equals(
+                SliderUtil.clampToMinMax(toDouble.apply(value), min, max));
     }
 
     @Override
     protected boolean isValueAlignedWithStep(TValue value) {
-        double min = getMinDouble();
-        double max = getMaxDouble();
+        double min = toDouble.apply(getMin());
+        double max = toDouble.apply(getMax());
         if (min > max) {
             return false;
         }
 
-        return value.equals(SliderUtil.snapToStep(
-                modelToPresentation.apply(value), min, max, getStepDouble()));
+        double step = toDouble.apply(getStep());
+        return value.equals(
+                SliderUtil.snapToStep(toDouble.apply(value), min, max, step));
     }
 }

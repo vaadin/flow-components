@@ -21,14 +21,16 @@ import com.vaadin.flow.function.SerializableFunction;
 
 import tools.jackson.databind.node.ArrayNode;
 
-abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent, TRange, TValue>, TRange extends Range, TValue extends Number>
-        extends SliderBase<TComponent, TRange, ArrayNode> {
+abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent, TValue, TNumber>, TValue extends Range<TNumber>, TNumber extends Number>
+        extends SliderBase<TComponent, TValue, TNumber, ArrayNode> {
 
-    public NumberRangeSlider(double min, double max,
-            SerializableFunction<ArrayNode, TRange> presentationToModel,
-            SerializableFunction<TRange, ArrayNode> modelToPresentation) {
+    public NumberRangeSlider(TNumber min, TNumber max,
+            SerializableFunction<ArrayNode, TValue> presentationToModel,
+            SerializableFunction<TValue, ArrayNode> modelToPresentation,
+            SerializableFunction<Double, TNumber> fromDouble,
+            SerializableFunction<TNumber, Double> toDouble) {
         super(min, max, ArrayNode.class, presentationToModel,
-                modelToPresentation);
+                modelToPresentation, fromDouble, toDouble);
     }
 
     /**
@@ -74,69 +76,6 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
     }
 
     /**
-     * Gets the minimum value of the slider.
-     *
-     * @return the minimum value
-     */
-    public TValue getMin() {
-        return fromDouble(super.getMinDouble());
-    }
-
-    /**
-     * Sets the minimum value of the slider.
-     *
-     * @param min
-     *            the minimum value
-     */
-    public void setMin(TValue min) {
-        setMinDouble(min.doubleValue());
-    }
-
-    /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
-    public TValue getMax() {
-        return fromDouble(super.getMaxDouble());
-    }
-
-    /**
-     * Sets the maximum value of the slider.
-     *
-     * @param max
-     *            the maximum value
-     */
-    public void setMax(TValue max) {
-        setMaxDouble(max.doubleValue());
-    }
-
-    /**
-     * Gets the step value of the slider.
-     * <p>
-     * Valid slider values are calculated relative to the minimum value:
-     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
-     *
-     * @return the step value
-     */
-    public TValue getStep() {
-        return fromDouble(super.getStepDouble());
-    }
-
-    /**
-     * Sets the step value of the slider.
-     * <p>
-     * Valid slider values are calculated relative to the minimum value:
-     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
-     *
-     * @param step
-     *            the step value
-     */
-    public void setStep(TValue step) {
-        setStepDouble(step.doubleValue());
-    }
-
-    /**
      * Clears the slider value, setting it to the full range from minimum to
      * maximum.
      *
@@ -153,7 +92,7 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
         try {
             ArrayNode arrayValue = (ArrayNode) getElement()
                     .getPropertyRaw("value");
-            TRange value = presentationToModel.apply(arrayValue);
+            TValue value = presentationToModel.apply(arrayValue);
             return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
         } catch (IllegalArgumentException | ClassCastException e) {
             return false;
@@ -161,37 +100,41 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
     }
 
     @Override
-    protected boolean isValueWithinMinMax(TRange value) {
-        double min = getMinDouble();
-        double max = getMaxDouble();
+    protected boolean isValueWithinMinMax(TValue value) {
+        double min = toDouble.apply(getMin());
+        double max = toDouble.apply(getMax());
         if (min > max) {
             return false;
         }
 
-        return value.equals(createRange(
-                fromDouble(SliderUtil.clampToMinMax(value.start().doubleValue(),
-                        min, max)),
-                fromDouble(SliderUtil.clampToMinMax(value.end().doubleValue(),
-                        min, max))));
+        double clampedStart = SliderUtil
+                .clampToMinMax(toDouble.apply(value.start()), min, max);
+        double clampedEnd = SliderUtil
+                .clampToMinMax(toDouble.apply(value.end()), min, max);
+        TValue clampedRange = createRange(fromDouble.apply(clampedStart),
+                fromDouble.apply(clampedEnd));
+
+        return value.equals(clampedRange);
     }
 
     @Override
-    protected boolean isValueAlignedWithStep(TRange value) {
-        double min = getMinDouble();
-        double max = getMaxDouble();
-        double step = getStepDouble();
+    protected boolean isValueAlignedWithStep(TValue value) {
+        double min = toDouble.apply(getMin());
+        double max = toDouble.apply(getMax());
+        double step = toDouble.apply(getStep());
         if (min > max) {
             return false;
         }
 
-        return value.equals(createRange(
-                fromDouble(SliderUtil.snapToStep(value.start().doubleValue(),
-                        min, max, step)),
-                fromDouble(SliderUtil.snapToStep(value.end().doubleValue(), min,
-                        max, step))));
+        double snappedStart = SliderUtil
+                .snapToStep(toDouble.apply(value.start()), min, max, step);
+        double snappedEnd = SliderUtil.snapToStep(toDouble.apply(value.end()),
+                min, max, step);
+        TValue snappedRange = createRange(fromDouble.apply(snappedStart),
+                fromDouble.apply(snappedEnd));
+
+        return value.equals(snappedRange);
     }
 
-    protected abstract TRange createRange(TValue start, TValue end);
-
-    protected abstract TValue fromDouble(Double value);
+    protected abstract TValue createRange(TNumber start, TNumber end);
 }
