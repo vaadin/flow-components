@@ -15,9 +15,14 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +33,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.ChartType;
+import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.tests.MockUIExtension;
@@ -219,6 +226,451 @@ class ChartAIControllerTest {
             Assertions.assertEquals(1, items.size());
             Assertions.assertEquals("A", items.get(0).getName());
             Assertions.assertEquals(42, items.get(0).getY().intValue());
+        }
+    }
+
+    @Nested
+    class GetState {
+
+        @Test
+        void noEntry_returnsNull() {
+            Assertions.assertNull(controller.getState());
+        }
+
+        @Test
+        void afterRender_returnsQueriesAndConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"column\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            ChartState state = controller.getState();
+            Assertions.assertNotNull(state);
+            Assertions.assertEquals(List.of("SELECT 1"), state.queries());
+            Assertions.assertNotSame(chart.getConfiguration(),
+                    state.configuration(),
+                    "State should contain a copy, not the live configuration");
+            Assertions.assertEquals(
+                    chart.getConfiguration().getChart().getType(),
+                    state.configuration().getChart().getType());
+        }
+
+        @Test
+        void configurationIsIsolatedFromChartMutations() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Original\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            ChartState savedState = controller.getState();
+
+            chart.getConfiguration().setTitle("Mutated");
+
+            Assertions.assertNotEquals("Mutated",
+                    savedState.configuration().getTitle().getText(),
+                    "State configuration should be a snapshot isolated "
+                            + "from later chart mutations");
+        }
+    }
+
+    @Nested
+    class ChartStateSerialization {
+
+        @Test
+        void chartState_isSerializable() throws Exception {
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            var state = new ChartState(List.of("SELECT 1"), config);
+            var baos = new ByteArrayOutputStream();
+            try (var oos = new ObjectOutputStream(baos)) {
+                oos.writeObject(state);
+            }
+            try (var ois = new ObjectInputStream(
+                    new ByteArrayInputStream(baos.toByteArray()))) {
+                var deserialized = (ChartState) ois.readObject();
+                Assertions.assertEquals(List.of("SELECT 1"),
+                        deserialized.queries());
+                Assertions.assertEquals(ChartType.COLUMN,
+                        deserialized.configuration().getChart().getType());
+            }
+        }
+    }
+
+    @Nested
+    class RestoreState {
+
+        @Test
+        void appliesConfigurationAndQueries() {
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            ChartState state = new ChartState(List.of("SELECT 1"), config);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            controller.restoreState(state);
+
+            Assertions.assertNotSame(config, chart.getConfiguration(),
+                    "restoreState should copy the configuration");
+            Assertions.assertEquals(ChartType.COLUMN,
+                    chart.getConfiguration().getChart().getType());
+
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertNotNull(entry);
+            Assertions.assertEquals(List.of("SELECT 1"), entry.getQueries());
+        }
+
+        @Test
+        void nullState_throws() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.restoreState(null));
+        }
+
+        @Test
+        void doesNotFireListeners() {
+            AtomicReference<ChartState> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 1"), config));
+
+            Assertions.assertNull(captured.get());
+        }
+
+        @Test
+        void rendersChart() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 1"), config));
+
+            Assertions.assertFalse(
+                    chart.getConfiguration().getSeries().isEmpty(),
+                    "restoreState should render the chart");
+        }
+
+        @Test
+        void doesNotMutateInputConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            ChartState state = new ChartState(List.of("SELECT 1"), config);
+
+            Assertions.assertTrue(config.getSeries().isEmpty());
+
+            controller.restoreState(state);
+
+            Assertions.assertTrue(state.configuration().getSeries().isEmpty(),
+                    "restoreState should not mutate the input State's "
+                            + "Configuration");
+        }
+
+        @Test
+        void clearsPendingState() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            // Create pending state via tool calls
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertTrue(entry.hasPendingState(),
+                    "Precondition: should have pending state");
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 2"), config));
+
+            entry = ChartEntry.get(chart);
+            Assertions.assertFalse(entry.hasPendingState(),
+                    "restoreState should clear pending state");
+        }
+    }
+
+    @Nested
+    class StateChangeListeners {
+
+        @Test
+        void firesAfterOnRequestCompleted() {
+            AtomicReference<ChartState> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNotNull(captured.get());
+            Assertions.assertEquals(List.of("SELECT 1"),
+                    captured.get().queries());
+            Assertions.assertNotSame(chart.getConfiguration(),
+                    captured.get().configuration(),
+                    "Listener state should contain a copy");
+            Assertions.assertEquals(
+                    chart.getConfiguration().getChart().getType(),
+                    captured.get().configuration().getChart().getType());
+        }
+
+        @Test
+        void doesNotFireOnRenderFailure() {
+            AtomicReference<ChartState> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            databaseProvider.throwOnExecute = new RuntimeException(
+                    "Render failure");
+            controller.onRequestCompleted();
+
+            Assertions.assertNull(captured.get());
+        }
+
+        @Test
+        void registration_removesListener() {
+            AtomicReference<ChartState> captured = new AtomicReference<>();
+            var registration = controller.addStateChangeListener(captured::set);
+            registration.remove();
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNull(captured.get());
+        }
+
+        @Test
+        void doesNotFireOnSecondCall() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            List<ChartState> states = new ArrayList<>();
+            controller.addStateChangeListener(states::add);
+
+            controller.onRequestCompleted();
+
+            Assertions.assertTrue(states.isEmpty(),
+                    "Second onRequestCompleted should not fire listeners "
+                            + "because pending state was already cleared");
+        }
+
+        @Test
+        void throwingListenerDoesNotPreventOtherListeners() {
+            AtomicReference<ChartState> secondListenerState = new AtomicReference<>();
+
+            controller.addStateChangeListener(state -> {
+                throw new RuntimeException("Listener failure");
+            });
+            controller.addStateChangeListener(secondListenerState::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNotNull(secondListenerState.get(),
+                    "Second listener should still fire even if the "
+                            + "first listener throws an exception");
+        }
+
+        @Test
+        void configOnlyUpdate_doesNotFire() {
+            AtomicReference<ChartState> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
+            controller.onRequestCompleted();
+
+            Assertions.assertNull(captured.get());
+        }
+    }
+
+    @Nested
+    class DetachedChart {
+
+        @BeforeEach
+        void detach() {
+            ui.remove(chart);
+        }
+
+        @Test
+        void onRequestCompleted_pendingStateSurvivesUntilRender() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Render is deferred (chart detached), so pending state
+            // should not yet be cleared.
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertTrue(entry.hasPendingState(),
+                    "Pending state should survive until render executes");
+        }
+
+        @Test
+        void onRequestCompleted_listenerFiresOnReattach() {
+            AtomicReference<ChartState> captured = new AtomicReference<>();
+            controller.addStateChangeListener(captured::set);
+
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Listener should not fire while chart is detached
+            Assertions.assertNull(captured.get(),
+                    "State change listener should not fire before "
+                            + "chart is attached and render completes");
+
+            // After re-attachment, deferred render should fire listener
+            ui.add(chart);
+            Assertions.assertNotNull(captured.get(),
+                    "State change listener should fire after "
+                            + "chart is re-attached");
+        }
+
+        @Test
+        void onRequestCompleted_rendersLatestStateOnAttach() {
+            var tools = controller.getTools();
+
+            // First request while detached
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Second request while still detached
+            databaseProvider.results = List
+                    .of(Map.of("category", "B", "value", 20));
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 2\"]}");
+            controller.onRequestCompleted();
+
+            ui.add(chart);
+
+            // After re-attachment, the chart should reflect the latest
+            // state from the second request.
+            Assertions.assertEquals(ChartType.PIE,
+                    chart.getConfiguration().getChart().getType());
+        }
+
+        @Test
+        void restoreState_renderFailure_doesNotThrow() {
+            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 1"), config));
+
+            // Re-attach triggers the deferred render, which will fail.
+            // Should not propagate the exception.
+            Assertions.assertDoesNotThrow(() -> ui.add(chart));
+        }
+
+        @Test
+        void restoreState_pendingStateSurvivesUntilRender() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            // Create pending state via tools
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(
+                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+
+            Configuration config = new Configuration();
+            config.getChart().setType(ChartType.COLUMN);
+            controller
+                    .restoreState(new ChartState(List.of("SELECT 2"), config));
+
+            // Render is deferred (chart detached), so pending state
+            // from the tool calls should be cleared by restoreState,
+            // but the restoreState render itself hasn't executed yet.
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertTrue(
+                    chart.getConfiguration().getSeries().isEmpty(),
+                    "Render should be deferred while chart is detached");
+
+            // After re-attachment, the chart should be rendered
+            ui.add(chart);
+            Assertions.assertFalse(
+                    chart.getConfiguration().getSeries().isEmpty(),
+                    "Chart should be rendered after re-attachment");
+            Assertions.assertFalse(entry.hasPendingState(),
+                    "Pending state should be cleared after render");
         }
     }
 
