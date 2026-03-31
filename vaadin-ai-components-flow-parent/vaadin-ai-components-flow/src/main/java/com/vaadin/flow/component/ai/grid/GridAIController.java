@@ -29,6 +29,8 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * AI controller for populating a {@link Grid} with database data via LLM tool
@@ -48,7 +50,9 @@ import com.vaadin.flow.component.grid.Grid;
  * </p>
  * <p>
  * This controller is <b>not serializable</b>. Grid state can be captured via
- * {@link #getState()} and restored via {@link #restoreState(GridState)}.
+ * {@link #getState()} and restored via {@link #restoreState(GridState)}. State
+ * change listeners can be registered via
+ * {@link #addStateChangeListener(SerializableConsumer)}.
  * </p>
  *
  * @author Vaadin Ltd
@@ -65,6 +69,7 @@ public class GridAIController implements AIController {
 
     private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
+    private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
 
     /**
      * Creates a new grid AI controller.
@@ -157,7 +162,7 @@ public class GridAIController implements AIController {
         }
         var query = entry.getPendingQuery();
         LOGGER.info("onRequestCompleted: applying query: {}", query);
-        applyQuery(entry, query);
+        deferRender(entry, query, true);
     }
 
     /**
@@ -177,6 +182,9 @@ public class GridAIController implements AIController {
     /**
      * Restores a previously saved grid state. Re-executes the stored query and
      * renders the grid.
+     * <p>
+     * Does not fire state change listeners.
+     * </p>
      *
      * @param state
      *            the state to restore, not {@code null}
@@ -187,14 +195,33 @@ public class GridAIController implements AIController {
             return;
         }
         var entry = GridEntry.getOrCreate(grid, GRID_ID);
-        applyQuery(entry, state.query());
+        deferRender(entry, state.query(), false);
     }
 
-    private void applyQuery(GridEntry entry, String query) {
+    /**
+     * Adds a listener that is notified when the grid state changes after an AI
+     * request completes successfully.
+     *
+     * @param listener
+     *            the listener, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addStateChangeListener(
+            SerializableConsumer<GridState> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        stateChangeListeners.add(listener);
+        return () -> stateChangeListeners.remove(listener);
+    }
+
+    private void deferRender(GridEntry entry, String query,
+            boolean fireListeners) {
         grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
             try {
                 GridRenderer.renderGrid(grid, databaseProvider, query);
                 entry.setCurrentQuery(query);
+                if (fireListeners) {
+                    fireStateChangeListeners();
+                }
                 LOGGER.info("Grid updated successfully");
             } catch (Exception e) {
                 LOGGER.error("Error updating grid", e);
@@ -202,5 +229,21 @@ public class GridAIController implements AIController {
                 entry.clearPendingState();
             }
         }));
+    }
+
+    private void fireStateChangeListeners() {
+        if (stateChangeListeners.isEmpty()) {
+            return;
+        }
+        var state = getState();
+        if (state != null) {
+            stateChangeListeners.forEach(listener -> {
+                try {
+                    listener.accept(state);
+                } catch (Exception e) {
+                    LOGGER.error("State change listener failed", e);
+                }
+            });
+        }
     }
 }

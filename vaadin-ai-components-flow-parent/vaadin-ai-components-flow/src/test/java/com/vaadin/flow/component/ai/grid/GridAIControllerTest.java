@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -324,6 +325,109 @@ class GridAIControllerTest {
 
         var result = findTool("get_grid_state").execute("{}");
         Assertions.assertTrue(result.contains("SELECT a FROM t"));
+    }
+
+    // --- State change listeners ---
+
+    @Test
+    void stateChangeListener_firesAfterOnRequestCompleted() {
+        var captured = new AtomicReference<GridState>();
+        controller.addStateChangeListener(captured::set);
+
+        dbProvider.queryResults = List.of(row("a", 1));
+        simulateUpdate("SELECT a FROM t");
+
+        Assertions.assertNotNull(captured.get());
+        Assertions.assertEquals("SELECT a FROM t", captured.get().query());
+    }
+
+    @Test
+    void stateChangeListener_doesNotFireOnRenderFailure() {
+        var captured = new AtomicReference<GridState>();
+        controller.addStateChangeListener(captured::set);
+
+        dbProvider.queryResults = List.of(row("a", 1));
+        findTool("update_grid_data")
+                .execute("{\"query\": \"SELECT a FROM t\"}");
+
+        dbProvider.throwOnExecute = true;
+        controller.onRequestCompleted();
+
+        Assertions.assertNull(captured.get());
+    }
+
+    @Test
+    void stateChangeListener_doesNotFireOnRestoreState() {
+        var captured = new AtomicReference<GridState>();
+        controller.addStateChangeListener(captured::set);
+
+        dbProvider.queryResults = List.of(row("a", 1));
+        controller.restoreState(new GridState("SELECT a FROM t"));
+
+        Assertions.assertNull(captured.get());
+    }
+
+    @Test
+    void stateChangeListener_registration_removesListener() {
+        var captured = new AtomicReference<GridState>();
+        var registration = controller.addStateChangeListener(captured::set);
+        registration.remove();
+
+        dbProvider.queryResults = List.of(row("a", 1));
+        simulateUpdate("SELECT a FROM t");
+
+        Assertions.assertNull(captured.get());
+    }
+
+    @Test
+    void stateChangeListener_doesNotFireOnSecondCall() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        simulateUpdate("SELECT a FROM t");
+
+        var states = new ArrayList<GridState>();
+        controller.addStateChangeListener(states::add);
+
+        controller.onRequestCompleted();
+
+        Assertions.assertTrue(states.isEmpty(),
+                "Second onRequestCompleted should not fire listeners");
+    }
+
+    @Test
+    void stateChangeListener_throwingListenerDoesNotPreventOthers() {
+        var capture = new AtomicReference<GridState>();
+
+        controller.addStateChangeListener(state -> {
+            throw new RuntimeException("Listener failure");
+        });
+        controller.addStateChangeListener(capture::set);
+
+        dbProvider.queryResults = List.of(row("a", 1));
+        simulateUpdate("SELECT a FROM t");
+
+        Assertions.assertNotNull(capture.get(),
+                "Second listener should fire despite first throwing");
+    }
+
+    @Test
+    void stateChangeListener_firesAfterRestoreThenLlmUpdate() {
+        dbProvider.queryResults = List.of(row("a", 1));
+        controller.restoreState(new GridState("SELECT a FROM old"));
+
+        var captured = new AtomicReference<GridState>();
+        controller.addStateChangeListener(captured::set);
+
+        simulateUpdate("SELECT a FROM new_table");
+
+        Assertions.assertNotNull(captured.get());
+        Assertions.assertEquals("SELECT a FROM new_table",
+                captured.get().query());
+    }
+
+    @Test
+    void stateChangeListener_nullListener_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> controller.addStateChangeListener(null));
     }
 
     // --- Empty state ---
