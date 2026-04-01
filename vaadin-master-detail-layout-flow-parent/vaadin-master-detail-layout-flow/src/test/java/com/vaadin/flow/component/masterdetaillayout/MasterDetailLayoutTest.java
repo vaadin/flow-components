@@ -362,14 +362,14 @@ class MasterDetailLayoutTest {
 
     @Test
     void setExpandingArea_getExpandingArea() {
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.BOTH,
-                layout.getExpandingArea());
-
-        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.MASTER);
-
         Assertions.assertEquals(MasterDetailLayout.ExpandingArea.MASTER,
                 layout.getExpandingArea());
-        Assertions.assertEquals("master",
+
+        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.BOTH);
+
+        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.BOTH,
+                layout.getExpandingArea());
+        Assertions.assertEquals("both",
                 layout.getElement().getProperty("expand"));
 
         layout.setExpandingArea(MasterDetailLayout.ExpandingArea.DETAIL);
