@@ -50,9 +50,6 @@ public class IntegerRangeSlider extends
                 .listToJson(Arrays.asList(value.start(), value.end()));
     };
 
-    private static final int DEFAULT_MIN = 0;
-    private static final int DEFAULT_MAX = 100;
-
     /**
      * Constructs a {@code RangeSlider} with min 0 and max 100. The initial
      * value is [0, 100].
@@ -60,7 +57,7 @@ public class IntegerRangeSlider extends
      * The step defaults to 1.
      */
     public IntegerRangeSlider() {
-        this(DEFAULT_MIN, DEFAULT_MAX);
+        this((int) DEFAULT_MIN, (int) DEFAULT_MAX);
     }
 
     /**

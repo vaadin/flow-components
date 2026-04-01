@@ -30,9 +30,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/slider", version = "25.2.0-alpha3")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
-    private static final int DEFAULT_MIN = 0;
-    private static final int DEFAULT_MAX = 100;
-
     /**
      * Constructs a {@code Slider} with min 0 and max 100. The initial value is
      * 0.
@@ -40,7 +37,7 @@ public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
      * The step defaults to 1.
      */
     public IntegerSlider() {
-        this(DEFAULT_MIN, DEFAULT_MAX);
+        this((int) DEFAULT_MIN, (int) DEFAULT_MAX);
     }
 
     /**

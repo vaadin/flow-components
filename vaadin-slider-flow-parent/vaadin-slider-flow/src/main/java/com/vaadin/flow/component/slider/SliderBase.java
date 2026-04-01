@@ -51,7 +51,9 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
         KeyNotifier {
 
-    private static final double DEFAULT_STEP = 1.0;
+    protected static final double DEFAULT_MIN = 0;
+    protected static final double DEFAULT_MAX = 100;
+    private static final double DEFAULT_STEP = 1;
 
     protected final SerializableFunction<TPresentation, TValue> presentationToModel;
     protected final SerializableFunction<TValue, TPresentation> modelToPresentation;

@@ -50,9 +50,6 @@ public class RangeSlider
                 .listToJson(Arrays.asList(value.start(), value.end()));
     };
 
-    private static final double DEFAULT_MIN = 0.0;
-    private static final double DEFAULT_MAX = 100.0;
-
     /**
      * Constructs a {@code RangeSlider} with min 0 and max 100. The initial
      * value is [0, 100].
