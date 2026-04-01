@@ -3,6 +3,7 @@ name: Validation
 on:
   pull_request:
     branches: ['main', '25.*']
+  merge_group:
   workflow_dispatch:
     inputs:
       components:
@@ -15,7 +16,7 @@ permissions:
   checks: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -35,7 +36,8 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: ${{ github.event_name == 'merge_group' && 50 || 1 }}
 
       - name: Setup JDK 21
         uses: actions/setup-java@v5
@@ -79,11 +81,15 @@ jobs:
 
       - name: Check for skip-ci
         id: skip-ci
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
+          if [ "${{ github.event_name }}" = "merge_group" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if echo "$PR_TITLE" | grep -q '\[skip ci\]'; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -103,15 +109,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           elements="${{ github.event.inputs.components || '' }}"
+          changed_files=""
           if [ -z "$elements" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
             pr_number="${{ github.event.pull_request.number }}"
-            modified=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename' \
+            changed_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename')
+          elif [ -z "$elements" ] && [ "${{ github.event_name }}" = "merge_group" ]; then
+            changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
+          fi
+          if [ -n "$changed_files" ]; then
+            modified=$(echo "$changed_files" \
               | grep 'vaadin.*flow-parent' \
               | sed 's,^vaadin-\(.*\)-flow-parent.*,\1,' \
               | sort -u)
             nmods=$(echo "$modified" | wc -w | tr -d ' ')
-            all_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename' | sort -u | tr -d '[:space:]')
-            component_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename' | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]')
+            all_files=$(echo "$changed_files" | sort -u | tr -d '[:space:]')
+            component_files=$(echo "$changed_files" | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]')
             if [ "$nmods" -lt 5 ] && [ ${#all_files} -eq ${#component_files} ]; then
               elements=$(echo $modified | tr '\n' ' ')
               echo "Running partial build for: $elements"
