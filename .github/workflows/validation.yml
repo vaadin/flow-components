@@ -27,6 +27,12 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    services:
+      selenium:
+        image: selenium/standalone-chrome:latest
+        options: --shm-size=2g
+        ports:
+          - 4444:4444
     steps:
       - name: Set Maven args
         run: |
@@ -147,13 +153,6 @@ jobs:
         if: steps.skip-ci.outputs.skip != 'true'
         run: node scripts/wtr.js ${{ steps.components.outputs.elements }}
 
-      - name: Start Selenium
-        if: steps.skip-ci.outputs.skip != 'true'
-        run: |
-          docker pull selenium/standalone-chrome:latest
-          docker run --name selenium --net=host --rm -d -v /dev/shm:/dev/shm selenium/standalone-chrome:latest
-          sleep 5
-
       - name: Run integration tests
         if: steps.skip-ci.outputs.skip != 'true'
         env:
@@ -161,17 +160,13 @@ jobs:
         run: |
           args="$MAVEN_ARGS"
           [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
-          args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=localhost"
+          args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=localhost -Dcom.vaadin.testbench.Parameters.hubPort=4444"
           args="$args -Dfailsafe.rerunFailingTestsCount=2 -Dmaven.test.redirectTestOutputToFile=true"
           mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=1"
 
           mvn verify -Dvaadin.pnpm.enable -Drun-it -Drelease -Dvaadin.productionMode \
             -Dvaadin.force.production.build=true \
             $mode $args -pl integration-tests -DskipUnitTests
-
-      - name: Stop Selenium
-        if: always()
-        run: docker stop selenium 2>/dev/null || true
 
       - name: Publish unit test results
         if: always()
