@@ -18,8 +18,8 @@ package com.vaadin.flow.component.slider;
 import java.io.Serializable;
 
 /**
- * Represents the value of a {@link RangeSlider}, consisting of a start and end
- * value.
+ * Represents the value of an {@link IntegerRangeSlider}, consisting of integer
+ * start and end values.
  *
  * @param start
  *            the start value of the range
@@ -32,7 +32,7 @@ public record IntegerRangeSliderValue(Integer start,
         Integer end) implements Serializable, Range<Integer> {
 
     /**
-     * Creates a new RangeSliderValue with the given start and end values.
+     * Creates a new IntegerRangeSlider with the given start and end values.
      *
      * @param start
      *            the start value of the range

@@ -18,8 +18,8 @@ package com.vaadin.flow.component.slider;
 import java.io.Serializable;
 
 /**
- * Represents the value of a {@link RangeSlider}, consisting of a start and end
- * value.
+ * Represents the value of a {@link RangeSlider}, consisting of decimal start
+ * and end values.
  *
  * @param start
  *            the start value of the range

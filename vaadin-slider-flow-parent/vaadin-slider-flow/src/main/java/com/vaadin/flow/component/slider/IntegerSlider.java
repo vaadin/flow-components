@@ -20,9 +20,12 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * Slider is an input field that allows the user to select a numeric value
- * within a range by dragging a handle along a track or using arrow keys for
- * precise input.
+ * IntegerSlider is an input field that allows the user to select a numeric
+ * value within a range by dragging a handle along a track or using arrow keys
+ * for precise input.
+ * <p>
+ * IntegerSlider uses {@link Integer} as the value type, see {@link Slider} for
+ * a version of the component that supports decimal values.
  *
  * @author Vaadin Ltd.
  */
@@ -31,8 +34,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
     /**
-     * Constructs a {@code Slider} with min 0 and max 100. The initial value is
-     * 0.
+     * Constructs an {@code IntegerSlider} with min 0 and max 100. The initial
+     * value is 0.
      * <p>
      * The step defaults to 1.
      */
@@ -41,8 +44,8 @@ public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given min and max. The initial value
-     * is set to the minimum value.
+     * Constructs an {@code IntegerSlider} with the given min and max. The
+     * initial value is set to the minimum value.
      * <p>
      * The step defaults to 1.
      *
@@ -56,8 +59,8 @@ public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min 0, and max 100. The
-     * initial value is 0.
+     * Constructs an {@code IntegerSlider} with the given label, min 0, and max
+     * 100. The initial value is 0.
      * <p>
      * The step defaults to 1.
      *
@@ -70,8 +73,8 @@ public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min and max. The
-     * initial value is set to the minimum value.
+     * Constructs an {@code IntegerSlider} with the given label, min and max.
+     * The initial value is set to the minimum value.
      * <p>
      * The step defaults to 1.
      *

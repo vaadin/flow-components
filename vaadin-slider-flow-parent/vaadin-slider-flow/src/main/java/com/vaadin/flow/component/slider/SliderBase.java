@@ -41,7 +41,11 @@ import com.vaadin.flow.signals.Signal;
  * @param <TComponent>
  *            the component type
  * @param <TValue>
- *            the value type
+ *            the model value type
+ * @param <TNumber>
+ *            the number type used for min, max, and step properties
+ * @param <TPresentation>
+ *            the presentation type used by the element property
  *
  * @author Vaadin Ltd
  */
@@ -77,11 +81,18 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      * @param max
      *            the maximum value
      * @param presentationType
-     *            the class of the presentation type
+     *            the class of the presentation type used by the element
+     *            property
      * @param presentationToModel
-     *            a function to convert from presentation to model
+     *            a function to convert a client-side presentation value to the
+     *            slider's range value type
      * @param modelToPresentation
-     *            a function to convert from model to presentation
+     *            a function to convert a value of the slider's range value type
+     *            to client-side presentation
+     * @param fromDouble
+     *            a function to convert from double to the slider's number type
+     * @param toDouble
+     *            a function to convert from the slider's number type to double
      */
     protected SliderBase(TNumber min, TNumber max,
             Class<TPresentation> presentationType,

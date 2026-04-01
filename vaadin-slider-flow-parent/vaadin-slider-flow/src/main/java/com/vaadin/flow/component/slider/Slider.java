@@ -23,6 +23,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * Slider is an input field that allows the user to select a numeric value
  * within a range by dragging a handle along a track or using arrow keys for
  * precise input.
+ * <p>
+ * Slider uses {@link Double} as the value type, see {@link IntegerSlider} for a
+ * version of the component that supports integer values.
  *
  * @author Vaadin Ltd.
  */

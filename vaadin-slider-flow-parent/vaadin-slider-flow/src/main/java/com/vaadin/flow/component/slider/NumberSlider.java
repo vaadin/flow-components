@@ -20,11 +20,36 @@ import java.util.Optional;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.function.SerializableFunction;
 
+/**
+ * Base class for sliders that allow selecting a single numeric value within a
+ * range.
+ * 
+ * @param <TComponent>
+ *            the type of the slider component
+ * @param <TValue>
+ *            the type of the slider's value, min, max, step properties, which
+ *            must extend {@link Number}
+ */
 abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>, TValue extends Number>
         extends SliderBase<TComponent, TValue, TValue, Double>
         implements HasAriaLabel {
 
-    <TPresentation> NumberSlider(TValue min, TValue max,
+    /**
+     * Constructs a NumberSlider with the given min and max values, and
+     * functions to convert between the slider's value type and double.
+     * 
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param fromDouble
+     *            a function to convert a double value to the slider's value
+     *            type
+     * @param toDouble
+     *            a function to convert a value of the slider's value type to
+     *            double
+     */
+    protected NumberSlider(TValue min, TValue max,
             SerializableFunction<Double, TValue> fromDouble,
             SerializableFunction<TValue, Double> toDouble) {
         super(min, max, Double.class, fromDouble, toDouble, fromDouble,

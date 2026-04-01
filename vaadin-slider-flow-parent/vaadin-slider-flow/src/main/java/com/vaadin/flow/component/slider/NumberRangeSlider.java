@@ -21,9 +21,45 @@ import com.vaadin.flow.function.SerializableFunction;
 
 import tools.jackson.databind.node.ArrayNode;
 
+/**
+ * Base class for sliders that allow selecting a range of numeric values within
+ * configured bounds.
+ * 
+ * @param <TComponent>
+ *            the type of the slider component
+ * @param <TValue>
+ *            the type of the slider's value, which must extend {@link Range} of
+ *            a numeric type
+ * @param <TNumber>
+ *            the numeric type of the slider's start value, end value, min, max,
+ *            step properties, which must extend {@link Number}
+ */
 abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent, TValue, TNumber>, TValue extends Range<TNumber>, TNumber extends Number>
         extends SliderBase<TComponent, TValue, TNumber, ArrayNode> {
 
+    /**
+     * Constructs a NumberRangeSlider with the given min and max values,
+     * functions to convert between the slider's range value type and
+     * client-side presentation, and functions to convert between the slider's
+     * numeric type and double.
+     * 
+     * @param min
+     *            the minimum value
+     * @param max
+     *            the maximum value
+     * @param presentationToModel
+     *            a function to convert a client-side presentation value to the
+     *            slider's range value type
+     * @param modelToPresentation
+     *            a function to convert a value of the slider's range value type
+     *            to client-side presentation
+     * @param fromDouble
+     *            a function to convert a double value to the slider's numeric
+     *            type
+     * @param toDouble
+     *            a function to convert a value of the slider's numeric type to
+     *            double
+     */
     public NumberRangeSlider(TNumber min, TNumber max,
             SerializableFunction<ArrayNode, TValue> presentationToModel,
             SerializableFunction<TValue, ArrayNode> modelToPresentation,

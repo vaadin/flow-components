@@ -26,9 +26,13 @@ import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.databind.node.ArrayNode;
 
 /**
- * RangeSlider is an input field that allows the user to select a numeric range
- * within bounds by dragging two thumbs along a track or using arrow keys for
- * precise input.
+ * IntegerRangeSlider is an input field that allows the user to select a numeric
+ * range within bounds by dragging two thumbs along a track or using arrow keys
+ * for precise input.
+ * <p>
+ * IntegerRangeSlider uses {@link Integer} as the value type for its start and
+ * end values, see {@link RangeSlider} for a version of the component that
+ * supports integer values.
  *
  * @author Vaadin Ltd.
  */
@@ -51,8 +55,8 @@ public class IntegerRangeSlider extends
     };
 
     /**
-     * Constructs a {@code RangeSlider} with min 0 and max 100. The initial
-     * value is [0, 100].
+     * Constructs an {@code IntegerRangeSlider} with min 0 and max 100. The
+     * initial value is [0, 100].
      * <p>
      * The step defaults to 1.
      */
@@ -61,8 +65,8 @@ public class IntegerRangeSlider extends
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given min and max. The initial
-     * value is set to [min, max].
+     * Constructs an {@code IntegerRangeSlider} with the given min and max. The
+     * initial value is set to [min, max].
      * <p>
      * The step defaults to 1.
      *
@@ -77,8 +81,8 @@ public class IntegerRangeSlider extends
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, min 0, and max
-     * 100. The initial value is [0, 100].
+     * Constructs an {@code IntegerRangeSlider} with the given label, min 0, and
+     * max 100. The initial value is [0, 100].
      * <p>
      * The step defaults to 1.
      *
@@ -91,8 +95,8 @@ public class IntegerRangeSlider extends
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, min and max. The
-     * initial value is set to [min, max].
+     * Constructs an {@code IntegerRangeSlider} with the given label, min and
+     * max. The initial value is set to [min, max].
      * <p>
      * The step defaults to 1.
      *
