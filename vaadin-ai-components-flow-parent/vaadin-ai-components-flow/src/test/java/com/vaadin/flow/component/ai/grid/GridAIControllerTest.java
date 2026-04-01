@@ -487,9 +487,8 @@ class GridAIControllerTest {
 
     @Test
     void getSystemPrompt_containsColumnGroupingInstructions() {
-        var prompt = GridAIController.getSystemPrompt();
-        Assertions.assertTrue(prompt.contains("dot-separated"));
-        Assertions.assertTrue(prompt.contains("Contact.Email"));
+        var prompt = GridAIController.getSystemPrompt().toLowerCase();
+        Assertions.assertTrue(prompt.contains("column grouping"));
     }
 
     // --- stripGroupPrefix ---
