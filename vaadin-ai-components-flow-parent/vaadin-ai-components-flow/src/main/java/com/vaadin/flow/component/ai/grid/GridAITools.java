@@ -173,10 +173,14 @@ public final class GridAITools {
             public String getDescription() {
                 return """
                         Updates the grid data using a SQL SELECT query.
-                        The grid automatically creates columns from query results.
-                        Use SQL aliases (AS) for human-readable column headers.
+                        The grid creates columns from query result names.
+                        ALWAYS list specific columns — NEVER use SELECT *.
+                        ALWAYS give every column an AS alias with a readable name.
                         Do NOT use LIMIT or OFFSET — the grid handles pagination.
-                        Example: SELECT name AS "Name", salary AS "Salary" FROM employees
+
+                        GROUPING RULE: "grouped under X" means alias as "X.ColumnName":
+                        "amount and quantity grouped under Sales"
+                        → SELECT amount AS "Sales.Amount", quantity AS "Sales.Quantity" FROM sales
                         """;
             }
 
@@ -192,7 +196,7 @@ public final class GridAITools {
                             },
                             "query": {
                               "type": "string",
-                              "description": "SQL SELECT query without LIMIT/OFFSET"
+                              "description": "SQL SELECT with specific columns and AS aliases. No LIMIT/OFFSET. No SELECT *. For grouping use X.Name aliases."
                             }
                           },
                           "required": ["query"]
