@@ -301,8 +301,9 @@ public class MasterDetailLayout extends Component implements HasSize,
      * detail area is shown as an overlay.
      * <p>
      * If not specified, the size is determined automatically by measuring the
-     * detail content when it first becomes visible, and then caching the
-     * resulting intrinsic size.
+     * detail content whenever new content is provided via {@link #setDetail}.
+     * The measured intrinsic size is then cached until the next
+     * {@link #setDetail} call.
      *
      * @param size
      *            the size of the detail area in CSS length units
@@ -317,8 +318,9 @@ public class MasterDetailLayout extends Component implements HasSize,
      * detail area is shown as an overlay.
      * <p>
      * If not specified, the size is determined automatically by measuring the
-     * detail content when it first becomes visible, and then caching the
-     * resulting intrinsic size.
+     * detail content whenever new content is provided via {@link #setDetail}.
+     * The measured intrinsic size is then cached until the next
+     * {@link #setDetail} call.
      *
      * @param size
      *            the size of the detail area
