@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -155,21 +156,21 @@ jobs:
         if: always()
         run: docker stop selenium 2>/dev/null || true
 
-      - name: Upload surefire reports
+      - name: Publish unit test results
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: dorny/test-reporter@v1
         with:
-          name: surefire-reports
-          path: '**/target/surefire-reports/'
-          retention-days: 5
+          name: Unit Tests
+          path: '**/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
 
-      - name: Upload failsafe reports
+      - name: Publish integration test results
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: dorny/test-reporter@v1
         with:
-          name: failsafe-reports
-          path: 'integration-tests/target/failsafe-reports/'
-          retention-days: 5
+          name: Integration Tests
+          path: 'integration-tests/target/failsafe-reports/TEST-*.xml'
+          reporter: java-junit
 
       - name: Upload error screenshots
         if: failure()
