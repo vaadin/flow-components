@@ -296,9 +296,14 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
-     * Sets the size of the detail area in CSS length units. If there is not
+     * Sets the size of the detail area in CSS length units. When there is not
      * enough space to show master and detail areas next to each other, the
-     * detail area is shown as an overlay. Defaults to 15em.
+     * detail area is shown as an overlay.
+     * <p>
+     * If not specified, the size is determined automatically by measuring the
+     * detail content whenever new content is provided via {@link #setDetail}.
+     * The measured intrinsic size is then cached until the next
+     * {@link #setDetail} call.
      *
      * @param size
      *            the size of the detail area in CSS length units
@@ -308,9 +313,14 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
-     * Sets the size of the detail area in CSS length units. If there is not
+     * Sets the size of the detail area in CSS length units. When there is not
      * enough space to show master and detail areas next to each other, the
-     * detail area is shown as an overlay. Defaults to 15em.
+     * detail area is shown as an overlay.
+     * <p>
+     * If not specified, the size is determined automatically by measuring the
+     * detail content whenever new content is provided via {@link #setDetail}.
+     * The measured intrinsic size is then cached until the next
+     * {@link #setDetail} call.
      *
      * @param size
      *            the size of the detail area
@@ -421,7 +431,7 @@ public class MasterDetailLayout extends Component implements HasSize,
 
     /**
      * Gets which area(s) expand to fill available space. Defaults to
-     * {@link ExpandingArea#BOTH}.
+     * {@link ExpandingArea#MASTER}.
      *
      * @return the expanding area
      */
@@ -430,13 +440,13 @@ public class MasterDetailLayout extends Component implements HasSize,
         if (expand != null) {
             return ExpandingArea.valueOf(expand.toUpperCase());
         }
-        return ExpandingArea.BOTH;
+        return ExpandingArea.MASTER;
     }
 
     /**
      * Controls which area(s) expand to fill available space. Possible values
      * are {@link ExpandingArea#MASTER}, {@link ExpandingArea#DETAIL}, and
-     * {@link ExpandingArea#BOTH}. Defaults to {@link ExpandingArea#BOTH}.
+     * {@link ExpandingArea#BOTH}. Defaults to {@link ExpandingArea#MASTER}.
      *
      * @param expandingArea
      *            the expanding area
@@ -470,7 +480,7 @@ public class MasterDetailLayout extends Component implements HasSize,
     /**
      * Adds a listener for when the backdrop of the details overlay is clicked.
      * The backdrop is the area outside the detail area when it is shown in
-     * drawer mode. Can be used to hide the details when the backdrop is
+     * overlay mode. Can be used to hide the details when the backdrop is
      * clicked.
      *
      * @param listener
@@ -531,7 +541,7 @@ public class MasterDetailLayout extends Component implements HasSize,
     /**
      * Event that is fired when the backdrop of the details overlay is clicked.
      * The backdrop is the area outside the detail area when it is shown in
-     * drawer mode. Can be used to hide the details when the backdrop is
+     * overlay mode. Can be used to hide the details when the backdrop is
      * clicked.
      */
     @DomEvent("backdrop-click")
