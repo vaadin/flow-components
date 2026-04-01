@@ -19,7 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  MAVEN_ARGS: -ntp -B ${{ !runner.debug && '-q' || '' }}
   FORK_COUNT: 5
 
 jobs:
@@ -28,6 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
+      - name: Set Maven args
+        run: |
+          args="-ntp -B"
+          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
+          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
