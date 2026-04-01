@@ -88,6 +88,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
+    // Test
+
     private TextFieldI18n i18n;
 
     private Validator<String> defaultValidator = (value, context) -> {
