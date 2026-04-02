@@ -44,6 +44,8 @@ import com.vaadin.flow.component.charts.model.GanttSeries;
 import com.vaadin.flow.component.charts.model.HeatSeries;
 import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.model.WaterFallSum;
@@ -930,6 +932,67 @@ class DefaultDataConverterTest {
             var result = converter.convertToSeries(data);
             Assertions.assertEquals(1,
                     ((AbstractSeries) result.getFirst()).getyAxis());
+        }
+    }
+
+    @Nested
+    class SeriesTypeTests {
+
+        @Test
+        void singleSeries_withTypeColumn() {
+            var data = List.of(row(X, 1, Y, 10, TYPE, "column"));
+            var result = converter.convertToSeries(data);
+            var series = (AbstractSeries) result.getFirst();
+            Assertions.assertInstanceOf(PlotOptionsColumn.class,
+                    series.getPlotOptions());
+        }
+
+        @Test
+        void withoutType_noPlotOptions() {
+            var data = List.of(row(X, 1, Y, 10));
+            var result = converter.convertToSeries(data);
+            var series = (AbstractSeries) result.getFirst();
+            Assertions.assertNull(series.getPlotOptions());
+        }
+
+        @Test
+        void typeColumn_strippedBeforePatternDetection() {
+            var data = List.of(row(X, 1, Y, 10, TYPE, "column"));
+            var result = (DataSeries) converter.convertToSeries(data)
+                    .getFirst();
+            Assertions.assertEquals(1, result.getData().getFirst().getX());
+            Assertions.assertEquals(10, result.getData().getFirst().getY());
+        }
+
+        @Test
+        void grouped_differentTypePerGroup() {
+            var data = List.of(
+                    row(SERIES, "Revenue", X, 1, Y, 100, TYPE, "line"),
+                    row(SERIES, "Volume", X, 1, Y, 50000, TYPE, "column"));
+            var result = converter.convertToSeries(data);
+            Assertions.assertEquals(2, result.size());
+            Assertions.assertInstanceOf(PlotOptionsLine.class,
+                    ((AbstractSeries) result.get(0)).getPlotOptions());
+            Assertions.assertInstanceOf(PlotOptionsColumn.class,
+                    ((AbstractSeries) result.get(1)).getPlotOptions());
+        }
+
+        @Test
+        void unknownType_noPlotOptions() {
+            var data = List.of(row(X, 1, Y, 10, TYPE, "unknown"));
+            var result = converter.convertToSeries(data);
+            var series = (AbstractSeries) result.getFirst();
+            Assertions.assertNull(series.getPlotOptions());
+        }
+
+        @Test
+        void typeAndYAxisCombined() {
+            var data = List.of(row(X, 1, Y, 10, TYPE, "column", Y_AXIS, 1));
+            var result = converter.convertToSeries(data);
+            var series = (AbstractSeries) result.getFirst();
+            Assertions.assertInstanceOf(PlotOptionsColumn.class,
+                    series.getPlotOptions());
+            Assertions.assertEquals(1, series.getyAxis());
         }
     }
 

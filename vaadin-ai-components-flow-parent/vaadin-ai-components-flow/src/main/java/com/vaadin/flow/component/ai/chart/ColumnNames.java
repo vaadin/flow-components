@@ -59,6 +59,10 @@ public final class ColumnNames implements Serializable {
 
     public static final String Y_AXIS = PREFIX + "yaxis";
 
+    // --- Per-series chart type ---
+
+    public static final String TYPE = PREFIX + "type";
+
     // --- OHLC / Candlestick ---
 
     public static final String OPEN = PREFIX + "open";

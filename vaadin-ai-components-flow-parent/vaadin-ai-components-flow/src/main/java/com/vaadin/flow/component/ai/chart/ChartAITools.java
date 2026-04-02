@@ -584,6 +584,12 @@ public final class ChartAITools {
                                 It is removed before chart type detection. \
                                 Example: SELECT date AS {X}, volume AS {Y}, 1 AS {Y_AXIS} FROM trades
 
+                                Per-series chart type: add a {TYPE} column (e.g. 'column', 'line', 'bar', 'area', 'spline', 'areaspline', 'scatter') \
+                                to override the global chart type for that series. Use with {SERIES} for mixed-type charts. \
+                                It is removed before chart type detection. \
+                                Example: SELECT month AS {X}, revenue AS {Y}, region AS {SERIES}, \
+                                CASE WHEN region = 'South' THEN 'column' ELSE NULL END AS {TYPE} FROM sales
+
                                 Basic charts (line, bar, column, area, spline, pie):
                                 - 2 columns: category, value (no special aliases needed)
                                 - Example: SELECT month AS category, SUM(revenue) AS value FROM sales GROUP BY month

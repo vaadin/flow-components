@@ -35,10 +35,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.BoxPlotItem;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -55,6 +57,13 @@ import com.vaadin.flow.component.charts.model.HeatSeries;
 import com.vaadin.flow.component.charts.model.Node;
 import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.model.PlotOptionsArea;
+import com.vaadin.flow.component.charts.model.PlotOptionsAreaspline;
+import com.vaadin.flow.component.charts.model.PlotOptionsBar;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
+import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
+import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.model.TreeSeriesItem;
@@ -124,6 +133,15 @@ public class DefaultDataConverter implements DataConverter {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DefaultDataConverter.class);
 
+    private static final Map<String, Supplier<AbstractPlotOptions>> PLOT_OPTIONS_BY_TYPE = Map
+            .ofEntries(Map.entry("line", PlotOptionsLine::new),
+                    Map.entry("column", PlotOptionsColumn::new),
+                    Map.entry("bar", PlotOptionsBar::new),
+                    Map.entry("area", PlotOptionsArea::new),
+                    Map.entry("spline", PlotOptionsSpline::new),
+                    Map.entry("areaspline", PlotOptionsAreaspline::new),
+                    Map.entry("scatter", PlotOptionsScatter::new));
+
     @Override
     public List<Series> convertToSeries(List<Map<String, Object>> data) {
         Objects.requireNonNull(data, "Data must not be null");
@@ -139,17 +157,13 @@ public class DefaultDataConverter implements DataConverter {
             return convertGrouped(data, columnMapping);
         }
 
-        var yAxisIndex = extractYAxisIndex(data.getFirst(), columnMapping);
-        if (columns.contains(Y_AXIS)) {
-            data = stripColumn(data, columnMapping.get(Y_AXIS));
-            columnMapping = buildColumnMapping(data.getFirst());
-            columns = columnMapping.keySet();
-        }
+        var metadata = extractSeriesMetadata(data, columnMapping);
+        data = metadata.data();
+        columnMapping = buildColumnMapping(data.getFirst());
+        columns = columnMapping.keySet();
 
         var series = convertSingle(data, columns, columnMapping);
-        if (yAxisIndex != null) {
-            series.setyAxis(yAxisIndex);
-        }
+        metadata.applyTo(series);
         return List.of(series);
     }
 
@@ -195,19 +209,14 @@ public class DefaultDataConverter implements DataConverter {
                     .map(row -> withoutKey(row, originalSeriesKey)).toList();
             var groupMapping = buildColumnMapping(groupRows.getFirst());
 
-            var yAxisIndex = extractYAxisIndex(groupRows.getFirst(),
-                    groupMapping);
-            if (groupMapping.containsKey(Y_AXIS)) {
-                groupRows = stripColumn(groupRows, groupMapping.get(Y_AXIS));
-                groupMapping = buildColumnMapping(groupRows.getFirst());
-            }
+            var metadata = extractSeriesMetadata(groupRows, groupMapping);
+            groupRows = metadata.data();
+            groupMapping = buildColumnMapping(groupRows.getFirst());
 
             var series = convertSingle(groupRows, groupMapping.keySet(),
                     groupMapping);
             series.setName(entry.getKey().isEmpty() ? null : entry.getKey());
-            if (yAxisIndex != null) {
-                series.setyAxis(yAxisIndex);
-            }
+            metadata.applyTo(series);
             result.add(series);
         }
         return result;
@@ -220,15 +229,49 @@ public class DefaultDataConverter implements DataConverter {
         return copy;
     }
 
-    private static List<Map<String, Object>> stripColumn(
-            List<Map<String, Object>> data, String originalKey) {
-        return data.stream().map(row -> withoutKey(row, originalKey)).toList();
+    /**
+     * Per-series metadata extracted from control columns ({@code _yaxis},
+     * {@code _type}) before pattern detection.
+     */
+    private record SeriesMetadata(List<Map<String, Object>> data,
+            Integer yAxisIndex, String seriesType) implements Serializable {
+
+        void applyTo(AbstractSeries series) {
+            if (yAxisIndex != null) {
+                series.setyAxis(yAxisIndex);
+            }
+            if (seriesType != null) {
+                var supplier = PLOT_OPTIONS_BY_TYPE
+                        .get(seriesType.toLowerCase(Locale.ENGLISH));
+                if (supplier != null) {
+                    series.setPlotOptions(supplier.get());
+                }
+            }
+        }
     }
 
-    private static Integer extractYAxisIndex(Map<String, Object> row,
-            Map<String, String> columnMapping) {
-        var value = getNumber(row, columnMapping, Y_AXIS);
-        return value != null ? value.intValue() : null;
+    /**
+     * Extracts {@code _yaxis} and {@code _type} metadata from the first row and
+     * strips both columns from all rows.
+     */
+    private static SeriesMetadata extractSeriesMetadata(
+            List<Map<String, Object>> data, Map<String, String> columnMapping) {
+        var firstRow = data.getFirst();
+
+        var yAxisValue = getNumber(firstRow, columnMapping, Y_AXIS);
+        Integer yAxisIndex = yAxisValue != null ? yAxisValue.intValue() : null;
+
+        String seriesType = getText(firstRow, columnMapping, TYPE);
+
+        for (String col : List.of(Y_AXIS, TYPE)) {
+            if (columnMapping.containsKey(col)) {
+                String originalKey = columnMapping.get(col);
+                data = data.stream().map(row -> withoutKey(row, originalKey))
+                        .toList();
+            }
+        }
+
+        return new SeriesMetadata(data, yAxisIndex, seriesType);
     }
 
     // --- Pattern matchers returning DataSeries ---
