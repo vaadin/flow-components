@@ -133,7 +133,7 @@ jobs:
 
       - name: npm install
         if: steps.skip-ci.outputs.skip != 'true'
-        run: npm install --silent --quiet --no-progress
+        run: npm install --ignore-scripts --silent --quiet --no-progress
 
       - name: Merge ITs
         if: steps.skip-ci.outputs.skip != 'true'
@@ -175,7 +175,8 @@ jobs:
 
       - name: Publish unit test results
         if: always()
-        uses: dorny/test-reporter@v1
+        ## Make sonar happy for external actions
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Unit Tests
           path: '**/target/surefire-reports/TEST-*.xml'
@@ -183,7 +184,7 @@ jobs:
 
       - name: Publish integration test results
         if: always()
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Integration Tests
           path: 'integration-tests/target/failsafe-reports/TEST-*.xml'
