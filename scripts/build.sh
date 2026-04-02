@@ -148,7 +148,7 @@ then
 fi
 
 ## Install node modules used for merging ITs
-cmd="npm install --silent --quiet --no-progress"
+cmd="npm install --ignore-scripts --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd || exit 1
 
