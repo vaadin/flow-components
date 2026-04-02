@@ -139,7 +139,18 @@ public class DefaultDataConverter implements DataConverter {
             return convertGrouped(data, columnMapping);
         }
 
-        return List.of(convertSingle(data, columns, columnMapping));
+        var yAxisIndex = extractYAxisIndex(data.getFirst(), columnMapping);
+        if (columns.contains(Y_AXIS)) {
+            data = stripColumn(data, columnMapping.get(Y_AXIS));
+            columnMapping = buildColumnMapping(data.getFirst());
+            columns = columnMapping.keySet();
+        }
+
+        var series = convertSingle(data, columns, columnMapping);
+        if (yAxisIndex != null) {
+            series.setyAxis(yAxisIndex);
+        }
+        return List.of(series);
     }
 
     /**
@@ -183,9 +194,20 @@ public class DefaultDataConverter implements DataConverter {
             var groupRows = entry.getValue().stream()
                     .map(row -> withoutKey(row, originalSeriesKey)).toList();
             var groupMapping = buildColumnMapping(groupRows.getFirst());
+
+            var yAxisIndex = extractYAxisIndex(groupRows.getFirst(),
+                    groupMapping);
+            if (groupMapping.containsKey(Y_AXIS)) {
+                groupRows = stripColumn(groupRows, groupMapping.get(Y_AXIS));
+                groupMapping = buildColumnMapping(groupRows.getFirst());
+            }
+
             var series = convertSingle(groupRows, groupMapping.keySet(),
                     groupMapping);
             series.setName(entry.getKey().isEmpty() ? null : entry.getKey());
+            if (yAxisIndex != null) {
+                series.setyAxis(yAxisIndex);
+            }
             result.add(series);
         }
         return result;
@@ -196,6 +218,17 @@ public class DefaultDataConverter implements DataConverter {
         var copy = new LinkedHashMap<>(row);
         copy.remove(key);
         return copy;
+    }
+
+    private static List<Map<String, Object>> stripColumn(
+            List<Map<String, Object>> data, String originalKey) {
+        return data.stream().map(row -> withoutKey(row, originalKey)).toList();
+    }
+
+    private static Integer extractYAxisIndex(Map<String, Object> row,
+            Map<String, String> columnMapping) {
+        var value = getNumber(row, columnMapping, Y_AXIS);
+        return value != null ? value.intValue() : null;
     }
 
     // --- Pattern matchers returning DataSeries ---

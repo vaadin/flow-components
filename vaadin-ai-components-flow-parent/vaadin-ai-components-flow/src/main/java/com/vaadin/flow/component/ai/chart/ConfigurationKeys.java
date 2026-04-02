@@ -98,6 +98,7 @@ public final class ConfigurationKeys implements Serializable {
     // --- Axis ---
 
     public static final String CATEGORIES = "categories";
+    public static final String OPPOSITE = "opposite";
 
     // --- Color axis ---
 

@@ -51,6 +51,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
+import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -120,7 +121,7 @@ public final class ChartConfigurationParser implements Serializable {
                 applyAxisConfig(config.getxAxis(), configNode.get(X_AXIS));
             }
             if (configNode.has(Y_AXIS)) {
-                applyAxisConfig(config.getyAxis(), configNode.get(Y_AXIS));
+                applyYAxisConfig(config, configNode.get(Y_AXIS));
             }
             if (configNode.has(Z_AXIS)) {
                 applyAxisConfig(config.getzAxis(), configNode.get(Z_AXIS));
@@ -337,6 +338,40 @@ public final class ChartConfigurationParser implements Serializable {
                 // skip
             }
         }
+    }
+
+    /**
+     * Handles yAxis as either a single object or an array of axis configs. When
+     * an array is provided, the first element configures the default y-axis and
+     * additional elements create secondary axes via
+     * {@link Configuration#addyAxis(YAxis)}.
+     */
+    private static void applyYAxisConfig(Configuration config,
+            JsonNode yAxisNode) {
+        if (yAxisNode.isObject()) {
+            applyAxisConfig(config.getyAxis(), yAxisNode);
+        } else if (yAxisNode.isArray()) {
+            for (int i = 0; i < yAxisNode.size(); i++) {
+                JsonNode element = yAxisNode.get(i);
+                if (!element.isObject()) {
+                    continue;
+                }
+                if (i == 0) {
+                    applyAxisConfig(config.getyAxis(), element);
+                } else {
+                    config.addyAxis(createSecondaryYAxis(element));
+                }
+            }
+        }
+    }
+
+    private static YAxis createSecondaryYAxis(JsonNode element) {
+        YAxis axis = new YAxis();
+        applyAxisConfig(axis, element);
+        if (element.has(OPPOSITE) && element.get(OPPOSITE).isBoolean()) {
+            axis.setOpposite(element.get(OPPOSITE).asBoolean());
+        }
+        return axis;
     }
 
     private static void applyAxisConfig(Axis axis, JsonNode axisNode) {

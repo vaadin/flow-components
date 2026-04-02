@@ -33,6 +33,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
+import com.vaadin.flow.component.charts.model.YAxis;
 
 class ChartConfigurationParserTest {
 
@@ -200,6 +201,31 @@ class ChartConfigurationParserTest {
             Assertions.assertEquals("Depth", zAxis.getTitle().getText());
             Assertions.assertEquals(1.0, zAxis.getMin());
             Assertions.assertEquals(1000.0, zAxis.getMax());
+        }
+
+        @Test
+        void yAxisArray_createsSecondaryAxes() {
+            var config = parse("{\"yAxis\":["
+                    + "{\"title\":{\"text\":\"Price\"},\"min\":0},"
+                    + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}"
+                    + "]}");
+            Assertions.assertEquals(2, config.getNumberOfyAxes());
+
+            YAxis primary = config.getyAxis(0);
+            Assertions.assertEquals("Price", primary.getTitle().getText());
+            Assertions.assertEquals(0.0, primary.getMin());
+
+            YAxis secondary = config.getyAxis(1);
+            Assertions.assertEquals("Volume", secondary.getTitle().getText());
+            Assertions.assertTrue(secondary.getOpposite());
+        }
+
+        @Test
+        void yAxisSingleObject_stillWorks() {
+            var config = parse(
+                    "{\"yAxis\":{\"title\":{\"text\":\"Revenue\"}}}");
+            Assertions.assertEquals("Revenue",
+                    config.getyAxis().getTitle().getText());
         }
 
         @Test
