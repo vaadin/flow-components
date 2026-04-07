@@ -58,12 +58,36 @@ import com.vaadin.flow.component.charts.model.Node;
 import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
+import com.vaadin.flow.component.charts.model.PlotOptionsArearange;
 import com.vaadin.flow.component.charts.model.PlotOptionsAreaspline;
+import com.vaadin.flow.component.charts.model.PlotOptionsAreasplinerange;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
+import com.vaadin.flow.component.charts.model.PlotOptionsBoxplot;
+import com.vaadin.flow.component.charts.model.PlotOptionsBubble;
+import com.vaadin.flow.component.charts.model.PlotOptionsBullet;
+import com.vaadin.flow.component.charts.model.PlotOptionsCandlestick;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumnrange;
+import com.vaadin.flow.component.charts.model.PlotOptionsErrorbar;
+import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
+import com.vaadin.flow.component.charts.model.PlotOptionsFunnel;
+import com.vaadin.flow.component.charts.model.PlotOptionsGantt;
+import com.vaadin.flow.component.charts.model.PlotOptionsGauge;
+import com.vaadin.flow.component.charts.model.PlotOptionsHeatmap;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
+import com.vaadin.flow.component.charts.model.PlotOptionsOhlc;
+import com.vaadin.flow.component.charts.model.PlotOptionsOrganization;
+import com.vaadin.flow.component.charts.model.PlotOptionsPie;
+import com.vaadin.flow.component.charts.model.PlotOptionsPolygon;
+import com.vaadin.flow.component.charts.model.PlotOptionsPyramid;
+import com.vaadin.flow.component.charts.model.PlotOptionsSankey;
 import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
+import com.vaadin.flow.component.charts.model.PlotOptionsSolidgauge;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
+import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
+import com.vaadin.flow.component.charts.model.PlotOptionsTreemap;
+import com.vaadin.flow.component.charts.model.PlotOptionsWaterfall;
+import com.vaadin.flow.component.charts.model.PlotOptionsXrange;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.model.TreeSeriesItem;
@@ -133,14 +157,33 @@ public class DefaultDataConverter implements DataConverter {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DefaultDataConverter.class);
 
-    private static final Map<String, Supplier<AbstractPlotOptions>> PLOT_OPTIONS_BY_TYPE = Map
-            .ofEntries(Map.entry("line", PlotOptionsLine::new),
-                    Map.entry("column", PlotOptionsColumn::new),
-                    Map.entry("bar", PlotOptionsBar::new),
-                    Map.entry("area", PlotOptionsArea::new),
-                    Map.entry("spline", PlotOptionsSpline::new),
-                    Map.entry("areaspline", PlotOptionsAreaspline::new),
-                    Map.entry("scatter", PlotOptionsScatter::new));
+    private static final Map<String, Supplier<AbstractPlotOptions>> PLOT_OPTIONS_BY_TYPE = buildPlotOptionsMap(
+            PlotOptionsArea::new, PlotOptionsArearange::new,
+            PlotOptionsAreaspline::new, PlotOptionsAreasplinerange::new,
+            PlotOptionsBar::new, PlotOptionsBoxplot::new,
+            PlotOptionsBubble::new, PlotOptionsBullet::new,
+            PlotOptionsCandlestick::new, PlotOptionsColumn::new,
+            PlotOptionsColumnrange::new, PlotOptionsErrorbar::new,
+            PlotOptionsFlags::new, PlotOptionsFunnel::new,
+            PlotOptionsGantt::new, PlotOptionsGauge::new,
+            PlotOptionsHeatmap::new, PlotOptionsLine::new, PlotOptionsOhlc::new,
+            PlotOptionsOrganization::new, PlotOptionsPie::new,
+            PlotOptionsPolygon::new, PlotOptionsPyramid::new,
+            PlotOptionsSankey::new, PlotOptionsScatter::new,
+            PlotOptionsSolidgauge::new, PlotOptionsSpline::new,
+            PlotOptionsTimeline::new, PlotOptionsTreemap::new,
+            PlotOptionsWaterfall::new, PlotOptionsXrange::new);
+
+    @SafeVarargs
+    private static Map<String, Supplier<AbstractPlotOptions>> buildPlotOptionsMap(
+            Supplier<AbstractPlotOptions>... suppliers) {
+        var map = new HashMap<String, Supplier<AbstractPlotOptions>>();
+        for (var supplier : suppliers) {
+            var key = supplier.get().getChartType().toString();
+            map.put(key, supplier);
+        }
+        return Map.copyOf(map);
+    }
 
     @Override
     public List<Series> convertToSeries(List<Map<String, Object>> data) {
