@@ -107,29 +107,9 @@ public class GridAIController implements AIController {
                 2. Call get_database_schema() to learn the exact table and column names
                 3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
 
-                SQL RULES:
-                - ALWAYS list specific columns — NEVER use SELECT *
-                - ALWAYS give every column a human-readable AS alias
-                - Do NOT use LIMIT or OFFSET — the grid handles pagination
-                - Use double quotes for aliases with spaces or dots
-
-                The grid creates columns from query result column names/aliases.
-                Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
-
-                COLUMN GROUPING (important — read carefully):
-                When the user mentions "grouped under X" in their request:
-                1. Select ONLY the columns mentioned for grouping
-                2. Alias each column as "X.ReadableName" (with the group prefix and a dot)
-                3. Do NOT include columns that are not part of a group
-                Example request: "product and category grouped under Product"
-                Correct SQL: SELECT product AS "Product.Name", category AS "Product.Category" FROM sales
-                Result: A "Product" header spanning both columns.
-                Do NOT use "X.Name" format unless the user asks for grouping.
-
                 IMPORTANT:
                 - Call get_grid_state() and update_grid_data() in the SAME response
                 - Do NOT stop after get_grid_state()
-                - "grouped under X" in the user request means: alias as "X.ColumnName" in SQL
                 """;
     }
 

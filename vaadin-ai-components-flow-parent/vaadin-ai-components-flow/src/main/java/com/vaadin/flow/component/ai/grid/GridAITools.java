@@ -172,15 +172,25 @@ public final class GridAITools {
             @Override
             public String getDescription() {
                 return """
-                        Updates the grid data using a SQL SELECT query.
-                        The grid creates columns from query result names.
-                        ALWAYS list specific columns — NEVER use SELECT *.
-                        ALWAYS give every column an AS alias with a readable name.
-                        Do NOT use LIMIT or OFFSET — the grid handles pagination.
+                        Updates the grid data using a SQL SELECT query. \
+                        The grid creates columns from query result column names/aliases.
 
-                        GROUPING RULE: "grouped under X" means alias as "X.ColumnName":
-                        "amount and quantity grouped under Sales"
-                        → SELECT amount AS "Sales.Amount", quantity AS "Sales.Quantity" FROM sales
+                        SQL RULES:
+                        - ALWAYS list specific columns — NEVER use SELECT *
+                        - ALWAYS give every column a human-readable AS alias
+                        - Do NOT use LIMIT or OFFSET — the grid handles pagination
+                        - Use double quotes for aliases with spaces or dots
+                        Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
+
+                        COLUMN GROUPING (only when the user asks for grouping):
+                        When the user mentions "grouped under X" in their request:
+                        1. Select ONLY the columns mentioned for grouping
+                        2. Alias each column as "X.ReadableName" (with the group prefix and a dot)
+                        3. Do NOT include columns that are not part of a group
+                        Example request: "product and category grouped under Product"
+                        Correct SQL: SELECT product AS "Product.Name", category AS "Product.Category" FROM sales
+                        Result: A "Product" header spanning both columns.
+                        Do NOT use "X.Name" format unless the user asks for grouping.
                         """;
             }
 
@@ -196,7 +206,7 @@ public final class GridAITools {
                             },
                             "query": {
                               "type": "string",
-                              "description": "SQL SELECT with specific columns and AS aliases. No LIMIT/OFFSET. No SELECT *. For grouping use X.Name aliases."
+                              "description": "SQL SELECT query with specific columns and AS aliases. No LIMIT/OFFSET. No SELECT *."
                             }
                           },
                           "required": ["query"]
