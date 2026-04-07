@@ -143,6 +143,17 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateConfiguration_validatesEagerly() {
+            var tool = findTool(controller.getTools(),
+                    "update_chart_configuration");
+
+            String result = tool
+                    .execute("{\"configuration\": \"not a json object\"}");
+            Assertions.assertTrue(result.contains("Error"),
+                    "Invalid config should return error: " + result);
+        }
+
+        @Test
         void updateData_validatesQueriesEagerly() {
             databaseProvider.throwOnExecute = new RuntimeException("Bad SQL");
 
