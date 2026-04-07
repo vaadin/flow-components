@@ -485,13 +485,6 @@ class GridAIControllerTest {
         Assertions.assertTrue(prompt.contains("update_grid_data"));
     }
 
-    @Test
-    void getSystemPrompt_containsColumnGroupingInstructions() {
-        var prompt = GridAIController.getSystemPrompt();
-        Assertions.assertTrue(prompt.contains("dot-separated"));
-        Assertions.assertTrue(prompt.contains("Contact.Email"));
-    }
-
     // --- stripGroupPrefix ---
 
     @Nested

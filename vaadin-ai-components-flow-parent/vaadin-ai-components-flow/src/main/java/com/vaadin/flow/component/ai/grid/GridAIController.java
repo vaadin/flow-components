@@ -104,25 +104,12 @@ public class GridAIController implements AIController {
                 WORKFLOW:
                 Complete the user's request in a SINGLE response by calling all needed tools.
                 1. Call get_grid_state() to see what's already configured
-                2. Use get_database_schema() if you need to understand available data
-                3. Call update_grid_data() with a SQL SELECT query
-
-                The grid automatically creates columns based on query result columns.
-                Column headers are derived from SQL column names/aliases.
-                Use SQL aliases (AS) to provide human-readable column headers.
-                Do NOT use LIMIT or OFFSET — the grid handles pagination automatically.
-
-                COLUMN GROUPING:
-                Use dot-separated aliases to group related columns under a shared header.
-                Example: SELECT email AS "Contact.Email", phone AS "Contact.Phone" FROM t
-                This creates a "Contact" group header spanning both columns.
-
-                Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
+                2. Call get_database_schema() to learn the exact table and column names
+                3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
 
                 IMPORTANT:
                 - Call get_grid_state() and update_grid_data() in the SAME response
                 - Do NOT stop after get_grid_state()
-                - Use double quotes for column aliases with spaces or dots
                 """;
     }
 
