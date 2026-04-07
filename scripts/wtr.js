@@ -53,7 +53,7 @@ function runTests() {
       });
 
       // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
+      execSync(`npm install --ignore-scripts @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
