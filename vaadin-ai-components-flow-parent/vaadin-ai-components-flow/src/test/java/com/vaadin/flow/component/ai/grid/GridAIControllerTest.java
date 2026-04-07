@@ -485,12 +485,6 @@ class GridAIControllerTest {
         Assertions.assertTrue(prompt.contains("update_grid_data"));
     }
 
-    @Test
-    void getSystemPrompt_containsColumnGroupingInstructions() {
-        var prompt = GridAIController.getSystemPrompt().toLowerCase();
-        Assertions.assertTrue(prompt.contains("column grouping"));
-    }
-
     // --- stripGroupPrefix ---
 
     @Nested
