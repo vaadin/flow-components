@@ -347,14 +347,17 @@ public final class PlotOptionsSchemaGenerator {
         cleaned = cleaned.replaceAll("@param\\s+\\w+\\s*", "");
         cleaned = cleaned.replaceAll("@return\\s*", "");
         // Replace {@link ClassName#method} and {@code text} keeping the text
-        cleaned = cleaned.replaceAll("\\{@\\w+\\s+(?:[^#}]*#)?([^}]*)\\}",
+        cleaned = cleaned.replaceAll("\\{@\\w+\\s+(?:[^#}]*#)?+([^}]*)\\}",
                 "$1");
         // Remove HTML tags
         cleaned = cleaned.replaceAll("<[^>]+>", "");
         // Normalize whitespace
         cleaned = cleaned.replaceAll("\\s+", " ").trim();
         // Remove "Defaults to: ..." suffix
-        cleaned = cleaned.replaceAll("\\s*Defaults to:.*$", "").trim();
+        int defaultsIdx = cleaned.indexOf("Defaults to:");
+        if (defaultsIdx >= 0) {
+            cleaned = cleaned.substring(0, defaultsIdx).trim();
+        }
         return cleaned;
     }
 
