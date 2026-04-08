@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.Axis;
 import com.vaadin.flow.component.charts.model.AxisTitle;
@@ -518,12 +520,9 @@ public final class ChartConfigurationParser implements Serializable {
         colorModule.addDeserializer(Color.class, new ColorDeserializer());
 
         PLOT_OPTIONS_READER = JsonMapper.builder()
-                .changeDefaultVisibility(handler -> handler.withVisibility(
-                        com.fasterxml.jackson.annotation.PropertyAccessor.ALL,
-                        com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE)
-                        .withVisibility(
-                                com.fasterxml.jackson.annotation.PropertyAccessor.FIELD,
-                                com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY))
+                .changeDefaultVisibility(handler -> handler
+                        .withVisibility(PropertyAccessor.ALL, Visibility.NONE)
+                        .withVisibility(PropertyAccessor.FIELD, Visibility.ANY))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .addHandler(new LenientEnumHandler()).addModule(colorModule)
