@@ -147,6 +147,31 @@ class ChartRenderingTest {
         }
 
         @Test
+        void sameChartTypeMergesConfigIntoExisting() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+
+            // First render: line chart with title
+            updateConfiguration(
+                    "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Original\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
+
+            Assertions.assertEquals("Original",
+                    chart.getConfiguration().getTitle().getText());
+
+            // Second render: same type, only update title (merge path)
+            updateConfiguration("{\"title\":{\"text\":\"Updated\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
+
+            Assertions.assertEquals("Updated",
+                    chart.getConfiguration().getTitle().getText());
+            Assertions.assertEquals(ChartType.LINE,
+                    chart.getConfiguration().getChart().getType());
+        }
+
+        @Test
         void configOnlyAfterGaugeResetsPane() {
             // First: full render as gauge
             databaseProvider.results = List.of(row(ColumnNames.Y, 78));
@@ -336,7 +361,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void emptySeriesResetsAxisType() {
+        void emptySeriesPreservesAxisType() {
             controller.setDataConverter(data -> List.of(new DataSeries()));
             databaseProvider.results = List.of();
 
@@ -349,15 +374,16 @@ class ChartRenderingTest {
             Assertions.assertEquals(AxisType.LINEAR,
                     chart.getConfiguration().getxAxis().getType());
 
-            // Second render: config without axis type — should clear it
+            // Second render: same chart type preserves existing config
+            // (merge behavior). Axis type remains LINEAR since config
+            // doesn't override it and there is no series data to
+            // trigger auto-detection.
             updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
             updateData("SELECT 1");
             controller.onRequestCompleted();
 
-            // Configuration reset clears stale axis type when config
-            // doesn't specify one, so Highcharts auto-detects
-            Assertions
-                    .assertNull(chart.getConfiguration().getxAxis().getType());
+            Assertions.assertEquals(AxisType.LINEAR,
+                    chart.getConfiguration().getxAxis().getType());
         }
 
         @Test

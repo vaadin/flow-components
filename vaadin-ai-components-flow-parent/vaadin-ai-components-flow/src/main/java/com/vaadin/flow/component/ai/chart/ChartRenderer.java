@@ -69,11 +69,17 @@ public final class ChartRenderer implements Serializable {
             allSeries.addAll(dataConverter.convertToSeries(results));
         }
 
+        Configuration config = chart.getConfiguration();
         if (configJson != null) {
-            chart.setConfiguration(ChartConfigurationParser.parse(configJson));
+            var parsed = ChartConfigurationParser.parse(configJson);
+            if (chartTypeChanged(config, parsed)) {
+                config = parsed;
+                chart.setConfiguration(config);
+            } else {
+                ChartConfigurationParser.merge(configJson, config);
+            }
         }
 
-        Configuration config = chart.getConfiguration();
         config.setSeries(allSeries.toArray(new Series[0]));
 
         // Apply axis defaults from series data after LLM config,
@@ -89,6 +95,18 @@ public final class ChartRenderer implements Serializable {
         // lost when the chart is rendered via async Push (see
         // DashboardChartControllerIT).
         chart.drawChart(true);
+    }
+
+    /**
+     * Returns {@code true} if the new configuration specifies a different chart
+     * type than the current one, indicating a full configuration reset is
+     * needed.
+     */
+    private static boolean chartTypeChanged(Configuration current,
+            Configuration incoming) {
+        var currentType = current.getChart().getType();
+        var incomingType = incoming.getChart().getType();
+        return incomingType != null && !incomingType.equals(currentType);
     }
 
     /**

@@ -277,17 +277,15 @@ public final class ChartAITools {
             @Override
             public String getDescription() {
                 return """
-                        Updates the Highcharts configuration of a chart. The configuration \
-                        object follows the same structure as the Highcharts options object \
-                        (as returned by get_chart_state), supporting: chart (type, dimensions, \
-                        margins, spacing, borders, background, inverted, polar, animation, \
-                        zoomType), title, subtitle, xAxis, yAxis, zAxis, colorAxis, tooltip, \
-                        legend, plotOptions (series defaults, stacking, dataLabels, markers, \
-                        pie innerSize for donuts), credits, and pane.
+                        Updates the Highcharts configuration of a chart. Only include the \
+                        properties you want to change — existing properties are preserved. \
+                        Changing chart.type resets the entire configuration.
 
-                        CRITICAL: ALWAYS specify the chart type in configuration.chart.type - this is essential for proper rendering.
+                        CRITICAL: ALWAYS specify the chart type in configuration.chart.type \
+                        when creating a new chart or changing chart type.
 
-                        IMPORTANT: Do NOT include 'series' in the configuration - chart data is managed separately via update_chart_data_source tool.
+                        IMPORTANT: Do NOT include series data in the configuration — chart data \
+                        is managed separately via update_chart_data_source tool.
 
                         Parameters:
                         - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.

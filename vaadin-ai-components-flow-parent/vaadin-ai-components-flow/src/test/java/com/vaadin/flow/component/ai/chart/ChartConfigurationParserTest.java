@@ -475,15 +475,15 @@ class ChartConfigurationParserTest {
         }
 
         @Test
-        void invalidJson_doesNotThrow() {
-            parse("not json");
-            // Should log error but not throw
+        void invalidJson_throws() {
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> parse("not json"));
         }
 
         @Test
-        void nonObjectJson_doesNotThrow() {
-            parse("[1,2,3]");
-            // Should log warning but not throw
+        void nonObjectJson_throws() {
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> parse("[1,2,3]"));
         }
 
         @Test

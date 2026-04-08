@@ -131,6 +131,10 @@ public class ChartAIController implements AIController {
 
             @Override
             public void updateConfiguration(String chartId, String configJson) {
+                // Parse eagerly to validate. If the JSON contains
+                // invalid values, the exception propagates back to the
+                // LLM as an error so it can fix the configuration.
+                ChartConfigurationParser.parse(configJson);
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingConfigurationJson(configJson);
             }

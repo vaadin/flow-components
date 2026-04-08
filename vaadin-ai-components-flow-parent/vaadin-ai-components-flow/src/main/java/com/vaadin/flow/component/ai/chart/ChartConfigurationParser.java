@@ -26,9 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.charts.model.Axis;
 import com.vaadin.flow.component.charts.model.AxisTitle;
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -54,6 +51,7 @@ import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.internal.JacksonUtils;
 
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -65,84 +63,110 @@ import tools.jackson.databind.node.ObjectNode;
  */
 public final class ChartConfigurationParser implements Serializable {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(ChartConfigurationParser.class);
-
     private ChartConfigurationParser() {
     }
 
+    /**
+     * Parses a Highcharts JSON configuration string into a new
+     * {@link Configuration} object.
+     *
+     * @param configJson
+     *            the Highcharts JSON configuration string to parse
+     * @return a new {@link Configuration} populated with the parsed values
+     * @throws IllegalArgumentException
+     *             if the JSON string is invalid or not an object
+     */
     public static Configuration parse(String configJson) {
         Configuration config = new Configuration();
+        merge(configJson, config);
+        return config;
+    }
+
+    /**
+     * Parses a JSON configuration string and applies the values onto the given
+     * {@link Configuration}. Only properties present in the JSON are modified;
+     * existing properties not mentioned in the JSON are preserved.
+     *
+     * @param configJson
+     *            the Highcharts JSON configuration string to parse
+     * @param config
+     *            the existing {@link Configuration} to merge the parsed values
+     *            into
+     * @throws IllegalArgumentException
+     *             if the JSON string is invalid or not an object
+     */
+    public static void merge(String configJson, Configuration config) {
+        ObjectNode configNode = parseJsonToNode(configJson);
+
+        String chartType = null;
+        if (configNode.has(TYPE)) {
+            chartType = configNode.get(TYPE).asString();
+        } else if (configNode.has(CHART) && configNode.get(CHART).isObject()) {
+            JsonNode chartNode = configNode.get(CHART);
+            if (chartNode.has(TYPE)) {
+                chartType = chartNode.get(TYPE).asString();
+            }
+        }
+        if (chartType != null) {
+            applyChartType(config, chartType);
+        }
+
+        if (configNode.has(CHART) && configNode.get(CHART).isObject()) {
+            applyChartModelConfig(config.getChart(), configNode.get(CHART));
+        }
+        if (configNode.has(TITLE)) {
+            applyTitleConfig(config, configNode.get(TITLE));
+        }
+        if (configNode.has(SUBTITLE)) {
+            applySubtitleConfig(config, configNode.get(SUBTITLE));
+        }
+        if (configNode.has(TOOLTIP) && configNode.get(TOOLTIP).isObject()) {
+            applyTooltipConfig(config.getTooltip(), configNode.get(TOOLTIP));
+        }
+        if (configNode.has(LEGEND) && configNode.get(LEGEND).isObject()) {
+            applyLegendConfig(config.getLegend(), configNode.get(LEGEND));
+        }
+        if (configNode.has(X_AXIS)) {
+            applyAxisConfig(config.getxAxis(), configNode.get(X_AXIS));
+        }
+        if (configNode.has(Y_AXIS)) {
+            applyAxisConfig(config.getyAxis(), configNode.get(Y_AXIS));
+        }
+        if (configNode.has(Z_AXIS)) {
+            applyAxisConfig(config.getzAxis(), configNode.get(Z_AXIS));
+        }
+        if (configNode.has(COLOR_AXIS)) {
+            applyColorAxisConfig(config, configNode.get(COLOR_AXIS));
+        }
+        if (configNode.has(CREDITS) && configNode.get(CREDITS).isObject()) {
+            applyCreditsConfig(config.getCredits(), configNode.get(CREDITS));
+        }
+        if (configNode.has(PANE) && configNode.get(PANE).isObject()) {
+            applyPaneConfig(config, configNode.get(PANE));
+        }
+        if (configNode.has(PLOT_OPTIONS)
+                && configNode.get(PLOT_OPTIONS).isObject()) {
+            applyPlotOptionsConfig(config, configNode.get(PLOT_OPTIONS));
+        }
+    }
+
+    private static ObjectNode parseJsonToNode(String configJson) {
         try {
             JsonNode parsedNode = JacksonUtils.getMapper().readTree(configJson);
-            // Handle double-encoded JSON strings from LLM
             if (parsedNode.isString()) {
                 parsedNode = JacksonUtils.getMapper()
                         .readTree(parsedNode.asString());
             }
-            if (!(parsedNode instanceof ObjectNode configNode)) {
-                LOGGER.warn("Expected JSON object for chart config but got: {}",
-                        parsedNode.getNodeType());
-                return config;
+            if (parsedNode instanceof ObjectNode objectNode) {
+                return objectNode;
             }
-
-            String chartType = null;
-            if (configNode.has(TYPE)) {
-                chartType = configNode.get(TYPE).asString();
-            } else if (configNode.has(CHART)
-                    && configNode.get(CHART).isObject()) {
-                JsonNode chartNode = configNode.get(CHART);
-                if (chartNode.has(TYPE)) {
-                    chartType = chartNode.get(TYPE).asString();
-                }
-            }
-            if (chartType != null) {
-                applyChartType(config, chartType);
-            }
-
-            if (configNode.has(CHART) && configNode.get(CHART).isObject()) {
-                applyChartModelConfig(config.getChart(), configNode.get(CHART));
-            }
-            if (configNode.has(TITLE)) {
-                applyTitleConfig(config, configNode.get(TITLE));
-            }
-            if (configNode.has(SUBTITLE)) {
-                applySubtitleConfig(config, configNode.get(SUBTITLE));
-            }
-            if (configNode.has(TOOLTIP) && configNode.get(TOOLTIP).isObject()) {
-                applyTooltipConfig(config.getTooltip(),
-                        configNode.get(TOOLTIP));
-            }
-            if (configNode.has(LEGEND) && configNode.get(LEGEND).isObject()) {
-                applyLegendConfig(config.getLegend(), configNode.get(LEGEND));
-            }
-            if (configNode.has(X_AXIS)) {
-                applyAxisConfig(config.getxAxis(), configNode.get(X_AXIS));
-            }
-            if (configNode.has(Y_AXIS)) {
-                applyAxisConfig(config.getyAxis(), configNode.get(Y_AXIS));
-            }
-            if (configNode.has(Z_AXIS)) {
-                applyAxisConfig(config.getzAxis(), configNode.get(Z_AXIS));
-            }
-            if (configNode.has(COLOR_AXIS)) {
-                applyColorAxisConfig(config, configNode.get(COLOR_AXIS));
-            }
-            if (configNode.has(CREDITS) && configNode.get(CREDITS).isObject()) {
-                applyCreditsConfig(config.getCredits(),
-                        configNode.get(CREDITS));
-            }
-            if (configNode.has(PANE) && configNode.get(PANE).isObject()) {
-                applyPaneConfig(config, configNode.get(PANE));
-            }
-            if (configNode.has(PLOT_OPTIONS)
-                    && configNode.get(PLOT_OPTIONS).isObject()) {
-                applyPlotOptionsConfig(config, configNode.get(PLOT_OPTIONS));
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error applying chart config", e);
+            throw new IllegalArgumentException(
+                    "Expected JSON object for chart config but got: "
+                            + parsedNode.getNodeType());
+        } catch (JacksonException e) {
+            throw new IllegalArgumentException(
+                    "Invalid chart configuration JSON: " + e.getMessage(), e);
         }
-        return config;
     }
 
     private static final Map<String, ChartType> CHART_TYPES_BY_NAME;
