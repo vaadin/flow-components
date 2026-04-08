@@ -361,7 +361,7 @@ class ChartRenderingTest {
         }
 
         @Test
-        void emptySeriesResetsAxisType() {
+        void emptySeriesPreservesAxisType() {
             controller.setDataConverter(data -> List.of(new DataSeries()));
             databaseProvider.results = List.of();
 

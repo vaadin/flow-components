@@ -66,6 +66,16 @@ public final class ChartConfigurationParser implements Serializable {
     private ChartConfigurationParser() {
     }
 
+    /**
+     * Parses a Highcharts JSON configuration string into a new
+     * {@link Configuration} object.
+     *
+     * @param configJson
+     *            the Highcharts JSON configuration string to parse
+     * @return a new {@link Configuration} populated with the parsed values
+     * @throws IllegalArgumentException
+     *             if the JSON string is invalid or not an object
+     */
     public static Configuration parse(String configJson) {
         Configuration config = new Configuration();
         merge(configJson, config);
@@ -76,6 +86,14 @@ public final class ChartConfigurationParser implements Serializable {
      * Parses a JSON configuration string and applies the values onto the given
      * {@link Configuration}. Only properties present in the JSON are modified;
      * existing properties not mentioned in the JSON are preserved.
+     *
+     * @param configJson
+     *            the Highcharts JSON configuration string to parse
+     * @param config
+     *            the existing {@link Configuration} to merge the parsed values
+     *            into
+     * @throws IllegalArgumentException
+     *             if the JSON string is invalid or not an object
      */
     public static void merge(String configJson, Configuration config) {
         ObjectNode configNode = parseJsonToNode(configJson);
