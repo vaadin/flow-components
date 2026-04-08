@@ -23,6 +23,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -36,13 +37,16 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.ColorAxis;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Credits;
+import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.Legend;
 import com.vaadin.flow.component.charts.model.Pane;
+import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
+import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -134,7 +138,7 @@ public final class ChartConfigurationParser implements Serializable {
             applyAxisConfig(config.getxAxis(), configNode.get(X_AXIS));
         }
         if (configNode.has(Y_AXIS)) {
-            applyAxisConfig(config.getyAxis(), configNode.get(Y_AXIS));
+            applyYAxisConfig(config, configNode.get(Y_AXIS));
         }
         if (configNode.has(Z_AXIS)) {
             applyAxisConfig(config.getzAxis(), configNode.get(Z_AXIS));
@@ -151,6 +155,9 @@ public final class ChartConfigurationParser implements Serializable {
         if (configNode.has(PLOT_OPTIONS)
                 && configNode.get(PLOT_OPTIONS).isObject()) {
             applyPlotOptionsConfig(config, configNode.get(PLOT_OPTIONS));
+        }
+        if (configNode.has(SERIES) && configNode.get(SERIES).isArray()) {
+            applySeriesConfig(config, configNode.get(SERIES));
         }
     }
 
@@ -367,6 +374,40 @@ public final class ChartConfigurationParser implements Serializable {
         }
     }
 
+    /**
+     * Handles yAxis as either a single object or an array of axis configs. When
+     * an array is provided, the first element configures the default y-axis and
+     * additional elements create secondary axes via
+     * {@link Configuration#addyAxis(YAxis)}.
+     */
+    private static void applyYAxisConfig(Configuration config,
+            JsonNode yAxisNode) {
+        if (yAxisNode.isObject()) {
+            applyAxisConfig(config.getyAxis(), yAxisNode);
+        } else if (yAxisNode.isArray()) {
+            for (int i = 0; i < yAxisNode.size(); i++) {
+                JsonNode element = yAxisNode.get(i);
+                if (!element.isObject()) {
+                    continue;
+                }
+                if (i == 0) {
+                    applyAxisConfig(config.getyAxis(), element);
+                } else {
+                    config.addyAxis(createSecondaryYAxis(element));
+                }
+            }
+        }
+    }
+
+    private static YAxis createSecondaryYAxis(JsonNode element) {
+        YAxis axis = new YAxis();
+        applyAxisConfig(axis, element);
+        if (element.has(OPPOSITE) && element.get(OPPOSITE).isBoolean()) {
+            axis.setOpposite(element.get(OPPOSITE).asBoolean());
+        }
+        return axis;
+    }
+
     private static void applyAxisConfig(Axis axis, JsonNode axisNode) {
         if (axis == null || !axisNode.isObject()) {
             return;
@@ -525,6 +566,71 @@ public final class ChartConfigurationParser implements Serializable {
                 .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .addHandler(new LenientEnumHandler()).addModule(colorModule)
                 .build();
+    }
+
+    // --- Per-series configuration ---
+
+    private static final String Y_AXIS_KEY = "yAxis";
+    private static final String NAME = "name";
+    private static final String SERIES = "series";
+
+    /**
+     * Parses series entries from the JSON array and adds them to the
+     * configuration as {@link DataSeries} with name, plot options, and y-axis
+     * binding set (but no data). These act as configuration templates that the
+     * renderer applies to data series matched by name.
+     */
+    private static void applySeriesConfig(Configuration config,
+            JsonNode seriesArray) {
+        for (var entryNode : seriesArray) {
+            if (!entryNode.isObject() || !entryNode.has(NAME)) {
+                continue;
+            }
+            String seriesName = entryNode.get(NAME).asString();
+            if (seriesName == null || seriesName.isEmpty()) {
+                continue;
+            }
+
+            var series = new DataSeries();
+            series.setName(seriesName);
+
+            String type = entryNode.has(TYPE) && entryNode.get(TYPE).isString()
+                    ? entryNode.get(TYPE).asString()
+                    : null;
+
+            if (entryNode.has(Y_AXIS_KEY)
+                    && entryNode.get(Y_AXIS_KEY).isNumber()) {
+                series.setyAxis(entryNode.get(Y_AXIS_KEY).asInt());
+            }
+
+            AbstractPlotOptions plotOptions = deserializePlotOptions(type,
+                    (ObjectNode) entryNode);
+            if (plotOptions != null) {
+                series.setPlotOptions(plotOptions);
+            }
+
+            config.addSeries(series);
+        }
+    }
+
+    private static AbstractPlotOptions deserializePlotOptions(String type,
+            ObjectNode optionsNode) {
+        String typeName = type != null ? type.toLowerCase(Locale.ENGLISH)
+                : "series";
+        Class<? extends AbstractPlotOptions> targetClass = PlotOptionsSchema
+                .getPlotOptionsClass(typeName);
+        if (targetClass == null) {
+            targetClass = PlotOptionsSeries.class;
+        }
+
+        // Remove non-PlotOptions fields before deserialization
+        ObjectNode plotNode = optionsNode.deepCopy();
+        plotNode.remove(TYPE);
+        plotNode.remove(Y_AXIS_KEY);
+        plotNode.remove(NAME);
+        plotNode.remove("data");
+
+        return PLOT_OPTIONS_READER.treeToValue(plotNode, targetClass);
     }
 
 }

@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.BoxPlotItem;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem3d;
@@ -876,6 +877,59 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(2, series2023.getData().size());
             Assertions.assertEquals("Sales",
                     series2023.getData().getFirst().getName());
+        }
+    }
+
+    @Nested
+    class YAxisBindingTests {
+
+        @Test
+        void singleSeries_withYAxisBinding() {
+            var data = List.of(row(X, 1, Y, 100, Y_AXIS, 1),
+                    row(X, 2, Y, 200, Y_AXIS, 1));
+            var result = converter.convertToSeries(data);
+            Assertions.assertEquals(1, result.size());
+            var series = (AbstractSeries) result.getFirst();
+            Assertions.assertEquals(1, series.getyAxis());
+        }
+
+        @Test
+        void withoutYAxis_noAxisBinding() {
+            var data = List.of(row(X, 1, Y, 10));
+            var result = converter.convertToSeries(data);
+            Assertions.assertNull(
+                    ((AbstractSeries) result.getFirst()).getyAxis());
+        }
+
+        @Test
+        void yAxisColumn_strippedBeforePatternDetection() {
+            var data = List.of(row(X, 1, Y, 10, Y_AXIS, 1));
+            var result = (DataSeries) converter.convertToSeries(data)
+                    .getFirst();
+            Assertions.assertEquals(1, result.getData().getFirst().getX());
+            Assertions.assertEquals(10, result.getData().getFirst().getY());
+        }
+
+        @Test
+        void grouped_differentYAxisPerGroup() {
+            var data = List.of(row(SERIES, "Price", X, 1, Y, 100, Y_AXIS, 0),
+                    row(SERIES, "Price", X, 2, Y, 110, Y_AXIS, 0),
+                    row(SERIES, "Volume", X, 1, Y, 50000, Y_AXIS, 1),
+                    row(SERIES, "Volume", X, 2, Y, 48000, Y_AXIS, 1));
+            var result = converter.convertToSeries(data);
+            Assertions.assertEquals(2, result.size());
+            Assertions.assertEquals(0,
+                    ((AbstractSeries) result.get(0)).getyAxis());
+            Assertions.assertEquals(1,
+                    ((AbstractSeries) result.get(1)).getyAxis());
+        }
+
+        @Test
+        void caseInsensitive_yAxisColumn() {
+            var data = List.of(row("_YAXIS", 1, X, 1, Y, 10));
+            var result = converter.convertToSeries(data);
+            Assertions.assertEquals(1,
+                    ((AbstractSeries) result.getFirst()).getyAxis());
         }
     }
 

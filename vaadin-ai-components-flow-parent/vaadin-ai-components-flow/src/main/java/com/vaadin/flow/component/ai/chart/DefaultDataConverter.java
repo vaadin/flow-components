@@ -139,11 +139,27 @@ public class DefaultDataConverter implements DataConverter {
             return convertGrouped(data, columnMapping);
         }
 
-        return List.of(convertSingle(data, columns, columnMapping));
+        return List.of(convertGroup(data, columnMapping));
     }
 
     /**
-     * Converts a single dataset (no {@code _series} column) into one series.
+     * Strips per-series metadata columns ({@code _yaxis}, {@code _type}),
+     * detects the chart type pattern, and applies the metadata to the resulting
+     * series.
+     */
+    private AbstractSeries convertGroup(List<Map<String, Object>> data,
+            Map<String, String> columnMapping) {
+        var metadata = extractSeriesMetadata(data, columnMapping);
+        data = metadata.data();
+        columnMapping = buildColumnMapping(data.getFirst());
+        var series = convertSingle(data, columnMapping.keySet(), columnMapping);
+        metadata.applyTo(series);
+        return series;
+    }
+
+    /**
+     * Detects the chart type pattern from column names and converts data into
+     * the appropriate series type.
      */
     private AbstractSeries convertSingle(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
@@ -183,8 +199,7 @@ public class DefaultDataConverter implements DataConverter {
             var groupRows = entry.getValue().stream()
                     .map(row -> withoutKey(row, originalSeriesKey)).toList();
             var groupMapping = buildColumnMapping(groupRows.getFirst());
-            var series = convertSingle(groupRows, groupMapping.keySet(),
-                    groupMapping);
+            var series = convertGroup(groupRows, groupMapping);
             series.setName(entry.getKey().isEmpty() ? null : entry.getKey());
             result.add(series);
         }
@@ -196,6 +211,40 @@ public class DefaultDataConverter implements DataConverter {
         var copy = new LinkedHashMap<>(row);
         copy.remove(key);
         return copy;
+    }
+
+    /**
+     * Per-series metadata extracted from the {@code _yaxis} control column
+     * before pattern detection.
+     */
+    private record SeriesMetadata(List<Map<String, Object>> data,
+            Integer yAxisIndex) implements Serializable {
+
+        void applyTo(AbstractSeries series) {
+            if (yAxisIndex != null) {
+                series.setyAxis(yAxisIndex);
+            }
+        }
+    }
+
+    /**
+     * Extracts {@code _yaxis} metadata from the first row and strips the column
+     * from all rows.
+     */
+    private static SeriesMetadata extractSeriesMetadata(
+            List<Map<String, Object>> data, Map<String, String> columnMapping) {
+        var firstRow = data.getFirst();
+
+        var yAxisValue = getNumber(firstRow, columnMapping, Y_AXIS);
+        Integer yAxisIndex = yAxisValue != null ? yAxisValue.intValue() : null;
+
+        if (columnMapping.containsKey(Y_AXIS)) {
+            String originalKey = columnMapping.get(Y_AXIS);
+            data = data.stream().map(row -> withoutKey(row, originalKey))
+                    .toList();
+        }
+
+        return new SeriesMetadata(data, yAxisIndex);
     }
 
     // --- Pattern matchers returning DataSeries ---
