@@ -583,9 +583,14 @@ class ChartAIToolsSchemaTest {
                         expanded + " should be expanded with nested "
                                 + "properties");
             }
-            // Descriptions parsed from JavaDoc
+            // Descriptions parsed from JavaDoc, with {@link} tags cleaned
             Assertions.assertTrue(series.get("lineWidth").has("description"),
                     "Fields should have descriptions from JavaDoc");
+            String animationDesc = series.get("animation").get("description")
+                    .asString();
+            Assertions.assertFalse(animationDesc.contains("{@link"),
+                    "Descriptions should not contain raw JavaDoc tags: "
+                            + animationDesc);
             // _fn_ fields excluded
             Assertions.assertFalse(series.has("_fn_pointFormatter"),
                     "_fn_ fields should be excluded");
