@@ -34,11 +34,8 @@ import com.vaadin.flow.component.charts.model.AxisTitle;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartModel;
 import com.vaadin.flow.component.charts.model.ChartType;
-import com.vaadin.flow.component.charts.model.ColorAxis;
 import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.Credits;
 import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.Legend;
@@ -129,10 +126,10 @@ public final class ChartConfigurationParser implements Serializable {
             applySubtitleConfig(config, configNode.get(SUBTITLE));
         }
         if (configNode.has(TOOLTIP) && configNode.get(TOOLTIP).isObject()) {
-            applyTooltipConfig(config.getTooltip(), configNode.get(TOOLTIP));
+            mergeInto(config.getTooltip(), configNode.get(TOOLTIP));
         }
         if (configNode.has(LEGEND) && configNode.get(LEGEND).isObject()) {
-            applyLegendConfig(config.getLegend(), configNode.get(LEGEND));
+            mergeInto(config.getLegend(), configNode.get(LEGEND));
         }
         if (configNode.has(X_AXIS)) {
             applyAxisConfig(config.getxAxis(), configNode.get(X_AXIS));
@@ -143,11 +140,12 @@ public final class ChartConfigurationParser implements Serializable {
         if (configNode.has(Z_AXIS)) {
             applyAxisConfig(config.getzAxis(), configNode.get(Z_AXIS));
         }
-        if (configNode.has(COLOR_AXIS)) {
+        if (configNode.has(COLOR_AXIS)
+                && configNode.get(COLOR_AXIS).isObject()) {
             applyColorAxisConfig(config, configNode.get(COLOR_AXIS));
         }
         if (configNode.has(CREDITS) && configNode.get(CREDITS).isObject()) {
-            applyCreditsConfig(config.getCredits(), configNode.get(CREDITS));
+            mergeInto(config.getCredits(), configNode.get(CREDITS));
         }
         if (configNode.has(PANE) && configNode.get(PANE).isObject()) {
             applyPaneConfig(config, configNode.get(PANE));
@@ -208,102 +206,10 @@ public final class ChartConfigurationParser implements Serializable {
 
     private static void applyChartModelConfig(ChartModel chartModel,
             JsonNode chartNode) {
-        if (chartNode.has(BACKGROUND_COLOR)
-                && chartNode.get(BACKGROUND_COLOR).isString()) {
-            chartModel.setBackgroundColor(
-                    new SolidColor(chartNode.get(BACKGROUND_COLOR).asString()));
-        }
-        if (chartNode.has(BORDER_WIDTH)
-                && chartNode.get(BORDER_WIDTH).isNumber()) {
-            chartModel.setBorderWidth(chartNode.get(BORDER_WIDTH).asInt());
-        }
-        if (chartNode.has(BORDER_COLOR)
-                && chartNode.get(BORDER_COLOR).isString()) {
-            chartModel.setBorderColor(
-                    new SolidColor(chartNode.get(BORDER_COLOR).asString()));
-        }
-        if (chartNode.has(BORDER_RADIUS)
-                && chartNode.get(BORDER_RADIUS).isNumber()) {
-            chartModel.setBorderRadius(chartNode.get(BORDER_RADIUS).asInt());
-        }
-        if (chartNode.has(WIDTH) && chartNode.get(WIDTH).isNumber()) {
-            chartModel.setWidth(chartNode.get(WIDTH).asInt());
-        }
-        if (chartNode.has(HEIGHT)) {
-            if (chartNode.get(HEIGHT).isString()) {
-                chartModel.setHeight(chartNode.get(HEIGHT).asString());
-            } else if (chartNode.get(HEIGHT).isNumber()) {
-                chartModel.setHeight(
-                        String.valueOf(chartNode.get(HEIGHT).asInt()));
-            }
-        }
-        if (chartNode.has(MARGIN_TOP) && chartNode.get(MARGIN_TOP).isNumber()) {
-            chartModel.setMarginTop(chartNode.get(MARGIN_TOP).asInt());
-        }
-        if (chartNode.has(MARGIN_RIGHT)
-                && chartNode.get(MARGIN_RIGHT).isNumber()) {
-            chartModel.setMarginRight(chartNode.get(MARGIN_RIGHT).asInt());
-        }
-        if (chartNode.has(MARGIN_BOTTOM)
-                && chartNode.get(MARGIN_BOTTOM).isNumber()) {
-            chartModel.setMarginBottom(chartNode.get(MARGIN_BOTTOM).asInt());
-        }
-        if (chartNode.has(MARGIN_LEFT)
-                && chartNode.get(MARGIN_LEFT).isNumber()) {
-            chartModel.setMarginLeft(chartNode.get(MARGIN_LEFT).asInt());
-        }
-        if (chartNode.has(SPACING_TOP)
-                && chartNode.get(SPACING_TOP).isNumber()) {
-            chartModel.setSpacingTop(chartNode.get(SPACING_TOP).asInt());
-        }
-        if (chartNode.has(SPACING_RIGHT)
-                && chartNode.get(SPACING_RIGHT).isNumber()) {
-            chartModel.setSpacingRight(chartNode.get(SPACING_RIGHT).asInt());
-        }
-        if (chartNode.has(SPACING_BOTTOM)
-                && chartNode.get(SPACING_BOTTOM).isNumber()) {
-            chartModel.setSpacingBottom(chartNode.get(SPACING_BOTTOM).asInt());
-        }
-        if (chartNode.has(SPACING_LEFT)
-                && chartNode.get(SPACING_LEFT).isNumber()) {
-            chartModel.setSpacingLeft(chartNode.get(SPACING_LEFT).asInt());
-        }
-        if (chartNode.has(PLOT_BACKGROUND_COLOR)
-                && chartNode.get(PLOT_BACKGROUND_COLOR).isString()) {
-            chartModel.setPlotBackgroundColor(new SolidColor(
-                    chartNode.get(PLOT_BACKGROUND_COLOR).asString()));
-        }
-        if (chartNode.has(PLOT_BORDER_COLOR)
-                && chartNode.get(PLOT_BORDER_COLOR).isString()) {
-            chartModel.setPlotBorderColor(new SolidColor(
-                    chartNode.get(PLOT_BORDER_COLOR).asString()));
-        }
-        if (chartNode.has(PLOT_BORDER_WIDTH)
-                && chartNode.get(PLOT_BORDER_WIDTH).isNumber()) {
-            chartModel.setPlotBorderWidth(
-                    chartNode.get(PLOT_BORDER_WIDTH).asInt());
-        }
-        if (chartNode.has(INVERTED) && chartNode.get(INVERTED).isBoolean()) {
-            chartModel.setInverted(chartNode.get(INVERTED).asBoolean());
-        }
-        if (chartNode.has(POLAR) && chartNode.get(POLAR).isBoolean()) {
-            chartModel.setPolar(chartNode.get(POLAR).asBoolean());
-        }
-        if (chartNode.has(ANIMATION) && chartNode.get(ANIMATION).isBoolean()) {
-            chartModel.setAnimation(chartNode.get(ANIMATION).asBoolean());
-        }
-        if (chartNode.has(STYLED_MODE)
-                && chartNode.get(STYLED_MODE).isBoolean()) {
-            chartModel.setStyledMode(chartNode.get(STYLED_MODE).asBoolean());
-        }
-        if (chartNode.has(ZOOM_TYPE) && chartNode.get(ZOOM_TYPE).isString()) {
-            String zoomType = chartNode.get(ZOOM_TYPE).asString().toUpperCase();
-            try {
-                chartModel.setZoomType(Dimension.valueOf(zoomType));
-            } catch (IllegalArgumentException e) {
-                // Invalid zoom type, skip
-            }
-        }
+        // Strip "type" — handled separately via applyChartType
+        ObjectNode node = ((ObjectNode) chartNode).deepCopy();
+        node.remove(TYPE);
+        mergeInto(chartModel, node);
     }
 
     private static void applyTitleConfig(Configuration config,
@@ -321,56 +227,6 @@ public final class ChartConfigurationParser implements Serializable {
             config.setSubTitle(subtitleNode.get(TEXT).asString());
         } else if (subtitleNode.isString()) {
             config.setSubTitle(subtitleNode.asString());
-        }
-    }
-
-    private static void applyTooltipConfig(Tooltip tooltip,
-            JsonNode tooltipNode) {
-        if (tooltipNode.has(POINT_FORMAT)) {
-            tooltip.setPointFormat(tooltipNode.get(POINT_FORMAT).asString());
-        }
-        if (tooltipNode.has(HEADER_FORMAT)) {
-            tooltip.setHeaderFormat(tooltipNode.get(HEADER_FORMAT).asString());
-        }
-        if (tooltipNode.has(SHARED) && tooltipNode.get(SHARED).isBoolean()) {
-            tooltip.setShared(tooltipNode.get(SHARED).asBoolean());
-        }
-        if (tooltipNode.has(VALUE_SUFFIX)) {
-            tooltip.setValueSuffix(tooltipNode.get(VALUE_SUFFIX).asString());
-        }
-        if (tooltipNode.has(VALUE_PREFIX)) {
-            tooltip.setValuePrefix(tooltipNode.get(VALUE_PREFIX).asString());
-        }
-    }
-
-    private static void applyLegendConfig(Legend legend, JsonNode legendNode) {
-        if (legendNode.has(ENABLED) && legendNode.get(ENABLED).isBoolean()) {
-            legend.setEnabled(legendNode.get(ENABLED).asBoolean());
-        }
-        if (legendNode.has(ALIGN) && legendNode.get(ALIGN).isString()) {
-            try {
-                legend.setAlign(HorizontalAlign.valueOf(
-                        legendNode.get(ALIGN).asString().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                // skip
-            }
-        }
-        if (legendNode.has(VERTICAL_ALIGN)
-                && legendNode.get(VERTICAL_ALIGN).isString()) {
-            try {
-                legend.setVerticalAlign(VerticalAlign.valueOf(legendNode
-                        .get(VERTICAL_ALIGN).asString().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                // skip
-            }
-        }
-        if (legendNode.has(LAYOUT) && legendNode.get(LAYOUT).isString()) {
-            try {
-                legend.setLayout(LayoutDirection.valueOf(
-                        legendNode.get(LAYOUT).asString().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                // skip
-            }
         }
     }
 
@@ -440,25 +296,12 @@ public final class ChartConfigurationParser implements Serializable {
         }
     }
 
-    private static void applyCreditsConfig(Credits credits,
-            JsonNode creditsNode) {
-        if (creditsNode.has(ENABLED) && creditsNode.get(ENABLED).isBoolean()) {
-            credits.setEnabled(creditsNode.get(ENABLED).asBoolean());
-        }
-        if (creditsNode.has(TEXT)) {
-            credits.setText(creditsNode.get(TEXT).asString());
-        }
-        if (creditsNode.has(HREF)) {
-            credits.setHref(creditsNode.get(HREF).asString());
-        }
-    }
-
     private static void applyColorAxisConfig(Configuration config,
             JsonNode colorAxisNode) {
         if (!colorAxisNode.isObject()) {
             return;
         }
-        ColorAxis colorAxis = config.getColorAxis();
+        var colorAxis = config.getColorAxis();
         if (colorAxisNode.has(MIN) && colorAxisNode.get(MIN).isNumber()) {
             colorAxis.setMin(colorAxisNode.get(MIN).asDouble());
         }
@@ -501,6 +344,14 @@ public final class ChartConfigurationParser implements Serializable {
         if (paneNode.has(SIZE) && paneNode.get(SIZE).isString()) {
             pane.setSize(paneNode.get(SIZE).asString());
         }
+    }
+
+    /**
+     * Merges JSON properties into an existing object using the configured
+     * {@link #PLOT_OPTIONS_READER}.
+     */
+    private static <T> void mergeInto(T target, JsonNode node) {
+        PLOT_OPTIONS_READER.readerForUpdating(target).readValue(node);
     }
 
     /**
