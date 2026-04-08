@@ -538,11 +538,107 @@ class ChartAIToolsSchemaTest {
         @Test
         void pie_uniqueFields() {
             var opts = new PlotOptionsPie();
+            opts.setDataLabels(null);
             opts.setInnerSize("50%");
             opts.setStartAngle(-90);
             opts.setEndAngle(90);
             opts.setSlicedOffset(10);
             assertPlotOptionsMatchSchema("pie", opts);
+        }
+
+        /**
+         * Verifies the generated schema structure for specific properties,
+         * covering every code path in {@link PlotOptionsSchemaGenerator}:
+         * boolean, number, string, Color, enum, array, expandable nested
+         * objects, non-expandable objects, descriptions, and field filters.
+         */
+        @Test
+        void generatedSchema_coversAllFieldTypes() {
+            JsonNode series = getSchemaNode("series").get("properties");
+
+            // Boolean field
+            assertPropertyType(series, "animation", "boolean");
+            // Number field
+            assertPropertyType(series, "lineWidth", "number");
+            // String field
+            assertPropertyType(series, "className", "string");
+            // Color → string with CSS color description
+            assertPropertyEquals(series, "color", "{\"type\":\"string\","
+                    + "\"description\":\"CSS color (e.g. '#ff0000')\"}");
+            // Enum → string with enum values
+            JsonNode stacking = series.get("stacking");
+            Assertions.assertEquals("string", stacking.get("type").asString());
+            Assertions.assertTrue(stacking.has("enum"),
+                    "Enum field should have 'enum' values");
+            // String array
+            JsonNode keys = series.get("keys");
+            Assertions.assertEquals("array", keys.get("type").asString());
+            Assertions.assertEquals("string",
+                    keys.get("items").get("type").asString());
+            // Non-expandable AbstractConfigurationObject → plain object
+            assertPropertyType(series, "states", "object");
+            // Expandable types → nested properties
+            for (String expanded : List.of("dataLabels", "marker", "tooltip")) {
+                Assertions.assertTrue(series.get(expanded).has("properties"),
+                        expanded + " should be expanded with nested "
+                                + "properties");
+            }
+            // Descriptions parsed from JavaDoc
+            Assertions.assertTrue(series.get("lineWidth").has("description"),
+                    "Fields should have descriptions from JavaDoc");
+            // _fn_ fields excluded
+            Assertions.assertFalse(series.has("_fn_pointFormatter"),
+                    "_fn_ fields should be excluded");
+            // Color array (on pie)
+            JsonNode pie = getSchemaNode("pie").get("properties");
+            JsonNode colors = pie.get("colors");
+            Assertions.assertEquals("array", colors.get("type").asString());
+            Assertions.assertEquals("CSS color",
+                    colors.get("items").get("description").asString());
+        }
+
+        private void assertPropertyType(JsonNode properties, String name,
+                String expectedType) {
+            Assertions.assertNotNull(properties.get(name),
+                    "Missing property: " + name);
+            Assertions.assertEquals(expectedType,
+                    properties.get(name).get("type").asString(),
+                    name + " should have type " + expectedType);
+        }
+
+        private void assertPropertyEquals(JsonNode properties, String name,
+                String expectedJson) {
+            Assertions.assertNotNull(properties.get(name),
+                    "Missing property: " + name);
+            Assertions.assertEquals(MAPPER.readTree(expectedJson),
+                    properties.get(name), name + " schema mismatch");
+        }
+
+        @Test
+        void allChartTypes_haveSchemas() {
+            // Hardcoded list independent of the generator's supplier
+            // list so this catches accidentally removed types.
+            var expectedTypes = new String[] { "series", "area", "arearange",
+                    "areaspline", "areasplinerange", "bar", "boxplot", "bubble",
+                    "bullet", "candlestick", "column", "columnrange",
+                    "errorbar", "flags", "funnel", "gantt", "gauge", "heatmap",
+                    "line", "ohlc", "organization", "pie", "polygon", "pyramid",
+                    "sankey", "scatter", "solidgauge", "spline", "timeline",
+                    "treemap", "waterfall", "xrange" };
+            for (String type : expectedTypes) {
+                String result = schemaTool
+                        .execute("{\"chartType\":\"" + type + "\"}");
+                Assertions.assertFalse(result.startsWith("Error"),
+                        "Missing schema for type '" + type + "': " + result);
+            }
+        }
+
+        private JsonNode getSchemaNode(String chartType) {
+            String json = schemaTool
+                    .execute("{\"chartType\":\"" + chartType + "\"}");
+            Assertions.assertFalse(json.startsWith("Error"),
+                    "Schema lookup failed: " + json);
+            return MAPPER.readTree(json);
         }
 
         private void assertPlotOptionsMatchSchema(String chartType,
