@@ -469,25 +469,58 @@ class ChartAIToolsSchemaTest {
             return;
         }
 
-        if (jsonNode.isObject() && schemaNode.has("properties")) {
-            JsonNode schemaProperties = schemaNode.get("properties");
-            Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.properties()
-                    .iterator();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> field = fields.next();
-                String fieldName = field.getKey();
-                String fieldPath = path + "." + fieldName;
+        if (jsonNode.isObject()) {
+            // An object node's schema should declare "type": "object"
+            if (!schemaNode.has("type") && (schemaNode.has("properties")
+                    || schemaNode.has("additionalProperties"))) {
+                uncovered.add(path + ": missing \"type\": \"object\"");
+            }
+            if (schemaNode.has("properties")) {
+                JsonNode schemaProperties = schemaNode.get("properties");
+                JsonNode additionalProps = schemaNode
+                        .get("additionalProperties");
+                Iterator<Map.Entry<String, JsonNode>> fields = jsonNode
+                        .properties().iterator();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> field = fields.next();
+                    String fieldName = field.getKey();
+                    String fieldPath = path + "." + fieldName;
 
-                if (!schemaProperties.has(fieldName)) {
-                    if (!EXCLUDED_PROPERTIES.contains(fieldPath)
+                    if (schemaProperties.has(fieldName)) {
+                        assertAllPropertiesCovered(field.getValue(),
+                                schemaProperties.get(fieldName), fieldPath,
+                                uncovered);
+                    } else if (additionalProps != null
+                            && additionalProps.isObject()
+                            && additionalProps.has("properties")) {
+                        assertAllPropertiesCovered(field.getValue(),
+                                additionalProps, fieldPath, uncovered);
+                    } else if (additionalProps == null
+                            && !EXCLUDED_PROPERTIES.contains(fieldPath)
                             && !INTERNAL_FIELD_NAMES.contains(fieldName)) {
                         uncovered.add(fieldPath);
                     }
-                    continue;
                 }
-
-                assertAllPropertiesCovered(field.getValue(),
-                        schemaProperties.get(fieldName), fieldPath, uncovered);
+            } else if (schemaNode.has("additionalProperties")
+                    && schemaNode.get("additionalProperties").isObject()
+                    && schemaNode.get("additionalProperties")
+                            .has("properties")) {
+                JsonNode additionalProps = schemaNode
+                        .get("additionalProperties");
+                for (var field : jsonNode.properties()) {
+                    assertAllPropertiesCovered(field.getValue(),
+                            additionalProps, path + "." + field.getKey(),
+                            uncovered);
+                }
+            } else if (!schemaNode.has("additionalProperties")
+                    && jsonNode.size() > 0) {
+                for (var field : jsonNode.properties()) {
+                    String fieldPath = path + "." + field.getKey();
+                    if (!EXCLUDED_PROPERTIES.contains(fieldPath)
+                            && !INTERNAL_FIELD_NAMES.contains(field.getKey())) {
+                        uncovered.add(fieldPath);
+                    }
+                }
             }
         }
 
