@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.Axis;
 import com.vaadin.flow.component.charts.model.AxisTitle;
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -34,25 +34,28 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.ColorAxis;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Credits;
-import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.Legend;
-import com.vaadin.flow.component.charts.model.Marker;
 import com.vaadin.flow.component.charts.model.Pane;
-import com.vaadin.flow.component.charts.model.PlotOptionsBar;
-import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
-import com.vaadin.flow.component.charts.model.PlotOptionsPie;
-import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
-import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
+import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.DeserializationProblemHandler;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -458,86 +461,73 @@ public final class ChartConfigurationParser implements Serializable {
         }
     }
 
+    /**
+     * Applies global plot options from the {@code plotOptions} configuration
+     * section. Each key (e.g. "series", "column", "pie") maps to a chart type
+     * whose PlotOptions class is resolved and deserialized.
+     */
     private static void applyPlotOptionsConfig(Configuration config,
             JsonNode plotOptionsNode) {
-        if (plotOptionsNode.has(SERIES)
-                && plotOptionsNode.get(SERIES).isObject()) {
-            PlotOptionsSeries series = new PlotOptionsSeries();
-            applySeriesPlotOptions(series, plotOptionsNode.get(SERIES));
-            config.setPlotOptions(series);
-        }
-        if (plotOptionsNode.has(PIE) && plotOptionsNode.get(PIE).isObject()) {
-            PlotOptionsPie pie = new PlotOptionsPie();
-            JsonNode pieNode = plotOptionsNode.get(PIE);
-            applyDataLabelsConfig(pie.getDataLabels(), pieNode);
-            if (pieNode.has(INNER_SIZE) && pieNode.get(INNER_SIZE).isString()) {
-                pie.setInnerSize(pieNode.get(INNER_SIZE).asString());
+        for (var entry : plotOptionsNode.properties()) {
+            String typeName = entry.getKey();
+            JsonNode optionNode = entry.getValue();
+            if (!optionNode.isObject()) {
+                continue;
             }
-            config.setPlotOptions(pie);
-        }
-        if (plotOptionsNode.has(COLUMN)
-                && plotOptionsNode.get(COLUMN).isObject()) {
-            PlotOptionsColumn column = new PlotOptionsColumn();
-            JsonNode columnNode = plotOptionsNode.get(COLUMN);
-            parseStacking(columnNode).ifPresent(column::setStacking);
-            applyDataLabelsConfig(column.getDataLabels(), columnNode);
-            if (columnNode.has(BORDER_RADIUS)
-                    && columnNode.get(BORDER_RADIUS).isNumber()) {
-                column.setBorderRadius(columnNode.get(BORDER_RADIUS).asInt());
+            Class<? extends AbstractPlotOptions> clazz = PlotOptionsSchema
+                    .getPlotOptionsClass(typeName);
+            if (clazz == null) {
+                continue;
             }
-            config.setPlotOptions(column);
-        }
-        if (plotOptionsNode.has(BAR) && plotOptionsNode.get(BAR).isObject()) {
-            PlotOptionsBar bar = new PlotOptionsBar();
-            JsonNode barNode = plotOptionsNode.get(BAR);
-            parseStacking(barNode).ifPresent(bar::setStacking);
-            applyDataLabelsConfig(bar.getDataLabels(), barNode);
-            if (barNode.has(BORDER_RADIUS)
-                    && barNode.get(BORDER_RADIUS).isNumber()) {
-                bar.setBorderRadius(barNode.get(BORDER_RADIUS).asInt());
-            }
-            config.setPlotOptions(bar);
+            var plotOptions = PLOT_OPTIONS_READER.treeToValue(optionNode,
+                    clazz);
+            config.addPlotOptions(plotOptions);
         }
     }
 
-    private static void applySeriesPlotOptions(PlotOptionsSeries options,
-            JsonNode node) {
-        parseStacking(node).ifPresent(options::setStacking);
-        applyDataLabelsConfig(options.getDataLabels(), node);
-        if (node.has(MARKER) && node.get(MARKER).isObject()) {
-            JsonNode markerNode = node.get(MARKER);
-            Marker marker = new Marker();
-            if (markerNode.has(ENABLED)
-                    && markerNode.get(ENABLED).isBoolean()) {
-                marker.setEnabled(markerNode.get(ENABLED).asBoolean());
-            }
-            options.setMarker(marker);
+    /**
+     * ObjectMapper configured for deserializing plot options from JSON. Uses
+     * field-based access (matching ChartSerialization), case-insensitive enums,
+     * and ignores unknown properties.
+     */
+    private static final ObjectMapper PLOT_OPTIONS_READER;
+
+    private static final class ColorDeserializer
+            extends ValueDeserializer<Color> implements Serializable {
+        @Override
+        public Color deserialize(JsonParser p, DeserializationContext ctxt)
+                throws JacksonException {
+            return new SolidColor(p.getString());
         }
     }
 
-    private static Optional<Stacking> parseStacking(JsonNode node) {
-        if (node.has(STACKING) && node.get(STACKING).isString()) {
-            try {
-                return Optional.of(Stacking
-                        .valueOf(node.get(STACKING).asString().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                // skip
+    private static final class LenientEnumHandler
+            extends DeserializationProblemHandler implements Serializable {
+        @Override
+        public Object handleWeirdStringValue(DeserializationContext ctxt,
+                Class<?> targetType, String valueToConvert, String failureMsg) {
+            if (targetType.isEnum()) {
+                return null;
             }
+            return NOT_HANDLED;
         }
-        return Optional.empty();
     }
 
-    private static void applyDataLabelsConfig(DataLabels dataLabels,
-            JsonNode node) {
-        if (node.has(DATA_LABELS) && node.get(DATA_LABELS).isObject()) {
-            JsonNode dlNode = node.get(DATA_LABELS);
-            if (dlNode.has(ENABLED) && dlNode.get(ENABLED).isBoolean()) {
-                dataLabels.setEnabled(dlNode.get(ENABLED).asBoolean());
-            }
-            if (dlNode.has(FORMAT) && dlNode.get(FORMAT).isString()) {
-                dataLabels.setFormat(dlNode.get(FORMAT).asString());
-            }
-        }
+    static {
+        var colorModule = new SimpleModule("ColorDeserializer");
+        colorModule.addDeserializer(Color.class, new ColorDeserializer());
+
+        PLOT_OPTIONS_READER = JsonMapper.builder()
+                .changeDefaultVisibility(handler -> handler.withVisibility(
+                        com.fasterxml.jackson.annotation.PropertyAccessor.ALL,
+                        com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE)
+                        .withVisibility(
+                                com.fasterxml.jackson.annotation.PropertyAccessor.FIELD,
+                                com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY))
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .addHandler(new LenientEnumHandler()).addModule(colorModule)
+                .build();
     }
 
 }

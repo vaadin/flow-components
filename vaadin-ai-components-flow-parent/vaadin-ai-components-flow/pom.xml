@@ -104,6 +104,27 @@
                 <artifactId>bnd-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>generate-plot-options-descriptions</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <mainClass>com.vaadin.flow.component.ai.chart.PlotOptionsSchemaGenerator</mainClass>
+                            <arguments>
+                                <argument>${project.basedir}/../../vaadin-charts-flow-parent/vaadin-charts-flow/src/main/java/com/vaadin/flow/component/charts/model</argument>
+                                <argument>${project.build.outputDirectory}/com/vaadin/flow/component/ai/chart/plot-options-schemas.json</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
