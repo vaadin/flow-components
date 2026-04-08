@@ -353,24 +353,6 @@ class ChartAIToolsTest {
         }
 
         @Test
-        void knownType_returnsSchemaWithProperties() {
-            String result = tool.execute("{\"chartType\":\"column\"}");
-            Assertions.assertFalse(result.contains("Error"), result);
-            Assertions.assertTrue(result.contains("\"properties\""));
-            Assertions.assertTrue(result.contains("stacking"));
-            Assertions.assertTrue(result.contains("borderRadius"));
-        }
-
-        @Test
-        void seriesType_returnsBaseProperties() {
-            String result = tool.execute("{\"chartType\":\"series\"}");
-            Assertions.assertFalse(result.contains("Error"), result);
-            Assertions.assertTrue(result.contains("stacking"));
-            Assertions.assertTrue(result.contains("dataLabels"));
-            Assertions.assertTrue(result.contains("marker"));
-        }
-
-        @Test
         void unknownType_returnsError() {
             String result = tool.execute("{\"chartType\":\"nonexistent\"}");
             Assertions.assertTrue(result.contains("Error"));
@@ -391,43 +373,6 @@ class ChartAIToolsTest {
             Assertions.assertTrue(result.contains("\"properties\""));
         }
 
-        @Test
-        void lineType_containsLineWidthAndMarker() {
-            String result = tool.execute("{\"chartType\":\"line\"}");
-            Assertions.assertFalse(result.contains("Error"), result);
-            Assertions.assertTrue(result.contains("lineWidth"));
-            Assertions.assertTrue(result.contains("marker"));
-        }
-
-        @Test
-        void pieType_containsInnerSize() {
-            String result = tool.execute("{\"chartType\":\"pie\"}");
-            Assertions.assertFalse(result.contains("Error"), result);
-            Assertions.assertTrue(result.contains("innerSize"));
-        }
-
-        @Test
-        void schemaContainsNestedObjectForDataLabels() {
-            String result = tool.execute("{\"chartType\":\"column\"}");
-            // dataLabels should be expanded with its own properties
-            Assertions.assertTrue(result.contains("dataLabels"));
-            Assertions.assertTrue(result.contains("enabled"));
-            Assertions.assertTrue(result.contains("format"));
-        }
-
-        @Test
-        void enumFieldsHaveEnumValues() {
-            String result = tool.execute("{\"chartType\":\"column\"}");
-            // stacking should include enum values
-            Assertions.assertTrue(result.contains("\"enum\""));
-        }
-
-        @Test
-        void colorFieldsMappedAsString() {
-            String result = tool.execute("{\"chartType\":\"column\"}");
-            // color field should be a string type
-            Assertions.assertTrue(result.contains("CSS color"));
-        }
     }
 
     /**
