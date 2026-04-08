@@ -224,9 +224,9 @@ public class Spreadsheet extends Component
 
     private boolean sheetProtected;
 
-    private HashMap<String, String> cellKeysToEditorIdMap;
+    private HashMap<String, String> cellKeysToEditorIdMap = new HashMap<>();
 
-    private HashMap<String, String> componentIDtoCellKeysMap;
+    private HashMap<String, String> componentIDtoCellKeysMap = new HashMap<>();
 
     // Cell CSS key to link tooltip (usually same as address)
     private HashMap<String, String> hyperlinksTooltips;
@@ -558,14 +558,22 @@ public class Spreadsheet extends Component
 
     private void setCellKeysToEditorIdMap(
             HashMap<String, String> cellKeysToEditorIdMap) {
-        this.cellKeysToEditorIdMap = cellKeysToEditorIdMap;
+        if (cellKeysToEditorIdMap == null) {
+            this.cellKeysToEditorIdMap.clear();
+        } else {
+            this.cellKeysToEditorIdMap = cellKeysToEditorIdMap;
+        }
         getElement().setProperty("cellKeysToEditorIdMap",
                 Serializer.serialize(cellKeysToEditorIdMap));
     }
 
     private void setComponentIDtoCellKeysMap(
             HashMap<String, String> componentIDtoCellKeysMap) {
-        this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
+        if (componentIDtoCellKeysMap == null) {
+            this.componentIDtoCellKeysMap.clear();
+        } else {
+            this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
+        }
         getElement().setProperty("componentIDtoCellKeysMap",
                 Serializer.serialize(componentIDtoCellKeysMap));
     }
@@ -1739,7 +1747,8 @@ public class Spreadsheet extends Component
             loadOrUpdateOverlays();
         }
 
-        if (componentIDtoCellKeysMap != null || cellKeysToEditorIdMap != null) {
+        if (!componentIDtoCellKeysMap.isEmpty()
+                || !cellKeysToEditorIdMap.isEmpty()) {
             // The node id's of custom components may no longer be valid after a
             // detach/attach. Remove all custom components and reload them (with
             // updated node id's).
@@ -3755,8 +3764,7 @@ public class Spreadsheet extends Component
             final int row = selectedCellReference.getRow();
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
             var currentCellKeysToEditorIdMap = getCellKeysToEditorIdMap();
-            if (currentCellKeysToEditorIdMap != null
-                    && currentCellKeysToEditorIdMap.containsKey(key)
+            if (currentCellKeysToEditorIdMap.containsKey(key)
                     && customComponents != null) {
                 String componentId = currentCellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
@@ -3768,8 +3776,8 @@ public class Spreadsheet extends Component
                     }
                 }
             }
-            setCellKeysToEditorIdMap(currentCellKeysToEditorIdMap == null ? null
-                    : new HashMap<>(currentCellKeysToEditorIdMap));
+            setCellKeysToEditorIdMap(
+                    new HashMap<>(currentCellKeysToEditorIdMap));
         }
     }
 
@@ -4591,9 +4599,8 @@ public class Spreadsheet extends Component
     private void loadCustomComponents() {
         if (customComponentFactory != null) {
             // Preserve custom editor mappings to maintain StateNode connections
-            HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap() != null
-                    ? new HashMap<>(getCellKeysToEditorIdMap())
-                    : new HashMap<>();
+            HashMap<String, String> _cellKeysToEditorIdMap = new HashMap<>(
+                    getCellKeysToEditorIdMap());
             HashMap<String, String> _componentIDtoCellKeysMap = new HashMap<>();
             if (customComponents == null) {
                 customComponents = new HashSet<Component>();
