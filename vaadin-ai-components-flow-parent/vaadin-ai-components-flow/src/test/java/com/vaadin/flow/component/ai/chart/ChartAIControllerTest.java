@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -32,8 +30,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.networknt.schema.SchemaRegistry;
-import com.networknt.schema.SpecificationVersion;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -45,8 +41,6 @@ import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
-
-import tools.jackson.databind.ObjectMapper;
 
 class ChartAIControllerTest {
 
@@ -204,9 +198,6 @@ class ChartAIControllerTest {
             plotOptions.setColorByPoint(true);
             plotOptions.getDataLabels().setEnabled(true);
             configuration.setPlotOptions(plotOptions);
-
-            // Verify plot options validate against the schema
-            assertPlotOptionsMatchSchema(tools, configuration);
 
             // Apply and render
             findTool(tools, "update_chart_configuration")
@@ -730,32 +721,6 @@ class ChartAIControllerTest {
     }
 
     // --- Helpers ---
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    /**
-     * Asserts that every plot options object in the given configuration
-     * validates against the schema returned by {@code get_plot_options_schema}
-     * for the configuration's chart type.
-     */
-    private static void assertPlotOptionsMatchSchema(
-            List<LLMProvider.ToolSpec> tools, Configuration configuration) {
-        String chartType = configuration.getChart().getType().toString();
-        String schemaJson = findTool(tools, "get_plot_options_schema")
-                .execute("{\"chartType\":\"" + chartType + "\"}");
-        var schema = SchemaRegistry
-                .withDefaultDialect(SpecificationVersion.DRAFT_4)
-                .getSchema(schemaJson);
-
-        Assertions.assertFalse(configuration.getPlotOptions().isEmpty(),
-                "Configuration must have at least one plot options entry");
-        for (var plotOptions : configuration.getPlotOptions()) {
-            var json = ChartSerialization.toJSON(plotOptions);
-            var errors = schema.validate(MAPPER.readTree(json));
-            assertTrue(errors.isEmpty(), "Plot options JSON does not match "
-                    + chartType + " schema: " + errors);
-        }
-    }
 
     private static LLMProvider.ToolSpec findTool(
             List<LLMProvider.ToolSpec> tools, String name) {

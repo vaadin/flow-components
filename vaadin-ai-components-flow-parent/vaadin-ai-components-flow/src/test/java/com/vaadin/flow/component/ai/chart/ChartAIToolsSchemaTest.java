@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.networknt.schema.Error;
@@ -32,11 +34,14 @@ import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.SpecificationVersion;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.ColorAxis;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Credits;
+import com.vaadin.flow.component.charts.model.Cursor;
+import com.vaadin.flow.component.charts.model.DashStyle;
 import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
@@ -46,8 +51,10 @@ import com.vaadin.flow.component.charts.model.Marker;
 import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
@@ -399,6 +406,145 @@ class ChartAIToolsSchemaTest {
             config.getChart().setType(type);
             config.setTitle(type.toString() + " chart");
             assertMatchesSchema(config);
+        }
+    }
+
+    /**
+     * Tests that serialized {@link AbstractPlotOptions} objects validate
+     * against the JSON schema returned by {@code get_plot_options_schema}. Each
+     * test targets a specific field type handled by
+     * {@link PlotOptionsSchemaGenerator}.
+     */
+    @Nested
+    class PlotOptionsSchemaValidation {
+
+        private static LLMProvider.ToolSpec schemaTool;
+
+        @BeforeAll
+        static void setUp() {
+            schemaTool = ChartAITools.getPlotOptionsSchema();
+        }
+
+        @Test
+        void column_booleanAndNumberFields() {
+            var opts = new PlotOptionsColumn();
+            opts.setColorByPoint(true);
+            opts.setAnimation(false);
+            opts.setBorderRadius(5);
+            opts.setBorderWidth(1);
+            opts.setGroupPadding(0.2);
+            assertPlotOptionsMatchSchema("column", opts);
+        }
+
+        @Test
+        void column_stringAndColorFields() {
+            var opts = new PlotOptionsColumn();
+            opts.setClassName("custom-class");
+            opts.setColor(new SolidColor("#ff0000"));
+            opts.setNegativeColor(new SolidColor("#0000ff"));
+            opts.setBorderColor(new SolidColor("#cccccc"));
+            assertPlotOptionsMatchSchema("column", opts);
+        }
+
+        @Test
+        void column_enumField_stacking() {
+            var opts = new PlotOptionsColumn();
+            opts.setStacking(Stacking.NORMAL);
+            assertPlotOptionsMatchSchema("column", opts);
+        }
+
+        @Test
+        void series_enumFields_dashStyleAndCursor() {
+            var opts = new PlotOptionsSeries();
+            opts.setDashStyle(DashStyle.LONGDASHDOT);
+            opts.setCursor(Cursor.POINTER);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void series_stringArrayField_keys() {
+            var opts = new PlotOptionsSeries();
+            opts.setKeys("x", "y", "name");
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void pie_colorArrayField() {
+            var opts = new PlotOptionsPie();
+            opts.setColors(new SolidColor("#ff0000"), new SolidColor("#00ff00"),
+                    new SolidColor("#0000ff"));
+            assertPlotOptionsMatchSchema("pie", opts);
+        }
+
+        @Test
+        void series_expandableObject_dataLabels() {
+            var opts = new PlotOptionsSeries();
+            DataLabels dataLabels = new DataLabels();
+            dataLabels.setEnabled(true);
+            dataLabels.setFormat("{point.y:.1f}");
+            dataLabels.setRotation(45);
+            dataLabels.setColor(new SolidColor("#333333"));
+            opts.setDataLabels(dataLabels);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void series_expandableObject_marker() {
+            var opts = new PlotOptionsSeries();
+            Marker marker = new Marker();
+            marker.setEnabled(true);
+            marker.setRadius(4);
+            marker.setLineWidth(2);
+            marker.setFillColor(new SolidColor("#ff0000"));
+            opts.setMarker(marker);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void series_expandableObject_seriesTooltip() {
+            var opts = new PlotOptionsSeries();
+            SeriesTooltip tooltip = new SeriesTooltip();
+            tooltip.setValueSuffix(" units");
+            tooltip.setValuePrefix("$");
+            tooltip.setPointFormat("{series.name}: <b>{point.y}</b>");
+            opts.setTooltip(tooltip);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void line_lineWidthAndMarkerCombined() {
+            var opts = new PlotOptionsLine();
+            opts.setLineWidth(3);
+            Marker marker = new Marker();
+            marker.setEnabled(false);
+            opts.setMarker(marker);
+            assertPlotOptionsMatchSchema("line", opts);
+        }
+
+        @Test
+        void pie_uniqueFields() {
+            var opts = new PlotOptionsPie();
+            opts.setInnerSize("50%");
+            opts.setStartAngle(-90);
+            opts.setEndAngle(90);
+            opts.setSlicedOffset(10);
+            assertPlotOptionsMatchSchema("pie", opts);
+        }
+
+        private void assertPlotOptionsMatchSchema(String chartType,
+                AbstractPlotOptions plotOptions) {
+            String schemaJson = schemaTool
+                    .execute("{\"chartType\":\"" + chartType + "\"}");
+            Assertions.assertFalse(schemaJson.startsWith("Error"),
+                    "Schema lookup failed: " + schemaJson);
+            var schema = SchemaRegistry
+                    .withDefaultDialect(SpecificationVersion.DRAFT_4)
+                    .getSchema(schemaJson);
+            var json = toJSON(plotOptions);
+            var errors = schema.validate(MAPPER.readTree(json));
+            Assertions.assertTrue(errors.isEmpty(),
+                    "Plot options JSON does not match " + chartType
+                            + " schema: " + errors);
         }
     }
 
