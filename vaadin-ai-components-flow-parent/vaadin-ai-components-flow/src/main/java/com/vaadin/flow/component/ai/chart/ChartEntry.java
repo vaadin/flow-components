@@ -36,7 +36,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  */
-class ChartEntry implements Serializable {
+public class ChartEntry implements Serializable {
 
     private final String id;
     private List<String> queries = new ArrayList<>();
@@ -184,7 +184,7 @@ class ChartEntry implements Serializable {
      *            the chart ID
      * @return the state as a JSON string, never {@code null}
      */
-    static String getStateAsJson(Chart chart, String chartId) {
+    public static String getStateAsJson(Chart chart, String chartId) {
         ObjectNode result = JacksonUtils.createObjectNode();
         result.put("chartId", chartId);
 

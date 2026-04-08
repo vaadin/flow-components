@@ -29,7 +29,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  *
  * @author Vaadin Ltd
  */
-class GridEntry implements Serializable {
+public class GridEntry implements Serializable {
 
     private final String id;
     private String currentQuery;
