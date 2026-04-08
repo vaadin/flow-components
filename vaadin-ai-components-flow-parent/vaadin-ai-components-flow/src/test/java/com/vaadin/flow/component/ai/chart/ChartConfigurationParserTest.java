@@ -500,6 +500,22 @@ class ChartConfigurationParserTest {
             Assertions.assertEquals(Stacking.NORMAL, column.getStacking());
         }
 
+        @Test
+        void nonObjectValue_isSkipped() {
+            var config = parse(
+                    "{\"plotOptions\":{\"column\":\"not an object\"}}");
+            Assertions.assertTrue(config.getPlotOptions().isEmpty());
+        }
+
+        @Test
+        void colorField_deserializedFromString() {
+            var config = parse("{\"plotOptions\":{\"column\":"
+                    + "{\"color\":\"#ff0000\"}}}");
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertNotNull(column.getColor());
+            Assertions.assertEquals("#ff0000", column.getColor().toString());
+        }
+
         @SuppressWarnings("unchecked")
         private <T> T getPlotOption(Configuration config, Class<T> type) {
             return (T) config.getPlotOptions().stream().filter(type::isInstance)

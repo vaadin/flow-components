@@ -426,6 +426,20 @@ class ChartAIToolsSchemaTest {
         }
 
         @Test
+        void parametersSchema_chartTypeHasTypeAndDescription()
+                throws Exception {
+            JsonNode paramSchema = MAPPER
+                    .readTree(schemaTool.getParametersSchema());
+            JsonNode chartType = paramSchema.get("properties").get("chartType");
+            Assertions.assertNotNull(chartType, "chartType property missing");
+            Assertions.assertTrue(chartType.has("type"),
+                    "chartType should declare a type");
+            Assertions.assertEquals("string", chartType.get("type").asString());
+            Assertions.assertTrue(chartType.has("description"),
+                    "chartType should have a description");
+        }
+
+        @Test
         void column_booleanAndNumberFields() {
             var opts = new PlotOptionsColumn();
             opts.setColorByPoint(true);

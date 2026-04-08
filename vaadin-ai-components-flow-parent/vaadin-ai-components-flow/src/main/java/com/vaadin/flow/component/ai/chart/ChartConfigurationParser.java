@@ -50,7 +50,6 @@ import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.ObjectMapper;
@@ -523,7 +522,6 @@ public final class ChartConfigurationParser implements Serializable {
                 .changeDefaultVisibility(handler -> handler
                         .withVisibility(PropertyAccessor.ALL, Visibility.NONE)
                         .withVisibility(PropertyAccessor.FIELD, Visibility.ANY))
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .addHandler(new LenientEnumHandler()).addModule(colorModule)
                 .build();

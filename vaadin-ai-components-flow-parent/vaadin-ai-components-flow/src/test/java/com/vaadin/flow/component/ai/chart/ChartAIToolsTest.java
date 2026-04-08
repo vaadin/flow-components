@@ -357,6 +357,10 @@ class ChartAIToolsTest {
             String result = tool.execute("{\"chartType\":\"nonexistent\"}");
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("unknown chart type"));
+            Assertions.assertTrue(result.contains("Supported types:"),
+                    "Error should list supported types");
+            Assertions.assertTrue(result.contains("column"),
+                    "Supported types should include 'column'");
         }
 
         @Test
