@@ -42,7 +42,7 @@ public class TreeGridExpandedAutoWidthPreserveOnRefreshIT
 
         getDriver().navigate().refresh();
 
-        grid = $(TreeGridElement.class).first();
+        grid = $(TreeGridElement.class).waitForFirst();
         Assert.assertEquals(columnOffsetWidth,
                 grid.getCell(0, 0).getPropertyInteger("offsetWidth"));
     }
