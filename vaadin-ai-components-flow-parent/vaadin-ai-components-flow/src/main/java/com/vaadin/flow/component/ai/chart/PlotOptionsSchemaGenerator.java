@@ -88,6 +88,43 @@ public final class PlotOptionsSchemaGenerator {
 
     private static final int MAX_DEPTH = 1;
 
+    /**
+     * Fields that are internal, technical, or accessibility-related and not
+     * useful for natural-language chart customization. Excluded from the
+     * generated schema to reduce noise for the LLM.
+     */
+    private static final Set<String> EXCLUDED_FIELDS = Set.of(
+            // Accessibility
+            "description", "exposeElementToA11y", "skipKeyboardNavigation",
+            // Performance internals
+            "animationLimit", "cropThreshold", "turboThreshold",
+            // Developer / styled-mode only
+            "className", "colorIndex", "colorKey",
+            // Rendering internals
+            "clip", "crisp", "linecap", "boostBlending",
+            // Event tracking
+            "enableMouseTracking", "stickyTracking", "findNearestPointBy",
+            "trackByArea",
+            // Internal data mapping
+            "keys", "compare", "compareBase", "gapSize", "gapUnit",
+            // Series linking / legend internals
+            "linkedTo", "legendIndex", "showInNavigator", "legendType",
+            // Axis / point calculation internals
+            "getExtremesFromAll", "pointRange", "pointStart", "pointInterval",
+            "pointIntervalUnit", "pointPlacement", "softThreshold", "zoneAxis",
+            // Selection internals
+            "selected", "showCheckbox",
+            // Null / gap handling
+            "connectNulls", "connectEnds",
+            // Treemap internals
+            "levelIsConstant", "interactByLeaf", "layoutAlgorithm",
+            "layoutStartingDirection", "alternateStartingDirection",
+            "sortIndex",
+            // Export / rendering
+            "includeInDataExport", "useHTML",
+            // Other internals
+            "allowDrillToNode", "allowTraversingTree", "inactiveOtherPoints");
+
     private static final Set<Class<?>> EXPANDABLE_TYPES = Set.of(
             findClass("com.vaadin.flow.component.charts.model.DataLabels"),
             findClass("com.vaadin.flow.component.charts.model.Marker"),
@@ -95,7 +132,7 @@ public final class PlotOptionsSchemaGenerator {
 
     // Matches the JavaDoc block immediately preceding a setter.
     // Uses (?:[^*]+|\*(?!/))* to stay within a single /** ... */ block.
-    private static final Pattern SETTER_JAVADOC_PATTERN = Pattern.compile(
+    private static final Pattern SETTER_JAVADOC_PATTERN = Pattern.compile( // NOSONAR
             "/\\*\\*((?:[^*]+|\\*(?!/))*+)\\*/\\s*public\\s+(?:abstract\\s+)?void\\s+set(\\w+)\\s*\\(");
 
     private PlotOptionsSchemaGenerator() {
@@ -154,7 +191,7 @@ public final class PlotOptionsSchemaGenerator {
                 continue;
             }
             var name = field.getName();
-            if (name.startsWith("_fn_")) {
+            if (name.startsWith("_fn_") || EXCLUDED_FIELDS.contains(name)) {
                 continue;
             }
             var fieldSchema = fieldToSchema(field, depth, descriptions);

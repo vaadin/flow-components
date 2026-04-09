@@ -561,7 +561,7 @@ class ChartAIToolsSchemaTest {
             // Number field
             assertPropertyType(series, "lineWidth", "number");
             // String field
-            assertPropertyType(series, "className", "string");
+            assertPropertyType(series, "cursor", "string");
             // Color → string with CSS color description
             assertPropertyEquals(series, "color", "{\"type\":\"string\","
                     + "\"description\":\"CSS color (e.g. '#ff0000')\"}");
@@ -570,11 +570,6 @@ class ChartAIToolsSchemaTest {
             Assertions.assertEquals("string", stacking.get("type").asString());
             Assertions.assertTrue(stacking.has("enum"),
                     "Enum field should have 'enum' values");
-            // String array
-            JsonNode keys = series.get("keys");
-            Assertions.assertEquals("array", keys.get("type").asString());
-            Assertions.assertEquals("string",
-                    keys.get("items").get("type").asString());
             // Non-expandable objects are excluded (no useful schema)
             Assertions.assertNull(series.get("states"),
                     "Opaque object properties should be excluded");
@@ -595,6 +590,12 @@ class ChartAIToolsSchemaTest {
             // _fn_ fields excluded
             Assertions.assertFalse(series.has("_fn_pointFormatter"),
                     "_fn_ fields should be excluded");
+            // Internal/technical fields excluded
+            for (String excluded : List.of("className", "enableMouseTracking",
+                    "turboThreshold", "skipKeyboardNavigation")) {
+                Assertions.assertFalse(series.has(excluded),
+                        "Internal field should be excluded: " + excluded);
+            }
             // Color array (on pie)
             JsonNode pie = getSchemaNode("pie").get("properties");
             JsonNode colors = pie.get("colors");
