@@ -46,7 +46,7 @@ public class PopoverDelayDefaultsIT extends AbstractComponentIT {
     public void changeDefaults_refreshPage_checkPopoverConfig() {
         $("button").id("set-default-delays-to-5000").click();
         getDriver().navigate().refresh();
-        popover = $(PopoverElement.class).first();
+        popover = $(PopoverElement.class).waitForFirst();
         Assert.assertEquals(5000, getActiveHideDelay(popover));
         Assert.assertEquals(5000, getActiveFocusDelay(popover));
         Assert.assertEquals(5000, getActiveHoverDelay(popover));

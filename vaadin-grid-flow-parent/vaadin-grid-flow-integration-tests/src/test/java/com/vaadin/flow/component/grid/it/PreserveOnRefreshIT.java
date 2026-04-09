@@ -65,6 +65,7 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
     public void refresh_editorOpen() {
         findElement(By.id("edit-button")).click();
         getDriver().navigate().refresh();
+        waitForElementPresent(By.id("closed"));
         WebElement closed = findElement(By.id("closed"));
         Assert.assertEquals(closed.getText(), "Closed");
 
@@ -75,7 +76,7 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
     }
 
     private GridElement getGrid() {
-        return $(GridElement.class).first();
+        return $(GridElement.class).waitForFirst();
     }
 
 }
