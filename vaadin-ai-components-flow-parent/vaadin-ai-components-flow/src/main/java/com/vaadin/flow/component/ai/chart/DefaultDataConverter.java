@@ -139,21 +139,11 @@ public class DefaultDataConverter implements DataConverter {
             return convertGrouped(data, columnMapping);
         }
 
-        return List.of(convertGroup(data, columnMapping));
+        return List.of(convertSingle(data, columns, columnMapping));
     }
 
     /**
-     * Detects the chart type pattern from column names and converts the group
-     * into a series.
-     */
-    private AbstractSeries convertGroup(List<Map<String, Object>> data,
-            Map<String, String> columnMapping) {
-        return convertSingle(data, columnMapping.keySet(), columnMapping);
-    }
-
-    /**
-     * Detects the chart type pattern from column names and converts data into
-     * the appropriate series type.
+     * Converts a single dataset (no {@code _series} column) into one series.
      */
     private AbstractSeries convertSingle(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
@@ -193,7 +183,8 @@ public class DefaultDataConverter implements DataConverter {
             var groupRows = entry.getValue().stream()
                     .map(row -> withoutKey(row, originalSeriesKey)).toList();
             var groupMapping = buildColumnMapping(groupRows.getFirst());
-            var series = convertGroup(groupRows, groupMapping);
+            var series = convertSingle(groupRows, groupMapping.keySet(),
+                    groupMapping);
             series.setName(entry.getKey().isEmpty() ? null : entry.getKey());
             result.add(series);
         }
