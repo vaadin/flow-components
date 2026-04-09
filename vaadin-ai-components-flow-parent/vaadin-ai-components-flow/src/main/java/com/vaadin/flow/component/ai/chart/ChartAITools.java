@@ -317,40 +317,40 @@ public final class ChartAITools {
                                       "description": "REQUIRED: Chart type - ALWAYS specify this property",
                                       "enum": ["line", "spline", "area", "areaspline", "bar", "column", "pie", "scatter", "gauge", "arearange", "columnrange", "areasplinerange", "boxplot", "errorbar", "bubble", "funnel", "waterfall", "pyramid", "solidgauge", "heatmap", "treemap", "polygon", "candlestick", "flags", "timeline", "ohlc", "organization", "sankey", "xrange", "gantt", "bullet"]
                                     },
-                                    "{c:BACKGROUND_COLOR}": { "type": "string", "description": "Background color (e.g., '#ffffff')" },
-                                    "{c:BORDER_COLOR}": { "type": "string", "description": "Border color" },
-                                    "{c:BORDER_WIDTH}": { "type": "number", "description": "Border width in pixels" },
-                                    "{c:BORDER_RADIUS}": { "type": "number", "description": "Border radius in pixels" },
+                                    "{c:BACKGROUND_COLOR}": { "type": "string", "description": "Background color or gradient for the outer chart area (e.g., '#ffffff')" },
+                                    "{c:BORDER_COLOR}": { "type": "string", "description": "Color of the outer chart border" },
+                                    "{c:BORDER_WIDTH}": { "type": "number", "description": "Pixel width of the outer chart border" },
+                                    "{c:BORDER_RADIUS}": { "type": "number", "description": "Corner radius of the outer chart border" },
                                     "{c:WIDTH}": { "type": "number", "description": "Chart width in pixels" },
                                     "{c:HEIGHT}": { "oneOf": [{ "type": "number", "description": "Height in pixels" }, { "type": "string", "description": "Height as string (e.g., '400px', '100%')" }] },
-                                    "{c:MARGIN_TOP}": { "type": "number" },
-                                    "{c:MARGIN_RIGHT}": { "type": "number" },
-                                    "{c:MARGIN_BOTTOM}": { "type": "number" },
-                                    "{c:MARGIN_LEFT}": { "type": "number" },
-                                    "{c:SPACING_TOP}": { "type": "number" },
-                                    "{c:SPACING_RIGHT}": { "type": "number" },
-                                    "{c:SPACING_BOTTOM}": { "type": "number" },
-                                    "{c:SPACING_LEFT}": { "type": "number" },
-                                    "{c:PLOT_BACKGROUND_COLOR}": { "type": "string" },
-                                    "{c:PLOT_BORDER_COLOR}": { "type": "string" },
-                                    "{c:PLOT_BORDER_WIDTH}": { "type": "number" },
-                                    "{c:INVERTED}": { "type": "boolean", "description": "Invert axes" },
-                                    "{c:POLAR}": { "type": "boolean", "description": "Polar chart" },
-                                    "{c:ANIMATION}": { "type": "boolean" },
-                                    "{c:STYLED_MODE}": { "type": "boolean" },
-                                    "{c:ZOOM_TYPE}": { "type": "string", "enum": ["x", "y", "xy"] }
+                                    "{c:MARGIN_TOP}": { "type": "number", "description": "Fixed pixel margin between the top outer edge of the chart and the plot area" },
+                                    "{c:MARGIN_RIGHT}": { "type": "number", "description": "Fixed pixel margin between the right outer edge of the chart and the plot area" },
+                                    "{c:MARGIN_BOTTOM}": { "type": "number", "description": "Fixed pixel margin between the bottom outer edge of the chart and the plot area" },
+                                    "{c:MARGIN_LEFT}": { "type": "number", "description": "Fixed pixel margin between the left outer edge of the chart and the plot area" },
+                                    "{c:SPACING_TOP}": { "type": "number", "description": "Space between the top edge of the chart and the content" },
+                                    "{c:SPACING_RIGHT}": { "type": "number", "description": "Space between the right edge of the chart and the content" },
+                                    "{c:SPACING_BOTTOM}": { "type": "number", "description": "Space between the bottom edge of the chart and the content" },
+                                    "{c:SPACING_LEFT}": { "type": "number", "description": "Space between the left edge of the chart and the content" },
+                                    "{c:PLOT_BACKGROUND_COLOR}": { "type": "string", "description": "Background color or gradient for the plot area" },
+                                    "{c:PLOT_BORDER_COLOR}": { "type": "string", "description": "Color of the inner chart or plot area border" },
+                                    "{c:PLOT_BORDER_WIDTH}": { "type": "number", "description": "Pixel width of the plot area border" },
+                                    "{c:INVERTED}": { "type": "boolean", "description": "Whether to invert the axes so that the x axis is vertical and y axis is horizontal" },
+                                    "{c:POLAR}": { "type": "boolean", "description": "When true, cartesian charts are transformed into the polar coordinate system" },
+                                    "{c:ANIMATION}": { "type": "boolean", "description": "Overall animation for all chart updating. Does not affect initial series animation." },
+                                    "{c:STYLED_MODE}": { "type": "boolean", "description": "Whether to apply styled mode. When enabled, no presentational attributes or CSS are applied to the chart SVG." },
+                                    "{c:ZOOM_TYPE}": { "type": "string", "description": "Decides in what dimensions the user can zoom by dragging the mouse", "enum": ["x", "y", "xy"] }
                                   }
                                 },
                                 "{c:TITLE}": {
                                   "oneOf": [
                                     { "type": "string", "description": "Title text" },
-                                    { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } }
+                                    { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The title text" } } }
                                   ]
                                 },
                                 "{c:SUBTITLE}": {
                                   "oneOf": [
                                     { "type": "string", "description": "Subtitle text" },
-                                    { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } }
+                                    { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The subtitle text" } } }
                                   ]
                                 },
                                 "{c:X_AXIS}": {
@@ -358,10 +358,10 @@ public final class ChartAITools {
                                   "description": "X-axis configuration",
                                   "properties": {
                                     "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
-                                    "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } },
-                                    "{c:CATEGORIES}": { "type": "array", "items": { "type": "string" } },
-                                    "{c:MIN}": { "type": "number" },
-                                    "{c:MAX}": { "type": "number" }
+                                    "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The axis title text" } } },
+                                    "{c:CATEGORIES}": { "type": "array", "items": { "type": "string" }, "description": "Category names to use instead of numbers for the axis" },
+                                    "{c:MIN}": { "type": "number", "description": "Minimum value of the axis. Auto-calculated if null." },
+                                    "{c:MAX}": { "type": "number", "description": "Maximum value of the axis. Auto-calculated if null." }
                                   }
                                 },
                                 "{c:Y_AXIS}": {
@@ -370,10 +370,10 @@ public final class ChartAITools {
                                       "type": "object",
                                       "description": "Single Y-axis configuration",
                                       "properties": {
-                                        "{c:TYPE}": { "type": "string", "enum": ["linear", "logarithmic", "datetime", "category"] },
-                                        "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } },
-                                        "{c:MIN}": { "type": "number" },
-                                        "{c:MAX}": { "type": "number" }
+                                        "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
+                                        "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The axis title text" } } },
+                                        "{c:MIN}": { "type": "number", "description": "Minimum value of the axis. Auto-calculated if null." },
+                                        "{c:MAX}": { "type": "number", "description": "Maximum value of the axis. Auto-calculated if null." }
                                       }
                                     },
                                     {
@@ -382,11 +382,11 @@ public final class ChartAITools {
                                       "items": {
                                         "type": "object",
                                         "properties": {
-                                          "{c:TYPE}": { "type": "string", "enum": ["linear", "logarithmic", "datetime", "category"] },
-                                          "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } },
-                                          "{c:MIN}": { "type": "number" },
-                                          "{c:MAX}": { "type": "number" },
-                                          "{c:OPPOSITE}": { "type": "boolean", "description": "Show axis on opposite side (right)" }
+                                          "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
+                                          "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The axis title text" } } },
+                                          "{c:MIN}": { "type": "number", "description": "Minimum value of the axis. Auto-calculated if null." },
+                                          "{c:MAX}": { "type": "number", "description": "Maximum value of the axis. Auto-calculated if null." },
+                                          "{c:OPPOSITE}": { "type": "boolean", "description": "Whether to display the axis on the opposite side of the normal (right for vertical axes, top for horizontal)" }
                                         }
                                       }
                                     }
@@ -397,57 +397,57 @@ public final class ChartAITools {
                                   "description": "Z-axis configuration (for 3D and bubble charts)",
                                   "properties": {
                                     "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
-                                    "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string" } } },
-                                    "{c:MIN}": { "type": "number" },
-                                    "{c:MAX}": { "type": "number" }
+                                    "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The axis title text" } } },
+                                    "{c:MIN}": { "type": "number", "description": "Minimum value of the axis. Auto-calculated if null." },
+                                    "{c:MAX}": { "type": "number", "description": "Maximum value of the axis. Auto-calculated if null." }
                                   }
                                 },
                                 "{c:COLOR_AXIS}": {
                                   "type": "object",
                                   "description": "Color axis for heatmaps",
                                   "properties": {
-                                    "{c:MIN}": { "type": "number" },
-                                    "{c:MAX}": { "type": "number" },
-                                    "{c:MIN_COLOR}": { "type": "string" },
-                                    "{c:MAX_COLOR}": { "type": "string" }
+                                    "{c:MIN}": { "type": "number", "description": "Minimum value of the color axis" },
+                                    "{c:MAX}": { "type": "number", "description": "Maximum value of the color axis" },
+                                    "{c:MIN_COLOR}": { "type": "string", "description": "Color to represent the minimum value" },
+                                    "{c:MAX_COLOR}": { "type": "string", "description": "Color to represent the maximum value" }
                                   }
                                 },
                                 "{c:TOOLTIP}": {
                                   "type": "object",
                                   "description": "Tooltip configuration",
                                   "properties": {
-                                    "{c:POINT_FORMAT}": { "type": "string" },
-                                    "{c:HEADER_FORMAT}": { "type": "string" },
-                                    "{c:SHARED}": { "type": "boolean" },
-                                    "{c:VALUE_SUFFIX}": { "type": "string" },
-                                    "{c:VALUE_PREFIX}": { "type": "string" }
+                                    "{c:POINT_FORMAT}": { "type": "string", "description": "HTML for the point's line in the tooltip. Variables like {point.y}, {series.name} are enclosed in curly brackets." },
+                                    "{c:HEADER_FORMAT}": { "type": "string", "description": "HTML of the tooltip header line. Variables like {point.key}, {series.name} are enclosed in curly brackets." },
+                                    "{c:SHARED}": { "type": "boolean", "description": "When true, the entire plot area captures mouse movement and tooltip texts for all series are shown in a single bubble" },
+                                    "{c:VALUE_SUFFIX}": { "type": "string", "description": "A string to append to each series' y value in the tooltip" },
+                                    "{c:VALUE_PREFIX}": { "type": "string", "description": "A string to prepend to each series' y value in the tooltip" }
                                   }
                                 },
                                 "{c:LEGEND}": {
                                   "type": "object",
                                   "description": "Legend configuration",
                                   "properties": {
-                                    "{c:ENABLED}": { "type": "boolean" },
-                                    "{c:ALIGN}": { "type": "string", "enum": ["left", "center", "right"] },
-                                    "{c:VERTICAL_ALIGN}": { "type": "string", "enum": ["top", "middle", "bottom"] },
-                                    "{c:LAYOUT}": { "type": "string", "enum": ["horizontal", "vertical"] }
+                                    "{c:ENABLED}": { "type": "boolean", "description": "Enable or disable the legend" },
+                                    "{c:ALIGN}": { "type": "string", "description": "Horizontal alignment of the legend box within the chart area", "enum": ["left", "center", "right"] },
+                                    "{c:VERTICAL_ALIGN}": { "type": "string", "description": "Vertical alignment of the legend box", "enum": ["top", "middle", "bottom"] },
+                                    "{c:LAYOUT}": { "type": "string", "description": "The layout of the legend items", "enum": ["horizontal", "vertical"] }
                                   }
                                 },
                                 "{c:CREDITS}": {
                                   "type": "object",
                                   "description": "Credits configuration",
                                   "properties": {
-                                    "{c:ENABLED}": { "type": "boolean" },
-                                    "{c:TEXT}": { "type": "string" },
-                                    "{c:HREF}": { "type": "string" }
+                                    "{c:ENABLED}": { "type": "boolean", "description": "Whether to show the credits text" },
+                                    "{c:TEXT}": { "type": "string", "description": "The text for the credits label" },
+                                    "{c:HREF}": { "type": "string", "description": "The URL for the credits label" }
                                   }
                                 },
                                 "{c:PANE}": {
                                   "type": "object",
                                   "description": "Pane configuration (for gauges and polar charts)",
                                   "properties": {
-                                    "{c:START_ANGLE}": { "type": "number" },
-                                    "{c:END_ANGLE}": { "type": "number" },
+                                    "{c:START_ANGLE}": { "type": "number", "description": "Start angle of the polar X axis or gauge axis in degrees where 0 is north" },
+                                    "{c:END_ANGLE}": { "type": "number", "description": "End angle of the polar X axis or gauge value axis in degrees where 0 is north" },
                                     "{c:CENTER}": { "type": "array", "items": { "type": "string" }, "description": "Center position ['50%', '50%']" },
                                     "{c:SIZE}": { "type": "string", "description": "Size (e.g., '100%')" }
                                   }
