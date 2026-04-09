@@ -114,15 +114,4 @@ public final class ConfigurationKeys implements Serializable {
     public static final String END_ANGLE = "endAngle";
     public static final String CENTER = "center";
     public static final String SIZE = "size";
-
-    // --- Plot options ---
-
-    public static final String SERIES = "series";
-    public static final String PIE = "pie";
-    public static final String COLUMN = "column";
-    public static final String BAR = "bar";
-    public static final String STACKING = "stacking";
-    public static final String DATA_LABELS = "dataLabels";
-    public static final String MARKER = "marker";
-    public static final String INNER_SIZE = "innerSize";
 }
