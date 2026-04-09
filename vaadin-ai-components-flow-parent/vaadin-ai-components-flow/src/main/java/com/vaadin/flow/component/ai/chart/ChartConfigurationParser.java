@@ -385,6 +385,9 @@ public final class ChartConfigurationParser implements Serializable {
         if (yAxisNode.isObject()) {
             applyAxisConfig(config.getyAxis(), yAxisNode);
         } else if (yAxisNode.isArray()) {
+            // Clear existing axes to prevent secondary axis accumulation
+            // when the same yAxis array is applied on repeated merges.
+            config.removeyAxes();
             for (int i = 0; i < yAxisNode.size(); i++) {
                 JsonNode element = yAxisNode.get(i);
                 if (!element.isObject()) {
@@ -602,6 +605,15 @@ public final class ChartConfigurationParser implements Serializable {
                     && entryNode.get(PLOT_OPTIONS).isObject()) {
                 AbstractPlotOptions plotOptions = deserializePlotOptions(type,
                         (ObjectNode) entryNode.get(PLOT_OPTIONS));
+                if (plotOptions != null) {
+                    series.setPlotOptions(plotOptions);
+                }
+            } else if (type != null) {
+                // Create default plotOptions from type even without
+                // explicit plotOptions, so the series renders as the
+                // correct chart type (e.g. line vs column).
+                AbstractPlotOptions plotOptions = deserializePlotOptions(type,
+                        JacksonUtils.createObjectNode());
                 if (plotOptions != null) {
                     series.setPlotOptions(plotOptions);
                 }

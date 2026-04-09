@@ -900,6 +900,116 @@ class ChartRenderingTest {
     }
 
     @Nested
+    class DualYAxis {
+
+        @Test
+        void secondaryYAxisDoesNotAccumulateOnReRender() {
+            // First render: column chart with dual y-axes
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "North", "category", "Jan", "value",
+                            45000),
+                    row(ColumnNames.SERIES, "South", "category", "Jan", "value",
+                            38000));
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"yAxis\":[" + "{\"title\":{\"text\":\"Revenue\"}},"
+                    + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}"
+                    + "]," + "\"series\":["
+                    + "{\"name\":\"North\",\"yAxis\":0},"
+                    + "{\"name\":\"South\",\"yAxis\":1}" + "]}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
+
+            Assertions.assertEquals(2,
+                    chart.getConfiguration().getNumberOfyAxes(),
+                    "First render should have 2 y-axes");
+
+            // Second render: same chart type with same dual y-axes
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"yAxis\":[" + "{\"title\":{\"text\":\"Revenue\"}},"
+                    + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}"
+                    + "]," + "\"series\":["
+                    + "{\"name\":\"North\",\"yAxis\":0},"
+                    + "{\"name\":\"South\",\"yAxis\":1}" + "]}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
+
+            Assertions.assertEquals(2,
+                    chart.getConfiguration().getNumberOfyAxes(),
+                    "Re-render should still have exactly 2 y-axes, "
+                            + "not accumulate");
+        }
+
+        @Test
+        void perSeriesYAxisAppliedToDataSeries() {
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "Revenue", "category", "Jan",
+                            "value", 45000),
+                    row(ColumnNames.SERIES, "Volume", "category", "Jan",
+                            "value", 52000));
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"yAxis\":[" + "{\"title\":{\"text\":\"Revenue\"}},"
+                    + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}"
+                    + "]," + "\"series\":["
+                    + "{\"name\":\"Revenue\",\"yAxis\":0},"
+                    + "{\"name\":\"Volume\",\"yAxis\":1}" + "]}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+
+            var revSeries = (com.vaadin.flow.component.charts.model.AbstractSeries) series
+                    .stream().filter(s -> "Revenue".equals(s.getName()))
+                    .findFirst().orElseThrow();
+            var volSeries = (com.vaadin.flow.component.charts.model.AbstractSeries) series
+                    .stream().filter(s -> "Volume".equals(s.getName()))
+                    .findFirst().orElseThrow();
+
+            Assertions.assertEquals(0, revSeries.getyAxis(),
+                    "Revenue should be on primary y-axis");
+            Assertions.assertEquals(1, volSeries.getyAxis(),
+                    "Volume should be on secondary y-axis");
+        }
+    }
+
+    @Nested
+    class PerSeriesTypeOverride {
+
+        @Test
+        void perSeriesTypeWithoutPlotOptions_appliesType() {
+            // LLM sends type override without explicit plotOptions
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "Revenue", "category", "Jan",
+                            "value", 45000),
+                    row(ColumnNames.SERIES, "Count", "category", "Jan", "value",
+                            120));
+
+            updateConfiguration(
+                    "{\"chart\":{\"type\":\"column\"}," + "\"series\":["
+                            + "{\"name\":\"Revenue\",\"type\":\"column\"},"
+                            + "{\"name\":\"Count\",\"type\":\"line\"}" + "]}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            var countSeries = (com.vaadin.flow.component.charts.model.AbstractSeries) series
+                    .stream().filter(s -> "Count".equals(s.getName()))
+                    .findFirst().orElseThrow();
+
+            Assertions.assertNotNull(countSeries.getPlotOptions(),
+                    "Per-series type override should create plotOptions "
+                            + "even without explicit plotOptions in config");
+            Assertions.assertInstanceOf(
+                    com.vaadin.flow.component.charts.model.PlotOptionsLine.class,
+                    countSeries.getPlotOptions(),
+                    "Count series should have line plotOptions from "
+                            + "type override");
+        }
+    }
+
+    @Nested
     class WaterfallChart {
 
         @Test

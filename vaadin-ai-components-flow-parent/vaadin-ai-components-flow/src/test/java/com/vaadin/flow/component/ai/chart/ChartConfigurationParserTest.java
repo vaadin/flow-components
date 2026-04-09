@@ -672,6 +672,18 @@ class ChartConfigurationParserTest {
         }
 
         @Test
+        void seriesWithTypeButNoPlotOptions_createsPlotOptionsFromType() {
+            var config = parse("{\"series\":[{\"name\":\"South\","
+                    + "\"type\":\"line\",\"yAxis\":1}]}");
+            var series = findSeries(config, "South");
+            Assertions.assertNotNull(series);
+            Assertions.assertInstanceOf(PlotOptionsLine.class,
+                    series.getPlotOptions(),
+                    "type without plotOptions should create default "
+                            + "plotOptions of the correct type");
+        }
+
+        @Test
         void seriesWithoutName_skipped() {
             var config = parse("{\"series\":[{\"type\":\"column\"}]}");
             Assertions.assertTrue(config.getSeries().isEmpty());
