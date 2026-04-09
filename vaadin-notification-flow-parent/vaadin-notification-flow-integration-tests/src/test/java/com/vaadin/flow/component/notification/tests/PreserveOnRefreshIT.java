@@ -71,7 +71,7 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
         assertNotificationIsOpen();
 
         getDriver().navigate().refresh();
-        TestBenchElement notification = $(NOTIFICATION_TAG).first();
+        TestBenchElement notification = $(NOTIFICATION_TAG).waitForFirst();
         boolean containsComponentContent = notification.$("span")
                 .withAttribute("id", "component-content").exists();
         Assert.assertTrue(
