@@ -183,8 +183,8 @@ class ChartConfigurationParserTest {
                     + "\"min\":0,\"max\":100}}");
             var yAxis = config.getyAxis();
             Assertions.assertEquals("Revenue", yAxis.getTitle().getText());
-            Assertions.assertEquals(0.0, yAxis.getMin());
-            Assertions.assertEquals(100.0, yAxis.getMax());
+            Assertions.assertEquals(0.0, yAxis.getMin().doubleValue());
+            Assertions.assertEquals(100.0, yAxis.getMax().doubleValue());
         }
 
         @Test
@@ -202,8 +202,8 @@ class ChartConfigurationParserTest {
             var zAxis = config.getzAxis();
             Assertions.assertEquals(AxisType.LOGARITHMIC, zAxis.getType());
             Assertions.assertEquals("Depth", zAxis.getTitle().getText());
-            Assertions.assertEquals(1.0, zAxis.getMin());
-            Assertions.assertEquals(1000.0, zAxis.getMax());
+            Assertions.assertEquals(1.0, zAxis.getMin().doubleValue());
+            Assertions.assertEquals(1000.0, zAxis.getMax().doubleValue());
         }
 
         @Test
@@ -216,7 +216,7 @@ class ChartConfigurationParserTest {
 
             YAxis primary = config.getyAxis(0);
             Assertions.assertEquals("Price", primary.getTitle().getText());
-            Assertions.assertEquals(0.0, primary.getMin());
+            Assertions.assertEquals(0.0, primary.getMin().doubleValue());
 
             YAxis secondary = config.getyAxis(1);
             Assertions.assertEquals("Volume", secondary.getTitle().getText());
@@ -383,8 +383,8 @@ class ChartConfigurationParserTest {
         void colorAxisMinMax() {
             var config = parse("{\"colorAxis\":{\"min\":0,\"max\":100}}");
             var colorAxis = config.getColorAxis();
-            Assertions.assertEquals(0.0, colorAxis.getMin());
-            Assertions.assertEquals(100.0, colorAxis.getMax());
+            Assertions.assertEquals(0.0, colorAxis.getMin().doubleValue());
+            Assertions.assertEquals(100.0, colorAxis.getMax().doubleValue());
         }
 
         @Test

@@ -20,29 +20,18 @@ import static com.vaadin.flow.component.ai.chart.ConfigurationKeys.*;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
-import com.vaadin.flow.component.charts.model.Axis;
-import com.vaadin.flow.component.charts.model.AxisTitle;
-import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartModel;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.charts.model.HorizontalAlign;
-import com.vaadin.flow.component.charts.model.LayoutDirection;
-import com.vaadin.flow.component.charts.model.Legend;
-import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
-import com.vaadin.flow.component.charts.model.Tooltip;
-import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
@@ -131,24 +120,24 @@ public final class ChartConfigurationParser implements Serializable {
         if (configNode.has(LEGEND) && configNode.get(LEGEND).isObject()) {
             mergeInto(config.getLegend(), configNode.get(LEGEND));
         }
-        if (configNode.has(X_AXIS)) {
-            applyAxisConfig(config.getxAxis(), configNode.get(X_AXIS));
+        if (configNode.has(X_AXIS) && configNode.get(X_AXIS).isObject()) {
+            mergeInto(config.getxAxis(), configNode.get(X_AXIS));
         }
         if (configNode.has(Y_AXIS)) {
             applyYAxisConfig(config, configNode.get(Y_AXIS));
         }
-        if (configNode.has(Z_AXIS)) {
-            applyAxisConfig(config.getzAxis(), configNode.get(Z_AXIS));
+        if (configNode.has(Z_AXIS) && configNode.get(Z_AXIS).isObject()) {
+            mergeInto(config.getzAxis(), configNode.get(Z_AXIS));
         }
         if (configNode.has(COLOR_AXIS)
                 && configNode.get(COLOR_AXIS).isObject()) {
-            applyColorAxisConfig(config, configNode.get(COLOR_AXIS));
+            mergeInto(config.getColorAxis(), configNode.get(COLOR_AXIS));
         }
         if (configNode.has(CREDITS) && configNode.get(CREDITS).isObject()) {
             mergeInto(config.getCredits(), configNode.get(CREDITS));
         }
         if (configNode.has(PANE) && configNode.get(PANE).isObject()) {
-            applyPaneConfig(config, configNode.get(PANE));
+            mergeInto(config.getPane(), configNode.get(PANE));
         }
         if (configNode.has(PLOT_OPTIONS)
                 && configNode.get(PLOT_OPTIONS).isObject()) {
@@ -239,7 +228,7 @@ public final class ChartConfigurationParser implements Serializable {
     private static void applyYAxisConfig(Configuration config,
             JsonNode yAxisNode) {
         if (yAxisNode.isObject()) {
-            applyAxisConfig(config.getyAxis(), yAxisNode);
+            mergeInto(config.getyAxis(), yAxisNode);
         } else if (yAxisNode.isArray()) {
             for (int i = 0; i < yAxisNode.size(); i++) {
                 JsonNode element = yAxisNode.get(i);
@@ -247,102 +236,13 @@ public final class ChartConfigurationParser implements Serializable {
                     continue;
                 }
                 if (i == 0) {
-                    applyAxisConfig(config.getyAxis(), element);
+                    mergeInto(config.getyAxis(), element);
                 } else {
-                    config.addyAxis(createSecondaryYAxis(element));
+                    YAxis axis = new YAxis();
+                    mergeInto(axis, element);
+                    config.addyAxis(axis);
                 }
             }
-        }
-    }
-
-    private static YAxis createSecondaryYAxis(JsonNode element) {
-        YAxis axis = new YAxis();
-        applyAxisConfig(axis, element);
-        if (element.has(OPPOSITE) && element.get(OPPOSITE).isBoolean()) {
-            axis.setOpposite(element.get(OPPOSITE).asBoolean());
-        }
-        return axis;
-    }
-
-    private static void applyAxisConfig(Axis axis, JsonNode axisNode) {
-        if (axis == null || !axisNode.isObject()) {
-            return;
-        }
-        if (axisNode.has(TYPE) && axisNode.get(TYPE).isString()) {
-            try {
-                axis.setType(AxisType
-                        .valueOf(axisNode.get(TYPE).asString().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                // Invalid axis type, skip
-            }
-        }
-        if (axisNode.has(TITLE) && axisNode.get(TITLE).isObject()) {
-            var titleNode = axisNode.get(TITLE);
-            if (titleNode.has(TEXT)) {
-                axis.setTitle(new AxisTitle(titleNode.get(TEXT).asString()));
-            }
-        }
-        if (axisNode.has(CATEGORIES) && axisNode.get(CATEGORIES).isArray()) {
-            List<String> categories = new ArrayList<>();
-            axisNode.get(CATEGORIES)
-                    .forEach(cat -> categories.add(cat.asString()));
-            axis.setCategories(categories.toArray(new String[0]));
-        }
-        if (axisNode.has(MIN) && axisNode.get(MIN).isNumber()) {
-            axis.setMin(axisNode.get(MIN).asDouble());
-        }
-        if (axisNode.has(MAX) && axisNode.get(MAX).isNumber()) {
-            axis.setMax(axisNode.get(MAX).asDouble());
-        }
-    }
-
-    private static void applyColorAxisConfig(Configuration config,
-            JsonNode colorAxisNode) {
-        if (!colorAxisNode.isObject()) {
-            return;
-        }
-        var colorAxis = config.getColorAxis();
-        if (colorAxisNode.has(MIN) && colorAxisNode.get(MIN).isNumber()) {
-            colorAxis.setMin(colorAxisNode.get(MIN).asDouble());
-        }
-        if (colorAxisNode.has(MAX) && colorAxisNode.get(MAX).isNumber()) {
-            colorAxis.setMax(colorAxisNode.get(MAX).asDouble());
-        }
-        if (colorAxisNode.has(MIN_COLOR)
-                && colorAxisNode.get(MIN_COLOR).isString()) {
-            colorAxis.setMinColor(
-                    new SolidColor(colorAxisNode.get(MIN_COLOR).asString()));
-        }
-        if (colorAxisNode.has(MAX_COLOR)
-                && colorAxisNode.get(MAX_COLOR).isString()) {
-            colorAxis.setMaxColor(
-                    new SolidColor(colorAxisNode.get(MAX_COLOR).asString()));
-        }
-    }
-
-    private static void applyPaneConfig(Configuration config,
-            JsonNode paneNode) {
-        if (!paneNode.isObject()) {
-            return;
-        }
-        // Use the existing pane instead of adding a new one to avoid
-        // pane accumulation across repeated renders.
-        Pane pane = config.getPane();
-        if (paneNode.has(START_ANGLE) && paneNode.get(START_ANGLE).isNumber()) {
-            pane.setStartAngle(paneNode.get(START_ANGLE).asInt());
-        }
-        if (paneNode.has(END_ANGLE) && paneNode.get(END_ANGLE).isNumber()) {
-            pane.setEndAngle(paneNode.get(END_ANGLE).asInt());
-        }
-        if (paneNode.has(CENTER) && paneNode.get(CENTER).isArray()) {
-            var centerArray = paneNode.get(CENTER);
-            if (centerArray.size() >= 2) {
-                pane.setCenter(new String[] { centerArray.get(0).asString(),
-                        centerArray.get(1).asString() });
-            }
-        }
-        if (paneNode.has(SIZE) && paneNode.get(SIZE).isString()) {
-            pane.setSize(paneNode.get(SIZE).asString());
         }
     }
 
