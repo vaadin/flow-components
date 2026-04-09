@@ -575,8 +575,9 @@ class ChartAIToolsSchemaTest {
             Assertions.assertEquals("array", keys.get("type").asString());
             Assertions.assertEquals("string",
                     keys.get("items").get("type").asString());
-            // Non-expandable AbstractConfigurationObject → plain object
-            assertPropertyType(series, "states", "object");
+            // Non-expandable objects are excluded (no useful schema)
+            Assertions.assertNull(series.get("states"),
+                    "Opaque object properties should be excluded");
             // Expandable types → nested properties
             for (String expanded : List.of("dataLabels", "marker", "tooltip")) {
                 Assertions.assertTrue(series.get(expanded).has("properties"),

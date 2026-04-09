@@ -195,10 +195,8 @@ public final class PlotOptionsSchemaGenerator {
         if (depth < MAX_DEPTH && EXPANDABLE_TYPES.contains(type)) {
             return buildObjectSchema(type, depth + 1, descriptions);
         }
-        if (depth < MAX_DEPTH
-                && AbstractConfigurationObject.class.isAssignableFrom(type)) {
-            return typeNode("object");
-        }
+        // Skip non-expandable complex objects — an opaque "type":"object"
+        // gives the LLM no useful information about valid keys.
         return null;
     }
 
@@ -242,6 +240,10 @@ public final class PlotOptionsSchemaGenerator {
                 var itemNode = typeNode("string");
                 itemNode.put("description", "CSS color");
                 node.set("items", itemNode);
+            } else {
+                // Skip arrays of complex objects — without an items schema
+                // the LLM cannot know what to put in the array.
+                return null;
             }
         }
         return node;
