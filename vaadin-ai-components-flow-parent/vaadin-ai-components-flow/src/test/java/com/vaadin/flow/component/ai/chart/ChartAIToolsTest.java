@@ -36,9 +36,9 @@ class ChartAIToolsTest {
     }
 
     @Test
-    void createAll_returnsThreeTools() {
+    void createAll_returnsFourTools() {
         var tools = ChartAITools.createAll(callbacks);
-        Assertions.assertEquals(3, tools.size());
+        Assertions.assertEquals(4, tools.size());
     }
 
     @Test
@@ -54,6 +54,7 @@ class ChartAIToolsTest {
         Assertions.assertTrue(names.contains("get_chart_state"));
         Assertions.assertTrue(names.contains("update_chart_configuration"));
         Assertions.assertTrue(names.contains("update_chart_data_source"));
+        Assertions.assertTrue(names.contains("get_plot_options_schema"));
     }
 
     @Nested
@@ -334,6 +335,48 @@ class ChartAIToolsTest {
             var result = tool.execute("not json at all");
             Assertions.assertTrue(result.contains("Error"));
         }
+    }
+
+    @Nested
+    class GetPlotOptionsSchema {
+
+        private LLMProvider.ToolSpec tool;
+
+        @BeforeEach
+        void setUp() {
+            tool = ChartAITools.getPlotOptionsSchema();
+        }
+
+        @Test
+        void name() {
+            Assertions.assertEquals("get_plot_options_schema", tool.getName());
+        }
+
+        @Test
+        void unknownType_returnsError() {
+            String result = tool.execute("{\"chartType\":\"nonexistent\"}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("unknown chart type"));
+            Assertions.assertTrue(result.contains("Supported types:"),
+                    "Error should list supported types");
+            Assertions.assertTrue(result.contains("column"),
+                    "Supported types should include 'column'");
+        }
+
+        @Test
+        void missingParameter_returnsError() {
+            String result = tool.execute("{}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("chartType"));
+        }
+
+        @Test
+        void caseInsensitive() {
+            String result = tool.execute("{\"chartType\":\"COLUMN\"}");
+            Assertions.assertFalse(result.contains("Error"), result);
+            Assertions.assertTrue(result.contains("\"properties\""));
+        }
+
     }
 
     /**

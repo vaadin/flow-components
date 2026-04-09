@@ -27,8 +27,10 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
+import com.vaadin.flow.component.charts.model.PlotOptionsArea;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Stacking;
@@ -454,6 +456,64 @@ class ChartConfigurationParserTest {
             parse("{\"plotOptions\":{\"series\":"
                     + "{\"stacking\":\"invalid_value\"}}}");
             // Should not throw
+        }
+
+        @Test
+        void lineLineWidth() {
+            var config = parse(
+                    "{\"plotOptions\":{\"line\":{\"lineWidth\":3}}}");
+            var line = getPlotOption(config, PlotOptionsLine.class);
+            Assertions.assertEquals(3, line.getLineWidth());
+        }
+
+        @Test
+        void areaFillOpacity() {
+            var config = parse(
+                    "{\"plotOptions\":{\"area\":{\"fillOpacity\":0.5}}}");
+            var area = getPlotOption(config, PlotOptionsArea.class);
+            Assertions.assertEquals(0.5, area.getFillOpacity());
+        }
+
+        @Test
+        void unknownChartType_isIgnored() {
+            var config = parse(
+                    "{\"plotOptions\":{\"nonexistent\":{\"foo\":true}}}");
+            Assertions.assertTrue(config.getPlotOptions().isEmpty());
+        }
+
+        @Test
+        void multipleTypes_inSamePlotOptions() {
+            var config = parse(
+                    "{\"plotOptions\":{" + "\"column\":{\"borderRadius\":5},"
+                            + "\"line\":{\"lineWidth\":2}}}");
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertEquals(5, column.getBorderRadius());
+            var line = getPlotOption(config, PlotOptionsLine.class);
+            Assertions.assertEquals(2, line.getLineWidth());
+        }
+
+        @Test
+        void caseInsensitiveEnumValues() {
+            var config = parse(
+                    "{\"plotOptions\":{\"column\":{\"stacking\":\"Normal\"}}}");
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertEquals(Stacking.NORMAL, column.getStacking());
+        }
+
+        @Test
+        void nonObjectValue_isSkipped() {
+            var config = parse(
+                    "{\"plotOptions\":{\"column\":\"not an object\"}}");
+            Assertions.assertTrue(config.getPlotOptions().isEmpty());
+        }
+
+        @Test
+        void colorField_deserializedFromString() {
+            var config = parse("{\"plotOptions\":{\"column\":"
+                    + "{\"color\":\"#ff0000\"}}}");
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertNotNull(column.getColor());
+            Assertions.assertEquals("#ff0000", column.getColor().toString());
         }
 
         @SuppressWarnings("unchecked")

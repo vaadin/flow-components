@@ -37,6 +37,9 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.Stacking;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartAIControllerTest {
@@ -180,6 +183,38 @@ class ChartAIControllerTest {
 
             Assertions
                     .assertDoesNotThrow(() -> controller.onRequestCompleted());
+        }
+
+        @Test
+        void updateConfiguration_appliesColumnPlotOptions() {
+            var tools = controller.getTools();
+
+            // Build a configuration with column plot options
+            var configuration = new Configuration();
+            configuration.getChart().setType(ChartType.COLUMN);
+            var plotOptions = new PlotOptionsColumn();
+            plotOptions.setStacking(Stacking.NORMAL);
+            plotOptions.setBorderRadius(5);
+            plotOptions.setColorByPoint(true);
+            plotOptions.getDataLabels().setEnabled(true);
+            configuration.setPlotOptions(plotOptions);
+
+            // Apply and render
+            findTool(tools, "update_chart_configuration")
+                    .execute("{\"configuration\":"
+                            + ChartSerialization.toJSON(configuration) + "}");
+            findTool(tools, "update_chart_data_source")
+                    .execute("{\"queries\":[\"SELECT 1\"]}");
+            controller.onRequestCompleted();
+
+            // Verify plot options were applied to the chart
+            var applied = (PlotOptionsColumn) chart.getConfiguration()
+                    .getPlotOptions(ChartType.COLUMN);
+            Assertions.assertNotNull(applied);
+            Assertions.assertEquals(Stacking.NORMAL, applied.getStacking());
+            Assertions.assertEquals(5, applied.getBorderRadius().intValue());
+            Assertions.assertTrue(applied.getColorByPoint());
+            Assertions.assertTrue(applied.getDataLabels().getEnabled());
         }
 
         @Test

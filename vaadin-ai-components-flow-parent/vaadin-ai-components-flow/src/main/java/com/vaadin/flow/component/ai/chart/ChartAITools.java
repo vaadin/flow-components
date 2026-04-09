@@ -219,7 +219,7 @@ public final class ChartAITools {
         Objects.requireNonNull(callbacks, "callbacks must not be null");
         return List.of(getChartState(callbacks),
                 updateChartConfiguration(callbacks),
-                updateChartDataSource(callbacks));
+                updateChartDataSource(callbacks), getPlotOptionsSchema());
     }
 
     public static LLMProvider.ToolSpec getChartState(Callbacks callbacks) {
@@ -436,73 +436,8 @@ public final class ChartAITools {
                                 },
                                 "{c:PLOT_OPTIONS}": {
                                   "type": "object",
-                                  "description": "Default options for series types. Use 'series' key for options applying to all series, or a chart type key (e.g., 'pie', 'column') for type-specific options.",
-                                  "properties": {
-                                    "{c:SERIES}": {
-                                      "type": "object",
-                                      "description": "Default options for all series types",
-                                      "properties": {
-                                        "{c:STACKING}": { "type": "string", "enum": ["normal", "percent"], "description": "Stack series by value or percentage" },
-                                        "{c:DATA_LABELS}": {
-                                          "type": "object",
-                                          "properties": {
-                                            "{c:ENABLED}": { "type": "boolean" },
-                                            "{c:FORMAT}": { "type": "string", "description": "Label format string" }
-                                          }
-                                        },
-                                        "{c:MARKER}": {
-                                          "type": "object",
-                                          "properties": {
-                                            "{c:ENABLED}": { "type": "boolean" }
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "{c:PIE}": {
-                                      "type": "object",
-                                      "description": "Default options for pie series",
-                                      "properties": {
-                                        "{c:INNER_SIZE}": { "type": "string", "description": "Inner diameter for donut charts (e.g., '50%')" },
-                                        "{c:DATA_LABELS}": {
-                                          "type": "object",
-                                          "properties": {
-                                            "{c:ENABLED}": { "type": "boolean" },
-                                            "{c:FORMAT}": { "type": "string" }
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "{c:COLUMN}": {
-                                      "type": "object",
-                                      "description": "Default options for column series",
-                                      "properties": {
-                                        "{c:STACKING}": { "type": "string", "enum": ["normal", "percent"] },
-                                        "{c:DATA_LABELS}": {
-                                          "type": "object",
-                                          "properties": {
-                                            "{c:ENABLED}": { "type": "boolean" },
-                                            "{c:FORMAT}": { "type": "string" }
-                                          }
-                                        },
-                                        "{c:BORDER_RADIUS}": { "type": "number", "description": "Border radius for column corners" }
-                                      }
-                                    },
-                                    "{c:BAR}": {
-                                      "type": "object",
-                                      "description": "Default options for bar series",
-                                      "properties": {
-                                        "{c:STACKING}": { "type": "string", "enum": ["normal", "percent"] },
-                                        "{c:DATA_LABELS}": {
-                                          "type": "object",
-                                          "properties": {
-                                            "{c:ENABLED}": { "type": "boolean" },
-                                            "{c:FORMAT}": { "type": "string" }
-                                          }
-                                        },
-                                        "{c:BORDER_RADIUS}": { "type": "number" }
-                                      }
-                                    }
-                                  }
+                                  "description": "Default options for series types. Use 'series' key for options applying to all series, or a chart type key (e.g. 'pie', 'column', 'line') for type-specific defaults. Call get_plot_options_schema(chartType) to discover available properties.",
+                                  "additionalProperties": { "type": "object" }
                                 }
                               }
                             }
@@ -678,6 +613,67 @@ public final class ChartAITools {
                 } catch (Exception e) {
                     LOGGER.error("update_chart_data_source failed", e);
                     return "Error updating chart data: " + e.getMessage();
+                }
+            }
+        };
+    }
+
+    /**
+     * Tool that returns the JSON schema for a specific chart type's plot
+     * options. Stateless — no callbacks needed.
+     */
+    public static LLMProvider.ToolSpec getPlotOptionsSchema() {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return "get_plot_options_schema";
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                        Returns the JSON schema for plot options of a specific chart type.
+                        Use this to discover available styling properties (dataLabels, stacking, marker, lineWidth, etc.)
+                        before setting plotOptions or seriesOptions in update_chart_configuration.
+                        Use 'series' as the type for base options that apply to all chart types.""";
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "chartType": {
+                              "type": "string",
+                              "description": "The chart type (e.g. 'column', 'line', 'bar', 'area', 'pie', 'series')"
+                            }
+                          },
+                          "required": ["chartType"]
+                        }""";
+            }
+
+            @Override
+            public String execute(String arguments) {
+                try {
+                    LOGGER.info("get_plot_options_schema called with: {}",
+                            arguments);
+                    JsonNode args = JacksonUtils.readTree(arguments);
+                    JsonNode typeNode = args.get("chartType");
+                    if (typeNode == null || typeNode.isNull()) {
+                        return "Error: 'chartType' parameter is required.";
+                    }
+                    String chartType = typeNode.asString();
+                    String schema = PlotOptionsSchema.getSchema(chartType);
+                    if (schema == null) {
+                        return "Error: unknown chart type '" + chartType
+                                + "'. Supported types: " + String.join(", ",
+                                        PlotOptionsSchema.supportedTypes());
+                    }
+                    return schema;
+                } catch (Exception e) {
+                    LOGGER.error("get_plot_options_schema failed", e);
+                    return "Error: " + e.getMessage();
                 }
             }
         };

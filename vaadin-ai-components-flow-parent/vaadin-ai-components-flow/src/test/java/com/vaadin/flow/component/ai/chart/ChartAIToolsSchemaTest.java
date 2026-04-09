@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.networknt.schema.Error;
@@ -32,11 +34,14 @@ import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.SpecificationVersion;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.ColorAxis;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Credits;
+import com.vaadin.flow.component.charts.model.Cursor;
+import com.vaadin.flow.component.charts.model.DashStyle;
 import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
@@ -46,8 +51,10 @@ import com.vaadin.flow.component.charts.model.Marker;
 import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
@@ -403,6 +410,288 @@ class ChartAIToolsSchemaTest {
     }
 
     /**
+     * Tests that serialized {@link AbstractPlotOptions} objects validate
+     * against the JSON schema returned by {@code get_plot_options_schema}. Each
+     * test targets a specific field type handled by
+     * {@link PlotOptionsSchemaGenerator}.
+     */
+    @Nested
+    class PlotOptionsSchemaValidation {
+
+        private static LLMProvider.ToolSpec schemaTool;
+
+        @BeforeAll
+        static void setUp() {
+            schemaTool = ChartAITools.getPlotOptionsSchema();
+        }
+
+        @Test
+        void parametersSchema_chartTypeHasTypeAndDescription()
+                throws Exception {
+            JsonNode paramSchema = MAPPER
+                    .readTree(schemaTool.getParametersSchema());
+            JsonNode chartType = paramSchema.get("properties").get("chartType");
+            Assertions.assertNotNull(chartType, "chartType property missing");
+            Assertions.assertTrue(chartType.has("type"),
+                    "chartType should declare a type");
+            Assertions.assertEquals("string", chartType.get("type").asString());
+            Assertions.assertTrue(chartType.has("description"),
+                    "chartType should have a description");
+        }
+
+        @Test
+        void column_booleanAndNumberFields() {
+            var opts = new PlotOptionsColumn();
+            opts.setColorByPoint(true);
+            opts.setAnimation(false);
+            opts.setBorderRadius(5);
+            opts.setBorderWidth(1);
+            opts.setGroupPadding(0.2);
+            assertPlotOptionsMatchSchema("column", opts);
+        }
+
+        @Test
+        void column_stringAndColorFields() {
+            var opts = new PlotOptionsColumn();
+            opts.setClassName("custom-class");
+            opts.setColor(new SolidColor("#ff0000"));
+            opts.setNegativeColor(new SolidColor("#0000ff"));
+            opts.setBorderColor(new SolidColor("#cccccc"));
+            assertPlotOptionsMatchSchema("column", opts);
+        }
+
+        @Test
+        void column_enumField_stacking() {
+            var opts = new PlotOptionsColumn();
+            opts.setStacking(Stacking.NORMAL);
+            assertPlotOptionsMatchSchema("column", opts);
+        }
+
+        @Test
+        void series_enumFields_dashStyleAndCursor() {
+            var opts = new PlotOptionsSeries();
+            opts.setDashStyle(DashStyle.LONGDASHDOT);
+            opts.setCursor(Cursor.POINTER);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void series_stringArrayField_keys() {
+            var opts = new PlotOptionsSeries();
+            opts.setKeys("x", "y", "name");
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void pie_colorArrayField() {
+            var opts = new PlotOptionsPie();
+            opts.setColors(new SolidColor("#ff0000"), new SolidColor("#00ff00"),
+                    new SolidColor("#0000ff"));
+            assertPlotOptionsMatchSchema("pie", opts);
+        }
+
+        @Test
+        void series_expandableObject_dataLabels() {
+            var opts = new PlotOptionsSeries();
+            DataLabels dataLabels = new DataLabels();
+            dataLabels.setEnabled(true);
+            dataLabels.setFormat("{point.y:.1f}");
+            dataLabels.setRotation(45);
+            dataLabels.setColor(new SolidColor("#333333"));
+            opts.setDataLabels(dataLabels);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void series_expandableObject_marker() {
+            var opts = new PlotOptionsSeries();
+            Marker marker = new Marker();
+            marker.setEnabled(true);
+            marker.setRadius(4);
+            marker.setLineWidth(2);
+            marker.setFillColor(new SolidColor("#ff0000"));
+            opts.setMarker(marker);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void series_expandableObject_seriesTooltip() {
+            var opts = new PlotOptionsSeries();
+            SeriesTooltip tooltip = new SeriesTooltip();
+            tooltip.setValueSuffix(" units");
+            tooltip.setValuePrefix("$");
+            tooltip.setPointFormat("{series.name}: <b>{point.y}</b>");
+            opts.setTooltip(tooltip);
+            assertPlotOptionsMatchSchema("series", opts);
+        }
+
+        @Test
+        void line_lineWidthAndMarkerCombined() {
+            var opts = new PlotOptionsLine();
+            opts.setLineWidth(3);
+            Marker marker = new Marker();
+            marker.setEnabled(false);
+            opts.setMarker(marker);
+            assertPlotOptionsMatchSchema("line", opts);
+        }
+
+        @Test
+        void pie_uniqueFields() {
+            var opts = new PlotOptionsPie();
+            opts.setDataLabels(null);
+            opts.setInnerSize("50%");
+            opts.setStartAngle(-90);
+            opts.setEndAngle(90);
+            opts.setSlicedOffset(10);
+            assertPlotOptionsMatchSchema("pie", opts);
+        }
+
+        /**
+         * Verifies the generated schema structure for specific properties,
+         * covering every code path in {@link PlotOptionsSchemaGenerator}:
+         * boolean, number, string, Color, enum, array, expandable nested
+         * objects, non-expandable objects, descriptions, and field filters.
+         */
+        @Test
+        void generatedSchema_coversAllFieldTypes() {
+            JsonNode series = getSchemaNode("series").get("properties");
+
+            // Boolean field
+            assertPropertyType(series, "animation", "boolean");
+            // Number field
+            assertPropertyType(series, "lineWidth", "number");
+            // String field
+            assertPropertyType(series, "cursor", "string");
+            // Color → string with CSS color description
+            assertPropertyEquals(series, "color", "{\"type\":\"string\","
+                    + "\"description\":\"CSS color (e.g. '#ff0000')\"}");
+            // Enum → string with enum values
+            JsonNode stacking = series.get("stacking");
+            Assertions.assertEquals("string", stacking.get("type").asString());
+            Assertions.assertTrue(stacking.has("enum"),
+                    "Enum field should have 'enum' values");
+            // Non-expandable objects are excluded (no useful schema)
+            Assertions.assertNull(series.get("states"),
+                    "Opaque object properties should be excluded");
+            // Expandable types → nested properties
+            for (String expanded : List.of("dataLabels", "marker", "tooltip")) {
+                Assertions.assertTrue(series.get(expanded).has("properties"),
+                        expanded + " should be expanded with nested "
+                                + "properties");
+            }
+            // Descriptions parsed from JavaDoc, with {@link} tags cleaned
+            Assertions.assertTrue(series.get("lineWidth").has("description"),
+                    "Fields should have descriptions from JavaDoc");
+            String animationDesc = series.get("animation").get("description")
+                    .asString();
+            Assertions.assertFalse(animationDesc.contains("{@link"),
+                    "Descriptions should not contain raw JavaDoc tags: "
+                            + animationDesc);
+            // _fn_ fields excluded
+            Assertions.assertFalse(series.has("_fn_pointFormatter"),
+                    "_fn_ fields should be excluded");
+            // Internal/technical fields excluded
+            for (String excluded : List.of("className", "enableMouseTracking",
+                    "turboThreshold", "skipKeyboardNavigation")) {
+                Assertions.assertFalse(series.has(excluded),
+                        "Internal field should be excluded: " + excluded);
+            }
+            // Color array (on pie)
+            JsonNode pie = getSchemaNode("pie").get("properties");
+            JsonNode colors = pie.get("colors");
+            Assertions.assertEquals("array", colors.get("type").asString());
+            Assertions.assertEquals("CSS color",
+                    colors.get("items").get("description").asString());
+        }
+
+        private void assertPropertyType(JsonNode properties, String name,
+                String expectedType) {
+            Assertions.assertNotNull(properties.get(name),
+                    "Missing property: " + name);
+            Assertions.assertEquals(expectedType,
+                    properties.get(name).get("type").asString(),
+                    name + " should have type " + expectedType);
+        }
+
+        private void assertPropertyEquals(JsonNode properties, String name,
+                String expectedJson) {
+            Assertions.assertNotNull(properties.get(name),
+                    "Missing property: " + name);
+            Assertions.assertEquals(MAPPER.readTree(expectedJson),
+                    properties.get(name), name + " schema mismatch");
+        }
+
+        @Test
+        void descriptions_containNoJavaCodeFragments() {
+            for (String type : PlotOptionsSchema.supportedTypes()) {
+                JsonNode schema = getSchemaNode(type);
+                JsonNode properties = schema.get("properties");
+                if (properties == null) {
+                    continue;
+                }
+                for (var field : properties.properties()) {
+                    JsonNode desc = field.getValue().get("description");
+                    if (desc == null) {
+                        continue;
+                    }
+                    String text = desc.asString();
+                    Assertions.assertFalse(
+                            text.contains("public ")
+                                    || text.contains("private ")
+                                    || text.contains("return "),
+                            type + "." + field.getKey()
+                                    + " description contains Java code: "
+                                    + text.substring(0,
+                                            Math.min(text.length(), 80)));
+                }
+            }
+        }
+
+        @Test
+        void allChartTypes_haveSchemas() {
+            // Hardcoded list independent of the generator's supplier
+            // list so this catches accidentally removed types.
+            var expectedTypes = new String[] { "series", "area", "arearange",
+                    "areaspline", "areasplinerange", "bar", "boxplot", "bubble",
+                    "bullet", "candlestick", "column", "columnrange",
+                    "errorbar", "flags", "funnel", "gantt", "gauge", "heatmap",
+                    "line", "ohlc", "organization", "pie", "polygon", "pyramid",
+                    "sankey", "scatter", "solidgauge", "spline", "timeline",
+                    "treemap", "waterfall", "xrange" };
+            for (String type : expectedTypes) {
+                String result = schemaTool
+                        .execute("{\"chartType\":\"" + type + "\"}");
+                Assertions.assertFalse(result.startsWith("Error"),
+                        "Missing schema for type '" + type + "': " + result);
+            }
+        }
+
+        private JsonNode getSchemaNode(String chartType) {
+            String json = schemaTool
+                    .execute("{\"chartType\":\"" + chartType + "\"}");
+            Assertions.assertFalse(json.startsWith("Error"),
+                    "Schema lookup failed: " + json);
+            return MAPPER.readTree(json);
+        }
+
+        private void assertPlotOptionsMatchSchema(String chartType,
+                AbstractPlotOptions plotOptions) {
+            String schemaJson = schemaTool
+                    .execute("{\"chartType\":\"" + chartType + "\"}");
+            Assertions.assertFalse(schemaJson.startsWith("Error"),
+                    "Schema lookup failed: " + schemaJson);
+            var schema = SchemaRegistry
+                    .withDefaultDialect(SpecificationVersion.DRAFT_4)
+                    .getSchema(schemaJson);
+            var json = toJSON(plotOptions);
+            var errors = schema.validate(MAPPER.readTree(json));
+            Assertions.assertTrue(errors.isEmpty(),
+                    "Plot options JSON does not match " + chartType
+                            + " schema: " + errors);
+        }
+    }
+
+    /**
      * Serializes the given configuration using
      * {@link com.vaadin.flow.component.charts.util.ChartSerialization#toJSON}
      * and validates the result against the JSON Schema. Also verifies that
@@ -469,25 +758,58 @@ class ChartAIToolsSchemaTest {
             return;
         }
 
-        if (jsonNode.isObject() && schemaNode.has("properties")) {
-            JsonNode schemaProperties = schemaNode.get("properties");
-            Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.properties()
-                    .iterator();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> field = fields.next();
-                String fieldName = field.getKey();
-                String fieldPath = path + "." + fieldName;
+        if (jsonNode.isObject()) {
+            // An object node's schema should declare "type": "object"
+            if (!schemaNode.has("type") && (schemaNode.has("properties")
+                    || schemaNode.has("additionalProperties"))) {
+                uncovered.add(path + ": missing \"type\": \"object\"");
+            }
+            if (schemaNode.has("properties")) {
+                JsonNode schemaProperties = schemaNode.get("properties");
+                JsonNode additionalProps = schemaNode
+                        .get("additionalProperties");
+                Iterator<Map.Entry<String, JsonNode>> fields = jsonNode
+                        .properties().iterator();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> field = fields.next();
+                    String fieldName = field.getKey();
+                    String fieldPath = path + "." + fieldName;
 
-                if (!schemaProperties.has(fieldName)) {
-                    if (!EXCLUDED_PROPERTIES.contains(fieldPath)
+                    if (schemaProperties.has(fieldName)) {
+                        assertAllPropertiesCovered(field.getValue(),
+                                schemaProperties.get(fieldName), fieldPath,
+                                uncovered);
+                    } else if (additionalProps != null
+                            && additionalProps.isObject()
+                            && additionalProps.has("properties")) {
+                        assertAllPropertiesCovered(field.getValue(),
+                                additionalProps, fieldPath, uncovered);
+                    } else if (additionalProps == null
+                            && !EXCLUDED_PROPERTIES.contains(fieldPath)
                             && !INTERNAL_FIELD_NAMES.contains(fieldName)) {
                         uncovered.add(fieldPath);
                     }
-                    continue;
                 }
-
-                assertAllPropertiesCovered(field.getValue(),
-                        schemaProperties.get(fieldName), fieldPath, uncovered);
+            } else if (schemaNode.has("additionalProperties")
+                    && schemaNode.get("additionalProperties").isObject()
+                    && schemaNode.get("additionalProperties")
+                            .has("properties")) {
+                JsonNode additionalProps = schemaNode
+                        .get("additionalProperties");
+                for (var field : jsonNode.properties()) {
+                    assertAllPropertiesCovered(field.getValue(),
+                            additionalProps, path + "." + field.getKey(),
+                            uncovered);
+                }
+            } else if (!schemaNode.has("additionalProperties")
+                    && jsonNode.size() > 0) {
+                for (var field : jsonNode.properties()) {
+                    String fieldPath = path + "." + field.getKey();
+                    if (!EXCLUDED_PROPERTIES.contains(fieldPath)
+                            && !INTERNAL_FIELD_NAMES.contains(field.getKey())) {
+                        uncovered.add(fieldPath);
+                    }
+                }
             }
         }
 
