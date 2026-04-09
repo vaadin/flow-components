@@ -94,8 +94,9 @@ public final class PlotOptionsSchemaGenerator {
             findClass("com.vaadin.flow.component.charts.model.SeriesTooltip"));
 
     // Matches the JavaDoc block immediately preceding a setter.
+    // Uses (?:[^*]+|\*(?!/))* to stay within a single /** ... */ block.
     private static final Pattern SETTER_JAVADOC_PATTERN = Pattern.compile(
-            "/\\*\\*([\\s\\S]*?)\\*/\\s*public\\s+(?:abstract\\s+)?void\\s+set(\\w+)\\s*\\(");
+            "/\\*\\*((?:[^*]+|\\*(?!/))*+)\\*/\\s*public\\s+(?:abstract\\s+)?void\\s+set(\\w+)\\s*\\(");
 
     private PlotOptionsSchemaGenerator() {
     }
@@ -347,7 +348,7 @@ public final class PlotOptionsSchemaGenerator {
         cleaned = cleaned.replaceAll("@param\\s+\\w+\\s*", "");
         cleaned = cleaned.replaceAll("@return\\s*", "");
         // Replace {@link ClassName#method} and {@code text} keeping the text
-        cleaned = cleaned.replaceAll("\\{@\\w+\\s+(?:[^#}]*#)?+([^}]*)\\}",
+        cleaned = cleaned.replaceAll("\\{@\\w+\\s+(?:[^#}]*#)?+([^}]*)\\}", // NOSONAR
                 "$1");
         // Remove HTML tags
         cleaned = cleaned.replaceAll("<[^>]+>", "");

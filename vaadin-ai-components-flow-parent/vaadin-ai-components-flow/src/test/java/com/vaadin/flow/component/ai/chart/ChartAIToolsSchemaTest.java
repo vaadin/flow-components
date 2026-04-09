@@ -620,6 +620,32 @@ class ChartAIToolsSchemaTest {
         }
 
         @Test
+        void descriptions_containNoJavaCodeFragments() {
+            for (String type : PlotOptionsSchema.supportedTypes()) {
+                JsonNode schema = getSchemaNode(type);
+                JsonNode properties = schema.get("properties");
+                if (properties == null) {
+                    continue;
+                }
+                for (var field : properties.properties()) {
+                    JsonNode desc = field.getValue().get("description");
+                    if (desc == null) {
+                        continue;
+                    }
+                    String text = desc.asString();
+                    Assertions.assertFalse(
+                            text.contains("public ")
+                                    || text.contains("private ")
+                                    || text.contains("return "),
+                            type + "." + field.getKey()
+                                    + " description contains Java code: "
+                                    + text.substring(0,
+                                            Math.min(text.length(), 80)));
+                }
+            }
+        }
+
+        @Test
         void allChartTypes_haveSchemas() {
             // Hardcoded list independent of the generator's supplier
             // list so this catches accidentally removed types.
