@@ -72,8 +72,14 @@ public class ChartAIController implements AIController {
             Data and configuration are separate concerns:
             - update_chart_data_source() populates chart series from SQL queries
             - update_chart_configuration() controls visual appearance (type, styling, axes, etc.)
-            - NEVER include 'series' in configuration — data comes only from queries
+            - NEVER include series data in configuration — data comes only from queries
             - When changing chart type, ensure the query column aliases match the new type
+
+            Per-series styling and mixed chart types:
+            - Use the series array in update_chart_configuration() to override chart type or \
+            styling for specific series, matched by name
+            - Call get_plot_options_schema(chartType) to discover available properties
+            - Example: {"series": [{"name": "South", "type": "column", "yAxis": 1}]}
             """;
 
     private final Chart chart;

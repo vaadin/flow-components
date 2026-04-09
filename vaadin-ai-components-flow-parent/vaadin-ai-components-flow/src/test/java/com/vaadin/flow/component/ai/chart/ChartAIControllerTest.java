@@ -109,7 +109,7 @@ class ChartAIControllerTest {
     class ToolCallbacks {
 
         @Test
-        void getChartState_excludesSeriesFromConfiguration() {
+        void getChartState_excludesSeriesDataFromConfiguration() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
 
@@ -122,8 +122,10 @@ class ChartAIControllerTest {
 
             String state = findTool(tools, "get_chart_state").execute("{}");
             Assertions.assertTrue(state.contains("\"configuration\""));
-            Assertions.assertFalse(state.contains("\"series\""),
-                    "State configuration should not contain series data");
+            Assertions.assertTrue(state.contains("\"series\""),
+                    "State should include series configuration");
+            Assertions.assertFalse(state.contains("\"data\""),
+                    "State should not contain series data");
         }
 
         @Test

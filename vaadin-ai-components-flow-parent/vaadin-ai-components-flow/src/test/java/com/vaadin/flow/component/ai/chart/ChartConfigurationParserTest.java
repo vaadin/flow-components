@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
+import com.vaadin.flow.component.charts.model.YAxis;
 
 class ChartConfigurationParserTest {
 
@@ -202,6 +204,42 @@ class ChartConfigurationParserTest {
             Assertions.assertEquals("Depth", zAxis.getTitle().getText());
             Assertions.assertEquals(1.0, zAxis.getMin());
             Assertions.assertEquals(1000.0, zAxis.getMax());
+        }
+
+        @Test
+        void yAxisArray_createsSecondaryAxes() {
+            var config = parse("{\"yAxis\":["
+                    + "{\"title\":{\"text\":\"Price\"},\"min\":0},"
+                    + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}"
+                    + "]}");
+            Assertions.assertEquals(2, config.getNumberOfyAxes());
+
+            YAxis primary = config.getyAxis(0);
+            Assertions.assertEquals("Price", primary.getTitle().getText());
+            Assertions.assertEquals(0.0, primary.getMin());
+
+            YAxis secondary = config.getyAxis(1);
+            Assertions.assertEquals("Volume", secondary.getTitle().getText());
+            Assertions.assertTrue(secondary.getOpposite());
+        }
+
+        @Test
+        void yAxisArray_nonObjectElement_skipped() {
+            var config = parse("{\"yAxis\":["
+                    + "{\"title\":{\"text\":\"Price\"}}," + "42,"
+                    + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}"
+                    + "]}");
+            // The non-object element (42) should be skipped and not create
+            // a spurious empty secondary axis.
+            Assertions.assertEquals(2, config.getNumberOfyAxes());
+        }
+
+        @Test
+        void yAxisSingleObject_stillWorks() {
+            var config = parse(
+                    "{\"yAxis\":{\"title\":{\"text\":\"Revenue\"}}}");
+            Assertions.assertEquals("Revenue",
+                    config.getyAxis().getTitle().getText());
         }
 
         @Test
@@ -551,5 +589,123 @@ class ChartConfigurationParserTest {
             var config = parse("{}");
             Assertions.assertNull(config.getTitle().getText());
         }
+    }
+
+    @Nested
+    class SeriesConfig {
+
+        private static AbstractSeries findSeries(Configuration config,
+                String name) {
+            return config.getSeries().stream()
+                    .filter(s -> s instanceof AbstractSeries as
+                            && name.equals(as.getName()))
+                    .map(AbstractSeries.class::cast).findFirst().orElse(null);
+        }
+
+        @Test
+        void seriesWithType_createsCorrectPlotOptions() {
+            var config = parse("{\"series\":[{\"name\":\"South\","
+                    + "\"type\":\"column\",\"plotOptions\":{}}]}");
+            var series = findSeries(config, "South");
+            Assertions.assertNotNull(series);
+            Assertions.assertInstanceOf(PlotOptionsColumn.class,
+                    series.getPlotOptions());
+        }
+
+        @Test
+        void seriesWithYAxis_parsed() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"Volume\",\"yAxis\":1}]}");
+            var series = findSeries(config, "Volume");
+            Assertions.assertNotNull(series);
+            Assertions.assertEquals(1, series.getyAxis());
+        }
+
+        @Test
+        void seriesWithPlotOptions_deserialized() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"Revenue\"," + "\"type\":\"line\","
+                            + "\"plotOptions\":{\"lineWidth\":3}}]}");
+            var series = findSeries(config, "Revenue");
+            Assertions.assertInstanceOf(PlotOptionsLine.class,
+                    series.getPlotOptions());
+            var lineOptions = (PlotOptionsLine) series.getPlotOptions();
+            Assertions.assertEquals(3, lineOptions.getLineWidth());
+        }
+
+        @Test
+        void seriesWithStacking_deserialized() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"Sales\"," + "\"type\":\"column\","
+                            + "\"plotOptions\":{\"stacking\":\"normal\"}}]}");
+            var series = findSeries(config, "Sales");
+            var columnOptions = (PlotOptionsColumn) series.getPlotOptions();
+            Assertions.assertEquals(Stacking.NORMAL,
+                    columnOptions.getStacking());
+        }
+
+        @Test
+        void multipleSeries_parsed() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"North\",\"type\":\"areaspline\","
+                            + "\"plotOptions\":{}},"
+                            + "{\"name\":\"South\",\"type\":\"column\","
+                            + "\"yAxis\":1,\"plotOptions\":{}}]}");
+            Assertions.assertEquals(2, config.getSeries().size());
+            Assertions.assertNotNull(findSeries(config, "North"));
+            Assertions.assertEquals(1, findSeries(config, "South").getyAxis());
+        }
+
+        @Test
+        void seriesMissing_noSeriesAdded() {
+            var config = parse("{\"title\":\"Test\"}");
+            Assertions.assertTrue(config.getSeries().isEmpty());
+        }
+
+        @Test
+        void seriesWithoutPlotOptions_noProblem() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"Data\",\"yAxis\":1}]}");
+            var series = findSeries(config, "Data");
+            Assertions.assertNotNull(series);
+            Assertions.assertNull(series.getPlotOptions());
+        }
+
+        @Test
+        void seriesWithTypeButNoPlotOptions_createsPlotOptionsFromType() {
+            var config = parse("{\"series\":[{\"name\":\"South\","
+                    + "\"type\":\"line\",\"yAxis\":1}]}");
+            var series = findSeries(config, "South");
+            Assertions.assertNotNull(series);
+            Assertions.assertInstanceOf(PlotOptionsLine.class,
+                    series.getPlotOptions(),
+                    "type without plotOptions should create default "
+                            + "plotOptions of the correct type");
+        }
+
+        @Test
+        void seriesWithoutName_skipped() {
+            var config = parse("{\"series\":[{\"type\":\"column\"}]}");
+            Assertions.assertTrue(config.getSeries().isEmpty());
+        }
+
+        @Test
+        void seriesWithEmptyName_skipped() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"\",\"type\":\"column\"}]}");
+            Assertions.assertTrue(config.getSeries().isEmpty());
+        }
+
+        @Test
+        void seriesWithUnknownType_fallsBackToPlotOptionsSeries() {
+            var config = parse("{\"series\":[{\"name\":\"Data\","
+                    + "\"type\":\"nonexistent\","
+                    + "\"plotOptions\":{\"lineWidth\":3}}]}");
+            var series = findSeries(config, "Data");
+            Assertions.assertNotNull(series);
+            Assertions.assertInstanceOf(PlotOptionsSeries.class,
+                    series.getPlotOptions());
+        }
+
     }
 }

@@ -46,15 +46,16 @@ public final class ConfigurationKeys implements Serializable {
     public static final String CREDITS = "credits";
     public static final String PANE = "pane";
     public static final String PLOT_OPTIONS = "plotOptions";
+    public static final String SERIES = "series";
 
     // --- Common properties ---
 
+    public static final String NAME = "name";
     public static final String TYPE = "type";
     public static final String TEXT = "text";
     public static final String ENABLED = "enabled";
     public static final String MIN = "min";
     public static final String MAX = "max";
-    public static final String FORMAT = "format";
 
     // --- Chart model ---
 
@@ -98,6 +99,7 @@ public final class ConfigurationKeys implements Serializable {
     // --- Axis ---
 
     public static final String CATEGORIES = "categories";
+    public static final String OPPOSITE = "opposite";
 
     // --- Color axis ---
 

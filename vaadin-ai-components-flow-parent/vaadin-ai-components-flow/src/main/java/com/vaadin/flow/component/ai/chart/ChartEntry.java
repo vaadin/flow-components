@@ -192,9 +192,19 @@ class ChartEntry implements Serializable {
         if (entry != null && !entry.queries.isEmpty()) {
             String configJson = ChartSerialization
                     .toJSON(chart.getConfiguration());
-            ObjectNode configNode = (ObjectNode) JacksonUtils
-                    .readTree(configJson);
-            configNode.remove("series");
+            ObjectNode configNode = JacksonUtils.readTree(configJson);
+
+            // Strip data from series but keep configuration (name,
+            // plotOptions, yAxis, type) so the LLM can see per-series
+            // settings.
+            if (configNode.has("series")
+                    && configNode.get("series").isArray()) {
+                for (var seriesNode : configNode.get("series")) {
+                    if (seriesNode instanceof ObjectNode seriesObj) {
+                        seriesObj.remove("data");
+                    }
+                }
+            }
             result.set("configuration", configNode);
 
             ArrayNode arr = result.putArray("queries");

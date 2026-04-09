@@ -17,8 +17,10 @@ package com.vaadin.flow.component.ai.chart;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
@@ -80,16 +82,23 @@ public final class ChartRenderer implements Serializable {
             }
         }
 
+        // Extract per-series config (plotOptions, yAxis) from the
+        // configuration's series before replacing them with SQL data.
+        // The config series act as templates set by the parser.
+        var seriesConfig = extractSeriesConfig(config);
         config.setSeries(allSeries.toArray(new Series[0]));
+
+        // Name single unnamed series using the chart title so the
+        // legend shows a meaningful label instead of "Series 1".
+        // Must run before applySeriesConfig which matches by name.
+        nameUnnamedSeries(config, allSeries);
+
+        applySeriesConfig(allSeries, seriesConfig);
 
         // Apply axis defaults from series data after LLM config,
         // so that data-driven axis type detection (e.g. datetime)
         // overrides any incorrect LLM-provided axis type.
         applyAxisDefaults(config, allSeries);
-
-        // Name single unnamed series using the chart title so the
-        // legend shows a meaningful label instead of "Series 1".
-        nameUnnamedSeries(config, allSeries);
 
         // Full reset required. Without it, axis categories are
         // lost when the chart is rendered via async Push (see
@@ -209,6 +218,49 @@ public final class ChartRenderer implements Serializable {
             var title = config.getTitle();
             if (title != null && title.getText() != null) {
                 abstractSeries.setName(title.getText());
+            }
+        }
+    }
+
+    /**
+     * Extracts per-series configuration (plot options, y-axis) from the
+     * configuration's current series, keyed by series name. These are
+     * "template" series set by the parser that carry config but no data.
+     */
+    private static Map<String, AbstractSeries> extractSeriesConfig(
+            Configuration config) {
+        var result = new LinkedHashMap<String, AbstractSeries>();
+        for (var series : config.getSeries()) {
+            if (series instanceof AbstractSeries as && as.getName() != null) {
+                result.put(as.getName(), as);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Applies previously extracted series configuration to the data series,
+     * matching by name.
+     */
+    private static void applySeriesConfig(List<Series> allSeries,
+            Map<String, AbstractSeries> seriesConfig) {
+        if (seriesConfig.isEmpty()) {
+            return;
+        }
+        for (var series : allSeries) {
+            if (!(series instanceof AbstractSeries as)
+                    || as.getName() == null) {
+                continue;
+            }
+            var template = seriesConfig.get(as.getName());
+            if (template == null) {
+                continue;
+            }
+            if (template.getPlotOptions() != null) {
+                as.setPlotOptions(template.getPlotOptions());
+            }
+            if (template.getyAxis() != null) {
+                as.setyAxis(template.getyAxis());
             }
         }
     }
