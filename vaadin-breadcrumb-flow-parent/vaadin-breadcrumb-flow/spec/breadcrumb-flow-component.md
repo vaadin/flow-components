@@ -30,21 +30,7 @@ breadcrumb.addItem(new BreadcrumbItem("Sprocket",
         ProductView.class, new RouteParameters("id", "42")));
 ```
 
-### 3. Data-Driven with Items Property
-
-```java
-Breadcrumb breadcrumb = new Breadcrumb();
-breadcrumb.setItems(
-    new BreadcrumbItem("Home", "/"),
-    new BreadcrumbItem("Products", "/products"),
-    new BreadcrumbItem("Widgets", "/products/widgets"),
-    new BreadcrumbItem("Sprocket")
-);
-```
-
-`setItems()` replaces all existing items. This is an alternative to adding items individually.
-
-### 4. With Icons (Prefix)
+### 3. With Icons (Prefix)
 
 ```java
 BreadcrumbItem homeItem = new BreadcrumbItem("Home", "/");
@@ -56,23 +42,16 @@ breadcrumb.addItem(new BreadcrumbItem("Products", "/products"));
 breadcrumb.addItem(new BreadcrumbItem("Widgets"));
 ```
 
-### 5. Responsive Overflow
-
-The component automatically manages overflow based on available width. Item visibility is based on priority order: current page highest priority, then parent, then root, then remaining ancestors. Hidden items are accessible via an overflow popover.
-
-This behavior is handled entirely by the web component — no Java API is needed. The overflow is automatic and does not require configuration.
-
 ---
 ### Key Design Decisions
 
-1. **Child component API as primary** — `addItem(BreadcrumbItem...)` for adding items individually. Also supports `setItems()` for replacing all items at once, consistent with how the web component supports both slotted children and an `items` property.
+1. **Child component API** — `addItem(BreadcrumbItem...)` for adding items individually, following the `SideNav`/`HasSideNavItems` pattern.
 2. **`BreadcrumbItem` as a dedicated class** — not a generic component. Provides type-safe API for `path`, `disabled`, label text, and prefix component. Follows the `SideNavItem` pattern.
 3. **`path` property** on items instead of `href` — consistent with `SideNavItem`. Supports both `String` paths and type-safe `Class<? extends Component>` view class overloads with optional `RouteParameters`.
 4. **Auto `aria-current="page"`** on the last item when it has no `path` — handled by the web component.
-5. **Responsive overflow handled by web component** — no Java API needed. The web component manages item visibility based on available width.
-6. **`HasAriaLabel` on `Breadcrumb`** — allows setting the `aria-label` for the navigation landmark, consistent with how the web component uses `label` for `aria-label`.
-7. **`HasPrefix` on `BreadcrumbItem`** — allows setting a prefix component (e.g., icon) on individual items, consistent with the web component's `prefix` slot.
-8. **No default `label` value** — left undefined by default to avoid baked-in English text, consistent with the web component spec.
+5. **`HasAriaLabel` on `Breadcrumb`** — allows setting the `aria-label` for the navigation landmark, consistent with how the web component uses `label` for `aria-label`.
+6. **`HasPrefix` on `BreadcrumbItem`** — allows setting a prefix component (e.g., icon) on individual items, consistent with the web component's `prefix` slot.
+7. **No default `label` value** — left undefined by default to avoid baked-in English text, consistent with the web component spec.
 
 ---
 
@@ -96,9 +75,6 @@ Extends `Component`, implements `HasSize`, `HasAriaLabel`.
 | `addItemAtIndex` | `int index, BreadcrumbItem item` | `void` | Inserts an item at the given position |
 | `remove` | `BreadcrumbItem... items` | `void` | Removes the given items |
 | `removeAll` | — | `void` | Removes all items |
-| `getItems` | — | `List<BreadcrumbItem>` | Returns the list of direct child items |
-| `setItems` | `BreadcrumbItem... items` | `void` | Replaces all items with the given items |
-| `setItems` | `List<BreadcrumbItem> items` | `void` | Replaces all items with the given list |
 
 `HasAriaLabel` provides `setAriaLabel(String)` / `getAriaLabel()` for the navigation landmark label.
 
