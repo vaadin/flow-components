@@ -570,10 +570,6 @@ public final class ChartConfigurationParser implements Serializable {
 
     // --- Per-series configuration ---
 
-    private static final String Y_AXIS_KEY = "yAxis";
-    private static final String NAME = "name";
-    private static final String SERIES = "series";
-
     /**
      * Parses series entries from the JSON array and adds them to the
      * configuration as {@link DataSeries} with name, plot options, and y-axis
@@ -598,15 +594,17 @@ public final class ChartConfigurationParser implements Serializable {
                     ? entryNode.get(TYPE).asString()
                     : null;
 
-            if (entryNode.has(Y_AXIS_KEY)
-                    && entryNode.get(Y_AXIS_KEY).isNumber()) {
-                series.setyAxis(entryNode.get(Y_AXIS_KEY).asInt());
+            if (entryNode.has(Y_AXIS) && entryNode.get(Y_AXIS).isNumber()) {
+                series.setyAxis(entryNode.get(Y_AXIS).asInt());
             }
 
-            AbstractPlotOptions plotOptions = deserializePlotOptions(type,
-                    (ObjectNode) entryNode);
-            if (plotOptions != null) {
-                series.setPlotOptions(plotOptions);
+            if (entryNode.has(PLOT_OPTIONS)
+                    && entryNode.get(PLOT_OPTIONS).isObject()) {
+                AbstractPlotOptions plotOptions = deserializePlotOptions(type,
+                        (ObjectNode) entryNode.get(PLOT_OPTIONS));
+                if (plotOptions != null) {
+                    series.setPlotOptions(plotOptions);
+                }
             }
 
             config.addSeries(series);
@@ -614,7 +612,7 @@ public final class ChartConfigurationParser implements Serializable {
     }
 
     private static AbstractPlotOptions deserializePlotOptions(String type,
-            ObjectNode optionsNode) {
+            ObjectNode plotOptionsNode) {
         String typeName = type != null ? type.toLowerCase(Locale.ENGLISH)
                 : "series";
         Class<? extends AbstractPlotOptions> targetClass = PlotOptionsSchema
@@ -622,15 +620,7 @@ public final class ChartConfigurationParser implements Serializable {
         if (targetClass == null) {
             targetClass = PlotOptionsSeries.class;
         }
-
-        // Remove non-PlotOptions fields before deserialization
-        ObjectNode plotNode = optionsNode.deepCopy();
-        plotNode.remove(TYPE);
-        plotNode.remove(Y_AXIS_KEY);
-        plotNode.remove(NAME);
-        plotNode.remove("data");
-
-        return PLOT_OPTIONS_READER.treeToValue(plotNode, targetClass);
+        return PLOT_OPTIONS_READER.treeToValue(plotOptionsNode, targetClass);
     }
 
 }

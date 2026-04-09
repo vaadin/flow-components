@@ -226,8 +226,7 @@ class ChartConfigurationParserTest {
         @Test
         void yAxisArray_nonObjectElement_skipped() {
             var config = parse("{\"yAxis\":["
-                    + "{\"title\":{\"text\":\"Price\"}},"
-                    + "42,"
+                    + "{\"title\":{\"text\":\"Price\"}}," + "42,"
                     + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}"
                     + "]}");
             // The non-object element (42) should be skipped and not create
@@ -605,8 +604,8 @@ class ChartConfigurationParserTest {
 
         @Test
         void seriesWithType_createsCorrectPlotOptions() {
-            var config = parse(
-                    "{\"series\":[{\"name\":\"South\",\"type\":\"column\"}]}");
+            var config = parse("{\"series\":[{\"name\":\"South\","
+                    + "\"type\":\"column\",\"plotOptions\":{}}]}");
             var series = findSeries(config, "South");
             Assertions.assertNotNull(series);
             Assertions.assertInstanceOf(PlotOptionsColumn.class,
@@ -623,10 +622,10 @@ class ChartConfigurationParserTest {
         }
 
         @Test
-        void seriesWithProperties_deserialized() {
+        void seriesWithPlotOptions_deserialized() {
             var config = parse(
-                    "{\"series\":[{\"name\":\"Revenue\",\"type\":\"line\","
-                            + "\"lineWidth\":3}]}");
+                    "{\"series\":[{\"name\":\"Revenue\"," + "\"type\":\"line\","
+                            + "\"plotOptions\":{\"lineWidth\":3}}]}");
             var series = findSeries(config, "Revenue");
             Assertions.assertInstanceOf(PlotOptionsLine.class,
                     series.getPlotOptions());
@@ -637,8 +636,8 @@ class ChartConfigurationParserTest {
         @Test
         void seriesWithStacking_deserialized() {
             var config = parse(
-                    "{\"series\":[{\"name\":\"Sales\",\"type\":\"column\","
-                            + "\"stacking\":\"normal\"}]}");
+                    "{\"series\":[{\"name\":\"Sales\"," + "\"type\":\"column\","
+                            + "\"plotOptions\":{\"stacking\":\"normal\"}}]}");
             var series = findSeries(config, "Sales");
             var columnOptions = (PlotOptionsColumn) series.getPlotOptions();
             Assertions.assertEquals(Stacking.NORMAL,
@@ -648,8 +647,10 @@ class ChartConfigurationParserTest {
         @Test
         void multipleSeries_parsed() {
             var config = parse(
-                    "{\"series\":[{\"name\":\"North\",\"type\":\"areaspline\"},"
-                            + "{\"name\":\"South\",\"type\":\"column\",\"yAxis\":1}]}");
+                    "{\"series\":[{\"name\":\"North\",\"type\":\"areaspline\","
+                            + "\"plotOptions\":{}},"
+                            + "{\"name\":\"South\",\"type\":\"column\","
+                            + "\"yAxis\":1,\"plotOptions\":{}}]}");
             Assertions.assertEquals(2, config.getSeries().size());
             Assertions.assertNotNull(findSeries(config, "North"));
             Assertions.assertEquals(1, findSeries(config, "South").getyAxis());
@@ -662,12 +663,12 @@ class ChartConfigurationParserTest {
         }
 
         @Test
-        void seriesWithoutType_usesSeriesBase() {
+        void seriesWithoutPlotOptions_noProblem() {
             var config = parse(
                     "{\"series\":[{\"name\":\"Data\",\"yAxis\":1}]}");
             var series = findSeries(config, "Data");
-            Assertions.assertInstanceOf(PlotOptionsSeries.class,
-                    series.getPlotOptions());
+            Assertions.assertNotNull(series);
+            Assertions.assertNull(series.getPlotOptions());
         }
 
         @Test
@@ -686,7 +687,8 @@ class ChartConfigurationParserTest {
         @Test
         void seriesWithUnknownType_fallsBackToPlotOptionsSeries() {
             var config = parse("{\"series\":[{\"name\":\"Data\","
-                    + "\"type\":\"nonexistent\",\"lineWidth\":3}]}");
+                    + "\"type\":\"nonexistent\","
+                    + "\"plotOptions\":{\"lineWidth\":3}}]}");
             var series = findSeries(config, "Data");
             Assertions.assertNotNull(series);
             Assertions.assertInstanceOf(PlotOptionsSeries.class,

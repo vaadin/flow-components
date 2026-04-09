@@ -463,11 +463,12 @@ public final class ChartAITools {
                                   "items": {
                                     "type": "object",
                                     "properties": {
-                                      "name": { "type": "string", "description": "Series name to configure" },
+                                      "{c:NAME}": { "type": "string", "description": "Series name to configure" },
                                       "{c:TYPE}": { "type": "string", "description": "Chart type override (e.g. 'column', 'line', 'areaspline')" },
-                                      "yAxis": { "type": "integer", "description": "Y-axis index (0=primary, 1=secondary)" }
+                                      "{c:Y_AXIS}": { "type": "integer", "description": "Y-axis index (0=primary, 1=secondary)" },
+                                      "{c:PLOT_OPTIONS}": { "type": "object", "description": "Series-specific styling. Call get_plot_options_schema(chartType) for available properties.", "additionalProperties": true }
                                     },
-                                    "required": ["name"]
+                                    "required": ["{c:NAME}"]
                                   }
                                 }
                               }

@@ -50,6 +50,7 @@ public final class ConfigurationKeys implements Serializable {
 
     // --- Common properties ---
 
+    public static final String NAME = "name";
     public static final String TYPE = "type";
     public static final String TEXT = "text";
     public static final String ENABLED = "enabled";
