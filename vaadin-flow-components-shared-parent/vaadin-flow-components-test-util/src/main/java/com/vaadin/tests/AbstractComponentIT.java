@@ -15,10 +15,27 @@
  */
 package com.vaadin.tests;
 
+import org.junit.AfterClass;
+import org.junit.Rule;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import com.vaadin.testbench.ScreenshotOnFailureRule;
 
 public abstract class AbstractComponentIT
         extends com.vaadin.flow.testutil.AbstractComponentIT {
+
+    private static WebDriver sharedDriver;
+
+    /**
+     * Overrides the rule from ParallelTest to prevent quitting the driver after
+     * each test method, allowing driver reuse across tests in the same class.
+     */
+    @Rule
+    public ScreenshotOnFailureRule screenshotOnFailure = new ScreenshotOnFailureRule(
+            this, false);
 
     protected int getDeploymentPort() {
         return 8080;
@@ -34,9 +51,55 @@ public abstract class AbstractComponentIT
 
     @Override
     public void setup() throws Exception {
-        super.setup();
+        if (sharedDriver != null && isDriverAlive(sharedDriver)) {
+            // Reuse existing driver, reset browser state from previous test
+            setDriver(sharedDriver);
+            getDriver().manage().deleteAllCookies();
+            getDriver().navigate().to("about:blank");
+        } else {
+            // Clean up dead driver reference if needed
+            if (sharedDriver != null) {
+                tryQuitDriver(sharedDriver);
+                sharedDriver = null;
+            }
+            // Create new driver via parent chain
+            super.setup();
+            sharedDriver = getDriver();
+        }
 
         // Set a default window size
         testBench().resizeViewPortTo(1024, 800);
+    }
+
+    @AfterClass
+    public static void quitSharedDriver() {
+        if (sharedDriver != null) {
+            tryQuitDriver(sharedDriver);
+            sharedDriver = null;
+        }
+    }
+
+    private static boolean isDriverAlive(WebDriver driver) {
+        try {
+            WebDriver realDriver = driver;
+            while (realDriver instanceof WrapsDriver) {
+                realDriver = ((WrapsDriver) realDriver).getWrappedDriver();
+            }
+            if (realDriver instanceof RemoteWebDriver) {
+                return ((RemoteWebDriver) realDriver).getSessionId() != null;
+            }
+            driver.getTitle();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static void tryQuitDriver(WebDriver driver) {
+        try {
+            driver.quit();
+        } catch (Exception e) {
+            // Ignore - driver may already be dead
+        }
     }
 }
