@@ -525,11 +525,6 @@ public final class ChartAITools {
                                 Multi-series: add a {SERIES} column to group rows into separate named series. \
                                 It is removed before chart type detection.
 
-                                Dual Y-axis: add a {Y_AXIS} column (integer 0 or 1) to bind a series to a Y-axis index. \
-                                Default is 0 (primary). Use with update_chart_configuration to define multiple Y-axes (yAxis as array). \
-                                It is removed before chart type detection. \
-                                Example: SELECT date AS {X}, volume AS {Y}, 1 AS {Y_AXIS} FROM trades
-
                                 Basic charts (line, bar, column, area, spline, pie):
                                 - 2 columns: category, value (no special aliases needed)
                                 - Example: SELECT month AS category, SUM(revenue) AS value FROM sales GROUP BY month

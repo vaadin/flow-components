@@ -55,10 +55,6 @@ public final class ColumnNames implements Serializable {
 
     public static final String SERIES = PREFIX + "series";
 
-    // --- Y-axis binding ---
-
-    public static final String Y_AXIS = PREFIX + "yaxis";
-
     // --- OHLC / Candlestick ---
 
     public static final String OPEN = PREFIX + "open";
