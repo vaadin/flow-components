@@ -87,16 +87,18 @@ public final class ChartRenderer implements Serializable {
         // The config series act as templates set by the parser.
         var seriesConfig = extractSeriesConfig(config);
         config.setSeries(allSeries.toArray(new Series[0]));
+
+        // Name single unnamed series using the chart title so the
+        // legend shows a meaningful label instead of "Series 1".
+        // Must run before applySeriesConfig which matches by name.
+        nameUnnamedSeries(config, allSeries);
+
         applySeriesConfig(allSeries, seriesConfig);
 
         // Apply axis defaults from series data after LLM config,
         // so that data-driven axis type detection (e.g. datetime)
         // overrides any incorrect LLM-provided axis type.
         applyAxisDefaults(config, allSeries);
-
-        // Name single unnamed series using the chart title so the
-        // legend shows a meaningful label instead of "Series 1".
-        nameUnnamedSeries(config, allSeries);
 
         // Full reset required. Without it, axis categories are
         // lost when the chart is rendered via async Push (see

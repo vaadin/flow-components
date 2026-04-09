@@ -532,6 +532,30 @@ class ChartRenderingTest {
         }
 
         @Test
+        void perSeriesPlotOptions_appliedToSingleUnnamedSeries() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+
+            updateConfiguration("{\"chart\":{\"type\":\"areaspline\"},"
+                    + "\"title\":{\"text\":\"Revenue\"},"
+                    + "\"series\":[{\"name\":\"Revenue\","
+                    + "\"type\":\"areaspline\","
+                    + "\"plotOptions\":{\"fillColor\":\"green\"}}]}");
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(1, series.size());
+            // Series should be named from title AND have plotOptions applied
+            Assertions.assertEquals("Revenue", series.get(0).getName());
+            var plotOptions = ((com.vaadin.flow.component.charts.model.AbstractSeries) series
+                    .get(0)).getPlotOptions();
+            Assertions.assertNotNull(plotOptions,
+                    "Per-series plotOptions should be applied to "
+                            + "single unnamed series after title-based naming");
+        }
+
+        @Test
         void multipleSeriesWithSeriesColumnKeepsOriginalNames() {
             databaseProvider.results = List.of(
                     row(ColumnNames.SERIES, "Series A", "category", "Jan",
