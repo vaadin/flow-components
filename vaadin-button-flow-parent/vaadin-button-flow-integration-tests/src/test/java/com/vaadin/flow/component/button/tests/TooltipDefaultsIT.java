@@ -46,7 +46,7 @@ public class TooltipDefaultsIT extends AbstractComponentIT {
     public void changeDefaults_refreshPage_checkTooltipConfig() {
         $("button").id("set-default-delays-to-5000").click();
         getDriver().navigate().refresh();
-        buttonWithTooltip = $(ButtonElement.class).first();
+        buttonWithTooltip = $(ButtonElement.class).waitForFirst();
         Assert.assertEquals(5000, getActiveHideDelay(buttonWithTooltip));
         Assert.assertEquals(5000, getActiveFocusDelay(buttonWithTooltip));
         Assert.assertEquals(5000, getActiveHoverDelay(buttonWithTooltip));
