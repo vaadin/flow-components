@@ -46,6 +46,7 @@ public final class ConfigurationKeys implements Serializable {
     public static final String CREDITS = "credits";
     public static final String PANE = "pane";
     public static final String PLOT_OPTIONS = "plotOptions";
+    public static final String SERIES = "series";
 
     // --- Common properties ---
 
