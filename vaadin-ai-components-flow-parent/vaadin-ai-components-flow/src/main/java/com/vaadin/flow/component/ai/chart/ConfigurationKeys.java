@@ -56,7 +56,6 @@ public final class ConfigurationKeys implements Serializable {
     public static final String ENABLED = "enabled";
     public static final String MIN = "min";
     public static final String MAX = "max";
-    public static final String FORMAT = "format";
 
     // --- Chart model ---
 
