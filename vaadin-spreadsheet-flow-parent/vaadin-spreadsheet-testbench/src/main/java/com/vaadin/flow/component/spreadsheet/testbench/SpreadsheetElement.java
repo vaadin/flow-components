@@ -60,14 +60,25 @@ public class SpreadsheetElement extends TestBenchElement {
      *             if the cell at (row, column) is not found.
      */
     public SheetCellElement getCellAt(int row, int column) {
-        String cellSelector = String.format(".col%d.row%d.cell", column, row);
-        // If there are multiple cells return the merged cell
-        if (findElementsInShadowRoot(By.cssSelector(cellSelector)).size() > 1) {
-            cellSelector += ".merged-cell";
+        String selector = String.format(".col%d.row%d.cell", column, row);
+        String mergedSelector = selector + ".merged-cell";
+        // Single JS call to find the cell, preferring merged cell when
+        // multiple matches exist
+        WebElement cell = (WebElement) executeScript("""
+                var root = arguments[0].shadowRoot
+                    .querySelector('.v-spreadsheet');
+                var cells = root.querySelectorAll(arguments[1]);
+                if (cells.length > 1) {
+                    return root.querySelector(arguments[2]);
+                }
+                return cells[0];
+                """, this, selector, mergedSelector);
+        if (cell == null) {
+            throw new NoSuchElementException(
+                    "Cell not found: row=" + row + ", column=" + column);
         }
-        TestBenchElement cell = (TestBenchElement) findElementInShadowRoot(
-                By.cssSelector(cellSelector));
-        SheetCellElement cellElement = cell.wrap(SheetCellElement.class);
+        TestBenchElement wrapped = wrapElement(cell, getCommandExecutor());
+        SheetCellElement cellElement = wrapped.wrap(SheetCellElement.class);
         cellElement.setParent(this);
         return cellElement;
     }
