@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.TimeoutException;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -20,8 +20,6 @@ import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-spreadsheet")
 public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
-
-    private final static String NEW_VALUE = "something";
 
     @Before
     public void init() {
@@ -157,19 +155,29 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     private void checkProtectionInCell(String address,
             boolean shouldBeProtected) {
         SheetCellElement cell = getSpreadsheet().getCellAt(address);
-        try {
-            cell.setValue(NEW_VALUE);
-        } catch (WebDriverException e) {
-            // Cell is locked and the input is not visible
+        boolean editable = isCellEditable(cell);
+        Assert.assertEquals(
+                address + (shouldBeProtected ? " should be protected"
+                        : " should be editable"),
+                !shouldBeProtected, editable);
+    }
+
+    /**
+     * Checks if a cell is editable by double-clicking it and checking whether
+     * the cell value input becomes visible.
+     */
+    private boolean isCellEditable(SheetCellElement cell) {
+        if (!cell.isNormalCell()) {
+            return false;
         }
-        if (shouldBeProtected) {
-            Assert.assertNotEquals(
-                    address + " is protected and value shouldn't have changed",
-                    NEW_VALUE, cell.getValue());
-        } else {
-            Assert.assertEquals(
-                    address + " is unprotected and value should have changed",
-                    NEW_VALUE, cell.getValue());
+        try {
+            waitUntil(driver -> {
+                cell.doubleClick();
+                return getSpreadsheet().getCellValueInput().isDisplayed();
+            }, 1);
+            return true;
+        } catch (TimeoutException e) {
+            return false;
         }
     }
 }
