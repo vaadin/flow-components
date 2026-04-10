@@ -394,7 +394,7 @@ public final class ChartAITools {
                                 },
                                 "{c:Z_AXIS}": {
                                   "type": "object",
-                                  "description": "Z-axis configuration (for 3D and bubble charts)",
+                                  "description": "Z-axis configuration (for 3D charts)",
                                   "properties": {
                                     "{c:TYPE}": { "type": "string", "description": "Axis type", "enum": ["linear", "logarithmic", "datetime", "category"] },
                                     "{c:TITLE}": { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The axis title text" } } },
