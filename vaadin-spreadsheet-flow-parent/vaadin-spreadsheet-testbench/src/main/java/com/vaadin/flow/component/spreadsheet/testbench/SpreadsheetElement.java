@@ -62,17 +62,31 @@ public class SpreadsheetElement extends TestBenchElement {
     public SheetCellElement getCellAt(int row, int column) {
         String selector = String.format(".col%d.row%d.cell", column, row);
         String mergedSelector = selector + ".merged-cell";
-        // Single JS call to find the cell, preferring merged cell when
-        // multiple matches exist
-        WebElement cell = (WebElement) executeScript("""
-                var root = arguments[0].shadowRoot
-                    .querySelector('.v-spreadsheet');
-                var cells = root.querySelectorAll(arguments[1]);
-                if (cells.length > 1) {
-                    return root.querySelector(arguments[2]);
-                }
-                return cells[0];
-                """, this, selector, mergedSelector);
+        // Single async JS call to find the cell, preferring merged cell
+        // when multiple matches exist. Polls to handle cases where the
+        // cell hasn't been rendered yet (e.g. after scrolling).
+        WebElement cell = (WebElement) getCommandExecutor().getDriver()
+                .executeAsyncScript("""
+                        var root = arguments[0].shadowRoot
+                            .querySelector('.v-spreadsheet');
+                        var selector = arguments[1];
+                        var mergedSelector = arguments[2];
+                        var callback = arguments[3];
+                        var attempts = 0;
+                        function poll() {
+                            var cells = root.querySelectorAll(selector);
+                            if (cells.length > 1) {
+                                callback(root.querySelector(mergedSelector));
+                            } else if (cells.length === 1) {
+                                callback(cells[0]);
+                            } else if (++attempts < 50) {
+                                setTimeout(poll, 100);
+                            } else {
+                                callback(null);
+                            }
+                        }
+                        poll();
+                        """, this, selector, mergedSelector);
         if (cell == null) {
             throw new NoSuchElementException(
                     "Cell not found: row=" + row + ", column=" + column);
