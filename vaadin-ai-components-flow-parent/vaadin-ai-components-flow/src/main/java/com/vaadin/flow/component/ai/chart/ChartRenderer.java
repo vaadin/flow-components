@@ -31,7 +31,9 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.FlagItem;
 import com.vaadin.flow.component.charts.model.GanttSeries;
+import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
 import com.vaadin.flow.component.charts.model.Series;
 
 /**
@@ -94,6 +96,7 @@ public final class ChartRenderer implements Serializable {
         nameUnnamedSeries(config, allSeries);
 
         applySeriesConfig(allSeries, seriesConfig);
+        applyFlagsPlotOptions(allSeries);
 
         // Apply axis defaults from series data after LLM config,
         // so that data-driven axis type detection (e.g. datetime)
@@ -218,6 +221,27 @@ public final class ChartRenderer implements Serializable {
             var title = config.getTitle();
             if (title != null && title.getText() != null) {
                 abstractSeries.setName(title.getText());
+            }
+        }
+    }
+
+    /**
+     * Ensures any DataSeries containing FlagItem objects has PlotOptionsFlags
+     * set, so flags render correctly even when the chart-level type is
+     * different (e.g. column).
+     */
+    private static void applyFlagsPlotOptions(List<Series> allSeries) {
+        for (var series : allSeries) {
+            if (!(series instanceof DataSeries ds)) {
+                continue;
+            }
+            if (ds.getPlotOptions() instanceof PlotOptionsFlags) {
+                continue;
+            }
+            boolean hasFlags = ds.getData().stream()
+                    .anyMatch(FlagItem.class::isInstance);
+            if (hasFlags) {
+                ds.setPlotOptions(new PlotOptionsFlags());
             }
         }
     }
