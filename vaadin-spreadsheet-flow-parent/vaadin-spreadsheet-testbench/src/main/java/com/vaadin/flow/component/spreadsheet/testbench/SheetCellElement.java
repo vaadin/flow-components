@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.testbench.TestBenchElement;
 
@@ -39,45 +41,17 @@ public class SheetCellElement extends TestBenchElement {
      */
     public void setValue(String newValue) {
         if (isNormalCell()) {
-            // Single async JS call that selects the cell, activates the
-            // inline editor, sets the value, and commits with Tab.
-            // mousedown with correct coordinates is needed so the
-            // spreadsheet updates cell selection before editing starts.
-            getCommandExecutor().getDriver().executeAsyncScript("""
-                    var cell = arguments[0];
-                    var root = arguments[1].shadowRoot
-                        .querySelector('.v-spreadsheet');
-                    var value = arguments[2];
-                    var callback = arguments[3];
-                    var r = cell.getBoundingClientRect();
-                    var cx = r.left + r.width / 2;
-                    var cy = r.top + r.height / 2;
-                    var opts = {bubbles: true, cancelable: true,
-                        view: window, clientX: cx, clientY: cy};
-                    cell.dispatchEvent(new MouseEvent('mousedown', opts));
-                    cell.dispatchEvent(new MouseEvent('mouseup', opts));
-                    cell.dispatchEvent(new MouseEvent('click', opts));
-                    cell.dispatchEvent(new MouseEvent('dblclick', opts));
-                    // Poll until cellinput is visible, then set value
-                    // and commit with Tab
-                    var attempts = 0;
-                    function poll() {
-                        var ci = root.querySelector('#cellinput');
-                        if (ci && ci.offsetParent !== null) {
-                            ci.value = value;
-                            ci.dispatchEvent(new KeyboardEvent('keydown', {
-                                key: 'Tab', code: 'Tab', keyCode: 9,
-                                which: 9, bubbles: true, cancelable: true
-                            }));
-                            callback(true);
-                        } else if (++attempts < 50) {
-                            setTimeout(poll, 100);
-                        } else {
-                            callback(false);
-                        }
-                    }
-                    poll();
-                    """, this, parent, newValue);
+            waitUntil(driver -> {
+                doubleClick();
+                return parent.getCellValueInput().isDisplayed();
+            });
+            WebElement cellValueInput = parent.getCellValueInput();
+            executeScript("arguments[0].value=''",
+                    ((TestBenchElement) cellValueInput).getWrappedElement());
+            new Actions(getDriver()).moveToElement(cellValueInput)
+                    .sendKeys(newValue).build().perform();
+            new Actions(getDriver()).moveToElement(cellValueInput)
+                    .sendKeys(Keys.TAB).build().perform();
             getCommandExecutor().waitForVaadin();
         }
     }
