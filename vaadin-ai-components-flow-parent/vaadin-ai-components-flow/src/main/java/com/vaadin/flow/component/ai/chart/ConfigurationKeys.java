@@ -81,6 +81,17 @@ public final class ConfigurationKeys implements Serializable {
     public static final String ANIMATION = "animation";
     public static final String STYLED_MODE = "styledMode";
     public static final String ZOOM_TYPE = "zoomType";
+    public static final String OPTIONS_3D = "options3d";
+    public static final String ALPHA = "alpha";
+    public static final String BETA = "beta";
+    public static final String DEPTH = "depth";
+    public static final String VIEW_DISTANCE = "viewDistance";
+    public static final String FRAME = "frame";
+    public static final String BACK = "back";
+    public static final String BOTTOM = "bottom";
+    public static final String SIDE = "side";
+    public static final String TOP = "top";
+    public static final String COLOR = "color";
 
     // --- Tooltip ---
 

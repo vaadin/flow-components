@@ -26,6 +26,7 @@ import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Dimension;
+import com.vaadin.flow.component.charts.model.Frame;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
@@ -559,6 +560,114 @@ class ChartConfigurationParserTest {
             return (T) config.getPlotOptions().stream().filter(type::isInstance)
                     .findFirst().orElseThrow(() -> new RuntimeException(
                             "No PlotOptions of type " + type.getSimpleName()));
+        }
+    }
+
+    @Nested
+    class Options3dConfig {
+
+        @Test
+        void allOptions3dProperties() {
+            var config = parse("{\"chart\":{\"options3d\":{"
+                    + "\"enabled\":true,\"alpha\":15,\"beta\":25,"
+                    + "\"depth\":200,\"viewDistance\":150}}}");
+            var options3d = config.getChart().getOptions3d();
+            Assertions.assertTrue(options3d.getEnabled());
+            Assertions.assertEquals(15, options3d.getAlpha());
+            Assertions.assertEquals(25, options3d.getBeta());
+            Assertions.assertEquals(200, options3d.getDepth());
+            Assertions.assertEquals(150, options3d.getViewDistance());
+        }
+
+        @Test
+        void partialOptions3d_onlyEnabled() {
+            var config = parse(
+                    "{\"chart\":{\"options3d\":{\"enabled\":true}}}");
+            var options3d = config.getChart().getOptions3d();
+            Assertions.assertTrue(options3d.getEnabled());
+            Assertions.assertNull(options3d.getAlpha());
+            Assertions.assertNull(options3d.getBeta());
+        }
+
+        @Test
+        void nonObjectOptions3d_isIgnored() {
+            var config = parse("{\"chart\":{\"options3d\":\"not_an_object\"}}");
+            // Should not throw, options3d stays at defaults
+            Assertions.assertNull(config.getChart().getOptions3d().getAlpha());
+        }
+
+        @Test
+        void frameWithAllPanels() {
+            var config = parse("{\"chart\":{\"options3d\":{"
+                    + "\"enabled\":true," + "\"frame\":{"
+                    + "\"back\":{\"color\":\"#f5f5dc\",\"size\":2},"
+                    + "\"bottom\":{\"color\":\"#cccccc\",\"size\":3},"
+                    + "\"side\":{\"color\":\"#dddddd\",\"size\":4},"
+                    + "\"top\":{\"color\":\"#eeeeee\",\"size\":5}" + "}}}}");
+            Frame frame = config.getChart().getOptions3d().getFrame();
+            Assertions.assertNotNull(frame.getBack().getColor());
+            Assertions.assertEquals(2, frame.getBack().getSize());
+            Assertions.assertNotNull(frame.getBottom().getColor());
+            Assertions.assertEquals(3, frame.getBottom().getSize());
+            Assertions.assertNotNull(frame.getSide().getColor());
+            Assertions.assertEquals(4, frame.getSide().getSize());
+            Assertions.assertNotNull(frame.getTop().getColor());
+            Assertions.assertEquals(5, frame.getTop().getSize());
+        }
+
+        @Test
+        void frameWithOnlyBack() {
+            var config = parse("{\"chart\":{\"options3d\":{"
+                    + "\"frame\":{\"back\":{\"color\":\"#ff0000\",\"size\":1}}"
+                    + "}}}");
+            Frame frame = config.getChart().getOptions3d().getFrame();
+            Assertions.assertNotNull(frame.getBack().getColor());
+            Assertions.assertEquals(1, frame.getBack().getSize());
+            // Other panels should have no color set
+            Assertions.assertNull(frame.getBottom().getColor());
+            Assertions.assertNull(frame.getSide().getColor());
+            Assertions.assertNull(frame.getTop().getColor());
+        }
+
+        @Test
+        void framePanelWithOnlyColor() {
+            var config = parse("{\"chart\":{\"options3d\":{"
+                    + "\"frame\":{\"bottom\":{\"color\":\"#aabbcc\"}}" + "}}}");
+            var bottom = config.getChart().getOptions3d().getFrame()
+                    .getBottom();
+            Assertions.assertNotNull(bottom.getColor());
+            Assertions.assertNull(bottom.getSize());
+        }
+
+        @Test
+        void framePanelWithOnlySize() {
+            var config = parse("{\"chart\":{\"options3d\":{"
+                    + "\"frame\":{\"side\":{\"size\":10}}" + "}}}");
+            var side = config.getChart().getOptions3d().getFrame().getSide();
+            Assertions.assertNull(side.getColor());
+            Assertions.assertEquals(10, side.getSize());
+        }
+
+        @Test
+        void nonObjectFrame_isIgnored() {
+            var config = parse("{\"chart\":{\"options3d\":{"
+                    + "\"enabled\":true,\"frame\":\"not_an_object\"}}}");
+            // Should not throw
+            Assertions
+                    .assertTrue(config.getChart().getOptions3d().getEnabled());
+        }
+
+        @Test
+        void nonObjectPanelEntry_isIgnored() {
+            var config = parse("{\"chart\":{\"options3d\":{"
+                    + "\"frame\":{\"back\":42,\"bottom\":\"str\","
+                    + "\"side\":true,\"top\":null}}}}");
+            // Should not throw, panels remain at defaults
+            Frame frame = config.getChart().getOptions3d().getFrame();
+            Assertions.assertNull(frame.getBack().getColor());
+            Assertions.assertNull(frame.getBottom().getColor());
+            Assertions.assertNull(frame.getSide().getColor());
+            Assertions.assertNull(frame.getTop().getColor());
         }
     }
 
