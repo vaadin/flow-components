@@ -53,6 +53,8 @@ Naming and patterns for Java/Flow specific features should be made so that they 
 
 If a feature is not needed for any use case, it is probably unnecessary. You can report that these features were considered as useful ones but were omitted as they were not needed.
 
+Note that while web components are generic and agnostic to certain technologies, the Flow component should not be. The Flow components should be as convenient to use as possible and offer convenient integration API to other components or features as needed.
+
 The Flow spec translates the web component spec into Java API terms. Follow this structure:
 
 ```markdown
@@ -135,7 +137,6 @@ Apply these rules when translating from web component spec to Flow spec:
 - Translate HTML examples into Java component tree construction
 - Where the web component uses string properties for content (like `text`), the Flow API should offer both `String` and `Component` overloads where appropriate (see Card's `setTitle(String)` and `setTitle(Component)`)
 - Data-driven examples should use Java collections (`List`, `Stream`)
-- Include router integration examples where the component deals with navigation (e.g. breadcrumbs)
 - Preserve all key design decisions from the web component spec, adding Flow-specific decisions where needed
 - If the web component spec mentions responsive/overflow behavior, note that this is handled by the web component — the Flow API doesn't need to expose it
 
