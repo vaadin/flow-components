@@ -157,6 +157,7 @@ public class DefaultDataConverter implements DataConverter {
                 .or(() -> tryXRange(data, columns, columnMapping))
                 .or(() -> tryTimeline(data, columns, columnMapping))
                 .or(() -> tryBubble(data, columns, columnMapping))
+                .or(() -> tryXY(data, columns, columnMapping))
                 .or(() -> tryFlags(data, columns, columnMapping))
                 .or(() -> tryRange(data, columns, columnMapping))
                 .or(() -> tryBullet(data, columns, columnMapping))
@@ -300,6 +301,28 @@ public class DefaultDataConverter implements DataConverter {
                 continue;
             }
             var item = new DataSeriesItem3d(x, y, z);
+            applyColor(item, row, columnMapping, columns);
+            series.add(item);
+        }
+        return Optional.of(series);
+    }
+
+    private Optional<AbstractSeries> tryXY(List<Map<String, Object>> data,
+            Set<String> columns, Map<String, String> columnMapping) {
+        if (!hasColumns(columns, X, Y) || columns.contains(Z)
+                || columns.contains(TARGET)
+                || columns.contains(WATERFALL_TYPE)) {
+            return Optional.empty();
+        }
+        var series = new DataSeries();
+        for (var i = 0; i < data.size(); i++) {
+            var row = data.get(i);
+            var x = getNumber(row, columnMapping, X);
+            var y = getNumber(row, columnMapping, Y);
+            if (x == null && y == null) {
+                continue;
+            }
+            var item = new DataSeriesItem(x, y);
             applyColor(item, row, columnMapping, columns);
             series.add(item);
         }

@@ -440,6 +440,96 @@ class DefaultDataConverterTest {
         }
     }
 
+    // --- XY (scatter) ---
+
+    @Nested
+    class XYTests {
+
+        @Test
+        void createsNumericXYItems() {
+            var data = List.of(row(X, 32, Y, 85000), row(X, 28, Y, 72000));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(2, result.getData().size());
+            var item = result.getData().getFirst();
+            Assertions.assertEquals(32, item.getX());
+            Assertions.assertEquals(85000, item.getY());
+        }
+
+        @Test
+        void withExtraColumns_stillMatchesXY() {
+            // Extra non-alias columns (e.g. name for tooltip) should not
+            // prevent XY pattern from matching
+            var data = List.of(row(X, 32, Y, 85000, "name", "John"));
+            var result = (DataSeries) convertSingle(data);
+            var item = result.getData().getFirst();
+            Assertions.assertEquals(32, item.getX());
+            Assertions.assertEquals(85000, item.getY());
+        }
+
+        @Test
+        void withSeriesColumn_groupsBySeriesAndCreatesXYItems() {
+            var data = List.of(row(X, 32, Y, 85000, SERIES, "Engineering"),
+                    row(X, 28, Y, 72000, SERIES, "Sales"));
+            var result = converter.convertToSeries(data);
+            Assertions.assertEquals(2, result.size());
+            var eng = (DataSeries) result.getFirst();
+            Assertions.assertEquals("Engineering", eng.getName());
+            var item = eng.getData().getFirst();
+            Assertions.assertEquals(32, item.getX());
+            Assertions.assertEquals(85000, item.getY());
+        }
+
+        @Test
+        void doesNotMatchWhenZPresent() {
+            // _z present → should match bubble, not XY
+            var data = List.of(row(X, 1, Y, 2, Z, 3));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertInstanceOf(DataSeriesItem3d.class,
+                    result.getData().getFirst());
+        }
+
+        @Test
+        void doesNotMatchWhenTargetPresent() {
+            // _target present → should match bullet, not XY
+            var data = List.of(row(X, 0, Y, 275, TARGET, 250));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertInstanceOf(DataSeriesItemBullet.class,
+                    result.getData().getFirst());
+        }
+
+        @Test
+        void nullXAndY_skipsRow() {
+            var data = List.of(row(X, null, Y, null), row(X, 5, Y, 10));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals(5, result.getData().getFirst().getX());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List
+                    .of(row(X, 32, Y, 85000, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000",
+                    result.getData().getFirst().getColor());
+        }
+
+        @Test
+        void dateXColumn_convertsToEpochMilliseconds() {
+            // Covers volume series in candlestick combo: _x is a date, _y
+            // is numeric. Without tryXY, the fallback treats date as a
+            // category name instead of a numeric timestamp.
+            var date = java.sql.Date.valueOf(LocalDate.of(2025, 1, 6));
+            var data = List.of(row(X, date, Y, 52000));
+            var result = (DataSeries) convertSingle(data);
+            var item = result.getData().getFirst();
+            var expectedMs = LocalDate.of(2025, 1, 6)
+                    .atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+            Assertions.assertEquals(expectedMs, item.getX().longValue());
+            Assertions.assertEquals(52000, item.getY());
+        }
+    }
+
     // --- Flags ---
 
     @Nested
