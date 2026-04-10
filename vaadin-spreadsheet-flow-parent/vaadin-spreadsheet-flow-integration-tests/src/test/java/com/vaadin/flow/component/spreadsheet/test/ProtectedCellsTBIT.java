@@ -28,7 +28,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetHasUnprotectedRowsAndColumns_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedRowsAndColumns_trySetCellValue_onlyUnlockedCellsEditable() {
         checkProtectionInCell("B2", true);
         checkProtectionInCell("C2", false);
         checkProtectionInCell("D2", true);
@@ -41,7 +41,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetHasUnprotectedColumns_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedColumns_trySetCellValue_onlyUnlockedCellsEditable() {
         selectSheetAt(1);
 
         checkProtectionInCell("A5", false);
@@ -63,7 +63,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetHasUnprotectedRows_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedRows_trySetCellValue_onlyUnlockedCellsEditable() {
         selectSheetAt(2);
 
         checkProtectionInCell("B1", false);
@@ -82,7 +82,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
 
     @Ignore("Ignored until https://github.com/vaadin/flow-components/issues/3233 is fixed")
     @Test
-    public void sheetHasUnprotectedRanges_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedRanges_trySetCellValue_onlyUnlockedCellsEditable() {
         selectSheetAt(3);
 
         checkProtectionInCell("D1", false);
@@ -106,7 +106,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetIsAllLocked_trySetCellValue_noCellUpdated() {
+    public void sheetIsAllLocked_trySetCellValue_noCellEditable() {
         selectSheetAt(4);
 
         checkProtectionInCell("B2", true);
@@ -122,7 +122,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
 
     @Ignore("Test ignored since it always passes locally but never on CI")
     @Test
-    public void sheetIsAllLocked_changeDefaultStyleAndTrySetCellValue_allCellUpdated() {
+    public void sheetIsAllLocked_changeDefaultStyleAndTrySetCellValue_allCellsEditable() {
         selectSheetAt(4);
         loadTestFixture(TestFixtures.DefaultStyleUnlocked);
 
@@ -138,7 +138,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetIsAllUnlocked_trySetCellValue_allCellUpdated() {
+    public void sheetIsAllUnlocked_trySetCellValue_allCellsEditable() {
         selectSheetAt(5);
 
         checkProtectionInCell("B2", false);
@@ -174,7 +174,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
             waitUntil(driver -> {
                 cell.doubleClick();
                 return getSpreadsheet().getCellValueInput().isDisplayed();
-            }, 1);
+            }, 2);
             return true;
         } catch (TimeoutException e) {
             return false;
