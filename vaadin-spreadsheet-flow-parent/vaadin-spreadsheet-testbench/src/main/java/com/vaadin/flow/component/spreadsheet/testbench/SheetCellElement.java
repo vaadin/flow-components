@@ -41,74 +41,83 @@ public class SheetCellElement extends TestBenchElement {
         if (isNormalCell()) {
             // Single async JS call that selects the cell, activates the
             // inline editor, sets the value, and commits with Tab.
-            // mousedown with correct coordinates is needed so the
-            // spreadsheet updates cell selection before editing starts.
-            getCommandExecutor().getDriver().executeAsyncScript("""
-                    var cell = arguments[0];
-                    var shadowRoot = arguments[1].shadowRoot;
-                    var root = shadowRoot
-                        .querySelector('.v-spreadsheet');
-                    var value = arguments[2];
-                    var callback = arguments[3];
-                    var r = cell.getBoundingClientRect();
-                    var cx = r.left + r.width / 2;
-                    var cy = r.top + r.height / 2;
-                    var opts = {bubbles: true, cancelable: true,
-                        view: window, clientX: cx, clientY: cy};
-                    cell.dispatchEvent(new MouseEvent('mousedown', opts));
-                    cell.dispatchEvent(new MouseEvent('mouseup', opts));
-                    cell.dispatchEvent(new MouseEvent('click', opts));
-                    cell.dispatchEvent(new MouseEvent('dblclick', opts));
-                    // Build expected class prefix to verify cellinput
-                    // is on the correct cell
-                    var cellClasses = cell.className.match(
-                        /col\\d+|row\\d+/g) || [];
-                    var expectedPrefix = cellClasses.join(' ');
-                    // Poll until cellinput is visible on the correct
-                    // cell AND has focus. Focus check is critical:
-                    // startEditingCell defers input.setFocus(true), and
-                    // dispatching Tab before that runs causes
-                    // onCellInputFocus to re-start editing on the next
-                    // cell after Tab moves the selection.
-                    var attempts = 0;
-                    function waitForInput() {
-                        var ci = root.querySelector('#cellinput');
-                        // className is non-empty when editing is active
-                        // (set by startEditingCell), and cleared by
-                        // stopEditingCell. activeElement check ensures
-                        // the deferred focus from startEditingCell has
-                        // completed.
-                        var ready = ci
-                            && ci.className.indexOf(expectedPrefix) === 0
-                            && shadowRoot.activeElement === ci;
-                        if (ready) {
-                            ci.value = value;
-                            ci.dispatchEvent(new KeyboardEvent('keydown', {
-                                key: 'Tab', code: 'Tab', keyCode: 9,
-                                which: 9, bubbles: true, cancelable: true
-                            }));
-                            // Wait for the cellinput to be closed after
-                            // the commit, so that the next setValue call
-                            // starts with a clean state.
-                            waitForClose();
-                        } else if (++attempts < 50) {
-                            setTimeout(waitForInput, 100);
-                        } else {
-                            callback(false);
-                        }
-                    }
-                    function waitForClose() {
-                        var ci = root.querySelector('#cellinput');
-                        if (!ci || ci.className === '') {
-                            callback(true);
-                        } else if (++attempts < 50) {
-                            setTimeout(waitForClose, 100);
-                        } else {
-                            callback(false);
-                        }
-                    }
-                    waitForInput();
-                    """, this, parent, newValue);
+            Boolean result = (Boolean) getCommandExecutor().getDriver()
+                    .executeAsyncScript(
+                            """
+                                    const cell = arguments[0];
+                                    const shadowRoot = arguments[1].shadowRoot;
+                                    const root = shadowRoot.querySelector('.v-spreadsheet');
+                                    const value = arguments[2];
+                                    const callback = arguments[3];
+
+                                    const MAX_ATTEMPTS = 50;
+                                    const delay = () => new Promise(r => setTimeout(r, 100));
+
+                                    function startEditing() {
+                                        // Needs correct mouse coordinates
+                                        const r = cell.getBoundingClientRect();
+                                        const cx = r.left + r.width / 2;
+                                        const cy = r.top + r.height / 2;
+                                        const opts = {bubbles: true, cancelable: true,
+                                            view: window, clientX: cx, clientY: cy};
+                                        // Fire synthetic events to trigger selection and editor opening
+                                        cell.dispatchEvent(new MouseEvent('mousedown', opts));
+                                        cell.dispatchEvent(new MouseEvent('mouseup', opts));
+                                        cell.dispatchEvent(new MouseEvent('click', opts));
+                                        cell.dispatchEvent(new MouseEvent('dblclick', opts));
+                                    }
+
+                                    async function waitForInput() {
+                                        for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                            const input = root.querySelector('#cellinput');
+                                            if (input && shadowRoot.activeElement === input) {
+                                                return input;
+                                            }
+                                            await delay();
+                                        }
+                                        callback(false);
+                                    }
+
+                                    async function waitForClose() {
+                                        for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                            const input = root.querySelector('#cellinput');
+                                            if (!input || shadowRoot.activeElement !== input) {
+                                                return;
+                                            }
+                                            await delay();
+                                        }
+                                        callback(false);
+                                    }
+
+                                    // Main function
+                                    (async () => {
+                                        // Select the cell and open the editor
+                                        startEditing();
+
+                                        // Wait for input to be visible and focused
+                                        const input = await waitForInput();
+
+                                        // Set the value, commit with Tab key
+                                        input.value = value;
+                                        input.dispatchEvent(new KeyboardEvent('keydown', {
+                                            key: 'Tab', code: 'Tab', keyCode: 9,
+                                            which: 9, bubbles: true, cancelable: true
+                                        }));
+
+                                        // Wait for the editor to close before finishing
+                                        // Allows next setValue call to start with a clean state
+                                        await waitForClose();
+                                        callback(true);
+                                    })();
+                                    """,
+                            this, parent, newValue);
+
+            if (Boolean.FALSE.equals(result)) {
+                throw new org.openqa.selenium.TimeoutException(
+                        "setValue timed out for cell "
+                                + getDomAttribute("class") + " with value '"
+                                + newValue + "'");
+            }
             getCommandExecutor().waitForVaadin();
         }
     }
