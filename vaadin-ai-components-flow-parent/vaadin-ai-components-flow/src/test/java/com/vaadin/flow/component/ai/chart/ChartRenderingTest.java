@@ -35,6 +35,7 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
 
@@ -1045,6 +1046,54 @@ class ChartRenderingTest {
     }
 
     // --- Helpers ---
+
+    @Nested
+    class FlagsChart {
+
+        @Test
+        void flagsSeriesRendersAsFlagsOnColumnChart() {
+            databaseProvider.results = List
+                    .of(row("_title", "Launch", "_text", "Product launch"));
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT title AS _title, text AS _text FROM flags");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(1, series.size());
+
+            var flagsSeries = (DataSeries) series.getFirst();
+            Assertions.assertInstanceOf(PlotOptionsFlags.class,
+                    flagsSeries.getPlotOptions(),
+                    "Flags series should have PlotOptionsFlags "
+                            + "regardless of chart-level type");
+        }
+
+        @Test
+        void flagsSeriesPreservesExistingPlotOptionsFlags() {
+            databaseProvider.results = List
+                    .of(row("_title", "Launch", "_text", "Product launch"));
+
+            updateConfiguration("{\"chart\":{\"type\":\"line\"},"
+                    + "\"title\":{\"text\":\"Events\"},"
+                    + "\"series\":[{\"name\":\"Events\","
+                    + "\"type\":\"flags\","
+                    + "\"plotOptions\":{\"onSeries\":\"price\"}}]}");
+            updateData("SELECT title AS _title, text AS _text FROM flags");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(1, series.size());
+
+            var flagsSeries = (DataSeries) series.getFirst();
+            var plotOptions = flagsSeries.getPlotOptions();
+            Assertions.assertInstanceOf(PlotOptionsFlags.class, plotOptions,
+                    "Flags series should have PlotOptionsFlags");
+            Assertions.assertEquals("price",
+                    ((PlotOptionsFlags) plotOptions).getOnSeries(),
+                    "Pre-configured onSeries should be preserved");
+        }
+    }
 
     private static Map<String, Object> row(Object... kvPairs) {
         Map<String, Object> map = new LinkedHashMap<>();
