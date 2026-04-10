@@ -32,6 +32,8 @@ import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.Axis;
 import com.vaadin.flow.component.charts.model.AxisTitle;
 import com.vaadin.flow.component.charts.model.AxisType;
+import com.vaadin.flow.component.charts.model.Back;
+import com.vaadin.flow.component.charts.model.Bottom;
 import com.vaadin.flow.component.charts.model.ChartModel;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.ColorAxis;
@@ -39,12 +41,16 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Credits;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Dimension;
+import com.vaadin.flow.component.charts.model.Frame;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.Legend;
+import com.vaadin.flow.component.charts.model.Options3d;
 import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+import com.vaadin.flow.component.charts.model.Side;
 import com.vaadin.flow.component.charts.model.Tooltip;
+import com.vaadin.flow.component.charts.model.Top;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.Color;
@@ -302,6 +308,75 @@ public final class ChartConfigurationParser implements Serializable {
                 chartModel.setZoomType(Dimension.valueOf(zoomType));
             } catch (IllegalArgumentException e) {
                 // Invalid zoom type, skip
+            }
+        }
+        if (chartNode.has(OPTIONS_3D) && chartNode.get(OPTIONS_3D).isObject()) {
+            applyOptions3dConfig(chartModel.getOptions3d(),
+                    chartNode.get(OPTIONS_3D));
+        }
+    }
+
+    private static void applyOptions3dConfig(Options3d options3d,
+            JsonNode node) {
+        if (node.has(ENABLED) && node.get(ENABLED).isBoolean()) {
+            options3d.setEnabled(node.get(ENABLED).asBoolean());
+        }
+        if (node.has(ALPHA) && node.get(ALPHA).isNumber()) {
+            options3d.setAlpha(node.get(ALPHA).asInt());
+        }
+        if (node.has(BETA) && node.get(BETA).isNumber()) {
+            options3d.setBeta(node.get(BETA).asInt());
+        }
+        if (node.has(DEPTH) && node.get(DEPTH).isNumber()) {
+            options3d.setDepth(node.get(DEPTH).asInt());
+        }
+        if (node.has(VIEW_DISTANCE) && node.get(VIEW_DISTANCE).isNumber()) {
+            options3d.setViewDistance(node.get(VIEW_DISTANCE).asInt());
+        }
+        if (node.has(FRAME) && node.get(FRAME).isObject()) {
+            applyFrameConfig(options3d.getFrame(), node.get(FRAME));
+        }
+    }
+
+    private static void applyFrameConfig(Frame frame, JsonNode frameNode) {
+        if (frameNode.has(BACK) && frameNode.get(BACK).isObject()) {
+            JsonNode n = frameNode.get(BACK);
+            Back back = frame.getBack();
+            if (n.has(COLOR) && n.get(COLOR).isString()) {
+                back.setColor(new SolidColor(n.get(COLOR).asString()));
+            }
+            if (n.has(SIZE) && n.get(SIZE).isNumber()) {
+                back.setSize(n.get(SIZE).asInt());
+            }
+        }
+        if (frameNode.has(BOTTOM) && frameNode.get(BOTTOM).isObject()) {
+            JsonNode n = frameNode.get(BOTTOM);
+            Bottom bottom = frame.getBottom();
+            if (n.has(COLOR) && n.get(COLOR).isString()) {
+                bottom.setColor(new SolidColor(n.get(COLOR).asString()));
+            }
+            if (n.has(SIZE) && n.get(SIZE).isNumber()) {
+                bottom.setSize(n.get(SIZE).asInt());
+            }
+        }
+        if (frameNode.has(SIDE) && frameNode.get(SIDE).isObject()) {
+            JsonNode n = frameNode.get(SIDE);
+            Side side = frame.getSide();
+            if (n.has(COLOR) && n.get(COLOR).isString()) {
+                side.setColor(new SolidColor(n.get(COLOR).asString()));
+            }
+            if (n.has(SIZE) && n.get(SIZE).isNumber()) {
+                side.setSize(n.get(SIZE).asInt());
+            }
+        }
+        if (frameNode.has(TOP) && frameNode.get(TOP).isObject()) {
+            JsonNode n = frameNode.get(TOP);
+            Top top = frame.getTop();
+            if (n.has(COLOR) && n.get(COLOR).isString()) {
+                top.setColor(new SolidColor(n.get(COLOR).asString()));
+            }
+            if (n.has(SIZE) && n.get(SIZE).isNumber()) {
+                top.setSize(n.get(SIZE).asInt());
             }
         }
     }

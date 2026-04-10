@@ -338,7 +338,28 @@ public final class ChartAITools {
                                     "{c:POLAR}": { "type": "boolean", "description": "When true, cartesian charts are transformed into the polar coordinate system" },
                                     "{c:ANIMATION}": { "type": "boolean", "description": "Overall animation for all chart updating. Does not affect initial series animation." },
                                     "{c:STYLED_MODE}": { "type": "boolean", "description": "Whether to apply styled mode. When enabled, no presentational attributes or CSS are applied to the chart SVG." },
-                                    "{c:ZOOM_TYPE}": { "type": "string", "description": "Decides in what dimensions the user can zoom by dragging the mouse", "enum": ["x", "y", "xy"] }
+                                    "{c:ZOOM_TYPE}": { "type": "string", "description": "Decides in what dimensions the user can zoom by dragging the mouse", "enum": ["x", "y", "xy"] },
+                                    "{c:OPTIONS_3D}": {
+                                      "type": "object",
+                                      "description": "Options to render the chart in 3D. Required for 3D charts and for the zAxis to take effect.",
+                                      "properties": {
+                                        "{c:ENABLED}": { "type": "boolean", "description": "Whether to render the chart using 3D functionality" },
+                                        "{c:ALPHA}": { "type": "number", "description": "One of the two rotation angles for the chart" },
+                                        "{c:BETA}": { "type": "number", "description": "One of the two rotation angles for the chart" },
+                                        "{c:DEPTH}": { "type": "number", "description": "The total depth of the chart" },
+                                        "{c:VIEW_DISTANCE}": { "type": "number", "description": "The distance the viewer is standing in front of the chart, used for perspective effect" },
+                                        "{c:FRAME}": {
+                                          "type": "object",
+                                          "description": "Defines the 3D frame panels around the chart",
+                                          "properties": {
+                                            "{c:BACK}": { "type": "object", "description": "Back panel of the frame", "properties": { "{c:COLOR}": { "type": "string", "description": "The color of the panel" }, "{c:SIZE}": { "type": "number", "description": "Thickness of the panel" } } },
+                                            "{c:BOTTOM}": { "type": "object", "description": "Bottom panel of the frame", "properties": { "{c:COLOR}": { "type": "string", "description": "The color of the panel" }, "{c:SIZE}": { "type": "number", "description": "Thickness of the panel" } } },
+                                            "{c:SIDE}": { "type": "object", "description": "Side panel of the frame", "properties": { "{c:COLOR}": { "type": "string", "description": "The color of the panel" }, "{c:SIZE}": { "type": "number", "description": "Thickness of the panel" } } },
+                                            "{c:TOP}": { "type": "object", "description": "Top panel of the frame", "properties": { "{c:COLOR}": { "type": "string", "description": "The color of the panel" }, "{c:SIZE}": { "type": "number", "description": "Thickness of the panel" } } }
+                                          }
+                                        }
+                                      }
+                                    }
                                   }
                                 },
                                 "{c:TITLE}": {
