@@ -507,11 +507,9 @@ class DefaultDataConverterTest {
 
         @Test
         void colorColumn_setsItemColor() {
-            var data = List
-                    .of(row(X, 32, Y, 85000, COLOR, "#FF0000"));
+            var data = List.of(row(X, 32, Y, 85000, COLOR, "#FF0000"));
             var result = (DataSeries) convertSingle(data);
-            assertColor("#FF0000",
-                    result.getData().getFirst().getColor());
+            assertColor("#FF0000", result.getData().getFirst().getColor());
         }
 
         @Test
