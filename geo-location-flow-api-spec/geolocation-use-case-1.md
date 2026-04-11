@@ -35,13 +35,17 @@ public class StoreFinderView extends VerticalLayout {
                 },
                 err -> {
                     results.removeAll();
-                    message.setText(switch (err.code()) {
-                        case GeolocationError.PERMISSION_DENIED ->
+                    message.setText(switch (err.errorCode()) {
+                        case PERMISSION_DENIED ->
                                 "Location permission denied. "
                                         + "Please enter a postcode instead.";
-                        case GeolocationError.TIMEOUT ->
+                        case TIMEOUT ->
                                 "Location request timed out. Please try again.";
-                        default -> "Could not determine your location.";
+                        case POSITION_UNAVAILABLE ->
+                                "Could not determine your location.";
+                        case null ->
+                                // unknown future W3C code
+                                err.message();
                     });
                 }));
 
@@ -67,9 +71,11 @@ public class StoreFinderView extends VerticalLayout {
 - **Typed position**. `pos.coords().latitude()` and
   `pos.coords().longitude()` are plain Java `double` accessors on
   records — no JSON, no string parsing.
-- **Error codes are the W3C numeric codes** exposed as
-  `public static final int` constants on `GeolocationError`. The
-  `switch` is readable without reaching for an enum.
+- **`err.errorCode()` returns a `GeolocationErrorCode` enum**, so the
+  `switch` is exhaustive at compile time. The `case null` arm handles
+  any unknown future W3C code without losing compile-time safety; the
+  raw `err.code()` accessor is still available for callers that
+  prefer the numeric value.
 
 ## What the application owns
 

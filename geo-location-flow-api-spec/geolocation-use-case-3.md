@@ -7,16 +7,11 @@ granted yet (first visit, revoked, private window), the application
 must fall back to the explicit flow from UC1 — not pop an unexpected
 prompt on page load.
 
-With the PR 23527 API, "auto-fetch on view load" is straightforward:
-call `Geolocation.get` from `onAttach`. The trickier part — **"never
-prompt on cold load when permission is not already granted"** — is
-not covered by the API; the application has to query the browser's
-Permissions API itself (via `executeJs`) before calling
-`Geolocation.get`.
+`Geolocation.queryPermission(callback)` returns the current browser
+permission state as a `GeolocationPermission` enum. Gating
+`Geolocation.get` on `GRANTED` is the complete UC3 recipe in Java.
 
 ## Example: News portal with a "local headlines" panel
-
-### Naive version: auto-fetch always (may prompt first-time visitors)
 
 ```java
 @Route("")
@@ -38,70 +33,57 @@ public class HomeView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent event) {
         super.onAttach(event);
-        // Will silently succeed for returning users whose permission is
-        // already 'granted'. Will prompt first-time visitors — see the
-        // "permission-gated" version below to avoid that.
-        fetchAndPopulate();
+        Geolocation.queryPermission(state -> {
+            if (state == GeolocationPermission.GRANTED) {
+                fetchAndPopulate();
+            }
+            // DENIED / PROMPT / UNKNOWN → do nothing; the user will
+            // click the explicit button (UC1).
+        });
     }
 
     private void fetchAndPopulate() {
         Geolocation.get(
                 new GeolocationOptions(null, 5000, 300_000),
                 pos -> populateLocalHeadlines(news, pos),
-                err -> { /* stay quiet — the user will click the button */ });
+                err -> { /* stay quiet — the user has the button */ });
     }
 }
 ```
 
-### Permission-gated version (matches UC3's "no surprise prompt")
+## How the Flow API covers UC3
 
-Use a tiny `executeJs` snippet to ask the browser's Permissions API
-whether we already have consent, and only call `Geolocation.get` if
-we do. Everything else is identical.
+- **`Geolocation.queryPermission(callback)`** is a single-line query
+  of the browser's Permissions API. The callback runs on the UI
+  thread so it can call `Geolocation.get` directly.
+- **Only `GRANTED` triggers a browser call.** First-time visitors
+  (`PROMPT`), previously-denied visitors (`DENIED`), and browsers
+  that cannot report state (`UNKNOWN`) never see an unexpected
+  permission dialog. This is exactly what UC3 calls for.
+- **Returning-user case is a one-line branch.** Once `GRANTED` has
+  been confirmed, `Geolocation.get` runs silently and the local
+  panel populates before the user notices.
 
-```java
-@Override
-protected void onAttach(AttachEvent event) {
-    super.onAttach(event);
+## Safari limitation
 
-    event.getUI().getPage().executeJs(
-                    "return navigator.permissions"
-                            + " ? navigator.permissions.query({name:'geolocation'})"
-                            + "       .then(r => r.state)"
-                            + " : 'unknown'")
-            .toCompletableFuture(String.class)
-            .thenAccept(state -> event.getUI().access(() -> {
-                if ("granted".equals(state)) {
-                    fetchAndPopulate();
-                }
-                // state == 'prompt' / 'denied' / 'unknown' → do nothing;
-                // the user will click the explicit button (UC1).
-            }));
-}
-```
+Safari does not implement `navigator.permissions.query({name: 'geolocation'})`
+— it throws a `TypeError` on unknown permission names. The Flow
+wrapper catches that and returns `GeolocationPermission.UNKNOWN`, so
+**Safari users never see the `GRANTED` branch** and auto-fetch never
+fires for them. They fall through to the explicit-click flow (UC1),
+which is the safest degradation.
 
-## How the PR API covers UC3
+This is a browser limitation with no known workaround. Firefox and
+Chromium-based browsers return the correct state.
 
-- **`Geolocation.get` is callable from any UI-thread code**, including
-  `onAttach`. There is no "auto mode" flag — the application decides
-  when to call it.
-- **Returning-user case is one line.** Inside an `onAttach` that has
-  already confirmed permission is granted, `Geolocation.get` runs
-  silently and the local panel populates before the user notices.
-- **UC3's no-prompt-on-cold-load requirement needs extra code.** The
-  PR does not expose the Permissions API, so the application queries
-  it directly with `executeJs`. The snippet above is the complete
-  glue; once a helper like `Geolocation.currentPermission(ui)` is
-  available in a future revision, this becomes a one-liner, but for
-  now it is a few lines of JS in the application.
+## Reacting to later permission changes
 
-## What this looks like compared to the earlier "button component" spec
-
-The earlier spec had `setAutoLocate(true)` on the component, which
-internally called the Permissions API and auto-gated. The PR API
-pushes that decision into the application for two reasons: it keeps
-the Flow surface minimal, and it lets applications make their own
-trade-offs (e.g. some apps legitimately *want* to prompt on first
-load, and a one-size-fits-all `autoLocate` flag would have to pick a
-default). The trade-off is that UC3 moves from "one method call" to
-"one method call + a few lines of `executeJs`".
+`queryPermission` is a one-shot query. To react to the user
+re-enabling or revoking location mid-session, call `queryPermission`
+on every attach (the code above already does this) or, for views
+that stay mounted for a long time, poll on a timer. A reactive
+`Signal<GeolocationPermission>` tracking `permissionchange` events
+was considered but is not part of the API — Firefox's
+`permissionchange` is unreliable and Safari never fires it, so a
+signal-based variant would have inconsistent semantics across
+browsers.

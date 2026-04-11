@@ -5,11 +5,13 @@ while an activity is in progress. Tracking must stop when the activity
 ends, when the user leaves the page, or when the user explicitly opts
 out.
 
-With the PR 23527 API, `Geolocation.track(owner)` returns a handle
-whose `state()` is a `Signal<GeolocationState>` that the view consumes
-with `ComponentEffect.effect(owner, ...)`. The browser watch is tied
-to `owner`'s lifecycle, so navigation away from the view cancels it
-automatically.
+`Geolocation.track(owner)` returns a handle whose `state()` is a
+`Signal<GeolocationState>` that the view consumes with
+`ComponentEffect.effect(owner, ...)`. The browser watch is tied to
+`owner`'s lifecycle, so navigation away from the view cancels it
+automatically. A `stop()` method on the handle also cancels the watch
+explicitly, for the "Stop ride" case where the user ends tracking
+without leaving the view.
 
 ## Example: Cycling workout view
 
@@ -50,10 +52,10 @@ public class RideView extends VerticalLayout {
                             "Tracking failed: " + err.message());
                 }
             });
+        } else {
+            tracker.stop();   // cancels the browser watch
+            tracker = null;
         }
-        // Detaching the view is the only way to cancel the browser
-        // watch in this version of the API — see "Stopping tracking"
-        // below.
     }
 
     private void onSample(GeolocationPosition pos) {
@@ -91,41 +93,41 @@ public class RideView extends VerticalLayout {
   `Geolocation.track` fires `window.Vaadin.Flow.geolocation.clearWatch`
   on the client. UC2's "tracking must stop when the user leaves the
   page" is satisfied without any view code.
-- **`minimumAccuracy` is an application-side filter.** The PR does
+- **`tracker.stop()`** cancels the watch explicitly when the user
+  taps "Stop" without leaving the view. It is idempotent and runs
+  the same teardown path as the detach listener, so calling it
+  twice — or calling it on a handle whose owner has already
+  detached — is safe.
+- **`minimumAccuracy` is an application-side filter.** The API does
   not ship a threshold option. The `if (pos.coords().accuracy() > 25)`
   line in `onSample` is the full equivalent — UC5's "brief bad GPS
   fix should not add a kilometre-long zig-zag" is still
   straightforward.
 
-## Stopping tracking without leaving the view
+## Using `try-with-resources` for short-lived tracking
 
-There is **no `tracker.stop()` method** on the PR API — tracking stops
-only when the owner component detaches. To implement a "Stop ride"
-button that the user can click without navigating away, the view has
-to detach the owner or install the tracker on a disposable subcomponent:
+`Geolocation` implements `AutoCloseable` (where `close()` delegates to
+`stop()`), so a short-lived tracking scope can use
+`try-with-resources`:
 
 ```java
-private Div trackerHost;         // a throwaway child component
-private Geolocation tracker;
-
-private void startTracking() {
-    trackerHost = new Div();
-    add(trackerHost);
-    tracker = Geolocation.track(trackerHost, ...);
-    ComponentEffect.effect(trackerHost, () -> { /* react to tracker.state() */ });
-}
-
-private void stopTracking() {
-    remove(trackerHost);   // detaches trackerHost → cancels the browser watch
-    trackerHost = null;
-    tracker = null;
+public void sampleForTenSeconds() {
+    try (Geolocation geo = Geolocation.track(this,
+            new GeolocationOptions(true, null, null))) {
+        ComponentEffect.effect(this, () -> {
+            if (geo.state().get() instanceof GeolocationPosition pos) {
+                samples.add(pos);
+            }
+        });
+        // ... after ten seconds / some condition, the try-with-resources
+        // block exits and geo.close() → stop() runs automatically.
+    }
 }
 ```
 
-This is slightly more ceremony than the earlier "button with a
-`stopWatching()` method" design, but it is a direct consequence of the
-PR's decision to tie tracking to component lifecycle rather than to
-a separately-managed subscription.
+This is mostly useful inside non-UI scopes such as asynchronous task
+handlers or when the view owns multiple trackers whose lifetimes are
+not identical.
 
 ## Alternative: a whole view that exists only while tracking
 
