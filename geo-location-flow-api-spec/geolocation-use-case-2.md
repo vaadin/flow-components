@@ -104,30 +104,28 @@ public class RideView extends VerticalLayout {
   fix should not add a kilometre-long zig-zag" is still
   straightforward.
 
-## Using `try-with-resources` for short-lived tracking
+## Why there is no `AutoCloseable` / `try-with-resources`
 
-`Geolocation` implements `AutoCloseable` (where `close()` delegates to
-`stop()`), so a short-lived tracking scope can use
-`try-with-resources`:
+The obvious "wrap the handle in `try-with-resources`" idiom does not
+actually work for `Geolocation.track`: the try block exits as soon as
+the effect is registered, long before any samples arrive. Real usage
+always stores the handle in a field and calls `stop()` from an event
+listener or lets the detach listener cancel it.
+
+If a scoped cleanup is genuinely needed (e.g. inside a background
+task handler), `try` / `finally` expresses it directly:
 
 ```java
-public void sampleForTenSeconds() {
-    try (Geolocation geo = Geolocation.track(this,
-            new GeolocationOptions(true, null, null))) {
-        ComponentEffect.effect(this, () -> {
-            if (geo.state().get() instanceof GeolocationPosition pos) {
-                samples.add(pos);
-            }
-        });
-        // ... after ten seconds / some condition, the try-with-resources
-        // block exits and geo.close() → stop() runs automatically.
-    }
+Geolocation geo = Geolocation.track(this, options);
+try {
+    // ... code that waits for the tracker to reach a stop condition ...
+} finally {
+    geo.stop();
 }
 ```
 
-This is mostly useful inside non-UI scopes such as asynchronous task
-handlers or when the view owns multiple trackers whose lifetimes are
-not identical.
+This is the same shape `AutoCloseable` would give, without the
+redundant method name.
 
 ## Alternative: a whole view that exists only while tracking
 

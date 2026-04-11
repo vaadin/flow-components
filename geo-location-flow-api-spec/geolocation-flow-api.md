@@ -8,8 +8,8 @@ Geolocation API. It lives in `flow-server`
 - **`Geolocation.track(Component owner)`** — continuous tracking whose
   state is exposed as a reactive `Signal<GeolocationState>` and is
   automatically tied to the owner component's lifecycle. The returned
-  handle is `AutoCloseable`, so tracking can also be stopped
-  explicitly via `stop()` without detaching the owner.
+  handle has an explicit `stop()` method for cancelling the watch
+  without detaching the owner.
 - **`Geolocation.isSupported(callback)`** — async feature detection
   (`navigator.geolocation` present, secure origin, not blocked by
   Permissions-Policy).
@@ -28,8 +28,8 @@ every real application needs.
 > Source: [vaadin/flow#23527](https://github.com/vaadin/flow/pull/23527)
 > (`flow-server/src/main/java/com/vaadin/flow/component/geolocation/`).
 >
-> **Additions over the base PR:** `Geolocation.stop()` /
-> `AutoCloseable`, `Geolocation.isSupported(callback)`,
+> **Additions over the base PR:** `Geolocation.stop()` on tracking
+> handles, `Geolocation.isSupported(callback)`,
 > `Geolocation.queryPermission(callback)`, `GeolocationPermission`
 > enum, and a `GeolocationErrorCode` enum derived from the numeric
 > error codes. Rationale for each is in the "Key Design Decisions"
@@ -117,13 +117,8 @@ public class RideView extends VerticalLayout {
   "Stop ride" case where the user wants to end tracking without
   leaving the view. The method is idempotent — calling it twice, or
   calling it on a handle whose owner has already detached, is safe.
-  `Geolocation` also implements `AutoCloseable`, so a handle can be
-  used with `try-with-resources` in short-lived scopes:
-  ```java
-  try (Geolocation geo = Geolocation.track(this, options)) {
-      // geo.stop() is called automatically when this block exits
-  }
-  ```
+  After `stop()`, the signal's last value remains readable but no
+  further updates arrive.
 - `GeolocationState` is a sealed interface with exactly three permitted
   subtypes, so the `switch` is exhaustive — adding a future state
   would be a compile error on every existing switch, keeping callers
@@ -491,14 +486,24 @@ back to raw `executeJs`.
    This matches W3C `PositionOptions` semantics and composes with
    `@JsonInclude(NON_NULL)` to omit defaults on the wire.
 
-10. **`Geolocation` is `AutoCloseable` with an explicit `stop()`.**
-    Tying the browser watch to the owner component's detach covers
-    the common case (UC2: "stop when the user leaves the page"), but
-    it does not cover "Stop" buttons in a view the user hasn't
-    navigated away from. An explicit `stop()` method, plus
-    `AutoCloseable` for `try-with-resources`, closes that gap. The
-    method is idempotent and safe to call on an already-detached
-    owner, so application code never has to track state.
+10. **Tracking handles have an explicit `stop()` method.** Tying
+    the browser watch to the owner component's detach covers the
+    common case (UC2: "stop when the user leaves the page"), but it
+    does not cover "Stop" buttons in a view the user hasn't
+    navigated away from. An explicit `stop()` method closes that
+    gap. The method is idempotent and safe to call on an
+    already-detached owner, so application code never has to track
+    state.
+    - *`AutoCloseable` considered and rejected.* The natural try-
+      with-resources scope — "this lexical block" — does not match
+      how tracking is actually used: every real usage stores the
+      handle in a field and calls `stop()` from an event listener
+      (click, detach, timer). A try-with-resources block would exit
+      before any samples arrived. Exposing `close()` alongside
+      `stop()` would therefore be two names for the same thing, and
+      `close()` reads poorly at the call site ("close what?").
+      Applications that genuinely want scoped cleanup use
+      `try { ... } finally { tracker.stop(); }`.
 
 11. **`Geolocation.queryPermission(callback)` returns a
     `GeolocationPermission` enum.** Without a Java-side permission
@@ -564,7 +569,7 @@ web component. The client-side helpers (`window.Vaadin.Flow.geolocation.get`,
 tracking handle
 
 ```java
-public class Geolocation implements Serializable, AutoCloseable {
+public class Geolocation implements Serializable {
     private Geolocation() { ... }
 
     // --- One-shot ---
@@ -586,7 +591,6 @@ public class Geolocation implements Serializable, AutoCloseable {
     public Signal<GeolocationState> state();
     public void stop();
     public boolean isActive();
-    @Override public void close();   // equivalent to stop()
 
     // --- Capability checks ---
 
@@ -610,9 +614,8 @@ public class Geolocation implements Serializable, AutoCloseable {
 | Instance method | Returns | Description |
 |---|---|---|
 | `state` | `Signal<GeolocationState>` | Read-only signal. Starts as `GeolocationState.Pending`; transitions to `GeolocationPosition` or `GeolocationError` as the browser reports. Consume via `ComponentEffect.effect(owner, ...)` or `.get()` / `.peek()`. |
-| `stop` | `void` | Cancels the underlying browser watch and tears down the DOM listeners. Idempotent — safe to call multiple times and safe to call on a handle whose owner has already detached. After `stop()`, `state()` stops receiving updates; the last state value remains readable. Has no effect on handles returned from `get(...)` (one-shot requests have no watch to cancel). |
+| `stop` | `void` | Cancels the underlying browser watch and tears down the DOM listeners. Idempotent — safe to call multiple times and safe to call on a handle whose owner has already detached. After `stop()`, `state()` stops receiving updates; the last state value remains readable. |
 | `isActive` | `boolean` | Returns `true` while the browser watch is running. `false` after `stop()` has been called or after the owner has detached. |
-| `close` | `void` | Equivalent to `stop()`. Enables `try-with-resources`. |
 
 ---
 
@@ -868,11 +871,10 @@ error on the Java side.
   4. Registers a detach listener that calls
      `window.Vaadin.Flow.geolocation.clearWatch(key)` and removes
      both DOM listeners.
-- `stop()` / `close()` run the same teardown path as the detach
-  listener (and is safe to call before the detach listener fires —
-  the detach listener becomes a no-op). The handle's internal
-  `isActive` flag flips to `false`; further `stop()` calls are
-  no-ops.
+- `stop()` runs the same teardown path as the detach listener (and
+  is safe to call before the detach listener fires — the detach
+  listener becomes a no-op). The handle's internal `isActive` flag
+  flips to `false`; further `stop()` calls are no-ops.
 - The client uses `addEventDetail().allowInert()` so watch events are
   delivered even when the owner element is temporarily inert.
 
@@ -910,7 +912,7 @@ code, with the trade-off noted.
 | Use case | How the Flow API covers it | Remaining gaps |
 |---|---|---|
 | UC1 — One-shot on click | `Geolocation.get(onSuccess, onError)` from a click handler. Exhaustive `switch` on `err.errorCode()`. | None. |
-| UC2 — Continuous tracking | `Geolocation.track(owner)` + `ComponentEffect.effect` on `state()`. Detach cancels the browser watch automatically; `stop()` / `AutoCloseable` cancels it from application code without detaching. | None. |
+| UC2 — Continuous tracking | `Geolocation.track(owner)` + `ComponentEffect.effect` on `state()`. Detach cancels the browser watch automatically; `stop()` cancels it from application code without detaching. | None. |
 | UC3 — Auto-use on return visit | `Geolocation.queryPermission` from `onAttach` → `Geolocation.get` only when `GRANTED`. No surprise prompts on cold load. | **Safari:** always returns `UNKNOWN`, so auto-fetch never fires and Safari users fall back to UC1. Browser limitation with no workaround. |
 | UC4 — Denial / failure / timeout / unavailable | `Geolocation.isSupported` hides the control when the API is unusable; `Geolocation.queryPermission` surfaces `DENIED` so the application can pre-explain; the `onError` callback with `GeolocationErrorCode` enum handles request failures. | **Safari** returns `UNKNOWN` from `queryPermission`, so targeted "previously-denied" help text cannot be shown on Safari. Error-path handling itself is fully covered. |
 | UC5 — Detailed position data | `GeolocationCoordinates` exposes all W3C fields; timestamp is `long` epoch ms, convertible to `Instant`. | `minimumAccuracy` filter lives in the application — one `if` in the callback. No functional gap. |
