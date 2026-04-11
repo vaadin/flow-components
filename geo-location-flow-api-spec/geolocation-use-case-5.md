@@ -24,7 +24,7 @@ public class RideDashboardView extends VerticalLayout {
 
     public RideDashboardView() {
         Geolocation geo = Geolocation.track(this,
-                new GeolocationOptions(true, null, null)); // high accuracy
+                GeolocationOptions.builder().highAccuracy(true).build());
 
         ComponentEffect.effect(this, () -> {
             switch (geo.state().get()) {

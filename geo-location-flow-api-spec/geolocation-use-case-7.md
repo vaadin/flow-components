@@ -55,7 +55,11 @@ public class PotholeReportView extends VerticalLayout {
 
         pin.setIcon(VaadinIcon.MAP_MARKER.create());
         pin.addClickListener(e -> Geolocation.get(
-                new GeolocationOptions(true, 10_000, 0),
+                GeolocationOptions.builder()
+                        .highAccuracy(true)
+                        .timeout(Duration.ofSeconds(10))
+                        .maximumAge(Duration.ZERO)
+                        .build(),
                 pos -> {
                     // Application-side validation (UC7's "refuse imprecise
                     // positions"): reject readings worse than 50 m.

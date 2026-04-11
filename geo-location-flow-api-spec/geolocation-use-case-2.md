@@ -40,7 +40,7 @@ public class RideView extends VerticalLayout {
             totalMetres = 0;
 
             tracker = Geolocation.track(this,
-                    new GeolocationOptions(true, null, null));
+                    GeolocationOptions.builder().highAccuracy(true).build());
 
             ComponentEffect.effect(this, () -> {
                 switch (tracker.state().get()) {
@@ -139,7 +139,7 @@ public class TrackingView extends VerticalLayout {
 
     public TrackingView() {
         Geolocation geo = Geolocation.track(this,
-                new GeolocationOptions(true, null, null));
+                GeolocationOptions.builder().highAccuracy(true).build());
 
         ComponentEffect.effect(this, () -> {
             switch (geo.state().get()) {

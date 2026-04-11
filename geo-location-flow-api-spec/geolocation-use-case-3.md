@@ -44,7 +44,10 @@ public class HomeView extends VerticalLayout {
 
     private void fetchAndPopulate() {
         Geolocation.get(
-                new GeolocationOptions(null, 5000, 300_000),
+                GeolocationOptions.builder()
+                        .timeout(Duration.ofSeconds(5))
+                        .maximumAge(Duration.ofMinutes(5))
+                        .build(),
                 pos -> populateLocalHeadlines(news, pos),
                 err -> { /* stay quiet — the user has the button */ });
     }

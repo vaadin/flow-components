@@ -87,7 +87,7 @@ public class RideView extends VerticalLayout {
     private void toggleTracking() {
         if (tracker == null) {
             tracker = Geolocation.track(this,
-                    new GeolocationOptions(true, null, null));
+                    GeolocationOptions.builder().highAccuracy(true).build());
 
             ComponentEffect.effect(this, () -> {
                 switch (tracker.state().get()) {
@@ -164,7 +164,10 @@ public class HomeView extends VerticalLayout {
 
     private void fetchAndPopulate() {
         Geolocation.get(
-                new GeolocationOptions(null, 5000, 300_000),
+                GeolocationOptions.builder()
+                        .timeout(Duration.ofSeconds(5))
+                        .maximumAge(Duration.ofMinutes(5))
+                        .build(),
                 pos -> populateLocalHeadlines(news, pos),
                 err -> { /* stay quiet — the user has the button */ });
     }
@@ -314,44 +317,47 @@ Geolocation.get(pos -> {
 
 `GeolocationOptions` is a record with three nullable fields that map
 1:1 onto W3C `PositionOptions`. A `null` field means "use the browser
-default".
-
-```java
-public record GeolocationOptions(
-        Boolean enableHighAccuracy,
-        Integer timeout,        // milliseconds
-        Integer maximumAge)     // milliseconds
-```
-
-Examples covering UC6's four tolerances:
+default". The recommended way to build an options value is the
+`GeolocationOptions.builder()`, which labels each setting at the
+call site and accepts `java.time.Duration` for the time-based fields:
 
 ```java
 // A — News site: cached city-level reading is fine.
-GeolocationOptions news = new GeolocationOptions(null, 5000, 300_000);
+GeolocationOptions news = GeolocationOptions.builder()
+        .timeout(Duration.ofSeconds(5))
+        .maximumAge(Duration.ofMinutes(5))
+        .build();
 
 // B — Turn-by-turn navigation: most accurate, continuous.
-GeolocationOptions nav = new GeolocationOptions(true, null, null);
+GeolocationOptions nav = GeolocationOptions.builder()
+        .highAccuracy(true)
+        .build();
 Geolocation geo = Geolocation.track(navView, nav);
 
 // C — Check-in: must be fresh.
-GeolocationOptions checkIn = new GeolocationOptions(true, 10_000, 0);
+GeolocationOptions checkIn = GeolocationOptions.builder()
+        .highAccuracy(true)
+        .timeout(Duration.ofSeconds(10))
+        .maximumAge(Duration.ZERO)
+        .build();
 
 // D — Address form: give up quickly.
-GeolocationOptions address = new GeolocationOptions(null, 3000, null);
-Geolocation.get(address, pos -> prefillAddress(pos));
+GeolocationOptions address = GeolocationOptions.builder()
+        .timeout(Duration.ofSeconds(3))
+        .build();
+Geolocation.get(address, pos -> prefillAddress(pos), null);
 ```
 
 - Each call to `get` or `track` may pass its own `GeolocationOptions`,
   so two parts of the same application can legitimately disagree.
-- `null` on any field means "use the browser default" (`false` for
-  `enableHighAccuracy`, `Infinity` for `timeout`, `0` for
-  `maximumAge`).
-- **Note on `Integer` vs `Duration`:** the PR uses `Integer timeout`
-  and `Integer maximumAge` in milliseconds because it is a thin
-  wrapper over W3C `PositionOptions`. Callers that prefer
-  `java.time.Duration` can wrap the constructor in a helper of their
-  own (`new GeolocationOptions(true, (int) d.toMillis(), ...)`), but
-  the core record stays millisecond-based.
+- Any setter the caller does not invoke leaves that field `null`,
+  which the browser interprets as the default (`false` for
+  `highAccuracy`, `Infinity` for `timeout`, `0` for `maximumAge`).
+- The record's canonical constructor
+  (`new GeolocationOptions(Boolean, Integer, Integer)`) is also
+  public and accepts raw millisecond values for callers that already
+  have millis on hand or that need to construct from deserialised
+  data. The builder is the recommended path for hand-written code.
 
 ### 7. Capturing a location as part of a form (UC7)
 
@@ -377,7 +383,11 @@ public class PotholeReportForm extends FormLayout {
         submit.setEnabled(false);
 
         pin.addClickListener(e -> Geolocation.get(
-                new GeolocationOptions(true, 10_000, 0),
+                GeolocationOptions.builder()
+                        .highAccuracy(true)
+                        .timeout(Duration.ofSeconds(10))
+                        .maximumAge(Duration.ZERO)
+                        .build(),
                 pos -> {
                     if (pos.coords().accuracy() > 50) {
                         Notification.show(
@@ -454,19 +464,31 @@ back to raw `executeJs`.
    changes, so the view does not need to register event listeners
    manually.
 
-5. **`get` uses callbacks, not a signal.** A one-shot request has one
-   answer, not a stream, so a signal would be overkill. The
-   `get(onSuccess, onError)` callback pair maps directly to the two
-   W3C promise branches, and the callbacks run on the UI thread.
+5. **`get` uses callbacks, not a signal, and has three overloads.**
+   A one-shot request has one answer, not a stream, so a signal
+   would be overkill. The `get(onSuccess, onError)` callback pair
+   maps directly to the two W3C promise branches, and the callbacks
+   run on the UI thread. Three overloads cover the realistic shapes:
+   `get(onSuccess)` for fire-and-forget, `get(onSuccess, onError)`
+   for the common UC1 shape, and `get(options, onSuccess, onError)`
+   for the full form. A `get(options, onSuccess)` overload without
+   an error callback was considered and dropped — applications that
+   care about options almost always also care about errors, so that
+   middle case has no realistic users. Callers that genuinely want
+   options without error handling pass `null` for `onError` in the
+   full form.
 
 6. **`GeolocationError` carries both the numeric code and an enum
-   accessor.** The record keeps `int code` and the three
-   `public static final int` constants — matching the W3C wire shape
-   and staying Jackson-round-trippable — but also exposes
+   accessor.** The record keeps `int code` — matching the W3C wire
+   shape and staying Jackson-round-trippable — and exposes
    `errorCode()` returning a `GeolocationErrorCode` enum. Exhaustive
    `switch` on the enum is the recommended usage. Unknown future
    codes surface as `errorCode() == null`, so the raw `code()`
-   accessor remains available without a second API.
+   accessor remains available without a second API. The W3C numeric
+   values (`1` / `2` / `3`) live only in the `GeolocationErrorCode`
+   enum definition — no `public static final int` constants
+   elsewhere — so application code never has to remember the
+   mapping.
 
 7. **Optional coord fields are boxed `Double`, not `Optional<Double>`.**
    `altitude`, `altitudeAccuracy`, `heading`, `speed` may be missing
@@ -480,20 +502,31 @@ back to raw `executeJs`.
    `Instant` use `Instant.ofEpochMilli(pos.timestamp())` at the point
    of use.
 
-9. **Options are nullable record fields.** `GeolocationOptions` has
-   three fields (`Boolean enableHighAccuracy`, `Integer timeout`,
-   `Integer maximumAge`) and `null` means "use the browser default".
-   This matches W3C `PositionOptions` semantics and composes with
-   `@JsonInclude(NON_NULL)` to omit defaults on the wire.
+9. **Options are nullable record fields with a builder for readable
+   construction.** `GeolocationOptions` has three fields
+   (`Boolean enableHighAccuracy`, `Integer timeout`, `Integer maximumAge`)
+   and `null` means "use the browser default". This matches W3C
+   `PositionOptions` semantics and composes with `@JsonInclude(NON_NULL)`
+   to omit defaults on the wire. Because `new GeolocationOptions(null,
+   3000, null)` is unreadable at the call site, a `builder()` with
+   `Duration`-accepting setters (`highAccuracy(boolean)`,
+   `timeout(Duration)`, `maximumAge(Duration)`) is provided. The
+   record's canonical constructor remains public and
+   millisecond-based so deserialisation still works directly.
 
-10. **Tracking handles have an explicit `stop()` method.** Tying
-    the browser watch to the owner component's detach covers the
-    common case (UC2: "stop when the user leaves the page"), but it
-    does not cover "Stop" buttons in a view the user hasn't
-    navigated away from. An explicit `stop()` method closes that
-    gap. The method is idempotent and safe to call on an
+10. **Tracking handles have an explicit `stop()` method and nothing
+    else.** Tying the browser watch to the owner component's detach
+    covers the common case (UC2: "stop when the user leaves the
+    page"), but it does not cover "Stop" buttons in a view the user
+    hasn't navigated away from. An explicit `stop()` method closes
+    that gap. The method is idempotent and safe to call on an
     already-detached owner, so application code never has to track
-    state.
+    state. The tracking handle API is deliberately minimal:
+    `state()` + `stop()`. There is no `isActive()` query method —
+    every realistic need for "is this still running?" is better
+    served by the caller's own field (`tracker == null` after
+    `stop()`), and defensive checks on the handle add no value
+    because `stop()` is already idempotent.
     - *`AutoCloseable` considered and rejected.* The natural try-
       with-resources scope — "this lexical block" — does not match
       how tracking is actually used: every real usage stores the
@@ -575,8 +608,6 @@ public class Geolocation implements Serializable {
     // --- One-shot ---
 
     public static void get(SerializableConsumer<GeolocationPosition> onSuccess);
-    public static void get(GeolocationOptions options,
-                           SerializableConsumer<GeolocationPosition> onSuccess);
     public static void get(SerializableConsumer<GeolocationPosition> onSuccess,
                            SerializableConsumer<GeolocationError> onError);
     public static void get(GeolocationOptions options,
@@ -590,7 +621,6 @@ public class Geolocation implements Serializable {
 
     public Signal<GeolocationState> state();
     public void stop();
-    public boolean isActive();
 
     // --- Capability checks ---
 
@@ -603,9 +633,8 @@ public class Geolocation implements Serializable {
 | Static method | Parameters | Returns | Description |
 |---|---|---|---|
 | `get` | `SerializableConsumer<GeolocationPosition> onSuccess` | `void` | One-shot request. Errors are silently ignored. Must be called from a UI thread. |
-| `get` | `GeolocationOptions options, SerializableConsumer<GeolocationPosition> onSuccess` | `void` | As above, with options. `null` options means browser defaults. |
 | `get` | `SerializableConsumer<GeolocationPosition> onSuccess, SerializableConsumer<GeolocationError> onError` | `void` | One-shot with explicit error callback. `onError` may be `null`. |
-| `get` | `GeolocationOptions options, SerializableConsumer<GeolocationPosition> onSuccess, SerializableConsumer<GeolocationError> onError` | `void` | Full form. All callbacks run on the UI thread. |
+| `get` | `GeolocationOptions options, SerializableConsumer<GeolocationPosition> onSuccess, SerializableConsumer<GeolocationError> onError` | `void` | Full form. `options` / `onError` may be `null`. All callbacks run on the UI thread. |
 | `track` | `Component owner` | `Geolocation` | Starts continuous tracking tied to `owner`'s lifecycle. Returns a handle whose `state()` signal reports progress. |
 | `track` | `Component owner, GeolocationOptions options` | `Geolocation` | As above with options. |
 | `isSupported` | `SerializableConsumer<Boolean> callback` | `void` | Async feature detection. Calls back with `true` when `navigator.geolocation` is present, the origin is secure, and Permissions-Policy does not block geolocation. Works in every supported browser. |
@@ -615,7 +644,6 @@ public class Geolocation implements Serializable {
 |---|---|---|
 | `state` | `Signal<GeolocationState>` | Read-only signal. Starts as `GeolocationState.Pending`; transitions to `GeolocationPosition` or `GeolocationError` as the browser reports. Consume via `ComponentEffect.effect(owner, ...)` or `.get()` / `.peek()`. |
 | `stop` | `void` | Cancels the underlying browser watch and tears down the DOM listeners. Idempotent — safe to call multiple times and safe to call on a handle whose owner has already detached. After `stop()`, `state()` stops receiving updates; the last state value remains readable. |
-| `isActive` | `boolean` | Returns `true` while the browser watch is running. `false` after `stop()` has been called or after the owner has detached. |
 
 ---
 
@@ -691,10 +719,6 @@ public record GeolocationCoordinates(
 public record GeolocationError(int code, String message)
         implements GeolocationState {
 
-    public static final int PERMISSION_DENIED = 1;
-    public static final int POSITION_UNAVAILABLE = 2;
-    public static final int TIMEOUT = 3;
-
     /**
      * Returns the error code as a {@link GeolocationErrorCode} enum,
      * or {@code null} if the browser reports an unknown future code.
@@ -705,10 +729,15 @@ public record GeolocationError(int code, String message)
 }
 ```
 
-`code()` is the raw W3C numeric error code, kept for wire fidelity
-and for the `public static final int` constants. `errorCode()` is the
-enum-typed accessor for idiomatic Java `switch`. The two accessors
-expose the same information; callers pick whichever suits them.
+`code()` is the raw W3C numeric error code, kept as the wire-level
+field for Jackson round-tripping. `errorCode()` is the idiomatic
+Java accessor — use it in `switch` statements. The two accessors
+expose the same information; application code should normally use
+`errorCode()`.
+
+The numeric values of the W3C codes live in one place only — the
+`GeolocationErrorCode` enum below — so application code does not
+need to remember that `PERMISSION_DENIED` is `1`.
 
 ---
 
@@ -716,14 +745,18 @@ expose the same information; callers pick whichever suits them.
 
 ```java
 public enum GeolocationErrorCode {
-    PERMISSION_DENIED(GeolocationError.PERMISSION_DENIED),
-    POSITION_UNAVAILABLE(GeolocationError.POSITION_UNAVAILABLE),
-    TIMEOUT(GeolocationError.TIMEOUT);
+    /** The user denied the request for geolocation. */
+    PERMISSION_DENIED(1),
+    /** The position could not be determined. */
+    POSITION_UNAVAILABLE(2),
+    /** The request to get the position timed out. */
+    TIMEOUT(3);
 
     private final int code;
 
     GeolocationErrorCode(int code) { this.code = code; }
 
+    /** Returns the W3C numeric error code. */
     public int code() { return code; }
 
     /**
@@ -740,6 +773,11 @@ public enum GeolocationErrorCode {
     }
 }
 ```
+
+The numeric values `1` / `2` / `3` live in this enum definition
+alone. No `public static final int` constants anywhere else — if
+application code ever needs the numeric value (for logging, for
+example), it calls `GeolocationErrorCode.PERMISSION_DENIED.code()`.
 
 Recommended usage in `switch`:
 
@@ -799,7 +837,39 @@ public record GeolocationOptions(
         Integer timeout,
         Integer maximumAge) implements Serializable {
 
-    public GeolocationOptions() { this(null, null, null); }
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private Boolean enableHighAccuracy;
+        private Integer timeout;
+        private Integer maximumAge;
+
+        public Builder highAccuracy(boolean highAccuracy) {
+            this.enableHighAccuracy = highAccuracy;
+            return this;
+        }
+
+        public Builder timeout(Duration timeout) {
+            this.timeout = timeout == null
+                    ? null
+                    : Math.toIntExact(timeout.toMillis());
+            return this;
+        }
+
+        public Builder maximumAge(Duration maximumAge) {
+            this.maximumAge = maximumAge == null
+                    ? null
+                    : Math.toIntExact(maximumAge.toMillis());
+            return this;
+        }
+
+        public GeolocationOptions build() {
+            return new GeolocationOptions(
+                    enableHighAccuracy, timeout, maximumAge);
+        }
+    }
 }
 ```
 
@@ -808,6 +878,21 @@ public record GeolocationOptions(
 | `enableHighAccuracy` | `Boolean` | `false` | When `true`, requests GPS-backed high-accuracy position. |
 | `timeout` | `Integer` | `Infinity` | Maximum wait, in milliseconds, before the browser reports `TIMEOUT`. |
 | `maximumAge` | `Integer` | `0` | Maximum age of a cached reading, in milliseconds. `0` means "no cached reading accepted". |
+
+Recommended construction uses the builder so that each value is
+labelled at the call site and `Duration` can be passed directly:
+
+```java
+GeolocationOptions opts = GeolocationOptions.builder()
+        .highAccuracy(true)
+        .timeout(Duration.ofSeconds(10))
+        .maximumAge(Duration.ZERO)
+        .build();
+```
+
+The record's canonical constructor remains public and accepts raw
+millisecond `Integer` values for callers that already have millis on
+hand or that need to instantiate from deserialised data.
 
 ---
 
@@ -903,7 +988,7 @@ code, with the trade-off noted.
 | `setAutoLocate(true)` component flag | Covered by `queryPermission` + `onAttach` — one method call instead of a hidden flag | `Geolocation.queryPermission(state -> { if (state == GRANTED) Geolocation.get(...); });` |
 | `minimumAccuracy` (reject bad fixes) | Kept out of the wrapper; one `if` covers it | `if (pos.coords().accuracy() > 25) return;` in the callback or effect |
 | Reactive `Signal<GeolocationPermission>` tracking `permissionchange` | Firefox fires `permissionchange` unreliably; Safari never fires it. Signal semantics would differ across browsers | Call `queryPermission` on every attach, or poll on a timer for long-lived views |
-| `Duration` / `Instant` types on options/timestamps | Kept as `long` / `int` ms to match W3C and the wire shape | `Instant.ofEpochMilli(pos.timestamp())`; `(int) Duration.ofSeconds(5).toMillis()` |
+| `Instant` accessor on `GeolocationPosition.timestamp()` | Kept as `long` ms to match the W3C `DOMTimeStamp` wire shape | `Instant.ofEpochMilli(pos.timestamp())` at the point of use. (`GeolocationOptions.builder()` already accepts `Duration` for the time-based options.) |
 
 ---
 
@@ -916,5 +1001,5 @@ code, with the trade-off noted.
 | UC3 — Auto-use on return visit | `Geolocation.queryPermission` from `onAttach` → `Geolocation.get` only when `GRANTED`. No surprise prompts on cold load. | **Safari:** always returns `UNKNOWN`, so auto-fetch never fires and Safari users fall back to UC1. Browser limitation with no workaround. |
 | UC4 — Denial / failure / timeout / unavailable | `Geolocation.isSupported` hides the control when the API is unusable; `Geolocation.queryPermission` surfaces `DENIED` so the application can pre-explain; the `onError` callback with `GeolocationErrorCode` enum handles request failures. | **Safari** returns `UNKNOWN` from `queryPermission`, so targeted "previously-denied" help text cannot be shown on Safari. Error-path handling itself is fully covered. |
 | UC5 — Detailed position data | `GeolocationCoordinates` exposes all W3C fields; timestamp is `long` epoch ms, convertible to `Instant`. | `minimumAccuracy` filter lives in the application — one `if` in the callback. No functional gap. |
-| UC6 — Precision / freshness / battery | `GeolocationOptions` record, per-call. | Millisecond `Integer` instead of `Duration` — stylistic, not functional. |
+| UC6 — Precision / freshness / battery | `GeolocationOptions` record, per-call, built via `GeolocationOptions.builder()` with `Duration`-accepting setters. | None. |
 | UC7 — Location as a form field | Application owns a `Button` + `GeolocationPosition` field + `refreshSubmitState` guard. | No `HasValue` / `Binder` integration — by design. A higher-level `GeolocationField` component could be added in a separate module if it turns out to be commonly needed. |
