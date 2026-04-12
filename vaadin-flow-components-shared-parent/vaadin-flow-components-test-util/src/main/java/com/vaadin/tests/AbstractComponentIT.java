@@ -107,9 +107,15 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
 
     @After
     public void resetPage() throws Exception {
+        // Delete cookies while still on the app origin to force a new Vaadin
+        // session on the next navigation
+        sharedDriver.manage().deleteAllCookies();
         // Reset the page to a blank state after each test to minimize
         // interference between tests
         sharedDriver.get("about:blank");
+        // Drain browser logs so errors from this test don't leak into
+        // the next test's checkLogsForErrors() call
+        sharedDriver.manage().logs().get(LogType.BROWSER);
     }
 
     // ----- Test path and URL resolution -----
