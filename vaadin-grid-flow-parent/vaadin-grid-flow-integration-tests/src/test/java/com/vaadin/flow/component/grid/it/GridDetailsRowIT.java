@@ -56,8 +56,8 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     public void selectItem_onlyItsDetailsAreDisplayed() {
         grid.getCell(2, 0).click();
 
+        waitUntil(driver -> getDetailsElements().size() == 1);
         List<WebElement> detailsElements = getDetailsElements();
-        Assert.assertEquals(1, detailsElements.size());
         Assert.assertEquals("Person 2", detailsElements.get(0).getText());
     }
 
