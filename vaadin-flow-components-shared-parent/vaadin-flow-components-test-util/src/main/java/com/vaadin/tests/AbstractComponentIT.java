@@ -15,6 +15,7 @@
  */
 package com.vaadin.tests;
 
+import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -75,7 +76,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     public static void createDriver() {
         if (sharedDriver == null || !isDriverAlive(sharedDriver)) {
             tryQuitDriver(sharedDriver);
-            sharedDriver = createHeadlessChromeDriver();
+            sharedDriver = createChromeDriver();
         }
     }
 
@@ -174,10 +175,15 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         }
     }
 
-    private static WebDriver createHeadlessChromeDriver() {
+    private static boolean isJavaInDebugMode() {
+        return ManagementFactory.getRuntimeMXBean().getInputArguments()
+                .toString().contains("jdwp");
+    }
+
+    private static WebDriver createChromeDriver() {
         for (int i = 0; i < 3; i++) {
             try {
-                return tryCreateHeadlessChromeDriver();
+                return tryCreateChromeDriver();
             } catch (Exception e) {
                 logger.warn("Unable to create chromedriver on attempt " + i, e);
             }
@@ -186,10 +192,12 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
                 "Gave up trying to create a chromedriver instance");
     }
 
-    private static WebDriver tryCreateHeadlessChromeDriver() {
+    private static WebDriver tryCreateChromeDriver() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new", "--disable-gpu",
-                "--disable-backgrounding-occluded-windows");
+        if (!isJavaInDebugMode()) {
+            options.addArguments("--headless=new", "--disable-gpu",
+                    "--disable-backgrounding-occluded-windows");
+        }
 
         String extraArgs = System.getenv("TESTBENCH_CHROME_EXTRA_ARGS");
         if (extraArgs != null && !extraArgs.isBlank()) {
