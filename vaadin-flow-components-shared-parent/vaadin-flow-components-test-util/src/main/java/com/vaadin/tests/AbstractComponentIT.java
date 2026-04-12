@@ -264,13 +264,6 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     /**
-     * Scrolls the page by given amount of x and y deltas.
-     */
-    protected void scrollBy(int deltaX, int deltaY) {
-        executeScript("window.scrollBy(" + deltaX + ',' + deltaY + ");");
-    }
-
-    /**
      * Scrolls the page to the element given using javascript.
      */
     protected void scrollToElement(WebElement element) {
@@ -360,24 +353,6 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     public void blur() {
         executeScript(
                 "!!document.activeElement ? document.activeElement.blur() : 0");
-    }
-
-    /**
-     * Assert that the two elements are equal, unwrapping any element wrappers.
-     */
-    protected static void assertEquals(WebElement expectedElement,
-            WebElement actualElement) {
-        WebElement unwrappedExpected = expectedElement;
-        WebElement unwrappedActual = actualElement;
-        while (unwrappedExpected instanceof WrapsElement) {
-            unwrappedExpected = ((WrapsElement) unwrappedExpected)
-                    .getWrappedElement();
-        }
-        while (unwrappedActual instanceof WrapsElement) {
-            unwrappedActual = ((WrapsElement) unwrappedActual)
-                    .getWrappedElement();
-        }
-        Assert.assertEquals(unwrappedExpected, unwrappedActual);
     }
 
     /**
