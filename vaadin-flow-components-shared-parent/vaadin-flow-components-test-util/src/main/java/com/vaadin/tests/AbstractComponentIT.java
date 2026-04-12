@@ -16,6 +16,7 @@
 package com.vaadin.tests;
 
 import java.lang.management.ManagementFactory;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +46,8 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.flow.testutil.net.PortProber;
+import com.vaadin.testbench.IPAddress;
+import com.vaadin.testbench.Parameters;
 import com.vaadin.testbench.ScreenshotOnFailureRule;
 import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchTestCase;
@@ -67,6 +70,11 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static final Logger logger = LoggerFactory
             .getLogger(AbstractComponentIT.class);
 
+    public static final String USE_HUB_PROPERTY = "test.use.hub";
+
+    public static final boolean USE_HUB = Boolean.TRUE.toString()
+            .equals(System.getProperty(USE_HUB_PROPERTY, "false"));
+
     private static WebDriver sharedDriver;
 
     @Rule
@@ -77,7 +85,11 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     public static void createDriver() {
         if (sharedDriver == null || !isDriverAlive(sharedDriver)) {
             tryQuitDriver(sharedDriver);
-            sharedDriver = createChromeDriver();
+            if (USE_HUB) {
+                sharedDriver = createRemoteDriver();
+            } else {
+                sharedDriver = createChromeDriver();
+            }
             sharedDriver.manage().window().setSize(new Dimension(1024, 800));
         }
     }
@@ -113,6 +125,9 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     protected String getRootURL() {
+        if (USE_HUB) {
+            return "http://" + IPAddress.findSiteLocalAddress() + ":8080";
+        }
         return "http://localhost:8080";
     }
 
@@ -210,6 +225,26 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
                 .usingPort(port).withSilent(true).build();
         ChromeDriver chromeDriver = new ChromeDriver(service, options);
         return TestBench.createDriver(chromeDriver);
+    }
+
+    private static WebDriver createRemoteDriver() {
+        try {
+            String hubHost = Parameters.getHubHostname();
+            if (hubHost == null) {
+                hubHost = "localhost";
+            }
+            int hubPort = Parameters.getHubPort();
+            URL hubUrl = new URL(
+                    "http://" + hubHost + ":" + hubPort + "/wd/hub");
+
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments("--disable-gpu",
+                    "--disable-backgrounding-occluded-windows");
+            RemoteWebDriver driver = new RemoteWebDriver(hubUrl, options);
+            return TestBench.createDriver(driver);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create remote driver", e);
+        }
     }
 
     // ----- Test helper methods -----
