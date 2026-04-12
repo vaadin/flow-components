@@ -99,7 +99,9 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldNotIncludeEventInCallableArguments() {
         WebElement itemContent = findElement(By.id("content-0"));
-        drag(itemContent);
+        executeScript(
+                "arguments[0].dispatchEvent(new DragEvent('dragstart', { bubbles: true }))",
+                itemContent);
         Assert.assertEquals("event: dragged, item: 0, argument count: 0",
                 getFirstClientCallableLogMessage());
     }

@@ -15,19 +15,12 @@
  */
 package com.vaadin.tests;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -242,22 +235,6 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     /**
-     * Simulate DnD of {@code source} element into the {@code target} element.
-     */
-    public void dragAndDrop(WebElement source, WebElement target) {
-        getCommandExecutor().executeScript(LazyDndSimulationLoad.DND_SCRIPT,
-                source, target, "DND");
-    }
-
-    /**
-     * Simulate only a drag of {@code source}.
-     */
-    public void drag(WebElement source) {
-        getCommandExecutor().executeScript(LazyDndSimulationLoad.DND_SCRIPT,
-                source, null, "DRAG");
-    }
-
-    /**
      * Clicks on the element, using JS. This method is more convenient than
      * Selenium {@code findElement(By.id(urlId)).click()}, because Selenium
      * method changes scroll position, which is not always needed.
@@ -412,18 +389,4 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         return result == null ? null : String.valueOf(result);
     }
 
-    private static class LazyDndSimulationLoad {
-        private static final String DND_SCRIPT = loadDndScript(
-                "/dnd-simulation.js");
-
-        private static String loadDndScript(String scriptLocation) {
-            try (InputStream stream = AbstractComponentIT.class
-                    .getResourceAsStream(scriptLocation)) {
-                return IOUtils.readLines(stream, StandardCharsets.UTF_8).stream()
-                        .collect(Collectors.joining("\n"));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-    }
 }
