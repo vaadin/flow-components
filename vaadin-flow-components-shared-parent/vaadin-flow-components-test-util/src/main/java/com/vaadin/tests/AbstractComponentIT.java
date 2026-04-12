@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -70,6 +71,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
 
     private static WebDriver sharedDriver;
     private static ChromeDriverService sharedService;
+    private static String initialWindowHandle;
 
     @Rule
     public ScreenshotOnFailureRule screenshotOnFailure = new ScreenshotOnFailureRule(
@@ -83,26 +85,31 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
             Runtime.getRuntime().addShutdownHook(
                     new Thread(AbstractComponentIT::shutdownDriver));
         }
+
+        // Open a separate tab for each test suite to potentially avoid issues
+        // with browser state being shared between tests
+        initialWindowHandle = sharedDriver.getWindowHandle();
+        sharedDriver.switchTo().newWindow(WindowType.TAB);
+    }
+
+    @AfterClass
+    public static void closeSuiteTab() {
+        // Close the tab opened for the test suite and switch back to the
+        // initial tab
+        sharedDriver.close();
+        sharedDriver.switchTo().window(initialWindowHandle);
     }
 
     @Before
-    public void setupDriver() throws Exception {
+    public void setupPage() throws Exception {
         setDriver(sharedDriver);
     }
 
     @After
-    public void resetDriver() throws Exception {
-        // Save the handle of the current window
-        String oldWindow = driver.getWindowHandle();
-
-        // Open a fresh tab (or use WindowType.WINDOW for a new window)
-        driver.switchTo().newWindow(WindowType.TAB);
-
-        // Close the old tab
-        driver.switchTo().window(oldWindow).close();
-
-        // Switch back to the new tab (now the only one open)
-        driver.switchTo().window(driver.getWindowHandles().iterator().next());
+    public void resetPage() throws Exception {
+        // Reset the page to a blank state after each test to minimize
+        // interference between tests
+        sharedDriver.get("about:blank");
     }
 
     // ----- Test path and URL resolution -----
