@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -31,6 +31,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WindowType;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
@@ -68,6 +69,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
             .getLogger(AbstractComponentIT.class);
 
     private static WebDriver sharedDriver;
+    private static ChromeDriverService sharedService;
 
     @Rule
     public ScreenshotOnFailureRule screenshotOnFailure = new ScreenshotOnFailureRule(
@@ -76,25 +78,31 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     @BeforeClass
     public static void createDriver() {
         if (sharedDriver == null || !isDriverAlive(sharedDriver)) {
-            tryQuitDriver(sharedDriver);
             sharedDriver = createChromeDriver();
             sharedDriver.manage().window().setSize(new Dimension(1024, 800));
+            Runtime.getRuntime().addShutdownHook(
+                    new Thread(AbstractComponentIT::shutdownDriver));
         }
     }
 
     @Before
-    public void resetDriver() throws Exception {
+    public void setupDriver() throws Exception {
         setDriver(sharedDriver);
-        getDriver().manage().deleteAllCookies();
-        getDriver().navigate().to("about:blank");
     }
 
-    @AfterClass
-    public static void quitDriver() {
-        if (sharedDriver != null) {
-            tryQuitDriver(sharedDriver);
-            sharedDriver = null;
-        }
+    @After
+    public void resetDriver() throws Exception {
+        // Save the handle of the current window
+        String oldWindow = driver.getWindowHandle();
+
+        // Open a fresh tab (or use WindowType.WINDOW for a new window)
+        driver.switchTo().newWindow(WindowType.TAB);
+
+        // Close the old tab
+        driver.switchTo().window(oldWindow).close();
+
+        // Switch back to the new tab (now the only one open)
+        driver.switchTo().window(driver.getWindowHandles().iterator().next());
     }
 
     // ----- Test path and URL resolution -----
@@ -168,11 +176,18 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         }
     }
 
-    private static void tryQuitDriver(WebDriver driver) {
-        try {
-            driver.quit();
-        } catch (Exception e) {
-            // Ignore - driver may already be dead
+    private static void shutdownDriver() {
+        if (sharedDriver != null) {
+            try {
+                sharedDriver.quit();
+            } catch (Exception e) {
+                // Ignore - driver may already be dead
+            }
+            sharedDriver = null;
+        }
+        if (sharedService != null) {
+            sharedService.stop();
+            sharedService = null;
         }
     }
 
@@ -206,9 +221,9 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         }
 
         int port = PortProber.findFreePort();
-        ChromeDriverService service = new ChromeDriverService.Builder()
-                .usingPort(port).withSilent(true).build();
-        ChromeDriver chromeDriver = new ChromeDriver(service, options);
+        sharedService = new ChromeDriverService.Builder().usingPort(port)
+                .withSilent(true).build();
+        ChromeDriver chromeDriver = new ChromeDriver(sharedService, options);
         return TestBench.createDriver(chromeDriver);
     }
 
