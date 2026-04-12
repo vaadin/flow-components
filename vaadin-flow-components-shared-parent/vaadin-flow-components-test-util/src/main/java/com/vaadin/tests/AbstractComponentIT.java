@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -49,10 +50,14 @@ import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchTestCase;
 
 /**
- * Base class for component integration tests.
+ * Base class for Flow component integration tests.
  * <p>
  * Extends {@link TestBenchTestCase} directly and manages a local headless
  * Chrome driver that is reused across all test methods in the same test class.
+ * <p>
+ * This test setup does not support running tests in parallel. The only way to
+ * parallelize tests is forking separate JVMs that run one suite at a time, for
+ * example using {@code failsafe.forkCount}.
  * <p>
  * Test classes must be annotated with {@link TestPath} to specify the URL path
  * of the test view.
@@ -68,25 +73,24 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     public ScreenshotOnFailureRule screenshotOnFailure = new ScreenshotOnFailureRule(
             this, false);
 
-    @Before
-    public void setup() throws Exception {
-        if (sharedDriver != null && isDriverAlive(sharedDriver)) {
-            setDriver(sharedDriver);
-            getDriver().manage().deleteAllCookies();
-            getDriver().navigate().to("about:blank");
-        } else {
-            if (sharedDriver != null) {
-                tryQuitDriver(sharedDriver);
-                sharedDriver = null;
-            }
-            setDriver(createHeadlessChromeDriver());
-            sharedDriver = getDriver();
-            testBench().resizeViewPortTo(1024, 800);
+    @BeforeClass
+    public static void createDriver() {
+        if (sharedDriver == null || !isDriverAlive(sharedDriver)) {
+            tryQuitDriver(sharedDriver);
+            sharedDriver = createHeadlessChromeDriver();
         }
     }
 
+    @Before
+    public void resetDriver() throws Exception {
+        setDriver(sharedDriver);
+        getDriver().manage().deleteAllCookies();
+        getDriver().navigate().to("about:blank");
+        testBench().resizeViewPortTo(1024, 800);
+    }
+
     @AfterClass
-    public static void quitSharedDriver() {
+    public static void quitDriver() {
         if (sharedDriver != null) {
             tryQuitDriver(sharedDriver);
             sharedDriver = null;
@@ -201,9 +205,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         return TestBench.createDriver(chromeDriver);
     }
 
-    // =========================================================
-    // Helper methods duplicated from flow test-util base classes
-    // =========================================================
+    // ----- Test helper methods -----
 
     /**
      * Waits up to 10s for the given condition to become false.
