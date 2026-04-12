@@ -48,12 +48,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         $(TimePickerElement.class).waitForFirst();
     }
 
-    @Override
-    protected int getDeploymentPort() {
-        return super.getDeploymentPort();
-    }
-
-    @Test
+@Test
     public void testAllAvailableLocalesWhenValueChangedFromDropDown_stepOneHourAndFormatHourMinute_pickerValuesMatchesBrowserFormatted() {
         // select locale based on locale string
         // test via drop down 00:00 (0) 6:00 (7) 12:00 (13) 18:00 (19) 23:00(24)
