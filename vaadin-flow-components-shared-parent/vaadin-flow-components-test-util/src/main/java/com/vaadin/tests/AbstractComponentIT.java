@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
@@ -77,6 +78,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         if (sharedDriver == null || !isDriverAlive(sharedDriver)) {
             tryQuitDriver(sharedDriver);
             sharedDriver = createChromeDriver();
+            sharedDriver.manage().window().setSize(new Dimension(1024, 800));
         }
     }
 
@@ -85,7 +87,6 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         setDriver(sharedDriver);
         getDriver().manage().deleteAllCookies();
         getDriver().navigate().to("about:blank");
-        testBench().resizeViewPortTo(1024, 800);
     }
 
     @AfterClass
