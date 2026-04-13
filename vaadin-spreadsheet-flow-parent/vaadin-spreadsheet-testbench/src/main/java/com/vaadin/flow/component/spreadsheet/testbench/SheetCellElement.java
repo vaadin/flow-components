@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.testbench.TestBenchElement;
 
@@ -41,17 +39,90 @@ public class SheetCellElement extends TestBenchElement {
      */
     public void setValue(String newValue) {
         if (isNormalCell()) {
-            waitUntil(driver -> {
-                doubleClick();
-                return parent.getCellValueInput().isDisplayed();
-            });
-            WebElement cellValueInput = parent.getCellValueInput();
-            executeScript("arguments[0].value=''",
-                    ((TestBenchElement) cellValueInput).getWrappedElement());
-            new Actions(getDriver()).moveToElement(cellValueInput)
-                    .sendKeys(newValue).build().perform();
-            new Actions(getDriver()).moveToElement(cellValueInput)
-                    .sendKeys(Keys.TAB).build().perform();
+            // Single async JS call that selects the cell, activates the
+            // inline editor, sets the value, and commits with Tab.
+            Boolean result = (Boolean) getCommandExecutor().getDriver()
+                    .executeAsyncScript(
+                            """
+                                    const cell = arguments[0];
+                                    const shadowRoot = arguments[1].shadowRoot;
+                                    const root = shadowRoot.querySelector('.v-spreadsheet');
+                                    const value = arguments[2];
+                                    const callback = arguments[arguments.length - 1];
+
+                                    const MAX_ATTEMPTS = 50;
+                                    const delay = () => new Promise(r => setTimeout(r, 100));
+
+                                    function startEditing() {
+                                        // Fire synthetic events to trigger selection and editor opening
+                                        // Needs correct mouse coordinates
+                                        const r = cell.getBoundingClientRect();
+                                        const cx = r.left + r.width / 2;
+                                        const cy = r.top + r.height / 2;
+                                        const opts = {bubbles: true, cancelable: true,
+                                            view: window, clientX: cx, clientY: cy};
+                                        cell.dispatchEvent(new MouseEvent('mousedown', opts));
+                                        cell.dispatchEvent(new MouseEvent('mouseup', opts));
+                                        cell.dispatchEvent(new MouseEvent('click', opts));
+                                        cell.dispatchEvent(new MouseEvent('dblclick', opts));
+                                    }
+
+                                    async function waitForInput() {
+                                        for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                            const input = root.querySelector('#cellinput');
+                                            if (input && shadowRoot.activeElement === input) {
+                                                return input;
+                                            }
+                                            await delay();
+                                        }
+                                        return null;
+                                    }
+
+                                    async function waitForClose() {
+                                        for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                            const input = root.querySelector('#cellinput');
+                                            if (!input || shadowRoot.activeElement !== input) {
+                                                return true;
+                                            }
+                                            await delay();
+                                        }
+                                        return false;
+                                    }
+
+                                    // Select the cell and open the editor
+                                    startEditing();
+
+                                    // Wait for input to be visible and focused
+                                    const input = await waitForInput();
+                                    if (!input) {
+                                        callback(false);
+                                        return;
+                                    }
+
+                                    // Set the value, commit with Tab key
+                                    input.value = value;
+                                    input.dispatchEvent(new KeyboardEvent('keydown', {
+                                        key: 'Tab', code: 'Tab', keyCode: 9,
+                                        which: 9, bubbles: true, cancelable: true
+                                    }));
+
+                                    // Wait for the editor to close before finishing
+                                    // Allows next setValue call to start with a clean state
+                                    const closed = await waitForClose();
+                                    if (!closed) {
+                                        callback(false);
+                                        return;
+                                    }
+                                    callback(true);
+                                    """,
+                            this, parent, newValue);
+
+            if (Boolean.FALSE.equals(result)) {
+                throw new org.openqa.selenium.TimeoutException(
+                        "setValue timed out for cell "
+                                + getDomAttribute("class") + " with value '"
+                                + newValue + "'");
+            }
             getCommandExecutor().waitForVaadin();
         }
     }
