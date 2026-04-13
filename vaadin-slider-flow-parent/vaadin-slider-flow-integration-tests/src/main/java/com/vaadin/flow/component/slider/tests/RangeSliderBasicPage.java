@@ -28,10 +28,10 @@ public class RangeSliderBasicPage extends Div {
 
     public RangeSliderBasicPage() {
         RangeSlider rangeSlider = new RangeSlider();
-        rangeSlider.setMin(10);
-        rangeSlider.setMax(200);
-        rangeSlider.setStep(5);
-        rangeSlider.setValue(new RangeSliderValue(25, 150));
+        rangeSlider.setMin(10.0);
+        rangeSlider.setMax(200.0);
+        rangeSlider.setStep(5.0);
+        rangeSlider.setValue(new RangeSliderValue(25.0, 150.0));
         rangeSlider.setWidth("200px");
 
         Span serverValue = new Span();

@@ -31,7 +31,7 @@ class RangeSliderBinderValidationTest {
     private Binder<Bean> binder;
 
     public static class Bean {
-        private RangeSliderValue value = new RangeSliderValue(0, 100);
+        private RangeSliderValue value = new RangeSliderValue(0.0, 100.0);
 
         public RangeSliderValue getValue() {
             return value;
@@ -54,7 +54,7 @@ class RangeSliderBinderValidationTest {
 
     @Test
     void setValue_validatorPasses_noValidationError() {
-        rangeSlider.setValue(new RangeSliderValue(0, 50));
+        rangeSlider.setValue(new RangeSliderValue(0.0, 50.0));
 
         BindingValidationStatus<?> status = binder.validate()
                 .getFieldValidationStatuses().get(0);
@@ -64,7 +64,7 @@ class RangeSliderBinderValidationTest {
 
     @Test
     void setValue_validatorFails_hasValidationError() {
-        rangeSlider.setValue(new RangeSliderValue(0, 49));
+        rangeSlider.setValue(new RangeSliderValue(0.0, 49.0));
 
         BindingValidationStatus<?> status = binder.validate()
                 .getFieldValidationStatuses().get(0);
@@ -76,7 +76,7 @@ class RangeSliderBinderValidationTest {
 
     @Test
     void readBean_null_setsEmptyValue() {
-        rangeSlider.setValue(new RangeSliderValue(25, 75));
+        rangeSlider.setValue(new RangeSliderValue(25.0, 75.0));
         binder.readBean(null);
 
         Assertions.assertEquals(new RangeSliderValue(rangeSlider.getMin(),
