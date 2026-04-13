@@ -18,8 +18,8 @@ package com.vaadin.flow.component.slider;
 import java.io.Serializable;
 
 /**
- * Represents the value of a {@link RangeSlider}, consisting of a start and end
- * value.
+ * Represents the value of a {@link RangeSlider}, consisting of decimal start
+ * and end values.
  *
  * @param start
  *            the start value of the range
@@ -28,8 +28,8 @@ import java.io.Serializable;
  *
  * @author Vaadin Ltd
  */
-public record RangeSliderValue(double start,
-        double end) implements Serializable {
+public record RangeSliderValue(Double start,
+        Double end) implements Serializable, Range<Double> {
 
     /**
      * Creates a new RangeSliderValue with the given start and end values.
