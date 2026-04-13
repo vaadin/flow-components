@@ -377,6 +377,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
 
     @Override
     public void setValue(TValue value) {
+        Objects.requireNonNull(value, "Value cannot be null");
         super.setValue(value);
         schedulePropertyConsistencyCheck();
     }

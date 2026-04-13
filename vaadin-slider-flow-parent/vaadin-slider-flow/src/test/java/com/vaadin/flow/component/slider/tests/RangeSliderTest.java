@@ -69,6 +69,18 @@ class RangeSliderTest {
     }
 
     @Test
+    void rangeSliderValue_nullStart_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new RangeSliderValue(null, 100.0));
+    }
+
+    @Test
+    void rangeSliderValue_nullEnd_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new RangeSliderValue(0.0, null));
+    }
+
+    @Test
     void setMin_updatesProperty() {
         RangeSlider slider = new RangeSlider();
         slider.setMin(10.0);
@@ -76,6 +88,13 @@ class RangeSliderTest {
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(10, slider.getElement().getProperty("min", 0),
                 0);
+    }
+
+    @Test
+    void setMin_null_throws() {
+        RangeSlider slider = new RangeSlider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setMin(null));
     }
 
     @Test
@@ -89,6 +108,13 @@ class RangeSliderTest {
     }
 
     @Test
+    void setMax_null_throws() {
+        RangeSlider slider = new RangeSlider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setMax(null));
+    }
+
+    @Test
     void setStep_updatesProperty() {
         RangeSlider slider = new RangeSlider();
         slider.setStep(0.1);
@@ -96,6 +122,13 @@ class RangeSliderTest {
         Assertions.assertEquals(0.1, slider.getStep(), 0);
         Assertions.assertEquals(0.1,
                 slider.getElement().getProperty("step", 0.0), 0);
+    }
+
+    @Test
+    void setStep_null_throws() {
+        RangeSlider slider = new RangeSlider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setStep(null));
     }
 
     @Test
@@ -220,6 +253,13 @@ class RangeSliderTest {
         slider.getElement().setPropertyJson("value", createValueArray(80, 20));
         Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
                 slider.getValue());
+    }
+
+    @Test
+    void setValue_null_throws() {
+        RangeSlider slider = new RangeSlider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setValue(null));
     }
 
     @Test

@@ -71,6 +71,13 @@ class SliderTest {
     }
 
     @Test
+    void setMin_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setMin(null));
+    }
+
+    @Test
     void setMax_updatesProperty() {
         Slider slider = new Slider();
         slider.setMax(200.0);
@@ -81,6 +88,13 @@ class SliderTest {
     }
 
     @Test
+    void setMax_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setMax(null));
+    }
+
+    @Test
     void setStep_updatesProperty() {
         Slider slider = new Slider();
         slider.setStep(0.1);
@@ -88,6 +102,13 @@ class SliderTest {
         Assertions.assertEquals(0.1, slider.getStep(), 0);
         Assertions.assertEquals(0.1,
                 slider.getElement().getProperty("step", 0.0), 0);
+    }
+
+    @Test
+    void setStep_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setStep(null));
     }
 
     @Test
@@ -170,6 +191,13 @@ class SliderTest {
         Assertions.assertFalse(slider.isMinMaxVisible());
         Assertions.assertFalse(
                 slider.getElement().getProperty("minMaxVisible", false));
+    }
+
+    @Test
+    void setValue_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setValue(null));
     }
 
     @Test

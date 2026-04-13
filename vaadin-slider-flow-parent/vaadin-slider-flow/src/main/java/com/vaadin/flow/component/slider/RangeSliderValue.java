@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.slider;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Represents the value of a {@link RangeSlider}, consisting of decimal start
@@ -42,6 +43,8 @@ public record RangeSliderValue(Double start,
      *             if start is greater than end
      */
     public RangeSliderValue {
+        Objects.requireNonNull(start, "Start value cannot be null");
+        Objects.requireNonNull(end, "End value cannot be null");
         if (start > end) {
             throw new IllegalArgumentException(
                     "Start value cannot be greater than end value");
