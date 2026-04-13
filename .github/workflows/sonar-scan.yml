@@ -30,11 +30,11 @@ jobs:
           git log --format=%B "origin/$BASE_REF..HEAD" | \
             grep -q '\[skip ci\]' && echo "skip=true" >> "$GITHUB_OUTPUT" || echo "skip=false" >> "$GITHUB_OUTPUT"
 
-      - name: Setup JDK 21
+      - name: Setup JDK 17
         if: steps.skip-check.outputs.skip != 'true'
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
