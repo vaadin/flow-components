@@ -143,7 +143,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      * @return the minimum value
      */
     public TNumber getMin() {
-        return fromDouble.apply(getElement().getProperty("min", 0.0));
+        return fromDouble.apply(getElement().getProperty("min", DEFAULT_MIN));
     }
 
     /**
@@ -164,7 +164,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      * @return the maximum value
      */
     public TNumber getMax() {
-        return fromDouble.apply(getElement().getProperty("max", 100.0));
+        return fromDouble.apply(getElement().getProperty("max", DEFAULT_MAX));
     }
 
     /**
@@ -188,7 +188,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      * @return the step value
      */
     public TNumber getStep() {
-        return fromDouble.apply(getElement().getProperty("step", 1.0));
+        return fromDouble.apply(getElement().getProperty("step", DEFAULT_STEP));
     }
 
     /**
@@ -234,9 +234,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      *      SerializableConsumer)
      * @since 25.1
      */
-    public SignalBinding<Double> bindMin(Signal<TNumber> signal) {
-        var doubleSignal = signal.map(v -> toDouble.apply(v));
-        return getElement().bindProperty("min", doubleSignal, null);
+    public SignalBinding<TNumber> bindMin(Signal<TNumber> signal) {
+        return getElement().bindProperty("min", signal, null);
     }
 
     /**
@@ -262,9 +261,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      *      SerializableConsumer)
      * @since 25.1
      */
-    public SignalBinding<Double> bindMax(Signal<TNumber> signal) {
-        var doubleSignal = signal.map(v -> toDouble.apply(v));
-        return getElement().bindProperty("max", doubleSignal, null);
+    public SignalBinding<TNumber> bindMax(Signal<TNumber> signal) {
+        return getElement().bindProperty("max", signal, null);
     }
 
     /**
@@ -290,9 +288,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      *      SerializableConsumer)
      * @since 25.1
      */
-    public SignalBinding<Double> bindStep(Signal<TNumber> signal) {
-        var doubleSignal = signal.map(v -> toDouble.apply(v));
-        return getElement().bindProperty("step", doubleSignal, null);
+    public SignalBinding<TNumber> bindStep(Signal<TNumber> signal) {
+        return getElement().bindProperty("step", signal, null);
     }
 
     /**
