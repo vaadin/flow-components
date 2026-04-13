@@ -16,8 +16,10 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Crosshair;
 import com.vaadin.flow.component.charts.model.RangeSeries;
 import com.vaadin.flow.component.charts.model.Tooltip;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("serial")
+@Route("vaadin-charts/other/area-range")
 public class AreaRange extends AbstractChartExample {
 
     protected Chart chart;

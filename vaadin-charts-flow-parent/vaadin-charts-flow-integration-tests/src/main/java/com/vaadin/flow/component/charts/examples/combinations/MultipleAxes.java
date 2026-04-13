@@ -25,8 +25,10 @@ import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.router.Route;
 
 @CssImport(value = "./styles/MultipleAxes.css", themeFor = "vaadin-chart")
+@Route("vaadin-charts/combinations/multiple-axes")
 public class MultipleAxes extends AbstractChartExample {
 
     @Override

@@ -15,7 +15,6 @@ import java.util.List;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -26,9 +25,10 @@ import com.vaadin.flow.component.charts.model.PlotOptionsGantt;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("unused")
-@SkipFromDemo
+@Route("vaadin-charts/gantt/gantt-resource-management")
 public class GanttResourceManagement extends AbstractChartExample {
     @Override
     public void initDemo() {

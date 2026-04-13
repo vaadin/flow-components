@@ -25,7 +25,9 @@ import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/area/area-spline")
 public class AreaSpline extends AbstractChartExample {
 
     @Override

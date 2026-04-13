@@ -16,7 +16,9 @@ import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItemSankey;
 import com.vaadin.flow.component.charts.model.PlotOptionsSankey;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/sankey")
 public class Sankey extends AbstractChartExample {
 
     @Override

@@ -21,7 +21,9 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItemXrange;
 import com.vaadin.flow.component.charts.model.PlotOptionsXrange;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/xrange")
 public class Xrange extends AbstractChartExample {
 
     @Override

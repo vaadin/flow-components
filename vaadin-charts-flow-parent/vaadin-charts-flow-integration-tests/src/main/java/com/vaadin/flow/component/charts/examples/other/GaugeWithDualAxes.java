@@ -22,8 +22,10 @@ import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.TickPosition;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.router.Route;
 
 @CssImport(value = "./styles/GaugeWithDualAxes.css", themeFor = "vaadin-chart")
+@Route("vaadin-charts/other/gauge-with-dual-axes")
 public class GaugeWithDualAxes extends AbstractChartExample {
 
     @Override

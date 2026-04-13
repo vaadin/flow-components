@@ -18,8 +18,10 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.Tooltip;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 
+@Route("vaadin-charts/pie/pie-with-legend")
 public class PieWithLegend extends AbstractChartExample {
 
     protected Chart chart;

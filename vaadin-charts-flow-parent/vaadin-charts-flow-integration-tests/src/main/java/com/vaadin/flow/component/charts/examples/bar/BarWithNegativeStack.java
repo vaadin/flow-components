@@ -19,7 +19,9 @@ import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/bar/bar-with-negative-stack")
 public class BarWithNegativeStack extends AbstractChartExample {
 
     @Override

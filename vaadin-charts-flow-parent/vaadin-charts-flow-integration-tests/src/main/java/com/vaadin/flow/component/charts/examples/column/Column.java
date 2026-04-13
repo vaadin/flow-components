@@ -17,7 +17,9 @@ import com.vaadin.flow.component.charts.model.ListSeries;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/column/column")
 public class Column extends AbstractChartExample {
 
     @Override
