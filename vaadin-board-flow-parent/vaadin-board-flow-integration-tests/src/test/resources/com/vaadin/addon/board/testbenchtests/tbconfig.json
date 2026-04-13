@@ -1,9 +1,0 @@
-{
-  "browsers": [
-    {
-      "browserName": "chrome",
-      "platform": "ANY",
-      "version": ""
-    }
-  ]
-}
