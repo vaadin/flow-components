@@ -372,6 +372,7 @@
                             <vaadin.productionMode>false</vaadin.productionMode>
                             <vaadin.reuseDevServer>true</vaadin.reuseDevServer>
                             <vaadin.frontend.hotdeploy>true</vaadin.frontend.hotdeploy>
+                            <vaadin.devmode.hostsAllowed>*</vaadin.devmode.hostsAllowed>
                         </systemProperties>
                     </configuration>
                     <executions>
