@@ -41,7 +41,10 @@ import com.vaadin.flow.component.Component;
  * editor value to correspond to the cell's value.
  * <p>
  * The {@link #getCustomComponentForCell(Cell, int, int, Spreadsheet, Sheet)} is
- * called first
+ * called first.
+ * <p>
+ * Exceptions thrown by any method in this interface are caught and logged at
+ * WARN level. A failing cell will not prevent other cells from loading.
  *
  * @author Vaadin Ltd.
  */
