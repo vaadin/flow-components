@@ -19,7 +19,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-charts/area/area-chart")
-public class BasicChartIT extends AbstractChartTest {
+public class BasicChartIT extends AbstractChartIT {
 
     @Test
     public void Chart_TitleDisplayed() {

@@ -22,7 +22,7 @@ import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-charts/column/column-with-lazy-multi-level-drilldown-callback-tests")
 public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
-        extends AbstractChartTest {
+        extends AbstractChartIT {
 
     @Test
     public void test() throws AssertionError {

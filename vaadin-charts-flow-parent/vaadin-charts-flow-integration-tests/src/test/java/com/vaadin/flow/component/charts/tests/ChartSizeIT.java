@@ -15,7 +15,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-charts/pie/pie-with-size")
-public class ChartSizeIT extends AbstractChartTest {
+public class ChartSizeIT extends AbstractChartIT {
 
     @Test
     public void setSize_showChart_DimentionsAreSet() {

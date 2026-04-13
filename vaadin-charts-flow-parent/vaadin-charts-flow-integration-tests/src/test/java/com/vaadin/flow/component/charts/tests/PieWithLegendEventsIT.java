@@ -20,7 +20,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.elements.SpanElement;
 
 @TestPath("vaadin-charts/pie/pie-with-legend-events")
-public class PieWithLegendEventsIT extends AbstractChartTest {
+public class PieWithLegendEventsIT extends AbstractChartIT {
 
     private SpanElement lastEvent;
     private SpanElement eventDetails;

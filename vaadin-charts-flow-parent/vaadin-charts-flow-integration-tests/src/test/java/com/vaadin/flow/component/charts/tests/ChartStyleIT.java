@@ -16,7 +16,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-charts/pie/pie-with-class-name")
-public class ChartStyleIT extends AbstractChartTest {
+public class ChartStyleIT extends AbstractChartIT {
 
     @Test
     public void addClassName_showChart_classIsPresent() {

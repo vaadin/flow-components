@@ -18,7 +18,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-charts/lineandscatter/line-with-timezone")
-public class TimezoneIT extends AbstractChartTest {
+public class TimezoneIT extends AbstractChartIT {
 
     ChartElement chart;
 

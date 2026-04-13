@@ -19,7 +19,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-charts/column/column-with-lazy-multi-level-drilldown")
-public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractChartTest {
+public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractChartIT {
 
     @Test
     public void test() throws IOException, AssertionError {

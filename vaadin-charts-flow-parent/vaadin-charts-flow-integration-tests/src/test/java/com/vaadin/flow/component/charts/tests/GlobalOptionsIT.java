@@ -23,7 +23,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-charts/other/global-options")
-public class GlobalOptionsIT extends AbstractChartTest {
+public class GlobalOptionsIT extends AbstractChartIT {
 
     @Test
     public void addChart_defaultLangUsed() {

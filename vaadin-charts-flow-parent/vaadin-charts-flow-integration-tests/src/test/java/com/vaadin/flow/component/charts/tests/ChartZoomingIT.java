@@ -21,7 +21,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-charts/column/column-with-zooming")
-public class ChartZoomingIT extends AbstractChartTest {
+public class ChartZoomingIT extends AbstractChartIT {
 
     private ChartElement chart;
     private String[] chartXAxisLabels;

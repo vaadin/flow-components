@@ -15,7 +15,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-charts/pie/pie-without-accessibility")
-public class PieWithoutAccessibilityIT extends AbstractChartTest {
+public class PieWithoutAccessibilityIT extends AbstractChartIT {
 
     @Test
     public void setSize_showChart_DimentionsAreSet() {

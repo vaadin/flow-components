@@ -17,7 +17,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-charts/dynamic/dynamic-extremes")
-public class DynamicExtremesIT extends AbstractChartTest {
+public class DynamicExtremesIT extends AbstractChartIT {
 
     @Test
     public void axisFunction_toggleExtremesPoint_pointHidden() {

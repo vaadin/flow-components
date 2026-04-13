@@ -14,7 +14,7 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-charts/other/dynamic-changing-chart")
-public class DynamicChangingChartIT extends AbstractChartTest {
+public class DynamicChangingChartIT extends AbstractChartIT {
 
     @Test
     public void setConfiguration_changes_chart() {

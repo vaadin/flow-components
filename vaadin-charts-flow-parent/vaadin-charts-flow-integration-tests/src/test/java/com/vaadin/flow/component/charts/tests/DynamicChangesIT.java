@@ -16,7 +16,7 @@ import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-charts/dynamic/dynamic-changes")
-public class DynamicChangesIT extends AbstractChartTest {
+public class DynamicChangesIT extends AbstractChartIT {
 
     @Test
     public void seriesFunction_addPoint_pointCreated() {

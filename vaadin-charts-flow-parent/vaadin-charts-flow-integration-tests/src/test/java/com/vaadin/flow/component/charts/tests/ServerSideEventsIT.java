@@ -32,7 +32,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-charts/dynamic/server-side-events")
-public class ServerSideEventsIT extends AbstractChartTest {
+public class ServerSideEventsIT extends AbstractChartIT {
 
     @Before
     public void init() {
